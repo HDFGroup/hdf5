@@ -34,14 +34,14 @@ using namespace H5;
 #include "h5test.h"
 #include "h5cpputil.h"  // C++ utilility header file
 
-const H5std_string	FILE_BASIC("tattr_basic.h5");
-const H5std_string	FILE_COMPOUND("tattr_compound.h5");
-const H5std_string	FILE_SCALAR("tattr_scalar.h5");
-const H5std_string	FILE_MULTI("tattr_multi.h5");
-const H5std_string	FILE_DTYPE("tattr_dtype.h5");
-const H5std_string	ATTR_TMP_NAME("temp_attr_name");
-const H5std_string	FATTR_TMP_NAME("temp_fattr_name");
-const size_t		ATTR_MAX_DIMS = 7;
+const H5std_string FILE_BASIC("tattr_basic.h5");
+const H5std_string FILE_COMPOUND("tattr_compound.h5");
+const H5std_string FILE_SCALAR("tattr_scalar.h5");
+const H5std_string FILE_MULTI("tattr_multi.h5");
+const H5std_string FILE_DTYPE("tattr_dtype.h5");
+const H5std_string ATTR_TMP_NAME("temp_attr_name");
+const H5std_string FATTR_TMP_NAME("temp_fattr_name");
+const size_t ATTR_MAX_DIMS = 7;
 
 /* 3-D dataset with fixed dimensions */
 const int SPACE1_RANK = 3;
@@ -97,7 +97,7 @@ struct attr4_struct {
 
 const H5std_string ATTR5_NAME("Attr5");
 const int ATTR5_RANK = 0;
-float attr_data5 = (float)-5.123;    	// Test data for 5th attribute
+float attr_data5 = (float)-5.123;     // Test data for 5th attribute
 
 /* Info for another attribute */
 const H5std_string ATTR1A_NAME("Attr1_a");
@@ -121,117 +121,117 @@ static void test_attr_basic_write()
     SUBTEST("Basic Attribute Writing Functions");
 
     try {
-	// Create file
-	H5File fid1 (FILE_BASIC, H5F_ACC_TRUNC);
+        // Create file
+        H5File fid1 (FILE_BASIC, H5F_ACC_TRUNC);
 
-	// Create dataspace for dataset
-	DataSpace ds_space (SPACE1_RANK, dims1);
+        // Create dataspace for dataset
+        DataSpace ds_space (SPACE1_RANK, dims1);
 
-	/*
-	 *		Test attribute with dataset
-	 */
+        /*
+         *                Test attribute with dataset
+         */
 
-	// Create a dataset
-	DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR, ds_space);
+        // Create a dataset
+        DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR, ds_space);
 
-	// Create dataspace for attribute
-	DataSpace att_space (ATTR1_RANK, dims2);
+        // Create dataspace for attribute
+        DataSpace att_space (ATTR1_RANK, dims2);
 
-	// Create a file attribute
-	Attribute file_attr2 = fid1.createAttribute (FATTR1_NAME, PredType::NATIVE_INT, att_space);
+        // Create a file attribute
+        Attribute file_attr2 = fid1.createAttribute (FATTR1_NAME, PredType::NATIVE_INT, att_space);
 
-	// Create a file attribute
-	Attribute file_attr1 = fid1.createAttribute (FATTR2_NAME, PredType::NATIVE_INT, att_space);
+        // Create a file attribute
+        Attribute file_attr1 = fid1.createAttribute (FATTR2_NAME, PredType::NATIVE_INT, att_space);
 
-	// Create an attribute for the dataset
-	Attribute ds_attr1 = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space);
+        // Create an attribute for the dataset
+        Attribute ds_attr1 = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space);
 
-	// Try creating an attribute that already exists.  This should fail
-	// since two attributes cannot have the same name.  If an exception
-	// is not thrown for this action by createAttribute, then throw an
-	// invalid action exception.
-	try {
-	    Attribute invalid_attr = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space);
+        // Try creating an attribute that already exists.  This should fail
+        // since two attributes cannot have the same name.  If an exception
+        // is not thrown for this action by createAttribute, then throw an
+        // invalid action exception.
+        try {
+            Attribute invalid_attr = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space);
 
-	    // continuation here, that means no exception has been thrown
-	    throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
-	}
-	catch (AttributeIException& E) // catching invalid creating attribute
-        {} // do nothing, exception expected
-
-	// Write attribute information
-	ds_attr1.write (PredType::NATIVE_INT, attr_data1);
-
-	// Read attribute information immediately, without closing attribute
-	ds_attr1.read (PredType::NATIVE_INT, read_data1);
-
-	// Verify values read in
-	for(i=0; i<ATTR1_DIM1; i++)
-	    if(attr_data1[i]!=read_data1[i])
-		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
-
-	// Create two more attributes for this dataset, but only write to one.
-	Attribute ds_attr2 = dataset.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, att_space);
-	Attribute ds_attr3 = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_INT, att_space);
-
-	// Write attribute information
-	ds_attr2.write (PredType::NATIVE_INT, attr_data1a);
-
-	// Read attribute information immediately, without closing attribute
-	ds_attr2.read (PredType::NATIVE_INT, read_data1);
-
-	// Verify values read in
-	for(i=0; i<ATTR1_DIM1; i++)
-	    if(attr_data1a[i]!=read_data1[i])
-		TestErrPrintf("%d: attribute data different: attr_data1a[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1a[i],i,read_data1[i]);
-
-	// Close both attributes
-	ds_attr1.close();
-	ds_attr2.close();
-	ds_attr3.close();
-
-	/*
-	 *		Test attribute with group
-	 */
-
-	// Create group in file fid1
-	Group group = fid1.createGroup (GROUP1_NAME);
-
-	// Create dataspace for attribute
-	DataSpace sid3(ATTR2_RANK, dims3);
-
-	// Create an attribute for the group
-	Attribute gr_attr = group.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, sid3);
-
-	// Check storage size for attribute
-	hsize_t attr_size = gr_attr.getStorageSize();
-	verify_val((long)attr_size, (long)(ATTR2_DIM1*ATTR2_DIM2*sizeof(int)),
-			"Attribute::getStorageSize",__LINE__,__FILE__);
-
-	// Try to create the same attribute again (should fail)
-	try {
-	    Attribute invalid_attr = group.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, sid3);
             // continuation here, that means no exception has been thrown
-            throw InvalidActionException("H5Group::createAttribute",
-			"Attempting to create an existing attribute");
-	}
+            throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
+        }
         catch (AttributeIException& E) // catching invalid creating attribute
         {} // do nothing, exception expected
 
-	// Write attribute information
-	gr_attr.write (PredType::NATIVE_INT, attr_data2);
+        // Write attribute information
+        ds_attr1.write (PredType::NATIVE_INT, attr_data1);
 
-	// Check storage size for attribute
-	attr_size = gr_attr.getStorageSize();
-	verify_val((long)attr_size, (long)(ATTR2_DIM1*ATTR2_DIM2*sizeof(int)),
-			"Attribute::getStorageSize",  __LINE__, __FILE__);
+        // Read attribute information immediately, without closing attribute
+        ds_attr1.read (PredType::NATIVE_INT, read_data1);
 
-	PASSED();
+        // Verify values read in
+        for(i=0; i<ATTR1_DIM1; i++)
+            if(attr_data1[i]!=read_data1[i])
+                TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
+
+        // Create two more attributes for this dataset, but only write to one.
+        Attribute ds_attr2 = dataset.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, att_space);
+        Attribute ds_attr3 = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_INT, att_space);
+
+        // Write attribute information
+        ds_attr2.write (PredType::NATIVE_INT, attr_data1a);
+
+        // Read attribute information immediately, without closing attribute
+        ds_attr2.read (PredType::NATIVE_INT, read_data1);
+
+        // Verify values read in
+        for(i=0; i<ATTR1_DIM1; i++)
+            if(attr_data1a[i]!=read_data1[i])
+                TestErrPrintf("%d: attribute data different: attr_data1a[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1a[i],i,read_data1[i]);
+
+        // Close both attributes
+        ds_attr1.close();
+        ds_attr2.close();
+        ds_attr3.close();
+
+        /*
+         *                Test attribute with group
+         */
+
+        // Create group in file fid1
+        Group group = fid1.createGroup (GROUP1_NAME);
+
+        // Create dataspace for attribute
+        DataSpace sid3(ATTR2_RANK, dims3);
+
+        // Create an attribute for the group
+        Attribute gr_attr = group.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, sid3);
+
+        // Check storage size for attribute
+        hsize_t attr_size = gr_attr.getStorageSize();
+        verify_val((long)attr_size, (long)(ATTR2_DIM1*ATTR2_DIM2*sizeof(int)),
+                "Attribute::getStorageSize",__LINE__,__FILE__);
+
+        // Try to create the same attribute again (should fail)
+        try {
+            Attribute invalid_attr = group.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, sid3);
+            // continuation here, that means no exception has been thrown
+            throw InvalidActionException("H5Group::createAttribute",
+                "Attempting to create an existing attribute");
+        }
+        catch (AttributeIException& E) // catching invalid creating attribute
+        {} // do nothing, exception expected
+
+        // Write attribute information
+        gr_attr.write (PredType::NATIVE_INT, attr_data2);
+
+        // Check storage size for attribute
+        attr_size = gr_attr.getStorageSize();
+        verify_val((long)attr_size, (long)(ATTR2_DIM1*ATTR2_DIM2*sizeof(int)),
+                "Attribute::getStorageSize",  __LINE__, __FILE__);
+
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_basic_write()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_basic_write()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_basic_write()
 
@@ -248,14 +248,14 @@ static void test_attr_basic_write()
 **  B. ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
 **    1. With buffer smaller than the actual name
 **    2. Same test but with retiring overloaded function
-**	ssize_t Attribute::getName(size_t buf_size, H5std_string& attr_name)
+**        ssize_t Attribute::getName(size_t buf_size, H5std_string& attr_name)
 **
 **  C. H5std_string Attribute::getName()
 **
 **  D. H5std_string Attribute::getName(size_t len)
 **
 **  E. ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
-**	With buffer size equals the name's length, i.e., buf_size=0
+**        With buffer size equals the name's length, i.e., buf_size=0
 **
 ****************************************************************/
 static void test_attr_getname()
@@ -264,109 +264,109 @@ static void test_attr_getname()
     SUBTEST("Testing all overloads of Attribute::getName");
 
     try {
-	//
-	// Open the file FILE_BASIC and test getName with its attribute
-	//
+        //
+        // Open the file FILE_BASIC and test getName with its attribute
+        //
 
-	// Open file
-	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+        // Open file
+        H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
 
-	// Check for existence of attribute FATTR1_NAME
-	bool attr_exists = fid1.attrExists(FATTR1_NAME);
-	if (attr_exists == false)
-	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
+        // Check for existence of attribute FATTR1_NAME
+        bool attr_exists = fid1.attrExists(FATTR1_NAME);
+        if (attr_exists == false)
+            throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
-	// Open attribute 
-	Attribute fattr1(fid1.openAttribute(FATTR1_NAME));
+        // Open attribute 
+        Attribute fattr1(fid1.openAttribute(FATTR1_NAME));
 
-	// A. Get attribute name with
-	// ssize_t Attribute::getName(char* attr_name, size_t buf_size)
-	// using different buffer sizes and verify against FATTR1_NAME (3 cases)
+        // A. Get attribute name with
+        // ssize_t Attribute::getName(char* attr_name, size_t buf_size)
+        // using different buffer sizes and verify against FATTR1_NAME (3 cases)
 
-	// 1. With arbitrary buf_size that is larger than the name size
-	size_t buf_size = FATTR1_NAME.length() + 10;
-	char* fattr1_name = new char[buf_size+1];
-	HDmemset(fattr1_name, 0, buf_size+1);
-	ssize_t name_size = 0; // actual length of attribute name
-	name_size = fattr1.getName(fattr1_name, buf_size+1);
-	CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
-	verify_val((size_t)name_size, FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
-	verify_val((const char*)fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
-	delete []fattr1_name;
+        // 1. With arbitrary buf_size that is larger than the name size
+        size_t buf_size = FATTR1_NAME.length() + 10;
+        char* fattr1_name = new char[buf_size+1];
+        HDmemset(fattr1_name, 0, buf_size+1);
+        ssize_t name_size = 0; // actual length of attribute name
+        name_size = fattr1.getName(fattr1_name, buf_size+1);
+        CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
+        verify_val((size_t)name_size, FATTR1_NAME.length(), "Attribute::getName", __LINE__, __FILE__);
+        verify_val((const char*)fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        delete []fattr1_name;
 
-	// 2. With arbitrary buf_size that is smaller than the name's length.
-	// Let's try 4 first characters in the name.
-	buf_size = 4;
-	char short_name[5] = "File"; // to verify the read name
-	fattr1_name = new char[buf_size+1];
-	HDmemset(fattr1_name, 0, buf_size+1);
-	name_size = fattr1.getName(fattr1_name, buf_size+1);
-	CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
-	verify_val((size_t)name_size, FATTR1_NAME.size(), "Attribute::getName", __LINE__, __FILE__);
-	verify_val((const char*)fattr1_name, (const char*)short_name, "Attribute::getName", __LINE__, __FILE__);
-	delete []fattr1_name;
+        // 2. With arbitrary buf_size that is smaller than the name's length.
+        // Let's try 4 first characters in the name.
+        buf_size = 4;
+        char short_name[5] = "File"; // to verify the read name
+        fattr1_name = new char[buf_size+1];
+        HDmemset(fattr1_name, 0, buf_size+1);
+        name_size = fattr1.getName(fattr1_name, buf_size+1);
+        CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
+        verify_val((size_t)name_size, FATTR1_NAME.size(), "Attribute::getName", __LINE__, __FILE__);
+        verify_val((const char*)fattr1_name, (const char*)short_name, "Attribute::getName", __LINE__, __FILE__);
+        delete []fattr1_name;
 
-	// 3. With a buf_size that equals the name's length.
-	buf_size = FATTR1_NAME.length();
-	fattr1_name = new char[buf_size+1];
-	HDmemset(fattr1_name, 0, buf_size+1);
-	name_size = fattr1.getName(fattr1_name, buf_size+1);
-	CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
-	verify_val(fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
-	delete []fattr1_name;
+        // 3. With a buf_size that equals the name's length.
+        buf_size = FATTR1_NAME.length();
+        fattr1_name = new char[buf_size+1];
+        HDmemset(fattr1_name, 0, buf_size+1);
+        name_size = fattr1.getName(fattr1_name, buf_size+1);
+        CHECK(name_size, FAIL, "Attribute::getName", __LINE__, __FILE__);
+        verify_val(fattr1_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        delete []fattr1_name;
 
-	// B. Get attribute name with
-	// ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
-	// using buffer smaller than the actual name
-	buf_size = 4;
-	H5std_string fattr1_name2;
-	name_size = fattr1.getName(fattr1_name2, buf_size);
-	verify_val(fattr1_name2, "File", "Attribute::getName", __LINE__, __FILE__);
+        // B. Get attribute name with
+        // ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
+        // using buffer smaller than the actual name
+        buf_size = 4;
+        H5std_string fattr1_name2;
+        name_size = fattr1.getName(fattr1_name2, buf_size);
+        verify_val(fattr1_name2, "File", "Attribute::getName", __LINE__, __FILE__);
 
-	// Same test as above, but with deprecated overloaded function
-	// ssize_t Attribute::getName(size_t buf_size, H5std_string& attr_name)
-	// using buffer smaller than the actual name
-	H5std_string fattr1_name2a;
-	name_size = fattr1.getName(fattr1_name2a, buf_size);
-	verify_val(fattr1_name2a, "File", "Attribute::getName", __LINE__, __FILE__);
+        // Same test as above, but with deprecated overloaded function
+        // ssize_t Attribute::getName(size_t buf_size, H5std_string& attr_name)
+        // using buffer smaller than the actual name
+        H5std_string fattr1_name2a;
+        name_size = fattr1.getName(fattr1_name2a, buf_size);
+        verify_val(fattr1_name2a, "File", "Attribute::getName", __LINE__, __FILE__);
 
-	// C. Get file attribute's name with
-	// H5std_string Attribute::getName()
-	H5std_string fattr1_name3 = fattr1.getName();
-	verify_val(fattr1_name3, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        // C. Get file attribute's name with
+        // H5std_string Attribute::getName()
+        H5std_string fattr1_name3 = fattr1.getName();
+        verify_val(fattr1_name3, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
 
-	//
-	// D. Test getName getting part of an attribute's name using
-	// H5std_string Attribute::getName(len)
-	//
+        //
+        // D. Test getName getting part of an attribute's name using
+        // H5std_string Attribute::getName(len)
+        //
 
-	// Open dataset DSET1_NAME
-	DataSet dataset = fid1.openDataSet(DSET1_NAME);
+        // Open dataset DSET1_NAME
+        DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Check for existence of attribute
-	attr_exists = dataset.attrExists(ATTR1_NAME);
-	if (attr_exists == false)
-	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
+        // Check for existence of attribute
+        attr_exists = dataset.attrExists(ATTR1_NAME);
+        if (attr_exists == false)
+            throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
-	// Open attribute
-	Attribute attr1(dataset.openAttribute(ATTR1_NAME));
+        // Open attribute
+        Attribute attr1(dataset.openAttribute(ATTR1_NAME));
 
-	size_t len = 4;
-	H5std_string dattr_name1 = attr1.getName(len);
-	verify_val(dattr_name1, "Attr", "Attribute::getName", __LINE__, __FILE__);
+        size_t len = 4;
+        H5std_string dattr_name1 = attr1.getName(len);
+        verify_val(dattr_name1, "Attr", "Attribute::getName", __LINE__, __FILE__);
 
-	// E. Get dataset's attribute name with
-	// H5std_string Attribute::getName(H5std_string attr_name, buf_size=0)
-	H5std_string dattr_name2;
-	name_size = attr1.getName(dattr_name2);
-	verify_val(dattr_name2, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        // E. Get dataset's attribute name with
+        // H5std_string Attribute::getName(H5std_string attr_name, buf_size=0)
+        H5std_string dattr_name2;
+        name_size = attr1.getName(dattr_name2);
+        verify_val(dattr_name2, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_getname()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_getname()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_getname()
 
@@ -384,100 +384,100 @@ static void test_attr_rename()
     SUBTEST("Checking for Existence and Renaming Attribute");
 
     try {
-	// Open file
-	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+        // Open file
+        H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
 
-	// Check and rename attribute belonging to a file
+        // Check and rename attribute belonging to a file
 
-	// Check for existence of attribute
-	bool attr_exists = fid1.attrExists(FATTR1_NAME);
-	if (attr_exists == false)
-	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
+        // Check for existence of attribute
+        bool attr_exists = fid1.attrExists(FATTR1_NAME);
+        if (attr_exists == false)
+            throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
-	// Change attribute name
-	fid1.renameAttr(FATTR1_NAME, FATTR_TMP_NAME);
+        // Change attribute name
+        fid1.renameAttr(FATTR1_NAME, FATTR_TMP_NAME);
 
-	// Open attribute again
-	Attribute fattr1(fid1.openAttribute(FATTR_TMP_NAME));
+        // Open attribute again
+        Attribute fattr1(fid1.openAttribute(FATTR_TMP_NAME));
 
-	// Verify new attribute name
-	H5std_string fattr_name = fattr1.getName();
-	verify_val(fattr_name, FATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__);
+        // Verify new attribute name
+        H5std_string fattr_name = fattr1.getName();
+        verify_val(fattr_name, FATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__);
 
-	int num_attrs = fid1.getNumAttrs();
-	verify_val(num_attrs, 2, "Attribute::getNumAttrs", __LINE__, __FILE__);
+        int num_attrs = fid1.getNumAttrs();
+        verify_val(num_attrs, 2, "Attribute::getNumAttrs", __LINE__, __FILE__);
 
-	// Change first file attribute back to the original name
-	fid1.renameAttr(FATTR_TMP_NAME, FATTR1_NAME);
+        // Change first file attribute back to the original name
+        fid1.renameAttr(FATTR_TMP_NAME, FATTR1_NAME);
 
-	// Open the dataset
-	DataSet dataset = fid1.openDataSet(DSET1_NAME);
+        // Open the dataset
+        DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Check and rename attribute belonging to a dataset
+        // Check and rename attribute belonging to a dataset
 
-	// Check for existence of attribute
-	attr_exists = dataset.attrExists(ATTR1_NAME);
-	if (attr_exists == false)
-	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
+        // Check for existence of attribute
+        attr_exists = dataset.attrExists(ATTR1_NAME);
+        if (attr_exists == false)
+            throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
-	// Change attribute name
-	dataset.renameAttr(ATTR1_NAME, ATTR_TMP_NAME);
+        // Change attribute name
+        dataset.renameAttr(ATTR1_NAME, ATTR_TMP_NAME);
 
-	// Open attribute again
-	Attribute attr1(dataset.openAttribute(ATTR_TMP_NAME));
+        // Open attribute again
+        Attribute attr1(dataset.openAttribute(ATTR_TMP_NAME));
 
-	// Verify new attribute name
-	H5std_string attr_name = attr1.getName();
-	verify_val(attr_name, ATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__);
+        // Verify new attribute name
+        H5std_string attr_name = attr1.getName();
+        verify_val(attr_name, ATTR_TMP_NAME, "Attribute::getName", __LINE__, __FILE__);
 
-	// Read attribute information immediately, without closing attribute
-	attr1.read (PredType::NATIVE_INT, read_data1);
+        // Read attribute information immediately, without closing attribute
+        attr1.read (PredType::NATIVE_INT, read_data1);
 
-	// Verify values read in
-	for(i=0; i<ATTR1_DIM1; i++)
-	    if(attr_data1[i]!=read_data1[i])
-		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
+        // Verify values read in
+        for(i=0; i<ATTR1_DIM1; i++)
+            if(attr_data1[i]!=read_data1[i])
+                TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
-	// Close attribute
-    	attr1.close();
+        // Close attribute
+            attr1.close();
 
-	// Check for existence of second attribute
-	attr_exists = dataset.attrExists(ATTR2_NAME);
-	if (attr_exists == false)
-	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
+        // Check for existence of second attribute
+        attr_exists = dataset.attrExists(ATTR2_NAME);
+        if (attr_exists == false)
+            throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
-	// Open the second attribute
-	Attribute attr2(dataset.openAttribute(ATTR2_NAME));
+        // Open the second attribute
+        Attribute attr2(dataset.openAttribute(ATTR2_NAME));
 
-	// Verify second attribute name
-	H5std_string attr2_name = attr2.getName();
-	verify_val(attr2_name, ATTR2_NAME, "Attribute::getName", __LINE__, __FILE__);
+        // Verify second attribute name
+        H5std_string attr2_name = attr2.getName();
+        verify_val(attr2_name, ATTR2_NAME, "Attribute::getName", __LINE__, __FILE__);
 
-	// Read attribute information immediately, without closing attribute
-	attr2.read (PredType::NATIVE_INT, read_data1);
+        // Read attribute information immediately, without closing attribute
+        attr2.read (PredType::NATIVE_INT, read_data1);
 
-	// Verify values read in
-	for(i=0; i<ATTR1_DIM1; i++)
-	    if(attr_data1a[i]!=read_data1[i])
-		TestErrPrintf("%d: attribute data different: attr_data1a[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1a[i],i,read_data1[i]);
+        // Verify values read in
+        for(i=0; i<ATTR1_DIM1; i++)
+            if(attr_data1a[i]!=read_data1[i])
+                TestErrPrintf("%d: attribute data different: attr_data1a[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1a[i],i,read_data1[i]);
 
-	// Close attribute
-	attr2.close();
+        // Close attribute
+        attr2.close();
 
-	// Change first attribute back to the original name
-	dataset.renameAttr(ATTR_TMP_NAME, ATTR1_NAME);
+        // Change first attribute back to the original name
+        dataset.renameAttr(ATTR_TMP_NAME, ATTR1_NAME);
 
-	// Check for existence of attribute after renaming
-	attr_exists = dataset.attrExists(ATTR1_NAME);
-	if (attr_exists == false)
-	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
+        // Check for existence of attribute after renaming
+        attr_exists = dataset.attrExists(ATTR1_NAME);
+        if (attr_exists == false)
+            throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_rename()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_rename()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_rename()
 
@@ -494,59 +494,59 @@ static void test_attr_basic_read()
     SUBTEST("Basic Attribute Reading Functions");
 
     try {
-	// Open file
-	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+        // Open file
+        H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
 
-	// Open the dataset
-	DataSet dataset = fid1.openDataSet(DSET1_NAME);
+        // Open the dataset
+        DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Verify the correct number of attributes
-	int num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        int num_attrs = dataset.getNumAttrs();
+        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Open an attribute for the dataset
-	Attribute ds_attr=dataset.openAttribute(ATTR1_NAME);
+        // Open an attribute for the dataset
+        Attribute ds_attr=dataset.openAttribute(ATTR1_NAME);
 
-	// Read attribute information
-	int read_data1[ATTR1_DIM1]={0}; // Buffer for reading 1st attribute
-	ds_attr.read(PredType::NATIVE_INT, &read_data1);
+        // Read attribute information
+        int read_data1[ATTR1_DIM1]={0}; // Buffer for reading 1st attribute
+        ds_attr.read(PredType::NATIVE_INT, &read_data1);
 
-	// Verify values read in
-	for(i=0; i<ATTR1_DIM1; i++)
+        // Verify values read in
+        for(i=0; i<ATTR1_DIM1; i++)
             if(attr_data1[i]!=read_data1[i])
-		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
+                TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
-	/*
-	 *		Test attribute with group
-	 */
-	// Open the group
-	Group group = fid1.openGroup(GROUP1_NAME);
+        /*
+         *                Test attribute with group
+         */
+        // Open the group
+        Group group = fid1.openGroup(GROUP1_NAME);
 
-	// Verify the correct number of attributes
-	num_attrs = group.getNumAttrs();
-	verify_val(num_attrs, 1, "H5Group::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        num_attrs = group.getNumAttrs();
+        verify_val(num_attrs, 1, "H5Group::getNumAttrs", __LINE__, __FILE__);
 
-	// Open an attribute for the group
-	Attribute gr_attr = group.openAttribute(ATTR2_NAME);
+        // Open an attribute for the group
+        Attribute gr_attr = group.openAttribute(ATTR2_NAME);
 
-	// Buffer for reading 2nd attribute
-	int read_data2[ATTR2_DIM1][ATTR2_DIM2]={{0}};
+        // Buffer for reading 2nd attribute
+        int read_data2[ATTR2_DIM1][ATTR2_DIM2]={{0}};
 
-	// Read attribute information
-	gr_attr.read(PredType::NATIVE_INT, read_data2);
+        // Read attribute information
+        gr_attr.read(PredType::NATIVE_INT, read_data2);
 
-	// Verify values read in
-	for(i=0; i<ATTR2_DIM1; i++)
+        // Verify values read in
+        for(i=0; i<ATTR2_DIM1; i++)
             for(j=0; j<ATTR2_DIM2; j++)
-        	if(attr_data2[i][j]!=read_data2[i][j]) {
-		    TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__, i,j,attr_data2[i][j],i,j,read_data2[i][j]);
-		}
-	PASSED();
+                if(attr_data2[i][j]!=read_data2[i][j]) {
+                    TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__, i,j,attr_data2[i][j],i,j,read_data2[i][j]);
+                }
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_basic_read()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_basic_read()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_basic_read()
 
@@ -558,55 +558,55 @@ static void test_attr_basic_read()
 static void test_attr_compound_write()
 {
 
-	// Output message about test being performed
+        // Output message about test being performed
     SUBTEST("Multiple Attribute Functions");
 
     try {
-	// Create file
-	H5File fid1(FILE_COMPOUND.c_str(), H5F_ACC_TRUNC);
+        // Create file
+        H5File fid1(FILE_COMPOUND.c_str(), H5F_ACC_TRUNC);
 
-	// Create dataspace for dataset
-	hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-	DataSpace sid1(SPACE1_RANK, dims1);
+        // Create dataspace for dataset
+        hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+        DataSpace sid1(SPACE1_RANK, dims1);
 
-	// Create a dataset
-	DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR,sid1);
+        // Create a dataset
+        DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR,sid1);
 
-	// Create the attribute datatype.
-	CompType comp_type(sizeof(struct attr4_struct));
+        // Create the attribute datatype.
+        CompType comp_type(sizeof(struct attr4_struct));
 
-	attr4_field1_off = HOFFSET(struct attr4_struct, i);
-	comp_type.insertMember(ATTR4_FIELDNAME1, attr4_field1_off, PredType::NATIVE_INT);
+        attr4_field1_off = HOFFSET(struct attr4_struct, i);
+        comp_type.insertMember(ATTR4_FIELDNAME1, attr4_field1_off, PredType::NATIVE_INT);
 
-	attr4_field2_off = HOFFSET(struct attr4_struct, d);
-	comp_type.insertMember(ATTR4_FIELDNAME2, attr4_field2_off, PredType::NATIVE_DOUBLE);
+        attr4_field2_off = HOFFSET(struct attr4_struct, d);
+        comp_type.insertMember(ATTR4_FIELDNAME2, attr4_field2_off, PredType::NATIVE_DOUBLE);
 
-	attr4_field3_off = HOFFSET(struct attr4_struct, c);
-	comp_type.insertMember(ATTR4_FIELDNAME3, attr4_field3_off, PredType::NATIVE_SCHAR);
+        attr4_field3_off = HOFFSET(struct attr4_struct, c);
+        comp_type.insertMember(ATTR4_FIELDNAME3, attr4_field3_off, PredType::NATIVE_SCHAR);
 
-	// Create dataspace for 1st attribute
-	hsize_t		dims2[] = {ATTR4_DIM1,ATTR4_DIM2};
-	DataSpace sid2(ATTR4_RANK, dims2);
+        // Create dataspace for 1st attribute
+        hsize_t dims2[] = {ATTR4_DIM1,ATTR4_DIM2};
+        DataSpace sid2(ATTR4_RANK, dims2);
 
-	// Create complex attribute for the dataset
-	Attribute attr = dataset.createAttribute(ATTR4_NAME, comp_type, sid2);
+        // Create complex attribute for the dataset
+        Attribute attr = dataset.createAttribute(ATTR4_NAME, comp_type, sid2);
 
-	// Try to create the same attribute again (should fail)
-	try {
-	    Attribute invalid_attr = dataset.createAttribute (ATTR4_NAME, comp_type, sid2);
-	}
+        // Try to create the same attribute again (should fail)
+        try {
+            Attribute invalid_attr = dataset.createAttribute (ATTR4_NAME, comp_type, sid2);
+        }
         catch (AttributeIException& E) // catching invalid creating attribute
         {} // do nothing, exception expected
 
-	// Write complex attribute data
-	attr.write(comp_type, attr_data4);
+        // Write complex attribute data
+        attr.write(comp_type, attr_data4);
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_compound_write()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_compound_write()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_compound_write()
 
@@ -617,7 +617,7 @@ static void test_attr_compound_write()
 ****************************************************************/
 static void test_attr_compound_read()
 {
-    hsize_t dims[ATTR_MAX_DIMS];	// Attribute dimensions
+    hsize_t dims[ATTR_MAX_DIMS];        // Attribute dimensions
     size_t      size;   // Attribute datatype size as stored in file
     size_t      offset; // Attribute datatype field offset
     struct attr4_struct read_data4[ATTR4_DIM1][ATTR4_DIM2]; // Buffer for reading 4th attribute
@@ -626,139 +626,139 @@ static void test_attr_compound_read()
     SUBTEST("Basic Attribute Functions");
 
     try {
-	// Open file
-	H5File fid1(FILE_COMPOUND, H5F_ACC_RDWR);
+        // Open file
+        H5File fid1(FILE_COMPOUND, H5F_ACC_RDWR);
 
-	// Open the dataset
-	DataSet dataset = fid1.openDataSet(DSET1_NAME);
+        // Open the dataset
+        DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Verify the correct number of attributes
-	int num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        int num_attrs = dataset.getNumAttrs();
+        verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Open 1st attribute for the dataset
-	Attribute attr = dataset.openAttribute((unsigned)0);
+        // Open 1st attribute for the dataset
+        Attribute attr = dataset.openAttribute((unsigned)0);
 
-	/* Verify Dataspace */
+        /* Verify Dataspace */
 
-	// Get the dataspace of the attribute
-	DataSpace space = attr.getSpace();
+        // Get the dataspace of the attribute
+        DataSpace space = attr.getSpace();
 
-	// Get the rank of the dataspace and verify it
-	int rank = space.getSimpleExtentNdims();
-	verify_val(rank, ATTR4_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        // Get the rank of the dataspace and verify it
+        int rank = space.getSimpleExtentNdims();
+        verify_val(rank, ATTR4_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
-	// Get the dims of the dataspace and verify them
-	int ndims = space.getSimpleExtentDims(dims);
-	verify_val(ndims, ATTR4_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        // Get the dims of the dataspace and verify them
+        int ndims = space.getSimpleExtentDims(dims);
+        verify_val(ndims, ATTR4_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
         verify_val((long)dims[0], (long)ATTR4_DIM1, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
         verify_val((long)dims[1], (long)ATTR4_DIM2, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
 
-	// Get the class of the datatype that is used by attr
-	H5T_class_t type_class = attr.getTypeClass();
+        // Get the class of the datatype that is used by attr
+        H5T_class_t type_class = attr.getTypeClass();
 
-	// Verify that the type is of compound datatype
-	verify_val(type_class, H5T_COMPOUND, "Attribute::getTypeClass", __LINE__, __FILE__);
+        // Verify that the type is of compound datatype
+        verify_val(type_class, H5T_COMPOUND, "Attribute::getTypeClass", __LINE__, __FILE__);
 
-	// Get the compound datatype
-	CompType datatype = attr.getCompType();
+        // Get the compound datatype
+        CompType datatype = attr.getCompType();
 
-	// Verify the number of fields in the datatype, which must be 3
-	int fields = datatype.getNmembers();
-	verify_val(fields, 3, "CompType::getNmembers", __LINE__, __FILE__);
+        // Verify the number of fields in the datatype, which must be 3
+        int fields = datatype.getNmembers();
+        verify_val(fields, 3, "CompType::getNmembers", __LINE__, __FILE__);
 
-	// Verify that the fields have the same names as when the type
-	// was created
-	int j;
-	for(j=0; j<fields; j++)
-	{
-	    H5std_string fieldname = datatype.getMemberName(j);
-	    if(!((fieldname == ATTR4_FIELDNAME1) ||
-		(fieldname == ATTR4_FIELDNAME2) ||
-		(fieldname == ATTR4_FIELDNAME3)))
+        // Verify that the fields have the same names as when the type
+        // was created
+        int j;
+        for(j=0; j<fields; j++)
+        {
+            H5std_string fieldname = datatype.getMemberName(j);
+            if(!((fieldname == ATTR4_FIELDNAME1) ||
+                 (fieldname == ATTR4_FIELDNAME2) ||
+                 (fieldname == ATTR4_FIELDNAME3)))
             TestErrPrintf("%d:invalid field name for field #%d: %s\n",__LINE__,j,fieldname.c_str());
-	} /* end for */
+        } /* end for */
 
-	offset = datatype.getMemberOffset(0);
-	verify_val(offset, attr4_field1_off, "DataType::getMemberOffset", __LINE__, __FILE__);
+        offset = datatype.getMemberOffset(0);
+        verify_val(offset, attr4_field1_off, "DataType::getMemberOffset", __LINE__, __FILE__);
 
-	offset = datatype.getMemberOffset(1);
-	verify_val(offset, attr4_field2_off, "DataType::getMemberOffset", __LINE__, __FILE__);
+        offset = datatype.getMemberOffset(1);
+        verify_val(offset, attr4_field2_off, "DataType::getMemberOffset", __LINE__, __FILE__);
 
-	offset = datatype.getMemberOffset(2);
-	verify_val(offset, attr4_field3_off, "DataType::getMemberOffset", __LINE__, __FILE__);
+        offset = datatype.getMemberOffset(2);
+        verify_val(offset, attr4_field3_off, "DataType::getMemberOffset", __LINE__, __FILE__);
 
-	/* Verify each field's type, class & size */
+        /* Verify each field's type, class & size */
 
-	// Get and verify the type class of the first member
-	type_class = datatype.getMemberClass(0);
-	verify_val(type_class, H5T_INTEGER, "DataType::getMemberClass", __LINE__, __FILE__);
-	// Get and verify the order of this member's type
-	IntType i_type = datatype.getMemberIntType(0);
-	H5T_order_t order = i_type.getOrder();
-	verify_val(order, PredType::NATIVE_INT.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        // Get and verify the type class of the first member
+        type_class = datatype.getMemberClass(0);
+        verify_val(type_class, H5T_INTEGER, "DataType::getMemberClass", __LINE__, __FILE__);
+        // Get and verify the order of this member's type
+        IntType i_type = datatype.getMemberIntType(0);
+        H5T_order_t order = i_type.getOrder();
+        verify_val(order, PredType::NATIVE_INT.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
 
-	// Get and verify the size of this member's type
-	size = i_type.getSize();
-	verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        // Get and verify the size of this member's type
+        size = i_type.getSize();
+        verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__);
 
-	// Get and verify class, order, and size of the second member's type
-	type_class = datatype.getMemberClass(1);
-	verify_val(type_class, H5T_FLOAT, "DataType::getMemberClass", __LINE__, __FILE__);
-	FloatType f_type = datatype.getMemberFloatType(1);
-	order = f_type.getOrder();
-	verify_val(order, PredType::NATIVE_DOUBLE.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
-	size = f_type.getSize();
-	verify_val(size, PredType::NATIVE_DOUBLE.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        // Get and verify class, order, and size of the second member's type
+        type_class = datatype.getMemberClass(1);
+        verify_val(type_class, H5T_FLOAT, "DataType::getMemberClass", __LINE__, __FILE__);
+        FloatType f_type = datatype.getMemberFloatType(1);
+        order = f_type.getOrder();
+        verify_val(order, PredType::NATIVE_DOUBLE.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        size = f_type.getSize();
+        verify_val(size, PredType::NATIVE_DOUBLE.getSize(), "DataType::getSize", __LINE__, __FILE__);
 
-	// Get and verify class, order, and size of the third member's type
-	type_class = datatype.getMemberClass(2);
-	verify_val(type_class, H5T_INTEGER, "DataType::getMemberClass", __LINE__, __FILE__);
-	// Note: H5T_INTEGER is correct here!
+        // Get and verify class, order, and size of the third member's type
+        type_class = datatype.getMemberClass(2);
+        verify_val(type_class, H5T_INTEGER, "DataType::getMemberClass", __LINE__, __FILE__);
+        // Note: H5T_INTEGER is correct here!
 
-	StrType s_type = datatype.getMemberStrType(2);
-	order = s_type.getOrder();
-	verify_val(order, PredType::NATIVE_SCHAR.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
-	size = s_type.getSize();
-	verify_val(size, PredType::NATIVE_SCHAR.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        StrType s_type = datatype.getMemberStrType(2);
+        order = s_type.getOrder();
+        verify_val(order, PredType::NATIVE_SCHAR.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        size = s_type.getSize();
+        verify_val(size, PredType::NATIVE_SCHAR.getSize(), "DataType::getSize", __LINE__, __FILE__);
 
-	// Read attribute information
-	attr.read(datatype, read_data4);
+        // Read attribute information
+        attr.read(datatype, read_data4);
 
-	// Verify values read in
-	hsize_t ii, jj;
-	for(ii=0; ii<ATTR4_DIM1; ii++)
-	    for(jj=0; jj<ATTR4_DIM2; jj++)
-		if(HDmemcmp(&attr_data4[ii][jj],&read_data4[ii][jj],sizeof(struct attr4_struct))) {
-		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",__LINE__,ii,jj,attr_data4[ii][jj].i,ii,jj,read_data4[ii][jj].i);
-		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",__LINE__,ii,jj,attr_data4[ii][jj].d,ii,jj,read_data4[ii][jj].d);
-		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",__LINE__,ii,jj,attr_data4[ii][jj].c,ii,jj,read_data4[ii][jj].c);
+        // Verify values read in
+        hsize_t ii, jj;
+        for(ii=0; ii<ATTR4_DIM1; ii++)
+            for(jj=0; jj<ATTR4_DIM2; jj++)
+                if(HDmemcmp(&attr_data4[ii][jj],&read_data4[ii][jj],sizeof(struct attr4_struct))) {
+                    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",__LINE__,ii,jj,attr_data4[ii][jj].i,ii,jj,read_data4[ii][jj].i);
+                    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",__LINE__,ii,jj,attr_data4[ii][jj].d,ii,jj,read_data4[ii][jj].d);
+                    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",__LINE__,ii,jj,attr_data4[ii][jj].c,ii,jj,read_data4[ii][jj].c);
              } /* end if */
 
-	// Verify name
-	H5std_string attr_name = attr.getName();
-	verify_val(attr_name, ATTR4_NAME, "Attribute::getName", __LINE__, __FILE__);
+        // Verify name
+        H5std_string attr_name = attr.getName();
+        verify_val(attr_name, ATTR4_NAME, "Attribute::getName", __LINE__, __FILE__);
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_compound_read()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_compound_read()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
     try
     {
-	// Now, try truncating the file to make sure reference counting is good.
-	// If any references to ids in the previous block are left unterminated,
-	// the truncating will fail, because the file will not be closed in
-	// the file.close() above.
-	H5File file1(FILE_COMPOUND, H5F_ACC_TRUNC);
+        // Now, try truncating the file to make sure reference counting is good.
+        // If any references to ids in the previous block are left unterminated,
+        // the truncating will fail, because the file will not be closed in
+        // the file.close() above.
+        H5File file1(FILE_COMPOUND, H5F_ACC_TRUNC);
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (FileIException& E)
     {
-	issue_fail_msg("test_attr_compound_read()", __LINE__, __FILE__, "Unable to truncate file, possibly because some objects are left opened");
+        issue_fail_msg("test_attr_compound_read()", __LINE__, __FILE__, "Unable to truncate file, possibly because some objects are left opened");
     }
 }   // test_attr_compound_read()
 
@@ -773,47 +773,47 @@ static void test_attr_scalar_write()
     SUBTEST("Basic Scalar Attribute Writing Functions");
 
     try {
-	// Create file
-	H5File fid1(FILE_SCALAR, H5F_ACC_TRUNC);
+        // Create file
+        H5File fid1(FILE_SCALAR, H5F_ACC_TRUNC);
 
-	// Create dataspace for dataset
-	hsize_t	dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-	DataSpace sid1(SPACE1_RANK, dims1);
+        // Create dataspace for dataset
+        hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+        DataSpace sid1(SPACE1_RANK, dims1);
 
-	// Create a dataset
-	DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR,sid1);
+        // Create a dataset
+        DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR,sid1);
 
-	// Close dataset's dataspace
-	sid1.close();
+        // Close dataset's dataspace
+        sid1.close();
 
-	// Create dataspace for attribute
-	DataSpace att_space(ATTR5_RANK, NULL);
+        // Create dataspace for attribute
+        DataSpace att_space(ATTR5_RANK, NULL);
 
-	// Create an attribute for the dataset
-	Attribute ds_attr = dataset.createAttribute (ATTR5_NAME, PredType::NATIVE_FLOAT, att_space);
+        // Create an attribute for the dataset
+        Attribute ds_attr = dataset.createAttribute (ATTR5_NAME, PredType::NATIVE_FLOAT, att_space);
 
-	// Try creating an attribute that already exists.  This should fail
-	// since two attributes cannot have the same name.  If an exception
-	// is not thrown for this action by createAttribute, then throw an
-	// invalid action exception.
-	try {
-	    Attribute invalid_attr = dataset.createAttribute (ATTR5_NAME, PredType::NATIVE_FLOAT, att_space);
+        // Try creating an attribute that already exists.  This should fail
+        // since two attributes cannot have the same name.  If an exception
+        // is not thrown for this action by createAttribute, then throw an
+        // invalid action exception.
+        try {
+            Attribute invalid_attr = dataset.createAttribute (ATTR5_NAME, PredType::NATIVE_FLOAT, att_space);
 
-	    // continuation here, that means no exception has been thrown
-	    throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
-	}
-	catch (AttributeIException& E) // catching invalid creating attribute
+            // continuation here, that means no exception has been thrown
+            throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
+        }
+        catch (AttributeIException& E) // catching invalid creating attribute
         {} // do nothing, exception expected
 
-	// Write attribute information
-	ds_attr.write (PredType::NATIVE_FLOAT, &attr_data5);
+        // Write attribute information
+        ds_attr.write (PredType::NATIVE_FLOAT, &attr_data5);
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_scalar_write()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_scalar_write()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_scalar_write()
 
@@ -831,38 +831,38 @@ static void test_attr_scalar_read()
     SUBTEST("Basic Scalar Attribute Reading Functions");
 
     try {
-	// Open file
-	H5File fid1(FILE_SCALAR, H5F_ACC_RDWR);
+        // Open file
+        H5File fid1(FILE_SCALAR, H5F_ACC_RDWR);
 
-	// Open the dataset
-	DataSet dataset = fid1.openDataSet(DSET1_NAME);
+        // Open the dataset
+        DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Verify the correct number of attributes
-	int num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        int num_attrs = dataset.getNumAttrs();
+        verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Open an attribute for the dataset
-	Attribute ds_attr=dataset.openAttribute(ATTR5_NAME);
+        // Open an attribute for the dataset
+        Attribute ds_attr=dataset.openAttribute(ATTR5_NAME);
 
-	// Read attribute information
-	float read_data2=0.0;  // Buffer for reading 1st attribute
-	ds_attr.read(PredType::NATIVE_FLOAT,&read_data2);
-	if (HDfabs(read_data2 - attr_data5) > FP_EPSILON)
-	    verify_val(read_data2, attr_data5, FP_EPSILON, "Attribute::read", __LINE__, __FILE__);
+        // Read attribute information
+        float read_data2=0.0;  // Buffer for reading 1st attribute
+        ds_attr.read(PredType::NATIVE_FLOAT,&read_data2);
+        if (HDfabs(read_data2 - attr_data5) > FP_EPSILON)
+            verify_val(read_data2, attr_data5, FP_EPSILON, "Attribute::read", __LINE__, __FILE__);
 
-	// Get the dataspace of the attribute
-	DataSpace att_space = ds_attr.getSpace();
+        // Get the dataspace of the attribute
+        DataSpace att_space = ds_attr.getSpace();
 
-	// Make certain the dataspace is scalar
-	H5S_class_t space_type = att_space.getSimpleExtentType();
-	verify_val(space_type, H5S_SCALAR, "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
+        // Make certain the dataspace is scalar
+        H5S_class_t space_type = att_space.getSimpleExtentType();
+        verify_val(space_type, H5S_SCALAR, "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_scalar_read()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_scalar_read()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_scalar_read()
 
@@ -877,65 +877,65 @@ static void test_attr_mult_write()
     SUBTEST("Multiple Attribute Writing Functions");
 
     try {
-	// Create file
-	H5File fid1 (FILE_MULTI, H5F_ACC_TRUNC);
+        // Create file
+        H5File fid1 (FILE_MULTI, H5F_ACC_TRUNC);
 
-	// Create dataspace for dataset
-	hsize_t	dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-	DataSpace ds_space (SPACE1_RANK, dims1);
+        // Create dataspace for dataset
+        hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+        DataSpace ds_space (SPACE1_RANK, dims1);
 
-	// Create a dataset
-	DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR, ds_space);
+        // Create a dataset
+        DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR, ds_space);
 
-	// Create dataspace for 1st attribute
-	hsize_t	dims2[] = {ATTR1_DIM1};
-	DataSpace att_space (ATTR1_RANK, dims2);
+        // Create dataspace for 1st attribute
+        hsize_t dims2[] = {ATTR1_DIM1};
+        DataSpace att_space (ATTR1_RANK, dims2);
 
-	// Create 1st attribute for the dataset
-	Attribute ds_attr = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space);
+        // Create 1st attribute for the dataset
+        Attribute ds_attr = dataset.createAttribute (ATTR1_NAME, PredType::NATIVE_INT, att_space);
 
-	// Write attribute information
-	ds_attr.write (PredType::NATIVE_INT, attr_data1);
+        // Write attribute information
+        ds_attr.write (PredType::NATIVE_INT, attr_data1);
 
-	// Create dataspace for 2nd attribute
-	hsize_t	dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
-	DataSpace att2_space (ATTR2_RANK, dims3);
+        // Create dataspace for 2nd attribute
+        hsize_t dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
+        DataSpace att2_space (ATTR2_RANK, dims3);
 
-	// Create 2nd attribute for the dataset
-	Attribute ds_attr2 = dataset.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, att2_space);
+        // Create 2nd attribute for the dataset
+        Attribute ds_attr2 = dataset.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, att2_space);
 
-	// Write 2nd attribute information
-	ds_attr2.write (PredType::NATIVE_INT, attr_data2);
+        // Write 2nd attribute information
+        ds_attr2.write (PredType::NATIVE_INT, attr_data2);
 
-	// Create dataspace for 3rd attribute
-	hsize_t	dims4[] = {ATTR3_DIM1,ATTR3_DIM2,ATTR3_DIM3};
-	DataSpace att3_space (ATTR3_RANK, dims4);
+        // Create dataspace for 3rd attribute
+        hsize_t dims4[] = {ATTR3_DIM1,ATTR3_DIM2,ATTR3_DIM3};
+        DataSpace att3_space (ATTR3_RANK, dims4);
 
-	// Create 3rd attribute for the dataset
-	Attribute ds_attr3 = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_DOUBLE, att3_space);
+        // Create 3rd attribute for the dataset
+        Attribute ds_attr3 = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_DOUBLE, att3_space);
 
-	// Try creating an attribute that already exists.  This should fail
-	// since two attributes cannot have the same name.  If an exception
-	// is not thrown for this action by createAttribute, then throw an
-	// invalid action exception.
-	try {
-	    Attribute invalid_attr = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_DOUBLE, att3_space);
+        // Try creating an attribute that already exists.  This should fail
+        // since two attributes cannot have the same name.  If an exception
+        // is not thrown for this action by createAttribute, then throw an
+        // invalid action exception.
+        try {
+            Attribute invalid_attr = dataset.createAttribute (ATTR3_NAME, PredType::NATIVE_DOUBLE, att3_space);
 
-	    // continuation here, that means no exception has been thrown
-	    throw InvalidActionException("DataSet::createAttribute", "Attempting to create a duplicate attribute");
-	}
-	catch (AttributeIException& E) // catching invalid creating attribute
+            // continuation here, that means no exception has been thrown
+            throw InvalidActionException("DataSet::createAttribute", "Attempting to create a duplicate attribute");
+        }
+        catch (AttributeIException& E) // catching invalid creating attribute
         {} // do nothing, exception expected
 
-	// Write 3rd attribute information
-	ds_attr3.write (PredType::NATIVE_DOUBLE, attr_data3);
+        // Write 3rd attribute information
+        ds_attr3.write (PredType::NATIVE_DOUBLE, attr_data3);
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_mult_write()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_mult_write()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_mult_write()
 
@@ -951,39 +951,39 @@ static void test_attr_mult_read()
     double  read_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{0}}}; // Buffer for reading 3rd attribute
     hsize_t i,j,k;
 
-	// Output message about test being performed
+        // Output message about test being performed
     SUBTEST("Multiple Attribute Reading Functions");
 
     try {
-	// Open file
-	H5File fid1(FILE_MULTI, H5F_ACC_RDWR);
+        // Open file
+        H5File fid1(FILE_MULTI, H5F_ACC_RDWR);
 
-	// Open the dataset
-	DataSet dataset = fid1.openDataSet(DSET1_NAME);
+        // Open the dataset
+        DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Verify the correct number of attributes
-	int num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        int num_attrs = dataset.getNumAttrs();
+        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Open 1st attribute for the dataset
-	Attribute attr = dataset.openAttribute((unsigned)0);
+        // Open 1st attribute for the dataset
+        Attribute attr = dataset.openAttribute((unsigned)0);
 
-	/* Verify Dataspace */
+        /* Verify Dataspace */
 
-	// Get the dataspace of the attribute
-	DataSpace space = attr.getSpace();
+        // Get the dataspace of the attribute
+        DataSpace space = attr.getSpace();
 
-	// Get the rank of the dataspace and verify it
-	int rank = space.getSimpleExtentNdims();
-	verify_val(rank, ATTR1_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        // Get the rank of the dataspace and verify it
+        int rank = space.getSimpleExtentNdims();
+        verify_val(rank, ATTR1_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
-	// Get the dims of the dataspace and verify them
-	hsize_t dims[ATTR_MAX_DIMS];    // Attribute dimensions
-	int ndims = space.getSimpleExtentDims(dims);
-	if ((long)dims[0] != (long)ATTR1_DIM1)
-	    TestErrPrintf("%d:attribute dimensions different: dims[0]=%d, should be %d\n",__LINE__,(int)dims[0],ATTR1_DIM1);
+        // Get the dims of the dataspace and verify them
+        hsize_t dims[ATTR_MAX_DIMS];    // Attribute dimensions
+        int ndims = space.getSimpleExtentDims(dims);
+        if ((long)dims[0] != (long)ATTR1_DIM1)
+            TestErrPrintf("%d:attribute dimensions different: dims[0]=%d, should be %d\n",__LINE__,(int)dims[0],ATTR1_DIM1);
 
-	/* Verify Datatype */
+        /* Verify Datatype */
 
         // Get the class of the datatype that is used by attr
         H5T_class_t type_class = attr.getTypeClass();
@@ -991,51 +991,51 @@ static void test_attr_mult_read()
         // Verify that the type is of integer datatype
         verify_val(type_class, H5T_INTEGER, "Attribute::getTypeClass", __LINE__, __FILE__);
 
-    	// Get the integer datatype
+            // Get the integer datatype
         IntType i_type1 = attr.getIntType();
 
-	// Get and verify the order of this type
-	H5T_order_t order = i_type1.getOrder();
-	verify_val(order, PredType::NATIVE_INT.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        // Get and verify the order of this type
+        H5T_order_t order = i_type1.getOrder();
+        verify_val(order, PredType::NATIVE_INT.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
 
-	// Get and verify the size of this type
-	size_t size = i_type1.getSize();
-	verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        // Get and verify the size of this type
+        size_t size = i_type1.getSize();
+        verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__);
 
-	// Read attribute information
-	attr.read(PredType::NATIVE_INT, read_data1);
+        // Read attribute information
+        attr.read(PredType::NATIVE_INT, read_data1);
 
-	// Verify values read in
-	for(i=0; i<ATTR1_DIM1; i++)
-	    if(attr_data1[i]!=read_data1[i])
-		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
+        // Verify values read in
+        for(i=0; i<ATTR1_DIM1; i++)
+            if(attr_data1[i]!=read_data1[i])
+                TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
-	// Verify Name
-	H5std_string attr_name = attr.getName();
-	verify_val(attr_name, ATTR1_NAME, "DataType::getName", __LINE__, __FILE__);
+        // Verify Name
+        H5std_string attr_name = attr.getName();
+        verify_val(attr_name, ATTR1_NAME, "DataType::getName", __LINE__, __FILE__);
 
-	attr.close();
-	space.close();
+        attr.close();
+        space.close();
 
-	// Open 2nd attribute for the dataset
-	attr = dataset.openAttribute((unsigned)1);
+        // Open 2nd attribute for the dataset
+        attr = dataset.openAttribute((unsigned)1);
 
-	/* Verify Dataspace */
+        /* Verify Dataspace */
 
-	// Get the dataspace of the attribute
-	space = attr.getSpace();
+        // Get the dataspace of the attribute
+        space = attr.getSpace();
 
-	// Get the rank of the dataspace and verify it
-	rank = space.getSimpleExtentNdims();
-	verify_val(rank, ATTR2_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        // Get the rank of the dataspace and verify it
+        rank = space.getSimpleExtentNdims();
+        verify_val(rank, ATTR2_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
-	// Get the dims of the dataspace and verify them
-	ndims = space.getSimpleExtentDims(dims);
+        // Get the dims of the dataspace and verify them
+        ndims = space.getSimpleExtentDims(dims);
 
         verify_val((long)dims[0], (long)ATTR2_DIM1, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
         verify_val((long)dims[1], (long)ATTR2_DIM2, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
 
-	/* Verify Datatype */
+        /* Verify Datatype */
 
         // Get the class of the datatype that is used by attr
         type_class = attr.getTypeClass();
@@ -1043,52 +1043,52 @@ static void test_attr_mult_read()
         // Verify that the type is of integer datatype
         verify_val(type_class, H5T_INTEGER, "Attribute::getTypeClass", __LINE__, __FILE__);
 
-    	// Get the integer datatype
+            // Get the integer datatype
         IntType i_type2 = attr.getIntType();
 
-	// Get and verify the order of this type
-	order = i_type2.getOrder();
-	verify_val(order, PredType::NATIVE_INT.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        // Get and verify the order of this type
+        order = i_type2.getOrder();
+        verify_val(order, PredType::NATIVE_INT.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
 
-	// Get and verify the size of this type
-	size = i_type2.getSize();
-	verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        // Get and verify the size of this type
+        size = i_type2.getSize();
+        verify_val(size, PredType::NATIVE_INT.getSize(), "DataType::getSize", __LINE__, __FILE__);
 
-	// Read attribute information
-	attr.read(PredType::NATIVE_INT, read_data2);
-	//attr.read(i_type, read_data2);
+        // Read attribute information
+        attr.read(PredType::NATIVE_INT, read_data2);
+        //attr.read(i_type, read_data2);
 
-	// Verify values read in
-	for(i=0; i<ATTR2_DIM1; i++)
-	  for(j=0; j<ATTR2_DIM2; j++)
+        // Verify values read in
+        for(i=0; i<ATTR2_DIM1; i++)
+          for(j=0; j<ATTR2_DIM2; j++)
             if(attr_data2[i][j]!=read_data2[i][j])
                 TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__,i,j,attr_data2[i][j],i,j,read_data2[i][j]);
 
-	// Verify Name
-	attr_name = attr.getName();
-	verify_val(attr_name, ATTR2_NAME, "DataType::getName", __LINE__, __FILE__);
-	attr.close();
-	space.close();
+        // Verify Name
+        attr_name = attr.getName();
+        verify_val(attr_name, ATTR2_NAME, "DataType::getName", __LINE__, __FILE__);
+        attr.close();
+        space.close();
 
-	// Open 3rd attribute for the dataset
-	attr = dataset.openAttribute((unsigned)2);
+        // Open 3rd attribute for the dataset
+        attr = dataset.openAttribute((unsigned)2);
 
-	/* Verify Dataspace */
+        /* Verify Dataspace */
 
-	// Get the dataspace of the attribute
-	space = attr.getSpace();
+        // Get the dataspace of the attribute
+        space = attr.getSpace();
 
-	// Get the rank of the dataspace and verify it
-	rank = space.getSimpleExtentNdims();
-	verify_val(rank, ATTR3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
+        // Get the rank of the dataspace and verify it
+        rank = space.getSimpleExtentNdims();
+        verify_val(rank, ATTR3_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
-	// Get the dims of the dataspace and verify them
-	ndims = space.getSimpleExtentDims(dims);
-	verify_val((long)dims[0],(long)ATTR3_DIM1,"attribute dimensions",__FILE__,__LINE__);
-	verify_val((long)dims[1],(long)ATTR3_DIM2,"attribute dimensions",__FILE__,__LINE__);
-	verify_val((long)dims[2],(long)ATTR3_DIM3,"attribute dimensions",__FILE__,__LINE__);
+        // Get the dims of the dataspace and verify them
+        ndims = space.getSimpleExtentDims(dims);
+        verify_val((long)dims[0],(long)ATTR3_DIM1,"attribute dimensions",__FILE__,__LINE__);
+        verify_val((long)dims[1],(long)ATTR3_DIM2,"attribute dimensions",__FILE__,__LINE__);
+        verify_val((long)dims[2],(long)ATTR3_DIM3,"attribute dimensions",__FILE__,__LINE__);
 
-	/* Verify Datatype */
+        /* Verify Datatype */
 
         // Get the class of the datatype that is used by attr
         type_class = attr.getTypeClass();
@@ -1096,44 +1096,44 @@ static void test_attr_mult_read()
         // Verify that the type is of compound datatype
         verify_val(type_class, H5T_FLOAT, "Attribute::getTypeClass", __LINE__, __FILE__);
 
-    	// Get the double datatype
+            // Get the double datatype
         FloatType f_type = attr.getFloatType();
 
-	// Get and verify the order of this type
-	order = f_type.getOrder();
-	verify_val(order, PredType::NATIVE_DOUBLE.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
+        // Get and verify the order of this type
+        order = f_type.getOrder();
+        verify_val(order, PredType::NATIVE_DOUBLE.getOrder(), "DataType::getOrder", __LINE__, __FILE__);
 
-	// Get and verify the size of this type
-	size = f_type.getSize();
-	verify_val(size, PredType::NATIVE_DOUBLE.getSize(), "DataType::getSize", __LINE__, __FILE__);
+        // Get and verify the size of this type
+        size = f_type.getSize();
+        verify_val(size, PredType::NATIVE_DOUBLE.getSize(), "DataType::getSize", __LINE__, __FILE__);
 
-	// Read attribute information
-	attr.read(PredType::NATIVE_DOUBLE, read_data3);
+        // Read attribute information
+        attr.read(PredType::NATIVE_DOUBLE, read_data3);
 
-	// Verify values read in
-	for(i=0; i<ATTR3_DIM1; i++)
-	    for(j=0; j<ATTR3_DIM2; j++)
-		for(k=0; k<ATTR3_DIM3; k++)
-		    if(attr_data3[i][j][k]!=read_data3[i][j][k])
-			TestErrPrintf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n",__LINE__,i,j,k,attr_data3[i][j][k],i,j,k,read_data3[i][j][k]);
+        // Verify values read in
+        for(i=0; i<ATTR3_DIM1; i++)
+            for(j=0; j<ATTR3_DIM2; j++)
+                for(k=0; k<ATTR3_DIM3; k++)
+                    if(attr_data3[i][j][k]!=read_data3[i][j][k])
+                        TestErrPrintf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n",__LINE__,i,j,k,attr_data3[i][j][k],i,j,k,read_data3[i][j][k]);
 
-	// Verify Name
-	attr_name = attr.getName();
-	verify_val(attr_name, ATTR3_NAME, "DataType::getName", __LINE__, __FILE__);
+        // Verify Name
+        attr_name = attr.getName();
+        verify_val(attr_name, ATTR3_NAME, "DataType::getName", __LINE__, __FILE__);
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_mult_read()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_mult_read()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_mult_read()
 
 /****************************************************************
 **
 **  test_attr_delete(): Test deleting attribute from different
-**			hdf5 objects.
+**                      hdf5 objects.
 **
 ****************************************************************/
 static void test_attr_delete()
@@ -1144,113 +1144,113 @@ static void test_attr_delete()
     SUBTEST("Removing Attribute Function");
 
     try {
-	// Open file.
-	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+        // Open file.
+        H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
 
-	// Get the number of file attributes
-	int num_attrs = fid1.getNumAttrs();
-	verify_val(num_attrs, 2, "H5File::getNumAttrs", __LINE__, __FILE__);
+        // Get the number of file attributes
+        int num_attrs = fid1.getNumAttrs();
+        verify_val(num_attrs, 2, "H5File::getNumAttrs", __LINE__, __FILE__);
 
-	// Delete the second file attribute
-	fid1.removeAttr(FATTR2_NAME);
+        // Delete the second file attribute
+        fid1.removeAttr(FATTR2_NAME);
 
-	// Get the number of file attributes
-	num_attrs = fid1.getNumAttrs();
-	verify_val(num_attrs, 1, "H5File::getNumAttrs", __LINE__, __FILE__);
+        // Get the number of file attributes
+        num_attrs = fid1.getNumAttrs();
+        verify_val(num_attrs, 1, "H5File::getNumAttrs", __LINE__, __FILE__);
 
-	// Verify the name of the only file attribute left
-	Attribute fattr = fid1.openAttribute((unsigned)0);
-	attr_name = fattr.getName();
-	verify_val(attr_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
-	fattr.close();
-	
-	// Test deleting non-existing attribute
+        // Verify the name of the only file attribute left
+        Attribute fattr = fid1.openAttribute((unsigned)0);
+        attr_name = fattr.getName();
+        verify_val(attr_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        fattr.close();
+        
+        // Test deleting non-existing attribute
 
-	// Open the dataset
-	DataSet dataset = fid1.openDataSet(DSET1_NAME);
+        // Open the dataset
+        DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Verify the correct number of attributes
-	num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        num_attrs = dataset.getNumAttrs();
+        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Try to delete bogus attribute, should fail
-	try {
-	    dataset.removeAttr("Bogus");
+        // Try to delete bogus attribute, should fail
+        try {
+            dataset.removeAttr("Bogus");
 
-	    // continuation here, that means no exception has been thrown
-	    throw InvalidActionException("DataSet::removeAttr", "Attempting to remove non-existing attribute");
-	}
-	catch (AttributeIException& E) // catching invalid removing attribute
+            // continuation here, that means no exception has been thrown
+            throw InvalidActionException("DataSet::removeAttr", "Attempting to remove non-existing attribute");
+        }
+        catch (AttributeIException& E) // catching invalid removing attribute
         {} // do nothing, exception expected
 
-	// Test deleting dataset's attributes
+        // Test deleting dataset's attributes
 
-	// Verify the correct number of attributes
-	num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        num_attrs = dataset.getNumAttrs();
+        verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Delete middle (2nd) attribute
-	dataset.removeAttr(ATTR2_NAME);
+        // Delete middle (2nd) attribute
+        dataset.removeAttr(ATTR2_NAME);
 
-	// Verify the correct number of attributes
-	num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 2, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        num_attrs = dataset.getNumAttrs();
+        verify_val(num_attrs, 2, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Open 1st attribute for the dataset
-	Attribute attr = dataset.openAttribute((unsigned)0);
+        // Open 1st attribute for the dataset
+        Attribute attr = dataset.openAttribute((unsigned)0);
 
-	// Verify Name
-	attr_name = attr.getName();
-	verify_val(attr_name, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
+        // Verify Name
+        attr_name = attr.getName();
+        verify_val(attr_name, ATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
 
-	// Close attribute
-	attr.close();
+        // Close attribute
+        attr.close();
 
-	// Open last (formally 3rd) attribute for the dataset
-	attr = dataset.openAttribute((unsigned)1);
+        // Open last (formally 3rd) attribute for the dataset
+        attr = dataset.openAttribute((unsigned)1);
 
-	// Verify Name
-	attr_name = attr.getName();
-	verify_val(attr_name, ATTR3_NAME, "Attribute::getName", __LINE__, __FILE__);
+        // Verify Name
+        attr_name = attr.getName();
+        verify_val(attr_name, ATTR3_NAME, "Attribute::getName", __LINE__, __FILE__);
 
-	attr.close();
+        attr.close();
 
-	// Delete first attribute
-	dataset.removeAttr(ATTR1_NAME);
+        // Delete first attribute
+        dataset.removeAttr(ATTR1_NAME);
 
-	// Verify the correct number of attributes
-	num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        num_attrs = dataset.getNumAttrs();
+        verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	// Open the only attribute for the dataset (formally 3rd)
-	attr = dataset.openAttribute((unsigned)0);
+        // Open the only attribute for the dataset (formally 3rd)
+        attr = dataset.openAttribute((unsigned)0);
 
-	// Verify Name
-	attr_name = attr.getName();
-	verify_val(attr_name, ATTR3_NAME, "Attribute::getName", __LINE__, __FILE__);
-	// Close attribute
-	attr.close();
+        // Verify Name
+        attr_name = attr.getName();
+        verify_val(attr_name, ATTR3_NAME, "Attribute::getName", __LINE__, __FILE__);
+        // Close attribute
+        attr.close();
 
-	// Delete first attribute
-	dataset.removeAttr(ATTR3_NAME);
+        // Delete first attribute
+        dataset.removeAttr(ATTR3_NAME);
 
-	// Verify the correct number of attributes
-	num_attrs = dataset.getNumAttrs();
-	verify_val(num_attrs, 0, "DataSet::getNumAttrs", __LINE__, __FILE__);
+        // Verify the correct number of attributes
+        num_attrs = dataset.getNumAttrs();
+        verify_val(num_attrs, 0, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_delete()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_delete()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_delete()
 
 /****************************************************************
 **
 **  test_attr_dtype_shared(): Test code for using shared datatypes
-**				in attributes.
+**                            in attributes.
 **
 ****************************************************************/
 static void test_attr_dtype_shared()
@@ -1266,142 +1266,142 @@ static void test_attr_dtype_shared()
     SUBTEST("Shared Datatypes with Attributes");
 
     try {
-	// Create a file
-	H5File fid1(FILE_DTYPE, H5F_ACC_TRUNC);
+        // Create a file
+        H5File fid1(FILE_DTYPE, H5F_ACC_TRUNC);
 
-	// Close file
-	fid1.close();
+        // Close file
+        fid1.close();
 
-	// Get size of file
-	h5_stat_size_t empty_filesize;       // Size of empty file
-	empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-	if (empty_filesize < 0)
+        // Get size of file
+        h5_stat_size_t empty_filesize;       // Size of empty file
+        empty_filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
+        if (empty_filesize < 0)
             TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
-	// Open the file again
-	fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
+        // Open the file again
+        fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
 
-	// Enclosing to work around the issue of unused variables and/or
-	// objects created by copy constructors stay around until end of
-	// scope, causing incorrect number of ref counts.
-	{ // First enclosed block
+        // Enclosing to work around the issue of unused variables and/or
+        // objects created by copy constructors stay around until end of
+        // scope, causing incorrect number of ref counts.
+        { // First enclosed block
 
-	// Create a datatype to commit and use
-	IntType dtype(PredType::NATIVE_INT);
+        // Create a datatype to commit and use
+        IntType dtype(PredType::NATIVE_INT);
 
-	// Commit datatype to file
-	dtype.commit(fid1, TYPE1_NAME);
+        // Commit datatype to file
+        dtype.commit(fid1, TYPE1_NAME);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Check reference count on named datatype
-	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val((int)statbuf.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
+        // Check reference count on named datatype
+        fid1.getObjinfo(TYPE1_NAME, statbuf);
+        verify_val((int)statbuf.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-	// Create dataspace for dataset
-	DataSpace dspace;
+        // Create dataspace for dataset
+        DataSpace dspace;
 
-	DataSet dset = fid1.createDataSet(DSET1_NAME, dtype, dspace);
+        DataSet dset = fid1.createDataSet(DSET1_NAME, dtype, dspace);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Check reference count on named datatype
-	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val((int)statbuf.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
+        // Check reference count on named datatype
+        fid1.getObjinfo(TYPE1_NAME, statbuf);
+        verify_val((int)statbuf.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-	// Create attribute on dataset
-	Attribute attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
+        // Create attribute on dataset
+        Attribute attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Check reference count on named datatype
-	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val((int)statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+        // Check reference count on named datatype
+        fid1.getObjinfo(TYPE1_NAME, statbuf);
+        verify_val((int)statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
         // Close attribute
         attr.close();
 
-	// Delete attribute
-	dset.removeAttr(ATTR1_NAME);
+        // Delete attribute
+        dset.removeAttr(ATTR1_NAME);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Check reference count on named datatype
-	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val((int)statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
+        // Check reference count on named datatype
+        fid1.getObjinfo(TYPE1_NAME, statbuf);
+        verify_val((int)statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
         // Create attribute on dataset
         attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Check reference count on named datatype
-	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val((int)statbuf.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
+        // Check reference count on named datatype
+        fid1.getObjinfo(TYPE1_NAME, statbuf);
+        verify_val((int)statbuf.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-	// Write data into the attribute
-	attr.write(PredType::NATIVE_INT,&data);
+        // Write data into the attribute
+        attr.write(PredType::NATIVE_INT,&data);
 
-	// Close attribute, dataset, dataspace, datatype, and file
-	attr.close();
-	dset.close();
-	dspace.close();
-	dtype.close();
-	} // end of first enclosing
+        // Close attribute, dataset, dataspace, datatype, and file
+        attr.close();
+        dset.close();
+        dspace.close();
+        dtype.close();
+        } // end of first enclosing
 
-	fid1.close();
+        fid1.close();
 
-	// Open the file again
-	fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
+        // Open the file again
+        fid1.openFile(FILE_DTYPE, H5F_ACC_RDWR);
 
-	{ // Second enclosed block...
+        { // Second enclosed block...
 
-	// Open dataset
-	DataSet *dset2 = new DataSet (fid1.openDataSet(DSET1_NAME));
+        // Open dataset
+        DataSet *dset2 = new DataSet (fid1.openDataSet(DSET1_NAME));
 
-	// Open attribute
-	Attribute *attr2 = new Attribute (dset2->openAttribute(ATTR1_NAME));
+        // Open attribute
+        Attribute *attr2 = new Attribute (dset2->openAttribute(ATTR1_NAME));
 
-	// Read data from the attribute
-	attr2->read(PredType::NATIVE_INT, &rdata);
-	verify_val(data, rdata, "Attribute::read", __LINE__, __FILE__);
+        // Read data from the attribute
+        attr2->read(PredType::NATIVE_INT, &rdata);
+        verify_val(data, rdata, "Attribute::read", __LINE__, __FILE__);
 
-	// Close attribute and dataset
-	delete attr2;
-	delete dset2;
+        // Close attribute and dataset
+        delete attr2;
+        delete dset2;
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Check reference count on named datatype
-	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val((int)statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
+        // Check reference count on named datatype
+        fid1.getObjinfo(TYPE1_NAME, statbuf);
+        verify_val((int)statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-	} // end of second enclosing
+        } // end of second enclosing
 
-	// Unlink the dataset
-	fid1.unlink(DSET1_NAME);
+        // Unlink the dataset
+        fid1.unlink(DSET1_NAME);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Check reference count on named datatype
-	fid1.getObjinfo(TYPE1_NAME, statbuf);
-	verify_val((int)statbuf.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
+        // Check reference count on named datatype
+        fid1.getObjinfo(TYPE1_NAME, statbuf);
+        verify_val((int)statbuf.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-	// Unlink the named datatype
-	fid1.unlink(TYPE1_NAME);
+        // Unlink the named datatype
+        fid1.unlink(TYPE1_NAME);
 
-	// Close file
-	fid1.close();
+        // Close file
+        fid1.close();
 
-	// Check size of file
-	filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
-	verify_val((long)filesize, (long)empty_filesize, "Checking file size", __LINE__, __FILE__);
+        // Check size of file
+        filesize = h5_get_file_size(FILE_DTYPE.c_str(), H5P_DEFAULT);
+        verify_val((long)filesize, (long)empty_filesize, "Checking file size", __LINE__, __FILE__);
 
-	PASSED();
+        PASSED();
     }   // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_dtype_shared()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_dtype_shared()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_dtype_shared()
 
@@ -1424,116 +1424,116 @@ static void test_string_attr()
     SUBTEST("I/O on FL and VL String Attributes");
 
     try {
-	// Create file
-	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+        // Create file
+        H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
 
-	//
-	// Fixed-lenth string attributes
-	//
-	// Create a fixed-length string datatype to refer to.
-	StrType fls_type(0, ATTR_LEN);
+        //
+        // Fixed-lenth string attributes
+        //
+        // Create a fixed-length string datatype to refer to.
+        StrType fls_type(0, ATTR_LEN);
 
-	// Open the root group.
-	Group root = fid1.openGroup("/");
+        // Open the root group.
+        Group root = fid1.openGroup("/");
 
-	// Create dataspace for the attribute.
-	DataSpace att_space (H5S_SCALAR);
+        // Create dataspace for the attribute.
+        DataSpace att_space (H5S_SCALAR);
 
-	/* Test Attribute::write(...,const void *buf) with Fixed len string */
+        /* Test Attribute::write(...,const void *buf) with Fixed len string */
 
-	// Create an attribute for the root group.
-	Attribute gr_flattr1 = root.createAttribute(ATTR1_FL_STR_NAME, fls_type, att_space);
+        // Create an attribute for the root group.
+        Attribute gr_flattr1 = root.createAttribute(ATTR1_FL_STR_NAME, fls_type, att_space);
 
-	// Write data to the attribute.
-	gr_flattr1.write(fls_type, ATTRSTR_DATA.c_str());
+        // Write data to the attribute.
+        gr_flattr1.write(fls_type, ATTRSTR_DATA.c_str());
 
-	/* Test Attribute::write(...,const H5std_string& strg) with FL string */
+        /* Test Attribute::write(...,const H5std_string& strg) with FL string */
 
-	// Create an attribute for the root group.
-	Attribute gr_flattr2 = root.createAttribute(ATTR2_FL_STR_NAME, fls_type, att_space);
+        // Create an attribute for the root group.
+        Attribute gr_flattr2 = root.createAttribute(ATTR2_FL_STR_NAME, fls_type, att_space);
 
-	// Write data to the attribute.
-	gr_flattr2.write(fls_type, ATTRSTR_DATA);
+        // Write data to the attribute.
+        gr_flattr2.write(fls_type, ATTRSTR_DATA);
 
-	/* Test Attribute::read(...,void *buf) with FL string */
+        /* Test Attribute::read(...,void *buf) with FL string */
 
-	// Read and verify the attribute string as a string of chars.
-	char flstring_att_check[ATTR_LEN];
-	gr_flattr1.read(fls_type, flstring_att_check);
-	if(HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str())!=0)
-	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",__LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
+        // Read and verify the attribute string as a string of chars.
+        char flstring_att_check[ATTR_LEN];
+        gr_flattr1.read(fls_type, flstring_att_check);
+        if(HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str())!=0)
+            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",__LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
 
-	// Read and verify the attribute string as a string of chars; buffer
-	// is dynamically allocated.
-	size_t attr_size = gr_flattr1.getInMemDataSize();
-	char *fl_dyn_string_att_check;
-	fl_dyn_string_att_check = new char[attr_size+1];
-	gr_flattr1.read(fls_type, fl_dyn_string_att_check);
-	if(HDstrcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str())!=0)
-	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",__LINE__, ATTRSTR_DATA.c_str(), fl_dyn_string_att_check);
-	delete []fl_dyn_string_att_check;
+        // Read and verify the attribute string as a string of chars; buffer
+        // is dynamically allocated.
+        size_t attr_size = gr_flattr1.getInMemDataSize();
+        char *fl_dyn_string_att_check;
+        fl_dyn_string_att_check = new char[attr_size+1];
+        gr_flattr1.read(fls_type, fl_dyn_string_att_check);
+        if(HDstrcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str())!=0)
+            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",__LINE__, ATTRSTR_DATA.c_str(), fl_dyn_string_att_check);
+        delete []fl_dyn_string_att_check;
 
-	/* Test Attribute::read(...,H5std_string& strg) with FL string */
+        /* Test Attribute::read(...,H5std_string& strg) with FL string */
 
-	// Read and verify the attribute string as an std::string.
-	H5std_string read_flstr1;
-	gr_flattr1.read(fls_type, read_flstr1);
-	if (read_flstr1 != ATTRSTR_DATA)
-	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_flstr1=%s\n",__LINE__, ATTRSTR_DATA.c_str(), read_flstr1.c_str());
+        // Read and verify the attribute string as an std::string.
+        H5std_string read_flstr1;
+        gr_flattr1.read(fls_type, read_flstr1);
+        if (read_flstr1 != ATTRSTR_DATA)
+            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_flstr1=%s\n",__LINE__, ATTRSTR_DATA.c_str(), read_flstr1.c_str());
 
-	// Read and verify the attribute string as a string of chars.
-	HDstrcpy(flstring_att_check, "");
-	gr_flattr2.read(fls_type, flstring_att_check);
-	if(HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str())!=0)
-	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",__LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
+        // Read and verify the attribute string as a string of chars.
+        HDstrcpy(flstring_att_check, "");
+        gr_flattr2.read(fls_type, flstring_att_check);
+        if(HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str())!=0)
+            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",__LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
 
-	/* Test Attribute::read(...,H5std_string& strg) with FL string */
+        /* Test Attribute::read(...,H5std_string& strg) with FL string */
 
-	// Read and verify the attribute string as an std::string.
-	H5std_string read_flstr2;
-	gr_flattr2.read(fls_type, read_flstr2);
-	if (read_flstr2 != ATTRSTR_DATA)
-	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_flstr2=%s\n",__LINE__, ATTRSTR_DATA.c_str(), read_flstr2.c_str());
+        // Read and verify the attribute string as an std::string.
+        H5std_string read_flstr2;
+        gr_flattr2.read(fls_type, read_flstr2);
+        if (read_flstr2 != ATTRSTR_DATA)
+            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_flstr2=%s\n",__LINE__, ATTRSTR_DATA.c_str(), read_flstr2.c_str());
 
-	//
-	// Variable-lenth string attributes
-	//
-	// Create a variable length string datatype to refer to.
-	StrType vls_type(0, H5T_VARIABLE);
+        //
+        // Variable-lenth string attributes
+        //
+        // Create a variable length string datatype to refer to.
+        StrType vls_type(0, H5T_VARIABLE);
 
-	// Create an attribute for the root group.
-	Attribute gr_vlattr = root.createAttribute(ATTR_VL_STR_NAME, vls_type, att_space);
+        // Create an attribute for the root group.
+        Attribute gr_vlattr = root.createAttribute(ATTR_VL_STR_NAME, vls_type, att_space);
 
-	// Write data to the attribute.
-	gr_vlattr.write(vls_type, ATTRSTR_DATA);
+        // Write data to the attribute.
+        gr_vlattr.write(vls_type, ATTRSTR_DATA);
 
-	/* Test Attribute::read(...,void *buf) with Variable len string */
-	// Read and verify the attribute string as a string of chars.
-	char *string_att_check;
-	gr_vlattr.read(vls_type, &string_att_check);
-	if(HDstrcmp(string_att_check, ATTRSTR_DATA.c_str())!=0)
-	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",__LINE__, ATTRSTR_DATA.c_str(), string_att_check);
-	HDfree(string_att_check);
+        /* Test Attribute::read(...,void *buf) with Variable len string */
+        // Read and verify the attribute string as a string of chars.
+        char *string_att_check;
+        gr_vlattr.read(vls_type, &string_att_check);
+        if(HDstrcmp(string_att_check, ATTRSTR_DATA.c_str())!=0)
+            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",__LINE__, ATTRSTR_DATA.c_str(), string_att_check);
+        HDfree(string_att_check);
 
-	/* Test Attribute::read(...,H5std_string& strg) with VL string */
-	// Read and verify the attribute string as an std::string.
-	H5std_string read_str;
-	gr_vlattr.read(vls_type, read_str);
-	if (read_str != ATTRSTR_DATA)
-	    TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_str=%s\n",__LINE__, ATTRSTR_DATA.c_str(), read_str.c_str());
-	PASSED();
+        /* Test Attribute::read(...,H5std_string& strg) with VL string */
+        // Read and verify the attribute string as an std::string.
+        H5std_string read_str;
+        gr_vlattr.read(vls_type, read_str);
+        if (read_str != ATTRSTR_DATA)
+            TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,read_str=%s\n",__LINE__, ATTRSTR_DATA.c_str(), read_str.c_str());
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_string_attr()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_string_attr()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_string_attr()
 
 /****************************************************************
 **
 **  test_attr_exists(): Test checking for attribute existence.
-**	(additional attrExists tests are in test_attr_rename())
+**        (additional attrExists tests are in test_attr_rename())
 **
 ****************************************************************/
 static void test_attr_exists()
@@ -1542,40 +1542,40 @@ static void test_attr_exists()
     SUBTEST("Check Attribute Existence");
 
     try {
-	// Open file.
-	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+        // Open file.
+        H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
 
-	// Open the root group.
-	Group root = fid1.openGroup("/");
+        // Open the root group.
+        Group root = fid1.openGroup("/");
 
-	// Check for existence of attribute
-	bool attr_exists = fid1.attrExists(ATTR1_FL_STR_NAME);
-	if (attr_exists == false)
-	    throw InvalidActionException("H5File::attrExists", "fid1, ATTR1_FL_STR_NAMEAttribute should exist but does not");
+        // Check for existence of attribute
+        bool attr_exists = fid1.attrExists(ATTR1_FL_STR_NAME);
+        if (attr_exists == false)
+            throw InvalidActionException("H5File::attrExists", "fid1, ATTR1_FL_STR_NAMEAttribute should exist but does not");
 
-	// Check for existence of attribute
-	attr_exists = fid1.attrExists(FATTR1_NAME);
-	if (attr_exists == false)
-	    throw InvalidActionException("H5File::attrExists", "fid1,FATTR2_NAMEAttribute should exist but does not");
+        // Check for existence of attribute
+        attr_exists = fid1.attrExists(FATTR1_NAME);
+        if (attr_exists == false)
+            throw InvalidActionException("H5File::attrExists", "fid1,FATTR2_NAMEAttribute should exist but does not");
 
-	// Open a group.
-	Group group = fid1.openGroup(GROUP1_NAME);
+        // Open a group.
+        Group group = fid1.openGroup(GROUP1_NAME);
 
-	// Check for existence of attribute
-	attr_exists = group.attrExists(ATTR2_NAME);
-	if (attr_exists == false)
-	    throw InvalidActionException("H5File::attrExists", "group, ATTR2_NAMEAttribute should exist but does not");
+        // Check for existence of attribute
+        attr_exists = group.attrExists(ATTR2_NAME);
+        if (attr_exists == false)
+            throw InvalidActionException("H5File::attrExists", "group, ATTR2_NAMEAttribute should exist but does not");
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (InvalidActionException& E)
     {
-	issue_fail_msg("test_attr_exists()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_exists()", __LINE__, __FILE__, E.getCDetailMsg());
     }
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_exists()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_exists()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_exists()
 
@@ -1591,100 +1591,100 @@ const unsigned MAX_COMPACT_DEF = 8;
 const unsigned MIN_DENSE_DEF = 6;
 
 static void test_attr_dense_create(FileCreatPropList& fcpl,
-				   FileAccPropList& fapl)
+                                   FileAccPropList& fapl)
 {
     // Output message about test being performed
     SUBTEST("Dense Attribute Storage Creation");
 
     try {
-	// Create file
-	H5File fid1 (FILE_CRTPROPS, H5F_ACC_TRUNC, fcpl, fapl);
+        // Create file
+        H5File fid1 (FILE_CRTPROPS, H5F_ACC_TRUNC, fcpl, fapl);
 
-	// Close file
-	fid1.close();
+        // Close file
+        fid1.close();
 
-	// Get size of file
-	h5_stat_size_t empty_filesize;       // Size of empty file
-	empty_filesize = h5_get_file_size(FILE_CRTPROPS.c_str(), fapl.getId());
-	if (empty_filesize < 0)
+        // Get size of file
+        h5_stat_size_t empty_filesize;       // Size of empty file
+        empty_filesize = h5_get_file_size(FILE_CRTPROPS.c_str(), fapl.getId());
+        if (empty_filesize < 0)
             TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
-	// Re-open file
-	fid1.openFile(FILE_CRTPROPS, H5F_ACC_RDWR, fapl);
+        // Re-open file
+        fid1.openFile(FILE_CRTPROPS, H5F_ACC_RDWR, fapl);
 
-	// Create dataspace for dataset
-	DataSpace ds_space(H5S_SCALAR);
+        // Create dataspace for dataset
+        DataSpace ds_space(H5S_SCALAR);
 
-	//  Create dataset creation property list.
-	DSetCreatPropList dcpl;
+        //  Create dataset creation property list.
+        DSetCreatPropList dcpl;
 
-	// Create a dataset
-	DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR, ds_space, dcpl);
+        // Create a dataset
+        DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR, ds_space, dcpl);
 
-	unsigned max_compact = 0, min_dense = 0;
+        unsigned max_compact = 0, min_dense = 0;
 
-	// Retrieve limits for compact/dense attribute storage
-	dcpl.getAttrPhaseChange(max_compact, min_dense);
-	verify_val(max_compact, MAX_COMPACT_DEF, "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
-	verify_val(min_dense, MIN_DENSE_DEF, "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
+        // Retrieve limits for compact/dense attribute storage
+        dcpl.getAttrPhaseChange(max_compact, min_dense);
+        verify_val(max_compact, MAX_COMPACT_DEF, "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
+        verify_val(min_dense, MIN_DENSE_DEF, "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
 
-	// Set new compact/dense attribute storage limits to some random numbers
-	dcpl.setAttrPhaseChange(7, 5);
+        // Set new compact/dense attribute storage limits to some random numbers
+        dcpl.setAttrPhaseChange(7, 5);
 
-	// Retrieve limits for compact/dense attribute storage and verify them
-	dcpl.getAttrPhaseChange(max_compact, min_dense);
-	verify_val(max_compact, static_cast<unsigned>(7), "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
-	verify_val(min_dense, static_cast<unsigned>(5), "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
+        // Retrieve limits for compact/dense attribute storage and verify them
+        dcpl.getAttrPhaseChange(max_compact, min_dense);
+        verify_val(max_compact, static_cast<unsigned>(7), "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
+        verify_val(min_dense, static_cast<unsigned>(5), "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
 
-	// Close property list
-	dcpl.close();
+        // Close property list
+        dcpl.close();
 
-	// H5O_is_attr_dense_test - un-usable
+        // H5O_is_attr_dense_test - un-usable
 
-	// Add attributes, until just before converting to dense storage
-	char attr_name[NAME_BUF_SIZE];
-	unsigned attr_num;
-	for (attr_num = 0; attr_num < max_compact; attr_num++)
-	{
-	    // Create attribute
-	    sprintf(attr_name, "attr %02u", attr_num);
-	    Attribute attr = dataset.createAttribute(attr_name, PredType::NATIVE_UINT, ds_space);
+        // Add attributes, until just before converting to dense storage
+        char attr_name[NAME_BUF_SIZE];
+        unsigned attr_num;
+        for (attr_num = 0; attr_num < max_compact; attr_num++)
+        {
+            // Create attribute
+            sprintf(attr_name, "attr %02u", attr_num);
+            Attribute attr = dataset.createAttribute(attr_name, PredType::NATIVE_UINT, ds_space);
 
-	    // Write data to the attribute
-	    attr.write(PredType::NATIVE_UINT, &attr_num);
-	} // end for
+            // Write data to the attribute
+            attr.write(PredType::NATIVE_UINT, &attr_num);
+        } // end for
 
-	// H5O_is_attr_dense_test - un-usable
+        // H5O_is_attr_dense_test - un-usable
 
-	{ // Add one more attribute, to push into "dense" storage
+        { // Add one more attribute, to push into "dense" storage
 
-	    // Create another attribute
-	    sprintf(attr_name, "attr %02u", attr_num);
-	    Attribute attr = dataset.createAttribute(attr_name, PredType::NATIVE_UINT, ds_space);
+            // Create another attribute
+            sprintf(attr_name, "attr %02u", attr_num);
+            Attribute attr = dataset.createAttribute(attr_name, PredType::NATIVE_UINT, ds_space);
 
-	    // Write data to the attribute
-	    attr.write(PredType::NATIVE_UINT, &attr_num);
-	}
+            // Write data to the attribute
+            attr.write(PredType::NATIVE_UINT, &attr_num);
+        }
 
-	// Attempt to add attribute again, which should fail
-	try
-	{
-	    // Create another attribute
-	    sprintf(attr_name, "attr %02u", attr_num);
-	    Attribute attr = dataset.createAttribute(attr_name, PredType::NATIVE_UINT, ds_space);
+        // Attempt to add attribute again, which should fail
+        try
+        {
+            // Create another attribute
+            sprintf(attr_name, "attr %02u", attr_num);
+            Attribute attr = dataset.createAttribute(attr_name, PredType::NATIVE_UINT, ds_space);
 
-	    // continuation here, that means no exception has been thrown
-	    throw InvalidActionException("DataSet::createAttribute", "Maximum number of attributes has been reached");
-	}
-	catch (AttributeIException& E) // catching invalid action
+            // continuation here, that means no exception has been thrown
+            throw InvalidActionException("DataSet::createAttribute", "Maximum number of attributes has been reached");
+        }
+        catch (AttributeIException& E) // catching invalid action
         {} // do nothing, exception expected
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_dense_create()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_dense_create()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_dense_create()
 
@@ -1695,81 +1695,81 @@ static void test_attr_dense_create(FileCreatPropList& fcpl,
 **
 ****************************************************************/
 static void test_attr_corder_create_basic(FileCreatPropList& fcpl,
-				   FileAccPropList& fapl)
+                                   FileAccPropList& fapl)
 {
     // Output message about test being performed
     SUBTEST("Basic Code for Attributes with Creation Order Info");
 
     try {
-	// Create file
-	H5File fid1 (FILE_CRTPROPS, H5F_ACC_TRUNC, fcpl, fapl);
+        // Create file
+        H5File fid1 (FILE_CRTPROPS, H5F_ACC_TRUNC, fcpl, fapl);
 
-	//  Create dataset creation property list.
-	DSetCreatPropList dcpl;
+        //  Create dataset creation property list.
+        DSetCreatPropList dcpl;
 
-	// Get creation order indexing on object
-	unsigned crt_order_flags = 0;
-	crt_order_flags = dcpl.getAttrCrtOrder();
-	verify_val(crt_order_flags, (unsigned)0, "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
+        // Get creation order indexing on object
+        unsigned crt_order_flags = 0;
+        crt_order_flags = dcpl.getAttrCrtOrder();
+        verify_val(crt_order_flags, (unsigned)0, "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
 
-	// Setting invalid combination of a attribute order creation order
-	// indexing on should fail
-	try {
-	    dcpl.setAttrCrtOrder(H5P_CRT_ORDER_INDEXED);
+        // Setting invalid combination of a attribute order creation order
+        // indexing on should fail
+        try {
+            dcpl.setAttrCrtOrder(H5P_CRT_ORDER_INDEXED);
 
-	    // continuation here, that means no exception has been thrown
-	    throw InvalidActionException("DSetCreatPropList::getAttrCrtOrder", "Indexing cannot be set alone, order tracking is required");
-	}
-	catch (PropListIException& E) // catching invalid action
+            // continuation here, that means no exception has been thrown
+            throw InvalidActionException("DSetCreatPropList::getAttrCrtOrder", "Indexing cannot be set alone, order tracking is required");
+        }
+        catch (PropListIException& E) // catching invalid action
         {} // do nothing, exception expected
 
-	// Set attribute creation order tracking & indexing for object then
-	// verify them
-	dcpl.setAttrCrtOrder(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED);
-	crt_order_flags = dcpl.getAttrCrtOrder();
-	verify_val(crt_order_flags, (unsigned)(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED), "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
+        // Set attribute creation order tracking & indexing for object then
+        // verify them
+        dcpl.setAttrCrtOrder(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED);
+        crt_order_flags = dcpl.getAttrCrtOrder();
+        verify_val(crt_order_flags, (unsigned)(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED), "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
 
-	// Create dataspace for dataset
-	DataSpace ds_space(H5S_SCALAR);
+        // Create dataspace for dataset
+        DataSpace ds_space(H5S_SCALAR);
 
-	// Create a dataset
-	DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR, ds_space, dcpl);
+        // Create a dataset
+        DataSet dataset = fid1.createDataSet(DSET1_NAME, PredType::NATIVE_UCHAR, ds_space, dcpl);
 
-	// Close dataspace
-	ds_space.close();
+        // Close dataspace
+        ds_space.close();
 
-	// Check on dataset's attribute storage status.
-	// NOTE: Wrappers not available yet (H5O_is_attr_empty_test
-	// and H5O_is_attr_dense_test)
+        // Check on dataset's attribute storage status.
+        // NOTE: Wrappers not available yet (H5O_is_attr_empty_test
+        // and H5O_is_attr_dense_test)
 
-	// Close dataset
-	dataset.close();
+        // Close dataset
+        dataset.close();
 
-	// Close property list
-	dcpl.close();
+        // Close property list
+        dcpl.close();
 
-	// Close file
-	fid1.close();
+        // Close file
+        fid1.close();
 
-	// Re-open file
-	fid1.openFile(FILE_CRTPROPS, H5F_ACC_RDWR, fapl);
+        // Re-open file
+        fid1.openFile(FILE_CRTPROPS, H5F_ACC_RDWR, fapl);
 
-	// Open dataset created previously
-	dataset = fid1.openDataSet(DSET1_NAME);
+        // Open dataset created previously
+        dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Retrieve dataset creation property list for the dataset
-	dcpl = dataset.getCreatePlist();
+        // Retrieve dataset creation property list for the dataset
+        dcpl = dataset.getCreatePlist();
 
-	// Query the attribute creation properties
-	crt_order_flags = dcpl.getAttrCrtOrder();
-	verify_val(crt_order_flags, (unsigned)(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED), "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
+        // Query the attribute creation properties
+        crt_order_flags = dcpl.getAttrCrtOrder();
+        verify_val(crt_order_flags, (unsigned)(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED), "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
 
-	PASSED();
+        PASSED();
     } // end try block
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr_corder_create_basic()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr_corder_create_basic()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_corder_create_basic()
 
@@ -1814,42 +1814,42 @@ void test_attr()
             // Set the file access proplist for the type of format
             if (new_format)
             {
-	    MESSAGE(7, ("testing with new file format\n"));
-	    curr_fapl = fapl_new;
+                MESSAGE(7, ("testing with new file format\n"));
+                curr_fapl = fapl_new;
             }
             else
             {
-	    MESSAGE(7, ("testing with old file format\n"));
-	    curr_fapl = fapl;
+                MESSAGE(7, ("testing with old file format\n"));
+                curr_fapl = fapl;
             }
 
-            test_attr_basic_write();	// Test basic H5A writing code
-            test_attr_getname();	// Test overloads of Attribute::getName
-            test_attr_rename();		// Test renaming attribute
-            test_attr_basic_read(); 	// Test basic H5A reading code
+            test_attr_basic_write();    // Test basic H5A writing code
+            test_attr_getname();        // Test overloads of Attribute::getName
+            test_attr_rename();         // Test renaming attribute
+            test_attr_basic_read();     // Test basic H5A reading code
 
-            test_attr_compound_write();	// Test complex datatype H5A writing code
-            test_attr_compound_read();	// Test complex datatype H5A reading code
+            test_attr_compound_write(); // Test complex datatype H5A writing code
+            test_attr_compound_read();  // Test complex datatype H5A reading code
 
-            test_attr_scalar_write();	// Test scalar dataspace H5A writing code
-            test_attr_scalar_read();	// Test scalar dataspace H5A reading code
+            test_attr_scalar_write();   // Test scalar dataspace H5A writing code
+            test_attr_scalar_read();    // Test scalar dataspace H5A reading code
 
-            test_attr_mult_write();	// Test writing multiple attributes
-            test_attr_mult_read();	// Test reading multiple attributes
-            test_attr_delete();		// Test deleting attributes
+            test_attr_mult_write();     // Test writing multiple attributes
+            test_attr_mult_read();      // Test reading multiple attributes
+            test_attr_delete();         // Test deleting attributes
 
-            test_attr_dtype_shared();	// Test using shared datatypes in attributes
+            test_attr_dtype_shared();   // Test using shared datatypes in attributes
 
-            test_string_attr();		// Test read/write string attribute
-            test_attr_exists();		// Test H5Location::attrExists
+            test_string_attr();         // Test read/write string attribute
+            test_attr_exists();         // Test H5Location::attrExists
 
             // Test with new format
             if (new_format)
             {
-		// Test dense attribute storage creation
+                // Test dense attribute storage creation
                 test_attr_dense_create(fcpl, curr_fapl);
 
-		// Test create objects with attribute creation info
+                // Test create objects with attribute creation info
                 test_attr_corder_create_basic(fcpl, curr_fapl);
             }
         } // end for
@@ -1857,18 +1857,18 @@ void test_attr()
 
     catch (Exception& E)
     {
-	issue_fail_msg("test_attr()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_attr()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr()
 
 /*-------------------------------------------------------------------------
- * Function:	cleanup_attr
+ * Function     cleanup_attr
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose      Cleanup temporary test files
  *
- * Return:	none
+ * Return       none
  *
- * Programmer:	Albert Cheng
+ * Programmer   Albert Cheng
  *              July 2, 1998
  *
  * Modifications:

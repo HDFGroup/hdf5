@@ -39,6 +39,7 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5PBprivate.h"	/* Page Buffer				*/
 
 
 /****************/
@@ -96,15 +97,11 @@ herr_t
 H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     hid_t dxpl_id, void *buf/*out*/)
 {
-    H5F_io_info_t fio_info;             /* I/O info for operation */
+    H5F_io_info2_t fio_info;            /* I/O info for operation */
     H5FD_mem_t  map_type;               /* Mapped memory type */
-    hid_t       my_dxpl_id = dxpl_id;   /* transfer property to use for I/O */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-#ifdef QAK
-HDfprintf(stderr, "%s: read from addr = %a, size = %Zu\n", FUNC, addr, size);
-#endif /* QAK */
 
     HDassert(f);
     HDassert(f->shared);
@@ -118,20 +115,24 @@ HDfprintf(stderr, "%s: read from addr = %a, size = %Zu\n", FUNC, addr, size);
     /* Treat global heap as raw data */
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
-#ifdef H5_DEBUG_BUILD
-    /* GHEAP type is treated as RAW, so update the dxpl type property too */
-    if(H5FD_MEM_GHEAP == type)
-        my_dxpl_id = H5AC_rawdata_dxpl_id;
-#endif /* H5_DEBUG_BUILD */
-
-    /* Set up I/O info for operation */
+    /* Set up the I/O info object */
     fio_info.f = f;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(my_dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    if(H5FD_MEM_DRAW == type) {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
 
-    /* Pass through metadata accumulator layer */
-    if(H5F__accum_read(&fio_info, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through metadata accumulator failed")
+    /* Pass through page buffer layer */
+    if(H5PB_read(&fio_info, map_type, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through page buffer failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -157,15 +158,11 @@ herr_t
 H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     hid_t dxpl_id, const void *buf)
 {
-    H5F_io_info_t fio_info;             /* I/O info for operation */
+    H5F_io_info2_t fio_info;            /* I/O info for operation */
     H5FD_mem_t  map_type;               /* Mapped memory type */
-    hid_t       my_dxpl_id = dxpl_id;   /* transfer property to use for I/O */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-#ifdef QAK
-HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
-#endif /* QAK */
 
     HDassert(f);
     HDassert(f->shared);
@@ -180,20 +177,24 @@ HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
     /* Treat global heap as raw data */
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
-#ifdef H5_DEBUG_BUILD
-    /* GHEAP type is treated as RAW, so update the dxpl type property too */
-    if(H5FD_MEM_GHEAP == type)
-        my_dxpl_id = H5AC_rawdata_dxpl_id;
-#endif /* H5_DEBUG_BUILD */
-
-    /* Set up I/O info for operation */
+    /* Set up the I/O info object */
     fio_info.f = f;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(my_dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    if(H5FD_MEM_DRAW == type) {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
 
-    /* Pass through metadata accumulator layer */
-    if(H5F__accum_write(&fio_info, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through metadata accumulator failed")
+    /* Pass through page buffer layer */
+    if(H5PB_write(&fio_info, map_type, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through page buffer failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -216,7 +217,7 @@ done:
 herr_t
 H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
 {
-    H5F_io_info_t fio_info;             /* I/O info for operation */
+    H5F_io_info2_t fio_info;             /* I/O info for operation */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -227,10 +228,10 @@ H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
 
     /* Set up I/O info for operation */
     fio_info.f = f;
-
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+    if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    
+    if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Flush and reset the accumulator */
     if(H5F__accum_reset(&fio_info, TRUE) < 0)

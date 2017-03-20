@@ -1186,9 +1186,11 @@ dump_fcpl(hid_t fid)
     hsize_t  userblock; /* userblock size retrieved from FCPL */
     size_t   off_size;  /* size of offsets in the file */
     size_t   len_size;  /* size of lengths in the file */
-    H5F_file_space_type_t  fs_strategy;  /* file space strategy */
-    hsize_t  fs_threshold;    /* free-space section threshold */
-    H5F_info2_t finfo;  /* file information */
+    H5F_fspace_strategy_t  fs_strategy;  /* file space strategy */
+    hbool_t fs_persist; 	/* Persisting free-space or not */
+    hsize_t fs_threshold;   	/* free-space section threshold */
+    hsize_t fsp_size;    	/* file space page size */
+    H5F_info2_t finfo;  	/* file information */
 #ifdef SHOW_FILE_DRIVER
     hid_t    fapl;      /* file access property list ID */
     hid_t    fdriver;   /* file driver */
@@ -1204,7 +1206,8 @@ dump_fcpl(hid_t fid)
     H5Pget_sizes(fcpl,&off_size,&len_size);
     H5Pget_sym_k(fcpl,&sym_ik,&sym_lk);
     H5Pget_istore_k(fcpl,&istore_ik);
-    H5Pget_file_space(fcpl, &fs_strategy, &fs_threshold);
+    H5Pget_file_space_strategy(fcpl, &fs_strategy, &fs_persist, &fs_threshold);
+    H5Pget_file_space_page_size(fcpl, &fsp_size);
     H5Pclose(fcpl);
 #ifdef SHOW_FILE_DRIVER
     fapl=h5_fileaccess();
@@ -1265,18 +1268,22 @@ dump_fcpl(hid_t fid)
     PRINTSTREAM(rawoutstream, "%s %u\n","ISTORE_K", istore_ik);
 
     indentation(dump_indent + COL);
-    if(fs_strategy == H5F_FILE_SPACE_ALL_PERSIST) {
-        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_ALL_PERSIST");
-    } else if(fs_strategy == H5F_FILE_SPACE_ALL) {
-        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_ALL");
-    } else if(fs_strategy == H5F_FILE_SPACE_AGGR_VFD) {
-        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_AGGR_VFD");
-    } else if(fs_strategy == H5F_FILE_SPACE_VFD) {
-        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_VFD");
+    if(fs_strategy == H5F_FSPACE_STRATEGY_FSM_AGGR) {
+        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FSPACE_STRATEGY_FSM_AGGR");
+    } else if(fs_strategy == H5F_FSPACE_STRATEGY_PAGE) {
+        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FSPACE_STRATEGY_PAGE");
+    } else if(fs_strategy == H5F_FSPACE_STRATEGY_AGGR) {
+        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FSPACE_STRATEGY_AGGR");
+    } else if(fs_strategy == H5F_FSPACE_STRATEGY_NONE) {
+        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FSPACE_STRATEGY_NONE");
     } else
         PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "Unknown strategy");
     indentation(dump_indent + COL);
-    PRINTSTREAM(rawoutstream, "%s %Hu\n","FREE_SPACE_THRESHOLD", fs_threshold);
+    PRINTSTREAM(rawoutstream, "%s %s\n","FREE_SPACE_PERSIST", fs_persist ? "TRUE" : "FALSE");
+    indentation(dump_indent + COL);
+    PRINTSTREAM(rawoutstream, "%s %Hu\n","FREE_SPACE_SECTION_THRESHOLD", fs_threshold);
+    indentation(dump_indent + COL);
+    PRINTSTREAM(rawoutstream, "%s %Hu\n","FILE_SPACE_PAGE_SIZE", fsp_size);
 
     /*-------------------------------------------------------------------------
     * USER_BLOCK

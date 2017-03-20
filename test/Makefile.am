@@ -54,7 +54,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 TEST_PROG= testhdf5 \
            cache cache_api cache_image cache_tagging lheap ohdr stab gheap \
            evict_on_close farray earray btree2 fheap \
-           pool accum hyperslab istore bittests dt_arith \
+           pool accum hyperslab istore bittests dt_arith page_buffer \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
            twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_cross_platform\
@@ -91,7 +91,7 @@ endif
 # --enable-build-all at configure time.
 # The gen_old_* files can only be compiled with older versions of the library
 # so do not appear in this list.
-BUILD_ALL_PROGS=gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_idx gen_new_array \
+BUILD_ALL_PROGS=gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
     gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread \
     gen_sizes_lheap gen_file_image gen_plist

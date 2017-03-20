@@ -1198,25 +1198,40 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5P_file_space() {
+    public void testH5P_file_space_strategy() {
         long[] threshold = {0};
-        int[] strategy = {0};
+        boolean[] persist = {false};
+        int strategy = 0;
         try {
-            H5.H5Pget_file_space(fcpl_id, strategy, threshold);
-            assertTrue("strategy: "+strategy[0], strategy[0] == HDF5Constants.H5F_FILE_SPACE_ALL);
+            strategy = H5.H5Pget_file_space_strategy(fcpl_id, persist, threshold);
+            assertTrue("strategy(default): "+strategy, strategy == HDF5Constants.H5F_FSPACE_STRATEGY_FSM_AGGR);
+            assertTrue("persist(default): "+persist[0], persist[0] == false);
+            assertTrue("theshold(default): "+threshold[0], threshold[0] == 1);
+            H5.H5Pset_file_space_strategy(fcpl_id, HDF5Constants.H5F_FSPACE_STRATEGY_PAGE, true, 1);
+            strategy = H5.H5Pget_file_space_strategy(fcpl_id, persist, threshold);
+            assertTrue("strategy: "+strategy, strategy == HDF5Constants.H5F_FSPACE_STRATEGY_PAGE);
+            assertTrue("persist: "+persist[0], persist[0] == true);
             assertTrue("theshold: "+threshold[0], threshold[0] == 1);
-            H5.H5Pset_file_space(fcpl_id, HDF5Constants.H5F_FILE_SPACE_ALL_PERSIST, 10);
-            H5.H5Pget_file_space(fcpl_id, strategy, threshold);
-            assertTrue("strategy: "+strategy[0], strategy[0] == HDF5Constants.H5F_FILE_SPACE_ALL_PERSIST);
-            assertTrue("theshold: "+threshold[0], threshold[0] == 10);
-            H5.H5Pset_file_space(fcpl_id, HDF5Constants.H5F_FILE_SPACE_VFD, 0);
-            H5.H5Pget_file_space(fcpl_id, strategy, threshold);
-            assertTrue("strategy: "+strategy[0], strategy[0] == HDF5Constants.H5F_FILE_SPACE_VFD);
-            assertTrue("theshold: "+threshold[0], threshold[0] == 10);
         }
         catch (Throwable err) {
             err.printStackTrace();
-            fail("testH5P_file_space: " + err);
+            fail("testH5P_file_space_strategy: " + err);
+        }
+    }
+
+    @Test
+    public void testH5P_file_space_page_size() {
+        long page_size = 0;
+        try {
+            page_size = H5.H5Pget_file_space_page_size(fcpl_id);
+            assertTrue("page_size(default): "+page_size, page_size == 4096);
+            H5.H5Pset_file_space_page_size(fcpl_id, 512);
+            page_size = H5.H5Pget_file_space_page_size(fcpl_id);
+            assertTrue("page_size: "+page_size, page_size == 512);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5P_file_space_page_size: " + err);
         }
    }
 }

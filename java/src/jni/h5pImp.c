@@ -4883,61 +4883,130 @@ Java_hdf_hdf5lib_H5_H5Pset_1virtual_1printf_1gap
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Pget_file_space
- * Signature: (J[I[J)V
+ * Method:    H5Pget_file_space_strategy
+ * Signature: (J[Z[J)I
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1file_1space
-    (JNIEnv *env, jclass clss, jlong fcpl_id, jintArray strategy, jlongArray threshold)
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy
+    (JNIEnv *env, jclass clss, jlong fcpl_id, jbooleanArray persist, jlongArray threshold)
 {
     herr_t   status = -1;
-    jint    *thestrategyArray = NULL;
+    H5F_fspace_strategy_t    thestrategy = H5F_FSPACE_STRATEGY_FSM_AGGR; /* Library default */
     jlong   *thethresholdArray = NULL;
+    jboolean *thepersistArray = NULL;
     jboolean isCopy;
 
-    if (strategy) {
-        thestrategyArray = (jint*)ENVPTR->GetIntArrayElements(ENVPAR strategy, &isCopy);
-        if (thestrategyArray == NULL) {
-            h5JNIFatalError(env, "H5Pget_file_space:  strategy not pinned");
-            return;
+    if (persist) {
+        thepersistArray = (jboolean*)ENVPTR->GetBooleanArrayElements(ENVPAR persist, &isCopy);
+        if (thepersistArray == NULL) {
+            h5JNIFatalError(env, "H5Pget_file_space:  persist not pinned");
+            return -1;
         }
     }
 
     if (threshold) {
         thethresholdArray = (jlong*)ENVPTR->GetLongArrayElements(ENVPAR threshold, &isCopy);
         if (thethresholdArray == NULL) {
-            if (strategy) ENVPTR->ReleaseIntArrayElements(ENVPAR strategy, thestrategyArray, JNI_ABORT);
+            if (persist) ENVPTR->ReleaseBooleanArrayElements(ENVPAR persist, thepersistArray, JNI_ABORT);
             h5JNIFatalError(env, "H5Pget_file_space:  threshold not pinned");
-            return;
+            return -1;
         } /* end if */
     } /* end if */
 
-    status = H5Pget_file_space((hid_t)fcpl_id, (H5F_file_space_type_t*)thestrategyArray, (hsize_t*)thethresholdArray);
+    status = H5Pget_file_space_strategy((hid_t)fcpl_id, &thestrategy, (hbool_t*)thepersistArray, (hsize_t*)thethresholdArray);
 
     if (status < 0) {
-        if (strategy) ENVPTR->ReleaseIntArrayElements(ENVPAR strategy, thestrategyArray, JNI_ABORT);
+        if (persist) ENVPTR->ReleaseBooleanArrayElements(ENVPAR persist, thepersistArray, JNI_ABORT);
         if (threshold) ENVPTR->ReleaseLongArrayElements(ENVPAR threshold, thethresholdArray, JNI_ABORT);
         h5libraryError(env);
     } /* end if */
     else {
-        if (strategy) ENVPTR->ReleaseIntArrayElements(ENVPAR strategy, thestrategyArray, 0);
+        if (persist) ENVPTR->ReleaseBooleanArrayElements(ENVPAR persist, thepersistArray, 0);
         if (threshold) ENVPTR->ReleaseLongArrayElements(ENVPAR threshold, thethresholdArray, 0);
     } /* end else */
-} /* end Java_hdf_hdf5lib_H5_H5Pget_1file_1space */
+    return (jint)thestrategy;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy */
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Pset_file_space
- * Signature: (JIJ)V
+ * Method:    H5Pget_file_space_strategy_persist
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1persist
+    (JNIEnv *env, jclass clss, jlong fcpl_id)
+{
+    herr_t   status = -1;
+    hbool_t  thepersist = FALSE;
+
+    status = H5Pget_file_space_strategy((hid_t)fcpl_id, NULL, &thepersist, NULL);
+
+    if (status < 0)
+        h5libraryError(env);
+
+    return (jboolean)thepersist;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1persist */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_file_space_strategy_threshold
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1threshold
+    (JNIEnv *env, jclass clss, jlong fcpl_id)
+{
+    herr_t   status = -1;
+    hsize_t    thethreshold;
+
+    status = H5Pget_file_space_strategy((hid_t)fcpl_id, NULL, NULL, &thethreshold);
+
+    if (status < 0)
+        h5libraryError(env);
+
+    return (jlong)thethreshold;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1threshold */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_file_space_strategy
+ * Signature: (JIZJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1file_1space
-    (JNIEnv *env, jclass clss, jlong fcpl_id, jint strategy, jlong threshold)
+Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1strategy
+    (JNIEnv *env, jclass clss, jlong fcpl_id, jint strategy, jboolean persist, jlong threshold)
 {
-    if (H5Pset_file_space((hid_t)fcpl_id, (H5F_file_space_type_t)strategy, (hsize_t)threshold) < 0)
+    if (H5Pset_file_space_strategy((hid_t)fcpl_id, (H5F_fspace_strategy_t)strategy, (hbool_t)persist, (hsize_t)threshold) < 0)
         h5libraryError(env);
-} /* end Java_hdf_hdf5lib_H5_H5Pset_1file_1space */
+} /* end Java_hdf_hdf5lib_H5_H5Pset_file_space_strategy */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_file_space_page_size
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1page_1size
+    (JNIEnv *env, jclass clss, jlong fcpl_id, jlong fsp_size)
+{
+    if (H5Pset_file_space_page_size((hid_t)fcpl_id, (hsize_t)fsp_size) < 0)
+        h5libraryError(env);
+}
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_file_space_page_size
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1page_1size
+    (JNIEnv *env, jclass clss, jlong fcpl_id)
+{
+    hsize_t fsp_size = 0;
+    if (H5Pget_file_space_page_size((hid_t)fcpl_id, &fsp_size) < 0)
+        h5libraryError(env);
+    return (jlong)fsp_size;
+}
 
 static herr_t
 H5P_cls_create_cb

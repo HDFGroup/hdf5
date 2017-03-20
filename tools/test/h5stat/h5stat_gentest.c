@@ -77,7 +77,7 @@ gen_newgrat_file(const char *fname)
 	goto error;
 
     /* Set file space handling strategy */
-    if(H5Pset_file_space(fcpl, H5F_FILE_SPACE_ALL_PERSIST, (hsize_t)0) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, 1, (hsize_t)1) < 0)
 	goto error;
 
      /* Create file */

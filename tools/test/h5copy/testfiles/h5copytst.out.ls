@@ -3,57 +3,57 @@ Opened "./testfiles/h5copytst.out.h5" with sec2 driver.
     Location:  1:96
     Links:     1
 /A                       Group
-    Location:  1:84304
+    Location:  1:84208
     Links:     1
 /A/B1                    Group
-    Location:  1:85008
+    Location:  1:84912
     Links:     1
 /A/B1/simple             Dataset {6/6}
-    Location:  1:84176
+    Location:  1:84080
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /A/B2                    Group
-    Location:  1:88544
+    Location:  1:88448
     Links:     1
 /A/B2/simple2            Dataset {6/6}
-    Location:  1:88416
+    Location:  1:88320
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /C                       Group
-    Location:  1:91752
+    Location:  1:91656
     Links:     1
 /C/D                     Group
-    Location:  1:92456
+    Location:  1:92360
     Links:     1
 /C/D/simple              Dataset {6/6}
-    Location:  1:91624
+    Location:  1:91528
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /E                       Group
-    Location:  1:106368
+    Location:  1:106272
     Links:     1
 /E/F                     Group
-    Location:  1:107072
+    Location:  1:106976
     Links:     1
 /E/F/grp_dsets           Group
-    Location:  1:94568
+    Location:  1:94472
     Links:     1
 /E/F/grp_dsets/chunk     Dataset {6/6}
-    Location:  1:98752
+    Location:  1:98656
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /E/F/grp_dsets/compact   Dataset {6/6}
-    Location:  1:99208
+    Location:  1:99112
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /E/F/grp_dsets/compound  Dataset {2/2}
-    Location:  1:99344
+    Location:  1:99248
     Links:     1
     Storage:   <details removed for portability>
     Type:      struct {
@@ -61,60 +61,60 @@ Opened "./testfiles/h5copytst.out.h5" with sec2 driver.
                    "str2"             +20   20-byte null-terminated ASCII string
                } 40 bytes
 /E/F/grp_dsets/compressed Dataset {6/6}
-    Location:  1:101656
+    Location:  1:101560
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Filter-0:  deflate-1 OPT {1}
     Type:      32-bit little-endian integer
 /E/F/grp_dsets/named_vl  Dataset {2/2}
-    Location:  1:105920
+    Location:  1:105824
     Links:     1
     Storage:   <details removed for portability>
-    Type:      shared-1:106048 variable length of
+    Type:      shared-1:105952 variable length of
                    32-bit little-endian integer
 /E/F/grp_dsets/nested_vl Dataset {2/2}
-    Location:  1:106096
+    Location:  1:106000
     Links:     1
     Storage:   <details removed for portability>
     Type:      variable length of
                    variable length of
                        32-bit little-endian integer
 /E/F/grp_dsets/simple    Dataset {6/6}
-    Location:  1:106240
+    Location:  1:106144
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /E/F/grp_dsets/vl        Type
-    Location:  1:106048
+    Location:  1:105952
     Links:     2
-    Type:      shared-1:106048 variable length of
+    Type:      shared-1:105952 variable length of
                    32-bit little-endian integer
 /G                       Group
-    Location:  1:122016
+    Location:  1:121920
     Links:     1
 /G/H                     Group
-    Location:  1:122720
+    Location:  1:122624
     Links:     1
 /G/H/grp_nested          Group
-    Location:  1:109096
+    Location:  1:109000
     Links:     1
 /G/H/grp_nested/grp_dsets Group
-    Location:  1:109888
+    Location:  1:109792
     Links:     1
 /G/H/grp_nested/grp_dsets/chunk Dataset {6/6}
-    Location:  1:114072
+    Location:  1:113976
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /G/H/grp_nested/grp_dsets/compact Dataset {6/6}
-    Location:  1:114528
+    Location:  1:114432
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /G/H/grp_nested/grp_dsets/compound Dataset {2/2}
-    Location:  1:114664
+    Location:  1:114568
     Links:     1
     Storage:   <details removed for portability>
     Type:      struct {
@@ -122,48 +122,48 @@ Opened "./testfiles/h5copytst.out.h5" with sec2 driver.
                    "str2"             +20   20-byte null-terminated ASCII string
                } 40 bytes
 /G/H/grp_nested/grp_dsets/compressed Dataset {6/6}
-    Location:  1:116976
+    Location:  1:116880
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Filter-0:  deflate-1 OPT {1}
     Type:      32-bit little-endian integer
 /G/H/grp_nested/grp_dsets/named_vl Dataset {2/2}
-    Location:  1:121240
+    Location:  1:121144
     Links:     1
     Storage:   <details removed for portability>
-    Type:      shared-1:121368 variable length of
+    Type:      shared-1:121272 variable length of
                    32-bit little-endian integer
 /G/H/grp_nested/grp_dsets/nested_vl Dataset {2/2}
-    Location:  1:121416
+    Location:  1:121320
     Links:     1
     Storage:   <details removed for portability>
     Type:      variable length of
                    variable length of
                        32-bit little-endian integer
 /G/H/grp_nested/grp_dsets/simple Dataset {6/6}
-    Location:  1:121560
+    Location:  1:121464
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /G/H/grp_nested/grp_dsets/vl Type
-    Location:  1:121368
+    Location:  1:121272
     Links:     2
-    Type:      shared-1:121368 variable length of
+    Type:      shared-1:121272 variable length of
                    32-bit little-endian integer
 /chunk                   Dataset {6/6}
-    Location:  1:6312
+    Location:  1:6216
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /compact                 Dataset {6/6}
-    Location:  1:6440
+    Location:  1:6344
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /compound                Dataset {2/2}
-    Location:  1:8624
+    Location:  1:8528
     Links:     1
     Storage:   <details removed for portability>
     Type:      struct {
@@ -171,28 +171,28 @@ Opened "./testfiles/h5copytst.out.h5" with sec2 driver.
                    "str2"             +20   20-byte null-terminated ASCII string
                } 40 bytes
 /compressed              Dataset {6/6}
-    Location:  1:12984
+    Location:  1:12888
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Filter-0:  deflate-1 OPT {1}
     Type:      32-bit little-endian integer
 /grp_dsets               Group
-    Location:  1:28128
+    Location:  1:28032
     Links:     1
 /grp_dsets/chunk         Dataset {6/6}
-    Location:  1:32312
+    Location:  1:32216
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_dsets/compact       Dataset {6/6}
-    Location:  1:32768
+    Location:  1:32672
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_dsets/compound      Dataset {2/2}
-    Location:  1:32904
+    Location:  1:32808
     Links:     1
     Storage:   <details removed for portability>
     Type:      struct {
@@ -200,62 +200,62 @@ Opened "./testfiles/h5copytst.out.h5" with sec2 driver.
                    "str2"             +20   20-byte null-terminated ASCII string
                } 40 bytes
 /grp_dsets/compressed    Dataset {6/6}
-    Location:  1:35216
+    Location:  1:35120
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Filter-0:  deflate-1 OPT {1}
     Type:      32-bit little-endian integer
 /grp_dsets/named_vl      Dataset {2/2}
-    Location:  1:39480
+    Location:  1:39384
     Links:     1
     Storage:   <details removed for portability>
-    Type:      shared-1:39608 variable length of
+    Type:      shared-1:39512 variable length of
                    32-bit little-endian integer
 /grp_dsets/nested_vl     Dataset {2/2}
-    Location:  1:39656
+    Location:  1:39560
     Links:     1
     Storage:   <details removed for portability>
     Type:      variable length of
                    variable length of
                        32-bit little-endian integer
 /grp_dsets/simple        Dataset {6/6}
-    Location:  1:39800
+    Location:  1:39704
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_dsets/simple_group  Dataset {6/6}
-    Location:  1:55912
+    Location:  1:55816
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_dsets/vl            Type
-    Location:  1:39608
+    Location:  1:39512
     Links:     2
-    Type:      shared-1:39608 variable length of
+    Type:      shared-1:39512 variable length of
                    32-bit little-endian integer
 /grp_empty               Group
-    Location:  1:27336
+    Location:  1:27240
     Links:     1
 /grp_nested              Group
-    Location:  1:40592
+    Location:  1:40496
     Links:     1
 /grp_nested/grp_dsets    Group
-    Location:  1:41384
+    Location:  1:41288
     Links:     1
 /grp_nested/grp_dsets/chunk Dataset {6/6}
-    Location:  1:45568
+    Location:  1:45472
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_nested/grp_dsets/compact Dataset {6/6}
-    Location:  1:46024
+    Location:  1:45928
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_nested/grp_dsets/compound Dataset {2/2}
-    Location:  1:46160
+    Location:  1:46064
     Links:     1
     Storage:   <details removed for portability>
     Type:      struct {
@@ -263,51 +263,51 @@ Opened "./testfiles/h5copytst.out.h5" with sec2 driver.
                    "str2"             +20   20-byte null-terminated ASCII string
                } 40 bytes
 /grp_nested/grp_dsets/compressed Dataset {6/6}
-    Location:  1:48472
+    Location:  1:48376
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Filter-0:  deflate-1 OPT {1}
     Type:      32-bit little-endian integer
 /grp_nested/grp_dsets/named_vl Dataset {2/2}
-    Location:  1:52736
+    Location:  1:52640
     Links:     1
     Storage:   <details removed for portability>
-    Type:      shared-1:52864 variable length of
+    Type:      shared-1:52768 variable length of
                    32-bit little-endian integer
 /grp_nested/grp_dsets/nested_vl Dataset {2/2}
-    Location:  1:52912
+    Location:  1:52816
     Links:     1
     Storage:   <details removed for portability>
     Type:      variable length of
                    variable length of
                        32-bit little-endian integer
 /grp_nested/grp_dsets/simple Dataset {6/6}
-    Location:  1:53056
+    Location:  1:52960
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_nested/grp_dsets/vl Type
-    Location:  1:52864
+    Location:  1:52768
     Links:     2
-    Type:      shared-1:52864 variable length of
+    Type:      shared-1:52768 variable length of
                    32-bit little-endian integer
 /grp_rename              Group
-    Location:  1:57120
+    Location:  1:57024
     Links:     1
 /grp_rename/chunk        Dataset {6/6}
-    Location:  1:61304
+    Location:  1:61208
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_rename/compact      Dataset {6/6}
-    Location:  1:61760
+    Location:  1:61664
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_rename/compound     Dataset {2/2}
-    Location:  1:61896
+    Location:  1:61800
     Links:     1
     Storage:   <details removed for portability>
     Type:      struct {
@@ -315,28 +315,28 @@ Opened "./testfiles/h5copytst.out.h5" with sec2 driver.
                    "str2"             +20   20-byte null-terminated ASCII string
                } 40 bytes
 /grp_rename/compressed   Dataset {6/6}
-    Location:  1:64208
+    Location:  1:64112
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Filter-0:  deflate-1 OPT {1}
     Type:      32-bit little-endian integer
 /grp_rename/grp_dsets    Group
-    Location:  1:70000
+    Location:  1:69904
     Links:     1
 /grp_rename/grp_dsets/chunk Dataset {6/6}
-    Location:  1:74184
+    Location:  1:74088
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_rename/grp_dsets/compact Dataset {6/6}
-    Location:  1:74640
+    Location:  1:74544
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_rename/grp_dsets/compound Dataset {2/2}
-    Location:  1:74776
+    Location:  1:74680
     Links:     1
     Storage:   <details removed for portability>
     Type:      struct {
@@ -344,73 +344,73 @@ Opened "./testfiles/h5copytst.out.h5" with sec2 driver.
                    "str2"             +20   20-byte null-terminated ASCII string
                } 40 bytes
 /grp_rename/grp_dsets/compressed Dataset {6/6}
-    Location:  1:77088
+    Location:  1:76992
     Links:     1
     Chunks:    {2} 8 bytes
     Storage:   <details removed for portability>
     Filter-0:  deflate-1 OPT {1}
     Type:      32-bit little-endian integer
 /grp_rename/grp_dsets/named_vl Dataset {2/2}
-    Location:  1:81352
+    Location:  1:81256
     Links:     1
     Storage:   <details removed for portability>
-    Type:      shared-1:81480 variable length of
+    Type:      shared-1:81384 variable length of
                    32-bit little-endian integer
 /grp_rename/grp_dsets/nested_vl Dataset {2/2}
-    Location:  1:81528
+    Location:  1:81432
     Links:     1
     Storage:   <details removed for portability>
     Type:      variable length of
                    variable length of
                        32-bit little-endian integer
 /grp_rename/grp_dsets/simple Dataset {6/6}
-    Location:  1:81672
+    Location:  1:81576
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_rename/grp_dsets/vl Type
-    Location:  1:81480
+    Location:  1:81384
     Links:     2
-    Type:      shared-1:81480 variable length of
+    Type:      shared-1:81384 variable length of
                    32-bit little-endian integer
 /grp_rename/named_vl     Dataset {2/2}
-    Location:  1:68472
+    Location:  1:68376
     Links:     1
     Storage:   <details removed for portability>
-    Type:      shared-1:68600 variable length of
+    Type:      shared-1:68504 variable length of
                    32-bit little-endian integer
 /grp_rename/nested_vl    Dataset {2/2}
-    Location:  1:68648
+    Location:  1:68552
     Links:     1
     Storage:   <details removed for portability>
     Type:      variable length of
                    variable length of
                        32-bit little-endian integer
 /grp_rename/simple       Dataset {6/6}
-    Location:  1:68792
+    Location:  1:68696
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /grp_rename/vl           Type
-    Location:  1:68600
+    Location:  1:68504
     Links:     2
-    Type:      shared-1:68600 variable length of
+    Type:      shared-1:68504 variable length of
                    32-bit little-endian integer
 /named_vl                Dataset {2/2}
-    Location:  1:17280
+    Location:  1:17184
     Links:     1
     Storage:   <details removed for portability>
-    Type:      shared-1:17408 variable length of
+    Type:      shared-1:17312 variable length of
                    32-bit little-endian integer
 /nested_vl               Dataset {2/2}
-    Location:  1:21760
+    Location:  1:21664
     Links:     1
     Storage:   <details removed for portability>
     Type:      variable length of
                    variable length of
                        32-bit little-endian integer
 /rename                  Dataset {2/2}
-    Location:  1:26128
+    Location:  1:26032
     Links:     1
     Storage:   <details removed for portability>
     Type:      struct {
@@ -423,7 +423,7 @@ Opened "./testfiles/h5copytst.out.h5" with sec2 driver.
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer
 /simple_top              Dataset {6/6}
-    Location:  1:23952
+    Location:  1:23856
     Links:     1
     Storage:   <details removed for portability>
     Type:      32-bit little-endian integer

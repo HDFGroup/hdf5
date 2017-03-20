@@ -643,7 +643,7 @@ H5TEST_DLL void resize_entry(H5F_t * file_ptr,
                   size_t new_size,
                   hbool_t in_cache);
 
-H5TEST_DLL H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size);
+H5TEST_DLL H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged);
 
 H5TEST_DLL void row_major_scan_forward(H5F_t * file_ptr,
                             int32_t max_index,

@@ -30,54 +30,62 @@ class VarLenType;
 
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
-	// Group constructor to create a group or file (aka root group).
-	Group(const char* name, size_t size_hint = 0);
-	Group(const H5std_string& name, size_t size_hint = 0);
+        // Group constructor to create a group or file (aka root group).
+        Group(const char* name, size_t size_hint = 0);
+        Group(const H5std_string& name, size_t size_hint = 0);
 
-	// Group constructor to open a group or file (aka root group).
-	Group(const char* name);
-	Group(const H5std_string& name);
+        // Group constructor to open a group or file (aka root group).
+        Group(const char* name);
+        Group(const H5std_string& name);
 
-	// Close this group.
-	virtual void close();
+        // Close this group.
+        virtual void close();
 
-	///\brief Returns this class name.
-	virtual H5std_string fromClass () const { return("Group"); }
+        ///\brief Returns this class name.
+        virtual H5std_string fromClass () const { return("Group"); }
 
-	// Throw group exception.
-	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
+        // Throw group exception.
+        virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
 
-	// for CommonFG to get the file id.
-	virtual hid_t getLocId() const;
+        // for CommonFG to get the file id.
+        virtual hid_t getLocId() const;
 
-	// Creates a group by way of dereference.
-	Group(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+        // Creates a group by way of dereference.
+        Group(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 //        Group(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
-	// default constructor
-	Group();
+        // Opens an object within a group or a file, i.e., root group.
+        hid_t getObjId(const char* name, const PropList& plist = PropList::DEFAULT) const;
+        hid_t getObjId(const H5std_string& name, const PropList& plist = PropList::DEFAULT) const;
 
-	// Copy constructor: makes a copy of the original object
-	Group(const Group& original);
+        // Closes an object opened by getObjId().
+        void closeObjId(hid_t obj_id) const;
 
-	// Gets the group id.
-	virtual hid_t getId() const;
+        // default constructor
+        Group();
 
-	// Destructor
-	virtual ~Group();
+        // Copy constructor: makes a copy of the original object
+        Group(const Group& original);
 
-	// Creates a copy of an existing group using its id.
-	Group( const hid_t group_id );
+        // Gets the group id.
+        virtual hid_t getId() const;
+
+        // Destructor
+        virtual ~Group();
+
+        // Creates a copy of an existing group using its id.
+        Group(const hid_t group_id);
 
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Sets the group id.
-	virtual void p_setId(const hid_t new_id);
+        // Sets the group id.
+        virtual void p_setId(const hid_t new_id);
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
-	hid_t id;	// HDF5 group id
-};
+        hid_t id;    // HDF5 group id
 
-}
+}; // end of Group
+} // namespace H5
+
 #endif // __Group_H

@@ -729,7 +729,7 @@ CONTAINS
 
           CALL h5fget_freespace_f(fid, free_space, error)
                CALL check("h5fget_freespace_f",error,total_error)
-               if(error .eq.0 .and. free_space .ne. 0) then
+               if(error .eq.0 .and. free_space .ne. 1248) then
                  total_error = total_error + 1
                  write(*,*) "1: Wrong amount of free space reported, ", free_space
                endif
@@ -745,7 +745,7 @@ CONTAINS
           ! Check the free space now
           CALL h5fget_freespace_f(fid, free_space, error)
                CALL check("h5fget_freespace_f",error,total_error)
-               if(error .eq.0 .and. free_space .ne. 0) then
+               if(error .eq.0 .and. free_space .ne. 216) then
                  total_error = total_error + 1
                  write(*,*) "2: Wrong amount of free space reported, ", free_space
                endif
@@ -757,7 +757,7 @@ CONTAINS
           ! Check the free space now
           CALL h5fget_freespace_f(fid, free_space, error)
                CALL check("h5fget_freespace_f",error,total_error)
-               if(error .eq.0 .and. free_space .ne. 0) then
+               if(error .eq.0 .and. free_space .ne. 1248) then
                  total_error = total_error + 1
                  write(*,*) "3: Wrong amount of free space reported, ", free_space
                endif

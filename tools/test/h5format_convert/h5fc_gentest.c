@@ -568,7 +568,7 @@ gen_ext(const char *fname, unsigned new_format, unsigned what)
 	    H5Pset_shared_mesg_nindexes(fcpl, 4);
 	    break;
 	case 2:
-	    H5Pset_file_space(fcpl, H5F_FILE_SPACE_ALL_PERSIST, (hsize_t)0);
+	    H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1);
 	    break;
 	case 3:
 	    H5Pset_istore_k(fcpl, ISTORE_IK);
@@ -576,16 +576,16 @@ gen_ext(const char *fname, unsigned new_format, unsigned what)
 	    break;
 	case 4:
 	    H5Pset_istore_k(fcpl, ISTORE_IK);
-	    H5Pset_file_space(fcpl, H5F_FILE_SPACE_DEFAULT, (hsize_t)2);
+	    H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1);
 	    break;
 	case 5:
 	    H5Pset_shared_mesg_nindexes(fcpl, 4);
-	    H5Pset_file_space(fcpl, H5F_FILE_SPACE_VFD, (hsize_t)0);
+	    H5Pset_file_space_page_size(fcpl, (hsize_t)512);
 	    break;
 	case 6:
 	    H5Pset_istore_k(fcpl, ISTORE_IK);
 	    H5Pset_shared_mesg_nindexes(fcpl, 4);
-	    H5Pset_file_space(fcpl, H5F_FILE_SPACE_AGGR_VFD, (hsize_t)0);
+	    H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_NONE, FALSE, (hsize_t)1);
 	    break;
 	default:
 	    break;

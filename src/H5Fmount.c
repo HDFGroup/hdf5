@@ -614,7 +614,7 @@ H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_flush_mounts_recurse(H5F_t *f, hid_t dxpl_id)
+H5F_flush_mounts_recurse(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id)
 {
     unsigned	nerrors = 0;            /* Errors from recursive flushes */
     unsigned    u;                      /* Index variable */
@@ -627,11 +627,11 @@ H5F_flush_mounts_recurse(H5F_t *f, hid_t dxpl_id)
 
     /* Flush all child files, not stopping for errors */
     for(u = 0; u < f->shared->mtab.nmounts; u++)
-        if(H5F_flush_mounts_recurse(f->shared->mtab.child[u].file, dxpl_id) < 0)
+        if(H5F_flush_mounts_recurse(f->shared->mtab.child[u].file, meta_dxpl_id, raw_dxpl_id) < 0)
             nerrors++;
 
     /* Call the "real" flush routine, for this file */
-    if(H5F_flush(f, dxpl_id, FALSE) < 0)
+    if(H5F__flush(f, meta_dxpl_id, raw_dxpl_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
     /* Check flush errors for children - errors are already on the stack */
@@ -656,7 +656,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_flush_mounts(H5F_t *f, hid_t dxpl_id)
+H5F_flush_mounts(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -670,7 +670,7 @@ H5F_flush_mounts(H5F_t *f, hid_t dxpl_id)
         f = f->parent;
 
     /* Flush the mounted file hierarchy */
-    if(H5F_flush_mounts_recurse(f, dxpl_id) < 0)
+    if(H5F_flush_mounts_recurse(f, meta_dxpl_id, raw_dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
 
 done:

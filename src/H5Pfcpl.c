@@ -97,14 +97,23 @@
 #define H5F_CRT_SHMSG_BTREE_MIN_ENC     H5P__encode_unsigned
 #define H5F_CRT_SHMSG_BTREE_MIN_DEC     H5P__decode_unsigned
 /* Definitions for file space handling strategy */
-#define H5F_CRT_FILE_SPACE_STRATEGY_SIZE       sizeof(unsigned)
-#define H5F_CRT_FILE_SPACE_STRATEGY_DEF        H5F_FILE_SPACE_STRATEGY_DEF
-#define H5F_CRT_FILE_SPACE_STRATEGY_ENC        H5P__encode_unsigned
-#define H5F_CRT_FILE_SPACE_STRATEGY_DEC        H5P__decode_unsigned
-#define H5F_CRT_FREE_SPACE_THRESHOLD_SIZE      sizeof(hsize_t)
-#define H5F_CRT_FREE_SPACE_THRESHOLD_DEF       H5F_FREE_SPACE_THRESHOLD_DEF
-#define H5F_CRT_FREE_SPACE_THRESHOLD_ENC       H5P__encode_hsize_t
-#define H5F_CRT_FREE_SPACE_THRESHOLD_DEC       H5P__decode_hsize_t
+#define H5F_CRT_FILE_SPACE_STRATEGY_SIZE        sizeof(H5F_fspace_strategy_t)
+#define H5F_CRT_FILE_SPACE_STRATEGY_DEF         H5F_FILE_SPACE_STRATEGY_DEF
+#define H5F_CRT_FILE_SPACE_STRATEGY_ENC         H5P__fcrt_fspace_strategy_enc
+#define H5F_CRT_FILE_SPACE_STRATEGY_DEC         H5P__fcrt_fspace_strategy_dec
+#define H5F_CRT_FREE_SPACE_PERSIST_SIZE         sizeof(hbool_t)
+#define H5F_CRT_FREE_SPACE_PERSIST_DEF          H5F_FREE_SPACE_PERSIST_DEF
+#define H5F_CRT_FREE_SPACE_PERSIST_ENC          H5P__encode_hbool_t
+#define H5F_CRT_FREE_SPACE_PERSIST_DEC          H5P__decode_hbool_t
+#define H5F_CRT_FREE_SPACE_THRESHOLD_SIZE       sizeof(hsize_t)
+#define H5F_CRT_FREE_SPACE_THRESHOLD_DEF        H5F_FREE_SPACE_THRESHOLD_DEF
+#define H5F_CRT_FREE_SPACE_THRESHOLD_ENC        H5P__encode_hsize_t
+#define H5F_CRT_FREE_SPACE_THRESHOLD_DEC        H5P__decode_hsize_t
+/* Definitions for file space page size in support of level-2 page caching */
+#define H5F_CRT_FILE_SPACE_PAGE_SIZE_SIZE       sizeof(hsize_t)
+#define H5F_CRT_FILE_SPACE_PAGE_SIZE_DEF        H5F_FILE_SPACE_PAGE_SIZE_DEF
+#define H5F_CRT_FILE_SPACE_PAGE_SIZE_ENC        H5P__encode_hsize_t
+#define H5F_CRT_FILE_SPACE_PAGE_SIZE_DEC        H5P__decode_hsize_t
 
 
 /******************/
@@ -131,6 +140,8 @@ static herr_t H5P__fcrt_shmsg_index_types_enc(const void *value, void **_pp, siz
 static herr_t H5P__fcrt_shmsg_index_types_dec(const void **_pp, void *value);
 static herr_t H5P__fcrt_shmsg_index_minsize_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__fcrt_shmsg_index_minsize_dec(const void **_pp, void *value);
+static herr_t H5P__fcrt_fspace_strategy_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__fcrt_fspace_strategy_dec(const void **_pp, void *_value);
 
 
 /*********************/
@@ -178,8 +189,10 @@ static const unsigned H5F_def_sohm_index_flags_g[H5O_SHMESG_MAX_NINDEXES]    = H
 static const unsigned H5F_def_sohm_index_minsizes_g[H5O_SHMESG_MAX_NINDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
 static const unsigned H5F_def_sohm_list_max_g  = H5F_CRT_SHMSG_LIST_MAX_DEF;
 static const unsigned H5F_def_sohm_btree_min_g  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
-static const unsigned H5F_def_file_space_strategy_g = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
+static const H5F_fspace_strategy_t H5F_def_file_space_strategy_g = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
+static const hbool_t H5F_def_free_space_persist_g = H5F_CRT_FREE_SPACE_PERSIST_DEF;
 static const hsize_t H5F_def_free_space_threshold_g = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
+static const hsize_t H5F_def_file_space_page_size_g = H5F_CRT_FILE_SPACE_PAGE_SIZE_DEF;
 
 
 
@@ -267,11 +280,23 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the free-space persist flag */
+    if(H5P_register_real(pclass, H5F_CRT_FREE_SPACE_PERSIST_NAME, H5F_CRT_FREE_SPACE_PERSIST_SIZE, &H5F_def_free_space_persist_g,
+            NULL, NULL, NULL, H5F_CRT_FREE_SPACE_PERSIST_ENC, H5F_CRT_FREE_SPACE_PERSIST_DEC,
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
     /* Register the free space section threshold */
     if(H5P_register_real(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE, &H5F_def_free_space_threshold_g, 
             NULL, NULL, NULL, H5F_CRT_FREE_SPACE_THRESHOLD_ENC, H5F_CRT_FREE_SPACE_THRESHOLD_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the file space page size */
+    if(H5P_register_real(pclass, H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME, H5F_CRT_FILE_SPACE_PAGE_SIZE_SIZE, &H5F_def_file_space_page_size_g,
+            NULL, NULL, NULL, H5F_CRT_FILE_SPACE_PAGE_SIZE_ENC, H5F_CRT_FILE_SPACE_PAGE_SIZE_DEC,
+            NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1246,15 +1271,13 @@ H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *mi
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    /* Get value */
-    if (max_list) {
+    /* Get value(s) */
+    if(max_list)
         if(H5P_get(plist, H5F_CRT_SHMSG_LIST_MAX_NAME, max_list) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get list maximum");
-    }
-    if (min_btree) {
+    if(min_btree)
         if(H5P_get(plist, H5F_CRT_SHMSG_BTREE_MIN_NAME, min_btree) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SOHM information");
-    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1262,15 +1285,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_file_space
+ * Function:	H5Pset_file_space_strategy
  *
- * Purpose:	Sets the strategy that the library employs in managing file space.
- *		If strategy is zero, the property is not changed; the existing
- *			strategy is retained.
- *		Sets the threshold value that the file's free space
- *			manager(s) will use to track free space sections.
- *		If threshold is zero, the property is not changed; the existing
- *			threshold is retained.
+ * Purpose:	Sets the "strategy" that the library employs in managing file space
+ *		    Sets the "persist" value as to persist free-space or not
+ *		    Sets the "threshold" value that the free space manager(s) will use to track free space sections.
+ *          Ignore "persist" and "threshold" for strategies that do not use free-space managers
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1279,15 +1299,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold)
+H5Pset_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t strategy, hbool_t persist, hsize_t threshold)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iFfh", plist_id, strategy, threshold);
+    H5TRACE4("e", "iFfbh", plist_id, strategy, persist, threshold);
 
-    if((unsigned)strategy >= H5F_FILE_SPACE_NTYPES)
+    /* Check arguments */
+    if(strategy >= H5F_FSPACE_STRATEGY_NTYPES)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid strategy")
 
     /* Get the plist structure */
@@ -1295,24 +1316,28 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value(s), if non-zero */
-    if(strategy)
-	if(H5P_set(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &strategy) < 0)
-	    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set file space strategy")
-    if(threshold)
-	if(H5P_set(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &threshold) < 0)
-	    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set free-space threshold")
+    if(H5P_set(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &strategy) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file space strategy")
+
+    /* Ignore persist and threshold settings for strategies that do not use FSM */
+    if(strategy ==  H5F_FSPACE_STRATEGY_FSM_AGGR || strategy == H5F_FSPACE_STRATEGY_PAGE) {
+        if(H5P_set(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, &persist) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space persisting status")
+
+        if(H5P_set(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &threshold) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space threshold")
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pset_file_space() */
+} /* H5Pset_file_space_strategy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_file_space
+ * Function:	H5Pget_file_space_strategy
  *
- * Purpose:	Retrieves the strategy that the library uses in managing file space.
- *		Retrieves the threshold value that the file's free space
- *			managers use to track free space sections.
+ * Purpose:	Retrieves the strategy, persist, and threshold that the library 
+ *          uses in managing file space.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1321,13 +1346,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold)
+H5Pget_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t *strategy, hbool_t *persist, hsize_t *threshold)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Ff*h", plist_id, strategy, threshold);
+    H5TRACE4("e", "i*Ff*b*h", plist_id, strategy, persist, threshold);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -1337,11 +1362,158 @@ H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *thre
     if(strategy)
         if(H5P_get(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, strategy) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space strategy")
+    if(persist)
+        if(H5P_get(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, persist) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space persisting status")
     if(threshold)
         if(H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, threshold) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space threshold")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pget_file_space() */
+} /* H5Pget_file_space_strategy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__fcrt_fspace_strategy_enc
+ *
+ * Purpose:        Callback routine which is called whenever the free-space
+ *                 strategy property in the file creation property list
+ *                 is encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Friday, December 27, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__fcrt_fspace_strategy_enc(const void *value, void **_pp, size_t *size)
+{
+    const H5F_fspace_strategy_t *strategy = (const H5F_fspace_strategy_t *)value; /* Create local alias for values */
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(strategy);
+    HDassert(size);
+
+    if(NULL != *pp)
+        /* Encode free-space strategy */
+        *(*pp)++ = (uint8_t)*strategy;
+
+    /* Size of free-space strategy */
+    (*size)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__fcrt_fspace_strategy_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__fcrt_fspace_strategy_dec
+ *
+ * Purpose:        Callback routine which is called whenever the free-space
+ *                 strategy property in the file creation property list
+ *                 is decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Friday, December 27, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__fcrt_fspace_strategy_dec(const void **_pp, void *_value)
+{
+    H5F_fspace_strategy_t *strategy = (H5F_fspace_strategy_t *)_value;         /* Free-space strategy */
+    const uint8_t **pp = (const uint8_t **)_pp;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(strategy);
+
+    /* Decode free-space strategy */
+    *strategy = (H5F_fspace_strategy_t)*(*pp)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__fcrt_fspace_strategy_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_file_space_page_size
+ *
+ * Purpose:     Sets the file space page size for paged aggregation.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; August 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_file_space_page_size(hid_t plist_id, hsize_t fsp_size)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ih", plist_id, fsp_size);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(fsp_size < H5F_FILE_SPACE_PAGE_SIZE_MIN)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "cannot set file space page size to less than 512")
+
+    /* Set the value*/
+    if(H5P_set(plist, H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME, &fsp_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set file space page size")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_file_space_page_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_file_space_page_size
+ *
+ * Purpose:     Retrieves the file space page size for aggregating small metadata
+ *		or raw data in the parameter "fsp_size".
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; August 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_file_space_page_size(hid_t plist_id, hsize_t *fsp_size)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*h", plist_id, fsp_size);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get value */
+    if(fsp_size)
+        if(H5P_get(plist, H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME, fsp_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space page size")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_file_space_page_size() */
 

@@ -17,6 +17,21 @@
 # Created Date: 2011/5/3
 
 
+# Comment added to address HDFFV-8270:
+# As I understand it, the purpose of this file is to remove extraneous messages 
+# that appear in stdout and stderr on some machines that have been tested outside 
+# of the HDF Group realm.  The purpose of this script is to filter those 
+# extraneous messages from stdout and stderr so that when the output files are
+# compared to the expected output, the extra messages will not cause failures in 
+# the tests.  The system messages in the comments below are out of date, meaning
+# I suppose that while the script code to filter messages on the system was 
+# correct correct when last used, the output in the comments doesn't match the
+# script code that follows.  I don't currently have access to any of these 
+# systems to see the current output and the effect of the script code. If using
+# this file in the future, please update the comments to match the scripts in use.
+# Larry Knox 2017/3/15
+
+
 # Some systems will dump some messages to stdout for various reasons.
 # Remove them from the stdout result file.
 # $1 is the file name of the file to be filtered.

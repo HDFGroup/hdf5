@@ -4104,6 +4104,23 @@ typedef struct H5C_tag_info_t {
  *		of changes to the file driver info superblock extension
  *		management code needed to support rings.
  *
+ * msic_in_progress: As the metadata cache has become re-entrant, and as
+ *              the free space manager code has become more tightly 
+ *              integrated with the metadata cache, it is possible that 
+ *              a call to H5C_insert_entry() may trigger a call to 
+ *              H5C_make_space_in_cache(), which, via H5C__flush_single_entry()
+ *              and client callbacks, may trigger an infinite regression
+ *              of calls to H5C_make_space_in_cache().
+ *
+ *              The msic_in_progress boolean flag is used to detect this,
+ *              and prevent the infinite regression that would otherwise
+ *              occur.
+ *
+ *              Note that this is issue is not hypothetical -- this field 
+ *              was added 2/16/17 to address this issue when it was 
+ *              exposed by modifications to test/fheap.c to cause it to 
+ *              use paged allocation.
+ *
  * resize_ctl:	Instance of H5C_auto_size_ctl_t containing configuration
  * 		data for automatic cache resizing.
  *
@@ -4500,11 +4517,21 @@ typedef struct H5C_tag_info_t {
  * total_entries_skipped_in_msic: Number of clean entries skipped while
  *              enforcing the min_clean_fraction in H5C__make_space_in_cache().
  *
+ * total_dirty_pf_entries_skipped_in_msic: Number of dirty prefetched entries
+ *              skipped in H5C__make_space_in_cache().  Note that this can 
+ *              only occur when a file is opened R/O with a cache image
+ *              containing dirty entries.
+ *
  * total_entries_scanned_in_msic: Number of clean entries skipped while
  *              enforcing the min_clean_fraction in H5C__make_space_in_cache().
  *
  * max_entries_skipped_in_msic: Maximum number of clean entries skipped
  *              in any one call to H5C__make_space_in_cache().
+ *
+ * max_dirty_pf_entries_skipped_in_msic: Maximum number of dirty prefetched
+ *              entries skipped in any one call to H5C__make_space_in_cache().
+ *              Note that this can only occur when the file is opened 
+ *              R/O with a cache image containing dirty entries.
  *
  * max_entries_scanned_in_msic: Maximum number of entries scanned over
  *              in any one call to H5C__make_space_in_cache().
@@ -4733,6 +4760,7 @@ struct H5C_t {
     hbool_t			cache_full;
     hbool_t			size_decreased;
     hbool_t			resize_in_progress;
+    hbool_t			msic_in_progress;
     H5C_auto_size_ctl_t		resize_ctl;
 
     /* Fields for epoch markers used in automatic cache size adjustment */
@@ -4822,8 +4850,10 @@ struct H5C_t {
     /* Fields for tracking 'make space in cache' (msic) operations */
     int64_t                     calls_to_msic;
     int64_t                     total_entries_skipped_in_msic;
+    int64_t                     total_dirty_pf_entries_skipped_in_msic;
     int64_t                     total_entries_scanned_in_msic;
     int32_t                     max_entries_skipped_in_msic;
+    int32_t                     max_dirty_pf_entries_skipped_in_msic;
     int32_t                     max_entries_scanned_in_msic;
     int64_t                     entries_scanned_to_make_space;
  
@@ -4871,7 +4901,8 @@ typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id,
+    hbool_t *image_generated);
 H5_DLL herr_t H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id,
     H5C_t * cache_ptr, H5C_cache_entry_t** entry_ptr_ptr, 
     const H5C_class_t * type, haddr_t addr, void * udata);
