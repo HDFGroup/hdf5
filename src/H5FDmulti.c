@@ -1194,6 +1194,8 @@ H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
         *flags = 0;
         *flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_USE_ALLOC_SIZE;     /* OK just pass the allocation size to the alloc callback */
+        *flags |= H5FD_FEAT_PAGED_AGGR;         /* OK special file space mapping for paged aggregation */
     } /* end if */
 
     return(0);
@@ -1537,6 +1539,14 @@ H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
     mmt = file->fa.memb_map[type];
     if (H5FD_MEM_DEFAULT==mmt) mmt = type;
+
+    /* XXX: NEED to work on this again */
+    if(file->pub.paged_aggr) {
+        ALL_MEMBERS(mt) {
+            if(file->memb[mt])
+                file->memb[mt]->paged_aggr = file->pub.paged_aggr;
+        } END_MEMBERS;
+    }
 
     if (HADDR_UNDEF==(addr=H5FDalloc(file->memb[mmt], mmt, dxpl_id, size)))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file can't alloc", HADDR_UNDEF)

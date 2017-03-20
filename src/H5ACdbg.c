@@ -101,6 +101,7 @@ H5AC_stats(const H5F_t *f)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5AC_stats() */
 
+#ifndef NDEBUG
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_dump_cache
@@ -133,6 +134,7 @@ H5AC_dump_cache(const H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_dump_cache() */
+#endif /* NDEBUG */
 
 
 /*-------------------------------------------------------------------------

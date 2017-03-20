@@ -53,13 +53,16 @@
 /* ===================== */
 
 /* Helper Functions */
+#ifndef NDEBUG
 static int dump_cache(hid_t fid);
+#endif /* NDEBUG */ /* end debugging functions */
 static int verify_no_unknown_tags(hid_t fid);
 static int mark_all_entries_investigated(hid_t fid);
 static int reset_all_entries_investigated(hid_t fid);
 static int verify_tag(hid_t fid, int id, haddr_t tag);
 static int get_object_header_tag(hid_t loc_id, haddr_t *tag);
 static int get_sbe_tag(hid_t fid, haddr_t *tag);
+
 /* Tests */
 static unsigned check_file_creation_tags(hid_t fcpl_id, int type);
 static unsigned check_file_open_tags(hid_t fcpl, int type);
@@ -71,7 +74,6 @@ static unsigned check_attribute_rename_tags(hid_t fcpl, int type);
 static unsigned check_dataset_creation_tags(hid_t fcpl, int type);
 static unsigned check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type);
 static unsigned check_link_removal_tags(hid_t fcpl, int type);
-
 static unsigned check_group_creation_tags(void);
 static unsigned check_multi_group_creation_tags(void);
 static unsigned check_group_open_tags(void);
@@ -95,6 +97,7 @@ static unsigned check_invalid_tag_application(void);
 /* ================ */
 
 
+#ifndef NDEBUG
 
 /*-------------------------------------------------------------------------
  * Function:    dump_cache()
@@ -128,6 +131,7 @@ static int dump_cache(hid_t fid)
 error:
     return -1;
 } /* dump_cache */
+#endif /* NDEBUG */ /* end debugging functions */
 
 
 /*-------------------------------------------------------------------------
@@ -445,8 +449,10 @@ check_file_creation_tags(hid_t fcpl_id, int type)
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen before verification . */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* verify there is a superblock entry with superblock tag */
     if ( verify_tag(fid, H5AC_SUPERBLOCK_ID, H5AC__SUPERBLOCK_TAG) < 0 ) TEST_ERROR;
@@ -551,8 +557,10 @@ check_file_open_tags(hid_t fcpl, int type)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen before verification . */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* verify there is a superblock entry with superblock tag. */
     if ( verify_tag(fid, H5AC_SUPERBLOCK_ID, H5AC__SUPERBLOCK_TAG) < 0 ) TEST_ERROR;
@@ -653,8 +661,10 @@ check_group_creation_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
  
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -756,8 +766,10 @@ check_multi_group_creation_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify there is an object header for each group */
     for (i = 0; i < MULTIGROUPS; i++) {
@@ -888,8 +900,10 @@ check_link_iteration_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -1005,8 +1019,10 @@ check_dense_attribute_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify free space header and section info */
     if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, d_tag) < 0 ) TEST_ERROR;
@@ -1061,8 +1077,10 @@ check_dense_attribute_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* verify object header belonging to dataset */
     if ( verify_tag(fid, H5AC_OHDR_ID, d_tag) < 0 ) TEST_ERROR;
@@ -1169,8 +1187,10 @@ check_group_open_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -1273,8 +1293,10 @@ check_attribute_creation_tags(hid_t fcpl, int type)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* verify object header belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1407,8 +1429,10 @@ check_attribute_open_tags(hid_t fcpl, int type)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* verify object header belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1490,6 +1514,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     haddr_t g_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
+    hbool_t persistant_fsms = FALSE;
 
     /* Testing Macro */
     TESTING("tag application during attribute renaming");
@@ -1497,6 +1522,10 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* check to see if the FCPL specified persistant free space managers */
+    if(H5Pget_file_space_strategy(fcpl, NULL, &persistant_fsms, NULL) < 0)
+        TEST_ERROR;
 
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
@@ -1550,8 +1579,10 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -1586,9 +1617,18 @@ check_attribute_rename_tags(hid_t fcpl, int type)
 	 * 3 calls to verify_tag() for verifying free space: 
 	 *   one freespace header tag for H5FD_MEM_DRAW manager, 
 	 *   one freespace header tag for H5FD_MEM_SUPER manager 
+	 *   one freespace section info tag for H5FD_MEM_SUPER manager 
          */
         if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
+
+        /* If the free space managers are persistant, the
+         * H5MF_tidy_self_referential_fsm_hack() must have been run.
+         * Since this function floats all self referential free space
+         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata
+         * cache.
+         */
+        if(!persistant_fsms && verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0) TEST_ERROR;
+        if(!persistant_fsms && verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0) TEST_ERROR;
 
         /* verify btree header and leaf node belonging to group */
         if ( verify_tag(fid, H5AC_BT2_HDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1653,6 +1693,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     haddr_t g_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
+    hbool_t persistant_fsms = FALSE;
 
     /* Testing Macro */
     TESTING("tag application during attribute delete");
@@ -1660,6 +1701,10 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* check to see if the FCPL specified persistant free space managers */
+    if ( H5Pget_file_space_strategy(fcpl, NULL, &persistant_fsms, NULL) < 0 )
+        TEST_ERROR;
 
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
@@ -1712,8 +1757,10 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* verify object header belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1724,12 +1771,26 @@ check_attribute_delete_tags(hid_t fcpl, int type)
         if ( verify_tag(fid, H5AC_SOHM_TABLE_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
         /* 
-	 * 2 calls to verify_tag() for verifying free space: 
-	 *   one freespace header tag for H5FD_MEM_DRAW manager,
-	 *   one freespace header tag for H5FD_MEM_SUPER manager 
-	 */
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
+         * 2 calls to verify_tag() for verifying free space: 
+         *   one freespace header tag for free-space header,
+         *   one freespace header tag for free-space section info
+         */
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) 
+            TEST_ERROR;
+        if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 ) 
+            TEST_ERROR;
+
+#if 0
+        /* If the free space managers are persistant, the 
+         * H5MF_tidy_self_referential_fsm_hack() must have been run.
+         * Since this function floats all self referential free space 
+         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata 
+         * cache.
+         */
+        if ( ( ! persistant_fsms ) && 
+             ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) )
+            TEST_ERROR;
+#endif
 
     } /* end if */
 
@@ -1834,8 +1895,10 @@ check_dataset_creation_tags(hid_t fcpl, int type)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -1959,8 +2022,10 @@ check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -2097,8 +2162,10 @@ check_dataset_open_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -2228,8 +2295,10 @@ check_dataset_write_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
  
     /* Verify 10 b-tree nodes belonging to dataset  */
     for (i=0; i<10; i++)
@@ -2351,8 +2420,10 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
  
     /* Verify object header of group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -2506,8 +2577,10 @@ check_dataset_read_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
  
     /* Verify 19 b-tree nodes belonging to dataset  */
     for (i=0; i<19; i++)
@@ -2636,8 +2709,10 @@ check_dataset_size_retrieval(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify 19 b-tree nodes belonging to dataset  */
     for (i=0; i<19; i++)
@@ -2769,8 +2844,10 @@ check_dataset_extend_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, d_tag) < 0 ) TEST_ERROR;
@@ -2866,8 +2943,10 @@ check_object_info_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -2972,8 +3051,10 @@ check_object_copy_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3122,8 +3203,10 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3271,8 +3354,10 @@ check_link_getname_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3371,8 +3456,10 @@ check_external_link_creation_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
  
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3478,8 +3565,10 @@ check_external_link_open_tags(void)
     /* Verification of Metadata Tag Values */
     /* =================================== */
 
+#ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
+#endif /* NDEBUG */ /* end debugging functions */
 
     /* verify tag value of first file's root group */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3643,7 +3732,7 @@ main(void)
     fcpl_shmesg_all = H5Pcreate(H5P_FILE_CREATE);
     H5Pset_shared_mesg_nindexes(fcpl_shmesg_all, 1);
     H5Pset_shared_mesg_index(fcpl_shmesg_all, 0, H5O_SHMESG_ALL_FLAG, 20);
-    H5Pset_file_space(fcpl_shmesg_all, H5F_FILE_SPACE_ALL_PERSIST, (hsize_t)0);
+    H5Pset_file_space_strategy(fcpl_shmesg_all, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)0);
 
     /* ========= */
     /* Run Tests */

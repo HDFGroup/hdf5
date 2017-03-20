@@ -416,6 +416,7 @@ JUnit version 4.11
 .testH5P_layout
 .testH5Pget_link_creation_order
 .testH5Pset_shared_mesg_nindexes_InvalidHIGHnindexes
+.testH5P_file_space_page_size
 .testH5Pget_shared_mesg_index_Invalid_indexnum
 .testH5Pset_data_transform_NullExpression
 .testH5Pset_elink_prefix_null
@@ -438,9 +439,9 @@ JUnit version 4.11
 .testH5Pset_shared_mesg_index
 .testH5Pset_copy_object
 .testH5Pset_link_creation_order_trackedPLUSindexed
+.testH5P_file_space_strategy
 .testH5Pset_copy_object_invalidobject
 .testH5Pset_est_link_info_InvalidValues
-.testH5P_file_space
 .testH5Pset_local_heap_size_hint
 .testH5Pget_est_link_info
 .testH5Pset_scaleoffset
@@ -638,7 +639,7 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (636 tests)
+OK (637 tests)
 
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Fopen(): can't set access and transfer property lists

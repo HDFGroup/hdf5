@@ -220,7 +220,7 @@ class H5_DLLCPP H5Location : public IdComponent {
         // Noop destructor.
         virtual ~H5Location();
 
-}; /* end class H5Location */
+}; // end of H5Location
+} // namespace H5
 
-}
 #endif // __H5Location_H

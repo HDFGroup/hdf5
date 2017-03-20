@@ -315,8 +315,8 @@
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    ((F)->shared->store_msg_crt_idx = (FL))
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (((F)->shared->grp_btree_shared = (RC)) ? SUCCEED : FAIL)
-#define H5F_USE_TMP_SPACE(F)    ((F)->shared->use_tmp_space)
-#define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->tmp_addr, (ADDR)))
+#define H5F_USE_TMP_SPACE(F)    ((F)->shared->fs.use_tmp_space)
+#define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
 #define H5F_SET_LATEST_FLAGS(F, FL)  ((F)->shared->latest_flags = (FL))
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
@@ -324,6 +324,12 @@
 #define H5F_USE_MDC_LOGGING(F)  ((F)->shared->use_mdc_logging)
 #define H5F_START_MDC_LOG_ON_ACCESS(F)  ((F)->shared->start_mdc_log_on_access)
 #define H5F_MDC_LOG_LOCATION(F) ((F)->shared->mdc_log_location)
+#define H5F_ALIGNMENT(F)   	((F)->shared->alignment)
+#define H5F_THRESHOLD(F)   	((F)->shared->threshold)
+#define H5F_PGEND_META_THRES(F) ((F)->shared->fs.pgend_meta_thres)
+#define H5F_POINT_OF_NO_RETURN(F) ((F)->shared->fs.point_of_no_return)
+#define H5F_FIRST_ALLOC_DEALLOC(F) ((F)->shared->first_alloc_dealloc)
+#define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
 #else /* H5F_MODULE */
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
@@ -375,6 +381,12 @@
 #define H5F_USE_MDC_LOGGING(F)  (H5F_use_mdc_logging(F))
 #define H5F_START_MDC_LOG_ON_ACCESS(F)  (H5F_start_mdc_log_on_access(F))
 #define H5F_MDC_LOG_LOCATION(F) (H5F_mdc_log_location(F))
+#define H5F_ALIGNMENT(F)    	(H5F_get_alignment(F))
+#define H5F_THRESHOLD(F)    	(H5F_get_threshold(F))
+#define H5F_PGEND_META_THRES(F) (H5F_get_pgend_meta_thres(F))
+#define H5F_POINT_OF_NO_RETURN(F) (H5F_get_point_of_no_return(F))
+#define H5F_FIRST_ALLOC_DEALLOC(F) (H5F_get_first_alloc_dealloc(F))
+#define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
 #endif /* H5F_MODULE */
 
 
@@ -448,7 +460,9 @@
 #define H5F_CRT_SHMSG_LIST_MAX_NAME  "shmsg_list_max"   /* Shared message list maximum size */
 #define H5F_CRT_SHMSG_BTREE_MIN_NAME "shmsg_btree_min"  /* Shared message B-tree minimum size */
 #define H5F_CRT_FILE_SPACE_STRATEGY_NAME "file_space_strategy"  /* File space handling strategy */
+#define H5F_CRT_FREE_SPACE_PERSIST_NAME "free_space_persist"  	/* Free-space persisting status */
 #define H5F_CRT_FREE_SPACE_THRESHOLD_NAME "free_space_threshold"  /* Free space section threshold */
+#define H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME "file_space_page_size"  /* File space page size */
 
 
 
@@ -484,6 +498,9 @@
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME "mdc_initCacheImageCfg" /* Initial metadata cache image creation configuration */
+#define H5F_ACS_PAGE_BUFFER_SIZE_NAME           "page_buffer_size" /* the maximum size for the page buffer cache */
+#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME  "page_buffer_min_meta_perc" /* the min metadata percentage for the page buffer cache */
+#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME   "page_buffer_min_raw_perc" /* the min raw data percentage for the page buffer cache */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"                 /* Whether absolute symlinks local to file. */
@@ -522,9 +539,33 @@
 						/* See format specification on version 1 B-trees */
 
 /* Default file space handling strategy */
-#define H5F_FILE_SPACE_STRATEGY_DEF	        H5F_FILE_SPACE_ALL
+#define H5F_FILE_SPACE_STRATEGY_DEF	        H5F_FSPACE_STRATEGY_FSM_AGGR
+
+/* Default free space section threshold used by free-space managers */
+#define H5F_FREE_SPACE_PERSIST_DEF	        FALSE
+
 /* Default free space section threshold used by free-space managers */
 #define H5F_FREE_SPACE_THRESHOLD_DEF	        1
+
+/* For paged aggregation: default file space page size when not set */
+#define H5F_FILE_SPACE_PAGE_SIZE_DEF     	4096    
+/* For paged aggregation: minimum value for file space page size */
+#define H5F_FILE_SPACE_PAGE_SIZE_MIN     	512
+
+/* For paged aggregation: drop free-space with size <= this threshold for small meta section */
+#define H5F_FILE_SPACE_PGEND_META_THRES  10    
+
+/* Default for threshold for alignment (can be set via H5Pset_alignment()) */
+#define H5F_ALIGN_DEF			1
+/* Default for alignment (can be set via H5Pset_alignment()) */
+#define H5F_ALIGN_THRHD_DEF		1
+/* Default size for meta data aggregation block (can be set via H5Pset_meta_block_size()) */
+#define H5F_META_BLOCK_SIZE_DEF		2048
+/* Default size for small data aggregation block (can be set via H5Pset_small_data_block_size()) */
+#define H5F_SDATA_BLOCK_SIZE_DEF	2048
+
+/* Check for file using paged aggregation */
+#define H5F_PAGED_AGGR(F) (F->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE && F->shared->fs_page_size)
 
 /* Metadata read attempt values */
 #define H5F_METADATA_READ_ATTEMPTS		1	/* Default # of read attempts for non-SWMR access */
@@ -628,11 +669,19 @@ typedef struct H5F_object_flush_t {
     void *udata;                /* User data */
 } H5F_object_flush_t;
 
-/* I/O Info for an operation */
+/* I/O Info for an operation (old) */
 typedef struct H5F_io_info_t {
     const H5F_t *f;                     /* File object */
     const struct H5P_genplist_t *dxpl;         /* DXPL object */
 } H5F_io_info_t;
+
+/* I/O Info for an operation */
+/* (Migrate toward this one, so that both raw data & metadata DXPLs are available) */
+typedef struct H5F_io_info2_t {
+    const H5F_t *f;                             /* File object */
+    const struct H5P_genplist_t *meta_dxpl;     /* Metadata DXPL object */
+    const struct H5P_genplist_t *raw_dxpl;      /* Raw data DXPL object */
+} H5F_io_info2_t;
 
 /* Concise info about a block of bytes in a file */
 typedef struct H5F_block_t {
@@ -640,6 +689,34 @@ typedef struct H5F_block_t {
     hsize_t length;             /* Length of the block in the file */
 } H5F_block_t;
 
+/* Enum for free space manager state */
+typedef enum H5F_fs_state_t {
+    H5F_FS_STATE_CLOSED = 0,                /* Free space manager is closed */
+    H5F_FS_STATE_OPEN = 1,                  /* Free space manager has been opened */
+    H5F_FS_STATE_DELETING = 2               /* Free space manager is being deleted */
+} H5F_fs_state_t;
+
+/* For paged aggregation */
+/* The values 0 to 6 is the same as H5F_mem_t */
+typedef enum H5F_mem_page_t {
+    H5F_MEM_PAGE_DEFAULT = 0,       /* Not used */
+    H5F_MEM_PAGE_SUPER = 1,
+    H5F_MEM_PAGE_BTREE = 2,          
+    H5F_MEM_PAGE_DRAW = 3, 
+    H5F_MEM_PAGE_GHEAP = 4,      
+    H5F_MEM_PAGE_LHEAP = 5,      
+    H5F_MEM_PAGE_OHDR = 6,      
+    H5F_MEM_PAGE_LARGE_SUPER = 7,
+    H5F_MEM_PAGE_LARGE_BTREE = 8,
+    H5F_MEM_PAGE_LARGE_DRAW = 9,
+    H5F_MEM_PAGE_LARGE_GHEAP = 10,
+    H5F_MEM_PAGE_LARGE_LHEAP = 11,
+    H5F_MEM_PAGE_LARGE_OHDR = 12,
+    H5F_MEM_PAGE_NTYPES = 13       /* Sentinel value - must be last */
+} H5F_mem_page_t;
+
+#define H5F_MEM_PAGE_META       H5F_MEM_PAGE_SUPER          /* Small-sized meta data */
+#define H5F_MEM_PAGE_GENERIC    H5F_MEM_PAGE_LARGE_SUPER    /* Large-sized generic: meta and raw */
 
 /*****************************/
 /* Library-private Variables */
@@ -674,6 +751,10 @@ H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
 H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
 H5_DLL herr_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL herr_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref, size_t *obj_id_count_ptr);
+H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
+H5_DLL hbool_t H5F_get_point_of_no_return(const H5F_t *f);
+H5_DLL hbool_t H5F_get_first_alloc_dealloc(const H5F_t *f);
+H5_DLL hbool_t H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
@@ -704,6 +785,8 @@ H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5UC_t *rc);
 H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
 H5_DLL herr_t H5F_set_latest_flags(H5F_t *f, unsigned flags);
+H5_DLL hsize_t H5F_get_alignment(const H5F_t *f);
+H5_DLL hsize_t H5F_get_threshold(const H5F_t *f);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
 H5_DLL void H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t flag);
@@ -723,7 +806,7 @@ H5_DLL herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_hand
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
 H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 H5_DLL herr_t H5F_traverse_mount(struct H5O_loc_t *oloc/*in,out*/);
-H5_DLL herr_t H5F_flush_mounts(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F_flush_mounts(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,

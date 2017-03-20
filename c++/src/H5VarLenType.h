@@ -49,6 +49,8 @@ class H5_DLLCPP VarLenType : public DataType {
 
         // Default constructor
         VarLenType();
-};
-}
+
+}; // end of VarLenType
+} // namespace H5
+
 #endif // __H5VarLenType_H

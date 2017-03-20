@@ -147,6 +147,40 @@ H5FL_DEFINE(H5C_cache_entry_t);
 
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_cache_image_pending()
+ *
+ * Purpose:     Tests to see if the load of a metadata cache image 
+ *              load is pending (i.e. will be executed on the next 
+ *              protect or insert)
+ *
+ *              Returns TRUE if a cache image load is pending, and FALSE
+ *              if not.  Throws an assertion failure on error.
+ *
+ * Return:      TRUE if a cache image load is pending, and FALSE otherwise.
+ *
+ * Programmer:  John Mainzer, 6/18/16
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5C_cache_image_pending(const H5C_t *cache_ptr)
+{
+    hbool_t             ret_value = TRUE;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    ret_value = (cache_ptr->load_image && !cache_ptr->image_loaded);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_cache_image_pending() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_cache_image_status()
  *
  * Purpose:     Examine the metadata cache associated with the supplied 
@@ -489,7 +523,6 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
      */
     HDassert(!((type->flags & H5C__CLASS_SKIP_READS) &&
                (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)));
-
     HDassert(H5F_addr_defined(addr));
     HDassert(type->get_initial_load_size);
     HDassert(type->deserialize);
@@ -498,6 +531,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
      * relationships now.  The client will restore the relationship(s) with
      * the deserialized entry if appropriate.
      */
+    HDassert(pf_entry_ptr->fd_parent_count == pf_entry_ptr->flush_dep_nparents);
     for(i = (int)(pf_entry_ptr->fd_parent_count) - 1; i >= 0; i--) {
         HDassert(pf_entry_ptr->flush_dep_parent);
         HDassert(pf_entry_ptr->flush_dep_parent[i]);
@@ -525,7 +559,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
      */
     if(pf_entry_ptr->fd_child_count > 0) {
         if(NULL == (fd_children = (H5C_cache_entry_t **)H5MM_calloc(sizeof(H5C_cache_entry_t **) * (size_t)(pf_entry_ptr->fd_child_count + 1))))
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for fd child ptr array")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for fd child ptr array")
 
         if(H5C__destroy_pf_entry_child_flush_deps(cache_ptr, pf_entry_ptr, fd_children) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "can't destroy pf entry child flush dependency(s).")
@@ -544,7 +578,6 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
      */
     if(NULL == (thing = type->deserialize(pf_entry_ptr->image_ptr, len, udata, &dirty)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "Can't deserialize image")
-
     ds_entry_ptr = (H5C_cache_entry_t *)thing;
 
     /* In general, an entry should be clean just after it is loaded.
@@ -583,8 +616,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
     ds_entry_ptr->image_ptr                 	= pf_entry_ptr->image_ptr;
     ds_entry_ptr->image_up_to_date          	= !dirty;
     ds_entry_ptr->type                      	= type;
-    ds_entry_ptr->is_dirty	            	= dirty | 
-						  pf_entry_ptr->is_dirty;
+    ds_entry_ptr->is_dirty	            	= dirty | pf_entry_ptr->is_dirty;
     ds_entry_ptr->dirtied                   	= FALSE;
     ds_entry_ptr->is_protected              	= FALSE;
     ds_entry_ptr->is_read_only              	= FALSE;
@@ -626,7 +658,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
     pf_entry_ptr->coll_prev                 	= NULL;
 #endif /* H5_HAVE_PARALLEL */
 
-    /* initialize cache image related fields */
+    /* Initialize cache image related fields */
     ds_entry_ptr->include_in_image          	= FALSE;
     ds_entry_ptr->lru_rank	            	= 0;
     ds_entry_ptr->image_dirty	            	= FALSE;
@@ -638,6 +670,10 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
     ds_entry_ptr->prefetched	            	= FALSE;
     ds_entry_ptr->prefetch_type_id          	= 0;
     ds_entry_ptr->age		          	= 0;
+    ds_entry_ptr->prefetched_dirty              = pf_entry_ptr->prefetched_dirty;
+#ifndef NDEBUG  /* debugging field */
+    ds_entry_ptr->serialization_count           = 0;
+#endif /* NDEBUG */
 
     H5C__RESET_CACHE_ENTRY_STATS(ds_entry_ptr);
 
@@ -666,7 +702,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
      *     and H5C__FLUSH_CLEAR_ONLY_FLAG flags set.
      */
     pf_entry_ptr->image_ptr = NULL; 
-    if ( pf_entry_ptr->is_dirty ) {
+    if(pf_entry_ptr->is_dirty) {
         HDassert(pf_entry_ptr->in_slist);
         flush_flags |= H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG;
     } /* end if */
@@ -684,7 +720,6 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
     H5C__INSERT_IN_INDEX(cache_ptr, ds_entry_ptr, FAIL)
 
     HDassert(!ds_entry_ptr->in_slist);
-
     if(ds_entry_ptr->is_dirty)
         H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, ds_entry_ptr, FAIL)
 
@@ -699,16 +734,13 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
             (ds_entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_LOAD, ds_entry_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry loaded into cache")
 
-    /* restore flush dependencies with the flush dependency children of 
+    /* Restore flush dependencies with the flush dependency children of 
      * of the prefetched entry.  Note that we must protect *ds_entry_ptr 
      * before the call to avoid triggering sanity check failures, and 
      * then unprotect it afterwards.
      */
     i = 0;
     if(fd_children != NULL) {
-        int j;
-        hbool_t found;
-
         H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, ds_entry_ptr, FAIL)
         ds_entry_ptr->is_protected = TRUE;
         while(fd_children[i] != NULL) {
@@ -718,15 +750,22 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
             HDassert((fd_children[i])->fd_parent_count > 0);
             HDassert((fd_children[i])->fd_parent_addrs);
 
-            j = 0;
-            found = FALSE;
-            while((j < (int)((fd_children[i])->fd_parent_count)) && (!found)) {
-                if((fd_children[i])->fd_parent_addrs[j] == ds_entry_ptr->addr)
-                    found = TRUE;
+#ifndef NDEBUG
+            {
+                int j;
+                hbool_t found;
 
-                j++;
-            } /* end while */
-            HDassert(found);
+                j = 0;
+                found = FALSE;
+                while((j < (int)((fd_children[i])->fd_parent_count)) && (!found)) {
+                    if((fd_children[i])->fd_parent_addrs[j] == ds_entry_ptr->addr)
+                        found = TRUE;
+
+                    j++;
+                } /* end while */
+                HDassert(found);
+            }
+#endif /* NDEBUG */
 
             if(H5C_create_flush_dependency(ds_entry_ptr, fd_children[i]) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Can't restore child flush dependency")
@@ -735,7 +774,6 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
         } /* end while */
 
         H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, ds_entry_ptr, FAIL);
-
         ds_entry_ptr->is_protected = FALSE;
     } /* end if ( fd_children != NULL ) */
     HDassert((unsigned)i == ds_entry_ptr->fd_child_count);
@@ -825,6 +863,54 @@ H5C__free_image_entries_array(H5C_t * cache_ptr)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5C__free_image_entries_array() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_force_cache_image_load()
+ *
+ * Purpose:     On rare occasions, it is necessary to run 
+ *		H5MF_tidy_self_referential_fsm_hack() prior to the first
+ *              metadata cache access.  This is a problem as if there is a 
+ *              cache image at the end of the file, that routine will 
+ *              discard it.
+ *
+ *              We solve this issue by calling this function, which will
+ *		load the cache image and then call 
+ *              H5MF_tidy_self_referential_fsm_hack() to discard it.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              1/11/17
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_force_cache_image_load(H5F_t *f, hid_t dxpl_id)
+{
+    H5C_t *cache_ptr;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->load_image);
+
+    /* Load the cache image, if requested */
+    if(cache_ptr->load_image) {
+        cache_ptr->load_image = FALSE;
+        if(H5C__load_cache_image(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "can't load cache image")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_force_cache_image_load() */
 
 
 /*-------------------------------------------------------------------------
@@ -1235,7 +1321,7 @@ H5C__image_entry_cmp(const void *_entry1, const void *_entry2)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
+H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id, hbool_t *image_generated)
 {
     H5C_t *     cache_ptr = NULL;
     haddr_t     eoa_frag_addr = HADDR_UNDEF;
@@ -1251,6 +1337,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(image_generated);
 
     /* If the file is opened and closed without any access to 
      * any group or data set, it is possible that the cache image (if 
@@ -1260,6 +1347,26 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
         cache_ptr->load_image = FALSE;
         if(H5C__load_cache_image(f, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "can't load cache image")
+    } /* end if */
+
+    /* Before we start to generate the cache image (if requested), verify
+     * that the superblock supports superblock extension messages, and 
+     * silently cancel any request for a cache image if it does not.
+     *
+     * Ideally, we would do this when the cache image is requested,
+     * but the necessary information is not necessary available at that 
+     * time -- hence this last minute check.
+     *
+     * Note that under some error conditions, the superblock will be 
+     * undefined in this case as well -- if so, assume that the 
+     * superblock does not support superblock extension messages.
+     */
+    if((NULL == f->shared->sblock) ||
+         (f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2)) {
+        H5C_cache_image_ctl_t default_image_ctl = H5C__DEFAULT_CACHE_IMAGE_CTL;
+
+        cache_ptr->image_ctl = default_image_ctl;
+        HDassert(!(cache_ptr->image_ctl.generate_image));
     } /* end if */
 
     /* Generate the cache image, if requested */
@@ -1355,6 +1462,15 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
                         (hsize_t)(cache_ptr->image_data_len), &eoa_frag_addr, &eoa_frag_size)))
                 HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "can't allocate file space for metadata cache image")
 
+        /* Make note of the eoa after allocation of the cache image
+         * block.  This value is used for sanity checking when we
+         * shutdown the self referential free space managers after
+         * we destroy the metadata cache.
+         */
+        HDassert(HADDR_UNDEF == f->shared->eoa_post_mdci_fsalloc);
+        if(HADDR_UNDEF == (f->shared->eoa_post_mdci_fsalloc = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)) )
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+
         /* For now, drop any fragment left over from the allocation of the
          * image block on the ground.  A fragment should only be returned
          * if the underlying file alignment is greater than 1.
@@ -1386,7 +1502,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
          */
         if(cache_ptr->image_ctl.flags & H5C_CI__GEN_MDC_IMAGE_BLK)
             if(H5C__write_cache_image_superblock_msg(f, dxpl_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "update of cache image SB mesg failed.")
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "update of cache image SB mesg failed")
 
         /* At this point:
          *
@@ -1440,10 +1556,13 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
              */
             if(cache_ptr->image_ctl.flags & H5C_CI__GEN_MDC_IMAGE_BLK)
                 if(H5F_super_ext_remove_msg(f, dxpl_id, H5O_MDCI_MSG_ID) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove MDC image msg from superblock ext.")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove MDC image msg from superblock ext")
 
             cache_ptr->image_ctl.generate_image = FALSE;
         } /* end else */
+
+        /* Indicate that a cache image was generated */
+        *image_generated = TRUE;
     } /* end if */
 
 done:
@@ -1457,6 +1576,18 @@ done:
  * Purpose:	If *config_ptr contains valid data, copy it into the 
  *		image_ctl field of *cache_ptr.  Make adjustments for 
  *		changes in configuration as required.
+ *
+ *              If the file is open read only, silently
+ *              force the cache image configuration to its default
+ *              (which disables construction of a cache image).
+ *
+ *              Note that in addition to being inapplicable in the
+ *              read only case, cache image is also inapplicable if
+ *              the superblock does not support superblock extension 
+ *              messages.  Unfortunately, this information need not 
+ *              be available at this point. Thus we check for this 
+ *              later, in H5C_prep_for_file_close() and cancel the
+ *              cache image request if appropriate.
  *
  *		Fail if the new configuration is invalid.
  *
@@ -1483,26 +1614,13 @@ H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr,
     /* Check arguments */
     if((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache_ptr on entry")
-    if(config_ptr == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "NULL config_ptr on entry")
-    if(config_ptr->version != H5C__CURR_CACHE_IMAGE_CTL_VER)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Unknown config version")
 
-    /* check general configuration section of the config: */
+    /* Validate the config: */
     if(H5C_validate_cache_image_config(config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid cache image configuration")
 
-    if(H5F_INTENT(f) & H5F_ACC_RDWR)    /* file has been opened R/W */
-        cache_ptr->image_ctl = *config_ptr;
-    else { /* file opened R/O -- suppress cache image silently */
-	H5C_cache_image_ctl_t default_image_ctl = H5C__DEFAULT_CACHE_IMAGE_CTL;
-
-        cache_ptr->image_ctl = default_image_ctl;
-	HDassert(!(cache_ptr->image_ctl.generate_image));
-    } /* end else */
-
 #ifdef H5_HAVE_PARALLEL
-    /* the collective metadata write code is not currently compatible 
+    /* The collective metadata write code is not currently compatible 
      * with cache image.  Until this is fixed, suppress cache image silently
      * if there is more than one process.
      *                                         JRM -- 11/8/16
@@ -1513,6 +1631,30 @@ H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr,
         cache_ptr->image_ctl = default_image_ctl;
 	HDassert(!(cache_ptr->image_ctl.generate_image));
     } /* end if */
+    else {
+#endif /* H5_HAVE_PARALLEL */
+        /* A cache image can only be generated if the file is opened read / write
+         * and the superblock supports superblock extension messages.  
+         *
+         * However, the superblock version is not available at this point -- 
+         * hence we can only check the former requirement now.  Do the latter
+         * check just before we construct the image..  
+         *
+         * If the file is opened read / write, apply the supplied configuration.
+         *
+         * If it is not, set the image configuration to the default, which has 
+         * the effect of silently disabling the cache image if it was requested.
+         */
+        if(H5F_INTENT(f) & H5F_ACC_RDWR)
+            cache_ptr->image_ctl = *config_ptr;
+        else {
+            H5C_cache_image_ctl_t default_image_ctl = H5C__DEFAULT_CACHE_IMAGE_CTL;
+
+            cache_ptr->image_ctl = default_image_ctl;
+            HDassert(!(cache_ptr->image_ctl.generate_image));
+        } /* end else */
+#ifdef H5_HAVE_PARALLEL
+    } /* end else */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -3186,7 +3328,13 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr,
      * this as otherwise the cache will attempt to write them on file
      * close.  Since the file is R/O, the metadata cache image superblock
      * extension message and the cache image block will not be removed.
-     * Hence no danger in this.
+     * Hence no danger in this for subsequent opens.
+     *
+     * However, if the dirty entry (marked clean for purposes of the R/O
+     * file open) is evicted and then referred to, the cache will read
+     * either invalid or obsolete data from the file.  Handle this by 
+     * setting the prefetched_dirty field, and hiding such entries from
+     * the eviction candidate selection algorithm.
      */
     pf_entry_ptr->is_dirty = (is_dirty && file_is_rw);
 
@@ -3204,6 +3352,8 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr,
 
     /* Decode dirty dependency child count */
     UINT16DECODE(p, pf_entry_ptr->fd_dirty_child_count);
+    if(!file_is_rw) 
+        pf_entry_ptr->fd_dirty_child_count      = 0;
     if(pf_entry_ptr->fd_dirty_child_count > pf_entry_ptr->fd_child_count)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid dirty flush dependency child count")
 
@@ -3263,6 +3413,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr,
     pf_entry_ptr->image_up_to_date		= TRUE;
     pf_entry_ptr->type				= H5AC_PREFETCHED_ENTRY;
     pf_entry_ptr->prefetched			= TRUE;
+    pf_entry_ptr->prefetched_dirty              = is_dirty && (!file_is_rw);
 
     /* Sanity checks */
     HDassert(pf_entry_ptr->size > 0 && pf_entry_ptr->size < H5C_MAX_ENTRY_SIZE);

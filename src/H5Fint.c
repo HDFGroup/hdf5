@@ -76,8 +76,8 @@ typedef struct H5F_olist_t {
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);/* Declare a free list to manage the H5F_t struct */
-static herr_t H5F__flush_phase1(H5F_t *f, hid_t dxpl_id);
-static herr_t H5F__flush_phase2(H5F_t *f, hid_t dxpl_id, hbool_t closing);
+static herr_t H5F__flush_phase1(H5F_t *f, hid_t meta_dxpl_id);
+static herr_t H5F__flush_phase2(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing);
 
 
 /*********************/
@@ -182,6 +182,14 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         efc_size = H5F_efc_max_nfiles(f->shared->efc);
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set elink file cache size")
+    if(f->shared->page_buf != NULL) {
+        if(H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &(f->shared->page_buf->max_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set page buffer size")
+        if(H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &(f->shared->page_buf->min_meta_perc)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set minimum metadata fraction of page buffer")
+        if(H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &(f->shared->page_buf->min_raw_perc)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set minimum raw data fraction of page buffer")
+    } /* end if */
 #ifdef H5_HAVE_PARALLEL
     if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
@@ -495,7 +503,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_is_hdf5
+ * Function:	H5F__is_hdf5
  *
  * Purpose:	Check the file signature to detect an HDF5 file.
  *
@@ -509,17 +517,14 @@ done:
  *
  * Programmer:	Unknown
  *
- * Modifications:
- *		Robb Matzke, 1999-08-02
- *		Rewritten to use the virtual file layer.
  *-------------------------------------------------------------------------
  */
 htri_t
-H5F_is_hdf5(const char *name, hid_t dxpl_id)
+H5F__is_hdf5(const char *name, hid_t meta_dxpl_id, hid_t raw_dxpl_id)
 {
     H5FD_t	*file = NULL;           /* Low-level file struct */
+    H5FD_io_info_t fdio_info;           /* File driver I/O info */
     haddr_t     sig_addr;               /* Addess of hdf5 file signature */
-    H5P_genplist_t  *xfer_plist= NULL;  /* Dataset transfer property list object */
     htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -528,12 +533,15 @@ H5F_is_hdf5(const char *name, hid_t dxpl_id)
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
-    /* Get the property list object */
-    if(NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+    /* Set up the file driver info */
+    fdio_info.file = file;
+    if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(meta_dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+    if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(raw_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    if(H5FD_locate_signature(file, xfer_plist, &sig_addr) < 0)
+    if(H5FD_locate_signature(&fdio_info, &sig_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
     ret_value = (HADDR_UNDEF != sig_addr);
 
@@ -544,7 +552,7 @@ done:
             HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_is_hdf5() */
+} /* end H5F__is_hdf5() */
 
 
 /*-------------------------------------------------------------------------
@@ -597,10 +605,25 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         f->shared->flags = flags;
         f->shared->sohm_addr = HADDR_UNDEF;
         f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
-        for(u = 0; u < NELMTS(f->shared->fs_addr); u++)
-            f->shared->fs_addr[u] = HADDR_UNDEF;
         f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
+
+        /* Initialization for handling file space */
+        for(u = 0; u < NELMTS(f->shared->fs_addr); u++) {
+            f->shared->fs_state[u] = H5F_FS_STATE_CLOSED;
+            f->shared->fs_addr[u] = HADDR_UNDEF;
+            f->shared->fs_man[u] = NULL;
+        } /* end for */
+        f->shared->first_alloc_dealloc = FALSE;
+        f->shared->eoa_pre_fsm_fsalloc = HADDR_UNDEF;
+        f->shared->eoa_post_fsm_fsalloc = HADDR_UNDEF;
+        f->shared->eoa_post_mdci_fsalloc = HADDR_UNDEF;
+
+        /* Initialization for handling file space (for paged aggregation) */
+        f->shared->pgend_meta_thres = H5F_FILE_SPACE_PGEND_META_THRES;
+
+        /* intialize point of no return */
+        f->shared->point_of_no_return = FALSE;
 
         /*
          * Copy the file creation and file access property lists into the
@@ -621,8 +644,19 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         HDassert(f->shared->sohm_nindexes < 255);
         if(H5P_get(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &f->shared->fs_strategy) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space strategy")
+        if(H5P_get(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, &f->shared->fs_persist) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space persisting status")
         if(H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &f->shared->fs_threshold) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get free-space section threshold")
+        if(H5P_get(plist, H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME, &f->shared->fs_page_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space page size")
+        HDassert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
+
+        /* Temporary for multi/split drivers: fail file creation 
+             when persisting free-space or using paged aggregation strategy */
+        if(H5F_HAS_FEATURE(f, H5FD_FEAT_PAGED_AGGR))
+            if(f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE || f->shared->fs_persist)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't open with this strategy or persistent fs")
 
         /* Get the FAPL values to cache */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -796,7 +830,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_dest
+ * Function:	H5F__dest
  *
  * Purpose:	Destroys a file structure.  This function flushes the cache
  *		but doesn't do any other cleanup other than freeing memory
@@ -812,11 +846,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
+H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
 {
     herr_t	   ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -824,14 +858,14 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
 
     if(1 == f->shared->nrefs) {
         int actype;                         /* metadata cache type (enum value) */
-        H5F_io_info_t fio_info;             /* I/O info for operation */
+        H5F_io_info2_t fio_info;            /* I/O info for operation */
 
         /* Flush at this point since the file will be closed (phase 1).
          * Only try to flush the file if it was opened with write access, and if
          * the caller requested a flush.
          */
         if((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
-            if(H5F__flush_phase1(f, dxpl_id) < 0)
+            if(H5F__flush_phase1(f, meta_dxpl_id) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 1)")
 
@@ -839,7 +873,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
          * This allows the cache to set up for creating a metadata cache 
          * image if this has been requested.
          */
-        if(H5AC_prep_for_file_close(f, dxpl_id) < 0)
+        if(H5AC_prep_for_file_close(f, meta_dxpl_id) < 0)
             /* Push error, but keep going */
             HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "metadata cache prep for close failed")
 
@@ -848,7 +882,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
          * the caller requested a flush.
          */
         if((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
-            if(H5F__flush_phase2(f, dxpl_id, TRUE) < 0)
+            if(H5F__flush_phase2(f, meta_dxpl_id, raw_dxpl_id, TRUE) < 0)
                 /* Push error, but keep going */
                 HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 2)")
 
@@ -895,7 +929,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
              *                                          -- JRM
              */
             if(H5F_ACC_RDWR & H5F_INTENT(f)) {
-                if(H5MF_close(f, dxpl_id) < 0)
+                if(H5MF_close(f, meta_dxpl_id) < 0)
                     /* Push error, but keep going*/
                     HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
 
@@ -913,7 +947,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                     f->shared->sblock->status_flags &= (uint8_t)(~H5F_SUPER_SWMR_WRITE_ACCESS);
 
                     /* Mark EOA info dirty in cache, so change will get encoded */
-                    if(H5F_eoa_dirty(f, dxpl_id) < 0)
+                    if(H5F_eoa_dirty(f, meta_dxpl_id) < 0)
                         /* Push error, but keep going*/
                         HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
@@ -924,12 +958,12 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                      * At most, this should change the superblock or the
                      * superblock extension messages.
                      */
-                    if(H5MF_free_aggrs(f, dxpl_id) < 0)
+                    if(H5MF_free_aggrs(f, meta_dxpl_id) < 0)
                         /* Push error, but keep going*/
                         HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
 
                     /* Truncate the file to the current allocated size */
-                    if(H5FD_truncate(f->shared->lf, dxpl_id, TRUE) < 0)
+                    if(H5FD_truncate(f->shared->lf, meta_dxpl_id, TRUE) < 0)
                         /* Push error, but keep going*/
                         HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
 
@@ -968,9 +1002,14 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
         /* Shutdown the metadata cache */
-        if(H5AC_dest(f, dxpl_id))
+        if(H5AC_dest(f, meta_dxpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+
+        /* Shutdown the page buffer cache */
+        if(H5PB_dest(f) < 0)
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing page buffer cache")
 
         /* Clean up the metadata cache log location string */
         if(f->shared->mdc_log_location)
@@ -990,7 +1029,9 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
 
         /* Set up I/O info for operation */
         fio_info.f = f;
-        if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(meta_dxpl_id)))
+            HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
             HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
         /* Destroy other components of the file */
@@ -1130,7 +1171,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
  */
 H5F_t *
 H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-    hid_t dxpl_id)
+    hid_t meta_dxpl_id)
 {
     H5F_t              *file = NULL;        /*the success return value      */
     H5F_file_t         *shared = NULL;      /*shared part of `file'         */
@@ -1139,6 +1180,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     H5FD_class_t       *drvr;               /*file driver class info        */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
+    hid_t               raw_dxpl_id = H5AC_rawdata_dxpl_id;    /* Raw data dxpl used by library        */
+    size_t              page_buf_size;
+    unsigned            page_buf_min_meta_perc;
+    unsigned            page_buf_min_raw_perc;
     hbool_t             set_flag = FALSE;   /*set the status_flags in the superblock */
     hbool_t             clear = FALSE;      /*clear the status_flags 	    */
     hbool_t             evict_on_close;     /* evict on close value from plist  */
@@ -1289,6 +1334,25 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
+    /* Check if page buffering is enabled */
+    if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get page buffer size")
+    if(page_buf_size) {
+#ifdef H5_HAVE_PARALLEL
+        /* Collective metadata writes are not supported with page buffering */
+        if(file->coll_md_write)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "collective metadata writes are not supported with page buffering")
+
+        /* Temporary: fail file create when page buffering feature is enabled for parallel */
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "page buffering is disabled for parallel")
+#endif /* H5_HAVE_PARALLEL */
+        /* Query for other page buffer cache properties */
+        if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &page_buf_min_meta_perc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum metadata fraction of page buffer")
+        if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &page_buf_min_raw_perc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum raw data fraction of page buffer")
+    } /* end if */
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1299,26 +1363,35 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
          * to create & write the superblock.
          */
 
+        /* Create the page buffer before initializing the superblock */
+        if(page_buf_size)
+            if(H5PB_create(file, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create page buffer")
+
         /* Initialize information about the superblock and allocate space for it */
         /* (Writes superblock extension messages, if there are any) */
-        if(H5F__super_init(file, dxpl_id) < 0)
+        if(H5F__super_init(file, meta_dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
 
         /* Create and open the root group */
         /* (This must be after the space for the superblock is allocated in
          *      the file, since the superblock must be at offset 0)
          */
-        if(H5G_mkroot(file, dxpl_id, TRUE) < 0)
+        if(H5G_mkroot(file, meta_dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
     } /* end if */
     else if (1 == shared->nrefs) {
-
         /* Read the superblock if it hasn't been read before. */
-        if(H5F__super_read(file, dxpl_id, TRUE) < 0)
+        if(H5F__super_read(file, meta_dxpl_id, raw_dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
+        /* Create the page buffer before initializing the superblock */
+        if(page_buf_size)
+            if(H5PB_create(file, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create page buffer")
+
         /* Open the root group */
-        if(H5G_mkroot(file, dxpl_id, FALSE) < 0)
+        if(H5G_mkroot(file, meta_dxpl_id, FALSE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
     } /* end if */
 
@@ -1360,12 +1433,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
      */
     if(H5P_get(a_plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get evict on close value")
-
-    if(shared->nrefs == 1) {
+    if(shared->nrefs == 1)
         shared->evict_on_close = evict_on_close;
-    } else if(shared->nrefs > 1) {
+    else if(shared->nrefs > 1) {
         if(shared->evict_on_close != evict_on_close)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file evict-on-close value doesn't match")
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "file evict-on-close value doesn't match")
     } /* end if */
 
     /* Formulate the absolute path for later search of target file for external links */
@@ -1393,7 +1465,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             /* Flush the superblock */
             if(H5F_super_dirty(file) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, NULL, "unable to mark superblock as dirty")
-            if(H5F_flush_tagged_metadata(file, H5AC__SUPERBLOCK_TAG, H5AC_ind_read_dxpl_id) < 0)
+            if(H5F_flush_tagged_metadata(file, H5AC__SUPERBLOCK_TAG, meta_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock")
 
             /* Remove the file lock for SWMR_WRITE */
@@ -1405,7 +1477,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         else { /* H5F_ACC_RDONLY: check consistency of status_flags */
             /* Skip check of status_flags for file with < superblock version 3 */
             if(file->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3) {
-
                 if(H5F_INTENT(file) & H5F_ACC_SWMR_READ) { 
                     if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS && 
                             !(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
@@ -1413,12 +1484,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                             (!(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) && 
                             file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
                         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is not already open for SWMR writing")
-
                 } /* end if */
                 else if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) ||
                         (file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write (may use <h5clear file> to clear file consistency flags)")
-
             } /* version 3 superblock */
         } /* end else */
     } /* end if set_flag */
@@ -1428,7 +1497,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 
 done:
     if((NULL == ret_value) && file)
-        if(H5F_dest(file, dxpl_id, FALSE) < 0)
+        if(H5F__dest(file, meta_dxpl_id, raw_dxpl_id, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
@@ -1448,7 +1517,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__flush_phase1(H5F_t *f, hid_t dxpl_id)
+H5F__flush_phase1(H5F_t *f, hid_t meta_dxpl_id)
 {
     herr_t   ret_value = SUCCEED;       /* Return value */
 
@@ -1458,7 +1527,7 @@ H5F__flush_phase1(H5F_t *f, hid_t dxpl_id)
     HDassert(f);
 
     /* Flush any cached dataset storage raw data */
-    if(H5D_flush(f, dxpl_id) < 0)
+    if(H5D_flush(f, meta_dxpl_id) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
@@ -1468,7 +1537,7 @@ H5F__flush_phase1(H5F_t *f, hid_t dxpl_id)
     /* (needs to happen before cache flush, with superblock write, since the
      *  'eoa' value is written in superblock -QAK)
      */
-    if(H5MF_free_aggrs(f, dxpl_id) < 0)
+    if(H5MF_free_aggrs(f, meta_dxpl_id) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
 
@@ -1490,9 +1559,9 @@ H5F__flush_phase1(H5F_t *f, hid_t dxpl_id)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__flush_phase2(H5F_t *f, hid_t dxpl_id, hbool_t closing)
+H5F__flush_phase2(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing)
 {
-    H5F_io_info_t fio_info;             /* I/O info for operation */
+    H5F_io_info2_t fio_info;            /* I/O info for operation */
     herr_t   ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1501,23 +1570,26 @@ H5F__flush_phase2(H5F_t *f, hid_t dxpl_id, hbool_t closing)
     HDassert(f);
 
     /* Flush the entire metadata cache */
-    if(H5AC_flush(f, dxpl_id) < 0)
+    if(H5AC_flush(f, meta_dxpl_id) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
     /* Truncate the file to the current allocated size */
-    if(H5FD_truncate(f->shared->lf, dxpl_id, closing) < 0)
+    if(H5FD_truncate(f->shared->lf, meta_dxpl_id, closing) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
 
     /* Flush the entire metadata cache again since the EOA could have changed in the truncate call. */
-    if(H5AC_flush(f, dxpl_id) < 0)
+    if(H5AC_flush(f, meta_dxpl_id) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
     /* Set up I/O info for operation */
     fio_info.f = f;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+    if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(meta_dxpl_id)))
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(raw_dxpl_id)))
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
@@ -1526,8 +1598,13 @@ H5F__flush_phase2(H5F_t *f, hid_t dxpl_id, hbool_t closing)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
+    /* Flush the page buffer */
+    if(H5PB_flush(&fio_info) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "page buffer flush failed")
+
     /* Flush file buffers to disk. */
-    if(H5FD_flush(f->shared->lf, dxpl_id, closing) < 0)
+    if(H5FD_flush(f->shared->lf, meta_dxpl_id, closing) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "low level flush failed")
 
@@ -1536,7 +1613,7 @@ H5F__flush_phase2(H5F_t *f, hid_t dxpl_id, hbool_t closing)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_flush
+ * Function:	H5F__flush
  *
  * Purpose:	Flushes cached data.
  *
@@ -1549,28 +1626,27 @@ H5F__flush_phase2(H5F_t *f, hid_t dxpl_id, hbool_t closing)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
+H5F__flush(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing)
 {
     herr_t   ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check arguments */
     HDassert(f);
 
     /* First phase of flushing data */
-    if(H5F__flush_phase1(f, dxpl_id) < 0)
+    if(H5F__flush_phase1(f, meta_dxpl_id) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush file data")
 
     /* Second phase of flushing data */
-    if(H5F__flush_phase2(f, dxpl_id, closing) < 0)
+    if(H5F__flush_phase2(f, meta_dxpl_id, raw_dxpl_id, closing) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush file data")
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_flush() */
+} /* end H5F__flush() */
 
 
 /*-------------------------------------------------------------------------
@@ -1795,7 +1871,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
         if(H5F_efc_try_close(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't attempt to close EFC")
 
-    /* Delay flush until the shared file struct is closed, in H5F_dest.  If the
+    /* Delay flush until the shared file struct is closed, in H5F__dest.  If the
      * application called H5Fclose, it would have been flushed in that function
      * (unless it will have been flushed in H5F_dest anyways). */
 
@@ -1804,7 +1880,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
      */
-    if(H5F_dest(f, H5AC_ind_read_dxpl_id, TRUE) < 0)
+    if(H5F__dest(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
     /* Since we closed the file, this should be set to TRUE */
@@ -2362,7 +2438,8 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t dxpl_id)
+H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t meta_dxpl_id,
+    hid_t raw_dxpl_id)
 {
     H5FD_t     *fd_ptr;                 /* file driver */
     haddr_t     eoa;                    /* End of file address */
@@ -2429,10 +2506,10 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t dxpl_id)
 
     /* test to see if a buffer was provided -- if not, we are done */
     if(buf_ptr != NULL) {
+        H5FD_io_info_t fdio_info;       /* File driver I/O info */
         size_t	space_needed;		/* size of file image */
         hsize_t tmp;
         size_t tmp_size;
-        H5P_genplist_t *xfer_plist= NULL;  /* Dataset transfer property list object */
 
         /* Check for buffer too small */
         if((haddr_t)buf_len < eoa)
@@ -2440,13 +2517,16 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t dxpl_id)
 
         space_needed = (size_t)eoa;
 
-        /* Get the property list object */
-        if(NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+        /* Set up file driver I/O info object */
+        fdio_info.file = fd_ptr;
+        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(meta_dxpl_id)))
+            HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list object")
+        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(raw_dxpl_id)))
+            HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list object")
 
         /* read in the file image */
         /* (Note compensation for base address addition in internal routine) */
-        if(H5FD_read(fd_ptr, xfer_plist, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
+        if(H5FD_read(&fdio_info, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
 
         /* Offset to "status_flags" in the superblock */
@@ -2647,6 +2727,38 @@ H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_eoa() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F__set_paged_aggr
+ *
+ * Purpose:	Quick and dirty routine to set the file's paged_aggr mode
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June 19, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__set_paged_aggr(const H5F_t *f, hbool_t paged)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Dispatch to driver */
+    if(H5FD_set_paged_aggr(f->shared->lf, paged) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set paged aggr mode failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__set_paged_aggr() */
 
 #ifdef H5_HAVE_PARALLEL
 

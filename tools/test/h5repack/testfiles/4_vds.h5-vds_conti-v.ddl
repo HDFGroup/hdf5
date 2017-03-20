@@ -5,7 +5,7 @@ DATASET "vds_dset" {
    STORAGE_LAYOUT {
       CONTIGUOUS
       SIZE 576
-      OFFSET 2144
+      OFFSET 2048
    }
    FILTERS {
       NONE

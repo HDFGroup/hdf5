@@ -58,8 +58,10 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
     int          ok = 1;
     hid_t       fcpl_in     = -1;   /* file creation property for input file */
     hid_t   	fcpl_out    = -1;   /* file creation property for output file */
-    H5F_file_space_type_t in_strat, out_strat;	/* file space handling strategy for in/output file */
-    hsize_t	in_thresh, out_thresh;		/* free space section threshold for in/output file */
+    H5F_fspace_strategy_t in_strategy, out_strategy;	/* file space handling strategy for in/output file */
+    hbool_t 	in_persist, out_persist;		/* free-space persist status for in/output file */
+    hsize_t	in_threshold, out_threshold;		/* free-space section threshold for in/output file */
+    hsize_t	in_pagesize, out_pagesize;		/* file space page size for input/output file */
 
     /* open the output file */
     if((fidout = H5Fopen(out_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
@@ -196,8 +198,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
     }
 
    /*-------------------------------------------------------------------------
-    * Verify that file space strategy and free space threshold
-    * are set as expected
+    * Verify that file space info are set as expected
     *-------------------------------------------------------------------------
     */
 
@@ -211,10 +212,16 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fget_create_plist failed");
     }
 
-    /* Get file space management info for input file */
-    if(H5Pget_file_space(fcpl_in, &in_strat, &in_thresh) < 0) {
+    /* Get file space info for input file */
+    if(H5Pget_file_space_strategy(fcpl_in, &in_strategy, &in_persist, &in_threshold) < 0) {
         error_msg("failed to retrieve file space strategy & threshold\n");
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_file_space failed");
+    }
+
+    /* Get file space page size for input file */
+    if(H5Pget_file_space_page_size(fcpl_in, &in_pagesize) < 0) {
+        error_msg("failed to retrieve file space page size\n");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fget_create_plist failed");
     }
 
     /* Output file is already opened */
@@ -224,45 +231,84 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fget_create_plist failed");
     }
 
-    /* Get file space management info for output file */
-    if(H5Pget_file_space(fcpl_out, &out_strat, &out_thresh) < 0) {
+    /* Get file space info for output file */
+    if(H5Pget_file_space_strategy(fcpl_out, &out_strategy, &out_persist, &out_threshold) < 0) {
         error_msg("failed to retrieve file space strategy & threshold\n");
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_file_space failed");
     }
 
-    /*
-     * If the strategy option is not set,
-     * file space handling strategy should be the same for both
-     * input & output files.
-     * If the strategy option is set,
-     * the output file's file space handling strategy should be the same
-     * as what is set via the strategy option
-     */
-    if(!options->fs_strategy && out_strat != in_strat) {
-        error_msg("file space strategy not set as unexpected\n");
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
-
-    }
-    else if(options->fs_strategy && out_strat!= options->fs_strategy)  {
-        error_msg("file space strategy not set as unexpected\n");
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
+    /* Get file space page size for output file */
+    if(H5Pget_file_space_page_size(fcpl_out, &out_pagesize) < 0) {
+        error_msg("failed to retrieve file space page size\n");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fget_create_plist failed");
     }
 
     /*
-     * If the threshold option is not set,
-     * the free space section threshold should be the same for both
-     * input & output files.
-     * If the threshold option is set,
-     * the output file's free space section threshold should be the same
-     * as what is set via the threshold option.
+     * If -S option is set, the file space handling strategy should be set as specified.
+     * If -S option is not set, the file space handling strategy should be
+     * the same as the input file's strategy.
      */
-    if(!options->fs_threshold && out_thresh != in_thresh) {
-        error_msg("free space threshold not set as unexpected\n");
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "free space threshold not set as unexpected");
+    if(options->fs_strategy) {
+        if(out_strategy != (options->fs_strategy == (-1) ? 0 : options->fs_strategy)) {
+            error_msg("file space strategy not set as unexpected\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
+        }
+    } else {
+        if(out_strategy != in_strategy) {
+            error_msg("file space strategy not set as unexpected\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
+        }
     }
-    else if(options->fs_threshold && out_thresh != options->fs_threshold) {
-        error_msg("free space threshold not set as unexpected\n");
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "free space threshold not set as unexpected");
+
+    /*
+     * If the -P option is set, the free-space persist status should be set as specified.
+     * If the -P option is not set, the free-space persist status should be
+     * the same as the input file's free-space persist status
+     */
+    if(options->fs_persist) {
+        if(out_persist != (hbool_t)(options->fs_persist == (-1) ? FALSE : options->fs_persist)) {
+            error_msg("free-space persist status is not set as unexpected\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
+        }
+    } else {
+        if(out_persist != in_persist) {
+            error_msg("free-space persist status is not set as unexpected\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
+        }
+    }
+
+    /*
+     * If the -T option is set, the threshold size should be set as specified.
+     * If the -T option is not set, the threshold should be the same as the
+     * input file's threshold size.
+     */
+    if(options->fs_threshold) {
+        if(out_threshold != (hsize_t)(options->fs_threshold == (-1) ? 0 : options->fs_threshold)) {
+            error_msg("threshold is not set as unexpectec\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
+        }
+    } else {
+        if(out_threshold != in_threshold) {
+            error_msg("threshold is not set as unexpected\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
+        }
+    }
+
+    /*
+     * If the -G option is set, the file space page size should be set as specified.
+     * If the -G option is not set, the file space page size should be
+     * the same as the input file's file space page size.
+     */
+    if(options->fs_pagesize) {
+        if(out_pagesize != (hsize_t)(options->fs_pagesize == (-1) ? 0 : options->fs_pagesize)) {
+            error_msg("file space page size is not set as unexpected\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
+        }
+    } else { /* "-G" is not set */
+        if(out_pagesize != in_pagesize) {
+            error_msg("file space page size is not set as unexpected\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
+        }
     }
 
     /* Closing */

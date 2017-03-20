@@ -16,7 +16,7 @@
 /*****************************************************************************
    FILE
    trefer.cpp - HDF5 C++ testing the functionalities associated with the C
-        	Reference interface (H5R)
+                Reference interface (H5R)
 
  ***************************************************************************/
 #ifdef OLD_HEADER_FILENAME
@@ -93,7 +93,7 @@ test_reference_params(void)
         file1 = new H5File (FILE1, H5F_ACC_TRUNC);
 
         // Create dataspace for datasets
-        hsize_t	dims1[] = {SPACE1_DIM1};
+        hsize_t dims1[] = {SPACE1_DIM1};
         DataSpace sid1(SPACE1_RANK, dims1);
 
         // Create a group
@@ -172,7 +172,7 @@ test_reference_params(void)
     catch (Exception& E)
     {
         issue_fail_msg("test_reference_param()",__LINE__,__FILE__,
-        		E.getCFuncName(), E.getCDetailMsg());
+                        E.getCFuncName(), E.getCDetailMsg());
     }
 
     if(file1)
@@ -209,7 +209,7 @@ static void test_reference_obj(void)
         file1 = new H5File (FILE1, H5F_ACC_TRUNC);
 
         // Create dataspace for datasets
-        hsize_t	dims1[] = {SPACE1_DIM1};
+        hsize_t dims1[] = {SPACE1_DIM1};
         DataSpace sid1(SPACE1_RANK, dims1);
 
         // Create dataset access property list
@@ -364,7 +364,7 @@ static void test_reference_obj(void)
     catch (Exception& E)
     {
         issue_fail_msg("test_reference_obj()",__LINE__,__FILE__,
-        		E.getCFuncName(), E.getCDetailMsg());
+                        E.getCFuncName(), E.getCDetailMsg());
     }
 
     if(file1)
@@ -493,7 +493,7 @@ test_reference_group(void)
     catch (Exception& E)
     {
         issue_fail_msg("test_reference_group()",__LINE__,__FILE__,
-        		E.getCFuncName(), E.getCDetailMsg());
+                        E.getCFuncName(), E.getCDetailMsg());
     }
 
     if(file1)
@@ -523,10 +523,10 @@ test_reference_region_1D(void)
     SUBTEST("1-D Dataset Region Reference Functions");
 
     try {
-        hdset_reg_ref_t *wbuf,	// buffer to write to disk
+        hdset_reg_ref_t *wbuf,   // buffer to write to disk
                    *rbuf;        // buffer read from disk
-        uint8_t    *dwbuf,	// Buffer for writing numeric data to disk
-                   *drbuf;        // Buffer for reading numeric data from disk
+        uint8_t    *dwbuf,       // Buffer for writing numeric data to disk
+                   *drbuf;       // Buffer for reading numeric data from disk
 
         // Allocate write & read buffers
         wbuf = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
@@ -538,7 +538,7 @@ test_reference_region_1D(void)
         H5File file1(FILE2, H5F_ACC_TRUNC);
 
         // Create dataspace for datasets
-        hsize_t	dims3[] = {SPACE3_DIM1};
+        hsize_t dims3[] = {SPACE3_DIM1};
         DataSpace sid3(SPACE3_RANK, dims3);
 
         // Create dataset access property list
@@ -558,7 +558,7 @@ test_reference_region_1D(void)
         dset3.close();
 
         // Create dataspace for datasets
-        hsize_t	dims1[] = {SPACE1_DIM1};
+        hsize_t dims1[] = {SPACE1_DIM1};
         DataSpace sid1(SPACE1_RANK, dims1);
 
         // Create a dataset
@@ -785,7 +785,7 @@ test_reference_region_1D(void)
     catch (Exception& E)
     {
         issue_fail_msg("test_reference_region_1D()",__LINE__,__FILE__,
-        		E.getCFuncName(), E.getCDetailMsg());
+                        E.getCFuncName(), E.getCDetailMsg());
     }
 }   /* test_reference_region_1D() */
 

@@ -438,6 +438,7 @@ class H5_DLLCPP PredType : public AtomType {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-};
-}
+}; // end of PredType
+} // namespace H5
+
 #endif // __H5PredType_H

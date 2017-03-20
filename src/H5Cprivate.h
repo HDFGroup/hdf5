@@ -185,6 +185,7 @@
  *      H5C__TAKE_OWNERSHIP_FLAG
  *      H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG
  *      H5C__GENERATE_IMAGE_FLAG
+ *      H5C__UPDATE_PAGE_BUFFER_FLAG
  */
 #define H5C__NO_FLAGS_SET			0x00000
 #define H5C__SET_FLUSH_MARKER_FLAG		0x00001
@@ -205,6 +206,7 @@
 #define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG     0x08000
 #define H5C__DURING_FLUSH_FLAG                  0x10000 /* Set when the entire cache is being flushed */
 #define H5C__GENERATE_IMAGE_FLAG                0x20000 /* Set during parallel I/O */
+#define H5C__UPDATE_PAGE_BUFFER_FLAG            0x40000 /* Set during parallel I/O */
 
 /* Debugging/sanity checking/statistics settings */
 #ifndef NDEBUG
@@ -1066,9 +1068,9 @@ typedef int H5C_ring_t;
  *
  * is_read_only: Boolean flag that is only meaningful if is_protected is
  * 		TRUE.  In this circumstance, it indicates whether the
- * 		entry has been protected read only, or read/write.
+ * 		entry has been protected read-only, or read/write.
  *
- * 		If the entry has been protected read only (i.e. is_protected
+ * 		If the entry has been protected read-only (i.e. is_protected
  * 		and is_read_only are both TRUE), we allow the entry to be
  * 		protected more than once.
  *
@@ -1078,7 +1080,7 @@ typedef int H5C_ring_t;
  *		the entry is actually unprotected.
  *
  * ro_ref_count: Integer field used to maintain a count of the number of
- * 		outstanding read only protects on this entry.  This field
+ * 		outstanding read-only protects on this entry.  This field
  * 		must be zero whenever either is_protected or is_read_only
  * 		are TRUE.
  *
@@ -1458,13 +1460,13 @@ typedef int H5C_ring_t;
  *		the load of a cache image block, although other scenarios 
  *		are contemplated for the use of this feature.  Note that 
  *		unlike the usual prefetch situation, this means that a 
- *		pre fetched entry can be dirty, and/or can be a party to 
+ *		prefetched entry can be dirty, and/or can be a party to 
  *		flush dependency relationship(s).  This complicates matters 
  *		somewhat.
  *
- *		The essential feature of a pre-fetched entry is that it 
+ *		The essential feature of a prefetched entry is that it 
  *		consists only of a buffer containing the on disk image of 
- *		the entry.  Thus it must be  deserialized before it can 
+ *		the entry.  Thus it must be deserialized before it can 
  *		be passed back to the library on a protect call.  This 
  *		task is handled by H5C_deserialized_prefetched_entry().
  *		In essence, this routine calls the deserialize callback 
@@ -1475,7 +1477,7 @@ typedef int H5C_ring_t;
  *
  *		Further, if the prefetched entry is a flush dependency parent, 
  *		all its flush dependency children (which must also be 
- *		pre-fetched entries), must be tranfered to the new cache 
+ *		prefetched entries), must be tranfered to the new cache 
  *		entry returned by the deserailization callback.
  *
  *		Finally, if the prefetched entry is a flush dependency child, 
@@ -1510,6 +1512,46 @@ typedef int H5C_ring_t;
  *		converted to a regular entry.
  *
  *		This field must be zero if prefetched is FALSE.  
+ *
+ * prefetched_dirty:  Boolean field that must be set to FALSE unless the
+ *		following conditions hold:
+ *
+ *		    1) The file has been opened R/O.
+ *
+ *		    2) The entry is either a prefetched entry, or was 
+ *                     re-constructed from a prefetched entry.
+ *
+ *                  3) The base prefetched entry was marked dirty.
+ *
+ *              This field exists to solve the following problem with 
+ *              files containing cache images that are opened R/O.
+ *
+ *              If the cache image contains a dirty entry, that entry
+ *              must be marked clean when it is inserted into the cache
+ *              in the read-only case, as otherwise the metadata cache 
+ *              will attempt to flush it on file close -- which is poor 
+ *              form in the read-only case.
+ *
+ *              However, since the entry is marked clean, it is possible 
+ *              that the metadata cache will evict it if the size of the 
+ *              metadata in the file exceeds the size of the metadata cache,
+ *              and the application visits much of this data.
+ *
+ *              If this happens, and the metadata cache is then asked for
+ *              this entry, it will attempt to read it from file, and will
+ *              obtain either obsolete or invalid data depending on whether
+ *              the entry has ever been written to it assigned location in
+ *              the file.
+ *
+ *              With this background, the purpose of this field should be 
+ *              obvious -- when set, it allows the eviction candidate 
+ *              selection code to skip over the entry, thus avoiding the 
+ *              issue.
+ *
+ *              Since the issue only arises in the R/O case, there is 
+ *              no possible interaction with SWMR.  There are also 
+ *              potential interactions with Evict On Close -- at present,
+ *              we deal with this by disabling EOC in the R/O case.
  *
  * serialization_count:  Integer field used to maintain a count of the 
  *		number of times each entry is serialized during cache 
@@ -1627,6 +1669,7 @@ typedef struct H5C_cache_entry_t {
     hbool_t                     prefetched;
     int                         prefetch_type_id;
     int32_t                     age;
+    hbool_t			prefetched_dirty;
 
 #ifndef NDEBUG	/* debugging field */
     int                         serialization_count;
@@ -2208,6 +2251,7 @@ H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t dxpl_id,
     const H5C_class_t *type, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag); 
+H5_DLL herr_t H5C_force_cache_image_load(H5F_t * f, hid_t dxpl_id);
 H5_DLL herr_t H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag, hbool_t match_global);
 H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
 H5_DLL herr_t H5C_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
@@ -2259,7 +2303,6 @@ H5_DLL herr_t H5C_set_trace_file_ptr(H5C_t *cache_ptr, FILE *trace_file_ptr);
 H5_DLL herr_t H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     hbool_t display_detailed_stats);
 H5_DLL void H5C_stats__reset(H5C_t *cache_ptr);
-H5_DLL herr_t H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL herr_t H5C_unpin_entry(void *thing);
 H5_DLL herr_t H5C_destroy_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL herr_t H5C_unprotect(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *thing,
@@ -2273,9 +2316,11 @@ H5_DLL herr_t H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest
 H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
 H5_DLL herr_t H5C_unsettle_entry_ring(void *thing);
+H5_DLL herr_t H5C_unsettle_ring(H5F_t * f, H5C_ring_t ring);
 H5_DLL herr_t H5C_remove_entry(void *thing);
 H5_DLL herr_t H5C_cache_image_status(H5F_t * f, hbool_t *load_ci_ptr, 
     hbool_t *write_ci_ptr);
+H5_DLL hbool_t H5C_cache_image_pending(const H5C_t *cache_ptr);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
@@ -2289,6 +2334,8 @@ H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, unsigned ce_arr
 #endif /* H5_HAVE_PARALLEL */
 
 #ifndef NDEBUG	/* debugging functions */
+H5_DLL herr_t H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name);
+H5_DLL herr_t H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL hbool_t H5C_get_serialization_in_progress(const H5C_t *cache_ptr);
 H5_DLL hbool_t H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring);
 H5_DLL herr_t H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn);

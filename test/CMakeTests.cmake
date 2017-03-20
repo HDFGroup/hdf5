@@ -170,6 +170,7 @@ endforeach ()
 #-- Copy all the HDF5 files from the test directory into the source directory
 # --------------------------------------------------------------------
 set (HDF5_REFERENCE_TEST_FILES
+    aggr.h5
     bad_compound.h5
     be_data.h5
     be_extlink1.h5
@@ -187,7 +188,15 @@ set (HDF5_REFERENCE_TEST_FILES
     filespace_1_8.h5
     fill_old.h5
     filter_error.h5
+    fsm_aggr_nopersist.h5
+    fsm_aggr_persist.h5
     group_old.h5
+    h5fc_ext1_i.h5
+    h5fc_ext1_f.h5
+    h5fc_ext2_if.h5
+    h5fc_ext2_sf.h5
+    h5fc_ext3_isf.h5
+    h5fc_ext_none.h5
     le_data.h5
     le_extlink1.h5
     le_extlink2.h5
@@ -195,6 +204,9 @@ set (HDF5_REFERENCE_TEST_FILES
     multi_file_v16-r.h5
     multi_file_v16-s.h5
     noencoder.h5
+    none.h5
+    paged_nopersist.h5
+    paged_persist.h5
     specmetaread.h5
     tarrold.h5
     tbad_msg_count.h5
@@ -618,6 +630,7 @@ set (H5TEST_TESTS
     cross_read
     freespace
     mf
+    page_buffer
     vds
     file_image
     unregister
@@ -1288,7 +1301,6 @@ if (HDF5_BUILD_GENERATORS)
       gen_cross
       gen_deflate
       gen_filters
-      gen_idx
       gen_new_array
       gen_new_fill
       gen_new_group

@@ -57,7 +57,7 @@ static void *test_vlstr_alloc_custom(size_t size, void *info)
 {
     void *ret_value=NULL;        // Pointer to return
     size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
-    size_t extra;        	// Extra space needed
+    size_t extra;                // Extra space needed
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
@@ -91,7 +91,7 @@ static void test_vlstr_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
     size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
-    size_t extra;        	// Extra space needed
+    size_t extra;                     // Extra space needed
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
@@ -257,7 +257,7 @@ static void test_vlstring_array_dataset()
         for (ii = 0; ii < SPACE1_DIM1; ii++)
         {
             if(HDstrcmp(string_ds_check[ii], string_ds_array[ii])!=0)
-        	TestErrPrintf("Line %d: Dataset data different: written=%s,read=%s\n",__LINE__, string_ds_array[ii], string_ds_check[ii]);
+            TestErrPrintf("Line %d: Dataset data different: written=%s,read=%s\n",__LINE__, string_ds_array[ii], string_ds_check[ii]);
 
             HDfree(string_ds_check[ii]);
         }
@@ -351,23 +351,26 @@ static void test_vlstrings_special()
         hsize_t ii; // counting variable
         for (ii=0; ii<SPACE1_DIM1; ii++)
             if(rdata[ii]!=NULL)
-        	TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)ii,rdata[ii]);
+                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)ii,rdata[ii]);
 
         // Write dataset to disk, then read it back.
         dataset.write(wdata, vlst);
         dataset.read(rdata, vlst);
 
         // Compare data read in.
-        for (ii = 0; ii < SPACE1_DIM1; ii++) {
+        for (ii = 0; ii < SPACE1_DIM1; ii++)
+        {
             size_t wlen = HDstrlen(wdata[ii]);
             size_t rlen = HDstrlen(rdata[ii]);
-            if(wlen != rlen) {
-        	TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n", (int)ii, (unsigned)wlen, (int)ii, (unsigned)rlen);
-        	continue;
+            if(wlen != rlen)
+            {
+                TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n", (int)ii, (unsigned)wlen, (int)ii, (unsigned)rlen);
+                continue;
             } // end if
-            if(HDstrcmp(wdata[ii],rdata[ii]) != 0) {
-        	TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)ii, wdata[ii], (int)ii, rdata[ii]);
-        	continue;
+            if(HDstrcmp(wdata[ii],rdata[ii]) != 0)
+            {
+                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)ii, wdata[ii], (int)ii, rdata[ii]);
+                continue;
             } // end if
         } // end for
 
@@ -384,7 +387,7 @@ static void test_vlstrings_special()
         // Create the property list and set the fill value for the second
         // dataset.
         DSetCreatPropList dcpl;
-        char *fill = NULL;	// Fill value
+        char *fill = NULL;  // Fill value
         dcpl.setFillValue(vlst, &fill);
         dataset = file1.createDataSet("Dataset4", vlst, sid1, dcpl);
 
@@ -566,12 +569,12 @@ static void test_compact_vlstring()
         hsize_t i;
         for (i=0; i<SPACE1_DIM1; i++) {
             if (HDstrlen(wdata[i])!=strlen(rdata[i])) {
-        	TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
-        	continue;
+                TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+                continue;
             } // end if
             if (HDstrcmp(wdata[i],rdata[i]) != 0) {
-        	TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
-        	continue;
+                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+                continue;
             } // end if
         } // end for
 
@@ -800,7 +803,7 @@ static void test_vlstring_array_attribute()
         for (ii = 0; ii < SPACE1_DIM1; ii++)
         {
             if(HDstrcmp(string_att_check[ii], string_att_array[ii])!=0)
-        	TestErrPrintf("Line %d: Attribute data different: written=%s,read=%s\n",__LINE__, string_att_check[ii], string_att_check[ii]);
+                TestErrPrintf("Line %d: Attribute data different: written=%s,read=%s\n",__LINE__, string_att_check[ii], string_att_check[ii]);
 
             HDfree(string_att_check[ii]);  // note: no need for std::string test
         }
@@ -821,7 +824,7 @@ static void test_vlstring_array_attribute()
 
 /* Helper routine for test_vl_rewrite() */
 static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space,
-        			char *name, char *data)
+                              char *name, char *data)
 {
     DataSet dset;
     try {
@@ -839,7 +842,7 @@ static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space,
 
 /* Helper routine for test_vl_rewrite() */
 static void read_scalar_dset(H5File& file, DataType& type, DataSpace& space,
-        			char *name, char *data)
+                             char *name, char *data)
 {
     char *data_read;
     DataSet dset;

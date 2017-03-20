@@ -54,6 +54,13 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
         Group(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 //        Group(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
+        // Opens an object within a group or a file, i.e., root group.
+        hid_t getObjId(const char* name, const PropList& plist = PropList::DEFAULT) const;
+        hid_t getObjId(const H5std_string& name, const PropList& plist = PropList::DEFAULT) const;
+
+        // Closes an object opened by getObjId().
+        void closeObjId(hid_t obj_id) const;
+
         // default constructor
         Group();
 
@@ -77,7 +84,8 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
    private:
         hid_t id;    // HDF5 group id
-};
 
-}
+}; // end of Group
+} // namespace H5
+
 #endif // __Group_H

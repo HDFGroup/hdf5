@@ -626,7 +626,7 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_UNUS
     /* Call the flush routine for mounted file hierarchies. Do a global flush 
      * if the file is opened for write */
     if(H5F_ACC_RDWR & H5F_INTENT((H5F_t *)obj_ptr)) {
-        if(H5F_flush_mounts((H5F_t *)obj_ptr, H5AC_ind_read_dxpl_id) < 0)
+        if(H5F_flush_mounts((H5F_t *)obj_ptr, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFLUSH, FAIL, "unable to flush file hierarchy")
     } /* end if */
 

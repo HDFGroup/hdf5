@@ -791,9 +791,16 @@ typedef unsigned H5O_unknown_t;         /* Original message type ID */
  * (Data structure in memory)
  */
 typedef struct H5O_fsinfo_t {
-    H5F_file_space_type_t strategy;	/* File space strategy */
-    hsize_t		  threshold;	/* Free space section threshold */
-    haddr_t     	  fs_addr[H5FD_MEM_NTYPES-1]; /* Addresses of free space managers */
+    H5F_fspace_strategy_t   strategy;       /* File space strategy */
+    hbool_t persist;                        /* Persisting free-space or not */
+    hsize_t threshold;                      /* Free-space section threshold */
+    hsize_t page_size;                      /* For paged aggregation: file space page size */
+    size_t pgend_meta_thres;                /* For paged aggregation: page end metadata threshold */
+    haddr_t eoa_pre_fsm_fsalloc;            /* For paged aggregation: the eoa before free-space headers & sinfo */
+    haddr_t fs_addr[H5F_MEM_PAGE_NTYPES - 1];   /* 13 addresses of free-space managers */
+                                                /* For non-paged aggregation: only 6 addresses are used */
+    hbool_t mapped;                             /* Not stored */
+                                                /* Indicate the message is mapped from version 0 to version 1 */
 } H5O_fsinfo_t;
 
 /*
@@ -920,6 +927,7 @@ H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, const unsigned char *buf);
 H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, void *mesg);
+H5_DLL herr_t H5O_msg_get_flags(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id, uint8_t *flags);
 
 /* Object metadata flush/refresh routines */
 H5_DLL herr_t H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id, hid_t dxpl_id);

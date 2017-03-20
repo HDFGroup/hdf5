@@ -19,8 +19,10 @@ usage: h5repack [OPTIONS] file1 file2
    -a A, --alignment=A     Alignment value for H5Pset_alignment
    -f FILT, --filter=FILT  Filter type
    -l LAYT, --layout=LAYT  Layout type
-   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy
-   -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold
+   -S FS_STRATEGY, --fs_strategy=FS_STRATEGY  File space management strategy for H5Pset_file_space_strategy
+   -P FS_PERSIST, --fs_persist=FS_PERSIST  Persisting or not persisting free-space for H5Pset_file_space_strategy
+   -T FS_THRESHOLD, --fs_threshold=FS_THRESHOLD   Free-space section threshold for H5Pset_file_space_strategy
+   -G FS_PAGESIZE, --fs_pagesize=FS_PAGESIZE   File space page size for H5Pset_file_space_page_size
 
     M - is an integer greater than 1, size of dataset in bytes (default is 0) 
     E - is a filename.
@@ -36,18 +38,27 @@ usage: h5repack [OPTIONS] file1 file2
      --enable-error-stack Prints messages from the HDF5 error stack as they
                           occur.
 
-    FS_STRGY is the file space management strategy to use for the output file.
-             It is a string as listed below:
-        ALL_PERSIST - Use persistent free-space managers, aggregators and virtual file driver
-                      for file space allocation
-        ALL - Use non-persistent free-space managers, aggregators and virtual file driver
-              for file space allocation
-        AGGR_VFD - Use aggregators and virtual file driver for file space allocation
-        VFD - Use virtual file driver for file space allocation
+    FS_STRATEGY is a string indicating the file space strategy used:
+        FSM_AGGR:
+               The mechanisms used in managing file space are free-space managers, aggregators and virtual file driver.
+        PAGE:
+               The mechanisms used in managing file space are free-space managers with embedded paged aggregation and virtual file driver.
+        AGGR:
+               The mechanisms used in managing file space are aggregators and virtual file driver.
+        NONE:
+               The mechanisms used in managing file space are virtual file driver.
+        The default strategy when not set is FSM_AGGR without persisting free-space.
 
-    FS_THRD is the free-space section threshold to use for the output file.
-            It is the minimum size (in bytes) of free-space sections to be tracked
-            by the the library's free-space managers.
+    FS_PERSIST is 1 to persisting free-space or 0 to not persisting free-space.
+      The default when not set is not persisting free-space.
+      The value is ignored for AGGR and NONE strategies.
+
+    FS_THRESHOLD is the minimum size (in bytes) of free-space sections to be tracked by the library.
+      The default when not set is 1.
+      The value is ignored for AGGR and NONE strategies.
+
+    FS_PAGESIZE is the size (in bytes) >=512 that is used by the library when the file space strategy PAGE is used.
+      The default when not set is 4096.
 
     FILT - is a string with the format:
 

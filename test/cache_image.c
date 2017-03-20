@@ -59,6 +59,9 @@ static unsigned cache_image_smoke_check_6(void);
 static unsigned cache_image_api_error_check_1(void);
 static unsigned cache_image_api_error_check_2(void);
 static unsigned cache_image_api_error_check_3(void);
+static unsigned cache_image_api_error_check_4(void);
+
+static unsigned get_free_sections_test(void);
 
 
 /****************************************************************************/
@@ -664,12 +667,10 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
     }
 
     if ( ( pass ) && ( config_fsm ) ) {
-
-        if ( H5Pset_file_space(fcpl_id, H5F_FILE_SPACE_ALL_PERSIST, 1) < 0 ) {
-
-	    pass = FALSE;
-	    failure_mssg = "H5Pset_file_space() failed.";
-	}
+        if(H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Pset_file_space_strategy() failed.";
+        }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
@@ -4560,7 +4561,7 @@ cache_image_smoke_check_4(void)
  *		   If sufficient zoos have been created, continue to 
  *                 10).  Otherwise goto 5)
  *
- *	       10) Open the file.  
+ *	       10) Open the file R/O.  
  *
  *		   Verify that the file contains a metadata cache
  *		   image superblock extension message.
@@ -4571,14 +4572,23 @@ cache_image_smoke_check_4(void)
  *
  *	       13) Open the file.
  *
- *		   Verify that the file doesn't contain a metadata cache
+ *		   Verify that the file contains a metadata cache
  *		   image superblock extension message.
  *
  *	       14) Validate all the zoos.
  *
  *	       15) Close the file.
  *
- *	       16) Delete the file.
+ *	       16) Open the file.
+ *
+ *		   Verify that the file doesn't contain a metadata cache
+ *		   image superblock extension message.
+ *
+ *	       17) Validate all the zoos.
+ *
+ *	       18) Close the file.
+ *
+ *	       19) Delete the file.
  *
  * Return:      void
  *
@@ -4821,9 +4831,56 @@ cache_image_smoke_check_5(void)
     } /* end while */
     cp += 5;
  
+    /* 10) Open the file read only. 
+     *
+     *    Verify that the file contains a metadata cache image 
+     *    superblock extension message.
+     */
+    if(pass) {
+        open_hdf5_file(/* create_file        */ FALSE,
+		       /* mdci_sbem_expected */ TRUE,
+                       /* read_only          */ TRUE,
+                       /* set_mdci_fapl      */ FALSE,
+		       /* config_fsm         */ FALSE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ 0,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if(show_progress)
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 11) Validate all the zoos. */
+    i = min_group;
+    while(pass && i <= max_group) {
+	sprintf(process_group_name, "/process_%d", i);
+        validate_zoo(file_id, process_group_name, i++);
+    }
  
- 
-    /* 10) Open the file. 
+#if H5C_COLLECT_CACHE_STATS
+    if( pass) {
+        if(cache_ptr->images_loaded == 0) {
+            pass = FALSE;
+            failure_mssg = "metadata cache image block not loaded(2).";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if(show_progress)
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* 12) Close the file. */
+    if(pass) {
+        if(H5Fclose(file_id) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed.\n";
+        }
+    }
+
+    /* 13) Open the file R/W. 
      *
      *    Verify that the file contains a metadata cache image 
      *    superblock extension message.
@@ -4847,7 +4904,7 @@ cache_image_smoke_check_5(void)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 11) Validate all the zoos. */
+    /* 14) Validate all the zoos. */
     i = min_group;
     while ( ( pass ) && ( i <= max_group ) ) {
 
@@ -4871,7 +4928,7 @@ cache_image_smoke_check_5(void)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 12) Close the file. */
+    /* 15) Close the file. */
 
     if ( pass ) {
 
@@ -4883,7 +4940,7 @@ cache_image_smoke_check_5(void)
     }
  
  
-    /* 13) Open the file. 
+    /* 16) Open the file. 
      *
      *    Verify that the file doesn't contain a metadata cache image 
      *    superblock extension message.
@@ -4907,7 +4964,7 @@ cache_image_smoke_check_5(void)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
  
  
-    /* 14) Validate all the zoos.
+    /* 17) Validate all the zoos.
      *
      *    Verify that the metadata cache image superblock 
      *    extension message has been deleted.
@@ -4935,7 +4992,7 @@ cache_image_smoke_check_5(void)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 15) Close the file. */
+    /* 18) Close the file. */
 
     if ( pass ) {
 
@@ -4950,7 +5007,7 @@ cache_image_smoke_check_5(void)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
  
 
-    /* 16) Delete the file */
+    /* 19) Delete the file */
 
     if ( pass ) {
 
@@ -5035,10 +5092,13 @@ cache_image_smoke_check_5(void)
  *	       13) Close the file.
  *
  *             14) Get the size of the file.  Verify that it is less 
- *		   than 1 KB.  Without deletions and persistant free 
+ *		   than 20 KB.  Without deletions and persistant free 
  *		   space managers, size size is about 167 MB, so this 
  *		   is sufficient to verify that the persistant free 
  *		   space managers are more or less doing their job.
+ *
+ *                 Note that in the absence of paged allocation, file
+ *                 size gets below 1 KB.
  *
  *	       15) Delete the file.
  *
@@ -5352,20 +5412,24 @@ cache_image_smoke_check_6(void)
 
 
     /* 14) Get the size of the file.  Verify that it is less
-     *     than 1 KB.  Without deletions and persistant free
+     *     than 20 KB.  Without deletions and persistant free
      *     space managers, size size is about 167 MB, so this
      *     is sufficient to verify that the persistant free
      *     space managers are more or less doing their job.
+     *
+     *     Note that in the absence of paged allocation, file
+     *     size gets below 1 KB, but since this test is run both 
+     *     with and without paged allocation, we must leave some
+     *     extra space for the paged allocation case.
      */
-    if((file_size = h5_get_file_size(filename, H5P_DEFAULT)) < 0) {
-
-        pass = FALSE;
-        failure_mssg = "h5_get_file_size() failed.\n";
-
-    } else if ( file_size > 1024 ) {
-
-        pass = FALSE;
-        failure_mssg = "unexpectedly large file size.\n";
+    if(pass) {
+        if((file_size = h5_get_file_size(filename, H5P_DEFAULT)) < 0) {
+            pass = FALSE;
+            failure_mssg = "h5_get_file_size() failed.\n";
+        } else if(file_size > 20 * 1024) {
+            pass = FALSE;
+            failure_mssg = "unexpectedly large file size.\n";
+        }
     }
 
     if ( show_progress ) 
@@ -6444,6 +6508,1064 @@ cache_image_api_error_check_3(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    cache_image_api_error_check_4()
+ *
+ * Purpose:     This test is one of a sequence of tests intended
+ *		to verify correct management of API errors.
+ *
+ *		The object of this test is to verify that a request for 
+ *		a cache image when a version 2 superblock is not available/
+ *		not requested is handled correctly.
+ *		(the cache image request should be ignored silently).
+ *
+ *		The test is set up as follows:
+ *
+ *		1) Create a FAPL requesting  a cache image, but WITHOUT
+ *		   specifying the latest file format.
+ *
+ *		2) Create a HDF5 file using the above FAPL.  
+ *
+ *		3) Create some datasets in the file. 
+ *
+ *		4) Close the file.
+ *
+ *		5) Open the file read only.  Verify that the file doesn't 
+ *		   contain a cache image.
+ *
+ *		6) Verify that the datasets exist and contain the 
+ *		   expected data
+ *
+ *		   Verify that the cache image was not loaded.
+ *
+ *		7) Close the file.
+ *
+ *		8) Open the file R/W using the FAPL defined in 1) above.  
+ *		   Verify that the file does not contain a cache image.
+ *
+ *		9) Close the file.
+ *
+ *	       10) Open the file R/W using the FAPL defined in 1) above.
+ *	           Verify that the file does not contain a cache image.
+ *
+ *	       11) Verify that the data sets contain the expected data
+ *
+ *		   Verify that a cache image was not loaded.
+ *
+ *	       12) Create several more data sets.
+ *
+ *	       13) Close the file.
+ *
+ * 	       14) Open the file read write.
+ * 	       
+ * 	           Verify that the file does not contain a cache image.
+ *
+ *	       15) Verify the data sets exist and contain the expected
+ *	           data.
+ *
+ *		   Verify that a cache image was not loaded.
+ *
+ *	       16) Close the file.
+ *
+ *	       17) Delete the file.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              9/25/15
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static unsigned
+cache_image_api_error_check_4(void)
+{
+    const char * fcn_name = "cache_image_api_error_check_4()";
+    char filename[512];
+    hbool_t show_progress = FALSE;
+    hid_t fapl_id = -1;
+    hid_t file_id = -1;
+    H5F_t *file_ptr = NULL;
+    H5C_t *cache_ptr = NULL;
+    int cp = 0;
+    H5AC_cache_image_config_t cache_image_config;
+
+    TESTING("metadata cache image api error check 4");
+
+    pass = TRUE;
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* setup the file name */
+    if ( pass ) {
+
+        if ( h5_fixname(FILENAMES[0], H5P_DEFAULT, filename, sizeof(filename))
+            == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /*	1) Create a FAPL requesting  a cache image, but WITHOUT
+     *		   specifying the latest file format.
+     */
+    if ( pass ) {
+
+        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+        if ( fapl_id < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Pcreate() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) {
+
+        /* set cache image config fields to taste */
+        cache_image_config.version = H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION;
+        cache_image_config.generate_image = TRUE;
+        cache_image_config.save_resize_status = FALSE;
+        cache_image_config.entry_ageout = H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE;
+
+        if ( H5Pset_mdc_image_config(fapl_id, &cache_image_config) < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Pset_mdc_image_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 2) Create a HDF5 file using the above FAPL. */
+
+    if ( pass ) {
+
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+
+        if ( file_id < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fcreate() failed.\n";
+
+        } else {
+
+            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+            if ( file_ptr == NULL ) {
+
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
+
+            }
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* get a pointer to the files internal data structure and then
+     * to the cache structure
+     */
+    if ( pass ) {
+
+        if ( file_ptr->shared->cache == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "can't get cache pointer(1).\n";
+
+        } else {
+
+            cache_ptr = file_ptr->shared->cache;
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 3) Create some datasets in the file. */
+
+    if ( pass ) {
+
+        create_datasets(file_id, 0, 5);
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        HDassert(cache_ptr);
+
+        if ( cache_ptr->images_loaded != 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "metadata cache image block loaded(1).";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+ 
+ 
+    /* 4) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed.\n";
+
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+ 
+ 
+    /* 5) Open the file read only. */
+
+    if ( pass ) {
+
+        open_hdf5_file(/* create_file        */ FALSE,
+	 	       /* mdci_sbem_expected */ FALSE,
+                       /* read_only          */ TRUE,
+                       /* set_mdci_fapl      */ FALSE,
+		       /* config_fsm         */ FALSE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+ 
+ 
+    /* 6) Verify that the datasets exist and contain the 
+     *    expected data
+     */
+
+    if ( pass ) {
+
+       verify_datasets(file_id, 0, 5);
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        if ( cache_ptr->images_loaded != 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "metadata cache image block loaded(2).";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+ 
+
+    /* 7) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+ 
+ 
+    /* 8) Open the file R/W using the FAPL defined in 1) above.  
+     *
+     *    Verify that the file does not contain a cache image.
+     */
+
+    if ( pass ) {
+
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+        if ( file_id < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fopen() failed.\n";
+
+        } else {
+
+            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+            if ( file_ptr == NULL ) {
+
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
+
+            }
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* get a pointer to the files internal data structure and then
+     * to the cache structure
+     */
+    if ( pass ) {
+
+        if ( file_ptr->shared->cache == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "can't get cache pointer(1).\n";
+
+        } else {
+
+            cache_ptr = file_ptr->shared->cache;
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) {
+
+        if ( ( cache_ptr->load_image == TRUE ) ||
+             ( cache_ptr->delete_image == TRUE ) ) {
+
+            pass = FALSE;
+            failure_mssg = "mdci sb extension message present?\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 9) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+ 
+
+
+    /* 10) Open the file R/W using the FAPL defined in 1) above.
+     *     Verify that the file does not contain a cache image.
+     */
+
+    if ( pass ) {
+
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+        if ( file_id < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fopen() failed.\n";
+
+        } else {
+
+            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+            if ( file_ptr == NULL ) {
+
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
+
+            }
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* get a pointer to the files internal data structure and then
+     * to the cache structure
+     */
+    if ( pass ) {
+
+        if ( file_ptr->shared->cache == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "can't get cache pointer(1).\n";
+
+        } else {
+
+            cache_ptr = file_ptr->shared->cache;
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) {
+
+        if ( ( cache_ptr->load_image == TRUE ) ||
+             ( cache_ptr->delete_image == TRUE ) ) {
+
+            pass = FALSE;
+            failure_mssg = "mdci sb extension message present?\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 11) Verify that the data sets contain the expected data
+     *
+     *     Verify that a cache image was not loaded.
+     */
+
+    if ( pass ) {
+
+       verify_datasets(file_id, 0, 5);
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        if ( cache_ptr->images_loaded != 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "metadata cache image block loaded(2).";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 12) Create several more data sets. */
+
+    if ( pass ) {
+
+        create_datasets(file_id, 6, 10);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 13) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+ 
+
+    /* 14) Open the file read write.
+     *             
+     *     Verify that the file does not contain a cache image.
+     */
+
+    if ( pass ) {
+
+        open_hdf5_file(/* create_file        */ FALSE,
+	 	       /* mdci_sbem_expected */ FALSE,
+                       /* read_only          */ FALSE,
+                       /* set_mdci_fapl      */ FALSE,
+		       /* config_fsm         */ FALSE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+ 
+ 
+    /* 15) Verify the data sets exist and contain the expected  data.
+     *
+     *     Verify that a cache image was not loaded.
+     */
+
+    if ( pass ) {
+
+       verify_datasets(file_id, 0, 10);
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        if ( cache_ptr->images_loaded != 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "metadata cache image block loaded(2).";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 16) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+ 
+
+    /* 17) Delete the file */
+
+    if ( pass ) {
+
+        if ( HDremove(filename) < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "HDremove() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* tidy up */
+    if ( fapl_id != -1 )
+        H5Pclose(fapl_id);
+
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass )
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  FUNC, failure_mssg);
+
+    return !pass;
+
+} /* cache_image_api_error_check_4() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    get_free_sections_test()
+ *
+ * Purpose:     It is possible that H5Fget_free_sections() to be
+ *		called before any activity on the metadata cache.
+ *              This is a potential problem, as satisfying the 
+ *              H5Fget_free_sections() call requires access to all 
+ *              free space managers.  When persistant free space 
+ *              managers are enabled, this will require calling
+ *              H5MF_tidy_self_referential_fsm_hack().  This is a 
+ *              non issue in the absence of a cache image.  However,
+ *		this is a problem if a cache image exists, as 
+ *		the call to H5MF_tidy_self_referential_fsm_hack()
+ *		will free the file space allocated to the cache
+ *		image.
+ *
+ *		The objective of this test is to create a test file
+ *		with both non-empty self referential presistant 
+ *              free space managers, and a cache image, and then 
+ *              verify that this situation is handled correctly if 
+ *              H5Fget_free_sections() is called before the metadata
+ *              cache image is loaded.
+ *
+ *		The test is set up as follows:
+ *
+ *		 1) Create a HDF5 file with a cache image requested
+ *                  and persistant free space managers enabled.  
+ *
+ *		 2) Create some data sets, and then delete some of 
+ *                  of those near the beginning of the file.
+ *
+ *               3) Close the file.
+ *
+ *               4) Open the file read only.
+ *
+ *               5) Verify that a cache image exists, and has not
+ *                  been loaded.
+ *
+ *               6) Verify that one or more self referential FSMs
+ *                  have been stored at the end of the file just 
+ *                  before the cache image.
+ *
+ *               7) Call H5Fget_free_sections().
+ *
+ *               8) Verify that the cache image has been loaded and 
+ *                  that the self referential FSMs have been floated.
+ *
+ *               9) Verify that the remaining data sets contain the
+ *                  expected data.
+ *
+ *              10) Close the file.
+ *
+ *              11) Open the file R/W.
+ *
+ *              12) Verify that a cache image exists, and has not
+ *                  been loaded.
+ *
+ *              13) Verify that one or more self referential FSMs
+ *                  have been stored at the end of the file just 
+ *                  before the cache image.
+ *
+ *              14) Call H5Fget_free_sections().
+ *
+ *              15) Verify that the cache image has been loaded and 
+ *                  that the self referential FSMs have been floated.
+ *
+ *              16) Verify that the remaining data sets contain the
+ *                  expected data.
+ *
+ *              17) Delete the remaining data sets.
+ *
+ *		18) Close the file.
+ *
+ *              19) Verify that file space has been reclaimed.
+ *
+ *              20) Discard the file.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              1/10/17
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+get_free_sections_test(void)
+{
+    const char * fcn_name = "get_free_sections_test()";
+    char filename[512];
+    hbool_t show_progress = FALSE;
+    hid_t file_id = -1;
+    H5F_t *file_ptr = NULL;
+    H5C_t *cache_ptr = NULL;
+    h5_stat_size_t file_size;
+    int cp = 0;
+
+    TESTING("Cache image / H5Fget_free_sections() interaction");
+
+    pass = TRUE;
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* setup the file name */
+    if ( pass ) {
+
+        if ( h5_fixname(FILENAMES[0], H5P_DEFAULT, filename, sizeof(filename))
+            == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 1) Create a HDF5 file with a cache image requested
+     *    and persistant free space managers enabled.  
+     */
+
+    if ( pass ) {
+
+        open_hdf5_file(/* create_file        */ TRUE,
+                       /* mdci_sbem_expected */ FALSE,
+                       /* read_only          */ FALSE,
+                       /* set_mdci_fapl      */ TRUE,
+		       /* config_fsm         */ TRUE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 2) Create some data sets, and then delete some of 
+     *    of those near the beginning of the file.
+     */
+
+    if ( pass ) {
+
+        create_datasets(file_id, 1, 10);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 1, 10);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) {
+
+        delete_datasets(file_id, 1, 5);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 3) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed (1).\n";
+
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 4) Open the file read only. */
+
+    if ( pass ) {
+
+        open_hdf5_file(/* create_file        */ FALSE,
+                       /* mdci_sbem_expected */ TRUE,
+                       /* read_only          */ TRUE,
+                       /* set_mdci_fapl      */ FALSE,
+		       /* config_fsm         */ FALSE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 5) Verify that a cache image exists, and has not been loaded. */
+
+    if ( pass ) {
+
+        if ( ( ! file_ptr->shared->cache->load_image ) ||
+             ( file_ptr->shared->cache->image_loaded ) ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected cache image status.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 6) Verify that one or more self referential FSMs
+     *    have been stored at the end of the file just 
+     *    before the cache image.
+     */
+
+    if ( pass ) {
+
+        /* file_ptr->shared->first_alloc_dealloc is set to FALSE if the 
+         * file is opened R/O.
+         */
+        if ( ( file_ptr->shared->first_alloc_dealloc ) ||
+             ( ! H5F_addr_defined(file_ptr->shared->eoa_pre_fsm_fsalloc) ) ||
+             ( ! H5F_addr_defined(file_ptr->shared->cache->image_addr) ) ||
+             ( H5F_addr_gt(file_ptr->shared->eoa_pre_fsm_fsalloc,
+                           file_ptr->shared->cache->image_addr) ) ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected cache image status (1).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 7) Call H5Fget_free_sections(). */
+
+    if ( pass ) {
+
+        if ( H5Fget_free_sections(file_id, H5FD_MEM_DEFAULT, (size_t)0, NULL) 
+             < 0 ){
+
+            pass = FALSE;
+            failure_mssg = "H5Fget_free_sections() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 8) Verify that the cache image has been loaded and 
+     *    that the self referential FSMs have been floated.
+     */
+    if ( pass ) {
+
+        if ( ! file_ptr->shared->cache->image_loaded ) {
+
+            pass = FALSE;
+            failure_mssg = "cache image not loaded (1).\n";
+
+        } else if ( file_ptr->shared->first_alloc_dealloc ) {
+
+            pass = FALSE;
+            failure_mssg = "self referential FSMs not floated (1).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 9) Verify that the remaining data sets contain the expected data. */
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 6, 10);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 10) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed (2).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 11) Open the file R/W. */
+
+    if ( pass ) {
+
+        open_hdf5_file(/* create_file        */ FALSE,
+                       /* mdci_sbem_expected */ TRUE,
+                       /* read_only          */ FALSE,
+                       /* set_mdci_fapl      */ FALSE,
+		       /* config_fsm         */ FALSE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 12) Verify that a cache image exists, and has not been loaded. */
+
+    if ( pass ) {
+
+        if ( ( ! file_ptr->shared->cache->load_image ) ||
+             ( file_ptr->shared->cache->image_loaded ) ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected cache image status.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 13) Verify that one or more self referential FSMs
+     *     have been stored at the end of the file just 
+     *     before the cache image.
+     */
+    if ( pass ) {
+
+        if ( ( ! file_ptr->shared->first_alloc_dealloc ) ||
+             ( ! H5F_addr_defined(file_ptr->shared->eoa_pre_fsm_fsalloc) ) ||
+             ( ! H5F_addr_defined(file_ptr->shared->cache->image_addr) ) ||
+             ( H5F_addr_gt(file_ptr->shared->eoa_pre_fsm_fsalloc,
+                           file_ptr->shared->cache->image_addr) ) ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected cache image status (2).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 14) Call H5Fget_free_sections(). */
+
+    if ( pass ) {
+
+        if ( H5Fget_free_sections(file_id, H5FD_MEM_DEFAULT, (size_t)0, NULL) 
+             < 0 ){
+
+            pass = FALSE;
+            failure_mssg = "H5Fget_free_sections() failed (2).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 15) Verify that the cache image has been loaded and 
+     *     that the self referential FSMs have been floated.
+     */
+    if ( pass ) {
+
+        if ( ! file_ptr->shared->cache->image_loaded ) {
+
+            pass = FALSE;
+            failure_mssg = "cache image not loaded (2).\n";
+
+        } else if ( file_ptr->shared->first_alloc_dealloc ) {
+
+            pass = FALSE;
+            failure_mssg = "self referential FSMs not floated (2).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 16) Verify that the remaining data sets contain the expected data. */
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 6, 10);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 17) Delete the remaining data sets. */
+
+    if ( pass ) {
+
+        delete_datasets(file_id, 6, 10);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 18) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed (3).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 19) Verify that file space has been reclaimed. */
+
+    if ( pass ) {
+
+        if((file_size = h5_get_file_size(filename, H5P_DEFAULT)) < 0) {
+
+            pass = FALSE;
+            failure_mssg = "h5_get_file_size() failed.\n";
+
+        } else if ( file_size > 20 * 1024 ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpectedly large file size.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 20) Discard the file. */
+
+    if ( pass ) {
+
+        if ( HDremove(filename) < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "HDremove() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass )
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  FUNC, failure_mssg);
+
+    return !pass;
+
+} /* get_free_sections_test() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Run tests on the cache code contained in H5C.c
@@ -6489,6 +7611,9 @@ main(void)
     nerrs += cache_image_api_error_check_1();
     nerrs += cache_image_api_error_check_2();
     nerrs += cache_image_api_error_check_3();
+    nerrs += cache_image_api_error_check_4();
+
+    nerrs += get_free_sections_test();
 
     return(nerrs > 0);
 

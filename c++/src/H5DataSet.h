@@ -130,6 +130,7 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
         // Friend function to set DataSet id.  For library use only.
         friend void f_DataSet_setId(DataSet* dset, hid_t new_id);
 
-};
-}
+}; // end of DataSet
+} // namespace H5
+
 #endif // __H5DataSet_H

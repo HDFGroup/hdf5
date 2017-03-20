@@ -67,6 +67,8 @@ typedef struct parameters_ {
     int         h5_extendable; /* Make HDF5 dataset chunked            */
     int         h5_write_only; /* Perform the write tests only         */
     int         verify;       /* Verify data correctness              */
+    size_t      page_size;
+    size_t      page_buffer_size;
 } parameters;
 
 typedef struct results_ {
