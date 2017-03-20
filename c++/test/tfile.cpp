@@ -877,11 +877,7 @@ static void test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
         verify_val(finfo.super.version, 2, "H5File::getFileInfo", __LINE__, __FILE__);
-#else /* H5_NO_DEPRECATED_SYMBOLS */
-        verify_val(finfo.super.version, 1, "H5File::getFileInfo", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
         verify_val(finfo.free.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
         verify_val(finfo.sohm.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
@@ -896,11 +892,7 @@ static void test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
         verify_val(finfo.super.version, 2, "H5File::getFileInfo", __LINE__, __FILE__);
-#else /* H5_NO_DEPRECATED_SYMBOLS */
-        verify_val(finfo.super.version, 1, "H5File::getFileInfo", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
         verify_val(finfo.free.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
         verify_val(finfo.sohm.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
