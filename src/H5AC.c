@@ -611,6 +611,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
 
     /* Sanity check */
     HDassert(f);
+    HDassert(f->shared);
     HDassert(f->shared->cache);
 
 #if H5AC_DUMP_STATS_ON_CLOSE
@@ -641,9 +642,17 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
-    if(H5AC__flush_entries(f, dxpl_id) < 0)
+    /* If the file was opened R/W, attempt to flush all entries 
+     * from rank 0 & Bcast clean list to other ranks.
+     *
+     * Must not flush in the R/O case, as this will trigger the 
+     * free space manager settle routines.
+     */
+    if ( ( H5F_ACC_RDWR & H5F_INTENT(f) ) && 
+         ( H5AC__flush_entries(f, dxpl_id) < 0 ) )
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+
 #endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */

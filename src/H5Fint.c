@@ -1006,8 +1006,15 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
+        /* Set up I/O info for operation */
+        fio_info.f = f;
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(meta_dxpl_id)))
+            HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
         /* Shutdown the page buffer cache */
-        if(H5PB_dest(f) < 0)
+        if(H5PB_dest(&fio_info) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing page buffer cache")
 
@@ -1026,13 +1033,6 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
             f->shared->root_grp = NULL;
         } /* end if */
-
-        /* Set up I/O info for operation */
-        fio_info.f = f;
-        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(meta_dxpl_id)))
-            HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
-            HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
         /* Destroy other components of the file */
         if(H5F__accum_reset(&fio_info, TRUE) < 0)
