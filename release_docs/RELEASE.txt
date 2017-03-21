@@ -76,7 +76,62 @@ New Features
 
     C++ Library:
     ------------
-     -
+    - New wrappers for C APIs:
+        (HDFFV-10004, HDFFV-10139, HDFFV-10145 - PRs #232, #310, #334, #348)
+
+        // Sets/Gets the strategy and the threshold value that the library will
+        // will employ in managing file space.
+        FileCreatPropList::setFileSpaceStrategy - H5Pset_file_space_strategy
+        FileCreatPropList::getFileSpaceStrategy - H5Pget_file_space_strategy
+
+        // Sets/Gets the file space page size for paged aggregation.
+        FileCreatPropList::setFileSpacePagesize - H5Pset_file_space_page_size
+        FileCreatPropList::getFileSpacePagesize - H5Pget_file_space_page_size
+
+        // Checks if the given ID is valid.
+        IdComponent::isValid - H5Iis_valid
+
+        // Sets/Gets the number of soft or user-defined links that can be
+        // traversed before a failure occurs.
+        LinkAccPropList::setNumLinks - H5Pset_nlinks
+        LinkAccPropList::getNumLinks - H5Pget_nlinks
+
+        // Returns a copy of the creation property list of a datatype.
+        DataType::getCreatePlist - H5Tget_create_plist
+
+        // Opens/Closes an object within a group or a file, regardless object type
+        Group::getObjId - H5Oopen
+        Group::closeObjId - H5Oclose
+
+        // Maps elements of a virtual dataset to elements of the source dataset.
+        DSetCreatPropList::setVirtual - H5Pset_virtual
+
+        // Gets general information about this file.
+        H5File::getFileInfo - H5Fget_info2
+
+        // Returns the number of members in a type.
+        IdComponent::getNumMembers - H5Inmembers
+
+        // Determines if an element type exists.
+        IdComponent::typeExists - H5Itype_exists
+
+        // Determines if an object exists.
+        H5Location::exists - H5Lexists.
+
+        // Returns the header version of an HDF5 object.
+        H5Object::objVersion - H5Oget_info for version
+        (BMR, 2017/03/20)
+
+    - New constructors to open datatypes in ArrayType, CompType, DataType,
+      EnumType, FloatType, IntType, StrType, and VarLenType. (HDFFV-10156)
+      (BMR, 2017/03/20)
+
+    - New class LinkAccPropList for link access property list, to be used by
+      wrappers of H5Lexists. (HDFFV-10145 - PR #232) (BMR, 2017/03/20)
+
+    - New exception: ObjHeaderIException for H5O interface.
+      (HDFFV-10145 - PR #334) (BMR, 2017/03/20)
+
 
     Tools:
     ------
@@ -156,7 +211,15 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     C++ APIs
     --------
-    -
+    - Due to the change in the C API, the overloaded functions of
+      PropList::setProperty now need const for some arguments.  They are
+      planned for deprecation and are replaced by new versions with proper
+      consts. (PR #344 -BMR, 2017/03/20)
+
+    - The problem where a user-defined function cannot access both, attribute
+      and dataset, using only one argument (HDFFV9920) is now fixed.
+      (PR #45 -BMR, 2017/03/20)
+
 
     Testing
     -------
