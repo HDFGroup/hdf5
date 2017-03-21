@@ -91,11 +91,12 @@ CompType::CompType(const DataSet& dataset) : DataType()
 // Function:    CompType overloaded constructor
 ///\brief       Creates an CompType instance by opening an HDF5 compound
 ///             given its name, provided as a C character string.
+///\param       loc        - IN: Location of the type
 ///\param       dtype_name - IN: Compound type name
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Dec 2016
 // Description
-//              In 1.10.1, this constructor was introduced and will replace the
+//              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openCompType(const char*) to
 //              improve usability.
 //              -BMR, Dec 2016
@@ -109,11 +110,12 @@ CompType::CompType(const H5Location& loc, const char *dtype_name) : DataType()
 // Function:    CompType overloaded constructor
 ///\brief       Creates an CompType instance by opening an HDF5 compound
 ///             datatype given its name, provided as an \c H5std_string.
+///\param       loc        - IN: Location of the type
 ///\param       dtype_name - IN: Compound type name
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Dec 2016
 // Description
-//              In 1.10.1, this constructor was introduced and will replace the
+//              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openCompType(const H5Location&)
 //              to improve usability.
 //              -BMR, Dec 2016
