@@ -109,13 +109,13 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 
 //--------------------------------------------------------------------------
 // Function:    DataType overload constructor - dereference
-///\brief       Given a reference, ref, to an hdf5 group, creates a
-///             DataType object
-///\param       attr - IN: Specifying location where the referenced object is in
-///\param       ref - IN: Reference pointer
-///\param       ref_type - IN: Reference type - default to H5R_OBJECT
-///\param       plist - IN: Property list - default to PropList::DEFAULT
-///\exception   H5::ReferenceException
+// brief       Given a reference, ref, to an hdf5 group, creates a
+//             DataType object
+// param       attr - IN: Specifying location where the referenced object is in
+// param       ref - IN: Reference pointer
+// param       ref_type - IN: Reference type - default to H5R_OBJECT
+// param       plist - IN: Property list - default to PropList::DEFAULT
+// exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
 // Modification
 //        Jul, 2008
@@ -162,11 +162,12 @@ DataType::DataType(const PredType& pred_type) : H5Object()
 // Function:    DataType overloaded constructor
 ///\brief       Creates a DataType instance by opening an HDF5 datatype given
 ///             its name as a char*.
+///\param       loc        - IN: Location of the type
 ///\param       dtype_name - IN: Datatype name
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Dec 2016
 // Description
-//              In 1.10.1, this constructor was introduced and will replace the
+//              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openDataType(const char*) to
 //              improve usability.
 //              -BMR, Dec 2016
@@ -180,11 +181,12 @@ DataType::DataType(const H5Location& loc, const char *dtype_name) : H5Object()
 // Function:    DataType overloaded constructor
 ///\brief       Creates a DataType instance by opening an HDF5 datatype given
 ///             its name as an \c H5std_string.
+///\param       loc        - IN: Location of the type
 ///\param       dtype_name - IN: Datatype name
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Dec 2016
 // Description
-//              In 1.10.1, this constructor was introduced and will replace the
+//              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openDataType(const H5std_string&) to
 //              improve usability.
 //              -BMR, Dec 2016
@@ -297,27 +299,6 @@ bool DataType::operator==(const DataType& compared_type) const
     {
         throw DataTypeIException(inMemFunc("operator=="), "H5Tequal returns negative value");
     }
-}
-
-//--------------------------------------------------------------------------
-// Function:    DataType::p_opentype (private)
-///\brief       Opens an HDF5 datatype given its name
-///\param       dtype_name - IN: Datatype name
-///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Dec 2016
-// Description
-//              This function was introduced in 1.10.1 to be used by the new
-//              XxxType constructors that were introduced to replace the
-//              existing functions CommonFG::openXxxType(), which is awkward
-//              to use.  -BMR, Dec 2016
-//--------------------------------------------------------------------------
-hid_t DataType::p_opentype(const H5Location& loc, const char *dtype_name) const
-{
-    // Call C function to open the named datatype at this location
-    hid_t ret_value = H5Topen2(loc.getId(), dtype_name, H5P_DEFAULT);
-    if (ret_value < 0)
-        throw DataTypeIException("DataType constructor", "H5Topen2 failed");
-    return(ret_value);
 }
 
 //--------------------------------------------------------------------------
@@ -786,6 +767,26 @@ hid_t DataType::getId() const
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:    DataType::p_opentype (private)
+///\brief       Opens an HDF5 datatype given its name
+///\param       loc        - IN: Location of the type
+///\param       dtype_name - IN: Datatype name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Dec 2016
+// Description
+//              This function was introduced in 1.10.1 to be used by the new
+//              XxxType constructors that open a datatype. -BMR, Dec 2016
+//--------------------------------------------------------------------------
+hid_t DataType::p_opentype(const H5Location& loc, const char *dtype_name) const
+{
+    // Call C function to open the named datatype at this location
+    hid_t ret_value = H5Topen2(loc.getId(), dtype_name, H5P_DEFAULT);
+    if (ret_value < 0)
+        throw DataTypeIException("DataType constructor", "H5Topen2 failed");
+    return(ret_value);
+}
+
 //--------------------------------------------------------------------------
 // Function:    DataType::p_setId
 ///\brief       Sets the identifier of this object to a new value.

@@ -272,9 +272,8 @@ static void test_query()
         tcpl.close();
         tid2.close();
 
-        // Open the datatypes for query
+        // Open the datatypes for query.  Testing both ways
 
-        // Deprecated functions
         tid1 = file.openCompType(CompT_NAME);
         tid1.close();
         tid2 = file.openEnumType(EnumT_NAME);

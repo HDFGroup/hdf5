@@ -114,10 +114,11 @@ EnumType::EnumType(const IntType& data_type) : DataType()
 ///\brief       Creates an EnumType instance by opening an HDF5 enum datatype
 ///             given its name, provided as a C character string.
 ///\param       dtype_name - IN: Enum datatype name
+///\param       loc        - IN: Location of the type
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Dec 2016
 // Description
-//              In 1.10.1, this constructor was introduced and will replace the
+//              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openEnumType(const char*) to
 //              improve usability.
 //              -BMR, Dec 2016
@@ -131,11 +132,12 @@ EnumType::EnumType(const H5Location& loc, const char *dtype_name) : DataType()
 // Function:    EnumType overloaded constructor
 ///\brief       Creates an EnumType instance by opening an HDF5 enum datatype
 ///             given its name, provided as an \c H5std_string.
+///\param       loc        - IN: Location of the type
 ///\param       dtype_name - IN: Enum datatype name
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Dec 2016
 // Description
-//              In 1.10.1, this constructor was introduced and will replace the
+//              In 1.10.1, this constructor was introduced and may replace the
 //              existing function CommonFG::openEnumType(const H5std_string&)
 //              to improve usability.
 //              -BMR, Dec 2016
