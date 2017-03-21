@@ -524,16 +524,19 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::dereference
-///\brief       Dereferences a reference into an HDF5 object, given an attribute.
-///\param       attr - IN: Attribute specifying the location of the referenced object
-///\param       ref - IN: Reference pointer
-///\param       ref_type - IN: Reference type
-///\param       plist - IN: Property list - default to PropList::DEFAULT
-///\exception   H5::ReferenceException
+// brief        Dereferences a reference into an HDF5 object, given an attribute.
+// param        attr - IN: Attribute specifying the location of the referenced object
+// param        ref - IN: Reference pointer
+// param        ref_type - IN: Reference type
+// param        plist - IN: Property list - default to PropList::DEFAULT
+// exception    H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
 // Modification
 //      May, 2008
-//              Corrected missing parameters. - BMR
+//              Corrected missing parameters. -BMR
+//      Mar, 2017
+//              Removed in 1.10.1 because H5Location is Attribute's baseclass
+//              now. -BMR
 //--------------------------------------------------------------------------
  /* void H5Location::dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist)
 {
@@ -865,7 +868,7 @@ DataSet H5Location::createDataSet(const char* name, const DataType& data_type, c
 //--------------------------------------------------------------------------
 DataSet H5Location::createDataSet(const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist) const
 {
-    return(createDataSet( name.c_str(), data_type, data_space, create_plist));
+    return(createDataSet(name.c_str(), data_type, data_space, create_plist));
 }
 
 //--------------------------------------------------------------------------
