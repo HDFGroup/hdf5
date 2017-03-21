@@ -246,9 +246,10 @@ TOOLTEST_DUMP()
 ##############################################################################
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
+version_str=`echo @H5_VERSION@ | awk -F"-" '{print $1}' | sed 's/\./,/g'`
 
 # Run the test
-arg="h5repack_layout.h5 -v -f UD=260,4,9,1,9,235"
+arg="h5repack_layout.h5 -v -f UD=260,4,9,$version_str"
 TOOLTEST_DUMP plugin_version_test $arg
 
 arg="h5repack_layout.h5 -v -f UD=257,1,9"
