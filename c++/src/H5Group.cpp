@@ -66,6 +66,9 @@ Group::Group(const Group& original) : H5Object(), CommonFG(), id(original.id)
 //--------------------------------------------------------------------------
 // Function:    Group::getObjId
 ///\brief       Opens an object via object header.
+///\param       obj_name - IN: Path to the object
+///\param       plist    - IN: Access property list for the link pointing to
+///                            the object
 ///\exception   H5::FileIException or H5::GroupIException
 ///\par Description
 ///             This function opens an object in a group or file, using
@@ -88,6 +91,8 @@ hid_t Group::getObjId(const char* obj_name, const PropList& plist) const
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It takes a reference to a \c H5std_string for the object's name.
 ///\param       obj_name - IN: Path to the object
+///\param       plist    - IN: Access property list for the link pointing to
+///                            the object
 ///\exception   H5::FileIException or H5::GroupIException
 // Programmer   Binh-Minh Ribler - March, 2017
 //--------------------------------------------------------------------------
@@ -159,15 +164,19 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const 
 
 //--------------------------------------------------------------------------
 // Function:    Group overload constructor - dereference
-///\brief       Given a reference, ref, to an hdf5 group, creates a Group object
-///\param       attr - IN: Specifying location where the referenced object is in
-///\param       ref - IN: Reference pointer
-///\param       ref_type - IN: Reference type - default to H5R_OBJECT
-///\param       plist - IN: Property list - default to PropList::DEFAULT
-///\exception   H5::ReferenceException
+// brief        Given a reference, ref, to an hdf5 group, creates a Group objec
+// param        attr - IN: Specifying location where the referenced object is i
+// param        ref - IN: Reference pointer
+// param        ref_type - IN: Reference type - default to H5R_OBJECT
+// param        plist - IN: Property list - default to PropList::DEFAULT
+// exception    H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
+// Modification
+//      Mar, 2017
+//              Removed in 1.10.1 because H5Location is Attribute's baseclass
+//              now. -BMR
 //--------------------------------------------------------------------------
- /* Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
+/* Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
