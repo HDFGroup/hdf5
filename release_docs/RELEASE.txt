@@ -228,18 +228,6 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 Supported Platforms
 ===================
 
-    Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
-    #1 SMP x86_64 GNU/Linux       compilers:
-    (mayll/platypus)                 Version 4.4.7 20120313
-                                     Version 4.8.4
-                                  PGI C, Fortran, C++ for 64-bit target on
-                                  x86-64;
-                                      Version 16.10-0
-                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
-                                  compilers:
-                                     Version 15.0.3.187 (Build 20150407)
-                                  MPICH 3.1.4 compiled with GCC 4.9.3
-
     Linux 2.6.32-573.18.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
     (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
@@ -315,15 +303,13 @@ Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
-Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     ?
-Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     ?
-Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     ?
-CentOS 6.7 Linux 2.6.18 x86_64 GNU      n        y/y    n        y    y     y
-CentOS 6.7 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
-CentOS 6.7 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
+Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     y
+Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
+Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
+CentOS 7.2 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
-Linux 2.6.32-573.18.1.el6.ppc64         n        y/n    n        y    y     y
+Linux 2.6.32-573.18.1.el6.ppc64         n        y/y    n        y    y     y
 
 
 Platform                                 Shared  Shared    Shared    Thread-
@@ -340,10 +326,8 @@ Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
 Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
 Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
 Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
-CentOS 6.7 Linux 2.6.18 x86_64 GNU         y       y         y         y
-CentOS 6.7 Linux 2.6.18 x86_64 Intel       y       y         y         n
-CentOS 6.7 Linux 2.6.32 x86_64 PGI         y       y         y         n
-CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         n
+CentOS 7.2 Linux 2.6.32 x86_64 PGI         y       y         y         n
+CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         y
 CentOS 7.2 Linux 2.6.32 x86_64 Intel       y       y         y         n
 Linux 2.6.32-573.18.1.el6.ppc64            y       y         y         n
 
@@ -354,6 +338,18 @@ Compiler versions for each platform are listed in the preceding
 More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
+
+    Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (mayll/platypus)                 Version 4.4.7 20120313
+                                     Version 4.8.4
+                                  PGI C, Fortran, C++ for 64-bit target on
+                                  x86-64;
+                                      Version 16.10-0
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 15.0.3.187 (Build 20150407)
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
 
     Linux 2.6.32-573.18.1.el6.ppc64  MPICH mpich 3.1.4 compiled with
     #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
