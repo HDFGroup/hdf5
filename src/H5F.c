@@ -2073,10 +2073,8 @@ H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2
     /* Check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-
     if(NULL == file->shared->page_buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "page buffering not enabled on file")
-
     if(NULL == accesses || NULL == hits || NULL == misses || NULL == evictions || NULL == bypasses)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL input parameters for stats")
 
@@ -2087,6 +2085,7 @@ H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_page_buffering_stats() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_mdc_image_info
@@ -2116,14 +2115,14 @@ H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_len)
     /* Check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-
     if(NULL == image_addr || NULL == image_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL image addr or image len")
 
     /* Go get the address and size of the cache image */
     if(H5AC_get_mdc_image_info(file->shared->cache, image_addr, image_len) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_mdc_image_info() failed.")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_mdc_image_info() */
+
