@@ -64,7 +64,23 @@ New Features
 
     Library:
     --------
-    -
+    - Paged Aggregation
+
+      This is one of the file space management strategies. This strategy
+      aggregates small metadata and raw data allocations into constant-sized
+      well-aligned pages, which are suitable for page caching.  Paged
+      aggregation together with the page buffering feature will allow efficient
+      I/O accesses.
+
+    - Page Buffering
+
+      The page buffering layer in the HDF5 library absorbs small accesses to
+      the file system.  Each page in memory corresponds to a page allocated in
+      the file.  Access to the file system is then performed as a single page
+      or multiple of pages, if they are contiguous.  This ensures that small 
+      accesses to the file system are avoided while providing another caching
+      layer for improved I/O performance.  This feature works in conjunction
+      with the paged aggregation feature.
 
     Parallel Library:
     -----------------
@@ -162,6 +178,25 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     -------
     - Changed the plugins dlopen option from RTLD_NOW to RTLD_LAZY
       (PR 201 ADB 2016/12/12)
+
+    - Fix error when copying dataset with attribute which is a compound datatype
+      consisting of a variable length string.
+      (HDFFV-7991 VC 2016/08/19, 2016/08/21, 2016/08/24)
+
+    - H5DOappend will not fail if a dataset has no append callback registered.
+      (HDFFV-9960 VC 2016/08/05, 2016/08/14)
+
+    - Fix the problem where the committed datatype's file location is different
+      from the file location of an attribute with that committed datatype.
+      (HDFFV-9940 VC 2016/07/03, 2016/07/06)
+
+    - Fix for h5format_convert daily test failures when --enable-using-memchecker.
+      (svn-r30009 VC 2016/06/03)
+
+    - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
+      (b) Modifications to better handle error recovery when conversion by 
+          h5format_convert fails.
+      (HDFFV-9434 VC 2016/05/29)
 
     Configuration
     -------------
@@ -377,6 +412,10 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* hl/tools/h5watch tests are skipped temporarily because there are random
+  test failures.  Further investigation is needed. 
+  (Pull request #241 VC - 2017/01/10)
+
 * "make check" fails on CYGWIN when building shared lib files is enabled.  The
    default on Cygwin has been changed to disable shared.  It can be enabled with
    the --enable-shared configure option but is likely to fail "make check"
