@@ -113,6 +113,33 @@ TOOLTEST() {
     fi
 }
 
+# HDF5 has several tests that create and delete signal files to communicate
+# between processes, and it seems that even though the names of the files are
+# different, occasionally the wrong file is deleted, interrupting the flow of
+# the test.  Running each of these tests in its own directory should eliminate
+# the problem.
+mkdir usecases_test
+cp twriteorder usecases_test
+for FILE in use_*; do
+    case "$FILE" in
+        *.o) continue ;;    ## don't copy the .o files
+    esac
+    cp $FILE usecases_test
+done
+
+# With the --disable-shared option, swmr program files are built in the test
+# directory, otherwise they are in test/.libs with a corresponding wrapper
+# script in the test directory.  The programs or wrapper scripts in test should
+# always be copied, swmr files in .libs should be copied only if they exists.
+if [ -f .libs/use_append_chunk ]; then
+    mkdir usecases_test/.libs
+    cp .libs/use_* usecases_test/.libs
+    cp .libs/twriteorder usecases_test/.libs
+fi
+
+cd usecases_test
+
+
 # run tests for H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled here temporary
 USECORK=use_disable_mdc_flushes
 for p in $USECORK; do
@@ -158,10 +185,14 @@ for p in $USECASES_PROGRAMS; do
     fi
 done
 
-
+cd ..
 # Report test results and exit
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
+    if test -z "$HDF5_NOCLEANUP"; then
+        # delete the test directory
+        rm -rf usecases_test
+    fi
 else
     echo "$TESTNAME tests failed with $nerrors errors."
     EXIT_VALUE=$EXIT_FAILURE
