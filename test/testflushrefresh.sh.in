@@ -84,7 +84,7 @@ fi
 # different, occasionally the wrong file is deleted, interrupting the flow of
 # the test.  Running each of these tests in its own directory should eliminate 
 # the problem.
-mkdir -p flushrefresh_test/.libs
+mkdir flushrefresh_test
 cp flushrefresh flushrefresh_test
 
 # With the --disable-shared option, flushrefresh is built in the test directory,
@@ -92,6 +92,7 @@ cp flushrefresh flushrefresh_test
 # the test directory.  test/flushrefresh should always be copied, 
 # .libs/flushrefresh should be copied only if it exists.
 if [ -f .libs/flushrefresh ]; then
+    mkdir flushrefresh_test/.libs
     cp .libs/flushrefresh flushrefresh_test/.libs
 fi
 cd flushrefresh_test
@@ -210,6 +211,10 @@ fi
 
 if test $nerrors -eq 0 ; then
     echo "flush/refresh objects tests passed."
+    if test -z "$HDF5_NOCLEANUP"; then
+        # delete the test directory
+        rm -rf flushrefresh_test
+    fi
     exit 0
 else
     echo "flush/refresh objects tests failed with $nerrors errors."
