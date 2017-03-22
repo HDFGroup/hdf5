@@ -84,10 +84,8 @@ class H5_DLLCPP CommonFG {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-}; // end of CommonFG declaration
+}; // end of CommonFG
+} // namespace H5
 
-#ifndef H5_NO_NAMESPACE
-}
-#endif
 #endif // __CommonFG_H
 

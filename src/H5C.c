@@ -761,7 +761,10 @@ H5C_prep_for_file_close(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create cache image")
 
 #ifdef H5_HAVE_PARALLEL
-    if(!image_generated && cache_ptr->aux_ptr != NULL && f->shared->fs_persist) {
+    if ( ( H5F_INTENT(f) & H5F_ACC_RDWR ) &&
+         ( ! image_generated ) && 
+         ( cache_ptr->aux_ptr != NULL ) && 
+         ( f->shared->fs_persist ) ) {
         /* If persistent free space managers are enabled, flushing the
          * metadata cache may result in the deletion, insertion, and/or
          * dirtying of entries.
@@ -7295,14 +7298,20 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
 
             prev_ptr = entry_ptr->aux_prev;
 
+            if ( ( !(entry_ptr->prefetched_dirty) ) 
 #ifdef H5_HAVE_PARALLEL
-            if(!(entry_ptr->coll_access)) {
+                 && ( ! (entry_ptr->coll_access) )
 #endif /* H5_HAVE_PARALLEL */
-                if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
-#ifdef H5_HAVE_PARALLEL
+               ) {
+
+                if ( H5C__flush_single_entry(f, dxpl_id, entry_ptr, 
+                                  H5C__FLUSH_INVALIDATE_FLAG | 
+                                  H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0 )
+
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                "unable to flush entry")
+
             } /* end if */
-#endif /* H5_HAVE_PARALLEL */
 
 	    /* we are scanning the clean LRU, so the serialize function
 	     * will not be called on any entry -- thus there is no

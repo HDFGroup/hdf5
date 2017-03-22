@@ -812,19 +812,17 @@ const H5std_string        FILE7("tfile7.h5");
  *
  *-------------------------------------------------------------------------
  */
+const hsize_t FSP_SIZE_DEF = 4096;
+const hsize_t FSP_SIZE512 = 512;
 static void test_file_info()
 {
     // Output message about test being performed
     SUBTEST("File general information");
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-    hsize_t in_threshold = 2;   // Free space section threshold to set */
-    hsize_t out_threshold = 0;  // Free space section threshold to get */
+    hsize_t out_threshold = 0;  // Free space section threshold to get
+    hbool_t out_persist = FALSE;// Persist free-space read
     // File space handling strategy
-    H5F_file_space_type_t in_strategy = H5F_FILE_SPACE_ALL;
-    // File space handling strategy
-    H5F_file_space_type_t out_strategy = H5F_FILE_SPACE_DEFAULT;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+    H5F_fspace_strategy_t out_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
 
     try {
         // Create a file using default properties.
@@ -843,14 +841,30 @@ static void test_file_info()
         // Create file creation property list.
         FileCreatPropList fcpl;
 
+        // Retrieve file space information.
+        fcpl.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
+
+        // Verify file space information.
+        verify_val(out_strategy, H5F_FSPACE_STRATEGY_FSM_AGGR, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(out_persist, FALSE, "H5File::getFileInfo", __LINE__, __FILE__);
+        verify_val(out_threshold, 1, "H5File::getFileInfo", __LINE__, __FILE__);
+
+        /* Retrieve file space page size */
+        hsize_t out_fsp_psize = fcpl.getFileSpacePagesize();
+        verify_val(out_fsp_psize, FSP_SIZE_DEF, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__);
+
         // Set various file information.
         fcpl.setUserblock(F2_USERBLOCK_SIZE);
         fcpl.setSizes(F2_OFFSET_SIZE, F2_LENGTH_SIZE);
         fcpl.setSymk(F2_SYM_INTERN_K, F2_SYM_LEAF_K);
         fcpl.setIstorek(F2_ISTORE);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-        fcpl.setFileSpace(in_strategy, in_threshold);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+        hsize_t threshold = 5;      // Free space section threshold to set
+        hbool_t persist = TRUE;     // Persist free-space to set
+        H5F_fspace_strategy_t strategy = H5F_FSPACE_STRATEGY_PAGE;
+
+        fcpl.setFileSpaceStrategy(strategy, persist, threshold);
+        fcpl.setFileSpacePagesize(FSP_SIZE512);
 
         // Creating a file with the non-default file creation property list
         // should create a version 1 superblock
@@ -863,11 +877,7 @@ static void test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
         verify_val(finfo.super.version, 2, "H5File::getFileInfo", __LINE__, __FILE__);
-#else /* H5_NO_DEPRECATED_SYMBOLS */
-        verify_val(finfo.super.version, 1, "H5File::getFileInfo", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
         verify_val(finfo.free.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
         verify_val(finfo.sohm.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
@@ -882,11 +892,7 @@ static void test_file_info()
 
         // Get the file's version information.
         file7.getFileInfo(finfo);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
         verify_val(finfo.super.version, 2, "H5File::getFileInfo", __LINE__, __FILE__);
-#else /* H5_NO_DEPRECATED_SYMBOLS */
-        verify_val(finfo.super.version, 1, "H5File::getFileInfo", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
         verify_val(finfo.free.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
         verify_val(finfo.sohm.version, 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
@@ -912,14 +918,14 @@ static void test_file_info()
     VERIFY(nindexes, MISC11_NINDEXES, "H5Pget_shared_mesg_nindexes");
  */ 
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
         // Get and verify the file space info from the creation property list */
-        out_strategy = fcpl2.getFileSpaceStrategy();
-        verify_val(static_cast<unsigned>(out_strategy), static_cast<unsigned>(in_strategy), "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+        fcpl2.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
+        verify_val(out_strategy, strategy, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+        verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+        verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
 
-        out_threshold = fcpl2.getFileSpaceThreshold();
-        verify_val(static_cast<unsigned>(out_threshold), static_cast<unsigned>(in_threshold), "FileCreatPropList::getFileSpaceThreshold", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+        out_fsp_psize = fcpl2.getFileSpacePagesize();
+        verify_val(out_fsp_psize, FSP_SIZE512, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__);
 
         PASSED();
     }   // end of try block

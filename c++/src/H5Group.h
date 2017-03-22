@@ -52,6 +52,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
         // Creates a group by way of dereference.
         Group(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+        // Removed in 1.10.1, because H5Location is baseclass
 //        Group(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
         // Opens an object within a group or a file, i.e., root group.
@@ -84,7 +85,8 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
    private:
         hid_t id;    // HDF5 group id
-};
 
-}
+}; // end of Group
+} // namespace H5
+
 #endif // __Group_H

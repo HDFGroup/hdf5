@@ -468,7 +468,7 @@ H5PB__dest_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
 /*-------------------------------------------------------------------------
  * Function:	H5PB_dest
  *
- * Purpose:	destroy the PB on the file.
+ * Purpose:	Flush and destroy the PB on the file if it exists.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -477,19 +477,25 @@ H5PB__dest_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_dest(H5F_t *f)
+H5PB_dest(const H5F_io_info2_t *fio_info)
 {
     herr_t  ret_value = SUCCEED;        /* Return value */
+    H5F_t  *f;                          /* file pointer */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
+    HDassert(fio_info);
+    f = fio_info->f;
     HDassert(f);
 
-    /* Destroy page buffer info, if there is any */
+    /* flush and destroy the page buffer, if it exists */
     if(f->shared->page_buf) {
         H5PB_t *page_buf = f->shared->page_buf;
         H5PB_ud1_t op_data;                 /* Iteration context */
+
+        if(H5PB_flush(fio_info)<0)
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTFLUSH, FAIL, "can't flush page buffer")
 
         /* Set up context info */
         op_data.page_buf = page_buf;

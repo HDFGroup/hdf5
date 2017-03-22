@@ -101,6 +101,7 @@ class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
         // Friend function to set Attribute id.  For library use only.
         friend void f_Attribute_setId(Attribute* attr, hid_t new_id);
 
-};
-}
+}; // end of Attribute
+} // namespace H5
+
 #endif // __H5Attribute_H

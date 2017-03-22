@@ -146,6 +146,8 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         static DSetCreatPropList* getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-};
-}
+
+}; // end of DSetCreatPropList
+} // namespace H5
+
 #endif // __H5DSCreatPropList_H

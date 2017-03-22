@@ -69,6 +69,7 @@ class H5_DLLCPP LinkAccPropList : public PropList {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-};
-}
+}; // end of LinkAccPropList
+} // namespace H5
+
 #endif // __H5LinkAccPropList_H

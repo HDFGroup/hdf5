@@ -12,11 +12,11 @@ For more details check the HISTORY*.txt files in the HDF5 source.
 Links to HDF5 1.10.1 source code, documentation, and additional materials can be found on The HDF5 web page at:
 
      https://support.hdfgroup.org/HDF5/
-	 
+
 The HDF5 1.10.1 release can be obtained from:
 
-     https://support.hdfgroup.org/HDF5/release/obtain5110.html	 
-	 
+     https://support.hdfgroup.org/HDF5/release/obtain5110.html
+
 User documentation for the snapshot can be accessed directly at this location:
 
      https://support.hdfgroup.org/HDF5/doc1.10/
@@ -54,77 +54,151 @@ New Features
 
     Configuration:
     -------------
-    - CMake minimum is now 3.2.2. (ADB 2016/01/10)
-    
+    - CMake minimum is now 3.2.2.
+      (ADB 2017/01/10)
+
+    - Tools folder is separated into source and test folders. This
+      allows autotools to skip the make command and just execute
+      the make check command.
+      (HDFFV-9719 ADB 2016/10/27)
 
     Library:
     --------
-    - 
+    -
 
     Parallel Library:
     -----------------
-    - 
+    -
 
     Fortran Library:
     ----------------
-    - 
+    -
 
     C++ Library:
     ------------
-     - 
+    - New wrappers for C APIs:
+        (HDFFV-10004, HDFFV-10139, HDFFV-10145 - PRs #232, #310, #334, #348)
+
+        // Sets/Gets the strategy and the threshold value that the library will
+        // will employ in managing file space.
+        FileCreatPropList::setFileSpaceStrategy - H5Pset_file_space_strategy
+        FileCreatPropList::getFileSpaceStrategy - H5Pget_file_space_strategy
+
+        // Sets/Gets the file space page size for paged aggregation.
+        FileCreatPropList::setFileSpacePagesize - H5Pset_file_space_page_size
+        FileCreatPropList::getFileSpacePagesize - H5Pget_file_space_page_size
+
+        // Checks if the given ID is valid.
+        IdComponent::isValid - H5Iis_valid
+
+        // Sets/Gets the number of soft or user-defined links that can be
+        // traversed before a failure occurs.
+        LinkAccPropList::setNumLinks - H5Pset_nlinks
+        LinkAccPropList::getNumLinks - H5Pget_nlinks
+
+        // Returns a copy of the creation property list of a datatype.
+        DataType::getCreatePlist - H5Tget_create_plist
+
+        // Opens/Closes an object within a group or a file, regardless object type
+        Group::getObjId - H5Oopen
+        Group::closeObjId - H5Oclose
+
+        // Maps elements of a virtual dataset to elements of the source dataset.
+        DSetCreatPropList::setVirtual - H5Pset_virtual
+
+        // Gets general information about this file.
+        H5File::getFileInfo - H5Fget_info2
+
+        // Returns the number of members in a type.
+        IdComponent::getNumMembers - H5Inmembers
+
+        // Determines if an element type exists.
+        IdComponent::typeExists - H5Itype_exists
+
+        // Determines if an object exists.
+        H5Location::exists - H5Lexists.
+
+        // Returns the header version of an HDF5 object.
+        H5Object::objVersion - H5Oget_info for version
+        (BMR, 2017/03/20)
+
+    - New constructors to open datatypes in ArrayType, CompType, DataType,
+      EnumType, FloatType, IntType, StrType, and VarLenType. (HDFFV-10156)
+      (BMR, 2017/03/20)
+
+    - New class LinkAccPropList for link access property list, to be used by
+      wrappers of H5Lexists. (HDFFV-10145 - PR #232) (BMR, 2017/03/20)
+
+    - New exception: ObjHeaderIException for H5O interface.
+      (HDFFV-10145 - PR #334) (BMR, 2017/03/20)
+
 
     Tools:
     ------
-     - 
+     -
 
     High-Level APIs:
     ---------------
 
     C Packet Table API
     ------------------
-     - 
+     -
 
     Internal header file
     --------------------
     -
-	
+
     Documentation
     -------------
 
 Support for new platforms, languages and compilers.
 =======================================
-    - 
+    -
 
 Bug Fixes since HDF5-1.10.0-patch1 release
 ==================================
 
     Library
     -------
-    - 
+    - Changed the plugins dlopen option from RTLD_NOW to RTLD_LAZY
+      (PR 201 ADB 2016/12/12)
 
     Configuration
     -------------
-    - 
+    - Configuration will check for the strtoll and strtoull functions
+      before using alternatives
+      (PR 340 ADB 2017/03/17)
+
+    - CMake uses a Windows pdb directory variable if available and
+      will generate both static and shared pdb files.
+      (HDFFV-9875 ADB 2017/02/06)
+
+    - CMake now builds shared versions of tools.
+      (HDFFV-10123 ADB 2017/02/01)
 
     Performance
     -------------
-      - 
-	  
+      -
+
     Fortran
     --------
-    - 
+    -
 
     Tools
     -----
-    -
+    - h5diff correctly ignores strpad in comparing strings.
+      (HDFFV-10128 ADB 2017/03/03)
+
+    - h5repack now correctly parses the command line filter options.
+      (HDFFV-10046 ADB 2017/01/24)
 
     High-Level APIs:
     ------
-    - 
+    -
 
     Fortran High-Level APIs:
     ------
-    - 
+    -
 
     Documentation
     -------------
@@ -132,20 +206,28 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     F90 APIs
     --------
-    - 
+    -
 
 
     C++ APIs
     --------
-    - 
-	
+    - Due to the change in the C API, the overloaded functions of
+      PropList::setProperty now need const for some arguments.  They are
+      planned for deprecation and are replaced by new versions with proper
+      consts. (PR #344 -BMR, 2017/03/20)
+
+    - The problem where a user-defined function cannot access both, attribute
+      and dataset, using only one argument (HDFFV9920) is now fixed.
+      (PR #45 -BMR, 2017/03/20)
+
+
     Testing
     -------
-    - 
+    -
 
 Supported Platforms
 ===================
-    
+
     Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (mayll/platypus)                 Version 4.4.7 20120313
@@ -172,7 +254,7 @@ Supported Platforms
                                   compilers:
                                      Version 15.0.3.187 Build 20150407
                                   MPICH 3.1.4 compiled with GCC 4.9.3
-								  
+
     SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
@@ -186,11 +268,12 @@ Supported Platforms
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-   
+                                  Visual Studio 2015 w/ Intel Parallel Studio 2017 (cmake)
+
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-								  
+
     Mac OS X Mt. Lion 10.8.5      Apple clang/clang++ version 5.1 from Xcode 5.1
     64-bit                        gfortran GNU Fortran (GCC) 4.8.2
     (swallow/kite)                Intel icc/icpc/ifort version 15.0.3
@@ -226,7 +309,7 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
-Windows 7 x64                           y        y/y    n        y    y     y
+Windows 7 x64                           y        y/y    y        y    y     y
 Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
@@ -291,7 +374,7 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (Ubuntu 5.4.0-6ubuntu1~16.04.2) 5.4.0 20160609
                                   (cmake and autotools)
 
-								  
+
 Known Problems
 ==============
 * "make check" fails on CYGWIN when building shared lib files is enabled.  The

@@ -149,6 +149,8 @@ class H5_DLLCPP DataSpace : public IdComponent {
         friend void f_DataSpace_setId(DataSpace *dspace, hid_t new_id);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-};
-}
+
+}; // end of DataSpace
+} // namespace H5
+
 #endif // __H5DataSpace_H

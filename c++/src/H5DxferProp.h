@@ -127,6 +127,8 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         static DSetMemXferPropList* getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-};
-}
+
+}; // end of DSetMemXferPropList
+} // namespace H5
+
 #endif // __H5DSetMemXferPropList_H

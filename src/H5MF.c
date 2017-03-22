@@ -1347,6 +1347,12 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
     HDassert(f);
     HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
 
+    if(f->shared->first_alloc_dealloc) {
+        HDassert(! H5AC_cache_image_pending(f));
+        if(H5MF_tidy_self_referential_fsm_hack(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "tidy of self referential fsm hack failed")
+    } /* end if */
+
     /* Set mapped type, treating global heap as raw data */
     map_type = (alloc_type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : alloc_type;
 

@@ -503,9 +503,9 @@ void test_iterate()
     FileAccPropList fapl;
     fapl.setLibverBounds(H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
 
-    test_iter_group(fapl);        // Test iterating groups
-    test_HDFFV_9920();        	// Test the fix of HDFFV-9920
-    //test_iter_attr(fapl);        // Test iterating attributes
+    test_iter_group(fapl);    // Test iterating groups
+    test_HDFFV_9920();        // Test the fix of HDFFV-9920
+    //test_iter_attr(fapl);   // Test iterating attributes
 
 }   // test_iterate
 
