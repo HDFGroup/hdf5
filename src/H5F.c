@@ -2073,8 +2073,10 @@ H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2
     /* Check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+
     if(NULL == file->shared->page_buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "page buffering not enabled on file")
+
     if(NULL == accesses || NULL == hits || NULL == misses || NULL == evictions || NULL == bypasses)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL input parameters for stats")
 
@@ -2085,4 +2087,43 @@ H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_page_buffering_stats() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_mdc_image_info
+ *
+ * Purpose:     Retrieves the image_addr and image_len for the cache image in the file.
+ *              image_addr:  --base address of the on disk metadata cache image
+ *                           --HADDR_UNDEF if no cache image
+ *              image_len:   --size of the on disk metadata cache image
+ *                           --zero if no cache image
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi; March 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_len)
+{
+    H5F_t      *file;                   /* File object for file ID */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*a*h", file_id, image_addr, image_len);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+
+    if(NULL == image_addr || NULL == image_len)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL image addr or image len")
+
+    /* Go get the address and size of the cache image */
+    if(H5AC_get_mdc_image_info(file->shared->cache, image_addr, image_len) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_mdc_image_info() failed.")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fget_mdc_image_info() */

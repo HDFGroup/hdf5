@@ -3310,3 +3310,28 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_remove_entry() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_get_mdc_image_info
+ *
+ * Purpose:     Wrapper function for H5C_get_mdc_image_info().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  Vailin Choi; March 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(H5C_get_mdc_image_info((H5C_t *)cache_ptr, image_addr, image_len) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_mdc_image_info() failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_get_mdc_image_info() */
