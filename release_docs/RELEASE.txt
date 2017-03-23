@@ -120,17 +120,25 @@ New Features
 
         // Returns the header version of an HDF5 object.
         H5Object::objVersion - H5Oget_info for version
-        (BMR, 2017/03/20)
+      -BMR, 2017/03/20
 
     - New exception: ObjHeaderIException for H5O interface.
-      (HDFFV-10145 - PR #334) (BMR, 2017/03/15)
+      (HDFFV-10145 - PR #334) -BMR, 2017/03/15
 
     - New class LinkAccPropList for link access property list, to be used by
-      wrappers of H5Lexists. (HDFFV-10145 - PR #232) (BMR, 2017/01/04)
+      wrappers of H5Lexists. (HDFFV-10145 - PR #232) -BMR, 2017/01/04
 
     - New constructors to open datatypes in ArrayType, CompType, DataType,
       EnumType, FloatType, IntType, StrType, and VarLenType.
-      (HDFFV-10056 - PR #209) (BMR, 2016/12/26)
+      (HDFFV-10056 - PR #209) -BMR, 2016/12/26
+
+    - New member functions
+        DSetCreatPropList::setNbit() to setup N-bit compression for a dataset.
+        (HDFFV-8623 patch 7) -BMR, 2016/04/25
+
+        ArrayType::getArrayNDims() const
+        ArrayType::getArrayDims() const
+        both to replace the non-const versions. (HDFFV-9725) -BMR, 2016/04/25
 
 
     Tools:
@@ -214,28 +222,32 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     - Due to the change in the C API, the overloaded functions of
       PropList::setProperty now need const for some arguments.  They are
       planned for deprecation and are replaced by new versions with proper
-      consts. (PR #344) (BMR, 2017/03/17)
+      consts. (PR #344) -BMR, 2017/03/17
 
     - The problem where a user-defined function cannot access both, attribute
       and dataset, using only one argument is now fixed.
-      (HDFFV-9920 - PR #45) (BMR, 2016/10/11)
+      (HDFFV-9920 - PR #45) -BMR, 2016/10/11
 
     - The high-level API Packet Table (PT) did not write data correctly when
       the datatype is a compound type that has string type as one of the
       members.  This problem started in 1.8.15, after the fix of HDFFV-9042
       was applied, which caused the Packet Table to use native type to access
       the data.  It should be up to the application to specify whether the
-      buffer to be read into memory in the machine’s native architecture.
+      buffer to be read into memory is in the machine's native architecture.
       Thus, the PT is fixed to not use native type but to make a copy of the
       user's provided datatype during creation or the packet table's datatype
       during opening.  If an application wishes to use native type to read the
       data, then the application will request that.  However, the Packet Table
       doesn't provide a way to specify memory datatype in this release.  This
       feature will be available in future releases, HDFFV-10023.
-      (HDFFV-9758 - PRs #93 and #108) (BMR, 2016/10/27)
+      (HDFFV-9758 - PRs #93 and #108) -BMR, 2016/10/27
 
     - The obsolete macros, H5_NO_NAMESPACE and H5_NO_STD, are removed.
-      (HDFFV-9532 - PR #92) (BMR, 2016/10/23)
+      (HDFFV-9532 - PR #92) -BMR, 2016/10/23
+
+    - In-memory array information, ArrayType::rank and
+      ArrayType::dimensions, were removed. This is an implementation
+      detail and should not affect applications. (HDFFV-9725) -BMR, 2016/04/25
 
 
     Testing
