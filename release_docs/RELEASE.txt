@@ -151,7 +151,10 @@ New Features
 
     Tools:
     ------
-     -
+     - Add options to h5clear:
+       -s: clear the status_flags field in the file's superblock
+       -m: Remove the metadata cache image from the file
+       (Pull Request #361 QK 2017/03/22)
 
     High-Level APIs:
     ---------------
@@ -189,9 +192,6 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     - Fix the problem where the committed datatype's file location is different
       from the file location of an attribute with that committed datatype.
       (HDFFV-9940 VC 2016/07/03, 2016/07/06)
-
-    - Fix for h5format_convert daily test failures when --enable-using-memchecker.
-      (svn-r30009 VC 2016/06/03)
 
     - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
       (b) Modifications to better handle error recovery when conversion by 
@@ -412,10 +412,6 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
-* hl/tools/h5watch tests are skipped temporarily because there are random
-  test failures.  Further investigation is needed. 
-  (Pull request #241 VC - 2017/01/10)
-
 * "make check" fails on CYGWIN when building shared lib files is enabled.  The
    default on Cygwin has been changed to disable shared.  It can be enabled with
    the --enable-shared configure option but is likely to fail "make check"
