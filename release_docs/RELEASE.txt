@@ -1,5 +1,8 @@
-HDF5 version 1.10.1-pre0 currently under development
+HDF5 version 1.10.1-pre1 released on 2017-03-23
 ================================================================================
+Note:  this document is a work in progress.  In particular not all bug fixes have
+been documented here, and issues reported in the pre-release versions will appear in 
+"known problems" in the final 1.10.1 release.
 
 
 INTRODUCTION
@@ -40,7 +43,8 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 
 CONTENTS
 
-- New Features
+- Major New Features Introduced in HDF5 1.10.1
+- Other New Features
 - Support for new platforms and languages
 - Bug Fixes since HDF5-1.10.0-patch1
 - Supported Platforms
@@ -48,6 +52,59 @@ CONTENTS
 - More Tested Platforms
 - Known Problems
 
+
+Major New Features Introduced in HDF5 1.10.1
+============================================
+
+For links to the RFCs and documentation in this section please view 
+https://support.hdfgroup.org/HDF5/docNewFeatures in a web browser.
+
+________________________________________
+Metadata Cache Image 
+________________________________________
+
+    HDF5 metadata is typically small, and scattered throughout the HDF5 file. 
+    This can affect performance, particularly on large HPC systems. The Metadata 
+    Cache Image feature can improve performance by writing the metadata cache in 
+    a single block on file close, and then populating the cache with the contents 
+    of this block on file open, thus avoiding the many small I/O operations that 
+    would otherwise be required on file open and close. See the RFC for complete 
+    details regarding this feature. Also, see the Fine Tuning the Metadata Cache 
+    documentation. 
+
+________________________________________
+Metadata Cache Evict on Close 
+________________________________________
+
+    The HDF5 library's metadata cache is fairly conservative about holding on to 
+    HDF5 object metadata (object headers, chunk index structures, etc.), which can 
+    cause the cache size to grow, resulting in memory pressure on an application 
+    or system. The "evict on close" property will cause all metadata for an object 
+    to be evicted from the cache as long as metadata is not referenced from any 
+    other open object. See the Fine Tuning the Metadata Cache documentation 
+    for information on the APIs. 
+    
+________________________________________
+Paged Aggregation 
+________________________________________
+
+    The current HDF5 file space allocation accumulates small pieces of metadata 
+    and raw data in aggregator blocks which are not page aligned and vary widely 
+    in sizes. The paged aggregation feature was implemented to provide efficient 
+    paged access of these small pieces of metadata and raw data. See the RFC for 
+    details. Also, see the File Space Management documentation.
+    
+________________________________________
+Page Buffering 
+________________________________________
+
+    Small and random I/O accesses on parallel file systems result in poor 
+    performance for applications. Page buffering in conjunction with paged 
+    aggregation can improve performance by giving an application control of 
+    minimizing HDF5 I/O requests to a specific granularity and alignment. 
+    See the RFC for details. Also, see the Page Buffering documentation.
+    
+ 
 
 New Features
 ============
@@ -437,249 +494,6 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
-* "make check" fails on CYGWIN when building shared lib files is enabled.  The
-   default on Cygwin has been changed to disable shared.  It can be enabled with
-   the --enable-shared configure option but is likely to fail "make check"
-   with GCC compilers. (LK -2015/04/16)
 
-* CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
-  catches some undefined behavior in the alignment algorithm of the macro DETECT_I
-  in H5detect.c (Issue 8147).  Since the algorithm is trying to detect the alignment
-  of integers, ideally the flag -fcatch-undefined-behavior shouldn't to be used for
-  H5detect.c. In the future, we can separate flags for H5detect.c from the rest of
-  the library. (SLU - 2013/10/16)
-
-* The 5.9 C++ compiler on Sun failed to compile a C++ test ttypes.cpp.  It
-  complains with this message:
-      "/home/hdf5/src/H5Vprivate.h", line 130: Error: __func__ is not defined.
-
-  The reason is that __func__ is a predefined identifier in C99 standard.  The
-  HDF5 C library uses it in H5private.h.  The test ttypes.cpp includes
-  H5private.h (H5Tpkg.h<-H5Fprivate.h<-H5Vprivate.h<-H5private.h).  Sun's 5.9
-  C++ compiler doesn't support __func__, thus fails to compile the C++ test.
-  But 5.11 C++ compiler does.  To check whether your Sun C++ compiler knows this
-  identifier, try to compile the following simple C++ program:
-      #include<stdio.h>
-
-      int main(void)
-      {
-          printf("%s\n", __func__);
-          return 0;
-      }
-  (SLU - 2012/11/5)
-
-* The C++ and FORTRAN bindings are not currently working on FreeBSD with the
-  native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
-  ports (and probably gcc releases after that).
-  (QAK - 2012/10/19)
-
-* The data conversion test dt_arith.c has failures (segmentation fault) from
-  "long double" to other datatypes during hard conversion when the library
-  is built with the default GCC 4.2.1 on Mac Lion system.  It only happens
-  with optimization (-O3, -O2, and -O1).  Some newer versions of GCC do not
-  have this problem.  Users should disable optimization or try newer version
-  of GCC. (Issue 8017. SLU - 2012/6/12)
-
-* The data conversion test dt_arith.c fails in "long double" to integer
-  conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
-  (3.2.2 on Fedora) doesn't have the problem.  Users should lower down the
-  optimization level (-O1 or -O0) by defining CFLAGS in the command line of
-  "configure" like:
-
-      CFLAGS=-O1 ./configure
-
-  It will overwrite the library's default optimization level. (Issue 7829.
-  SLU - 2012/2/7)
-
-* --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10)
-
-* While working on the 1.8.6 release of HDF5, a bug was discovered that can
-  occur when reading from a dataset in parallel shortly after it has been
-  written to collectively. The issue was exposed by a new test in the parallel
-  HDF5 test suite, but had existed before that. We believe the problem lies with
-  certain MPI implementations and/or filesystems.
-
-  We have provided a pure MPI test program, as well as a standalone HDF5
-  program, that can be used to determine if this is an issue on your system.
-  They should be run across multiple nodes with a varying number of processes.
-  These programs can be found at:
-  http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
-
-* Parallel mode in AIX will fail some of the testcheck_version.sh tests where
-  it treats "exit(134) the same as if process 0 had received an abort signal.
-  This is fixed and will be available in the next release. AKC - 2009/11/3
-
-* The PathScale MPI implementation, accessing a Panasas file system, would
-  cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file is not
-  existing. This is due to the MPI_File_open() call failing if the amode has
-  the MPI_MODE_EXCL bit set. (See bug 1468 for details.) AKC - 2009/8/11
-
-* Parallel tests failed with 16 processes with data inconsistency at testphdf5
-  / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
-  collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
-  with MPI IO. (CMC - 2009/04/28)
-
-* For SNL, spirit/liberty/thunderbird: The serial tests pass but parallel
-  tests failed with MPI-IO file locking message. AKC - 2007/6/25.
-* On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers use
-  -mp -O1 compilation flags to build the libraries. Higher level of optimization
-  causes failures in several HDF5 library tests.
-* For HPUX 11.23 many tools tests failed for 64-bit version when linked to the
-  shared libraries (tested for 1.8.0-beta2)
-* For SNL, Red Storm: only paralle HDF5 is supported.  The serial tests pass
-  and the parallel tests also pass with lots of non-fatal error messages.
-* on SUN 5.10 C++ test fails in the "Testing Shared Datatypes with Attributes" test
-* configuring with --enable-debug=all produces compiler errors on most
-  platforms.  Users who want to run HDF5 in debug mode should use
-  --enable-debug rather than --enable-debug=all to enable debugging
-  information on most modules.
-* On Mac OS 10.4, test/dt_arith.c has some errors in conversion from long
-  double to (unsigned) long long and from (unsigned)long long to long double.
-* On Altix SGI with Intel 9.0 testmeta.c would not compile with -O3
-  optimization flag.
-* On VAX, Scaleoffset filter isn't supported. The filter cannot be applied to
-  HDF5 data generated on VAX. Scaleoffset filter only supports IEEE standard
-  for floating-point data.
-* On Cray X1, a lone colon on the command line of h5dump --xml (as in
-  the testh5dumpxml.sh script) is misinterpereted by the operating system
-  and causes an error.
-* On mpich 1.2.5 and 1.2.6, we found that if more than two processes
-  contribute no IO and the application asks to do IO with collective, we found
-  that when using 4 processors, a simple collective write will be hung
-  sometimes. This can be verified with t_mpi test under testpar.
-* The dataset created or rewritten with the v1.6.3 library or after can't
-  be read with the v1.6.2 library or before when Fletcher32 EDC(filter) is
-  enabled.  There was a bug in the calculating code of the Fletcher32
-  checksum in the library before v1.6.3.  The checksum value wasn't consistent
-  between big-endian and little-endian systems.  This bug was fixed in
-  Release 1.6.3.  However, after fixing the bug, the checksum value is no
-  longer the same as before on little-endian system.  The library release
-  after 1.6.4 can still read the dataset created or rewritten with the library
-  of v1.6.2 or before.  SLU - 2005/6/30
-* For the version 6(6.02 and 6.04) of Portland Group compiler on AMD Opteron
-  processor, there's a bug in the compiler for optimization(-O2).  The library
-  failed in several tests but all related to multi driver.  The problem has
-  been reported to the vendor.
-* On IBM AIX systems, parallel HDF5 mode will fail some tests with error
-  messages like "INFO: 0031-XXX ...".  This is from the command poe.
-  Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
-  and run the tests again.
-  The tests may fail with messages like "The socket name is already
-  in use".  HDF5 does not use sockets (except for stream-VFD).  This is
-  due to problems of the poe command trying to set up the debug socket.
-  Check if there are many old /tmp/s.pedb.* staying around.  These are
-  sockets used by the poe command and left behind due to failed commands.
-  Ask your system administrator to clean them out.  Lastly, request IBM
-  to provide a mean to run poe without the debug socket.
-
-* The C++ library's tests fails when compiling with PGI C++ compiler.  The
-  workaround until the problem is correctly handled is to use the
-  flag "--instantiate=local" prior to the configure and build steps, as:
-        setenv CXX "pgCC --instantiate=local"  for pgCC 5.02 and higher
-
-
-* The stream-vfd test uses ip port 10007 for testing. If another
-  application is already using that port address, the test will hang
-  indefinitely and has to be terminated by the kill command. To try the
-  test again, change the port address in test/stream_test.c to one not
-  being used in the host.
-
-* The --enable-static-exec configure flag will only statically link libraries
-  if the static version of that library is present. If only the shared version
-  of a library exists (i.e., most system libraries on Solaris, AIX, and Mac,
-  for example, only have shared versions), the flag should still result in a
-  successful compilation, but note that the installed executables will not be
-  fully static. Thus, the only guarantee on these systems is that the
-  executable is statically linked with just the HDF5 library.
-
-* With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
-  compilation. The ANSI version of the compiler complains about not being
-  able to handle the `long long' datatype with the warning:
-
-        warning: ANSI C does not support `long long'
-
-  This warning is innocuous and can be safely ignored.
-
-* Certain platforms give false negatives when testing h5ls:
-    - Cray J90 and Cray T90IEEE give errors during testing when displaying
-      some floating-point values. These are benign differences due to
-      the different precision in the values displayed and h5ls appears to
-      be dumping floating-point numbers correctly.
-
-* Not all platforms behave correctly with szip's shared libraries. Szip is
-  disabled in these cases, and a message is relayed at configure time. Static
-  libraries should be working on all systems that support szip, and should be
-  used when shared libraries are unavailable. There is also a configure error
-  on Altix machines that incorrectly reports when a version of szip without
-  an encoder is being used.
-
-* On some platforms that use Intel and Absoft compilers to build HDF5 fortran library,
-  compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
-  complaining about exit subroutine. Comment out the line
-  IF (total_error .ne. 0) CALL exit (total_error)
-
-* Information about building with PGI and Intel compilers is available in
-  INSTALL file sections 5.7 and 5.8
-
-* On at least one system, (SDSC DataStar), the scheduler (in this case
-  LoadLeveler) sends job status updates to standard error when you run
-  any executable that was compiled with the parallel compilers.
-
-  This causes problems when running "make check" on parallel builds, as
-  many of the tool tests function by saving the output from test runs,
-  and comparing it to an exemplar.
-
-  The best solution is to reconfigure the target system so it no longer
-  inserts the extra text.  However, this may not be practical.
-
-  In such cases, one solution is to "setenv HDF5_Make_Ignore yes" prior to
-  the configure and build.  This will cause "make check" to continue after
-  detecting errors in the tool tests.  However, in the case of SDSC DataStar,
-  it also leaves you with some 150 "failed" tests to examine by hand.
-
-  A second solution is to write a script to run serial tests and filter
-  out the text added by the scheduler.  A sample script used on SDSC
-  DataStar is given below, but you will probably have to customize it
-  for your installation.
-
-  Observe that the basic idea is to insert the script as the first item
-  on the command line which executes the the test.  The script then
-  executes the test and filters out the offending text before passing
-  it on.
-
-        #!/bin/csh
-
-        set STDOUT_FILE=~/bin/serial_filter.stdout
-        set STDERR_FILE=~/bin/serial_filter.stderr
-
-        rm -f $STDOUT_FILE $STDERR_FILE
-
-        ($* > $STDOUT_FILE) >& $STDERR_FILE
-
-  set RETURN_VALUE=$status
-
-        cat $STDOUT_FILE
-
-        tail +3 $STDERR_FILE
-
-  exit $RETURN_VALUE
-
-  You get the HDF make files and test scipts to execute your filter script
-  by setting the environment variable "RUNSERIAL" to the full path of the
-  script prior to running configure for parallel builds.  Remember to
-  "unsetenv RUNSERIAL" before running configure for a serial build.
-
-  Note that the RUNSERIAL environment variable exists so that we can
-  can prefix serial runs as necessary on the target system.  On DataStar,
-  no prefix is necessary.  However on an MPICH system, the prefix might
-  have to be set to something like "/usr/local/mpi/bin/mpirun -np 1" to
-  get the serial tests to run at all.
-
-  In such cases, you will have to include the regular prefix in your
-  filter script.
-
-* H5Ocopy() does not copy reg_ref attributes correctly when shared-message
-  is turn on. The value of the reference in the destination attriubte is
-  wrong. This H5Ocopy problem will affect h5copy tool
-
+    This section will be populated with issues reported to help@hdfgroup.org
+    during pre-release testing.  Please report any issues.
