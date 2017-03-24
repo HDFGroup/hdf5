@@ -216,16 +216,16 @@ tar2cmakezip()
     fi
 
     # step 2: add batch file for building CMake on window
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2012-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2012-64.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-64.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2012-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2012-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2013-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2013-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2015-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2015-64.bat $cmziptmpdir
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/SZip.tar.gz $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/ZLib.tar.gz $cmziptmpdir
     cp $cmziptmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpdir
     cp $cmziptmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpdir
     cp $cmziptmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpdir
