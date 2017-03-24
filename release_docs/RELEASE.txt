@@ -145,7 +145,8 @@ New Features
 
     Fortran Library:
     ----------------
-    -
+    - Added support for NAG compiler.
+      (HDFFV-9973 MSB (2017/2/10))
 
     C++ Library:
     ------------
@@ -223,6 +224,9 @@ New Features
 
     High-Level APIs:
     ---------------
+     - Added New Fortran 2003 API for h5tbmake_table_f.
+       (HDFFV-8486, MSB 2017/02/10)
+      
 
     C Packet Table API
     ------------------
@@ -282,7 +286,8 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     Fortran
     --------
-    -
+    - Changed H5S_ALL_F from INTEGER to INTEGER(HID_T)
+      (HDFFv-9987 MSB 2016/10/14)
 
     Tools
     -----
