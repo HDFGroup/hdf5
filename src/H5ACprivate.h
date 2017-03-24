@@ -453,6 +453,8 @@ H5_DLL herr_t H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr,
 H5_DLL herr_t H5AC_validate_cache_image_config(H5AC_cache_image_config_t *config_ptr);
 H5_DLL hbool_t H5AC_cache_image_pending(const H5F_t *f);
 H5_DLL herr_t H5AC_force_cache_image_load(H5F_t * f, hid_t dxpl_id);
+H5_DLL herr_t H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr,
+    hsize_t *image_len);
 
 /* Tag & Ring routines */
 H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag);
