@@ -1,5 +1,7 @@
 HDF5 version 1.10.1-pre1 released on 2017-03-23
 ================================================================================
+Note:  this document is a work in progress.  In particular not all bug fixes have
+been documented here, and some of the "known problems" are no longer relevant.
 
 
 INTRODUCTION
@@ -40,7 +42,8 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 
 CONTENTS
 
-- New Features
+- Major New Features Introduced in HDF5 1.10.1
+- Other New Features
 - Support for new platforms and languages
 - Bug Fixes since HDF5-1.10.0-patch1
 - Supported Platforms
@@ -48,6 +51,64 @@ CONTENTS
 - More Tested Platforms
 - Known Problems
 
+
+Major New Features Introduced in HDF5 1.10.1
+============================================
+
+________________________________________
+Metadata Cache Image 
+________________________________________
+
+    HDF5 metadata is typically small, and scattered throughout the HDF5 file. 
+    This can affect performance, particularly on large HPC systems. The Metadata 
+    Cache Image feature can improve performance by writing the metadata cache in 
+    a single block on file close, and then populating the cache with the contents 
+    of this block on file open, thus avoiding the many small I/O operations that 
+    would otherwise be required on file open and close. See the RFC* for complete 
+    details regarding this feature. Also, see the Fine Tuning the Metadata Cache 
+    documentation*. 
+
+    * https://support.hdfgroup.org/HDF5/docNewFeatures-pre
+
+________________________________________
+Metadata Cache Evict on Close 
+________________________________________
+
+    The HDF5 library's metadata cache is fairly conservative about holding on to 
+    HDF5 object metadata (object headers, chunk index structures, etc.), which can 
+    cause the cache size to grow, resulting in memory pressure on an application 
+    or system. The "evict on close" property will cause all metadata for an object 
+    to be evicted from the cache as long as metadata is not referenced from any 
+    other open object. See the Fine Tuning the Metadata Cache documentation* 
+    for information on the APIs. 
+    
+    * https://support.hdfgroup.org/HDF5/docNewFeatures-pre
+
+________________________________________
+Paged Aggregation 
+________________________________________
+
+    The current HDF5 file space allocation accumulates small pieces of metadata 
+    and raw data in aggregator blocks which are not page aligned and vary widely 
+    in sizes. The paged aggregation feature was implemented to provide efficient 
+    paged access of these small pieces of metadata and raw data. See the RFC* for 
+    details. Also, see the File Space Management documentation*.
+    
+    * https://support.hdfgroup.org/HDF5/docNewFeatures-pre
+
+________________________________________
+Page Buffering 
+________________________________________
+
+    Small and random I/O accesses on parallel file systems result in poor 
+    performance for applications. Page buffering in conjunction with paged 
+    aggregation can improve performance by giving an application control of 
+    minimizing HDF5 I/O requests to a specific granularity and alignment. 
+    See the RFC* for details. Also, see the Page Buffering documentation*.
+    
+    * https://support.hdfgroup.org/HDF5/docNewFeatures-pre
+
+ 
 
 New Features
 ============
