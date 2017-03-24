@@ -248,6 +248,17 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     Library
     -------
+    - SWMR implementation in the HDF5 1.10.0 and 1.10.0-patch1 releases has a broken 
+      metadata flush dependency that manifested itself with the following error at the 
+      end of the HDF5 error stack:
+
+      H5Dint.c line 846 in H5D__swmr_setup(): dataspace chunk index must be 0 for 
+      SWMR access, chunkno = 1
+      major: Dataset
+      minor: Bad value
+      It was also reported at https://github.com/areaDetector/ADCore/issues/203
+      The flush dependency is fixed in this release.
+
     - Changed the plugins dlopen option from RTLD_NOW to RTLD_LAZY
       (PR 201 ADB 2016/12/12)
 
