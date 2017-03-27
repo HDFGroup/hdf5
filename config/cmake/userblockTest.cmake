@@ -57,7 +57,7 @@ if (TEST_CHECKUB STREQUAL "YES")
     file (READ ${TEST_HFILE}.len.txt TEST_O_STRING_LEN)
   endif ()
 
-  MATH( EXPR TEST_STRING_SIZE "${TEST_U_STRING_LEN} + ${TEST_O_STRING_LEN}" )
+  math( EXPR TEST_STRING_SIZE "${TEST_U_STRING_LEN} + ${TEST_O_STRING_LEN}" )
 
   if (NOT TEST_O_STRING_LEN STREQUAL "0")
     #$JAM_BIN/getub -c $s2 $origfile > $cmpfile

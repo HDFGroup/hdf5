@@ -45,12 +45,12 @@ endif ()
 # does, it appends library to the list.
 #-----------------------------------------------------------------------------
 set (LINK_LIBS "")
-MACRO (CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
+macro (CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
   CHECK_LIBRARY_EXISTS ("${LIBRARY};${LINK_LIBS}" ${SYMBOL} "" ${VARIABLE})
   if (${VARIABLE})
     set (LINK_LIBS ${LINK_LIBS} ${LIBRARY})
   endif ()
-ENDMACRO ()
+endmacro ()
 
 # ----------------------------------------------------------------------
 # WINDOWS Hard code Values
@@ -133,7 +133,7 @@ if (NOT WINDOWS)
 endif ()
 
 # For other specific tests, use this MACRO.
-MACRO (HDF_FUNCTION_TEST OTHER_TEST)
+macro (HDF_FUNCTION_TEST OTHER_TEST)
   if ("${HDF_PREFIX}_${OTHER_TEST}" MATCHES "^${HDF_PREFIX}_${OTHER_TEST}$")
     set (MACRO_CHECK_FUNCTION_DEFINITIONS "-D${OTHER_TEST} ${CMAKE_REQUIRED_FLAGS}")
     set (OTHER_TEST_ADD_LIBRARIES)
@@ -178,7 +178,7 @@ MACRO (HDF_FUNCTION_TEST OTHER_TEST)
       )
     endif ()
   endif ()
-ENDMACRO ()
+endmacro ()
 
 #-----------------------------------------------------------------------------
 # Check for these functions before the time headers are checked
@@ -188,28 +188,29 @@ HDF_FUNCTION_TEST (STDC_HEADERS)
 #-----------------------------------------------------------------------------
 # Check IF header file exists and add it to the list.
 #-----------------------------------------------------------------------------
-MACRO (CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
+macro (CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
   CHECK_INCLUDE_FILES ("${USE_INCLUDES};${FILE}" ${VARIABLE})
   if (${VARIABLE})
     set (USE_INCLUDES ${USE_INCLUDES} ${FILE})
   endif ()
-ENDMACRO ()
+endmacro ()
 
 #-----------------------------------------------------------------------------
 #  Check for the existence of certain header files
 #-----------------------------------------------------------------------------
-CHECK_INCLUDE_FILE_CONCAT ("sys/resource.h"  ${HDF_PREFIX}_HAVE_SYS_RESOURCE_H)
-CHECK_INCLUDE_FILE_CONCAT ("sys/time.h"      ${HDF_PREFIX}_HAVE_SYS_TIME_H)
-CHECK_INCLUDE_FILE_CONCAT ("unistd.h"        ${HDF_PREFIX}_HAVE_UNISTD_H)
+CHECK_INCLUDE_FILE_CONCAT ("sys/file.h"      ${HDF_PREFIX}_HAVE_SYS_FILE_H)
 CHECK_INCLUDE_FILE_CONCAT ("sys/ioctl.h"     ${HDF_PREFIX}_HAVE_SYS_IOCTL_H)
-CHECK_INCLUDE_FILE_CONCAT ("sys/stat.h"      ${HDF_PREFIX}_HAVE_SYS_STAT_H)
+CHECK_INCLUDE_FILE_CONCAT ("sys/resource.h"  ${HDF_PREFIX}_HAVE_SYS_RESOURCE_H)
 CHECK_INCLUDE_FILE_CONCAT ("sys/socket.h"    ${HDF_PREFIX}_HAVE_SYS_SOCKET_H)
+CHECK_INCLUDE_FILE_CONCAT ("sys/stat.h"      ${HDF_PREFIX}_HAVE_SYS_STAT_H)
+CHECK_INCLUDE_FILE_CONCAT ("sys/time.h"      ${HDF_PREFIX}_HAVE_SYS_TIME_H)
 CHECK_INCLUDE_FILE_CONCAT ("sys/types.h"     ${HDF_PREFIX}_HAVE_SYS_TYPES_H)
-CHECK_INCLUDE_FILE_CONCAT ("stddef.h"        ${HDF_PREFIX}_HAVE_STDDEF_H)
-CHECK_INCLUDE_FILE_CONCAT ("setjmp.h"        ${HDF_PREFIX}_HAVE_SETJMP_H)
 CHECK_INCLUDE_FILE_CONCAT ("features.h"      ${HDF_PREFIX}_HAVE_FEATURES_H)
 CHECK_INCLUDE_FILE_CONCAT ("dirent.h"        ${HDF_PREFIX}_HAVE_DIRENT_H)
+CHECK_INCLUDE_FILE_CONCAT ("setjmp.h"        ${HDF_PREFIX}_HAVE_SETJMP_H)
+CHECK_INCLUDE_FILE_CONCAT ("stddef.h"        ${HDF_PREFIX}_HAVE_STDDEF_H)
 CHECK_INCLUDE_FILE_CONCAT ("stdint.h"        ${HDF_PREFIX}_HAVE_STDINT_H)
+CHECK_INCLUDE_FILE_CONCAT ("unistd.h"        ${HDF_PREFIX}_HAVE_UNISTD_H)
 
 # IF the c compiler found stdint, check the C++ as well. On some systems this
 # file will be found by C but not C++, only do this test IF the C++ compiler
@@ -346,7 +347,7 @@ endif ()
 #-----------------------------------------------------------------------------
 #  Check the size in bytes of all the int and float types
 #-----------------------------------------------------------------------------
-MACRO (HDF_CHECK_TYPE_SIZE type var)
+macro (HDF_CHECK_TYPE_SIZE type var)
   set (aType ${type})
   set (aVar  ${var})
 #  message (STATUS "Checking size of ${aType} and storing into ${aVar}")
@@ -355,7 +356,7 @@ MACRO (HDF_CHECK_TYPE_SIZE type var)
     set (${aVar} 0 CACHE INTERNAL "SizeOf for ${aType}")
 #    message (STATUS "Size of ${aType} was NOT Found")
   endif ()
-ENDMACRO ()
+endmacro ()
 
 HDF_CHECK_TYPE_SIZE (char           ${HDF_PREFIX}_SIZEOF_CHAR)
 HDF_CHECK_TYPE_SIZE (short          ${HDF_PREFIX}_SIZEOF_SHORT)
@@ -527,6 +528,8 @@ CHECK_FUNCTION_EXISTS (sigprocmask       ${HDF_PREFIX}_HAVE_SIGPROCMASK)
 CHECK_FUNCTION_EXISTS (snprintf          ${HDF_PREFIX}_HAVE_SNPRINTF)
 CHECK_FUNCTION_EXISTS (srandom           ${HDF_PREFIX}_HAVE_SRANDOM)
 CHECK_FUNCTION_EXISTS (strdup            ${HDF_PREFIX}_HAVE_STRDUP)
+CHECK_FUNCTION_EXISTS (strtoll           ${HDF_PREFIX}_HAVE_STRTOLL)
+CHECK_FUNCTION_EXISTS (strtoull          ${HDF_PREFIX}_HAVE_STRTOULL)
 CHECK_FUNCTION_EXISTS (symlink           ${HDF_PREFIX}_HAVE_SYMLINK)
 CHECK_FUNCTION_EXISTS (system            ${HDF_PREFIX}_HAVE_SYSTEM)
 
@@ -572,7 +575,7 @@ if (NOT WINDOWS)
 endif ()
 
 # For other CXX specific tests, use this MACRO.
-MACRO (HDF_CXX_FUNCTION_TEST OTHER_TEST)
+macro (HDF_CXX_FUNCTION_TEST OTHER_TEST)
   if ("${OTHER_TEST}" MATCHES "^${OTHER_TEST}$")
     set (MACRO_CHECK_FUNCTION_DEFINITIONS "-D${OTHER_TEST} ${CMAKE_REQUIRED_FLAGS}")
     set (OTHER_TEST_ADD_LIBRARIES)
@@ -585,6 +588,7 @@ MACRO (HDF_CXX_FUNCTION_TEST OTHER_TEST)
         HAVE_UNISTD_H
         HAVE_SYS_TYPES_H
         HAVE_SYS_SOCKET_H
+        HAVE_SYS_FILE_H
     )
       if ("${${HDF_PREFIX}_${def}}")
         set (MACRO_CHECK_FUNCTION_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D${def}")
@@ -617,7 +621,7 @@ MACRO (HDF_CXX_FUNCTION_TEST OTHER_TEST)
       )
     endif ()
   endif ()
-ENDMACRO ()
+endmacro ()
 
 #-----------------------------------------------------------------------------
 # Check a bunch of cxx functions

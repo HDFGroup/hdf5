@@ -106,9 +106,9 @@ CHECK_FUNCTION_EXISTS (difftime          H5_HAVE_DIFFTIME)
 
 # Find the library containing clock_gettime()
 if (NOT WINDOWS)
-  CHECK_FUNCTION_EXISTS(clock_gettime CLOCK_GETTIME_IN_LIBC)
-  CHECK_LIBRARY_EXISTS(rt clock_gettime "" CLOCK_GETTIME_IN_LIBRT)
-  CHECK_LIBRARY_EXISTS(posix4 clock_gettime "" CLOCK_GETTIME_IN_LIBPOSIX4)
+  CHECK_FUNCTION_EXISTS (clock_gettime CLOCK_GETTIME_IN_LIBC)
+  CHECK_LIBRARY_EXISTS (rt clock_gettime "" CLOCK_GETTIME_IN_LIBRT)
+  CHECK_LIBRARY_EXISTS (posix4 clock_gettime "" CLOCK_GETTIME_IN_LIBPOSIX4)
   if (CLOCK_GETTIME_IN_LIBC)
     set (H5_HAVE_CLOCK_GETTIME 1)
   elseif (CLOCK_GETTIME_IN_LIBRT)
@@ -147,7 +147,7 @@ if (NOT WINDOWS)
               "Test TEST_DIRECT_VFD_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
         )
       endif ()
-    else ( )
+    else ()
       set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
       message (STATUS "${msg}... no")
       file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
@@ -161,7 +161,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities
 #-----------------------------------------------------------------------------
-MACRO (H5ConversionTests TEST msg)
+macro (H5ConversionTests TEST msg)
   if ("${TEST}" MATCHES "^${TEST}$")
    # message (STATUS "===> ${TEST}")
     TRY_RUN (${TEST}_RUN   ${TEST}_COMPILE
@@ -190,12 +190,12 @@ MACRO (H5ConversionTests TEST msg)
     endif ()
 
   endif ()
-ENDMACRO ()
+endmacro ()
 
 #-----------------------------------------------------------------------------
 # Macro to make some of the conversion tests easier to write/read
 #-----------------------------------------------------------------------------
-MACRO (H5MiscConversionTest VAR TEST msg)
+macro (H5MiscConversionTest VAR TEST msg)
   if ("${TEST}" MATCHES "^${TEST}$")
     if (${VAR})
       set (${TEST} 1 CACHE INTERNAL ${msg})
@@ -205,7 +205,7 @@ MACRO (H5MiscConversionTest VAR TEST msg)
       message (STATUS "${msg}... no")
     endif ()
   endif ()
-ENDMACRO ()
+endmacro ()
 
 #-----------------------------------------------------------------------------
 # Check various conversion capabilities

@@ -26,7 +26,7 @@ set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
 # The provided CMake Fortran macros don't provide a general check function
 # so this one is used for a sizeof test.
 #-----------------------------------------------------------------------------
-MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
+macro (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
     message (STATUS "Testing Fortran ${FUNCTION}")
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
@@ -63,7 +63,7 @@ MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
           "Determining if the Fortran ${FUNCTION} exists failed with the following output:\n"
           "${OUTPUT}\n\n")
     endif ()
-ENDMACRO ()
+endmacro ()
 
 #-----------------------------------------------------------------------------
 # Configure Checks which require Fortran compilation must go in here
