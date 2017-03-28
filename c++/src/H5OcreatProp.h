@@ -72,6 +72,7 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-};
-}
+}; // end of ObjCreatPropList
+} // namespace H5
+
 #endif // __H5ObjCreatPropList_H

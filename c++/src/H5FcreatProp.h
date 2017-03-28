@@ -65,18 +65,19 @@ class H5_DLLCPP FileCreatPropList : public PropList {
         // indexing chunked datasets.
         void setIstorek(unsigned ik) const;
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
         // Sets the strategy and the threshold value that the library will
         // will employ in managing file space.
-        void setFileSpace(H5F_file_space_type_t strategy, hsize_t threshold) const;
+        void setFileSpaceStrategy(H5F_fspace_strategy_t strategy, hbool_t persist, hsize_t threshold) const;
 
         // Returns the strategy that the library uses in managing file space.
-        H5F_file_space_type_t getFileSpaceStrategy() const;
+        void getFileSpaceStrategy(H5F_fspace_strategy_t& strategy, hbool_t& persist, hsize_t& threshold) const;
+
+        // Sets the file space page size for paged aggregation.
+        void setFileSpacePagesize(hsize_t fsp_psize) const;
 
         // Returns the threshold value that the library uses in tracking free
         // space sections.
-        hsize_t getFileSpaceThreshold() const;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+        hsize_t getFileSpacePagesize() const;
 
         ///\brief Returns this class name.
         virtual H5std_string fromClass() const { return("FileCreatPropList"); }
@@ -104,6 +105,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-};
-}
+}; // end of FileCreatPropList
+} // namespace H5
+
 #endif // __H5FileCreatPropList_H

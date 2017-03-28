@@ -1386,7 +1386,13 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDstrtol
     #define HDstrtol(S,R,N)    strtol(S,R,N)
 #endif /* HDstrtol */
-H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
+#ifndef HDstrtoll
+    #ifdef H5_HAVE_STRTOLL
+        #define HDstrtoll(S,R,N)  strtoll(S,R,N)
+    #else
+        H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
+    #endif /* H5_HAVE_STRTOLL */
+#endif /* HDstrtoll */
 #ifndef HDstrtoul
     #define HDstrtoul(S,R,N)  strtoul(S,R,N)
 #endif /* HDstrtoul */

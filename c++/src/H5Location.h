@@ -86,6 +86,7 @@ class H5_DLLCPP H5Location : public IdComponent {
         // Open a referenced object whose location is specified by either
         // a file, an HDF5 object, or an attribute.
         void dereference(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+        // Removed in 1.10.1, because H5Location is baseclass
         //void dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
         // Retrieves a dataspace with the region pointed to selected.
@@ -220,7 +221,7 @@ class H5_DLLCPP H5Location : public IdComponent {
         // Noop destructor.
         virtual ~H5Location();
 
-}; /* end class H5Location */
+}; // end of H5Location
+} // namespace H5
 
-}
 #endif // __H5Location_H

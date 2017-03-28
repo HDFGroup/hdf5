@@ -78,6 +78,8 @@ class H5_DLLCPP AtomType : public DataType {
         // Constructor that takes an existing id
         AtomType(const hid_t existing_id);
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-};
-}
+
+}; // end of AtomType
+} // namespace H5
+
 #endif // __H5AtomType_H

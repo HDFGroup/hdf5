@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.236], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.11.0], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -1851,6 +1851,7 @@ AC_CHECK_FUNCS([frexpl gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
+AC_CHECK_FUNCS([strtoll strtoull])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
 AC_CHECK_FUNCS([roundf lroundf llroundf round lround llround])
 

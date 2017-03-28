@@ -6,6 +6,10 @@
 ### uncomment/comment and change the following lines for other configuration options
 
 #############################################################################################
+####      alternate toolsets       ####
+#set(CMAKE_GENERATOR_TOOLSET "Intel C++ Compiler 17.0")
+
+#############################################################################################
 ####      ext libraries       ####
 
 ### ext libs from tgz
@@ -31,7 +35,7 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING
 ### disable packaging
 
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NO_PACKAGES:BOOL=ON")
-### Create install package with external libraries (szip, zlib, jpeg)
+### Create install package with external libraries (szip, zlib)
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 
 #############################################################################################

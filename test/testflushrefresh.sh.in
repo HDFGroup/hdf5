@@ -79,11 +79,23 @@ if [ $rc -ne 0 ] ; then
     exit 0
 fi
 
-# ========================
-# Launch the Test Program.
-# ========================
-./flushrefresh &
-pid_main=$!
+# HDF5 has several tests that create and delete signal files to communicate
+# between processes, and it seems that even though the names of the files are
+# different, occasionally the wrong file is deleted, interrupting the flow of
+# the test.  Running each of these tests in its own directory should eliminate 
+# the problem.
+mkdir flushrefresh_test
+cp flushrefresh flushrefresh_test
+
+# With the --disable-shared option, flushrefresh is built in the test directory,
+# otherwise it is in test/.libs with a wrapper script named flushrefresh in 
+# the test directory.  test/flushrefresh should always be copied, 
+# .libs/flushrefresh should be copied only if it exists.
+if [ -f .libs/flushrefresh ]; then
+    mkdir flushrefresh_test/.libs
+    cp .libs/flushrefresh flushrefresh_test/.libs
+fi
+cd flushrefresh_test
 
 # =================================================
 # Set up/initialize some variables to be used later 
@@ -97,6 +109,12 @@ verification_done=0
 if [ -e $testfile ]; then
     rm $testfile
 fi
+
+# ========================
+# Launch the Test Program.
+# ========================
+./flushrefresh &
+pid_main=$!
 
 # =======================================
 # Run flush verification on test program.
@@ -193,6 +211,10 @@ fi
 
 if test $nerrors -eq 0 ; then
     echo "flush/refresh objects tests passed."
+    if test -z "$HDF5_NOCLEANUP"; then
+        # delete the test directory
+        rm -rf flushrefresh_test
+    fi
     exit 0
 else
     echo "flush/refresh objects tests failed with $nerrors errors."

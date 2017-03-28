@@ -248,17 +248,32 @@ static void test_query()
         index = tid2.getMemberIndex("ORANGE");
         verify_val(index, 3, "EnumType::getMemberIndex()", __LINE__, __FILE__);
 
-        // Commit compound datatype and close it
+        // Commit compound datatype, and test getting the datatype creation
+        // prop list, then close it
         tid1.commit(file, CompT_NAME);
+        PropList tcpl = tid1.getCreatePlist();
+        if (!IdComponent::isValid(tcpl.getId()))
+        {
+            // Throw an invalid action exception
+            throw InvalidActionException("H5Object::createAttribute", "Datatype creation property list is not valid");
+        }
+        tcpl.close();
         tid1.close();
 
-        // Commit enumeration datatype and close it
+        // Commit enumeration datatype, and test getting the datatype creation
+        // prop list, then close it
         tid2.commit(file, EnumT_NAME);
+        tcpl = tid2.getCreatePlist();
+        if (!IdComponent::isValid(tcpl.getId()))
+        {
+            // Throw an invalid action exception
+            throw InvalidActionException("H5Object::createAttribute", "Datatype creation property list is not valid");
+        }
+        tcpl.close();
         tid2.close();
 
-        // Open the datatypes for query
+        // Open the datatypes for query.  Testing both ways
 
-        // Deprecated functions
         tid1 = file.openCompType(CompT_NAME);
         tid1.close();
         tid2 = file.openEnumType(EnumT_NAME);

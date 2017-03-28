@@ -18,6 +18,7 @@
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
+#include "H5DataSpace.h"
 #include "H5PropList.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
@@ -737,6 +738,55 @@ void DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char* name, 
         throw PropListIException("DSetCreatPropList::getExternal",
                 "H5Pget_external failed");
     }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DSetCreatPropList::setVirtual
+///\brief       Maps elements of a virtual dataset to elements of the source
+///             dataset.
+///\param       vspace     - IN: Dataspace the virtual dataset, possibly an
+///                             unlimited selection
+///\param       src_fname  - IN: Name of the HDF5 file where the source dataset
+///                             is located (\a char*)
+///\param       src_dsname - IN: Path to the dataset in the file specified by
+///                             \a src_file_name (\a char*)
+///\param       sspace     - IN: Dataspace with a selection applied, possibly
+///                             an unlimited selection
+///\exception   H5::PropListIException
+///\par Description
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetVirtual
+// Programmer   Binh-Minh Ribler - Mar, 2017
+//--------------------------------------------------------------------------
+void DSetCreatPropList::setVirtual(const DataSpace& vspace, const char *src_fname, const char *src_dsname, const DataSpace& sspace) const
+{
+    herr_t ret_value = H5Pset_virtual(id, vspace.getId(), src_fname, src_dsname, sspace.getId());
+    if (ret_value < 0)
+    {
+        throw PropListIException("DSetCreatPropList::setVirtual",
+            "H5Pset_virtual failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DSetCreatPropList::setVirtual
+///\brief       Maps elements of a virtual dataset to elements of the source
+///             dataset.
+///\param       vspace     - IN: Dataspace the virtual dataset, possibly an
+///                             unlimited selection
+///\param       src_fname  - IN: Name of the HDF5 file where the source dataset
+///                             is located (\a H5std_string)
+///\param       src_dsname - IN: Path to the dataset in the file specified by
+///                             \a src_file_name (\a H5std_string)
+///\param       sspace     - IN: Dataspace with a selection applied, possibly
+///                             an unlimited selection
+///\exception   H5::PropListIException
+///\par Description
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetVirtual
+// Programmer   Binh-Minh Ribler - Mar, 2017
+//--------------------------------------------------------------------------
+void DSetCreatPropList::setVirtual(const DataSpace& vspace, const H5std_string src_fname, const H5std_string src_dsname, const DataSpace& sspace) const
+{
+    setVirtual(vspace, src_fname.c_str(), src_dsname.c_str(), sspace);
 }
 
 //--------------------------------------------------------------------------

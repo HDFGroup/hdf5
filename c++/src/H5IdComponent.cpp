@@ -24,6 +24,7 @@
 
 namespace H5 {
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // This flag indicates whether H5Library::initH5cpp has been called to register
 // the terminating functions with atexit()
 bool IdComponent::H5cppinit = false;
@@ -32,6 +33,7 @@ bool IdComponent::H5cppinit = false;
 // Subclasses that have global constants use it.  This is a temporary
 // work-around in 1.8.16.  It will be removed after HDFFV-9540 is fixed.
 bool IdComponent::H5dontAtexit_called = false;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    IdComponent::incRefCount
@@ -165,7 +167,7 @@ H5I_type_t IdComponent::getHDFObjType() const
 // Function:    getNumMembers (static)
 ///\brief       Returns the number of members of the given type.
 ///\return      Number of members
-///\Description
+///\par Description
 ///             If there is no member of the given type, getNumMembers will
 ///             return 0.  Valid types are:
 ///             \li \c H5I_FILE (= 1)
@@ -194,11 +196,32 @@ hsize_t IdComponent::getNumMembers(H5I_type_t type)
 }
 
 //--------------------------------------------------------------------------
+// Function:    isValid (static)
+///\brief       Checks if the given ID is valid.
+///\return      true if the given identifier is valid, and false, otherwise.
+///\par Description
+///             A valid ID is one that is in use and has an application
+///             reference count of at least 1.
+// Programmer   Binh-Minh Ribler - Mar 1, 2017
+//--------------------------------------------------------------------------
+bool IdComponent::isValid(hid_t an_id)
+{
+    // Call C function
+    htri_t ret_value = H5Iis_valid(an_id);
+    if (ret_value > 0)
+        return true;
+    else if (ret_value == 0)
+        return false;
+    else // Raise exception when H5Iis_valid returns a negative value
+        throw IdComponentException("isValid", "H5Iis_valid failed");
+}
+
+//--------------------------------------------------------------------------
 // Function:    typeExists (static)
 ///\brief       Queries if a given type is currently registered with the
 ///             library.
 ///\return      true if the given type exists, and false, otherwise.
-///\Description
+///\par Description
 ///             Valid types are:
 ///             \li \c H5I_FILE (= 1)
 ///             \li \c H5I_GROUP

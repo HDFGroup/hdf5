@@ -196,6 +196,15 @@ die "unable to read file: $CONFIGURE\n" unless -r $file;
 my $CPP_DOC_CONFIG = $file;
 $CPP_DOC_CONFIG =~ s/[^\/]*$/..\/c++\/src\/cpp_doc_config/;
 die "unable to read file: $CPP_DOC_CONFIG\n"  unless -r $file;
+my $H5_JAVA = $file;
+$H5_JAVA =~ s/[^\/]*$/..\/java\/src\/hdf\/hdf5lib\/H5.java/;
+die "unable to read file: $H5_JAVA\n" unless -r $file;
+my $TESTH5_JAVA = $file;
+$TESTH5_JAVA =~ s/[^\/]*$/..\/java\/test\/TestH5.java/; 
+die "unable to read file: $TESTH5_JAVA\n" unless -r $file;
+my $REPACK_LAYOUT_PLUGIN_VERSION = $file;
+$REPACK_LAYOUT_PLUGIN_VERSION =~ s/[^\/]*$/..\/tools\/test\/h5repack\/testfiles\/h5repack_layout.h5-plugin_version_test.ddl/;
+die "unable to read file: $REPACK_LAYOUT_PLUGIN_VERSION\n" unless -r $file;
 
 # Get the current version number.
 open FILE, $file or die "unable to open $file: $!\n";
@@ -351,15 +360,60 @@ if ($HDF5CONFIGCMAKE) {
      );
   my $version_string = sprintf("\"%d.%d.%d\"", @newver[0,1,2]);
 
-  $data =~ s/set\(CTEST_SOURCE_VERSION .*\)/set\(CTEST_SOURCE_VERSION $version_string\)/;
-  $data =~ s/set\(CTEST_SOURCE_VERSEXT .*\)/set\(CTEST_SOURCE_VERSEXT $sub_rel_ver_str\)/;
+  $data =~ s/set \(CTEST_SOURCE_VERSION .*\)/set \(CTEST_SOURCE_VERSION $version_string\)/;
+  $data =~ s/set \(CTEST_SOURCE_VERSEXT .*\)/set \(CTEST_SOURCE_VERSEXT $sub_rel_ver_str\)/;
 
   write_file($HDF5CONFIGCMAKE, $data);  
 }
 
+# Update the java/src/hdf/hdf5lib/H5.java file
+if ($H5_JAVA) {
+  my $data = read_file($H5_JAVA);
+#  my $sub_rel_ver_str = "";
+  my $sub_rel_ver_str = (
+     $newver[3] eq ""
+     ? sprintf("\"%s\"", "")
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
+     );
+  my $version_string1 = sprintf("%d.%d.%d", @newver[0,1,2]);
+  my $version_string2 = sprintf("%d, %d, %d", @newver[0,1,2]);
 
+  $data =~ s/\@version HDF5 .* <BR>/\@version HDF5 $version_string1 <BR>/;
+  $data =~ s/    public final static int LIB_VERSION\[\] = { \d*, \d*, \d* };/    public final static int LIB_VERSION[] = { $version_string2 };/;        
 
-# helper function to read the file for updating c++/src/cpp_doc_config file.
+  write_file($H5_JAVA, $data);
+}
+
+# Update the java/test/TestH5.java file
+if ($TESTH5_JAVA) {
+  my $data = read_file($TESTH5_JAVA);
+#  my $sub_rel_ver_str = "";
+  my $sub_rel_ver_str = (
+     $newver[3] eq ""
+     ? sprintf("\"%s\"", "")
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
+     );
+  my $version_string1 = sprintf("%d, %d, %d", @newver[0,1,2]);
+  my $version_string2 = sprintf("int majnum = %d, minnum = %d, relnum = %d", @newver[0,1,2]);
+
+  $data =~ s/        int libversion\[\] = { .* };/        int libversion\[\] = { $version_string1 };/;
+  $data =~ s/        int majnum = \d*, minnum = \d*, relnum = \d*;/        $version_string2;/;        
+
+  write_file($TESTH5_JAVA, $data);
+}
+
+# Update the tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl file
+if ($REPACK_LAYOUT_PLUGIN_VERSION) {
+  my $data = read_file($REPACK_LAYOUT_PLUGIN_VERSION);
+  my $version_string = sprintf("%d %d %d", @newver[0,1,2]);
+
+  $data =~ s/            PARAMS { 9 \d* \d* \d* }/            PARAMS { 9 $version_string }/g;
+
+  write_file($REPACK_LAYOUT_PLUGIN_VERSION, $data);
+}
+
+# helper function to read the file for updating c++/src/cpp_doc_config, 
+# config/cmake/scripts/HDF5Config.cmake, and java files.
 # The version string in that file is not at the top, so the string replacement
 # is not for the first line, and reading/writing the entire file as one string
 # facilitates the substring replacement.
@@ -375,8 +429,8 @@ sub read_file {
     return $all;
 }
 
-# helper function to write the file for updating c++/src/cpp_doc_config 
-# and config/cmake/scripts/HDF5config.cmake files.
+# helper function to write the file for updating c++/src/cpp_doc_config, 
+# config/cmake/scripts/HDF5config.cmake and java files.
 sub write_file {
     my ($filename, $content) = @_;
 

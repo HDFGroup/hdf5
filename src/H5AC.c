@@ -611,6 +611,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
 
     /* Sanity check */
     HDassert(f);
+    HDassert(f->shared);
     HDassert(f->shared->cache);
 
 #if H5AC_DUMP_STATS_ON_CLOSE
@@ -641,9 +642,17 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
-    if(H5AC__flush_entries(f, dxpl_id) < 0)
+    /* If the file was opened R/W, attempt to flush all entries 
+     * from rank 0 & Bcast clean list to other ranks.
+     *
+     * Must not flush in the R/O case, as this will trigger the 
+     * free space manager settle routines.
+     */
+    if ( ( H5F_ACC_RDWR & H5F_INTENT(f) ) && 
+         ( H5AC__flush_entries(f, dxpl_id) < 0 ) )
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+
 #endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
@@ -3300,4 +3309,30 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_remove_entry() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_get_mdc_image_info
+ *
+ * Purpose:     Wrapper function for H5C_get_mdc_image_info().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  Vailin Choi; March 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(H5C_get_mdc_image_info((H5C_t *)cache_ptr, image_addr, image_len) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_get_mdc_image_info() */
 

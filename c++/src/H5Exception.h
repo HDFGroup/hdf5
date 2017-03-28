@@ -174,8 +174,8 @@ class H5_DLLCPP IdComponentException : public Exception {
         IdComponentException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
         IdComponentException();
         virtual ~IdComponentException() throw();
-};
 
-}
+}; // end of IdComponentException
+} // namespace H5
 
 #endif // __H5Exception_H

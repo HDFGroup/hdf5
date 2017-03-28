@@ -142,11 +142,8 @@ const char *FILENAME[] = {
 #define H5L_DIM2 100
 
 /* Creation order macros */
-#define CORDER_GROUP_NAME       "corder_group"
 #define CORDER_SOFT_GROUP_NAME  "corder_soft_group"
 #define CORDER_NLINKS               18
-#define CORDER_ITER_STOP            3
-#define CORDER_EST_ENTRY_LEN        9
 
 /* Timestamp macros */
 #define TIMESTAMP_GROUP_1       "timestamp1"
@@ -341,7 +338,7 @@ static const char *FILENAME[] = {
 static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 {
     hsize_t size[1] = {1};
-    char    filename[NAME_BUF_SIZE];
+    char filename[NAME_BUF_SIZE];
 
     // Use the file access template id to create a file access prop. list.
     FileAccPropList fapl(fapl_id);
@@ -439,6 +436,55 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
     }
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_num_links
+ *
+ * Purpose      Test setting and getting limit of number of links
+ *
+ * Return       Success: 0
+ *
+ *              Failure: -1
+ *
+ * Programmer   Binh-Minh Ribler
+ *              October 16, 2009
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_num_links(hid_t fapl_id, hbool_t new_format)
+{
+    char filename[NAME_BUF_SIZE];
+
+    if(new_format)
+        SUBTEST("Setting number of links (w/new group format)")
+    else
+        SUBTEST("Setting number of links")
+
+    try
+    {
+        // Use the file access template id to create a file access prop. list.
+        FileAccPropList fapl(fapl_id);
+
+        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
+
+        LinkAccPropList lapl;
+        size_t nlinks = 5;
+        lapl.setNumLinks(nlinks);
+
+        // Read it back and verify
+        size_t read_nlinks = lapl.getNumLinks();
+        verify_val(read_nlinks, nlinks, "LinkAccPropList::setNumLinks", __LINE__, __FILE__);
+
+        PASSED();
+    } // end of try block
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+} // test_num_links
 
 /*-------------------------------------------------------------------------
  * Function:    test_links
