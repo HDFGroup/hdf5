@@ -46,7 +46,9 @@ const char *FILENAMES[] = {
 /* local utility function declarations */
 
 static void create_data_sets(hid_t file_id, int min_dset, int max_dset);
+#if 0 /* keep pending full parallel cache image */
 static void delete_data_sets(hid_t file_id, int min_dset, int max_dset);
+#endif
 
 static void open_hdf5_file(const hbool_t create_file,
     const hbool_t mdci_sbem_expected,
@@ -796,7 +798,12 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
  *
  *-------------------------------------------------------------------------
  */
-
+#if 0 
+/* this code will be needed to test full support of cache image
+ * in parallel -- keep it around against that day.
+ *
+ *                                      -- JRM
+ */
 static void 
 delete_data_sets(hid_t file_id, int min_dset, int max_dset)
 {
@@ -843,6 +850,7 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
     return;
 
 } /* delete_data_sets() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -2756,11 +2764,21 @@ usage(void)
         "The \"setup\" parameter indicates that t_cache_image is being \n",
         "invokde for this purpose.\n",
         "\n",
-        "usage: t_cache_image [setup]\n",
+        "Similarly, only a serial process can add a cache image to an\n",
+        "existing file.\n",
+        "\n",
+        "Here again, one process forks a serial version of the test program\n",
+        "with the \"ici\" parameter.\n"
+        "\n",
+        "usage: t_cache_image [setup|ici m n]\n",
         "\n",
         "where:\n",
         "\n",
         "       setup parameter forces creation of test file\n",
+        "\n",
+        "       ici parameter forces insertion of a cache image into the \n",
+        "       m   th test file, created by a parallel computation with .\n",
+        "       n   processes\n",
         "\n",
         "Returns 0 on success, 1 on failure.\n",
         "\n",
@@ -3141,11 +3159,6 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
     /* 1) Open the test file created at the beginning of this test.
      *
      *    Verify that the file contains a cache image.
-     *
-     *    Verify that only process 0 reads the cache image.
-     *
-     *    Verify that all other processes receive the cache 
-     *    image block from process 0.
      */
 
     if ( pass ) {
@@ -3172,35 +3185,56 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
     if ( show_progress ) 
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+
+    /* 2) Verify that the file contains the expected data. 
+     *
+     *    Verify that only process 0 reads the cache image.
+     *
+     *    Verify that all other processes receive the cache 
+     *    image block from process 0.
+     */
+
+    if ( pass ) {
+
+       verify_data_sets(file_id, 0, MAX_NUM_DSETS - 1);
+    }
+
     /* Verify that only process 0 reads the cache image. */
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        if ( ( ( mpi_rank == 0 ) && ( cache_ptr->images_read != 1 ) ) ||
+             ( ( mpi_rank > 0 )  && ( cache_ptr->images_read != 0 ) ) ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected images_read.";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
 
     if ( show_progress ) 
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* Verify that all other processes receive the cache image block 
      * from process 0.
+     * 
+     * Since we have alread verified that only process 0 has read the 
+     * image, it is sufficient to verify that the image was loaded on 
+     * all processes.
      */
-
-    if ( show_progress ) 
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
-
-
-    /* 2) Verify that the file contains the expected data. */
-    if ( pass ) {
-
-       verify_data_sets(file_id, 0, MAX_NUM_DSETS - 1);
-    }
-
 #if H5C_COLLECT_CACHE_STATS
     if ( pass ) {
 
-        if ( cache_ptr->images_loaded == 0 ) {
+        if ( cache_ptr->images_loaded != 1 ) {
 
             pass = FALSE;
-            failure_mssg = "metadata cache image block not loaded(1).";
+            failure_mssg = "Image not loaded?.";
         }
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* 3) Close the file. */
@@ -3317,12 +3351,13 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
  *
  *		   Verify that the file contains a cache image.
  *
+ *              2) Verify that the file contains the expected data.
+ *
  *		   Verify that only process 0 reads the cache image.
  *
  *		   Verify that all other processes receive the cache 
  *		   image block from process 0.
  *
- *              2) Verify that the file contains the expected data.
  *
  *              3) Close the file.
  *
@@ -3434,35 +3469,55 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
     if ( show_progress ) 
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+
+    /* 2) Verify that the file contains the expected data.
+     *
+     *    Verify that only process 0 reads the cache image.
+     *
+     *    Verify that all other processes receive the cache 
+     *    image block from process 0.
+     */
+    if ( pass ) {
+
+       verify_data_sets(file_id, 0, MAX_NUM_DSETS - 1);
+    }
+
     /* Verify that only process 0 reads the cache image. */
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        if ( ( ( mpi_rank == 0 ) && ( cache_ptr->images_read != 1 ) ) ||
+             ( ( mpi_rank > 0 )  && ( cache_ptr->images_read != 0 ) ) ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected images_read.";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
 
     if ( show_progress ) 
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* Verify that all other processes receive the cache image block 
      * from process 0.
+     * 
+     * Since we have alread verified that only process 0 has read the 
+     * image, it is sufficient to verify that the image was loaded on 
+     * all processes.
      */
-
-    if ( show_progress ) 
-        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
-
-
-    /* 2) Verify that the file contains the expected data. */
-    if ( pass ) {
-
-       verify_data_sets(file_id, 0, MAX_NUM_DSETS - 1);
-    }
-
 #if H5C_COLLECT_CACHE_STATS
     if ( pass ) {
 
-        if ( cache_ptr->images_loaded == 0 ) {
+        if ( cache_ptr->images_loaded != 1 ) {
 
             pass = FALSE;
-            failure_mssg = "metadata cache image block not loaded(2).";
+            failure_mssg = "Image not loaded?.";
         }
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* 3) Close the file. */
@@ -3754,7 +3809,13 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 7) Verify the datasets in the file backwards */
+    /* 7) Verify the datasets in the file backwards 
+     *
+     *    Verify that only process 0 reads the cache image.
+     *
+     *    Verify that all other processes receive the cache 
+     *    image block from process 0.
+     */
 
     i = num_dsets - 1;
     while ( ( pass ) && ( i >= 0 ) ) {
@@ -3762,6 +3823,46 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         par_verify_dataset(i, file_id, mpi_rank);
         i--;
     }
+
+    if ( ( mpi_rank == 0 ) && ( show_progress ) )
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Verify that only process 0 reads the cache image. */
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        if ( ( ( mpi_rank == 0 ) && ( cache_ptr->images_read != 1 ) ) ||
+             ( ( mpi_rank > 0 )  && ( cache_ptr->images_read != 0 ) ) ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected images_read.";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( ( mpi_rank == 0 ) && ( show_progress ) )
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Verify that all other processes receive the cache image block 
+     * from process 0.
+     * 
+     * Since we have alread verified that only process 0 has read the 
+     * image, it is sufficient to verify that the image was loaded on 
+     * all processes.
+     */
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        if ( cache_ptr->images_loaded != 1 ) {
+
+            pass = FALSE;
+            failure_mssg = "Image not loaded?.";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( ( mpi_rank == 0 ) && ( show_progress ) )
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* 8) Close the file */
@@ -3775,6 +3876,9 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
 
         }
     }
+
+    if ( ( mpi_rank == 0 ) && ( show_progress ) )
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* 9) Open the file */
@@ -3804,7 +3908,13 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 10) Verify the datasets in the file */
+    /* 10) Verify the datasets in the file 
+     *
+     *     Verify that only process 0 reads the cache image.
+     *
+     *     Verify that all other processes receive the cache 
+     *     image block from process 0.
+     */
 
     i = 0;
     while ( ( pass ) && ( i < num_dsets ) ) {
@@ -3812,6 +3922,43 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         par_verify_dataset(i, file_id, mpi_rank);
         i++;
     }
+
+    if ( ( mpi_rank == 0 ) && ( show_progress ) )
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Verify that only process 0 reads the cache image. */
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        if ( ( ( mpi_rank == 0 ) && ( cache_ptr->images_read != 1 ) ) ||
+             ( ( mpi_rank > 0 )  && ( cache_ptr->images_read != 0 ) ) ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected images_read.";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( ( mpi_rank == 0 ) && ( show_progress ) )
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Verify that all other processes receive the cache image block 
+     * from process 0.
+     * 
+     * Since we have alread verified that only process 0 has read the 
+     * image, it is sufficient to verify that the image was loaded on 
+     * all processes.
+     */
+#if H5C_COLLECT_CACHE_STATS
+    if ( pass ) {
+
+        if ( cache_ptr->images_loaded != 1 ) {
+
+            pass = FALSE;
+            failure_mssg = "Image not loaded?.";
+        }
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
 
     if ( ( mpi_rank == 0 ) && ( show_progress ) )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);

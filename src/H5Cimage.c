@@ -122,7 +122,7 @@ static H5C_cache_entry_t *H5C__reconstruct_cache_entry(const H5F_t *f,
     H5C_t *cache_ptr, const uint8_t **buf);
 static herr_t H5C__write_cache_image_superblock_msg(H5F_t *f, hid_t dxpl_id, 
     hbool_t create);
-static herr_t H5C__read_cache_image(H5F_t * f, hid_t dxpl_id, const H5C_t *cache_ptr);
+static herr_t H5C__read_cache_image(H5F_t * f, hid_t dxpl_id, H5C_t *cache_ptr);
 static herr_t H5C__write_cache_image(H5F_t *f, hid_t dxpl_id, const H5C_t *cache_ptr);
 static herr_t H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr);
 static herr_t H5C__free_image_entries_array(H5C_t *cache_ptr);
@@ -1035,7 +1035,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__read_cache_image(H5F_t *f, hid_t dxpl_id, const H5C_t *cache_ptr)
+H5C__read_cache_image(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr)
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -1053,31 +1053,53 @@ H5C__read_cache_image(H5F_t *f, hid_t dxpl_id, const H5C_t *cache_ptr)
     H5AC_aux_t *aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
     int mpi_result;
 
-    if((NULL == aux_ptr) || (aux_ptr->mpi_rank == 0)) {
-	HDassert((NULL == aux_ptr) || (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC));
+    if ( ( NULL == aux_ptr ) || ( aux_ptr->mpi_rank == 0 ) ) {
+
+	HDassert((NULL == aux_ptr) || 
+                 (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC));
 #endif /* H5_HAVE_PARALLEL */
 
 	/* Read the buffer (if serial access, or rank 0 of parallel access) */
-        if(H5F_block_read(f, H5FD_MEM_SUPER, cache_ptr->image_addr, cache_ptr->image_len, dxpl_id, cache_ptr->image_buffer) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, "Can't read metadata cache image block")
+        if ( H5F_block_read(f, H5FD_MEM_SUPER, cache_ptr->image_addr, 
+                            cache_ptr->image_len, dxpl_id, 
+                            cache_ptr->image_buffer) < 0)
+
+            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, \
+                        "Can't read metadata cache image block")
+
+        H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)
 
 #ifdef H5_HAVE_PARALLEL
-	if(aux_ptr) {
+	if ( aux_ptr ) {
+
 	    /* Broadcast cache image */
-            if(MPI_SUCCESS != (mpi_result = MPI_Bcast(cache_ptr->image_buffer, (int)cache_ptr->image_len, MPI_BYTE, 0, aux_ptr->mpi_comm)))
+            if ( MPI_SUCCESS != 
+                 (mpi_result = MPI_Bcast(cache_ptr->image_buffer, 
+                                         (int)cache_ptr->image_len, MPI_BYTE, 
+                                         0, aux_ptr->mpi_comm)) )
+
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
+
         } /* end if */
     } /* end if */
-    else if(aux_ptr) {
+    else if ( aux_ptr ) {
+
         /* Retrieve the contents of the metadata cache image from process 0 */
-        if(MPI_SUCCESS != (mpi_result = MPI_Bcast(cache_ptr->image_buffer, (int)cache_ptr->image_len, MPI_BYTE, 0, aux_ptr->mpi_comm)))
-            HMPI_GOTO_ERROR(FAIL, "can't receive cache image MPI_Bcast", mpi_result)
+        if ( MPI_SUCCESS != 
+             (mpi_result = MPI_Bcast(cache_ptr->image_buffer, 
+                                     (int)cache_ptr->image_len, MPI_BYTE, 
+                                     0, aux_ptr->mpi_comm)) )
+
+            HMPI_GOTO_ERROR(FAIL, "can't receive cache image MPI_Bcast", \
+                            mpi_result)
     } /* end else-if */
 } /* end block */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5C__read_cache_image() */
 
 
@@ -3203,26 +3225,31 @@ H5C__reconstruct_cache_contents(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr)
 
         i = -1;
         entry_ptr = cache_ptr->LRU_head_ptr;
+
         while(entry_ptr != NULL) {
-	    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+
+            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(entry_ptr->type != NULL);
 
-	    if(entry_ptr->prefetched) {
-	        HDassert(i <= entry_ptr->lru_rank);
-	        HDassert((entry_ptr->lru_rank <= 2) || 
-                         (entry_ptr->lru_rank == i + 1) ||
-                         (entry_ptr->lru_rank == i + 2));
+            if ( entry_ptr->prefetched ) {
 
-	        if((entry_ptr->lru_rank <= 2) && (entry_ptr->lru_rank == i + 2))
-		    lru_rank_holes++;
+                HDassert(entry_ptr->lru_rank != 0);
+                HDassert((entry_ptr->lru_rank == -1) ||
+                         (entry_ptr->lru_rank > i));
 
-	        i = entry_ptr->lru_rank;
-	    } /* end if */
+                if ( ( entry_ptr->lru_rank > 1 ) && 
+                     ( entry_ptr->lru_rank > i + 1 ) )
 
-	    entry_ptr = entry_ptr->next;
+                    lru_rank_holes += entry_ptr->lru_rank - (i + 1);
+
+                i = entry_ptr->lru_rank;
+
+            } /* end if */
+
+            entry_ptr = entry_ptr->next;
         } /* end while */
 
-	/* Holes of size 1 appear in the LRU ranking due to epoch 
+	/* Holes in the sequences of LRU ranks can appear due to epoch 
          * markers.  They are left in to allow re-insertion of the
          * epoch markers on reconstruction of the cache -- thus 
          * the following sanity check will have to be revised when
