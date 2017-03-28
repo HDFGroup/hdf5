@@ -913,8 +913,6 @@ H5S_select_is_regular(const H5S_t *space)
 void
 H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
 {
-    herr_t ret_value = FAIL;    /* Return value */
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
@@ -1621,13 +1619,13 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
     HDassert(space1);
     HDassert(space2);
 
-    /* Special case for one or both dataspaces being scalar */
-    if(space1->extent.rank == 0 || space2->extent.rank == 0) {
-        /* Check for different number of elements selected */
-        if(H5S_GET_SELECT_NPOINTS(space1) != H5S_GET_SELECT_NPOINTS(space2))
-            HGOTO_DONE(FALSE)
-    } /* end if */
-    else {
+    /* Check for different number of elements selected */
+    if(H5S_GET_SELECT_NPOINTS(space1) != H5S_GET_SELECT_NPOINTS(space2))
+        HGOTO_DONE(FALSE)
+
+    /* Check special cases if both dataspaces aren't scalar */
+    /* (If only one is, the number of selected points check is sufficient) */
+    if(space1->extent.rank > 0 && space2->extent.rank > 0) {
         const H5S_t *space_a;           /* Dataspace with larger rank */
         const H5S_t *space_b;           /* Dataspace with smaller rank */
         unsigned space_a_rank;          /* Number of dimensions of dataspace A */
@@ -1708,6 +1706,7 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
             } /* end while */
         } /* end if */
         else if((H5S_GET_SELECT_TYPE(space1) == H5S_SEL_NONE) || (H5S_GET_SELECT_TYPE(space2) == H5S_SEL_NONE)) {
+            /* (Both must be, at this point, if one is) */
             HGOTO_DONE(TRUE)
         } /* end if */
         else if((H5S_GET_SELECT_TYPE(space_a) == H5S_SEL_HYPERSLABS && space_a->select.sel_info.hslab->diminfo_valid)
@@ -1747,12 +1746,12 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
         } /* end if */
         /* Iterate through all the blocks in the selection */
         else {
-            hsize_t start_a[H5O_LAYOUT_NDIMS];  /* Start point of selection block in dataspace a */
-            hsize_t start_b[H5O_LAYOUT_NDIMS];  /* Start point of selection block in dataspace b */
-            hsize_t end_a[H5O_LAYOUT_NDIMS];    /* End point of selection block in dataspace a */
-            hsize_t end_b[H5O_LAYOUT_NDIMS];    /* End point of selection block in dataspace b */
-            hsize_t off_a[H5O_LAYOUT_NDIMS];    /* Offset of selection a blocks */
-            hsize_t off_b[H5O_LAYOUT_NDIMS];    /* Offset of selection b blocks */
+            hsize_t start_a[H5S_MAX_RANK];      /* Start point of selection block in dataspace a */
+            hsize_t start_b[H5S_MAX_RANK];      /* Start point of selection block in dataspace b */
+            hsize_t end_a[H5S_MAX_RANK];        /* End point of selection block in dataspace a */
+            hsize_t end_b[H5S_MAX_RANK];        /* End point of selection block in dataspace b */
+            hsize_t off_a[H5S_MAX_RANK];        /* Offset of selection a blocks */
+            hsize_t off_b[H5S_MAX_RANK];        /* Offset of selection b blocks */
             hbool_t first_block = TRUE;         /* Flag to indicate the first block */
 
             /* Allocate the selection iterators */
@@ -1874,7 +1873,7 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
                 } /* end else */
             } /* end while */
         } /* end else */
-    } /* end else */
+    } /* end if */
 
 done:
     if(iter_a_init && H5S_SELECT_ITER_RELEASE(iter_a) < 0)
@@ -2280,7 +2279,7 @@ done:
         H5S_t *src_space;       IN: Selection that is mapped to dst_space, and intersected with src_intersect_space
         H5S_t *dst_space;       IN: Selection that is mapped to src_space, and which contains the result
         H5S_t *src_intersect_space; IN: Selection whose intersection with src_space is projected to dst_space to obtain the result
-        H5S_t *proj_space;      OUT: Will contain the result (intersection of src_intersect_space and src_space projected from src_space to dst_space) after the operation
+        H5S_t **new_space_ptr;  OUT: Will contain the result (intersection of src_intersect_space and src_space projected from src_space to dst_space) after the operation
 
  RETURNS
     Non-negative on success/Negative on failure.
@@ -2289,7 +2288,7 @@ done:
     Projects the intersection of of the selections of src_space and
     src_intersect_space within the selection of src_space as a selection
     within the selection of dst_space.  The result is placed in the
-    selection of proj_space.
+    selection of new_space_ptr.
     
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -2351,10 +2350,9 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
 done:
     /* Cleanup on error */
-    if(ret_value < 0) {
+    if(ret_value < 0)
         if(new_space && H5S_close(new_space) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5S_select_project_intersection() */
@@ -2407,28 +2405,26 @@ H5S_select_subtract(H5S_t *space, H5S_t *subtract_space)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
         } /* end if */
         else {
-            /* Check for point selection in subtract_space, convert to
-             * hyperslab */
+            /* Check for point selection in subtract_space, convert to hyperslab */
             if(subtract_space->select.type->type == H5S_SEL_POINTS)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "point selections not currently supported")
 
-            /* Check for point or all selection in space, convert to hyperslab
-             */
+            /* Check for point or all selection in space, convert to hyperslab */
             if(space->select.type->type == H5S_SEL_ALL) {
                 /* Convert current "all" selection to "real" hyperslab selection */
                 /* Then allow operation to proceed */
-                hsize_t tmp_start[H5O_LAYOUT_NDIMS];    /* Temporary start information */
-                hsize_t tmp_stride[H5O_LAYOUT_NDIMS];   /* Temporary stride information */
-                hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary count information */
-                hsize_t tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block information */
-                unsigned i;                             /* Local index variable */
+                hsize_t tmp_start[H5S_MAX_RANK];        /* Temporary start information */
+                hsize_t tmp_stride[H5S_MAX_RANK];       /* Temporary stride information */
+                hsize_t tmp_count[H5S_MAX_RANK];        /* Temporary count information */
+                hsize_t tmp_block[H5S_MAX_RANK];        /* Temporary block information */
+                unsigned u;                             /* Local index variable */
 
                 /* Fill in temporary information for the dimensions */
-                for(i = 0; i < space->extent.rank; i++) {
-                    tmp_start[i] = 0;
-                    tmp_stride[i] = 1;
-                    tmp_count[i] = 1;
-                    tmp_block[i] = space->extent.size[i];
+                for(u = 0; u < space->extent.rank; u++) {
+                    tmp_start[u] = 0;
+                    tmp_stride[u] = 1;
+                    tmp_count[u] = 1;
+                    tmp_block[u] = space->extent.size[u];
                 } /* end for */
 
                 /* Convert to hyperslab selection */

@@ -124,9 +124,9 @@ typedef struct {
          * are only used for re-gurgitating the original values used to set the
          * hyperslab to the application when it queries the hyperslab selection
          * information. */
-    int unlim_dim;                              /* Dimension where selection is unlimited, or -1 if none */
-    hsize_t num_elem_non_unlim;                 /* # of elements in a "slice" excluding the unlimited dimension */
-    H5S_hyper_span_info_t *span_lst; /* List of hyperslab span information */
+    int unlim_dim;                      /* Dimension where selection is unlimited, or -1 if none */
+    hsize_t num_elem_non_unlim;         /* # of elements in a "slice" excluding the unlimited dimension */
+    H5S_hyper_span_info_t *span_lst;    /* List of hyperslab span information */
 } H5S_hyper_sel_t;
 
 /* Selection information methods */
