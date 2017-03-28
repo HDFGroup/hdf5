@@ -390,6 +390,304 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5PLappend
+ *
+ * Purpose: Insert a plugin path at the end of the list.
+ *
+ * Return: Non-negative or success.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PLappend(char* plugin_path)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    char        *dl_path = NULL;
+
+    FUNC_ENTER_API(FAIL)
+    if(H5PL_num_paths_g == H5PL_MAX_PATH_NUM)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
+    if(NULL == plugin_path)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
+    dl_path = H5MM_strdup(plugin_path);
+    if(NULL == dl_path)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+#ifdef H5_HAVE_WIN32_API
+    else { /* Expand windows env var*/
+        long bufCharCount;
+        char *tempbuf;
+        if(NULL == (tempbuf = (char *)H5MM_malloc(H5PL_EXPAND_BUFFER_SIZE)))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
+        if((bufCharCount = ExpandEnvironmentStrings(dl_path, tempbuf, H5PL_EXPAND_BUFFER_SIZE)) > H5PL_EXPAND_BUFFER_SIZE) {
+            tempbuf = (char *)H5MM_xfree(tempbuf);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+        }
+        if(bufCharCount == 0) {
+            tempbuf = (char *)H5MM_xfree(tempbuf);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+        }
+        dl_path = (char *)H5MM_xfree(dl_path);
+        dl_path = H5MM_strdup(tempbuf);
+        tempbuf = (char *)H5MM_xfree(tempbuf);
+    }
+#endif /* H5_HAVE_WIN32_API */
+    if(NULL == (H5PL_path_table_g[H5PL_num_paths_g] = H5MM_strdup(dl_path)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+    H5PL_num_paths_g++;
+
+done:
+    if(dl_path)
+        dl_path = (char *)H5MM_xfree(dl_path);
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5PLappend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5PLprepend
+ *
+ * Purpose: Insert a plugin path at the beginning of the list.
+ *
+ * Return: Non-negative or success.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PLprepend(char* plugin_path)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    char        *dl_path = NULL;
+    unsigned int plindex;
+
+    FUNC_ENTER_API(FAIL)
+    if(H5PL_num_paths_g == H5PL_MAX_PATH_NUM)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
+    if(NULL == plugin_path)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
+    dl_path = H5MM_strdup(plugin_path);
+    if(NULL == dl_path)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+#ifdef H5_HAVE_WIN32_API
+    else { /* Expand windows env var*/
+        long bufCharCount;
+        char *tempbuf;
+        if (NULL == (tempbuf = (char *)H5MM_malloc(H5PL_EXPAND_BUFFER_SIZE)))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
+        if ((bufCharCount = ExpandEnvironmentStrings(dl_path, tempbuf, H5PL_EXPAND_BUFFER_SIZE)) > H5PL_EXPAND_BUFFER_SIZE) {
+            tempbuf = (char *)H5MM_xfree(tempbuf);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+        }
+        if (bufCharCount == 0) {
+            tempbuf = (char *)H5MM_xfree(tempbuf);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+        }
+        dl_path = (char *)H5MM_xfree(dl_path);
+        dl_path = H5MM_strdup(tempbuf);
+        tempbuf = (char *)H5MM_xfree(tempbuf);
+    }
+#endif /* H5_HAVE_WIN32_API */
+    for (plindex = (unsigned int)H5PL_num_paths_g; plindex > 0; plindex--)
+        H5PL_path_table_g[plindex] = H5PL_path_table_g[plindex - 1];
+    if (NULL == (H5PL_path_table_g[0] = H5MM_strdup(dl_path)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+    H5PL_num_paths_g++;
+
+done:
+    if (dl_path)
+        dl_path = (char *)H5MM_xfree(dl_path);
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5PLprepend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5PLput
+ *
+ * Purpose: Replace the path at the specified index.
+ *
+ * Return: Non-negative or success.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PLput(char* plugin_path, unsigned int index)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    char        *dl_path = NULL;
+
+    FUNC_ENTER_API(FAIL)
+    if(NULL == plugin_path)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
+    dl_path = H5MM_strdup(plugin_path);
+    if(NULL == dl_path)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+#ifdef H5_HAVE_WIN32_API
+    else { /* Expand windows env var*/
+        long bufCharCount;
+        char *tempbuf;
+        if(NULL == (tempbuf = (char *)H5MM_malloc(H5PL_EXPAND_BUFFER_SIZE)))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
+        if((bufCharCount = ExpandEnvironmentStrings(dl_path, tempbuf, H5PL_EXPAND_BUFFER_SIZE)) > H5PL_EXPAND_BUFFER_SIZE) {
+            tempbuf = (char *)H5MM_xfree(tempbuf);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+        }
+        if(bufCharCount == 0) {
+            tempbuf = (char *)H5MM_xfree(tempbuf);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+        }
+        dl_path = (char *)H5MM_xfree(dl_path);
+        dl_path = H5MM_strdup(tempbuf);
+        tempbuf = (char *)H5MM_xfree(tempbuf);
+    }
+#endif /* H5_HAVE_WIN32_API */
+    if(H5PL_path_table_g[index])
+        H5PL_path_table_g[index] = (char *)H5MM_xfree(H5PL_path_table_g[index]);
+    if(NULL == (H5PL_path_table_g[index] = H5MM_strdup(dl_path)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+
+done:
+    if(dl_path)
+        dl_path = (char *)H5MM_xfree(dl_path);
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5PLput() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5PLinsert
+ *
+ * Purpose: Insert a plugin path at the specified index, moving other paths after the index.
+ *
+ * Return: Non-negative or success.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PLinsert(char* plugin_path, unsigned int index)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    char        *dl_path = NULL;
+    unsigned int plindex;
+
+    FUNC_ENTER_API(FAIL)
+    if(H5PL_num_paths_g == H5PL_MAX_PATH_NUM)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
+    if(NULL == plugin_path)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
+    dl_path = H5MM_strdup(plugin_path);
+    if(NULL == dl_path)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+#ifdef H5_HAVE_WIN32_API
+    else { /* Expand windows env var*/
+        long bufCharCount;
+        char *tempbuf;
+        if(NULL == (tempbuf = (char *)H5MM_malloc(H5PL_EXPAND_BUFFER_SIZE)))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
+        if((bufCharCount = ExpandEnvironmentStrings(dl_path, tempbuf, H5PL_EXPAND_BUFFER_SIZE)) > H5PL_EXPAND_BUFFER_SIZE) {
+            tempbuf = (char *)H5MM_xfree(tempbuf);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+        }
+        if(bufCharCount == 0) {
+            tempbuf = (char *)H5MM_xfree(tempbuf);
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+        }
+        dl_path = (char *)H5MM_xfree(dl_path);
+        dl_path = H5MM_strdup(tempbuf);
+        tempbuf = (char *)H5MM_xfree(tempbuf);
+    }
+#endif /* H5_HAVE_WIN32_API */
+    for(plindex = (unsigned int)H5PL_num_paths_g; plindex > index; plindex--)
+        H5PL_path_table_g[plindex] = H5PL_path_table_g[plindex - 1];
+    if(NULL == (H5PL_path_table_g[index] = H5MM_strdup(dl_path)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+    H5PL_num_paths_g++;
+
+done:
+    if(dl_path)
+        dl_path = (char *)H5MM_xfree(dl_path);
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5PLinsert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5PLremove
+ *
+ * Purpose: Remove the plugin path at the specifed index and compacting the list.
+ *
+ * Return: Non-negative or success.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PLremove(unsigned int index)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    char        *dl_path = NULL;
+    unsigned int plindex;
+
+    FUNC_ENTER_API(FAIL)
+    if(H5PL_num_paths_g == 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "no directories in table")
+    if(NULL == (dl_path = H5PL_path_table_g[index]))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no directory path at index")
+    for(plindex = index; plindex < (unsigned int)H5PL_num_paths_g; plindex++)
+        H5PL_path_table_g[plindex] = H5PL_path_table_g[plindex + 1];
+    if(H5PL_path_table_g[plindex])
+        dl_path = (char *)H5MM_xfree(dl_path);
+    H5PL_num_paths_g--;
+    H5PL_path_table_g[H5PL_num_paths_g] = NULL;
+
+done:
+    if(dl_path)
+        dl_path = (char *)H5MM_xfree(dl_path);
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5PLremove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5PLget
+ *
+ * Purpose: Query the plugin path at the specified index.
+ *
+ * Return:      Non-NULL on success/NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+const char*
+H5PLget(unsigned int index)
+{
+    char* ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_API(NULL)
+    if(H5PL_num_paths_g == 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "no directories in table")
+    if(NULL == (ret_value = H5PL_path_table_g[index]))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no directory path at index")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5PLget() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5PLsize
+ *
+ * Purpose: Query the size of the current list of plugin paths.
+ *
+ * Return: Non-negative or success.
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned int
+H5PLsize(void)
+{
+    return (unsigned int)H5PL_num_paths_g;
+} /* end H5PLsize() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5PL__init_path_table
  *
  * Purpose:     Initialize the path table.
