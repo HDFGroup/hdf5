@@ -298,7 +298,8 @@ unsigned FileCreatPropList::getIstorek() const
 // Function:    FileCreatPropList::setFileSpaceStrategy
 ///\brief       Sets the strategy and the threshold value that the library
 ///             will employ in managing file space.
-///\param       strategy - IN: Strategy for file space management
+///\param       strategy  - IN: Strategy for file space management
+///\param       persist   - IN: Whether to persist free-space
 ///\param       threshold - IN: Free-space section threshold. The library
 ///             default is 1, which is to track all free-space sections.
 ///\exception   H5::PropListIException
@@ -325,6 +326,9 @@ void FileCreatPropList::setFileSpaceStrategy(H5F_fspace_strategy_t strategy, hbo
 // Function:    FileCreatPropList::getFileSpaceStrategy
 ///\brief       Retrieves the strategy, persist, and threshold that the library
 ///             uses in managing file space.
+///\param       strategy  - OUT: Strategy for file space management
+///\param       persist   - OUT: Whether to persist free-space
+///\param       threshold - OUT: Free-space section threshold
 ///\exception   H5::PropListIException
 // Programmer   Binh-Minh Ribler - Feb, 2017
 //--------------------------------------------------------------------------
@@ -341,6 +345,7 @@ void FileCreatPropList::getFileSpaceStrategy(H5F_fspace_strategy_t& strategy, hb
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList::setFileSpacePagesize
 ///\brief       Sets the file space page size for paged aggregation.
+///\param       fsp_psize - IN: Filespace's page size
 ///\exception   H5::PropListIException
 // Programmer   Binh-Minh Ribler - Feb, 2017
 //--------------------------------------------------------------------------

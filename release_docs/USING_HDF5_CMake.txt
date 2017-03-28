@@ -221,7 +221,9 @@ NOTE: this file is available at the HDF web site:
 
     HDF5_Examples.cmake
 
-
+Also available at the HDF web site is a CMake application framework template.
+You can quickly add files to the framework and execute the script to compile
+your application with an installed HDF5 binary.
 
 ========================================================================
 ctest

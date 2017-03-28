@@ -1,4 +1,4 @@
-HDF5 version 1.9.236 currently under development
+HDF5 version 1.11.0 currently under development
 ================================================================================
 
 
@@ -12,11 +12,11 @@ For more details check the HISTORY*.txt files in the HDF5 source.
 Links to HDF5 1.10.1 source code, documentation, and additional materials can be found on The HDF5 web page at:
 
      https://support.hdfgroup.org/HDF5/
-	 
+
 The HDF5 1.10.1 release can be obtained from:
 
-     https://support.hdfgroup.org/HDF5/release/obtain5110.html	 
-	 
+     https://support.hdfgroup.org/HDF5/release/obtain5110.html
+
 User documentation for the snapshot can be accessed directly at this location:
 
      https://support.hdfgroup.org/HDF5/doc1.10/
@@ -54,77 +54,131 @@ New Features
 
     Configuration:
     -------------
-    - CMake minimum is now 3.2.2. (ADB 2016/01/10)
-    
+    - CMake minimum is now 3.2.2.
+      (ADB 2017/01/10)
+
+    - Tools folder is separated into source and test folders. This
+      allows autotools to skip the make command and just execute
+      the make check command.
+      (HDFFV-9719 ADB 2016/10/27)
 
     Library:
     --------
-    - 
+    - Paged Aggregation
+
+      This is one of the file space management strategies. This strategy
+      aggregates small metadata and raw data allocations into constant-sized
+      well-aligned pages, which are suitable for page caching.  Paged
+      aggregation together with the page buffering feature will allow efficient
+      I/O accesses.
+
+    - Page Buffering
+
+      The page buffering layer in the HDF5 library absorbs small accesses to
+      the file system.  Each page in memory corresponds to a page allocated in
+      the file.  Access to the file system is then performed as a single page
+      or multiple of pages, if they are contiguous.  This ensures that small 
+      accesses to the file system are avoided while providing another caching
+      layer for improved I/O performance.  This feature works in conjunction
+      with the paged aggregation feature.
 
     Parallel Library:
     -----------------
-    - 
+    -
 
     Fortran Library:
     ----------------
-    - 
+    -
 
     C++ Library:
     ------------
-     - 
+    -
 
     Tools:
     ------
-     - 
+     - Add options to h5clear:
+       -s: clear the status_flags field in the file's superblock
+       -m: Remove the metadata cache image from the file
+       (Pull Request #361 QK 2017/03/22)
 
     High-Level APIs:
     ---------------
 
     C Packet Table API
     ------------------
-     - 
+     -
 
     Internal header file
     --------------------
     -
-	
+
     Documentation
     -------------
 
 Support for new platforms, languages and compilers.
 =======================================
-    - 
+    -
 
 Bug Fixes since HDF5-1.10.0-patch1 release
 ==================================
 
     Library
     -------
-    - 
+    - Changed the plugins dlopen option from RTLD_NOW to RTLD_LAZY
+      (PR 201 ADB 2016/12/12)
+
+    - Fix error when copying dataset with attribute which is a compound datatype
+      consisting of a variable length string.
+      (HDFFV-7991 VC 2016/08/19, 2016/08/21, 2016/08/24)
+
+    - H5DOappend will not fail if a dataset has no append callback registered.
+      (HDFFV-9960 VC 2016/08/05, 2016/08/14)
+
+    - Fix the problem where the committed datatype's file location is different
+      from the file location of an attribute with that committed datatype.
+      (HDFFV-9940 VC 2016/07/03, 2016/07/06)
+
+    - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
+      (b) Modifications to better handle error recovery when conversion by 
+          h5format_convert fails.
+      (HDFFV-9434 VC 2016/05/29)
 
     Configuration
     -------------
-    - 
+    - Configuration will check for the strtoll and strtoull functions
+      before using alternatives
+      (PR 340 ADB 2017/03/17)
+
+    - CMake uses a Windows pdb directory variable if available and
+      will generate both static and shared pdb files.
+      (HDFFV-9875 ADB 2017/02/06)
+
+    - CMake now builds shared versions of tools.
+      (HDFFV-10123 ADB 2017/02/01)
 
     Performance
     -------------
-      - 
-	  
+      -
+
     Fortran
     --------
-    - 
+    -
 
     Tools
     -----
-    -
+    - h5diff correctly ignores strpad in comparing strings.
+      (HDFFV-10128 ADB 2017/03/03)
+
+    - h5repack now correctly parses the command line filter options.
+      (HDFFV-10046 ADB 2017/01/24)
 
     High-Level APIs:
     ------
-    - 
+    -
 
     Fortran High-Level APIs:
     ------
-    - 
+    -
 
     Documentation
     -------------
@@ -132,20 +186,21 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     F90 APIs
     --------
-    - 
+    -
 
 
     C++ APIs
     --------
-    - 
-	
+    -
+
+
     Testing
     -------
-    - 
+    -
 
 Supported Platforms
 ===================
-    
+
     Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (mayll/platypus)                 Version 4.4.7 20120313
@@ -172,7 +227,7 @@ Supported Platforms
                                   compilers:
                                      Version 15.0.3.187 Build 20150407
                                   MPICH 3.1.4 compiled with GCC 4.9.3
-								  
+
     SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
@@ -186,11 +241,12 @@ Supported Platforms
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-   
+                                  Visual Studio 2015 w/ Intel Parallel Studio 2017 (cmake)
+
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-								  
+
     Mac OS X Mt. Lion 10.8.5      Apple clang/clang++ version 5.1 from Xcode 5.1
     64-bit                        gfortran GNU Fortran (GCC) 4.8.2
     (swallow/kite)                Intel icc/icpc/ifort version 15.0.3
@@ -226,7 +282,7 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
-Windows 7 x64                           y        y/y    n        y    y     y
+Windows 7 x64                           y        y/y    y        y    y     y
 Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
@@ -291,7 +347,7 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (Ubuntu 5.4.0-6ubuntu1~16.04.2) 5.4.0 20160609
                                   (cmake and autotools)
 
-								  
+
 Known Problems
 ==============
 * "make check" fails on CYGWIN when building shared lib files is enabled.  The

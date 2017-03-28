@@ -744,13 +744,13 @@ void DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char* name, 
 // Function:    DSetCreatPropList::setVirtual
 ///\brief       Maps elements of a virtual dataset to elements of the source
 ///             dataset.
-///\param       vspace    - IN: Dataspace the virtual dataset, possibly an
+///\param       vspace     - IN: Dataspace the virtual dataset, possibly an
 ///                             unlimited selection
-///\param       src_fname - IN: Name of the HDF5 file where the source dataset
+///\param       src_fname  - IN: Name of the HDF5 file where the source dataset
 ///                             is located (\a char*)
-///\param       src_fname - IN: Path to the dataset in the file specified by
+///\param       src_dsname - IN: Path to the dataset in the file specified by
 ///                             \a src_file_name (\a char*)
-///\param       sspace    - IN: Dataspace with a selection applied, possibly
+///\param       sspace     - IN: Dataspace with a selection applied, possibly
 ///                             an unlimited selection
 ///\exception   H5::PropListIException
 ///\par Description
@@ -771,13 +771,13 @@ void DSetCreatPropList::setVirtual(const DataSpace& vspace, const char *src_fnam
 // Function:    DSetCreatPropList::setVirtual
 ///\brief       Maps elements of a virtual dataset to elements of the source
 ///             dataset.
-///\param       vspace    - IN: Dataspace the virtual dataset, possibly an
+///\param       vspace     - IN: Dataspace the virtual dataset, possibly an
 ///                             unlimited selection
-///\param       src_fname - IN: Name of the HDF5 file where the source dataset
+///\param       src_fname  - IN: Name of the HDF5 file where the source dataset
 ///                             is located (\a H5std_string)
-///\param       src_fname - IN: Path to the dataset in the file specified by
+///\param       src_dsname - IN: Path to the dataset in the file specified by
 ///                             \a src_file_name (\a H5std_string)
-///\param       sspace    - IN: Dataspace with a selection applied, possibly
+///\param       sspace     - IN: Dataspace with a selection applied, possibly
 ///                             an unlimited selection
 ///\exception   H5::PropListIException
 ///\par Description

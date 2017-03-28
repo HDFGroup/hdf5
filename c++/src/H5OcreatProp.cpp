@@ -155,7 +155,7 @@ void ObjCreatPropList::getAttrPhaseChange(unsigned& max_compact, unsigned& min_d
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList::setAttrCrtOrder
-///\brief       Sets tracking and indexing of attribute creation order.
+///\brief       Set the flags for creation order of attributes on an object
 ///\param       crt_order_flags  - IN: Flags specifying whether to track and
 ///                     index attribute creation order.  Default: No flag set
 ///\exception   H5::PropListIException
@@ -183,10 +183,9 @@ void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList::getAttrCrtOrder
-///\brief       Gets tracking and indexing settings for attribute
-///             creation order.
-///\param       crt_order_flags - OUT: Flags specifying whether to track and
-///                                    index attribute creation order
+///\brief       Returns the flags indicating creation order is tracked/indexed
+///             for attributes on an object.
+///\return      The flags
 ///\exception   H5::PropListIException
 ///\par Description
 ///             When no flag is set, i.e. crt_order_flags = 0, attribute
