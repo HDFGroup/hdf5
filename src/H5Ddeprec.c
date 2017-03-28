@@ -95,7 +95,7 @@ static herr_t H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
  *		properties (DCPL_ID).
  *
  *		All arguments are copied into the dataset, so the caller is
- *		allowed to derive new types, data spaces, and creation
+ *		allowed to derive new types, dataspaces, and creation
  *		parameters from the old ones and reuse them in calls to
  *		create other datasets.
  *
@@ -287,7 +287,7 @@ H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     HDcompile_assert(sizeof(old_dims) == sizeof(dataset->shared->curr_dims));
     HDmemcpy(old_dims, dataset->shared->curr_dims, H5S_MAX_RANK * sizeof(old_dims[0]));
 
-    /* Increase the size of the data space */
+    /* Increase the size of the dataspace */
     if((changed = H5S_extend(dataset->shared->space, size)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to increase size of dataspace")
 

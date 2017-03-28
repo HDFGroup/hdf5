@@ -1086,7 +1086,7 @@ H5S_mpio_space_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
 
         case H5S_NO_CLASS:
         default:
-            HDassert("unknown data space type" && 0);
+            HDassert("unknown dataspace type" && 0);
             break;
     } /* end switch */
 

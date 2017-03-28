@@ -114,7 +114,7 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
+H5S_select_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection)
 {
     herr_t ret_value = FAIL;    /* Return value */
 
@@ -125,10 +125,10 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
     HDassert(src);
 
     /* Copy regular fields */
-    dst->select=src->select;
+    dst->select = src->select;
 
     /* Perform correct type of copy based on the type of selection */
-    if((ret_value=(*src->select.type->copy)(dst,src,share_selection))<0)
+    if((ret_value = (*src->select.type->copy)(dst,src,share_selection)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy selection specific information")
 
 done:
@@ -150,8 +150,6 @@ done:
  *      pattern, don't call it directly, use the appropriate macro
  *      defined in H5Sprivate.h.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -159,13 +157,15 @@ H5S_select_release(H5S_t *ds)
 {
     herr_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(ds);
 
     /* Call the selection type's release function */
-    ret_value=(*ds->select.type->release)(ds);
+    if((ret_value = (*ds->select.type->release)(ds)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection")
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_release() */
 
@@ -185,8 +185,6 @@ H5S_select_release(H5S_t *ds)
  *      pattern, don't call it directly, use the appropriate macro
  *      defined in H5Sprivate.h.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -196,13 +194,15 @@ H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
 {
     herr_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(space);
 
     /* Call the selection type's get_seq_list function */
-    ret_value = (*space->select.type->get_seq_list)(space, flags, iter, maxseq, maxbytes, nseq, nbytes, off, len);
+    if((ret_value = (*space->select.type->get_seq_list)(space, flags, iter, maxseq, maxbytes, nseq, nbytes, off, len)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get selection sequence list")
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_get_seq_list() */
 
@@ -221,8 +221,6 @@ H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
  * Note: This routine participates in the "Inlining C function pointers"
  *      pattern, don't call it directly, use the appropriate macro
  *      defined in H5Sprivate.h.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -897,11 +895,11 @@ H5S_select_is_regular(const H5S_t *space)
  PURPOSE
     Adjust a selection by subtracting an offset
  USAGE
-    herr_t H5S_select_adjust_u(space, offset)
+    void H5S_select_adjust_u(space, offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hsize_t *offset; IN: Offset to subtract
  RETURNS
-    Non-negative on success, negative on failure
+    None
  DESCRIPTION
     Moves a selection by subtracting an offset from it.
  GLOBAL VARIABLES
@@ -912,7 +910,7 @@ H5S_select_is_regular(const H5S_t *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+void
 H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
 {
     herr_t ret_value = FAIL;    /* Return value */
@@ -921,10 +919,11 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
 
     /* Check args */
     HDassert(space);
+    HDassert(offset);
 
-    ret_value = (*space->select.type->adjust_u)(space, offset);
+    (*space->select.type->adjust_u)(space, offset);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 }   /* H5S_select_adjust_u() */
 
 
@@ -1612,8 +1611,8 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
 {
     H5S_sel_iter_t *iter_a = NULL;  /* Selection a iteration info */
     H5S_sel_iter_t *iter_b = NULL;  /* Selection b iteration info */
-    hbool_t iter_a_init = 0;  /* Selection a iteration info has been initialized */
-    hbool_t iter_b_init = 0;  /* Selection b iteration info has been initialized */
+    hbool_t iter_a_init = FALSE;  /* Selection a iteration info has been initialized */
+    hbool_t iter_b_init = FALSE;  /* Selection b iteration info has been initialized */
     htri_t ret_value = TRUE; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1698,7 +1697,7 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
                 space_b_dim--;
             } /* end while */
 
-            /* Since we are selecting the entire spaces, we must also verify that space_a 
+            /* Since we are selecting the entire space, we must also verify that space_a 
              * has size 1 in all dimensions that it does not share with space_b.
              */
             while(space_a_dim >= 0) {
@@ -1748,13 +1747,13 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
         } /* end if */
         /* Iterate through all the blocks in the selection */
         else {
-            hsize_t start_a[H5O_LAYOUT_NDIMS]; /* Start point of selection block in dataspace a */
-            hsize_t start_b[H5O_LAYOUT_NDIMS]; /* Start point of selection block in dataspace b */
-            hsize_t end_a[H5O_LAYOUT_NDIMS];   /* End point of selection block in dataspace a */
-            hsize_t end_b[H5O_LAYOUT_NDIMS];   /* End point of selection block in dataspace b */
-            hsize_t off_a[H5O_LAYOUT_NDIMS];   /* Offset of selection a blocks */
-            hsize_t off_b[H5O_LAYOUT_NDIMS];   /* Offset of selection b blocks */
-            hbool_t first_block = TRUE;        /* Flag to indicate the first block */
+            hsize_t start_a[H5O_LAYOUT_NDIMS];  /* Start point of selection block in dataspace a */
+            hsize_t start_b[H5O_LAYOUT_NDIMS];  /* Start point of selection block in dataspace b */
+            hsize_t end_a[H5O_LAYOUT_NDIMS];    /* End point of selection block in dataspace a */
+            hsize_t end_b[H5O_LAYOUT_NDIMS];    /* End point of selection block in dataspace b */
+            hsize_t off_a[H5O_LAYOUT_NDIMS];    /* Offset of selection a blocks */
+            hsize_t off_b[H5O_LAYOUT_NDIMS];    /* Offset of selection b blocks */
+            hbool_t first_block = TRUE;         /* Flag to indicate the first block */
 
             /* Allocate the selection iterators */
             if(NULL == (iter_a = H5FL_MALLOC(H5S_sel_iter_t)))
@@ -1769,10 +1768,10 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
              */
             if(H5S_select_iter_init(iter_a, space_a, (size_t)0) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator a")
-            iter_a_init = 1;
+            iter_a_init = TRUE;
             if(H5S_select_iter_init(iter_b, space_b, (size_t)0) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator b")
-            iter_b_init = 1;
+            iter_b_init = TRUE;
 
             /* Iterate over all the blocks in each selection */
             while(1) {
@@ -1901,7 +1900,7 @@ done:
     topologically identical to that in b (as verified by 
     H5S_select_shape_same().
 
-    This function exists, as some I/O code chokes of topologically 
+    This function exists, as some I/O code chokes on topologically 
     identical selections with different ranks.  At least to begin 
     with, we will deal with the issue by constructing projections
     of the memory dataspace with ranks equaling those of the file 
@@ -2151,10 +2150,9 @@ H5S_select_construct_projection(const H5S_t *base_space, H5S_t **new_space_ptr,
 
 done:
     /* Cleanup on error */
-    if(ret_value < 0) {
+    if(ret_value < 0)
         if(new_space && H5S_close(new_space) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_construct_projection() */

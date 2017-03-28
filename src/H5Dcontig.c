@@ -403,7 +403,7 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
 
     /*
      * The maximum size of the dataset cannot exceed the storage size.
-     * Also, only the slowest varying dimension of a simple data space
+     * Also, only the slowest varying dimension of a simple dataspace
      * can be extendible (currently only for external data storage).
      */
 

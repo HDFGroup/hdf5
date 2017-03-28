@@ -1558,7 +1558,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
     if(changed) {
         /* Update VDS extent */
         if(H5S_set_extent(dset->shared->space, new_dims) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
 
         /* Mark the space as dirty, for later writing to the file */
         if(H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR) 
@@ -1681,24 +1681,24 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
             /* Update top level virtual_select and clipped_virtual_select
              * extents */
             if(H5S_set_extent(storage->list[i].source_dset.virtual_select, new_dims) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
             if((storage->list[i].source_dset.clipped_virtual_select
                     != storage->list[i].source_dset.virtual_select)
                     && storage->list[i].source_dset.clipped_virtual_select)
                 if(H5S_set_extent(storage->list[i].source_dset.clipped_virtual_select, new_dims) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
 
             /* Update sub dataset virtual_select and clipped_virtual_select
              * extents */
             for(j = 0; j < storage->list[i].sub_dset_nalloc; j++)
                 if(storage->list[i].sub_dset[j].virtual_select) {
                     if(H5S_set_extent(storage->list[i].sub_dset[j].virtual_select, new_dims) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
                     if((storage->list[i].sub_dset[j].clipped_virtual_select
                             != storage->list[i].sub_dset[j].virtual_select)
                             && storage->list[i].sub_dset[j].clipped_virtual_select)
                         if(H5S_set_extent(storage->list[i].sub_dset[j].clipped_virtual_select, new_dims) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
                 } /* end if */
                 else
                     HDassert(!storage->list[i].sub_dset[j].clipped_virtual_select);
@@ -2185,7 +2185,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
 
                         /* Temporarily set extent of virtual selection to bounds */
                         if(H5S_set_extent(storage->list[i].sub_dset[j].virtual_select, vbounds_end) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
 
                         /* Get current VDS dimensions */
                         if(H5S_get_simple_extent_dims(io_info->dset->shared->space, tmp_dims, NULL) < 0)
@@ -2209,9 +2209,9 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                         /* Set extents of virtual_select and
                          * clipped_virtual_select to virtual extent */
                         if(H5S_set_extent(storage->list[i].sub_dset[j].virtual_select, tmp_dims) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
                         if(H5S_set_extent(storage->list[i].sub_dset[j].clipped_virtual_select, tmp_dims) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
                     } /* end if */
                 } /* end if */
 

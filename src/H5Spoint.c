@@ -17,7 +17,7 @@
  * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
  *              Tuesday, June 16, 1998
  *
- * Purpose:	Point selection data space I/O functions.
+ * Purpose:	Point selection dataspace I/O functions.
  */
 
 #include "H5Smodule.h"          /* This source code file is part of the H5S module */
@@ -50,7 +50,7 @@ static int H5S__point_unlim_dim(const H5S_t *space);
 static htri_t H5S_point_is_contiguous(const H5S_t *space);
 static htri_t H5S_point_is_single(const H5S_t *space);
 static htri_t H5S_point_is_regular(const H5S_t *space);
-static herr_t H5S_point_adjust_u(H5S_t *space, const hsize_t *offset);
+static void H5S_point_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S_point_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S_point_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 static herr_t H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
@@ -428,7 +428,7 @@ H5S_point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *co
     /* Insert the list of points selected in the proper place */
     if(op == H5S_SELECT_SET || op == H5S_SELECT_PREPEND) {
         /* Append current list, if there is one */
-        if(space->select.sel_info.pnt_lst->head != NULL)
+        if(NULL != space->select.sel_info.pnt_lst->head)
             curr->next = space->select.sel_info.pnt_lst->head;
 
         /* Put new list in point selection */
@@ -689,8 +689,8 @@ static htri_t
 H5S_point_is_valid (const H5S_t *space)
 {
     H5S_pnt_node_t *curr;      /* Point information nodes */
-    unsigned u;                   /* Counter */
-    htri_t ret_value=TRUE;     /* return value */
+    unsigned u;                 /* Counter */
+    htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -744,7 +744,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
 
     /* Check args */
     if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
     if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_POINTS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an element selection")
 
@@ -788,7 +788,7 @@ H5S_point_serial_size (const H5S_t *space)
      *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> +
      *      <length (4 bytes)> + <rank (4 bytes)> + <# of points (4 bytes)> = 24 bytes
      */
-    ret_value=24;
+    ret_value = 24;
 
     /* Count points in selection */
     curr=space->select.sel_info.pnt_lst->head;
@@ -1057,7 +1057,7 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer")
     if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
     if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_POINTS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a point selection")
 
@@ -1099,11 +1099,12 @@ H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 {
     H5S_pnt_node_t *node;       /* Point node */
     unsigned rank;              /* Dataspace rank */
-    unsigned u;                 /* index variable */
-    herr_t ret_value = SUCCEED;   /* Return value */
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity check */
     HDassert(space);
     HDassert(start);
     HDassert(end);
@@ -1355,11 +1356,11 @@ H5S_point_is_regular(const H5S_t *space)
  PURPOSE
     Adjust a "point" selection by subtracting an offset
  USAGE
-    herr_t H5S_point_adjust_u(space, offset)
+    void H5S_point_adjust_u(space, offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hsize_t *offset; IN: Offset to subtract
  RETURNS
-    Non-negative on success, negative on failure
+    None
  DESCRIPTION
     Moves a point selection by subtracting an offset from it.
  GLOBAL VARIABLES
@@ -1367,7 +1368,7 @@ H5S_point_is_regular(const H5S_t *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+static void
 H5S_point_adjust_u(H5S_t *space, const hsize_t *offset)
 {
     H5S_pnt_node_t *node;               /* Point node */
@@ -1397,7 +1398,7 @@ H5S_point_adjust_u(H5S_t *space, const hsize_t *offset)
         node = node->next;
     } /* end while */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI_VOID
 }   /* H5S_point_adjust_u() */
 
 
@@ -1694,7 +1695,7 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
 
     /* Get the dataspace dimensions */
     if((ndims = H5S_get_simple_extent_dims (space, dims, NULL)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to retrieve data space dimensions")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to retrieve dataspace dimensions")
 
     /* Walk through the points in the selection, starting at the current */
     /*  location in the iterator */

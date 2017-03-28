@@ -1643,7 +1643,7 @@ done:
  *              2) Gather all the information to the root process
  *
  *              3) Root process will do the following:
- *                 a) Obtain chunk addresses for all chunks in this data space
+ *                 a) Obtain chunk addresses for all chunks in this dataspace
  *                 b) With the consideration of the user option, calculate IO mode for each chunk
  *                 c) Build MPI derived datatype to combine "chunk address" and "assign_io" information
  *                      in order to do MPI Bcast only once

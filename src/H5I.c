@@ -890,7 +890,7 @@ H5I_subst(hid_t id, const void *new_object)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end if */
+} /* end H5I_subst() */
 
 
 /*-------------------------------------------------------------------------
@@ -922,7 +922,7 @@ H5I_object(hid_t id)
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end if */
+} /* end H5I_object() */
 
 
 /*-------------------------------------------------------------------------

@@ -503,7 +503,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_space_status
  *
- * Purpose:     Returns the status of data space allocation.
+ * Purpose:     Returns the status of dataspace allocation.
  *
  * Return:
  *              Success:        Non-negative
@@ -2854,13 +2854,13 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
             for(u = 0; u < dset->shared->layout.storage.u.virt.list_nused; u++) {
                 /* Patch extent */
                 if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].source_dset.virtual_select, size) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
                 dset->shared->layout.storage.u.virt.list[u].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
 
                 /* Patch sub-source datasets */
                 for(v = 0; v < dset->shared->layout.storage.u.virt.list[u].sub_dset_nalloc; v++)
                     if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].sub_dset[v].virtual_select, size) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
             } /* end for */
 
             /* Mark virtual datasets as not fully initialized so internal
@@ -3555,9 +3555,9 @@ H5D_get_space(H5D_t *dset)
         if(H5D__virtual_set_extent_unlim(dset, H5AC_ind_read_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update virtual dataset extent")
 
-    /* Read the data space message and return a data space object */
+    /* Read the dataspace message and return a dataspace object */
     if(NULL == (space = H5S_copy(dset->shared->space, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get data space")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
 
     /* Create an atom */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)

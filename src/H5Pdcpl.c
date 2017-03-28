@@ -2373,7 +2373,7 @@ H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
 
     /* Register ID */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
 done:
     /* Free space on failure */
@@ -2464,7 +2464,7 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
 
     /* Register ID */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
 done:
     /* Free space on failure */
