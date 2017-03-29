@@ -104,6 +104,13 @@ typedef const void *(*H5PL_get_plugin_info_t)(void);
 /* Special symbol to indicate no plugin loading */
 #define H5PL_NO_PLUGIN          "::"
 
+/* Special symbol to indicate relative path from environment */
+#define H5PL_PLUGIN_ENV_SPECIALCHAR    '@'
+
+/* Maximum size for path to executable */
+#ifndef    MAX_EXEC_PATH
+#define    MAX_EXEC_PATH 2048
+#endif
 
 /******************/
 /* Local Typedefs */
@@ -154,6 +161,7 @@ static H5PL_table_t     *H5PL_table_g = NULL;
 static char             *H5PL_path_table_g[H5PL_MAX_PATH_NUM];
 static size_t           H5PL_num_paths_g = 0;
 static hbool_t          H5PL_path_found_g = FALSE;
+static char             *H5PL_executable_path_g = NULL;
 
 /* Enable all plugin libraries */
 static unsigned int     H5PL_plugin_g = H5PL_ALL_PLUGIN;
@@ -175,6 +183,7 @@ herr_t
 H5PL__init_package(void)
 {
     char        *preload_path;
+    char         *tempbuf;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -185,6 +194,36 @@ H5PL__init_package(void)
         /* Special symbal "::" means no plugin during data reading. */
         if(!HDstrcmp(preload_path, H5PL_NO_PLUGIN))
             H5PL_plugin_g = 0;
+
+    /* Retrieve the executable path for use with H5PL_PLUGIN_ENV_SPECIALCHAR
+     * if the user uses it in a plugin path.
+     */
+    if(NULL == (tempbuf = (char *)H5MM_malloc(MAX_EXEC_PATH)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for executable path")
+#if    defined(_WIN32) || defined(_WIN64) || defined(H5_HAVE_WIN32_API)
+    const char PathSep = '\\';
+    GetModuleFileName(NULL, tempbuf, MAX_EXEC_PATH);
+#elif defined(__APPLE__)
+    const char PathSep = '/';
+    uint32_t size = sizeof(result);
+    _NSGetExecutablePath(tempbuf, &size);
+#else
+    const char PathSep = '/';
+    {
+        ssize_t count = readlink("/proc/self/exe", tempbuf, MAX_EXEC_PATH);
+        tempbuf[count] = '\0';
+    }
+#endif
+    {
+        char *bs = strrchr(tempbuf,  PathSep);
+        size_t    ncopy = MAX_EXEC_PATH;
+        if (bs)
+            ncopy = bs - tempbuf;
+        tempbuf[ncopy] = '\0';
+    }
+    H5PL_executable_path_g = H5MM_strdup(tempbuf);
+    if(tempbuf)
+        tempbuf = (char *)H5MM_xfree(tempbuf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5PL__init_package() */
@@ -239,6 +278,10 @@ H5PL_term_package(void)
             n++;
         } /* end if */
 
+        /* Free the executable path */
+        if(H5PL_executable_path_g)
+            H5PL_executable_path_g = (char *)H5MM_xfree(H5PL_executable_path_g);
+
         /* Mark the interface as uninitialized */
         if(0 == n)
             H5_PKG_INIT_VAR = FALSE;
@@ -246,6 +289,31 @@ H5PL_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5PL_term_package() */
+
+static char*
+H5PL_env_strdup(const char *plpath)
+{
+    char        *dl_path = NULL;
+    if(NULL == plpath)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
+    if (*plpath == H5PL_PLUGIN_ENV_SPECIALCHAR) {
+        char         *tempbuf;
+        int ExecPathLength = strlen(H5PL_executable_path_g);
+        int PluginPathLength = strlen(plpath);
+
+        if(NULL == (tempbuf = (char *)H5MM_malloc(ExecPathLength + PluginPathLength)))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for plugin path")
+
+        HDstrncpy(tempbuf, H5PL_executable_path_g, ExecPathLength);
+        HDstrncpy(tempbuf+ExecPathLength, s+1, PluginPathLength-1);
+        tempbuf[ExecPathLength + PluginPathLength] = '\0';
+        dl_path = H5MM_strdup(tempbuf);
+        tempbuf = (char *)H5MM_xfree(tempbuf);
+    }
+    else
+        dl_path = H5MM_strdup(plpath);
+    return dl_path;
+} /* end H5PL_env_strdup() */
 
 
 /*-------------------------------------------------------------------------
