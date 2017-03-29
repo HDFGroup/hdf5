@@ -28,7 +28,7 @@ cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION "1.10.1")
-set (CTEST_SOURCE_VERSEXT "-pre1")
+set (CTEST_SOURCE_VERSEXT "-pre2")
 
 ##############################################################################
 # handle input parameters to script.
