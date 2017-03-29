@@ -1,4 +1,4 @@
-HDF5 version 1.10.1-pre1 released on 2017-03-23
+HDF5 version 1.10.1-pre2 currently under development
 ================================================================================
 Note:  this document is a work in progress.  In particular not all bug fixes have
 been documented here, and issues reported in the pre-release versions will appear in 
