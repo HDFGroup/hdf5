@@ -20,9 +20,6 @@
  *		implemented in H5C.c
  */
 #include "H5private.h"          /* Put this first, so H5open() isn't invoked in public macros */
-#include "h5test.h"
-#include "H5Cprivate.h"
-#include "H5Iprivate.h"
 #include "H5MFprivate.h"
 #include "cache_common.h"
 
@@ -338,8 +335,7 @@ static void execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr,
 
 
 
-
-/* address translation funtions: */
+/* address translation functions: */
 
 
 /*-------------------------------------------------------------------------
@@ -357,8 +353,8 @@ static void execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr,
  */
 void
 addr_to_type_and_index(haddr_t addr,
-                       int32_t * type_ptr,
-                       int32_t * index_ptr)
+                       int32_t *type_ptr,
+                       int32_t *index_ptr)
 {
     int i;
     int32_t type;
@@ -1577,7 +1573,7 @@ entry_in_cache(H5C_t * cache_ptr,
 /*-------------------------------------------------------------------------
  * Function:	reset_entries
  *
- * Purpose:	reset the contents of the entries arrays to know values.
+ * Purpose:	reset the contents of the entries arrays to known values.
  *
  * Return:	void
  *

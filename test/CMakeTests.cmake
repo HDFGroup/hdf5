@@ -145,7 +145,7 @@ endif ()
 add_custom_target(HDF5_TEST_LIB_files ALL COMMENT "Copying files needed by HDF5_TEST_LIB tests" DEPENDS ${HDF5_TEST_LIB_files_list})
 if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
   add_custom_target(HDF5_TEST_LIBSH_files ALL COMMENT "Copying files needed by HDF5_TEST_LIBSH tests" DEPENDS ${HDF5_TEST_LIBSH_files_list})
-endif()
+endif ()
 
 # Remove any output file left over from previous test run
 add_test (NAME H5TEST-clear-testhdf5-objects
@@ -776,7 +776,7 @@ if (HDF5_TEST_VFD)
   endif ()
 
   # Windows only macro
-  MACRO (CHECK_VFD_TEST vfdtest vfdname resultcode)
+  macro (CHECK_VFD_TEST vfdtest vfdname resultcode)
     if (${vfdtest} STREQUAL "flush1" OR ${vfdtest} STREQUAL "flush2")
       if (${vfdname} STREQUAL "multi" OR ${vfdname} STREQUAL "split")
         if (NOT BUILD_SHARED_LIBS AND NOT CMAKE_BUILD_TYPE MATCHES Debug)
@@ -819,7 +819,7 @@ if (HDF5_TEST_VFD)
                 COMMAND ${CMAKE_COMMAND} -E echo "SKIP VFD-${vfdname}-${vfdtest}-shared"
             )
           endif ()
-        endif()
+        endif ()
       else ()
         add_test (NAME VFD-${vfdname}-${vfdtest}
             COMMAND "${CMAKE_COMMAND}"
@@ -884,9 +884,9 @@ if (HDF5_TEST_VFD)
         )
         endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_VFD_TEST vfdname resultcode)
+  macro (ADD_VFD_TEST vfdname resultcode)
     foreach (test ${H5_VFD_TESTS})
       if (WIN32)
         CHECK_VFD_TEST (${test} ${vfdname} ${resultcode})
@@ -979,7 +979,7 @@ if (HDF5_TEST_VFD)
       )
       endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
   # Run test with different Virtual File Driver
   foreach (vfd ${VFD_LIST})
@@ -995,13 +995,13 @@ endif ()
 ##############################################################################
 
 if (HDF5_BUILD_GENERATORS)
-  MACRO (ADD_H5_GENERATOR genfile)
+  macro (ADD_H5_GENERATOR genfile)
     add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
     TARGET_NAMING (${genfile} STATIC)
     TARGET_C_PROPERTIES (${genfile} STATIC " " " ")
     target_link_libraries (${genfile} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (${genfile} PROPERTIES FOLDER generator/test)
-  ENDMACRO ()
+  endmacro ()
 
   # generator executables
   set (H5_GENERATORS

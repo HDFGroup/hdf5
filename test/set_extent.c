@@ -20,9 +20,6 @@
  * Purpose:     Tests the H5Dset_extent call
  */
 
-#include <time.h>
-#include <stdlib.h>
-#include "hdf5.h"
 #include "h5test.h"
 
 /*-------------------------------------------------------------------------

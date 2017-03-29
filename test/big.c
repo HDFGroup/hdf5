@@ -120,7 +120,7 @@ static hsize_t values_used[WRT_N];
 static hsize_t
 randll(hsize_t limit, int current_index)
 {
-    hsize_t	acc;
+    hsize_t	acc = 0;
     int 	overlap = 1;
     int 	i;
     int 	tries = 0;
@@ -508,7 +508,7 @@ reader(char *filename, hid_t fapl)
         if('#' != ln[0])
             break;
         i = (int)HDstrtol(ln + 1, &s, 10);
-        hs_offset[0] = HDstrtoll(s, NULL, 0);
+        hs_offset[0] = HDstrtoull(s, NULL, 0);
         HDfprintf(stdout, "#%03d 0x%016Hx%47s", i, hs_offset[0], "");
         HDfflush(stdout);
 
@@ -618,8 +618,8 @@ test_sec2(hid_t fapl)
 quit:
     /* End with normal return code */
     /* Clean up the test file */
-    if(h5_cleanup(FILENAME, fapl))
-        HDremove(DNAME);
+    h5_clean_files(FILENAME, fapl);
+    HDremove(DNAME);
     return 0;
 
 error:
@@ -655,8 +655,8 @@ test_stdio(hid_t fapl)
 quit:
     /* End with normal return code */
     /* Clean up the test file */
-    if(h5_cleanup(FILENAME, fapl))
-        HDremove(DNAME);
+    h5_clean_files(FILENAME, fapl);
+    HDremove(DNAME);
     HDfflush(stdout);
     return 0;
 
@@ -716,8 +716,8 @@ test_family(hid_t fapl)
 quit:
     /* End with normal return code */
     /* Clean up the test file */
-    if(h5_cleanup(FILENAME, fapl))
-        HDremove(DNAME);
+    h5_clean_files(FILENAME, fapl);
+    HDremove(DNAME);
     return 0;
 
 error:

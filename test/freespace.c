@@ -2841,6 +2841,8 @@ main(void)
     if(env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
+    h5_reset();
+
     fapl = h5_fileaccess();
 
     /* make sure alignment is not set for tests to succeed */

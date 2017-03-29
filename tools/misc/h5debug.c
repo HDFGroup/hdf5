@@ -57,15 +57,15 @@
 /*-------------------------------------------------------------------------
  * Function:    get_H5B2_class
  *
- * Purpose:	Determine the v2 B-tree class from the buffer read in.
+ * Purpose:  Determine the v2 B-tree class from the buffer read in.
  *              B-trees are debugged through the B-tree subclass.  The subclass
  *              identifier is two bytes after the B-tree signature.
  *
- * Return:	Non-NULL on success/NULL on failure
+ * Return:  Non-NULL on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 11 2008
+ * Programmer:  Quincey Koziol
+ *    koziol@hdfgroup.org
+ *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -143,16 +143,18 @@ get_H5B2_class(const uint8_t *sig)
 int
 main(int argc, char *argv[])
 {
-    hid_t	fid, fapl, dxpl;
+    hid_t  fid, fapl, dxpl;
     H5F_t       *f;
     haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
+    H5E_auto2_t func;
+    void 	*edata;
     herr_t      status = SUCCEED;
 
     if(argc == 1) {
-  		HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
-  		HDexit(1);
+  	HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
+  	HDexit(1);
     } /* end if */
 
     /* Initialize the library */
@@ -160,6 +162,10 @@ main(int argc, char *argv[])
         HDfprintf(stderr, "cannot initialize the library\n");
         HDexit(1);
     } /* end if */
+
+    /* Disable error reporting */
+    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /*
      * Open the file and get the file descriptor.
@@ -447,6 +453,8 @@ main(int argc, char *argv[])
     H5Pclose(dxpl);
     H5Pclose(fapl);
     H5Fclose(fid);
+
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     return 0;
 } /* main() */

@@ -134,7 +134,7 @@ if (HDF5_ENABLE_F2003)
       endif ()
       set (last_test "f03_ex-shared_${example}")
     endif ()
-  endforeach (example ${F2003_examples})
+  endforeach ()
 endif ()
 
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)

@@ -52,7 +52,7 @@ typedef struct h5dump_table_list_t {
 
 extern h5dump_table_list_t  table_list;
 extern table_t             *group_table, *dset_table, *type_table;
-extern int                  dump_indent;              /*how far in to indent the line         */
+extern unsigned                  dump_indent;              /*how far in to indent the line         */
 
 extern int          unamedtype;     /* shared datatype with no name */
 extern hbool_t      hit_elink;  /* whether we have traversed an external link */
@@ -73,7 +73,6 @@ extern int          display_fi; /*file index */
 extern int          display_ai;  /*array index */
 extern int          display_escape; /*escape non printable characters */
 extern int          display_region; /*print region reference data */
-extern int          enable_error_stack; /* re-enable error stack */
 extern int          disable_compact_subset; /* disable compact form of subset notation */
 extern int          display_packed_bits; /*print 1-8 byte numbers as packed bits*/
 extern int          include_attrs; /* Display attributes */
@@ -88,8 +87,8 @@ extern H5_iter_order_t sort_order; /*sort_order [ascending | descending]   */
 extern unsigned long long packed_mask[PACKED_BITS_MAX];  /* packed bits are restricted to 8*sizeof(llong) bytes */
 
 /* packed bits display parameters */
-extern int packed_offset[PACKED_BITS_MAX];
-extern int packed_length[PACKED_BITS_MAX];
+extern unsigned packed_offset[PACKED_BITS_MAX];
+extern unsigned packed_length[PACKED_BITS_MAX];
 
 /*
  * The global table is set to either ddl_function_table or

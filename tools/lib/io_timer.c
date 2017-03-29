@@ -199,9 +199,8 @@ set_time(io_time_t *pt, timer_type t, int start_stop)
 	break;
     default:
 	HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
-	return (NULL);
-	break;
-    }
+	    return NULL;
+    } /* end switch */
 
 #if 0
     /* this does not belong here. Need fix in h5perf code when set_time() is called. -AKC- */

@@ -39,11 +39,6 @@ static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *fil
  * Programmer: Pedro Vicente, pvn@hdfgroup.org
  *
  * Date: December 19, 2003
- *  Modified: December, 19, 2007 (exactly 4 years later :-) )
- *  Separate into 3 cases
- *  1) no filter input, get all datasets and compare DCPLs. TO DO
- *  2) filter input on selected datasets, get each one trough OBJ and match
- *  3) filter input on all datasets, get all objects and match
  *
  *-------------------------------------------------------------------------
  */
@@ -524,7 +519,7 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
         {
 
             case H5Z_FILTER_NONE:
-            break;
+        	break;
 
             case H5Z_FILTER_SHUFFLE:
                 /* 1 private client value is returned by DCPL */

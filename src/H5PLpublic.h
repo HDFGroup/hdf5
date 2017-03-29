@@ -43,7 +43,14 @@ extern "C" {
 
 /* plugin state */
 H5_DLL herr_t H5PLset_loading_state(unsigned int plugin_type);
-H5_DLL herr_t H5PLget_loading_state(unsigned int *plugin_type/*out*/);
+H5_DLL herr_t H5PLget_loading_state(unsigned int* plugin_type/*out*/);
+H5_DLL herr_t H5PLappend(char* plugin_path);
+H5_DLL herr_t H5PLprepend(char* plugin_path);
+H5_DLL herr_t H5PLput(char* plugin_path, unsigned int index);
+H5_DLL herr_t H5PLinsert(char* plugin_path, unsigned int index);
+H5_DLL herr_t H5PLremove(unsigned int index);
+H5_DLL const char* H5PLget(unsigned int index);
+H5_DLL unsigned int H5PLsize(void);
 
 #ifdef __cplusplus
 }

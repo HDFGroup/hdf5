@@ -473,6 +473,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
  *
  *-------------------------------------------------------------------------
  */
+#ifndef HDstrtoll
 int64_t
 HDstrtoll(const char *s, const char **rest, int base)
 {
@@ -548,7 +549,7 @@ HDstrtoll(const char *s, const char **rest, int base)
         *rest = s;
     return acc;
 } /* end HDstrtoll() */
-
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:  HDrand/HDsrand

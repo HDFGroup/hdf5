@@ -156,7 +156,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -332,9 +332,8 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_
                         H5Dclose(obj);
                         goto done;
                     } 
-                    else {
+                    else
                         found_obj->displayed = TRUE;
-                    }
                 } /* end if */
 
                 dump_function_table->dump_dataset_function(obj, name, NULL);
@@ -755,7 +754,7 @@ xml_escape_the_string(const char *str, int slen)
     if (slen < 0)
         len = HDstrlen(str);
     else
-        len = slen;
+        len = (size_t)slen;
 
     extra = 0;
 
@@ -877,7 +876,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -953,7 +952,6 @@ xml_print_datatype(hid_t type, unsigned in_group)
         }
     } 
     else {
-
         switch (H5Tget_class(type)) {
         case H5T_INTEGER:
             ctx.need_prefix = TRUE;
@@ -1582,7 +1580,7 @@ xml_dump_datatype(hid_t type)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -1592,7 +1590,7 @@ xml_dump_datatype(hid_t type)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -1721,7 +1719,7 @@ xml_dump_dataspace(hid_t space)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -1731,7 +1729,7 @@ xml_dump_dataspace(hid_t space)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -1897,7 +1895,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
     h5tool_format_t     string_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     /* Print all the values. */
@@ -1911,7 +1909,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -1950,12 +1948,10 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
 
     if (obj_data == DATASET_DATA) {
         type = H5Dget_type(obj_id);
-        if (H5Tget_class(type) == H5T_REFERENCE) {
+        if (H5Tget_class(type) == H5T_REFERENCE)
             status = xml_print_refs(obj_id, DATASET_DATA);
-        } 
-        else if (H5Tget_class(type) == H5T_STRING) {
+        else if (H5Tget_class(type) == H5T_STRING)
             status = xml_print_strs(obj_id, DATASET_DATA);
-        } 
         else {
             h5tools_context_t datactx;
             HDmemset(&datactx, 0, sizeof(datactx));
@@ -2095,7 +2091,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -2105,7 +2101,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -2425,7 +2421,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -2435,7 +2431,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -2650,7 +2646,7 @@ xml_dump_group(hid_t gid, const char *name)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -2660,7 +2656,7 @@ xml_dump_group(hid_t gid, const char *name)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3011,9 +3007,8 @@ xml_print_refs(hid_t did, int source)
             goto error;
         e = H5Dread(did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
         /* need to check result here */
-        if (e < 0) {
+        if (e < 0)
             goto error;
-        }
     }
     else if (source == ATTRIBUTE_DATA) {
         space = H5Aget_space(did);
@@ -3028,9 +3023,8 @@ xml_print_refs(hid_t did, int source)
         }
         e = H5Aread(did, H5T_STD_REF_OBJ, buf);
         /* need to check the result here */
-        if (e < 0) {
+        if (e < 0)
             goto error;
-        }
     }
 
     refbuf = (hobj_ref_t *) buf;
@@ -3039,7 +3033,7 @@ xml_print_refs(hid_t did, int source)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -3049,7 +3043,7 @@ xml_print_refs(hid_t did, int source)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3140,20 +3134,16 @@ xml_print_strs(hid_t did, int source)
     h5tool_format_t   string_dataformat;
     hsize_t     curr_pos = 0;        /* total data element position   */
 
-    if (source == DATASET_DATA) {
+    if (source == DATASET_DATA)
         type = H5Dget_type(did);
-    }
-    else if (source == ATTRIBUTE_DATA) {
+    else if (source == ATTRIBUTE_DATA)
         type = H5Aget_type(did);
-    }
-    else {
+    else
         /* return an error */
         return FAIL;
-    }
-    if (H5Tget_class(type) != H5T_STRING) {
+    if (H5Tget_class(type) != H5T_STRING)
         /* return an error */
         goto error;
-    }
     /* Check if we have VL data in the dataset's datatype */
     is_vlstr = H5Tis_variable_str(type);
 
@@ -3169,9 +3159,8 @@ xml_print_strs(hid_t did, int source)
             goto error;
 
         e = H5Dread(did, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-        if (e < 0) {
+        if (e < 0)
             goto error;
-        }
     }
     else if (source == ATTRIBUTE_DATA) {
         space = H5Aget_space(did);
@@ -3185,9 +3174,8 @@ xml_print_strs(hid_t did, int source)
             goto error;
 
         e = H5Aread(did, type, buf);
-        if (e < 0) {
+        if (e < 0)
             goto error;
-        }
     }
 
     bp = (char*) buf;
@@ -3198,7 +3186,7 @@ xml_print_strs(hid_t did, int source)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -3208,7 +3196,7 @@ xml_print_strs(hid_t did, int source)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3314,7 +3302,7 @@ check_filters(hid_t dcpl)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -3324,7 +3312,7 @@ check_filters(hid_t dcpl)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3454,7 +3442,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -3464,7 +3452,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3824,7 +3812,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * s
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
 
     t_name = xml_escape_the_name(name);
@@ -3838,7 +3826,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * s
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -4039,42 +4027,42 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * s
     H5Pget_fill_time(dcpl, &ft);
     h5tools_str_append(&buffer, "FillTime=\"");
     switch (ft) {
-    case H5D_FILL_TIME_ALLOC:
-        h5tools_str_append(&buffer, "FillOnAlloc");
-        break;
-    case H5D_FILL_TIME_NEVER:
-        h5tools_str_append(&buffer, "FillNever");
-        break;
-    case H5D_FILL_TIME_IFSET:
-        h5tools_str_append(&buffer, "FillIfSet");
-        break;
+        case H5D_FILL_TIME_ALLOC:
+            h5tools_str_append(&buffer, "FillOnAlloc");
+            break;
+        case H5D_FILL_TIME_NEVER:
+            h5tools_str_append(&buffer, "FillNever");
+            break;
+        case H5D_FILL_TIME_IFSET:
+            h5tools_str_append(&buffer, "FillIfSet");
+            break;
         case H5D_FILL_TIME_ERROR:
             HDassert(0);
             /* fall through */
-    default:
-        h5tools_str_append(&buffer, "?");
-        break;
+        default:
+            h5tools_str_append(&buffer, "?");
+            break;
     } /* end switch */
     h5tools_str_append(&buffer, "\" ");
     H5Pget_alloc_time(dcpl, &at);
     h5tools_str_append(&buffer, "AllocationTime=\"");
     switch (at) {
-    case H5D_ALLOC_TIME_EARLY:
-        h5tools_str_append(&buffer, "Early");
-        break;
-    case H5D_ALLOC_TIME_INCR:
-        h5tools_str_append(&buffer, "Incremental");
-        break;
-    case H5D_ALLOC_TIME_LATE:
-        h5tools_str_append(&buffer, "Late");
-        break;
-    case H5D_ALLOC_TIME_DEFAULT:
+        case H5D_ALLOC_TIME_EARLY:
+            h5tools_str_append(&buffer, "Early");
+            break;
+        case H5D_ALLOC_TIME_INCR:
+            h5tools_str_append(&buffer, "Incremental");
+            break;
+        case H5D_ALLOC_TIME_LATE:
+            h5tools_str_append(&buffer, "Late");
+            break;
+        case H5D_ALLOC_TIME_DEFAULT:
         case H5D_ALLOC_TIME_ERROR:
             HDassert(0);
             /* fall through */
-    default:
-        h5tools_str_append(&buffer, "?");
-        break;
+        default:
+            h5tools_str_append(&buffer, "?");
+            break;
     } /* end switch */
     h5tools_str_append(&buffer, "\"");
     h5tools_str_append(&buffer, ">");
@@ -4418,7 +4406,7 @@ xml_print_enum(hid_t type)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -4428,7 +4416,7 @@ xml_print_enum(hid_t type)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }

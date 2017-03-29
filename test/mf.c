@@ -6246,6 +6246,8 @@ main(void)
     if(env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
+    h5_reset();
+
     fapl = h5_fileaccess();
 
     /* Make a copy of the FAPL before adjusting the alignment */
