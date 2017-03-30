@@ -35,7 +35,7 @@ static void create_datasets(hid_t file_id, int min_dset, int max_dset);
 static void delete_datasets(hid_t file_id, int min_dset, int max_dset);
 static void open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
     hbool_t read_only, hbool_t set_mdci_fapl, hbool_t config_fsm,
-    const char *hdf_file_name, unsigned cache_image_flags, 
+    hbool_t set_eoc, const char *hdf_file_name, unsigned cache_image_flags, 
     hid_t *file_id_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr);
 static void attempt_swmr_open_hdf5_file(hbool_t create_file,
     hbool_t set_mdci_fapl, const char *hdf_file_name);
@@ -62,6 +62,7 @@ static unsigned cache_image_api_error_check_3(void);
 static unsigned cache_image_api_error_check_4(void);
 
 static unsigned get_free_sections_test(void);
+static unsigned evict_on_close_test(void);
 
 
 /****************************************************************************/
@@ -535,7 +536,7 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
 static void
 open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
     hbool_t read_only, hbool_t set_mdci_fapl, hbool_t config_fsm,
-    const char *hdf_file_name, unsigned cache_image_flags,
+    hbool_t set_eoc, const char *hdf_file_name, unsigned cache_image_flags,
     hid_t *file_id_ptr, H5F_t ** file_ptr_ptr, H5C_t ** cache_ptr_ptr)
 {
     const char * fcn_name = "open_hdf5_file()";
@@ -601,7 +602,8 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
     /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass ) {
 
-        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) {
+        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+                                  H5F_LIBVER_LATEST) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "H5Pset_libver_bounds() failed.\n";
@@ -667,9 +669,22 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
     }
 
     if ( ( pass ) && ( config_fsm ) ) {
-        if(H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0) {
+        if(H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, 
+                                      TRUE, (hsize_t)1) < 0) {
             pass = FALSE;
             failure_mssg = "H5Pset_file_space_strategy() failed.";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* set evict on close if indicated */
+    if ( ( pass ) && ( set_eoc ) ) {
+
+        if ( H5Pset_evict_on_close(fapl_id, TRUE) < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Pset_evict_on_close() failed.";
         }
     }
 
@@ -682,10 +697,12 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
 
 	    if ( fcpl_id != -1 )
 
-                file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+                file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC, 
+                                    fcpl_id, fapl_id);
 	    else
 
-		file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+		file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC, 
+                                    H5P_DEFAULT, fapl_id);
 
         } else {
 
@@ -1362,6 +1379,7 @@ check_cache_image_ctl_flow_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__GEN_MDCI_SBE_MESG,
                        /* file_id_ptr        */ &file_id,
@@ -1415,6 +1433,7 @@ check_cache_image_ctl_flow_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -1476,6 +1495,7 @@ check_cache_image_ctl_flow_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -1637,6 +1657,7 @@ check_cache_image_ctl_flow_2(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__GEN_MDCI_SBE_MESG,
                        /* file_id_ptr        */ &file_id,
@@ -1679,6 +1700,7 @@ check_cache_image_ctl_flow_2(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -1718,6 +1740,7 @@ check_cache_image_ctl_flow_2(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -1894,6 +1917,7 @@ check_cache_image_ctl_flow_3(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -1935,6 +1959,7 @@ check_cache_image_ctl_flow_3(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__GEN_MDCI_SBE_MESG,
                        /* file_id_ptr        */ &file_id,
@@ -1988,6 +2013,7 @@ check_cache_image_ctl_flow_3(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -2041,6 +2067,7 @@ check_cache_image_ctl_flow_3(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -2091,6 +2118,7 @@ check_cache_image_ctl_flow_3(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -2260,6 +2288,7 @@ check_cache_image_ctl_flow_4(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -2301,6 +2330,7 @@ check_cache_image_ctl_flow_4(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__GEN_MDCI_SBE_MESG,
                        /* file_id_ptr        */ &file_id,
@@ -2343,6 +2373,7 @@ check_cache_image_ctl_flow_4(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -2385,6 +2416,7 @@ check_cache_image_ctl_flow_4(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -2424,6 +2456,7 @@ check_cache_image_ctl_flow_4(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -2589,6 +2622,7 @@ check_cache_image_ctl_flow_5(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__GEN_MDCI_SBE_MESG,
                        /* file_id_ptr        */ &file_id,
@@ -2648,6 +2682,7 @@ check_cache_image_ctl_flow_5(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__GEN_MDCI_SBE_MESG,
                        /* file_id_ptr        */ &file_id,
@@ -2700,6 +2735,7 @@ check_cache_image_ctl_flow_5(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -2867,6 +2903,7 @@ check_cache_image_ctl_flow_6(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__GEN_MDCI_SBE_MESG,
                        /* file_id_ptr        */ &file_id,
@@ -2915,6 +2952,7 @@ check_cache_image_ctl_flow_6(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__GEN_MDCI_SBE_MESG,
                        /* file_id_ptr        */ &file_id,
@@ -2957,6 +2995,7 @@ check_cache_image_ctl_flow_6(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -3149,6 +3188,7 @@ cache_image_smoke_check_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -3215,6 +3255,7 @@ cache_image_smoke_check_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -3280,6 +3321,7 @@ cache_image_smoke_check_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -3346,6 +3388,7 @@ cache_image_smoke_check_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -3388,6 +3431,7 @@ cache_image_smoke_check_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -3567,6 +3611,7 @@ cache_image_smoke_check_2(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -3630,6 +3675,7 @@ cache_image_smoke_check_2(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -3675,6 +3721,7 @@ cache_image_smoke_check_2(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -3865,6 +3912,7 @@ cache_image_smoke_check_3(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -3927,6 +3975,7 @@ cache_image_smoke_check_3(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -3992,6 +4041,7 @@ cache_image_smoke_check_3(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -4055,6 +4105,7 @@ cache_image_smoke_check_3(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -4248,6 +4299,7 @@ cache_image_smoke_check_4(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -4312,6 +4364,7 @@ cache_image_smoke_check_4(void)
                            /* read_only          */ FALSE,
                            /* set_mdci_fapl      */ TRUE,
 		           /* config_fsm         */ FALSE,
+		           /* set_eoc            */ FALSE,
                            /* hdf_file_name      */ filename,
                            /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                            /* file_id_ptr        */ &file_id,
@@ -4379,6 +4432,7 @@ cache_image_smoke_check_4(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -4442,6 +4496,7 @@ cache_image_smoke_check_4(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -4493,7 +4548,6 @@ cache_image_smoke_check_4(void)
 
     if ( show_progress ) 
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
- 
 
     /* 13) Delete the file */
 
@@ -4653,6 +4707,7 @@ cache_image_smoke_check_5(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -4742,6 +4797,7 @@ cache_image_smoke_check_5(void)
                            /* read_only          */ FALSE,
                            /* set_mdci_fapl      */ TRUE,
 		           /* config_fsm         */ FALSE,
+		           /* set_eoc            */ FALSE,
                            /* hdf_file_name      */ filename,
                            /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                            /* file_id_ptr        */ &file_id,
@@ -4842,6 +4898,7 @@ cache_image_smoke_check_5(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -4893,6 +4950,7 @@ cache_image_smoke_check_5(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -4953,6 +5011,7 @@ cache_image_smoke_check_5(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -5161,6 +5220,7 @@ cache_image_smoke_check_6(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -5225,6 +5285,7 @@ cache_image_smoke_check_6(void)
                            /* read_only          */ FALSE,
                            /* set_mdci_fapl      */ TRUE,
 		           /* config_fsm         */ FALSE,
+		           /* set_eoc            */ FALSE,
                            /* hdf_file_name      */ filename,
                            /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                            /* file_id_ptr        */ &file_id,
@@ -5303,6 +5364,7 @@ cache_image_smoke_check_6(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -5362,6 +5424,7 @@ cache_image_smoke_check_6(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -5559,6 +5622,7 @@ cache_image_api_error_check_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -5619,6 +5683,7 @@ cache_image_api_error_check_1(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -5681,6 +5746,7 @@ cache_image_api_error_check_1(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -5744,6 +5810,7 @@ cache_image_api_error_check_1(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -5931,6 +5998,7 @@ cache_image_api_error_check_2(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -5991,6 +6059,7 @@ cache_image_api_error_check_2(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -6053,6 +6122,7 @@ cache_image_api_error_check_2(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ 0,
                        /* file_id_ptr        */ &file_id,
@@ -6116,6 +6186,7 @@ cache_image_api_error_check_2(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -6177,6 +6248,7 @@ cache_image_api_error_check_2(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -6337,6 +6409,7 @@ cache_image_api_error_check_3(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -6422,6 +6495,7 @@ cache_image_api_error_check_3(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -6743,6 +6817,7 @@ cache_image_api_error_check_4(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -6997,6 +7072,7 @@ cache_image_api_error_check_4(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -7209,6 +7285,7 @@ get_free_sections_test(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ TRUE,
 		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -7274,6 +7351,7 @@ get_free_sections_test(void)
                        /* read_only          */ TRUE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -7398,6 +7476,7 @@ get_free_sections_test(void)
                        /* read_only          */ FALSE,
                        /* set_mdci_fapl      */ FALSE,
 		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
                        /* hdf_file_name      */ filename,
                        /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
                        /* file_id_ptr        */ &file_id,
@@ -7566,6 +7645,379 @@ get_free_sections_test(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    evict_on_close_test()
+ *
+ * Purpose:     If a file containing a cache image which in turn 
+ *              contains dirty entries is opened R/O, the metadata 
+ *              cache must refuse to evict the dirty entries, as 
+ *              it will not be able to reload them from file.  This
+ *              is a bit tricky, as the dirty entries must marked as
+ *              clean in the metadata cache so that the MDC will not 
+ *              attempt to flush then on file close.
+ *
+ *              The objective of this test is to verify that the 
+ *              metadata will not evict dirty entries in the above
+ *              context when the file is opened with the evict on close
+ *              FAPL entry.
+ *
+ *              Do this by creating a HDF5 file with a cache image 
+ *              containing dirty metadata.  
+ *
+ *              Then close the file, re-open it R/O, and scan its 
+ *              contents twice.  If evict on close succeeds in evicting
+ *              the dirty metadata, the second scan will fail, as valid 
+ *              versions of the dirty metadata will not be available.
+ *
+ *              To make the test more useful, enable persistant free 
+ *              space managers.
+ *
+ *		The test is set up as follows:
+ *
+ *		 1) Create a HDF5 file without a cache image requested
+ *                  and persistant free space managers enabled.  
+ *
+ *		 2) Create some data sets and verify them.
+ *
+ *               3) Close the file.
+ *
+ *               4) Open the file R/W, and with cache image requested.
+ *
+ *               5) Verify the datasets created in 2) above.  This will
+ *                  force their (clean) metadata into the metadata cache,
+ *                  and hence into the cache image.
+ *
+ *               6) Create some more datasets.
+ *
+ *               7) Close the file.
+ *
+ *               8) Open the file R/O and with evict on close enabled.
+ *
+ *               9) Verify all datasets twice.
+ *
+ *              10) Close the file.
+ *
+ *              11) Open the file R/W and with evict on close enabled.
+ *
+ *              12) Verify all datasets twice.
+ *
+ *              13) Close the file.
+ *
+ *              14) Discard the file.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              3/23/17
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+evict_on_close_test(void)
+{
+    const char * fcn_name = "evict_on_close_test()";
+    char filename[512];
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    hid_t file_id = -1;
+    H5F_t *file_ptr = NULL;
+    H5C_t *cache_ptr = NULL;
+    int cp = 0;
+
+    TESTING("Cache image / evict on close interaction");
+
+    pass = TRUE;
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* setup the file name */
+    if ( pass ) {
+
+        if ( h5_fixname(FILENAMES[0], H5P_DEFAULT, filename, sizeof(filename))
+            == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 1) Create a HDF5 file without a cache image requested
+     *    and persistant free space managers enabled.  
+     */
+    if ( pass ) {
+
+        open_hdf5_file(/* create_file        */ TRUE,
+                       /* mdci_sbem_expected */ FALSE,
+                       /* read_only          */ FALSE,
+                       /* set_mdci_fapl      */ FALSE,
+		       /* config_fsm         */ TRUE,
+		       /* set_eoc            */ FALSE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 2) Create some data sets and verify them.  */
+
+    if ( pass ) {
+
+        create_datasets(file_id, 1, 10);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 1, 10);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 3) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed (1).\n";
+
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 4) Open the file R/W, and with cache image requested. */
+
+    if ( pass ) {
+
+        open_hdf5_file(/* create_file        */ FALSE,
+                       /* mdci_sbem_expected */ FALSE,
+                       /* read_only          */ FALSE,
+                       /* set_mdci_fapl      */ TRUE,
+		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ FALSE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 5) Verify the datasets created in 2) above.  This will
+     *    force their (clean) metadata into the metadata cache,
+     *    and hence into the cache image.
+     */
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 1, 10);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 6) Create some more datasets and verify them */
+
+    if ( pass ) {
+
+        create_datasets(file_id, 11, 20);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 11, 20);
+    }
+
+    if ( verbose ) {
+
+        HDassert(cache_ptr);
+        HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+        HDfprintf(stdout, "index size / index dirty size = %lld / %lld\n", 
+                  (long long)(cache_ptr->index_size),
+                  (long long)(cache_ptr->dirty_index_size));
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 7) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed (2).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 8) Open the file R/O and with evict on close enabled. */
+
+    if ( pass ) {
+
+        open_hdf5_file(/* create_file        */ FALSE,
+                       /* mdci_sbem_expected */ TRUE,
+                       /* read_only          */ TRUE,
+                       /* set_mdci_fapl      */ FALSE,
+		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ TRUE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s*: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 9) Verify all datasets twice */
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 1, 20);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 1, 20);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 10) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed (3).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+ 
+    /* 11) Open the file R/w and with evict on close enabled. */
+
+    if ( pass ) {
+
+        open_hdf5_file(/* create_file        */ FALSE,
+                       /* mdci_sbem_expected */ TRUE,
+                       /* read_only          */ FALSE,
+                       /* set_mdci_fapl      */ FALSE,
+		       /* config_fsm         */ FALSE,
+		       /* set_eoc            */ TRUE,
+                       /* hdf_file_name      */ filename,
+                       /* cache_image_flags  */ H5C_CI__ALL_FLAGS,
+                       /* file_id_ptr        */ &file_id,
+                       /* file_ptr_ptr       */ &file_ptr,
+                       /* cache_ptr_ptr      */ &cache_ptr);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s*: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 12) Verify all datasets twice */
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 1, 20);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) {
+
+        verify_datasets(file_id, 1, 20);
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 13) Close the file. */
+
+    if ( pass ) {
+
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed (3).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+
+    /* 14) Discard the file. */
+
+    if ( pass ) {
+
+        if ( HDremove(filename) < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "HDremove() failed.\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass )
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  FUNC, failure_mssg);
+
+    return !pass;
+
+} /* evict_on_close_test() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Run tests on the cache code contained in H5C.c
@@ -7614,6 +8066,7 @@ main(void)
     nerrs += cache_image_api_error_check_4();
 
     nerrs += get_free_sections_test();
+    nerrs += evict_on_close_test();
 
     return(nerrs > 0);
 

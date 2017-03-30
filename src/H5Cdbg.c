@@ -738,9 +738,10 @@ H5C_stats(H5C_t * cache_ptr,
               (long long)(cache_ptr->index_scan_restarts));
 
     HDfprintf(stdout,
-	      "%s  cache image creations/loads/size   = %d / %d / %Hu\n",
+	    "%s  cache image creations/reads/loads/size = %d / %d /%d / %Hu\n",
               cache_ptr->prefix,
               cache_ptr->images_created,
+              cache_ptr->images_read,
               cache_ptr->images_loaded,
               cache_ptr->last_image_size);
 
@@ -993,6 +994,7 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED * cache_ptr)
     cache_ptr->index_scan_restarts              = 0;
 
     cache_ptr->images_created           = 0;
+    cache_ptr->images_read              = 0;
     cache_ptr->images_loaded            = 0;
     cache_ptr->last_image_size          = (hsize_t)0;
 
