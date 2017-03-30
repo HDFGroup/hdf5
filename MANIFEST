@@ -738,6 +738,7 @@
 ./src/H5Pstrcpl.c
 ./src/H5Ptest.c
 ./src/H5PL.c
+./src/H5PLpkg.h
 ./src/H5PLprivate.h
 ./src/H5PLpublic.h
 ./src/H5PLextern.h
