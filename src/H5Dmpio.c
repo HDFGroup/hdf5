@@ -329,8 +329,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__mpio_array_gather
  *
- * Purpose:     Given arrays by MPI ranks, gathers them into a single large
- *              array which is then distributed back to all ranks. If the
+ * Purpose:     Given arrays by MPI ranks, gathers them into a single array
+ *              which is then distributed back to all ranks. If the
  *              sort_func argument is specified, the list is sorted before
  *              being returned.
  *
@@ -1273,9 +1273,6 @@ if(H5DEBUG(D))
  *                 E. Perform the collective write
  *                 F. All processes collectively re-insert each modified
  *                    chunk from the gathered array into the chunk index
- *              3. If the operation is a read operation
- *                 A. Loop through each chunk in the operation
- *                    I.
  *
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1412,7 +1409,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
         mpi_buf_count = (mem_type_is_derived && file_type_is_derived) ? (hsize_t) 1 : (hsize_t) 0;
 
         /* Set up the base storage address for this operation */
-        ctg_store.contig.dset_addr = 0;
+        ctg_store.contig.dset_addr = 0; /* Write address must be set to address 0 */
         io_info->store = &ctg_store;
 
         /* Perform I/O */
@@ -2556,7 +2553,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     const H5D_chunk_map_t *fm, H5D_filtered_collective_io_info_t **chunk_list, size_t *num_entries)
 {
     H5D_filtered_collective_io_info_t *local_info_array = NULL; /* The list of initially select chunks for this process */
-    H5D_filtered_collective_io_info_t *overlap_info_array = NULL; /* The list of all chunks selected in the operation by all processes */
+    H5D_filtered_collective_io_info_t *shared_chunks_info_array = NULL; /* The list of all chunks selected in the operation by all processes */
     H5S_sel_iter_t                    *mem_iter = NULL; /* Memory iterator for H5D__gather_mem */
     unsigned char                     *mod_data = NULL; /* Chunk modification data sent by a process to a chunk's owner */
     H5SL_node_t                       *chunk_node;
@@ -2565,7 +2562,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     hbool_t                            mem_iter_init = FALSE;
     size_t                             num_send_requests = 0;
     size_t                             num_chunks_selected;
-    size_t                             overlap_info_array_num_entries;
+    size_t                             shared_chunks_info_array_num_entries;
     size_t                             i;
     int                                mpi_rank, mpi_size, mpi_code;
     herr_t                             ret_value = SUCCEED;
@@ -2630,13 +2627,13 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate memory iterator")
 
         if (H5D__mpio_array_gather(io_info, local_info_array, num_chunks_selected,
-                sizeof(*local_info_array), (void **) &overlap_info_array, &overlap_info_array_num_entries,
+                sizeof(*local_info_array), (void **) &shared_chunks_info_array, &shared_chunks_info_array_num_entries,
                 H5D__cmp_filtered_collective_io_info_entry) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather array")
 
-        for (i = 0, num_chunks_selected = 0, num_send_requests = 0; i < overlap_info_array_num_entries;) {
+        for (i = 0, num_chunks_selected = 0, num_send_requests = 0; i < shared_chunks_info_array_num_entries;) {
             H5D_filtered_collective_io_info_t chunk_entry;
-            haddr_t chunk_addr = overlap_info_array[i].old_chunk.offset;
+            haddr_t chunk_addr = shared_chunks_info_array[i].old_chunk.offset;
             size_t  total_io_size = 0;
             size_t  num_writers = 0;
             size_t  max_bytes = 0;
@@ -2660,22 +2657,22 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
                  * contributed will be the only one with a valid dataspace selection
                  * on that particular process
                  */
-                if (mpi_rank == overlap_info_array[i].owner)
-                    chunk_entry = overlap_info_array[i];
+                if (mpi_rank == shared_chunks_info_array[i].owner)
+                    chunk_entry = shared_chunks_info_array[i];
 
                 /* Add this chunk entry's IO size to the running total */
-                total_io_size += overlap_info_array[i].io_size;
+                total_io_size += shared_chunks_info_array[i].io_size;
 
                 /* New owner of the chunk is determined by the process
                  * which is writing the most data to the chunk
                  */
-                if (overlap_info_array[i].io_size > max_bytes) {
-                    max_bytes = overlap_info_array[i].io_size;
-                    new_owner = overlap_info_array[i].owner;
+                if (shared_chunks_info_array[i].io_size > max_bytes) {
+                    max_bytes = shared_chunks_info_array[i].io_size;
+                    new_owner = shared_chunks_info_array[i].owner;
                 }
 
                 num_writers++;
-            } while (++i < overlap_info_array_num_entries && overlap_info_array[i].old_chunk.offset == chunk_addr);
+            } while (++i < shared_chunks_info_array_num_entries && shared_chunks_info_array[i].old_chunk.offset == chunk_addr);
 
             if (mpi_rank == new_owner) {
                 hssize_t chunk_npoints;
@@ -2698,7 +2695,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
                 chunk_entry.full_overwrite = (total_io_size >= (hsize_t) chunk_npoints * type_info->dst_type_size) ? TRUE : FALSE;
 
                 /* New owner takes possession of the chunk */
-                overlap_info_array[num_chunks_selected++] = chunk_entry;
+                shared_chunks_info_array[num_chunks_selected++] = chunk_entry;
             } /* end if */
             else if (chunk_entry.chunk_info.fspace) {
                 unsigned char *mod_data_p = NULL; /* Use second pointer since H5S_encode advances pointer */
@@ -2759,7 +2756,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
             H5MM_free(local_info_array);
 
         /* Local info list becomes modified (redistributed) chunk list */
-        local_info_array = overlap_info_array;
+        local_info_array = shared_chunks_info_array;
     } /* end if */
 
     *chunk_list = local_info_array;
