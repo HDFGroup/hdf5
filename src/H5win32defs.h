@@ -23,6 +23,11 @@
  *
  */
 
+/*
+ * _MSC_VER = 1900 VS2015
+ * _MSC_VER = 1800 VS2013
+ * _MSC_VER = 1700 VS2012
+ */
 #ifdef H5_HAVE_WIN32_API
 
 typedef struct _stati64     h5_stat_t;
@@ -54,13 +59,22 @@ typedef __int64             h5_stat_size_t;
 #define HDsleep(S)          Sleep(S*1000)
 #define HDstat(S,B)         _stati64(S,B)
 #define HDstrcasecmp(A,B)   _stricmp(A,B)
-#define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
 #define HDstrdup(S)         _strdup(S)
 #define HDtzset()           _tzset()
 #define HDunlink(S)         _unlink(S)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
 
 #ifdef H5_HAVE_VISUAL_STUDIO
+
+#if (_MSC_VER < 1800)
+  #ifndef H5_HAVE_STRTOLL
+    #define HDstrtoll(S,R,N)    _strtoi64(S,R,N)
+  #endif /* H5_HAVE_STRTOLL */
+  #ifndef H5_HAVE_STRTOULL
+    #define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
+  #endif /* H5_HAVE_STRTOULL */
+#endif /* MSC_VER < 1800 */
+
 /*
  * The (void*) cast just avoids a compiler warning in H5_HAVE_VISUAL_STUDIO
  */

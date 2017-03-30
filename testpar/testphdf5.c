@@ -351,6 +351,11 @@ int main(int argc, char **argv)
     AddTest("split", test_split_comm_access, NULL,
 	    "dataset using split communicators", PARATESTFILE);
 
+#ifdef PB_OUT /* temporary: disable page buffering when parallel */
+    AddTest("page_buffer", test_page_buffer_access, NULL,
+            "page buffer usage in parallel", PARATESTFILE);
+#endif
+
     AddTest("props", test_file_properties, NULL,
 	    "Coll Metadata file property settings", PARATESTFILE);
 

@@ -194,6 +194,27 @@ hsize_t IdComponent::getNumMembers(H5I_type_t type)
 }
 
 //--------------------------------------------------------------------------
+// Function:    isValid (static)
+///\brief       Checks if the given ID is valid.
+///\return      true if the given identifier is valid, and false, otherwise.
+///\Description
+///             A valid ID is one that is in use and has an application
+///     reference count of at least 1.
+// Programmer   Binh-Minh Ribler - Mar 1, 2017
+//--------------------------------------------------------------------------
+bool IdComponent::isValid(hid_t an_id)
+{
+    // Call C function
+    htri_t ret_value = H5Iis_valid(an_id);
+    if (ret_value > 0)
+        return true;
+    else if (ret_value == 0)
+        return false;
+    else // Raise exception when H5Iis_valid returns a negative value
+        throw IdComponentException("isValid", "H5Iis_valid failed");
+}
+
+//--------------------------------------------------------------------------
 // Function:    typeExists (static)
 ///\brief       Queries if a given type is currently registered with the
 ///             library.

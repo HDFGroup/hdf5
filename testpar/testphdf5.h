@@ -246,6 +246,7 @@ void collective_group_write(void);
 void independent_group_read(void);
 void test_fapl_mpio_dup(void);
 void test_split_comm_access(void);
+void test_page_buffer_access(void);
 void dataset_atomicity(void);
 void dataset_writeInd(void);
 void dataset_writeAll(void);

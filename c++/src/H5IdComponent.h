@@ -19,7 +19,6 @@
 
 namespace H5 {
 
-class DataSpace;
 /*! \class IdComponent
     \brief Class IdComponent provides wrappers of the C functions that
      operate on an HDF5 identifier.
@@ -50,6 +49,9 @@ class H5_DLLCPP IdComponent {
 
         // Returns the number of members in a type.
         static hsize_t getNumMembers(H5I_type_t type);
+
+        // Checks if the given ID is valid.
+        static bool isValid(hid_t an_id);
 
         // Determines if an type exists.
         static bool typeExists(H5I_type_t type);
@@ -121,6 +123,6 @@ class H5_DLLCPP IdComponent {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end class IdComponent
+} // namespace H5
 
-}
 #endif // __IdComponent_H

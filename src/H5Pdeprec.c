@@ -488,5 +488,135 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_version() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_file_space
+ *
+ * Purpose:	    It is mapped to H5Pset_file_space_strategy().
+ *
+ * Return:	    Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Jan 2017
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold)
+{
+
+    H5F_fspace_strategy_t new_strategy;                     /* File space strategy type */
+    hbool_t new_persist = H5F_FREE_SPACE_PERSIST_DEF;       /* Persisting free-space or not */
+    hsize_t new_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;   /* Free-space section threshold */
+    H5F_file_space_type_t in_strategy = strategy;           /* Input strategy */
+    hsize_t in_threshold = threshold;                       /* Input threshold */
+    herr_t ret_value = SUCCEED;                             /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iFfh", plist_id, strategy, threshold);
+
+    if((unsigned)in_strategy >= H5F_FILE_SPACE_NTYPES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid strategy")
+    /*
+     *  For 1.10.0 H5Pset_file_space:
+     *      If strategy is zero, the property is not changed; 
+     *      the existing strategy is retained.
+     *      If threshold is zero, the property is not changed; 
+     *      the existing threshold is retained.
+     */
+    if(!in_strategy)
+        H5Pget_file_space(plist_id, &in_strategy, NULL);
+    if(!in_threshold)
+        H5Pget_file_space(plist_id, NULL, &in_threshold);
+
+    switch(in_strategy) {
+        case H5F_FILE_SPACE_ALL_PERSIST:
+            new_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
+            new_persist = TRUE;
+            new_threshold = in_threshold;
+            break;
+    
+        case H5F_FILE_SPACE_ALL:
+            new_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
+            new_threshold = in_threshold;
+            break;
+
+        case H5F_FILE_SPACE_AGGR_VFD:
+            new_strategy = H5F_FSPACE_STRATEGY_AGGR;
+            break;
+
+        case H5F_FILE_SPACE_VFD:
+            new_strategy = H5F_FSPACE_STRATEGY_NONE;
+            break;
+        
+        case H5F_FILE_SPACE_NTYPES:
+        case H5F_FILE_SPACE_DEFAULT:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file space strategy")
+    }
+
+    if(H5Pset_file_space_strategy(plist_id, new_strategy, new_persist, new_threshold) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file space strategy")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_file_space() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_file_space
+ *
+ * Purpose:	    It is mapped to H5Pget_file_space_strategy().
+ *
+ * Return:	    Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Jan 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold)
+{
+    H5F_fspace_strategy_t new_strategy;     /* File space strategy type */
+    hbool_t new_persist;                    /* Persisting free-space or not */
+    hsize_t new_threshold;                  /* Free-space section threshold */
+    herr_t ret_value = SUCCEED;             /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*Ff*h", plist_id, strategy, threshold);
+
+    /* Get current file space info */
+    if(H5Pget_file_space_strategy(plist_id, &new_strategy, &new_persist, &new_threshold) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space strategy")
+
+    /* Get value(s) */
+    if(strategy) {
+        switch(new_strategy) {
+
+            case H5F_FSPACE_STRATEGY_FSM_AGGR:
+                if(new_persist)
+                    *strategy = H5F_FILE_SPACE_ALL_PERSIST;
+                else
+                    *strategy = H5F_FILE_SPACE_ALL;
+            break;
+
+            case H5F_FSPACE_STRATEGY_AGGR:
+                *strategy = H5F_FILE_SPACE_AGGR_VFD;
+                break;
+
+            case H5F_FSPACE_STRATEGY_NONE:
+                *strategy = H5F_FILE_SPACE_VFD;
+                break;
+
+            case H5F_FSPACE_STRATEGY_PAGE:
+            case H5F_FSPACE_STRATEGY_NTYPES:
+            default:
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file space strategy")
+        }
+    }
+
+    if(threshold)
+        *threshold = new_threshold;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_file_space() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

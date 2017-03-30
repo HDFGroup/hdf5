@@ -115,6 +115,8 @@ class H5_DLLCPP CompType : public DataType {
         // Contains common code that is used by the member functions
         // getMemberXxxType
         hid_t p_get_member_type(unsigned member_num) const;
-};
-}
+
+}; // end of CompType
+} // namespace H5
+
 #endif // __H5CompType_H

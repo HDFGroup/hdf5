@@ -40,6 +40,7 @@
 #include "H5Ipkg.h"
 
 /* Uncomment to manually inspect cache states */
+/* (Requires debug build of the library) */
 /* #define EOC_MANUAL_INSPECTION */
 
 const char *FILENAMES[] = {

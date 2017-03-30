@@ -1385,22 +1385,57 @@ Java_hdf_hdf5lib_H5_H5Pset_1virtual_1printf_1gap
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Pget_file_space
- * Signature: (J[I[J)V
+ * Method:    H5Pget_file_space_strategy
+ * Signature: (J[Z[J)I
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1file_1space
-(JNIEnv *, jclass, jlong, jintArray, jlongArray);
-
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy
+(JNIEnv *, jclass, jlong, jbooleanArray, jlongArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Pset_file_space
- * Signature: (JIJ)V
+ * Method:    H5Pget_file_space_strategy_persist
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1persist
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_file_space_strategy_threshold
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1threshold
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_file_space_strategy
+ * Signature: (JIZJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1file_1space
-(JNIEnv *, jclass, jlong, jint, jlong);
+Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1strategy
+(JNIEnv *, jclass, jlong, jint, jboolean, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_file_space_page_size
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1page_1size
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_file_space_page_size
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1page_1size
+(JNIEnv *, jclass, jlong, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5

@@ -40,7 +40,7 @@ LinkAccPropList* LinkAccPropList::DEFAULT_ = 0;
 //              If LinkAccPropList::DEFAULT_ already points to an allocated
 //              object, throw a PropListIException.  This scenario should not
 //              happen.
-// Programmer   Binh-Minh Ribler - 2015
+// Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
 LinkAccPropList* LinkAccPropList::getConstant()
 {
@@ -66,7 +66,7 @@ LinkAccPropList* LinkAccPropList::getConstant()
 // Purpose:     Deletes the constant object that LinkAccPropList::DEFAULT_
 //              points to.
 // exception    H5::PropListIException
-// Programmer   Binh-Minh Ribler - 2015
+// Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
 void LinkAccPropList::deleteConstants()
 {
@@ -84,7 +84,7 @@ const LinkAccPropList& LinkAccPropList::DEFAULT = *getConstant();
 //--------------------------------------------------------------------------
 // Function:    Default Constructor
 ///\brief       Creates a file access property list
-// Programmer   Binh-Minh Ribler - 2000
+// Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
 LinkAccPropList::LinkAccPropList() : PropList(H5P_LINK_ACCESS) {}
 
@@ -92,7 +92,7 @@ LinkAccPropList::LinkAccPropList() : PropList(H5P_LINK_ACCESS) {}
 // Function:    LinkAccPropList copy constructor
 ///\brief       Copy Constructor: makes a copy of the original
 ///\param       original - IN: LinkAccPropList instance to copy
-// Programmer   Binh-Minh Ribler - 2000
+// Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
 LinkAccPropList::LinkAccPropList(const LinkAccPropList& original) : PropList(original) {}
 
@@ -100,14 +100,51 @@ LinkAccPropList::LinkAccPropList(const LinkAccPropList& original) : PropList(ori
 // Function:    LinkAccPropList overloaded constructor
 ///\brief       Creates a file access property list using the id of an
 ///             existing one.
-// Programmer   Binh-Minh Ribler - 2000
+// Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
 LinkAccPropList::LinkAccPropList(const hid_t plist_id) : PropList(plist_id) {}
 
 //--------------------------------------------------------------------------
+// Function:    LinkAccPropList::setNumLinks
+///\brief       Set the number of soft or user-defined link traversals allowed
+///             before the library assumes it has found a cycle and aborts the
+///             traversal.
+///\exception   H5::PropListIException
+// Programmer   Binh-Minh Ribler - March 1, 2017
+//--------------------------------------------------------------------------
+void LinkAccPropList::setNumLinks(size_t nlinks) const
+{
+    herr_t ret_value = H5Pset_nlinks(id, nlinks);
+    // Throw exception if H5Pset_nlinks returns failure
+    if (ret_value < 0)
+    {
+        throw PropListIException("setNumLinks", "H5Pset_nlinks failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    LinkAccPropList::getNumLinks
+///\brief       Gets the number of soft or user-defined links that can be
+///             traversed before a failure occurs.
+///\exception   H5::PropListIException
+// Programmer   Binh-Minh Ribler - March 1, 2017
+//--------------------------------------------------------------------------
+size_t LinkAccPropList::getNumLinks() const
+{
+    size_t nlinks = 0;
+    herr_t ret_value = H5Pget_nlinks(id, &nlinks);
+    // Throw exception if H5Pget_nlinks returns failure
+    if (ret_value < 0)
+    {
+        throw PropListIException("getNumLinks", "H5Pget_nlinks failed");
+    }
+    return(nlinks);
+}
+
+//--------------------------------------------------------------------------
 // Function:    LinkAccPropList destructor
 ///\brief       Noop destructor
-// Programmer   Binh-Minh Ribler - 2000
+// Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------
 LinkAccPropList::~LinkAccPropList() {}
 

@@ -100,7 +100,7 @@ static const char  *progname = "h5perf_serial";
  * It seems that only the options that accept additional information
  * such as dataset size (-e) require the colon next to it.
  */
-static const char *s_opts = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
+static const char *s_opts = "a:A:B:b:c:Cd:D:e:F:G:ghi:Imno:p:P:r:stT:v:wx:X:";
 static struct long_options l_opts[] = {
     { "align", require_arg, 'a' },
     { "alig", require_arg, 'a' },
@@ -292,7 +292,8 @@ struct options {
     int h5_extendable;        	/* Perform the write tests only         */
     int verify;        		/* Verify data correctness              */
     vfdtype     vfd;            /* File driver */
-
+    size_t page_buffer_size;
+    size_t page_size;
 };
 
 typedef struct _minmax {
@@ -401,6 +402,8 @@ run_test_loop(struct options *opts)
     parms.h5_write_only = opts->h5_write_only;
     parms.verify = opts->verify;
     parms.vfd = opts->vfd;
+    parms.page_buffer_size = opts->page_buffer_size;
+    parms.page_size = opts->page_size;
 
     /* load multidimensional options */
     parms.num_bytes = 1;
@@ -865,6 +868,16 @@ report_parameters(struct options *opts)
         recover_size_and_print((long long)opts->buf_size[i], " ");
     HDfprintf(output, "\n");
 
+    if(opts->page_size) {
+        HDfprintf(output, "Page Aggregation Enabled. Page size = %ld\n", opts->page_size);
+        if(opts->page_buffer_size)
+            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %ld\n", opts->page_buffer_size);
+        else
+            HDfprintf(output, "Page Buffering Disabled\n");
+    }
+    else
+        HDfprintf(output, "Page Aggregation Disabled\n");
+
     HDfprintf(output, "Dimension access order=");
     for (i=0; i<rank; i++)
         recover_size_and_print((long long)opts->order[i], " ");
@@ -941,6 +954,9 @@ parse_command_line(int argc, char *argv[])
 
     cl_opts = (struct options *)HDmalloc(sizeof(struct options));
 
+    cl_opts->page_buffer_size = 0;
+    cl_opts->page_size = 0;
+
     cl_opts->output_file = NULL;
     cl_opts->io_types =  0;    /* will set default after parsing options */
     cl_opts->num_iters = 1;
@@ -974,6 +990,12 @@ parse_command_line(int argc, char *argv[])
         switch ((char)opt) {
         case 'a':
             cl_opts->h5_alignment = parse_size_directive(opt_arg);
+            break;
+        case 'G':
+            cl_opts->page_size = parse_size_directive(opt_arg);
+            break;
+        case 'b':
+            cl_opts->page_buffer_size = parse_size_directive(opt_arg);
             break;
         case 'A':
             {

@@ -60,6 +60,8 @@ class H5_DLLCPP ArrayType : public DataType {
 
         // Default constructor
         ArrayType();
-};
-}
+
+}; // end of ArrayType
+} // namespace H5
+
 #endif // __H5ArrayType_H

@@ -86,7 +86,7 @@ typedef struct TEST_free_section_t {
 static herr_t TEST_sect_init_cls(H5FS_section_class_t *, void *);
 static herr_t TEST_sect_free(H5FS_section_info_t *_sect);
 static herr_t TEST_sect_can_merge(const H5FS_section_info_t *, const H5FS_section_info_t *, void H5_ATTR_UNUSED *);
-static herr_t TEST_sect_merging(H5FS_section_info_t *, H5FS_section_info_t *, void H5_ATTR_UNUSED *);
+static herr_t TEST_sect_merging(H5FS_section_info_t **, H5FS_section_info_t *, void H5_ATTR_UNUSED *);
 static herr_t TEST_sect_can_shrink(const H5FS_section_info_t *, void *);
 static herr_t TEST_sect_shrinking(H5FS_section_info_t **, void *);
 
@@ -245,26 +245,26 @@ TEST_sect_can_merge(const H5FS_section_info_t *_sect1,
  * Merge the two sections (second section is merged into the first section)
  */
 static herr_t
-TEST_sect_merging(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
+TEST_sect_merging(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
     void H5_ATTR_UNUSED *_udata)
 {
-    TEST_free_section_t *sect1 = (TEST_free_section_t *)_sect1;
+    TEST_free_section_t **sect1 = (TEST_free_section_t **)_sect1;
     TEST_free_section_t *sect2 = (TEST_free_section_t *)_sect2;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     /* Check arguments. */
     HDassert(sect1);
-    HDassert((sect1->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
-	     (sect1->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
-	     (sect1->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
+    HDassert(((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
+	     ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
+	     ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
     HDassert(sect2);
     HDassert((sect2->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
 	     (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
 	     (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
-    HDassert(H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr));
+    HDassert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
-    sect1->sect_info.size += sect2->sect_info.size;
+    (*sect1)->sect_info.size += sect2->sect_info.size;
 
     /* Get rid of second section */
     if(TEST_sect_free((H5FS_section_info_t *)sect2) < 0)
@@ -2540,7 +2540,7 @@ test_fs_sect_extend(hid_t fapl)
         TEST_ERROR
 
     /* Extend a block by requested-size */
-    if((status = H5FS_sect_try_extend(f, dxpl_id, frsp, (haddr_t)TEST_SECT_SIZE80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE40)) < 0)
+    if((status = H5FS_sect_try_extend(f, dxpl_id, frsp, (haddr_t)TEST_SECT_SIZE80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE40, 0, NULL)) < 0)
 	FAIL_STACK_ERROR
     if(FALSE == status)
         TEST_ERROR
@@ -2616,7 +2616,7 @@ test_fs_sect_extend(hid_t fapl)
         TEST_ERROR
 
     /* Extend the block by requested-size */
-    if((status = H5FS_sect_try_extend(f, dxpl_id, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE50)) < 0)
+    if((status = H5FS_sect_try_extend(f, dxpl_id, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE50, 0, NULL)) < 0)
 	FAIL_STACK_ERROR
     if(TRUE == status)
         TEST_ERROR
@@ -2689,7 +2689,7 @@ test_fs_sect_extend(hid_t fapl)
         TEST_ERROR
 
     /* Extend the block by requested-size */
-    if((status = H5FS_sect_try_extend(f, dxpl_id, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE30)) < 0)
+    if((status = H5FS_sect_try_extend(f, dxpl_id, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE30, 0, NULL)) < 0)
 	TEST_ERROR
     if(FALSE == status)
         TEST_ERROR
@@ -2763,7 +2763,7 @@ test_fs_sect_extend(hid_t fapl)
         TEST_ERROR
 
     /* Extend the block by requested-size */
-    if((status = H5FS_sect_try_extend(f, dxpl_id, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE15, (hsize_t)TEST_SECT_SIZE40)) < 0)
+    if((status = H5FS_sect_try_extend(f, dxpl_id, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE15, (hsize_t)TEST_SECT_SIZE40, 0, NULL)) < 0)
 	TEST_ERROR
     if(TRUE == status)
         TEST_ERROR

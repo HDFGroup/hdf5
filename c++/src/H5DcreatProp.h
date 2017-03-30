@@ -20,6 +20,7 @@
 namespace H5 {
 
 class DataType;
+class DataSpace;
 
 /*! \class DSetCreatPropList
     \brief Class DSetCreatPropList inherits from ObjCreatPropList and provides
@@ -116,6 +117,10 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         // Sets N-bit compression method.
         void setNbit() const;
 
+        // Maps elements of a virtual dataset to elements of the source dataset.
+        void setVirtual(const DataSpace& vspace, const char *src_fname, const char *src_dsname, const DataSpace& sspace) const;
+        void setVirtual(const DataSpace& vspace, const H5std_string src_fname, const H5std_string src_dsname, const DataSpace& sspace) const;
+
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DSetCreatPropList"); }
 
@@ -141,6 +146,8 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         static DSetCreatPropList* getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-};
-}
+
+}; // end of DSetCreatPropList
+} // namespace H5
+
 #endif // __H5DSCreatPropList_H

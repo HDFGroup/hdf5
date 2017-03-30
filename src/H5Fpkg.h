@@ -42,6 +42,7 @@
 #include "H5FSprivate.h"	/* File free space                      */
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Oprivate.h"         /* Object header messages               */
+#include "H5PBprivate.h"        /* Page buffer                          */
 #include "H5UCprivate.h"	/* Reference counted object functions	*/
 
 
@@ -68,8 +69,8 @@
 
 /* Macro to abstract checking whether file is using a free space manager */
 #define H5F_HAVE_FREE_SPACE_MANAGER(F)  \
-    ((F)->shared->fs_strategy == H5F_FILE_SPACE_ALL ||                        \
-            (F)->shared->fs_strategy == H5F_FILE_SPACE_ALL_PERSIST)
+    ((F)->shared->fs_strategy == H5F_FSPACE_STRATEGY_FSM_AGGR ||                        \
+     (F)->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE)
 
 /* Macros for encoding/decoding superblock */
 #define H5F_MAX_DRVINFOBLOCK_SIZE  1024         /* Maximum size of superblock driver info buffer */
@@ -200,13 +201,6 @@ typedef struct H5F_meta_accum_t {
     hbool_t             dirty;          /* Flag to indicate that the accumulated metadata is dirty */
 } H5F_meta_accum_t;
 
-/* Enum for free space manager state */
-typedef enum H5F_fs_state_t {
-    H5F_FS_STATE_CLOSED,                /* Free space manager is closed */
-    H5F_FS_STATE_OPEN,                  /* Free space manager has been opened */
-    H5F_FS_STATE_DELETING               /* Free space manager is being deleted */
-} H5F_fs_state_t;
-
 /* A record of the mount table */
 typedef struct H5F_mount_t {
     struct H5G_t	*group;	/* Mount point group held open		*/
@@ -281,6 +275,7 @@ struct H5F_file_t {
     unsigned long feature_flags; /* VFL Driver feature Flags            */
     haddr_t	maxaddr;	/* Maximum address for file             */
 
+    H5PB_t      *page_buf;                  /* The page buffer cache                */
     H5AC_t      *cache;		/* The object cache	 		*/
     H5AC_cache_config_t
 		mdc_initCacheCfg; /* initial configuration for the      */
@@ -316,19 +311,38 @@ struct H5F_file_t {
     H5UC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
 
     /* File space allocation information */
-    H5F_file_space_type_t fs_strategy;	/* File space handling strategy		*/
+    H5F_fspace_strategy_t fs_strategy;      /* File space handling strategy	*/
     hsize_t     fs_threshold;	/* Free space section threshold 	*/
+    hbool_t fs_persist;                     /* Free-space persist or not */
     hbool_t     use_tmp_space;  /* Whether temp. file space allocation is allowed */
     haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */
+    hbool_t point_of_no_return;             /* flag to indicate that we can't go back and delete a freespace header when it's used up */
+
+    H5F_fs_state_t fs_state[H5F_MEM_PAGE_NTYPES];   /* State of free space manager for each type */
+    haddr_t fs_addr[H5F_MEM_PAGE_NTYPES];           /* Address of free space manager info for each type */
+    H5FS_t *fs_man[H5F_MEM_PAGE_NTYPES];            /* Free space manager for each file space type */
+    hbool_t first_alloc_dealloc;            /* TRUE iff free space managers   */
+                                            /* are persistant and have not    */
+                                            /* been used accessed for either  */
+                                            /* allocation or deallocation     */
+                                            /* since file open.               */
+    haddr_t eoa_pre_fsm_fsalloc;	    /* eoa pre file space allocation  */
+                                            /* for self referential FSMs      */
+    haddr_t eoa_post_fsm_fsalloc;           /* eoa post file space allocation */
+                                            /* for self referential FSMs      */
+    haddr_t eoa_post_mdci_fsalloc;          /* eoa past file space allocation */
+                                            /* for metadata cache image, or   */
+                                            /* HADDR_UNDEF if no cache image. */
+
+    /* Free-space aggregation info */
     unsigned fs_aggr_merge[H5FD_MEM_NTYPES];    /* Flags for whether free space can merge with aggregator(s) */
-    H5F_fs_state_t fs_state[H5FD_MEM_NTYPES];   /* State of free space manager for each type */
-    haddr_t fs_addr[H5FD_MEM_NTYPES];   /* Address of free space manager info for each type */
-    H5FS_t *fs_man[H5FD_MEM_NTYPES];    /* Free space manager for each file space type */
-    H5FD_mem_t fs_type_map[H5FD_MEM_NTYPES]; /* Mapping of "real" file space type into tracked type */
-    H5F_blk_aggr_t meta_aggr;   /* Metadata aggregation info */
-                                /* (if aggregating metadata allocations) */
-    H5F_blk_aggr_t sdata_aggr;  /* "Small data" aggregation info */
-                                /* (if aggregating "small data" allocations) */
+    H5FD_mem_t fs_type_map[H5FD_MEM_NTYPES];    /* Mapping of "real" file space type into tracked type */
+    H5F_blk_aggr_t meta_aggr;   	        /* Metadata aggregation info (if aggregating metadata allocations) */
+    H5F_blk_aggr_t sdata_aggr;                  /* "Small data" aggregation info (if aggregating "small data" allocations) */
+
+    /* Paged aggregation info */
+    hsize_t fs_page_size;                           /* File space page size */
+    size_t pgend_meta_thres;                        /* Do not track page end meta section <= this threshold */
 
     /* Metadata accumulator information */
     H5F_meta_accum_t accum;     /* Metadata accumulator info           	*/
@@ -383,11 +397,12 @@ H5FL_EXTERN(H5F_file_t);
 /* General routines */
 H5F_t *H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, H5FD_t *lf);
-herr_t H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush);
-H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing);
-H5_DLL htri_t H5F_is_hdf5(const char *name, hid_t dxpl_id);
+H5_DLL herr_t H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush);
+H5_DLL herr_t H5F__flush(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing);
+H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
-H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len, hid_t dxpl_id);
+H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len,
+    hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 H5_DLL herr_t H5F_close(H5F_t *f);
 
 /* File mount related routines */
@@ -397,7 +412,8 @@ H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nop
 
 /* Superblock related routines */
 H5_DLL herr_t H5F__super_init(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read);
+H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id,
+    hbool_t initial_read);
 H5_DLL herr_t H5F__super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size);
 H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
@@ -410,14 +426,14 @@ H5_DLL herr_t H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hid_t dxpl_id,
     hbool_t was_created);
 
 /* Metadata accumulator routines */
-H5_DLL herr_t H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t type,
+H5_DLL herr_t H5F__accum_read(const H5F_io_info2_t *fio_info, H5FD_mem_t type,
     haddr_t addr, size_t size, void *buf);
-H5_DLL herr_t H5F__accum_write(const H5F_io_info_t *fio_info, H5FD_mem_t type,
+H5_DLL herr_t H5F__accum_write(const H5F_io_info2_t *fio_info, H5FD_mem_t type,
     haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5F__accum_free(const H5F_io_info_t *fio_info, H5FD_mem_t type,
+H5_DLL herr_t H5F__accum_free(const H5F_io_info2_t *fio_info, H5FD_mem_t type,
     haddr_t addr, hsize_t size);
-H5_DLL herr_t H5F__accum_flush(const H5F_io_info_t *fio_info);
-H5_DLL herr_t H5F__accum_reset(const H5F_io_info_t *fio_info, hbool_t flush);
+H5_DLL herr_t H5F__accum_flush(const H5F_io_info2_t *fio_info);
+H5_DLL herr_t H5F__accum_reset(const H5F_io_info2_t *fio_info, hbool_t flush);
 
 /* Shared file list related routines */
 H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);
@@ -431,9 +447,16 @@ H5_DLL herr_t H5F_efc_release(H5F_efc_t *efc);
 H5_DLL herr_t H5F_efc_destroy(H5F_efc_t *efc);
 H5_DLL herr_t H5F_efc_try_close(H5F_t *f);
 
+/* Space allocation routines */
+H5_DLL haddr_t H5F_alloc(H5F_t *f, hid_t dxpl_id, H5F_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *frag_size);
+H5_DLL herr_t H5F_free(H5F_t *f, hid_t dxpl_id, H5F_mem_t type, haddr_t addr, hsize_t size);
+H5_DLL htri_t H5F_try_extend(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, 
+    haddr_t blk_end, hsize_t extra_requested);
+
 /* Functions that get/retrieve values from VFD layer */
 H5_DLL herr_t H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr);
 H5_DLL herr_t H5F__set_base_addr(const H5F_t *f, haddr_t addr);
+H5_DLL herr_t H5F__set_paged_aggr(const H5F_t *f, hbool_t paged);
 
 /* Functions that flush or evict */
 H5_DLL herr_t H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id);
