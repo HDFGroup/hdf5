@@ -418,19 +418,15 @@ H5PLappend(const char* plugin_path)
     if(NULL == plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
     dl_path = H5MM_strdup(plugin_path);
-    if(NULL == dl_path)
+    if(NULL == (dl_path = H5MM_strdup(plugin_path)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
     H5PL_EXPAND_ENV_VAR
 
     H5PL_path_table_g[H5PL_num_paths_g] = dl_path;
-    dl_path = NULL;
     H5PL_num_paths_g++;
 
 done:
-    if(dl_path)
-        dl_path = (char *)H5MM_xfree(dl_path);
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLappend() */
 
@@ -456,8 +452,7 @@ H5PLprepend(const char* plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
     if(NULL == plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
-    dl_path = H5MM_strdup(plugin_path);
-    if(NULL == dl_path)
+    if(NULL == (dl_path = H5MM_strdup(plugin_path)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
     H5PL_EXPAND_ENV_VAR
@@ -465,13 +460,9 @@ H5PLprepend(const char* plugin_path)
     for (plindex = (unsigned int)H5PL_num_paths_g; plindex > 0; plindex--)
         H5PL_path_table_g[plindex] = H5PL_path_table_g[plindex - 1];
     H5PL_path_table_g[0] = dl_path;
-    dl_path = NULL;
     H5PL_num_paths_g++;
 
 done:
-    if (dl_path)
-        dl_path = (char *)H5MM_xfree(dl_path);
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLprepend() */
 
@@ -494,8 +485,7 @@ H5PLreplace(const char* plugin_path, unsigned int index)
     FUNC_ENTER_API(FAIL)
     if(NULL == plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
-    dl_path = H5MM_strdup(plugin_path);
-    if(NULL == dl_path)
+    if(NULL == (dl_path = H5MM_strdup(plugin_path)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
     H5PL_EXPAND_ENV_VAR
@@ -503,12 +493,8 @@ H5PLreplace(const char* plugin_path, unsigned int index)
     if(H5PL_path_table_g[index])
         H5PL_path_table_g[index] = (char *)H5MM_xfree(H5PL_path_table_g[index]);
     H5PL_path_table_g[index] = dl_path;
-    dl_path = NULL;
 
 done:
-    if(dl_path)
-        dl_path = (char *)H5MM_xfree(dl_path);
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLreplace() */
 
@@ -534,8 +520,7 @@ H5PLinsert(const char* plugin_path, unsigned int index)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
     if(NULL == plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
-    dl_path = H5MM_strdup(plugin_path);
-    if(NULL == dl_path)
+    if(NULL == (dl_path = H5MM_strdup(plugin_path)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
     H5PL_EXPAND_ENV_VAR
@@ -543,13 +528,9 @@ H5PLinsert(const char* plugin_path, unsigned int index)
     for(plindex = (unsigned int)H5PL_num_paths_g; plindex > index; plindex--)
         H5PL_path_table_g[plindex] = H5PL_path_table_g[plindex - 1];
     H5PL_path_table_g[index] = dl_path;
-    dl_path = NULL;
     H5PL_num_paths_g++;
 
 done:
-    if(dl_path)
-        dl_path = (char *)H5MM_xfree(dl_path);
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLinsert() */
 
@@ -592,20 +573,40 @@ done:
  *
  * Purpose: Query the plugin path at the specified index.
  *
- * Return:      Non-NULL on success/NULL on failure
+ * Return: Success: The length of path.
+ *
+ *  If `pathname' is non-NULL then write up to `size' bytes into that
+ *  buffer and always return the length of the pathname.
+ *  Otherwise `size' is ignored and the function does not store the pathname,
+ *  just returning the number of characters required to store the pathname.
+ *  If an error occurs then the buffer pointed to by `pathname' (NULL or non-NULL)
+ *  is unchanged and the function returns a negative value.
+ *  If a zero is returned for the name's length, then there is no pathname
+ *  associated with the index.
  *
  *-------------------------------------------------------------------------
  */
-const char*
-H5PLget(unsigned int index)
+ssize_t
+H5PLget(unsigned int index, char *pathname/*out*/, size_t size)
 {
-    char* ret_value = NULL; /* Return value */
+    ssize_t      ret_value = FAIL;    /* Return value */
+    ssize_t      len = 0;      /* Length of pathname */
+    char        *dl_path = NULL;
 
-    FUNC_ENTER_API(NULL)
+    FUNC_ENTER_API(FAIL)
     if(H5PL_num_paths_g == 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, NULL, "no directories in table")
-    if(NULL == (ret_value = H5PL_path_table_g[index]))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, NULL, "no directory path at index")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "no directories in table")
+    if(NULL == (dl_path = H5PL_path_table_g[index]))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no directory path at index")
+    len = HDstrlen(dl_path);
+    if(pathname) {
+        HDstrncpy(pathname, dl_path, MIN((size_t)(len + 1), size));
+        if((size_t)len >= size)
+            pathname[size - 1] = '\0';
+    } /* end if */
+
+    /* Set return value */
+    ret_value = len;
 
 done:
     FUNC_LEAVE_API(ret_value)
