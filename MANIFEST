@@ -800,6 +800,7 @@
 ./src/H5PBprivate.h
 ./src/H5PL.c
 ./src/H5PLmodule.h
+./src/H5PLpkg.h
 ./src/H5PLprivate.h
 ./src/H5PLpublic.h
 ./src/H5PLextern.h
