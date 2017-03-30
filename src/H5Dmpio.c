@@ -93,16 +93,16 @@ typedef struct H5D_chunk_addr_info_t {
   H5D_chunk_info_t chunk_info;
 } H5D_chunk_addr_info_t;
 
-/* Information about a chunk when performing collective filtered IO */
+/* Information about a single chunk when performing collective filtered IO */
 typedef struct H5D_filtered_collective_io_info_t {
-  H5D_chunk_info_t chunk_info;
-  H5F_block_t      old_chunk;
-  H5F_block_t      new_chunk;
-  hbool_t          full_overwrite;
-  size_t           io_size;
-  size_t           num_writers;
-  int              owner;
-  void            *buf;
+  H5D_chunk_info_t chunk_info; /* Info about this chunk, such as chunk index and file and memory dataspace */
+  H5F_block_t      old_chunk; /* The address in the file and size of this chunk before being filtered */
+  H5F_block_t      new_chunk; /* The address in the file and size of this chunk after being filtered */
+  hbool_t          full_overwrite; /* Whether or not this chunk is being fully overwritten */
+  size_t           io_size; /* Size of the I/O to this chunk */
+  size_t           num_writers; /* Total number of processes writing to this chunk */
+  int              owner; /* Process which will be writing to this chunk */
+  void            *buf; /* Chunk data to be written to file/that has been read from file*/
 } H5D_filtered_collective_io_info_t;
 
 /********************/
@@ -736,9 +736,9 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
 
-        /* Get the chunk optimization option */
+        /* Get the chunk optimization option threshold */
         if(H5P_get(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, &one_link_chunk_io_threshold) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't get chunk optimization option")
+            HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't get chunk optimization option threshold value")
 
         /* step 1: choose an IO option */
         /* If the average number of chunk per process is greater than a threshold, we will do one link chunked IO. */
