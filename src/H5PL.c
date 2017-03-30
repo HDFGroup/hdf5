@@ -38,7 +38,7 @@
         char *tempbuf;                                                                   \
         if(NULL == (tempbuf = (char *)H5MM_malloc(H5PL_EXPAND_BUFFER_SIZE)))             \
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")                          \
-        if((bufCharCount = ExpandEnvironmentStrings(dl_path, tempbuf, H5PL_EXPAND_BUFFER_SIZE)) > H5PL_EXPAND_BUFFER_SIZE) { \
+        if((bufCharCount = ExpandEnvironmentStringsA(dl_path, tempbuf, H5PL_EXPAND_BUFFER_SIZE)) > H5PL_EXPAND_BUFFER_SIZE) { \
             tempbuf = (char *)H5MM_xfree(tempbuf);                                       \
             HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")      \
         }                                                                                \
