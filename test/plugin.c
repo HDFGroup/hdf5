@@ -746,6 +746,7 @@ test_filter_path_apis(void)
     herr_t       ret;
     int          pathlen = -1;
     char         pathname[256];
+    char         tempname[256];
 
     HDputs("Testing access to the filter path table");
 
@@ -788,7 +789,7 @@ test_filter_path_apis(void)
     TESTING("    append (exceed)");
     /* Exceed the max path append */
     H5E_BEGIN_TRY {
-        HDsprintf(pathname, "a_path_%d", 16);
+        HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM);
         ret = H5PLappend(pathname);
     } H5E_END_TRY
     if (ret >= 0)
@@ -827,10 +828,11 @@ test_filter_path_apis(void)
         HDfprintf(stderr,"    get 1: %s\n", pathname);
         TEST_ERROR
     }
-    if ((pathlen = H5PLget(15, pathname, 256)) <= 0)
+    if ((pathlen = H5PLget(H5PL_MAX_PATH_NUM - 1, pathname, 256)) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_15") != 0) {
-        HDfprintf(stderr,"    get 15: %s\n", pathname);
+    HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM - 1);
+    if (strcmp(pathname, tempname") != 0) {
+        HDfprintf(stderr,"    get %d: %s\n", H5PL_MAX_PATH_NUM - 1, pathname);
         TEST_ERROR
     }
     PASSED();
@@ -854,13 +856,13 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is not full */
-    if (H5PLsize() != 15) TEST_ERROR
+    if (H5PLsize() != H5PL_MAX_PATH_NUM - 1) TEST_ERROR
 
     TESTING("    prepend");
     /* Prepend one path*/
-    HDsprintf(pathname, "a_path_%d", 17);
+    HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
     if (H5PLprepend(pathname) < 0) {
-        HDfprintf(stderr,"    prepend 17: %s\n", pathname);
+        HDfprintf(stderr,"    prepend %d: %s\n", H5PL_MAX_PATH_NUM + 1, pathname);
         TEST_ERROR
     }
 
@@ -876,7 +878,8 @@ test_filter_path_apis(void)
     }
     if (H5PLget(0, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_17") != 0) {
+    HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
+    if (strcmp(pathname, tempname") != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
@@ -885,7 +888,7 @@ test_filter_path_apis(void)
     TESTING("    prepend (exceed)");
     /* Exceed the max path prepend */
     H5E_BEGIN_TRY {
-        HDsprintf(pathname, "a_path_%d", 18);
+        HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 2);
         ret = H5PLprepend(pathname);
     } H5E_END_TRY
     if (ret >= 0)
@@ -894,7 +897,7 @@ test_filter_path_apis(void)
 
     TESTING("    replace");
     /* Replace one path*/
-    HDsprintf(pathname, "a_path_%d", 20);
+    HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 4);
     if (H5PLreplace(pathname, 1) < 0) {
         HDfprintf(stderr,"    replace 1: %s\n", pathname);
         TEST_ERROR
@@ -906,7 +909,8 @@ test_filter_path_apis(void)
     /* Verify that the entries were not moved */
     if (H5PLget(0, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_17") != 0) {
+    HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
+    if (strcmp(pathname, tempname") != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
@@ -936,7 +940,7 @@ test_filter_path_apis(void)
 
     TESTING("    insert");
     /* Insert one path*/
-    HDsprintf(pathname, "a_path_%d", 21);
+    HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 5);
     if (H5PLinsert(pathname, 3) < 0){
         HDfprintf(stderr,"    insert 3: %s\n", pathname);
         TEST_ERROR
@@ -957,7 +961,7 @@ test_filter_path_apis(void)
     TESTING("    insert (exceed)");
     /* Exceed the max path insert */
     H5E_BEGIN_TRY {
-        HDsprintf(pathname, "a_path_%d", 22);
+        HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 6);
         ret = H5PLinsert(pathname, 12);
     } H5E_END_TRY
     if (ret >= 0)
