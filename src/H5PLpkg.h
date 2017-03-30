@@ -29,12 +29,12 @@
 /* Package Private Macros */
 /**************************/
 
+#define H5PL_MAX_PATH_NUM       16
+
 
 /****************************/
 /* Package Private Typedefs */
 /****************************/
-
-#define H5PL_MAX_PATH_NUM       16
 
 
 /*****************************/
