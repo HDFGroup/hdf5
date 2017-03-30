@@ -774,7 +774,7 @@ test_filter_path_apis(void)
 
     TESTING("    append");
     /* Create multiple paths to fill table */
-    for (i=0; i < 16; i++) {
+    for (i=0; i < H5PL_MAX_PATH_NUM; i++) {
         HDsprintf(pathname, "a_path_%d", i);
         if (H5PLappend(pathname) < 0) {
             HDfprintf(stderr,"    at %d: %s\n", i, pathname);
@@ -782,7 +782,7 @@ test_filter_path_apis(void)
         }
     }
     /* Verify the table is full */
-    if (H5PLsize() != 16) TEST_ERROR
+    if (H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
     PASSED();
 
     TESTING("    append (exceed)");
@@ -796,7 +796,7 @@ test_filter_path_apis(void)
 
     /* Exceed the max path removal */
     H5E_BEGIN_TRY {
-        ret = H5PLremove(16);
+        ret = H5PLremove(H5PL_MAX_PATH_NUM);
     } H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -836,7 +836,7 @@ test_filter_path_apis(void)
     PASSED();
 
     TESTING("    get (bounds exceed)");
-    if ((pathlen = H5PLget(16, NULL, 0)) > 0)
+    if ((pathlen = H5PLget(H5PL_MAX_PATH_NUM, NULL, 0)) > 0)
         TEST_ERROR
     PASSED();
 
@@ -865,7 +865,7 @@ test_filter_path_apis(void)
     }
 
     /* Verify the table is full */
-    if (H5PLsize() != 16) TEST_ERROR
+    if (H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were moved */
     if (H5PLget(8, pathname, 256) <= 0)
@@ -901,7 +901,7 @@ test_filter_path_apis(void)
     }
 
     /* Verify the table is full */
-    if (H5PLsize() != 16) TEST_ERROR
+    if (H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were not moved */
     if (H5PLget(0, pathname, 256) <= 0)
@@ -952,7 +952,7 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is full */
-    if (H5PLsize() != 16) TEST_ERROR
+    if (H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     TESTING("    insert (exceed)");
     /* Exceed the max path insert */
