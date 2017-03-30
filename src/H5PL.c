@@ -564,7 +564,7 @@ H5PLremove(unsigned int index)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "no directories in table")
     if(NULL == H5PL_path_table_g[index])
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no directory path at index")
-    H5PL_path_table_g[plindex] = (char *)H5MM_xfree(H5PL_path_table_g[plindex]);
+    H5PL_path_table_g[index] = (char *)H5MM_xfree(H5PL_path_table_g[index]);
     for(plindex = index; plindex < (unsigned int)H5PL_num_paths_g; plindex++)
         H5PL_path_table_g[plindex] = H5PL_path_table_g[plindex + 1];
     H5PL_num_paths_g--;
