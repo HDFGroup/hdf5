@@ -807,7 +807,6 @@ test_filter_path_apis(void)
         HDfprintf(stderr,"    get path 0 length failed\n");
         TEST_ERROR
     }
-    HDfprintf(stdout,"    get path 0 length %d\n", pathlen);
     if (pathlen != 8) {
         TEST_ERROR
     }
@@ -815,7 +814,6 @@ test_filter_path_apis(void)
         HDfprintf(stderr,"    get 0 len: %d : %s\n", pathlen, pathname);
         TEST_ERROR
     }
-    HDfprintf(stdout,"    get path 0 length %d\n", pathlen);
     if (strcmp(pathname, "a_path_0") != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
@@ -825,14 +823,12 @@ test_filter_path_apis(void)
     TESTING("    get (bounds)");
     if ((pathlen = H5PLget(1, pathname, 256)) <= 0)
         TEST_ERROR
-    HDfprintf(stdout,"    get path 1 length %d\n", pathlen);
     if (strcmp(pathname, "a_path_1") != 0) {
         HDfprintf(stderr,"    get 1: %s\n", pathname);
         TEST_ERROR
     }
     if ((pathlen = H5PLget(15, pathname, 256)) <= 0)
         TEST_ERROR
-    HDfprintf(stdout,"    get path 15 length %d\n", pathlen);
     if (strcmp(pathname, "a_path_15") != 0) {
         HDfprintf(stderr,"    get 15: %s\n", pathname);
         TEST_ERROR
@@ -843,7 +839,6 @@ test_filter_path_apis(void)
     if ((pathlen = H5PLget(16, NULL, 0)) > 0)
         TEST_ERROR
     PASSED();
-    HDfprintf(stdout,"    get path 16 length %d\n", pathlen);
 
     TESTING("    remove (verify for prepend)");
     /* Remove one path*/
@@ -852,7 +847,6 @@ test_filter_path_apis(void)
     /* Verify that the entries were moved */
     if ((pathlen = H5PLget(8, pathname, 256)) <= 0)
         TEST_ERROR
-    HDfprintf(stdout,"    get path 8 length %d\n", pathlen);
     if (strcmp(pathname, "a_path_9") != 0) {
         HDfprintf(stderr,"    get 8: %s\n", pathname);
         TEST_ERROR
