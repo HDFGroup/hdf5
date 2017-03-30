@@ -47,8 +47,7 @@
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")          \
         }                                                                                \
         dl_path = (char *)H5MM_xfree(dl_path);                                           \
-        dl_path = H5MM_strdup(tempbuf);                                                  \
-        tempbuf = (char *)H5MM_xfree(tempbuf);                                           \
+        dl_path = tempbuf;                                                               \
  }
 #else
 #define H5PL_EXPAND_ENV_VAR
@@ -434,8 +433,8 @@ H5PLappend(char* plugin_path)
 
     H5PL_EXPAND_ENV_VAR
 
-    if(NULL == (H5PL_path_table_g[H5PL_num_paths_g] = H5MM_strdup(dl_path)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+    H5PL_path_table_g[H5PL_num_paths_g] = dl_path;
+    dl_path = NULL;
     H5PL_num_paths_g++;
 
 done:
@@ -475,8 +474,8 @@ H5PLprepend(char* plugin_path)
 
     for (plindex = (unsigned int)H5PL_num_paths_g; plindex > 0; plindex--)
         H5PL_path_table_g[plindex] = H5PL_path_table_g[plindex - 1];
-    if (NULL == (H5PL_path_table_g[0] = H5MM_strdup(dl_path)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+    H5PL_path_table_g[0] = dl_path;
+    dl_path = NULL;
     H5PL_num_paths_g++;
 
 done:
@@ -513,8 +512,8 @@ H5PLput(char* plugin_path, unsigned int index)
 
     if(H5PL_path_table_g[index])
         H5PL_path_table_g[index] = (char *)H5MM_xfree(H5PL_path_table_g[index]);
-    if(NULL == (H5PL_path_table_g[index] = H5MM_strdup(dl_path)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+    H5PL_path_table_g[index] = dl_path;
+    dl_path = NULL;
 
 done:
     if(dl_path)
@@ -553,8 +552,8 @@ H5PLinsert(char* plugin_path, unsigned int index)
 
     for(plindex = (unsigned int)H5PL_num_paths_g; plindex > index; plindex--)
         H5PL_path_table_g[plindex] = H5PL_path_table_g[plindex - 1];
-    if(NULL == (H5PL_path_table_g[index] = H5MM_strdup(dl_path)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+    H5PL_path_table_g[index] = dl_path;
+    dl_path = NULL;
     H5PL_num_paths_g++;
 
 done:
@@ -594,9 +593,6 @@ H5PLremove(unsigned int index)
     H5PL_path_table_g[H5PL_num_paths_g] = NULL;
 
 done:
-    if(dl_path)
-        dl_path = (char *)H5MM_xfree(dl_path);
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLremove() */
 
