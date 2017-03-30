@@ -876,7 +876,7 @@ test_filter_path_apis(void)
     TESTING("    replace");
     /* Replace one path*/
     HDsprintf(pathname, "a_path_%d", 20);
-    if (H5PLput(pathname, 1) < 0) {
+    if (H5PLreplace(pathname, 1) < 0) {
         HDfprintf(stderr,"    replace 1: %s\n", pathname);
         TEST_ERROR
     }

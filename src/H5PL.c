@@ -417,7 +417,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLappend(char* plugin_path)
+H5PLappend(const char* plugin_path)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
@@ -455,7 +455,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLprepend(char* plugin_path)
+H5PLprepend(const char* plugin_path)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
@@ -487,7 +487,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5PLput
+ * Function: H5PLreplace
  *
  * Purpose: Replace the path at the specified index.
  *
@@ -496,7 +496,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLput(char* plugin_path, unsigned int index)
+H5PLreplace(const char* plugin_path, unsigned int index)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
@@ -520,7 +520,7 @@ done:
         dl_path = (char *)H5MM_xfree(dl_path);
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5PLput() */
+} /* end H5PLreplace() */
 
 
 /*-------------------------------------------------------------------------
@@ -533,7 +533,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLinsert(char* plugin_path, unsigned int index)
+H5PLinsert(const char* plugin_path, unsigned int index)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
