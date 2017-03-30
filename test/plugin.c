@@ -831,7 +831,7 @@ test_filter_path_apis(void)
     if ((pathlen = H5PLget(H5PL_MAX_PATH_NUM - 1, pathname, 256)) <= 0)
         TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM - 1);
-    if (strcmp(pathname, tempname") != 0) {
+    if (strcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get %d: %s\n", H5PL_MAX_PATH_NUM - 1, pathname);
         TEST_ERROR
     }
