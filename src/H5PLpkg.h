@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if !(defined H5PL_FRIEND || defined H5PL_MODULE)
+#ifndef H5PL_PACKAGE
 #error "Do not include this file outside the H5PL package!"
 #endif
 
