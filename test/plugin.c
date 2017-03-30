@@ -741,10 +741,10 @@ error:
 static herr_t
 test_filter_path_apis(void)
 {
-    int          i;
+    unsigned int i;
     unsigned int ndx;
     herr_t       ret;
-    int          pathlen = -1;
+    ssize_t      pathlen = -1;
     char         pathname[256];
     char         tempname[256];
 
@@ -879,7 +879,7 @@ test_filter_path_apis(void)
     if (H5PLget(0, pathname, 256) <= 0)
         TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if (strcmp(pathname, tempname") != 0) {
+    if (strcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
@@ -910,7 +910,7 @@ test_filter_path_apis(void)
     if (H5PLget(0, pathname, 256) <= 0)
         TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if (strcmp(pathname, tempname") != 0) {
+    if (strcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
