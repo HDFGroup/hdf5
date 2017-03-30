@@ -838,7 +838,10 @@ test_filter_path_apis(void)
     PASSED();
 
     TESTING("    get (bounds exceed)");
-    if ((pathlen = H5PLget(H5PL_MAX_PATH_NUM, NULL, 0)) > 0)
+    H5E_BEGIN_TRY {
+        pathlen = H5PLget(H5PL_MAX_PATH_NUM, NULL, 0);
+    } H5E_END_TRY
+    if (pathlen > 0)
         TEST_ERROR
     PASSED();
 
