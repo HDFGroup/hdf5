@@ -157,6 +157,15 @@ H5TEST_DLL int print_func(const char *format, ...);
 H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 
+/* Functions that will replace VFD-dependent functions that violate
+ * the single responsibility principle. Unlike their predecessors,
+ * these new functions do not have hidden side effects.
+ */
+/* h5_fileaccess() replacement */
+/* h5_clean_files() replacements */
+H5TEST_DLL void h5_delete_test_file(const char *base_name, hid_t fapl);
+H5TEST_DLL void h5_delete_all_test_files(const char *base_name[], hid_t fapl);
+
 /* Routines for operating on the list of tests (for the "all in one" tests) */
 H5TEST_DLL void TestUsage(void);
 H5TEST_DLL void AddTest(const char *TheName, void (*TheCall) (void),
