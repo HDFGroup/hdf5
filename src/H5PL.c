@@ -417,7 +417,6 @@ H5PLappend(const char* plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
     if(NULL == plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
-    dl_path = H5MM_strdup(plugin_path);
     if(NULL == (dl_path = H5MM_strdup(plugin_path)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
@@ -587,7 +586,7 @@ done:
 ssize_t
 H5PLget(unsigned int index, char *pathname/*out*/, size_t size)
 {
-    ssize_t      ret_value = FAIL;    /* Return value */
+    ssize_t      ret_value = 0;    /* Return value */
     ssize_t      len = 0;      /* Length of pathname */
     char        *dl_path = NULL;
 
