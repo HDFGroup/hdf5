@@ -293,6 +293,13 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     
       (ABD, 2016/10/27, HDFFV-9719)
 
+    - Makefiles and test scripts have been updated to correctly remove files
+      created when running "make check" and to avoid removing any files under 
+      source control.  In-source builds followed by "make clean" and "make 
+      distclean" should result in the original source files.
+
+      (LRK, 2017/01/17, HDFFV-10099)
+
 
     Fortran
     --------
@@ -311,6 +318,11 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (ABD, 2017/01/24, HDFFV-10046)
 
+    - Compile scripts h5cc, h5fc, h5c++, h5pcc and h5pfc no longer drop 
+      the output file argument specified by the -o flag when -o <output_file>
+      is specified before -c <input_file>.
+
+      (LRK, 2016/11/04, HDFFV-9938, HDFFV-9530) 
 
     C++ APIs
     --------
