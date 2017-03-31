@@ -1,4 +1,9 @@
 set (CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS 3000)
+# Allow full output to go to CDash set to 0
+SET(CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE 50000)
+SET(CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE 50000)
+# WARNING!  This could be a lot of output and could overwhelm CDash and the
+# MySQL DB so this might not be a good idea!
 
 set (CTEST_CUSTOM_WARNING_EXCEPTION
     ${CTEST_CUSTOM_WARNING_EXCEPTION}
