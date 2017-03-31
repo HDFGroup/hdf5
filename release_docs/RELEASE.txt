@@ -1,9 +1,5 @@
 HDF5 version 1.10.1-pre2 currently under development
 ================================================================================
-Note:  this document is a work in progress.  In particular not all bug fixes have
-been documented here, and issues reported in the pre-release versions will appear in 
-"known problems" in the final 1.10.1 release.
-
 
 INTRODUCTION
 
@@ -44,8 +40,7 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 CONTENTS
 
 - Major New Features Introduced in HDF5 1.10.1
-- Other New Features
-- Support for new platforms and languages
+- Other New Features and Enhancements
 - Bug Fixes since HDF5-1.10.0-patch1
 - Supported Platforms
 - Tested Configuration Features Summary
@@ -103,55 +98,31 @@ ________________________________________
     aggregation can improve performance by giving an application control of 
     minimizing HDF5 I/O requests to a specific granularity and alignment. 
     See the RFC for details. Also, see the Page Buffering documentation.
-    
- 
 
-New Features
-============
+
+
+Other New Features and Enhancements
+===================================
 
     Configuration:
-    -------------
-    - CMake minimum is now 3.2.2.
-      (ADB 2017/01/10)
+    --------------
+    - The minimum version of CMake required to build HDF5 is now 3.2.2.
 
-    - Tools folder is separated into source and test folders. This
-      allows autotools to skip the make command and just execute
-      the make check command.
-      (HDFFV-9719 ADB 2016/10/27)
+      (ADB, 2017/01/10)
 
-    Library:
-    --------
-    - Paged Aggregation
-
-      This is one of the file space management strategies. This strategy
-      aggregates small metadata and raw data allocations into constant-sized
-      well-aligned pages, which are suitable for page caching.  Paged
-      aggregation together with the page buffering feature will allow efficient
-      I/O accesses.
-
-    - Page Buffering
-
-      The page buffering layer in the HDF5 library absorbs small accesses to
-      the file system.  Each page in memory corresponds to a page allocated in
-      the file.  Access to the file system is then performed as a single page
-      or multiple of pages, if they are contiguous.  This ensures that small 
-      accesses to the file system are avoided while providing another caching
-      layer for improved I/O performance.  This feature works in conjunction
-      with the paged aggregation feature.
-
-    Parallel Library:
-    -----------------
-    -
-
+    
     Fortran Library:
     ----------------
-    - Added support for NAG compiler.
-      (HDFFV-9973 MSB (2017/2/10))
+
+    - The HDF5 Fortran library can now be compiled with the NAG compiler.
+
+      (MSB, 2017/2/10, HDFFV-9973)
+
 
     C++ Library:
     ------------
-    - New wrappers for C APIs:
-        (HDFFV-10004, HDFFV-10139, HDFFV-10145 - PRs #209, #232, #310, #334, #348)
+
+    - The following C++ API wrappers have been added to the C++ Library:
 
         // Sets/Gets the strategy and the threshold value that the library will
         // will employ in managing file space.
@@ -194,135 +165,135 @@ New Features
 
         // Returns the header version of an HDF5 object.
         H5Object::objVersion - H5Oget_info for version
-      -BMR, 2017/03/20
+
+      (BMR, 2017/03/20, HDFFV-10004, HDFFV-10139, HDFFV-10145)
 
     - New exception: ObjHeaderIException for H5O interface.
-      (HDFFV-10145 - PR #334) -BMR, 2017/03/15
+
+      (BMR, 2017/03/15, HDFFV-10145)
 
     - New class LinkAccPropList for link access property list, to be used by
-      wrappers of H5Lexists. (HDFFV-10145 - PR #232) -BMR, 2017/01/04
+      wrappers of H5Lexists.
+
+      (BMR, 2017/01/04, HDFFV-10145)
 
     - New constructors to open datatypes in ArrayType, CompType, DataType,
       EnumType, FloatType, IntType, StrType, and VarLenType.
-      (HDFFV-10056 - PR #209) -BMR, 2016/12/26
+      
+      (BMR, 2016/12/26, HDFFV-10056)
 
-    - New member functions
+    - New member functions:
+
         DSetCreatPropList::setNbit() to setup N-bit compression for a dataset.
-        (HDFFV-8623 patch 7) -BMR, 2016/04/25
 
         ArrayType::getArrayNDims() const
         ArrayType::getArrayDims() const
-        both to replace the non-const versions. (HDFFV-9725) -BMR, 2016/04/25
+        both to replace the non-const versions.
+
+      (BMR, 2016/04/25, HDFFV-8623, HDFFV-9725)
 
 
     Tools:
     ------
-     - Add options to h5clear:
+     - The following options have been added to h5clear:
        -s: clear the status_flags field in the file's superblock
        -m: Remove the metadata cache image from the file
-       (Pull Request #361 QK 2017/03/22)
+
+       (QAK, 2017/03/22, PR#361)
+
 
     High-Level APIs:
     ---------------
      - Added New Fortran 2003 API for h5tbmake_table_f.
-       (HDFFV-8486, MSB 2017/02/10)
-      
 
-    C Packet Table API
-    ------------------
-     -
+       (MSB, 2017/02/10, HDFFV-8486)
 
-    Internal header file
-    --------------------
-    -
 
-    Documentation
-    -------------
-
-Support for new platforms, languages and compilers.
-=======================================
-    -
 
 Bug Fixes since HDF5-1.10.0-patch1 release
 ==================================
 
     Library
     -------
-    - SWMR implementation in the HDF5 1.10.0 and 1.10.0-patch1 releases has a broken 
-      metadata flush dependency that manifested itself with the following error at the 
+    - SWMR implementation in the HDF5 1.10.0 and 1.10.0-patch1 releases has a broken
+      metadata flush dependency that manifested itself with the following error at the
       end of the HDF5 error stack:
 
-      H5Dint.c line 846 in H5D__swmr_setup(): dataspace chunk index must be 0 for 
+      H5Dint.c line 846 in H5D__swmr_setup(): dataspace chunk index must be 0 for
       SWMR access, chunkno = 1
       major: Dataset
       minor: Bad value
+
       It was also reported at https://github.com/areaDetector/ADCore/issues/203
+
       The flush dependency is fixed in this release.
 
     - Changed the plugins dlopen option from RTLD_NOW to RTLD_LAZY
-      (PR 201 ADB 2016/12/12)
 
-    - Fix error when copying dataset with attribute which is a compound datatype
-      consisting of a variable length string.
-      (HDFFV-7991 VC 2016/08/19, 2016/08/21, 2016/08/24)
+      (ABD, 2016/12/12, PR#201)
 
-    - H5DOappend will not fail if a dataset has no append callback registered.
-      (HDFFV-9960 VC 2016/08/05, 2016/08/14)
+    - Fixed an error that would occur when copying an object with an attribute
+      which is a compound datatype consisting of a variable length string.    
 
-    - Fix the problem where the committed datatype's file location is different
-      from the file location of an attribute with that committed datatype.
-      (HDFFV-9940 VC 2016/07/03, 2016/07/06)
+      (VC, 2016/08/24, HDFFV-7991)
+
+    - H5DOappend will no longer fail if a dataset has no append callback registered.
+
+      (VC, 2016/08/14, HDFFV-9960)
+
+    - Fixed an error that would occur when calling H5Adelete on an attribute
+      which is attached to an externally linked object in the target file and
+      whose datatype is a committed datatype in the main file.    
+
+      (VC, 2016/07/06, HDFFV-9940)
 
     - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
-      (b) Modifications to better handle error recovery when conversion by 
+      (b) Modifications to better handle error recovery when conversion by
           h5format_convert fails.
-      (HDFFV-9434 VC 2016/05/29)
+
+      (VC, 2016/05/29, HDFFV-9434)
+
 
     Configuration
-    -------------
+    -------------         
     - Configuration will check for the strtoll and strtoull functions
       before using alternatives
-      (PR 340 ADB 2017/03/17)
+
+      (ABD, 2017/03/17, PR#340)
 
     - CMake uses a Windows pdb directory variable if available and
       will generate both static and shared pdb files.
-      (HDFFV-9875 ADB 2017/02/06)
+
+      (ABD, 2017/02/06, HDFFV-9875)
 
     - CMake now builds shared versions of tools.
-      (HDFFV-10123 ADB 2017/02/01)
 
-    Performance
-    -------------
-      -
+      (ABD, 2017/02/01, HDFFV-10123)
+
+    - The tools directory has been divided into two separate source and test
+      directories. This resolves a build dependency and, as a result,
+      'make check' will no longer fail in the tools directory if 'make' was
+      not executed first.
+    
+      (ABD, 2016/10/27, HDFFV-9719)
+
 
     Fortran
     --------
     - Changed H5S_ALL_F from INTEGER to INTEGER(HID_T)
-      (HDFFv-9987 MSB 2016/10/14)
+
+      (MSB, 2016/10/14, HDFFV-9987)
+
 
     Tools
     -----
-    - h5diff correctly ignores strpad in comparing strings.
-      (HDFFV-10128 ADB 2017/03/03)
+    - h5diff now correctly ignores strpad in comparing strings.
+
+      (ABD, 2017/03/03, HDFFV-10128)
 
     - h5repack now correctly parses the command line filter options.
-      (HDFFV-10046 ADB 2017/01/24)
 
-    High-Level APIs:
-    ------
-    -
-
-    Fortran High-Level APIs:
-    ------
-    -
-
-    Documentation
-    -------------
-
-
-    F90 APIs
-    --------
-    -
+      (ABD, 2017/01/24, HDFFV-10046)
 
 
     C++ APIs
@@ -330,11 +301,14 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     - Due to the change in the C API, the overloaded functions of
       PropList::setProperty now need const for some arguments.  They are
       planned for deprecation and are replaced by new versions with proper
-      consts. (PR #344) -BMR, 2017/03/17
+      consts.
+
+      (BMR, 2017/03/17, PR#344)
 
     - The problem where a user-defined function cannot access both, attribute
       and dataset, using only one argument is now fixed.
-      (HDFFV-9920 - PR #45) -BMR, 2016/10/11
+
+      (BMR, 2016/10/11, HDFFV-9920)
 
     - The high-level API Packet Table (PT) did not write data correctly when
       the datatype is a compound type that has string type as one of the
@@ -347,20 +321,22 @@ Bug Fixes since HDF5-1.10.0-patch1 release
       during opening.  If an application wishes to use native type to read the
       data, then the application will request that.  However, the Packet Table
       doesn't provide a way to specify memory datatype in this release.  This
-      feature will be available in future releases, HDFFV-10023.
-      (HDFFV-9758 - PRs #93 and #108) -BMR, 2016/10/27
+      feature will be available in future releases.
 
-    - The obsolete macros, H5_NO_NAMESPACE and H5_NO_STD, are removed.
-      (HDFFV-9532 - PR #92) -BMR, 2016/10/23
+      (BMR, 2016/10/27, HDFFV-9758)
+
+    - The obsolete macros H5_NO_NAMESPACE and H5_NO_STD have been removed from
+      the HDF5 C++ API library.
+
+      (BMR, 2016/10/23, HDFFV-9532)
 
     - In-memory array information, ArrayType::rank and
       ArrayType::dimensions, were removed. This is an implementation
-      detail and should not affect applications. (HDFFV-9725) -BMR, 2016/04/25
+      detail and should not affect applications.
+
+      (BMR, 2016/04/25, HDFFV-9725)
 
 
-    Testing
-    -------
-    -
 
 Supported Platforms
 ===================
