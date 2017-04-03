@@ -272,7 +272,8 @@ Bug Fixes since HDF5-1.10.0-patch1 release
       (NAF, 2016/08/11, HDFFV-9948)
 
     - H5DOappend will not fail if a dataset has no append callback registered.
-      (HDFFV-9960 VC 2016/08/05, 2016/08/14)
+
+      (VC 2016/08/05, 2016/08/14, HDFFV-9960)
 
     - Fixed an error that would occur when calling H5Adelete on an attribute
       which is attached to an externally linked object in the target file and
@@ -282,6 +283,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     - Fix the problem where the committed datatype's file location is different
       from the file location of an attribute with that committed datatype.
+
       (VC 2016/07/03, 2016/07/06, HDFFV-9940)
 
     - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
@@ -293,6 +295,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
       (b) Modifications to better handle error recovery when conversion by 
           h5format_convert fails.
+
       (VC 2016/05/29, HDFFV-9434)
 
 
@@ -355,15 +358,18 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     - h5diff correctly indicates error when it cannot read data due
       to an unavailable filter plugin.
+
       (ADB 2017/01/18, HDFFV-9994 )
 
     - Fixed an error in the compiler wrapper scripts (h5cc, h5fc, et al.)
       in which they would erroneously drop the file argument specified via
       the -o flag when the -o flag was specified before the -c flag on the
       command line, resulting in a failure to compile.
+
       (LRK, 2016/11/04, HDFFV-9938, HDFFV-9530) 
 
     - h5repack allows the --enable-error-stack option on the command line.
+
       (ADB 2016/08/08, HDFFV-9775)
 
 
