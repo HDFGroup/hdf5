@@ -494,6 +494,8 @@ H5PLreplace(const char* plugin_path, unsigned int index)
     FUNC_ENTER_API(FAIL)
     if(NULL == plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
+    if(index >= H5PL_MAX_PATH_NUM)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "index path out of bounds for table")
     if(NULL == (dl_path = H5MM_strdup(plugin_path)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
@@ -529,6 +531,8 @@ H5PLinsert(const char* plugin_path, unsigned int index)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
     if(NULL == plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
+    if(index >= H5PL_MAX_PATH_NUM)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "index path out of bounds for table")
     if(NULL == (dl_path = H5MM_strdup(plugin_path)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
@@ -562,12 +566,15 @@ H5PLremove(unsigned int index)
     FUNC_ENTER_API(FAIL)
     if(H5PL_num_paths_g == 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "no directories in table")
+    if(index >= H5PL_MAX_PATH_NUM)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "index path out of bounds for table")
     if(NULL == H5PL_path_table_g[index])
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no directory path at index")
     H5PL_path_table_g[index] = (char *)H5MM_xfree(H5PL_path_table_g[index]);
+
+    H5PL_num_paths_g--;
     for(plindex = index; plindex < (unsigned int)H5PL_num_paths_g; plindex++)
         H5PL_path_table_g[plindex] = H5PL_path_table_g[plindex + 1];
-    H5PL_num_paths_g--;
     H5PL_path_table_g[H5PL_num_paths_g] = NULL;
 
 done:
@@ -603,6 +610,8 @@ H5PLget(unsigned int index, char *pathname/*out*/, size_t size)
     FUNC_ENTER_API(FAIL)
     if(H5PL_num_paths_g == 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "no directories in table")
+    if(index >= H5PL_MAX_PATH_NUM)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "index path out of bounds for table")
     if(NULL == (dl_path = H5PL_path_table_g[index]))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no directory path at index")
     len = HDstrlen(dl_path);
