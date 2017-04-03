@@ -26,6 +26,7 @@
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
 ./COPYING
+./COPYING_LBNL_HDF5
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.am

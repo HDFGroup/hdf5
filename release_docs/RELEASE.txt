@@ -4,8 +4,8 @@ HDF5 version 1.10.2-snap0 currently under development
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.11.x and
-HDF5 1.10.1, and contains information on the platforms tested and known problems in HDF5-1.11.x.
+This document describes the differences between HDF5-1.10.0-patch1 and
+HDF5 1.10.1, and contains information on the platforms tested and known problems in HDF5-1.10.1.
 For more details check the HISTORY*.txt files in the HDF5 source.
 
 
@@ -28,8 +28,8 @@ in 1.10.1?" document:
      https://support.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew1101.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes
-from Release to Release" document, in the section "Release 1.10.1 (current
-release) versus Release 1.11.x
+from Release to Release" document, in the section "Release 1.8.19 (current
+release) versus Release 1.10.1
 
      https://support.hdfgroup.org/HDF5/doc1.10/ADGuide/Changes.html
 
@@ -42,7 +42,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.10.1
+- Bug Fixes since HDF5-1.10.0-patch1
 - Supported Platforms
 - Tested Configuration Features Summary
 - More Tested Platforms
@@ -54,7 +54,13 @@ New Features
 
     Configuration:
     -------------
-    - 
+    - CMake minimum is now 3.2.2.
+      (ADB 2017/01/10)
+
+    - Tools folder is separated into source and test folders. This
+      allows autotools to skip the make command and just execute
+      the make check command.
+      (HDFFV-9719 ADB 2016/10/27)
 
     Library:
     --------
@@ -160,7 +166,6 @@ New Features
 
     High-Level APIs:
     ---------------
-     - 
 
     C Packet Table API
     ------------------
@@ -177,12 +182,29 @@ Support for new platforms, languages and compilers.
 =======================================
     -
 
-Bug Fixes since HDF5-1.10.1 release
+Bug Fixes since HDF5-1.10.0-patch1 release
 ==================================
 
     Library
     -------
-    - 
+    - Changed the plugins dlopen option from RTLD_NOW to RTLD_LAZY
+      (PR 201 ADB 2016/12/12)
+
+    - Fix error when copying dataset with attribute which is a compound datatype
+      consisting of a variable length string.
+      (HDFFV-7991 VC 2016/08/19, 2016/08/21, 2016/08/24)
+
+    - H5DOappend will not fail if a dataset has no append callback registered.
+      (HDFFV-9960 VC 2016/08/05, 2016/08/14)
+
+    - Fix the problem where the committed datatype's file location is different
+      from the file location of an attribute with that committed datatype.
+      (HDFFV-9940 VC 2016/07/03, 2016/07/06)
+
+    - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
+      (b) Modifications to better handle error recovery when conversion by 
+          h5format_convert fails.
+      (HDFFV-9434 VC 2016/05/29)
 
     - Fix error when copying dataset with attribute which is a compound datatype
       consisting of a variable length string.
@@ -202,7 +224,18 @@ Bug Fixes since HDF5-1.10.1 release
 
     Configuration
     -------------
-    -
+    - Configuration will check for the strtoll and strtoull functions
+      before using alternatives
+      (PR 340 ADB 2017/03/17)
+
+    - CMake uses a Windows pdb directory variable if available and
+      will generate both static and shared pdb files.
+      (HDFFV-9875 ADB 2017/02/06)
+
+    - CMake now builds shared versions of tools.
+      (HDFFV-10123 ADB 2017/02/01)
+
+    Performance
     -------------
       -
 
@@ -212,7 +245,11 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
-    - 
+    - h5diff correctly ignores strpad in comparing strings.
+      (HDFFV-10128 ADB 2017/03/03)
+
+    - h5repack now correctly parses the command line filter options.
+      (HDFFV-10046 ADB 2017/01/24)
 
     High-Level APIs:
     ------
