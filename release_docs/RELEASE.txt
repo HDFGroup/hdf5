@@ -77,7 +77,7 @@ New Features
       The page buffering layer in the HDF5 library absorbs small accesses to
       the file system.  Each page in memory corresponds to a page allocated in
       the file.  Access to the file system is then performed as a single page
-      or multiple of pages, if they are contiguous.  This ensures that small 
+      or multiple of pages, if they are contiguous.  This ensures that small
       accesses to the file system are avoided while providing another caching
       layer for improved I/O performance.  This feature works in conjunction
       with the paged aggregation feature.
@@ -139,7 +139,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
       (HDFFV-9940 VC 2016/07/03, 2016/07/06)
 
     - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
-      (b) Modifications to better handle error recovery when conversion by 
+      (b) Modifications to better handle error recovery when conversion by
           h5format_convert fails.
       (HDFFV-9434 VC 2016/05/29)
 
@@ -171,6 +171,13 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     - h5repack now correctly parses the command line filter options.
       (HDFFV-10046 ADB 2017/01/24)
+
+    - h5diff correctly indicates error when it cannot read data due
+      to an unavailable filter plugin.
+      (HDFFV-9994 ADB 2017/01/18)
+
+    - h5repack allows the --enable-error-stack option on the command line.
+      (HDFFV-775 ADB 2016/08/08)
 
     High-Level APIs:
     ------
