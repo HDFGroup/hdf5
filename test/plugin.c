@@ -750,6 +750,8 @@ test_filter_path_apis(void)
 
     HDputs("Testing access to the filter path table");
 
+    if(H5Zfilter_avail(H5Z_FILTER_DYNLIB1) != TRUE) TEST_ERROR
+
     ndx = H5PLsize();
 
     TESTING("    remove");
@@ -764,7 +766,7 @@ test_filter_path_apis(void)
     if (H5PLsize() > 0) TEST_ERROR
     PASSED();
 
-    TESTING("    remove (exceed)");
+    TESTING("    remove (exceed min)");
     /* Exceed the min path removal */
     H5E_BEGIN_TRY {
         ret = H5PLremove(0);
@@ -795,6 +797,7 @@ test_filter_path_apis(void)
     if (ret >= 0)
         TEST_ERROR
 
+    TESTING("    remove (exceed max)");
     /* Exceed the max path removal */
     H5E_BEGIN_TRY {
         ret = H5PLremove(H5PL_MAX_PATH_NUM);
