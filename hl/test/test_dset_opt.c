@@ -161,21 +161,70 @@ test_direct_chunk_write (hid_t file)
 			cparms, H5P_DEFAULT)) < 0)
         goto error;
 
-    /* Initialize the dataset */
-    for(i = n = 0; i < NX; i++)
-        for(j = 0; j < NY; j++)
-            data[i][j] = n++;
-
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         goto error;
 
-    /*
-     * Write the data for the dataset.  It should stay in the chunk cache.
-     * It will be evicted from the cache by the H5DOwrite_chunk calls. 
-     */
+    HDmemset(data, 0, sizeof(data));
+    /* Initialize data for the first chunk */
+    for(i = n = 0; i < CHUNK_NX; i++)
+        for(j = 0; j < CHUNK_NY; j++)
+            data[i][j] = n++;
+
+     /* Write the data to the dataset. */ 
     if((status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      dxpl, data)) < 0)
         goto error;
+
+    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    if((dataset = H5Dopen2(file, DATASETNAME1, H5P_DEFAULT)) < 0)
+        goto error;
+
+    offset[0] = offset[1] = 0;
+
+    /* Get the size of the compressed chunk */
+    ret = H5Dget_chunk_storage_size(dataset, offset, &read_chunk_nbytes);
+
+    readbuf = HDmalloc(read_chunk_nbytes);
+    pt_readbuf = (const Bytef *)readbuf;
+
+    /* Test to use H5DOread_chunk() to read the chunk back */
+    if((status = H5DOread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, readbuf)) < 0)
+        goto error;
+
+    /* uncompress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen) */
+    ret = uncompress((Bytef *)read_dst_buf, (uLongf *)&buf_size, pt_readbuf, (uLong)read_chunk_nbytes);
+
+    /* Check for various zlib errors */
+    if(Z_BUF_ERROR == ret) {
+        HDfprintf(stderr, "error: not enough room in output buffer");
+        goto error;
+    } else if(Z_MEM_ERROR == ret) {
+        HDfprintf(stderr, "error: not enough memory");
+        goto error;
+    } else if(Z_OK != ret) {
+        HDfprintf(stderr, "error: corrupted input data");
+        goto error;
+    }
+
+    /* Check that the values read are the same as the values written */
+    for(i = 0; i < CHUNK_NX; i++) {
+        for(j = 0; j < CHUNK_NY; j++) {
+            if(data[i][j] != read_dst_buf[i][j]) {
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    data=%d, read_dst_buf=%d\n", data[i][j], read_dst_buf[i][j]);
+                goto error;
+            }
+        }
+    }
+
+    if(readbuf)
+        HDfree(readbuf);
 
     /* Initialize data for one chunk */
     for(i = n = 0; i < CHUNK_NX; i++)
@@ -191,13 +240,13 @@ test_direct_chunk_write (hid_t file)
 
     /* Check for various zlib errors */
     if(Z_BUF_ERROR == ret) {
-        fprintf(stderr, "overflow");
+        HDfprintf(stderr, "overflow");
         goto error;
     } else if(Z_MEM_ERROR == ret) {
-        fprintf(stderr, "deflate memory error");
+        HDfprintf(stderr, "deflate memory error");
         goto error;
     } else if(Z_OK != ret) {
-        fprintf(stderr, "other deflate error");
+        HDfprintf(stderr, "other deflate error");
         goto error;
     }
 
@@ -231,7 +280,7 @@ test_direct_chunk_write (hid_t file)
     ret = H5Dget_chunk_storage_size(dataset, offset, &read_chunk_nbytes);
 
     if(read_chunk_nbytes != (hsize_t)z_dst_nbytes) {
-        fprintf(stderr, "Read/write chunk size not the same.");
+        HDfprintf(stderr, "Read/write chunk size not the same.");
         goto error;
     }
 
@@ -243,7 +292,7 @@ test_direct_chunk_write (hid_t file)
         goto error;
 
     if(read_filter_mask != filter_mask) {
-        fprintf(stderr, "    Read/write filter mask not the same.");
+        HDfprintf(stderr, "    Read/write filter mask not the same.");
         goto error;
     }
 
@@ -252,13 +301,13 @@ test_direct_chunk_write (hid_t file)
 
     /* Check for various zlib errors */
     if(Z_BUF_ERROR == ret) {
-        fprintf(stderr, "error: not enough room in output buffer");
+        HDfprintf(stderr, "error: not enough room in output buffer");
         goto error;
     } else if(Z_MEM_ERROR == ret) {
-        fprintf(stderr, "error: not enough memory");
+        HDfprintf(stderr, "error: not enough memory");
         goto error;
     } else if(Z_OK != ret) {
-        fprintf(stderr, "error: corrupted input data");
+        HDfprintf(stderr, "error: corrupted input data");
         goto error;
     }
 
@@ -318,13 +367,13 @@ test_direct_chunk_write (hid_t file)
 
     /* Check for various zlib errors */
     if(Z_BUF_ERROR == ret) {
-        fprintf(stderr, "overflow");
+        HDfprintf(stderr, "overflow");
         goto error;
     } else if(Z_MEM_ERROR == ret) {
-        fprintf(stderr, "deflate memory error");
+        HDfprintf(stderr, "deflate memory error");
         goto error;
     } else if(Z_OK != ret) {
-        fprintf(stderr, "other deflate error");
+        HDfprintf(stderr, "other deflate error");
         goto error;
     }
 
@@ -359,7 +408,7 @@ test_direct_chunk_write (hid_t file)
     ret = H5Dget_chunk_storage_size(dataset, offset, &read_chunk_nbytes);
 
     if(read_chunk_nbytes != (hsize_t)z_dst_nbytes) {
-        fprintf(stderr, "Read/write chunk size not the same.");
+        HDfprintf(stderr, "Read/write chunk size not the same.");
         goto error;
     }
 
@@ -371,7 +420,7 @@ test_direct_chunk_write (hid_t file)
         goto error;
 
     if(read_filter_mask != filter_mask) {
-        fprintf(stderr, "    Read/write filter mask not the same.");
+        HDfprintf(stderr, "    Read/write filter mask not the same.");
         goto error;
     }
 
@@ -380,13 +429,13 @@ test_direct_chunk_write (hid_t file)
 
     /* Check for various zlib errors */
     if(Z_BUF_ERROR == ret) {
-        fprintf(stderr, "error: not enough room in output buffer");
+        HDfprintf(stderr, "error: not enough room in output buffer");
         goto error;
     } else if(Z_MEM_ERROR == ret) {
-        fprintf(stderr, "error: not enough memory");
+        HDfprintf(stderr, "error: not enough memory");
         goto error;
     } else if(Z_OK != ret) {
-        fprintf(stderr, "error: corrupted input data");
+        HDfprintf(stderr, "error: corrupted input data");
         goto error;
     }
 
@@ -449,7 +498,7 @@ error:
 
     return 1;
 } /* test_direct_chunk_write() */
-#endif /* H5_HAVE_FILTER_DEFLATE */
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	test_skip_compress_write1
@@ -554,7 +603,7 @@ test_skip_compress_write1(hid_t file)
         goto error;
 
     if(read_filter_mask != filter_mask) {
-        fprintf(stderr, "    Read/write filter mask not the same.");
+        HDfprintf(stderr, "    Read/write filter mask not the same.");
         goto error;
     }
 
@@ -819,7 +868,7 @@ test_skip_compress_write2(hid_t file)
         goto error;
 
     if(read_filter_mask != filter_mask) {
-        fprintf(stderr, "    Read/write filter mask not the same.");
+        HDfprintf(stderr, "    Read/write filter mask not the same.");
         goto error;
     }
 

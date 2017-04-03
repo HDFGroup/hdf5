@@ -63,7 +63,7 @@ H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *o
 
     /* If the user passed in a default DXPL, create one to pass to H5Dwrite() */
     if(H5P_DEFAULT == dxpl_id) {
-	if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
             goto done;
         created_dxpl = TRUE;
     } /* end if */
