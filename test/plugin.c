@@ -116,7 +116,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     /* Check if all the filters are available */
     if(H5Pall_filters_avail(dcpl)!=TRUE) {
         H5_FAILED();
-        HDprintf("    Line %d: Incorrect filter availability\n",__LINE__);
+        printf("    Line %d: Incorrect filter availability\n",__LINE__);
         TEST_ERROR
     } /* end if */
 
@@ -139,8 +139,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     for(j=0; j<(size_t)size[1]; j++) {
         if(0!=check[i][j]) {
         H5_FAILED();
-        HDprintf("    Read a non-zero value.\n");
-        HDprintf("    At index %lu,%lu\n",
+        printf("    Read a non-zero value.\n");
+        printf("    At index %lu,%lu\n",
             (unsigned long)i, (unsigned long)j);
         TEST_ERROR
         }
@@ -219,8 +219,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     for(j=0; j<size[1]; j++) {
         if(points[i][j] != check[i][j]) {
         H5_FAILED();
-        HDprintf("    Read different values than written.\n");
-        HDprintf("    At index %lu,%lu\n",
+        printf("    Read different values than written.\n");
+        printf("    At index %lu,%lu\n",
                 (unsigned long)i, (unsigned long)j);
         TEST_ERROR
         }
@@ -248,8 +248,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     for(j = 0; j < size[1]; j++)
         if(points[i][j] != check[i][j]) {
         H5_FAILED();
-        HDprintf("    Read different values than written.\n");
-        HDprintf("    At index %lu,%lu\n",
+        printf("    Read different values than written.\n");
+        printf("    At index %lu,%lu\n",
                 (unsigned long)i, (unsigned long)j);
         TEST_ERROR
         } /* end if */
@@ -815,7 +815,7 @@ test_filter_path_apis(void)
         HDfprintf(stderr,"    get 0 len: %d : %s\n", pathlen, pathname);
         TEST_ERROR
     }
-    if (strcmp(pathname, "a_path_0") != 0) {
+    if (HDstrcmp(pathname, "a_path_0") != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
@@ -824,14 +824,14 @@ test_filter_path_apis(void)
     TESTING("    get (bounds)");
     if ((pathlen = H5PLget(1, pathname, 256)) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_1") != 0) {
+    if (HDstrcmp(pathname, "a_path_1") != 0) {
         HDfprintf(stderr,"    get 1: %s\n", pathname);
         TEST_ERROR
     }
     if ((pathlen = H5PLget(H5PL_MAX_PATH_NUM - 1, pathname, 256)) <= 0)
         TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM - 1);
-    if (strcmp(pathname, tempname) != 0) {
+    if (HDstrcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get %d: %s\n", H5PL_MAX_PATH_NUM - 1, pathname);
         TEST_ERROR
     }
@@ -852,7 +852,7 @@ test_filter_path_apis(void)
     /* Verify that the entries were moved */
     if ((pathlen = H5PLget(8, pathname, 256)) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_9") != 0) {
+    if (HDstrcmp(pathname, "a_path_9") != 0) {
         HDfprintf(stderr,"    get 8: %s\n", pathname);
         TEST_ERROR
     }
@@ -875,14 +875,14 @@ test_filter_path_apis(void)
     /* Verify that the entries were moved */
     if (H5PLget(8, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_7") != 0) {
+    if (HDstrcmp(pathname, "a_path_7") != 0) {
         HDfprintf(stderr,"    get 8: %s\n", pathname);
         TEST_ERROR
     }
     if (H5PLget(0, pathname, 256) <= 0)
         TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if (strcmp(pathname, tempname) != 0) {
+    if (HDstrcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
@@ -913,13 +913,13 @@ test_filter_path_apis(void)
     if (H5PLget(0, pathname, 256) <= 0)
         TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if (strcmp(pathname, tempname) != 0) {
+    if (HDstrcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
     if (H5PLget(2, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_1") != 0) {
+    if (HDstrcmp(pathname, "a_path_1") != 0) {
         HDfprintf(stderr,"    get 2: %s\n", pathname);
         TEST_ERROR
     }
@@ -932,7 +932,7 @@ test_filter_path_apis(void)
     /* Verify that the entries were moved */
     if (H5PLget(4, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_4") != 0) {
+    if (HDstrcmp(pathname, "a_path_4") != 0) {
         HDfprintf(stderr,"    get 4: %s\n", pathname);
         TEST_ERROR
     }
@@ -952,7 +952,7 @@ test_filter_path_apis(void)
     /* Verify that the entries were moved */
     if (H5PLget(4, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_2") != 0){
+    if (HDstrcmp(pathname, "a_path_2") != 0){
         HDfprintf(stderr,"    get 4: %s\n", pathname);
         TEST_ERROR
     }
@@ -1097,14 +1097,14 @@ main(void)
 
     if(nerrors)
         TEST_ERROR
-    HDprintf("All plugin tests passed.\n");
+    printf("All plugin tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d PLUGIN TEST%s FAILED! *****\n",
+    printf("***** %d PLUGIN TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
