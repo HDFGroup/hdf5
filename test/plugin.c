@@ -750,6 +750,8 @@ test_filter_path_apis(void)
 
     HDputs("Testing access to the filter path table");
 
+    if(H5Zfilter_avail(H5Z_FILTER_DYNLIB1) != TRUE) TEST_ERROR
+
     ndx = H5PLsize();
 
     TESTING("    remove");
@@ -764,7 +766,7 @@ test_filter_path_apis(void)
     if (H5PLsize() > 0) TEST_ERROR
     PASSED();
 
-    TESTING("    remove (exceed)");
+    TESTING("    remove (exceed min)");
     /* Exceed the min path removal */
     H5E_BEGIN_TRY {
         ret = H5PLremove(0);
@@ -795,6 +797,7 @@ test_filter_path_apis(void)
     if (ret >= 0)
         TEST_ERROR
 
+    TESTING("    remove (exceed max)");
     /* Exceed the max path removal */
     H5E_BEGIN_TRY {
         ret = H5PLremove(H5PL_MAX_PATH_NUM);
@@ -815,7 +818,7 @@ test_filter_path_apis(void)
         HDfprintf(stderr,"    get 0 len: %d : %s\n", pathlen, pathname);
         TEST_ERROR
     }
-    if (strcmp(pathname, "a_path_0") != 0) {
+    if (HDstrcmp(pathname, "a_path_0") != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
@@ -824,14 +827,14 @@ test_filter_path_apis(void)
     TESTING("    get (bounds)");
     if ((pathlen = H5PLget(1, pathname, 256)) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_1") != 0) {
+    if (HDstrcmp(pathname, "a_path_1") != 0) {
         HDfprintf(stderr,"    get 1: %s\n", pathname);
         TEST_ERROR
     }
     if ((pathlen = H5PLget(H5PL_MAX_PATH_NUM - 1, pathname, 256)) <= 0)
         TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM - 1);
-    if (strcmp(pathname, tempname) != 0) {
+    if (HDstrcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get %d: %s\n", H5PL_MAX_PATH_NUM - 1, pathname);
         TEST_ERROR
     }
@@ -852,7 +855,7 @@ test_filter_path_apis(void)
     /* Verify that the entries were moved */
     if ((pathlen = H5PLget(8, pathname, 256)) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_9") != 0) {
+    if (HDstrcmp(pathname, "a_path_9") != 0) {
         HDfprintf(stderr,"    get 8: %s\n", pathname);
         TEST_ERROR
     }
@@ -875,14 +878,14 @@ test_filter_path_apis(void)
     /* Verify that the entries were moved */
     if (H5PLget(8, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_7") != 0) {
+    if (HDstrcmp(pathname, "a_path_7") != 0) {
         HDfprintf(stderr,"    get 8: %s\n", pathname);
         TEST_ERROR
     }
     if (H5PLget(0, pathname, 256) <= 0)
         TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if (strcmp(pathname, tempname) != 0) {
+    if (HDstrcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
@@ -913,13 +916,13 @@ test_filter_path_apis(void)
     if (H5PLget(0, pathname, 256) <= 0)
         TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if (strcmp(pathname, tempname) != 0) {
+    if (HDstrcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
     if (H5PLget(2, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_1") != 0) {
+    if (HDstrcmp(pathname, "a_path_1") != 0) {
         HDfprintf(stderr,"    get 2: %s\n", pathname);
         TEST_ERROR
     }
@@ -932,7 +935,7 @@ test_filter_path_apis(void)
     /* Verify that the entries were moved */
     if (H5PLget(4, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_4") != 0) {
+    if (HDstrcmp(pathname, "a_path_4") != 0) {
         HDfprintf(stderr,"    get 4: %s\n", pathname);
         TEST_ERROR
     }
@@ -952,7 +955,7 @@ test_filter_path_apis(void)
     /* Verify that the entries were moved */
     if (H5PLget(4, pathname, 256) <= 0)
         TEST_ERROR
-    if (strcmp(pathname, "a_path_2") != 0){
+    if (HDstrcmp(pathname, "a_path_2") != 0){
         HDfprintf(stderr,"    get 4: %s\n", pathname);
         TEST_ERROR
     }
