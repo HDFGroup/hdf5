@@ -897,10 +897,10 @@ test_filter_path_apis(void)
 
     TESTING("    remove (verify for insert)");
     /* Remove one path*/
-    if H5PLremove(4) < 0) TEST_ERROR
+    if(H5PLremove(4) < 0) TEST_ERROR
 
     /* Verify that the entries were moved */
-    if H5PLget(4, pathname, 256) <= 0) TEST_ERROR
+    if(H5PLget(4, pathname, 256) <= 0) TEST_ERROR
     if(HDstrcmp(pathname, "a_path_4") != 0) {
         HDfprintf(stderr,"    get 4: %s\n", pathname);
         TEST_ERROR
