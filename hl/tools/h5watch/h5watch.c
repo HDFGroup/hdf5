@@ -43,6 +43,7 @@ static int g_display_width = 80;	    /* output width in characters */
 static hbool_t g_simple_output = FALSE;     /* make output more machine-readable */
 static unsigned g_retry = DEFAULT_RETRY;    /* # of times to try opening the file if somehow file is unstable */
 static hbool_t g_display_hex = FALSE;	    /* display data in hexadecimal format : LATER */
+static hbool_t g_user_interrupt = FALSE;    /* Flag to indicate that user interrupted execution */
 
 static herr_t doprint(hid_t did, hsize_t *start, hsize_t *block, int rank);
 static herr_t slicendump(hid_t did, hsize_t *prev_dims, hsize_t *cur_dims,
@@ -337,7 +338,8 @@ monitor_dataset(hid_t fid, char *dsetname)
 	goto done;
     }
 
-    while(1) {
+    /* Loop until an error occurs or the user interrupts execution */
+    while(!g_user_interrupt) {
 
 	/* Refreshes the dataset */
 	if(H5Drefresh(did) < 0) {
@@ -798,9 +800,8 @@ parse_command_line(int argc, const char *argv[])
  */
 static void catch_signal(int H5_ATTR_UNUSED signo)
 {
-    /* Exit from h5watch */
-    leave(EXIT_SUCCESS);
-
+    /* Set the flag to get out of the main loop */
+    g_user_interrupt = TRUE;
 } /* catch_signal() */
 
 
