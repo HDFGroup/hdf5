@@ -232,14 +232,48 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (ABD, 2016/12/12, PR#201)
 
+    - A number of issues were fixed when reading/writing from/to corrupted
+      files to ensure that the library fails gracefully in these cases:
+
+      * Writing to a corrupted file that has an object message which is
+        incorrectly marked as sharable on disk results in a buffer overflow /
+        invalid write instead of a clean error message.
+
+      * Decoding data from a corrupted file with a dataset encoded with the
+        H5Z_NBIT decoding can result in a code execution vulnerability under
+        the context of the application using the HDF5 library.
+
+      * When decoding an array datatype from a corrupted file, the HDF5 library
+        fails to return an error in production if the number of dimensions
+        decoded is greater than the maximum rank.
+
+      * When decoding an "old style" array datatype from a corrupted file, the
+        HDF5 library fails to return an error in production if the number of
+        dimensions decoded is greater than the maximum rank.
+
+      (NAF, 2016/10/06, HDFFV-9950, HDFFV-9951, HDFFV-9992, HDFFV-9993)
+
     - Fixed an error that would occur when copying an object with an attribute
       which is a compound datatype consisting of a variable length string.    
 
       (VC, 2016/08/24, HDFFV-7991)
 
+    - Fix error when copying dataset with attribute which is a compound datatype
+      consisting of a variable length string.
+      (HDFFV-7991 VC 2016/08/19, 2016/08/21, 2016/08/24)
+
     - H5DOappend will no longer fail if a dataset has no append callback registered.
 
       (VC, 2016/08/14, HDFFV-9960)
+
+    - Fixed an issue where H5Pset_alignment could result in misaligned blocks
+      with some input combinations, causing an assertion failure in debug mode.
+
+      (NAF, 2016/08/11, HDFFV-9948)
+
+    - H5DOappend will not fail if a dataset has no append callback registered.
+
+      (VC 2016/08/05, 2016/08/14, HDFFV-9960)
 
     - Fixed an error that would occur when calling H5Adelete on an attribute
       which is attached to an externally linked object in the target file and
@@ -247,28 +281,32 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (VC, 2016/07/06, HDFFV-9940)
 
+    - Fix the problem where the committed datatype's file location is different
+      from the file location of an attribute with that committed datatype.
+
+      (VC 2016/07/03, 2016/07/06, HDFFV-9940)
+
     - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
       (b) Modifications to better handle error recovery when conversion by
           h5format_convert fails.
 
       (VC, 2016/05/29, HDFFV-9434)
 
-
-    - Fix error when copying dataset with attribute which is a compound datatype
-      consisting of a variable length string.
-      (HDFFV-7991 VC 2016/08/19, 2016/08/21, 2016/08/24)
-
-    - H5DOappend will not fail if a dataset has no append callback registered.
-      (HDFFV-9960 VC 2016/08/05, 2016/08/14)
-
-    - Fix the problem where the committed datatype's file location is different
-      from the file location of an attribute with that committed datatype.
-      (HDFFV-9940 VC 2016/07/03, 2016/07/06)
-
     - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
       (b) Modifications to better handle error recovery when conversion by 
           h5format_convert fails.
-      (HDFFV-9434 VC 2016/05/29)
+
+      (VC 2016/05/29, HDFFV-9434)
+
+
+    Parallel Library
+    ----------------
+    - Fixed a bug that could occur when allocating a chunked dataset in parallel
+      with an alignment set and an alignment threshold greater than the chunk
+      size but less than or equal to the raw data aggregator size.
+
+      (NAF, 2016/08/11, HDFFV-9969)
+
 
     Configuration
     -------------         
@@ -285,6 +323,13 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     - CMake now builds shared versions of tools.
 
       (ABD, 2017/02/01, HDFFV-10123)
+
+    - Makefiles and test scripts have been updated to correctly remove files
+      created when running "make check" and to avoid removing any files under 
+      source control.  In-source builds followed by "make clean" and "make 
+      distclean" should result in the original source files.
+
+      (LRK, 2017/01/17, HDFFV-10099)
 
     - The tools directory has been divided into two separate source and test
       directories. This resolves a build dependency and, as a result,
@@ -311,6 +356,22 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (ABD, 2017/01/24, HDFFV-10046)
 
+    - h5diff correctly indicates error when it cannot read data due
+      to an unavailable filter plugin.
+
+      (ADB 2017/01/18, HDFFV-9994 )
+
+    - Fixed an error in the compiler wrapper scripts (h5cc, h5fc, et al.)
+      in which they would erroneously drop the file argument specified via
+      the -o flag when the -o flag was specified before the -c flag on the
+      command line, resulting in a failure to compile.
+
+      (LRK, 2016/11/04, HDFFV-9938, HDFFV-9530) 
+
+    - h5repack allows the --enable-error-stack option on the command line.
+
+      (ADB 2016/08/08, HDFFV-9775)
+
 
     C++ APIs
     --------
@@ -320,11 +381,6 @@ Bug Fixes since HDF5-1.10.0-patch1 release
       consts.
 
       (BMR, 2017/03/17, PR#344)
-
-    - The problem where a user-defined function cannot access both, attribute
-      and dataset, using only one argument is now fixed.
-
-      (BMR, 2016/10/11, HDFFV-9920)
 
     - The high-level API Packet Table (PT) did not write data correctly when
       the datatype is a compound type that has string type as one of the
@@ -345,6 +401,11 @@ Bug Fixes since HDF5-1.10.0-patch1 release
       the HDF5 C++ API library.
 
       (BMR, 2016/10/23, HDFFV-9532)
+
+    - The problem where a user-defined function cannot access both, attribute
+      and dataset, using only one argument is now fixed.
+
+      (BMR, 2016/10/11, HDFFV-9920)
 
     - In-memory array information, ArrayType::rank and
       ArrayType::dimensions, were removed. This is an implementation
