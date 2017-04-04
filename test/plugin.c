@@ -44,8 +44,8 @@ const char *FILENAME[] = {
 /* Dataset names for testing filters */
 #define DSET_DEFLATE_NAME    "deflate"
 #define DSET_DYNLIB1_NAME    "dynlib1"
-#define DSET_DYNLIB2_NAME       "dynlib2"
-#define DSET_DYNLIB4_NAME   "dynlib4"
+#define DSET_DYNLIB2_NAME    "dynlib2"
+#define DSET_DYNLIB4_NAME    "dynlib4"
 
 /* Parameters for internal filter test */
 #define FILTER_CHUNK_DIM1       2
@@ -65,39 +65,36 @@ const char *FILENAME[] = {
 #define GROUP_ITERATION 1000
 
 int    points_deflate[DSET_DIM1][DSET_DIM2],
-        points_dynlib1[DSET_DIM1][DSET_DIM2],
-        points_dynlib2[DSET_DIM1][DSET_DIM2],
-        points_dynlib4[DSET_DIM1][DSET_DIM2],
-        points_bzip2[DSET_DIM1][DSET_DIM2];
+       points_dynlib1[DSET_DIM1][DSET_DIM2],
+       points_dynlib2[DSET_DIM1][DSET_DIM2],
+       points_dynlib4[DSET_DIM1][DSET_DIM2],
+       points_bzip2[DSET_DIM1][DSET_DIM2];
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_filter_internal
+ * Function:  test_filter_internal
  *
- * Purpose:    Tests writing entire data and partial data with filters
+ * Purpose:   Tests writing entire data and partial data with filters
  *
  * Return:    Success:    0
- *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *              27 February 2013
- *
+ *            Failure:    -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
 {
-    hid_t        dataset;        /* Dataset ID */
-    hid_t        dxpl;           /* Dataset xfer property list ID */
-    hid_t        write_dxpl;     /* Dataset xfer property list ID for writing */
-    hid_t        sid;            /* Dataspace ID */
-    const hsize_t    size[2] = {DSET_DIM1, DSET_DIM2};           /* Dataspace dimensions */
+    herr_t       ret_value = -1;
+    hid_t        dataset = -1;          /* Dataset ID */
+    hid_t        dxpl = -1;             /* Dataset xfer property list ID */
+    hid_t        write_dxpl = -1;       /* Dataset xfer property list ID for writing */
+    hid_t        sid = -1;              /* Dataspace ID */
+    const hsize_t    size[2] = {DSET_DIM1, DSET_DIM2};                      /* Dataspace dimensions */
     const hsize_t    hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
-    const hsize_t    hs_size[2] = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};   /* Hyperslab size */
+    const hsize_t    hs_size[2] = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};       /* Hyperslab size */
     void        *tconv_buf = NULL;      /* Temporary conversion buffer */
-    int                    points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
-    size_t        i, j;        /* Local index variables */
-    int                 n = 0;
+    int          points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
+    size_t       i, j;                  /* Local index variables */
+    int          n = 0;
 
     /* Create the data space */
     if((sid = H5Screate_simple(2, size, NULL)) < 0) TEST_ERROR
@@ -114,15 +111,14 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     TESTING("    filters (setup)");
 
     /* Check if all the filters are available */
-    if(H5Pall_filters_avail(dcpl)!=TRUE) {
+    if(H5Pall_filters_avail(dcpl) != TRUE) {
         H5_FAILED();
-        HDprintf("    Line %d: Incorrect filter availability\n",__LINE__);
+        HDprintf("    Line %d: Incorrect filter availability\n", __LINE__);
         TEST_ERROR
     } /* end if */
 
     /* Create the dataset */
-    if((dataset = H5Dcreate2(fid, name, H5T_NATIVE_INT, sid, H5P_DEFAULT,
-                dcpl, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset = H5Dcreate2(fid, name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR
 
     PASSED();
 
@@ -132,20 +128,16 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
      */
     TESTING("    filters (uninitialized read)");
 
-    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
-    TEST_ERROR;
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0) TEST_ERROR;
 
-    for(i=0; i<(size_t)size[0]; i++) {
-    for(j=0; j<(size_t)size[1]; j++) {
-        if(0!=check[i][j]) {
-        H5_FAILED();
-        HDprintf("    Read a non-zero value.\n");
-        HDprintf("    At index %lu,%lu\n",
-            (unsigned long)i, (unsigned long)j);
-        TEST_ERROR
-        }
-    }
-    }
+    for(i=0; i<(size_t)size[0]; i++)
+        for(j=0; j<(size_t)size[1]; j++)
+            if(0 != check[i][j]) {
+                H5_FAILED();
+                HDprintf("    Read a non-zero value.\n");
+                HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                TEST_ERROR
+            } /* end if */
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -156,14 +148,11 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     TESTING("    filters (write)");
 
     n = 0;
-    for(i=0; i<size[0]; i++) {
-    for(j=0; j<size[1]; j++) {
-        points[i][j] = (int)(n++);
-    }
-    }
+    for(i=0; i<size[0]; i++)
+        for(j=0; j<size[1]; j++)
+            points[i][j] = (int)(n++);
 
-    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points) < 0)
-    TEST_ERROR;
+    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points) < 0) TEST_ERROR;
 
     PASSED();
 
@@ -174,22 +163,19 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     TESTING("    filters (read)");
 
     /* Read the dataset back */
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
-    TEST_ERROR;
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0) TEST_ERROR;
 
-        /* Check that the values read are the same as the values written */
-        for(i=0; i<size[0]; i++) {
-    for(j=0; j<size[1]; j++) {
-        if(points[i][j] != check[i][j]) {
-        H5_FAILED();
-        HDfprintf(stderr,"    Read different values than written.\n");
-        HDfprintf(stderr,"    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
-        HDfprintf(stderr,"    At original: %d\n", (int)points[i][j]);
-        HDfprintf(stderr,"    At returned: %d\n", (int)check[i][j]);
-        TEST_ERROR
-        }
-    }
-        }
+    /* Check that the values read are the same as the values written */
+    for(i=0; i<size[0]; i++)
+        for(j=0; j<size[1]; j++)
+            if(points[i][j] != check[i][j]) {
+                H5_FAILED();
+                HDfprintf(stderr,"    Read different values than written.\n");
+                HDfprintf(stderr,"    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                HDfprintf(stderr,"    At original: %d\n", (int)points[i][j]);
+                HDfprintf(stderr,"    At returned: %d\n", (int)check[i][j]);
+                TEST_ERROR
+            } /* end if */
 
     PASSED();
 
@@ -202,30 +188,24 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
      */
     TESTING("    filters (modify)");
 
-    for(i=0; i<size[0]; i++) {
-    for(j=0; j<size[1]/2; j++) {
-        points[i][j] = (int)HDrandom () % RANDOM_LIMIT;
-    }
-    }
-    if(H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points) < 0)
-    TEST_ERROR;
+    for(i=0; i<size[0]; i++)
+        for(j=0; j<size[1]/2; j++)
+            points[i][j] = (int)HDrandom () % RANDOM_LIMIT;
 
-        /* Read the dataset back and check it */
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
-    TEST_ERROR;
+    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points) < 0) TEST_ERROR;
 
-        /* Check that the values read are the same as the values written */
-        for(i=0; i<size[0]; i++) {
-    for(j=0; j<size[1]; j++) {
-        if(points[i][j] != check[i][j]) {
-        H5_FAILED();
-        HDprintf("    Read different values than written.\n");
-        HDprintf("    At index %lu,%lu\n",
-                (unsigned long)i, (unsigned long)j);
-        TEST_ERROR
-        }
-    }
-        }
+    /* Read the dataset back and check it */
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0) TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    for(i=0; i<size[0]; i++)
+        for(j=0; j<size[1]; j++)
+            if(points[i][j] != check[i][j]) {
+                H5_FAILED();
+                HDprintf("    Read different values than written.\n");
+                HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                TEST_ERROR
+            } /* end if */
 
     PASSED();
 
@@ -240,19 +220,17 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     if(H5Dclose(dataset) < 0) TEST_ERROR;
     if((dataset = H5Dopen2(fid, name, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
-            TEST_ERROR;
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0) TEST_ERROR;
 
-        /* Check that the values read are the same as the values written */
-        for(i = 0; i < size[0]; i++)
-    for(j = 0; j < size[1]; j++)
-        if(points[i][j] != check[i][j]) {
-        H5_FAILED();
-        HDprintf("    Read different values than written.\n");
-        HDprintf("    At index %lu,%lu\n",
-                (unsigned long)i, (unsigned long)j);
-        TEST_ERROR
-        } /* end if */
+    /* Check that the values read are the same as the values written */
+    for(i = 0; i < size[0]; i++)
+        for(j = 0; j < size[1]; j++)
+            if(points[i][j] != check[i][j]) {
+                H5_FAILED();
+                HDprintf("    Read different values than written.\n");
+                HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                TEST_ERROR
+            } /* end if */
 
     PASSED();
 
@@ -264,92 +242,75 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
      */
     TESTING("    filters (partial I/O)");
 
-    for(i=0; i<(size_t)hs_size[0]; i++) {
-    for(j=0; j<(size_t)hs_size[1]; j++) {
-        points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] = (int)HDrandom() % RANDOM_LIMIT;
-    }
-    }
-    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size,
-                NULL) < 0) TEST_ERROR;
+    for(i=0; i<(size_t)hs_size[0]; i++)
+        for(j=0; j<(size_t)hs_size[1]; j++)
+            points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] = (int)HDrandom() % RANDOM_LIMIT;
+
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) TEST_ERROR;
     /* (Use the "read" DXPL because partial I/O on corrupted data test needs to ignore errors during writing) */
-    if(H5Dwrite (dataset, H5T_NATIVE_INT, sid, sid, dxpl, points) < 0)
-    TEST_ERROR;
+    if(H5Dwrite(dataset, H5T_NATIVE_INT, sid, sid, dxpl, points) < 0) TEST_ERROR;
 
-        if(H5Dread (dataset, H5T_NATIVE_INT, sid, sid, dxpl, check) < 0)
-    TEST_ERROR;
+    if(H5Dread(dataset, H5T_NATIVE_INT, sid, sid, dxpl, check) < 0) TEST_ERROR;
 
-        /* Check that the values read are the same as the values written */
-        for(i=0; i<(size_t)hs_size[0]; i++) {
-    for(j=0; j<(size_t)hs_size[1]; j++) {
-        if(points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] !=
-                      check[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]) {
-        H5_FAILED();
-        HDfprintf(stderr,"    Read different values than written.\n");
-        HDfprintf(stderr,"    At index %lu,%lu\n",
-                (unsigned long)((size_t)hs_offset[0]+i),
-                (unsigned long)((size_t)hs_offset[1]+j));
-        HDfprintf(stderr,"    At original: %d\n",
-                (int)points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]);
-        HDfprintf(stderr,"    At returned: %d\n",
-                (int)check[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]);
-        TEST_ERROR
-        }
-    }
-        }
+    /* Check that the values read are the same as the values written */
+    for(i=0; i<(size_t)hs_size[0]; i++)
+        for(j=0; j<(size_t)hs_size[1]; j++)
+            if(points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] != check[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]) {
+                H5_FAILED();
+                HDfprintf(stderr,"    Read different values than written.\n");
+                HDfprintf(stderr,"    At index %lu,%lu\n", (unsigned long)((size_t)hs_offset[0]+i), (unsigned long)((size_t)hs_offset[1]+j));
+                HDfprintf(stderr,"    At original: %d\n", (int)points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]);
+                HDfprintf(stderr,"    At returned: %d\n", (int)check[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]);
+                TEST_ERROR
+            } /* end if */
 
     PASSED();
 
     /* Save the data written to the file for later comparison when the file
      * is reopened for read test */
-    for(i=0; i<size[0]; i++) {
-        for(j=0; j<size[1]; j++) {
-            if(!HDstrcmp(name, DSET_DEFLATE_NAME)) {
-            points_deflate[i][j] = points[i][j];
-            } else if(!HDstrcmp(name, DSET_DYNLIB1_NAME)) {
-            points_dynlib1[i][j] = points[i][j];
-            } else if(!HDstrcmp(name, DSET_DYNLIB2_NAME)) {
-            points_dynlib2[i][j] = points[i][j];
-            } else if(!HDstrcmp(name, DSET_DYNLIB4_NAME)) {
-            points_dynlib4[i][j] = points[i][j];
-            }
-    }
-    }
+    for(i=0; i<size[0]; i++)
+        for(j=0; j<size[1]; j++)
+            if(!HDstrcmp(name, DSET_DEFLATE_NAME))
+                points_deflate[i][j] = points[i][j];
+            else if(!HDstrcmp(name, DSET_DYNLIB1_NAME))
+                points_dynlib1[i][j] = points[i][j];
+            else if(!HDstrcmp(name, DSET_DYNLIB2_NAME))
+                points_dynlib2[i][j] = points[i][j];
+            else if(!HDstrcmp(name, DSET_DYNLIB4_NAME))
+                points_dynlib4[i][j] = points[i][j];
 
-    /* Clean up objects used for this test */
-    if(H5Dclose (dataset) < 0) TEST_ERROR
-    if(H5Sclose (sid) < 0) TEST_ERROR
-    if(H5Pclose (dxpl) < 0) TEST_ERROR
-    free (tconv_buf);
-
-    return(0);
+    ret_value = 0;
 
 error:
+    /* Clean up objects used for this test */
+    H5E_BEGIN_TRY {
+        H5Dclose(dataset);
+        H5Sclose(sid);
+        H5Pclose(dxpl);
+    } H5E_END_TRY
+
     if(tconv_buf)
-        free (tconv_buf);
-    return -1;
+        HDfree(tconv_buf);
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
- * Function:    test_filters_for_datasets
+ * Function:  test_filters_for_datasets
  *
- * Purpose:    Tests creating datasets and writing data with dynamically
- *              loaded filters
+ * Purpose:   Tests creating datasets and writing data with dynamically loaded filters
  *
  * Return:    Success:    0
- *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *              14 March 2013
- *
+ *            Failure:    -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_filters_for_datasets(hid_t file)
 {
-    hid_t    dc;                 /* Dataset creation property list ID */
-    const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
-    unsigned int         compress_level = 9;
-    unsigned int         dynlib4_values[4];
+    herr_t           ret_value = -1;
+    hid_t            dc = -1;    /* Dataset creation property list ID */
+    const hsize_t    chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
+    unsigned int     compress_level = 9;
+    unsigned int     dynlib4_values[4];
 
     /*----------------------------------------------------------
      * STEP 1: Test deflation by itself.
@@ -358,12 +319,12 @@ test_filters_for_datasets(hid_t file)
     HDputs("Testing deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if(H5Pset_chunk (dc, 2, chunk_size) < 0) TEST_ERROR
-    if(H5Pset_deflate (dc, 6) < 0) TEST_ERROR
+    if(H5Pset_chunk(dc, 2, chunk_size) < 0) TEST_ERROR
+    if(H5Pset_deflate(dc, 6) < 0) TEST_ERROR
 
-    if(test_filter_internal(file,DSET_DEFLATE_NAME,dc) < 0) TEST_ERROR
+    if(test_filter_internal(file, DSET_DEFLATE_NAME, dc) < 0) TEST_ERROR
     /* Clean up objects used for this test */
-    if(H5Pclose (dc) < 0) TEST_ERROR
+    if(H5Pclose(dc) < 0) TEST_ERROR
 #else /* H5_HAVE_FILTER_DEFLATE */
     SKIPPED();
     HDputs("    Deflate filter not enabled");
@@ -375,13 +336,13 @@ test_filters_for_datasets(hid_t file)
      */
     HDputs("    DYNLIB1 filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if(H5Pset_chunk (dc, 2, chunk_size) < 0) TEST_ERROR
-    if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB1, H5Z_FLAG_MANDATORY, (size_t)1, &compress_level) < 0) TEST_ERROR
+    if(H5Pset_chunk(dc, 2, chunk_size) < 0) TEST_ERROR
+    if(H5Pset_filter(dc, H5Z_FILTER_DYNLIB1, H5Z_FLAG_MANDATORY, (size_t)1, &compress_level) < 0) TEST_ERROR
 
-    if(test_filter_internal(file,DSET_DYNLIB1_NAME,dc) < 0) TEST_ERROR
+    if(test_filter_internal(file, DSET_DYNLIB1_NAME, dc) < 0) TEST_ERROR
 
     /* Clean up objects used for this test */
-    if(H5Pclose (dc) < 0) TEST_ERROR
+    if(H5Pclose(dc) < 0) TEST_ERROR
 
     /* Unregister the dynamic filter DYNLIB1 for testing purpose. The next time when this test is run for
      * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
@@ -394,13 +355,13 @@ test_filters_for_datasets(hid_t file)
      */
     HDputs("    DYNLIB2 filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if(H5Pset_chunk (dc, 2, chunk_size) < 0) TEST_ERROR
-    if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB2, H5Z_FLAG_MANDATORY, 0, NULL) < 0) TEST_ERROR
+    if(H5Pset_chunk(dc, 2, chunk_size) < 0) TEST_ERROR
+    if(H5Pset_filter(dc, H5Z_FILTER_DYNLIB2, H5Z_FLAG_MANDATORY, 0, NULL) < 0) TEST_ERROR
 
     if(test_filter_internal(file,DSET_DYNLIB2_NAME,dc) < 0) TEST_ERROR
 
     /* Clean up objects used for this test */
-    if(H5Pclose (dc) < 0) TEST_ERROR
+    if(H5Pclose(dc) < 0) TEST_ERROR
 
     /* Unregister the dynamic filter DYNLIB2 for testing purpose. The next time when this test is run for
      * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
@@ -413,91 +374,88 @@ test_filters_for_datasets(hid_t file)
      */
     HDputs("    DYNLIB4 filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
-    if(H5Pset_chunk (dc, 2, chunk_size) < 0) TEST_ERROR
+    if(H5Pset_chunk(dc, 2, chunk_size) < 0) TEST_ERROR
     dynlib4_values[0] = 9;
     if(H5get_libversion(&dynlib4_values[1], &dynlib4_values[2], &dynlib4_values[3]) < 0) TEST_ERROR
-    if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB4, H5Z_FLAG_MANDATORY, (size_t)4, dynlib4_values) < 0) TEST_ERROR
+    if(H5Pset_filter(dc, H5Z_FILTER_DYNLIB4, H5Z_FLAG_MANDATORY, (size_t)4, dynlib4_values) < 0) TEST_ERROR
 
-    if(test_filter_internal(file,DSET_DYNLIB4_NAME,dc) < 0) TEST_ERROR
+    if(test_filter_internal(file, DSET_DYNLIB4_NAME, dc) < 0) TEST_ERROR
 
     /* Clean up objects used for this test */
-    if(H5Pclose (dc) < 0) TEST_ERROR
+    if(H5Pclose(dc) < 0) TEST_ERROR
 
     /* Unregister the dynamic filter DYNLIB4 for testing purpose. The next time when this test is run for
      * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
      * for this filter. */
     if(H5Zunregister(H5Z_FILTER_DYNLIB4) < 0) TEST_ERROR
 
-    return 0;
+    ret_value = 0;
 
 error:
-    return -1;
+    /* Clean up objects used for this test */
+    H5E_BEGIN_TRY {
+        H5Pclose(dc);
+    } H5E_END_TRY
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
- * Function:    test_read_data
+ * Function:  test_read_data
  *
- * Purpose:    Tests reading data and compares values
+ * Purpose:   Tests reading data and compares values
  *
  * Return:    Success:    0
- *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *              14 March 2013
- *
+ *            Failure:    -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_read_data(hid_t dataset, int *origin_data)
 {
-    int                    check[DSET_DIM1][DSET_DIM2];
-    const hsize_t    size[2] = {DSET_DIM1, DSET_DIM2};           /* Dataspace dimensions */
-    int                 *data_p = origin_data;
+    herr_t        ret_value = -1;
+    int           check[DSET_DIM1][DSET_DIM2];
+    const hsize_t size[2] = {DSET_DIM1, DSET_DIM2};   /* Dataspace dimensions */
+    int          *data_p = origin_data;
     size_t        i, j;        /* Local index variables */
 
     /* Read the dataset back */
-    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0)
-        TEST_ERROR;
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0) TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
-    for(i=0; i<size[0]; i++) {
+    for(i=0; i<size[0]; i++)
         for(j=0; j<size[1]; j++) {
-    if(*data_p != check[i][j]) {
-        H5_FAILED();
-        HDfprintf(stderr,"    Read different values than written.\n");
-        HDfprintf(stderr,"    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
-        HDfprintf(stderr,"    At original: %d\n", *data_p);
-        HDfprintf(stderr,"    At returned: %d\n", (int)check[i][j]);
-        TEST_ERROR
-    }
+            if(*data_p != check[i][j]) {
+                H5_FAILED();
+                HDfprintf(stderr,"    Read different values than written.\n");
+                HDfprintf(stderr,"    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                HDfprintf(stderr,"    At original: %d\n", *data_p);
+                HDfprintf(stderr,"    At returned: %d\n", (int)check[i][j]);
+                TEST_ERROR
+            } /* end if */
            data_p++;
-    }
-    }
+        }
 
     PASSED();
-    return 0;
+    ret_value = 0;
 
 error:
-    return -1;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
- * Function:    test_read_with_filters
+ * Function:  test_read_with_filters
  *
- * Purpose: Tests reading dataset created with dynamically loaded filters
+ * Purpose:   Tests reading dataset created with dynamically loaded filters
  *
- * Return:  Success:    0
- *      Failure:    -1
- *
- * Programmer:  Raymond Lu
- *              14 March 2013
- *
+ * Return:    Success:    0
+ *            Failure:    -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_read_with_filters(hid_t file)
 {
-    hid_t   dset;                 /* Dataset ID */
+    herr_t  ret_value = -1;
+    hid_t   dset = -1;                 /* Dataset ID */
 
     /*----------------------------------------------------------
      * STEP 1: Test deflation by itself.
@@ -526,7 +484,7 @@ test_read_with_filters(hid_t file)
      */
     TESTING("    DYNLIB1 filter");
 
-    if((dset = H5Dopen2(file,DSET_DYNLIB1_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset = H5Dopen2(file, DSET_DYNLIB1_NAME, H5P_DEFAULT)) < 0) TEST_ERROR
 
     if(test_read_data(dset, (int *)points_dynlib1) < 0) TEST_ERROR
 
@@ -538,7 +496,7 @@ test_read_with_filters(hid_t file)
      */
     TESTING("    DYNLIB2 filter");
 
-    if((dset = H5Dopen2(file,DSET_DYNLIB2_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset = H5Dopen2(file, DSET_DYNLIB2_NAME, H5P_DEFAULT)) < 0) TEST_ERROR
 
     if(test_read_data(dset, (int *)points_dynlib2) < 0) TEST_ERROR
 
@@ -556,27 +514,33 @@ test_read_with_filters(hid_t file)
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 
-    return 0;
+    ret_value = 0;
 
 error:
-    return -1;
+    /* Clean up objects used for this test */
+    H5E_BEGIN_TRY {
+        H5Dclose(dset);
+    } H5E_END_TRY
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
- * Function:    test_noread_data
+ * Function:  test_noread_data
  *
- * Purpose: Tests not reading data
+ * Purpose:   Tests not reading data
  *
- * Return:  Success:    0
- *      Failure:    -1
+ * Return:    Success:    0
+ *            Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_noread_data(hid_t dataset)
 {
+    herr_t     ret_value = -1;
     int        check[DSET_DIM1][DSET_DIM2];
-    herr_t     ret;
+    herr_t     ret = -1;
 
     /* Read the dataset back */
     H5E_BEGIN_TRY {
@@ -586,27 +550,28 @@ test_noread_data(hid_t dataset)
         TEST_ERROR
 
     PASSED();
-    return 0;
+    ret_value = 0;
 
 error:
-    return -1;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
- * Function:    test_noread_with_filters
+ * Function:  test_noread_with_filters
  *
- * Purpose:    Tests reading dataset created with dynamically loaded filters disabled
+ * Purpose:   Tests reading dataset created with dynamically loaded filters disabled
  *
  * Return:    Success:    0
- *        Failure:    -1
- *
+ *            Failure:    -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_noread_with_filters(hid_t file)
 {
-    hid_t    dset;                 /* Dataset ID */
-    unsigned     plugin_state;         /* status of plugins */
+    herr_t      ret_value = -1;
+    hid_t       dset = -1;            /* Dataset ID */
+    unsigned    plugin_state;         /* status of plugins */
+
     TESTING("DYNLIB1 filter with plugins disabled");
 
     /* disable filter plugin */
@@ -614,44 +579,45 @@ test_noread_with_filters(hid_t file)
     plugin_state = plugin_state & ~H5PL_FILTER_PLUGIN;
     if(H5PLset_loading_state(plugin_state) < 0) TEST_ERROR
 
-    if((dset = H5Dopen2(file,DSET_DYNLIB1_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset = H5Dopen2(file, DSET_DYNLIB1_NAME, H5P_DEFAULT)) < 0) TEST_ERROR
 
     if(test_noread_data(dset) < 0) TEST_ERROR
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 
-    /* re-enable filter plugin */
-    plugin_state = plugin_state | H5PL_FILTER_PLUGIN;
-    if(H5PLset_loading_state(plugin_state) < 0) TEST_ERROR
-
-    return 0;
+    ret_value = 0;
 
 error:
     /* re-enable filter plugin */
     plugin_state = plugin_state | H5PL_FILTER_PLUGIN;
-    if(H5PLset_loading_state(plugin_state) < 0) TEST_ERROR
-    return -1;
+    H5PLset_loading_state(plugin_state);
+
+    /* Clean up objects used for this test */
+    H5E_BEGIN_TRY {
+        H5Dclose(dset);
+    } H5E_END_TRY
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
- * Function:    test_filters_for_groups
+ * Function:  test_filters_for_groups
  *
- * Purpose:    Tests creating group with dynamically loaded filters
+ * Purpose:   Tests creating group with dynamically loaded filters
  *
  * Return:    Success:    0
- *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *              1 April 2013
- *
+ *            Failure:    -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_filters_for_groups(hid_t file)
 {
-    hid_t    gcpl, gid, group;
-    int         i;
-    char        gname[256];
+    herr_t   ret_value = -1;
+    hid_t    gcpl = -1;
+    hid_t    gid = -1;
+    hid_t    group = -1;
+    int      i;
+    char     gname[256];
 
     TESTING("DYNLIB3 filter for group");
 
@@ -664,7 +630,7 @@ test_filters_for_groups(hid_t file)
     if((gid = H5Gcreate2(file, "group1", H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create multiple groups under "group1" */
-    for (i=0; i < GROUP_ITERATION; i++) {
+    for(i=0; i < GROUP_ITERATION; i++) {
         HDsprintf(gname, "group_%d", i);
         if((group = H5Gcreate2(gid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(group) < 0) TEST_ERROR
@@ -674,14 +640,21 @@ test_filters_for_groups(hid_t file)
     if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* Clean up objects used for this test */
-    if(H5Pclose (gcpl) < 0) TEST_ERROR
+    if(H5Pclose(gcpl) < 0) TEST_ERROR
 
     PASSED();
 
-    return 0;
+    ret_value = 0;
 
 error:
-    return -1;
+    /* Clean up objects used for this test */
+    H5E_BEGIN_TRY {
+        H5Gclose(group);
+        H5Gclose(gid);
+        H5Pclose(gcpl);
+    } H5E_END_TRY
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -700,7 +673,9 @@ error:
 static herr_t
 test_groups_with_filters(hid_t file)
 {
-    hid_t    gid, group;
+    herr_t      ret_value = -1;
+    hid_t       gid;
+    hid_t       group;
     int         i;
     char        gname[256];
 
@@ -710,7 +685,7 @@ test_groups_with_filters(hid_t file)
     if((gid = H5Gopen2(file, "group1", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create multiple groups under "group1" */
-    for (i=0; i < GROUP_ITERATION; i++) {
+    for(i=0; i < GROUP_ITERATION; i++) {
         HDsprintf(gname, "group_%d", i);
         if((group = H5Gopen2(gid, gname, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(group) < 0) TEST_ERROR
@@ -721,26 +696,32 @@ test_groups_with_filters(hid_t file)
 
     PASSED();
 
-    return 0;
+    ret_value = 0;
 
 error:
-    return -1;
+    /* Clean up objects used for this test */
+    H5E_BEGIN_TRY {
+        H5Gclose(group);
+        H5Gclose(gid);
+    } H5E_END_TRY
+
+    return ret_value;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_filter_path_apis
+ * Function:  test_filter_path_apis
  *
- * Purpose:    Tests accessing the path table for dynamically loaded filters
+ * Purpose:   Tests accessing the path table for dynamically loaded filters
  *
  * Return:    Success:    0
- *        Failure:    -1
- *
+ *            Failure:    -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_filter_path_apis(void)
 {
+    herr_t       ret_value = -1;
     unsigned int i;
     unsigned int ndx;
     herr_t       ret;
@@ -756,14 +737,13 @@ test_filter_path_apis(void)
 
     TESTING("    remove");
     /* Remove all existing paths*/
-    for (i=ndx; i > 0; i--) {
-        if (H5PLremove(i-1) < 0) {
+    for(i=ndx; i > 0; i--)
+        if(H5PLremove(i-1) < 0) {
             HDfprintf(stderr,"    at %d: %s\n", i, pathname);
             TEST_ERROR
-        }
-     }
+        } /* end if */
     /* Verify the table is empty */
-    if (H5PLsize() > 0) TEST_ERROR
+    if(H5PLsize() > 0) TEST_ERROR
     PASSED();
 
     TESTING("    remove (exceed min)");
@@ -771,21 +751,20 @@ test_filter_path_apis(void)
     H5E_BEGIN_TRY {
         ret = H5PLremove(0);
     } H5E_END_TRY
-    if (ret >= 0)
-        TEST_ERROR
+    if(ret >= 0) TEST_ERROR
     PASSED();
 
     TESTING("    append");
     /* Create multiple paths to fill table */
-    for (i=0; i < H5PL_MAX_PATH_NUM; i++) {
+    for(i=0; i < H5PL_MAX_PATH_NUM; i++) {
         HDsprintf(pathname, "a_path_%d", i);
-        if (H5PLappend(pathname) < 0) {
+        if(H5PLappend(pathname) < 0) {
             HDfprintf(stderr,"    at %d: %s\n", i, pathname);
             TEST_ERROR
         }
     }
     /* Verify the table is full */
-    if (H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
     PASSED();
 
     TESTING("    append (exceed)");
@@ -794,47 +773,42 @@ test_filter_path_apis(void)
         HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM);
         ret = H5PLappend(pathname);
     } H5E_END_TRY
-    if (ret >= 0)
-        TEST_ERROR
+    if(ret >= 0) TEST_ERROR
 
     TESTING("    remove (exceed max)");
     /* Exceed the max path removal */
     H5E_BEGIN_TRY {
         ret = H5PLremove(H5PL_MAX_PATH_NUM);
     } H5E_END_TRY
-    if (ret >= 0)
-        TEST_ERROR
+    if(ret >= 0) TEST_ERROR
     PASSED();
 
     TESTING("    get (path name)");
-    if ((pathlen = H5PLget(0, NULL, 0)) <= 0) {
+    if((pathlen = H5PLget(0, NULL, 0)) <= 0) {
         HDfprintf(stderr,"    get path 0 length failed\n");
         TEST_ERROR
     }
-    if (pathlen != 8) {
-        TEST_ERROR
-    }
-    if ((pathlen = H5PLget(0, pathname, 256)) <= 0) {
+    if(pathlen != 8) TEST_ERROR
+
+    if((pathlen = H5PLget(0, pathname, 256)) <= 0) {
         HDfprintf(stderr,"    get 0 len: %d : %s\n", pathlen, pathname);
         TEST_ERROR
     }
-    if (HDstrcmp(pathname, "a_path_0") != 0) {
+    if(HDstrcmp(pathname, "a_path_0") != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
     PASSED();
 
     TESTING("    get (bounds)");
-    if ((pathlen = H5PLget(1, pathname, 256)) <= 0)
-        TEST_ERROR
-    if (HDstrcmp(pathname, "a_path_1") != 0) {
+    if((pathlen = H5PLget(1, pathname, 256)) <= 0) TEST_ERROR
+    if(HDstrcmp(pathname, "a_path_1") != 0) {
         HDfprintf(stderr,"    get 1: %s\n", pathname);
         TEST_ERROR
     }
-    if ((pathlen = H5PLget(H5PL_MAX_PATH_NUM - 1, pathname, 256)) <= 0)
-        TEST_ERROR
+    if((pathlen = H5PLget(H5PL_MAX_PATH_NUM - 1, pathname, 256)) <= 0) TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM - 1);
-    if (HDstrcmp(pathname, tempname) != 0) {
+    if(HDstrcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get %d: %s\n", H5PL_MAX_PATH_NUM - 1, pathname);
         TEST_ERROR
     }
@@ -844,18 +818,16 @@ test_filter_path_apis(void)
     H5E_BEGIN_TRY {
         pathlen = H5PLget(H5PL_MAX_PATH_NUM, NULL, 0);
     } H5E_END_TRY
-    if (pathlen > 0)
-        TEST_ERROR
+    if(pathlen > 0) TEST_ERROR
     PASSED();
 
     TESTING("    remove (verify for prepend)");
     /* Remove one path*/
-    if (H5PLremove(8) < 0) TEST_ERROR
+    if(H5PLremove(8) < 0) TEST_ERROR
 
     /* Verify that the entries were moved */
-    if ((pathlen = H5PLget(8, pathname, 256)) <= 0)
-        TEST_ERROR
-    if (HDstrcmp(pathname, "a_path_9") != 0) {
+    if((pathlen = H5PLget(8, pathname, 256)) <= 0) TEST_ERROR
+    if(HDstrcmp(pathname, "a_path_9") != 0) {
         HDfprintf(stderr,"    get 8: %s\n", pathname);
         TEST_ERROR
     }
@@ -867,25 +839,23 @@ test_filter_path_apis(void)
     TESTING("    prepend");
     /* Prepend one path*/
     HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if (H5PLprepend(pathname) < 0) {
+    if(H5PLprepend(pathname) < 0) {
         HDfprintf(stderr,"    prepend %d: %s\n", H5PL_MAX_PATH_NUM + 1, pathname);
         TEST_ERROR
     }
 
     /* Verify the table is full */
-    if (H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were moved */
-    if (H5PLget(8, pathname, 256) <= 0)
-        TEST_ERROR
-    if (HDstrcmp(pathname, "a_path_7") != 0) {
+    if(H5PLget(8, pathname, 256) <= 0) TEST_ERROR
+    if(HDstrcmp(pathname, "a_path_7") != 0) {
         HDfprintf(stderr,"    get 8: %s\n", pathname);
         TEST_ERROR
     }
-    if (H5PLget(0, pathname, 256) <= 0)
-        TEST_ERROR
+    if(H5PLget(0, pathname, 256) <= 0) TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if (HDstrcmp(pathname, tempname) != 0) {
+    if(HDstrcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
@@ -897,32 +867,29 @@ test_filter_path_apis(void)
         HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 2);
         ret = H5PLprepend(pathname);
     } H5E_END_TRY
-    if (ret >= 0)
-        TEST_ERROR
+    if(ret >= 0) TEST_ERROR
     PASSED();
 
     TESTING("    replace");
     /* Replace one path*/
     HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 4);
-    if (H5PLreplace(pathname, 1) < 0) {
+    if(H5PLreplace(pathname, 1) < 0) {
         HDfprintf(stderr,"    replace 1: %s\n", pathname);
         TEST_ERROR
     }
 
     /* Verify the table is full */
-    if (H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were not moved */
-    if (H5PLget(0, pathname, 256) <= 0)
-        TEST_ERROR
+    if(H5PLget(0, pathname, 256) <= 0) TEST_ERROR
     HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if (HDstrcmp(pathname, tempname) != 0) {
+    if(HDstrcmp(pathname, tempname) != 0) {
         HDfprintf(stderr,"    get 0: %s\n", pathname);
         TEST_ERROR
     }
-    if (H5PLget(2, pathname, 256) <= 0)
-        TEST_ERROR
-    if (HDstrcmp(pathname, "a_path_1") != 0) {
+    if(H5PLget(2, pathname, 256) <= 0) TEST_ERROR
+    if(HDstrcmp(pathname, "a_path_1") != 0) {
         HDfprintf(stderr,"    get 2: %s\n", pathname);
         TEST_ERROR
     }
@@ -930,39 +897,37 @@ test_filter_path_apis(void)
 
     TESTING("    remove (verify for insert)");
     /* Remove one path*/
-    if (H5PLremove(4) < 0) TEST_ERROR
+    if H5PLremove(4) < 0) TEST_ERROR
 
     /* Verify that the entries were moved */
-    if (H5PLget(4, pathname, 256) <= 0)
-        TEST_ERROR
-    if (HDstrcmp(pathname, "a_path_4") != 0) {
+    if H5PLget(4, pathname, 256) <= 0) TEST_ERROR
+    if(HDstrcmp(pathname, "a_path_4") != 0) {
         HDfprintf(stderr,"    get 4: %s\n", pathname);
         TEST_ERROR
     }
     PASSED();
 
     /* Verify the table is not full */
-    if (H5PLsize() != 15) TEST_ERROR
+    if(H5PLsize() != 15) TEST_ERROR
 
     TESTING("    insert");
     /* Insert one path*/
     HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 5);
-    if (H5PLinsert(pathname, 3) < 0){
+    if(H5PLinsert(pathname, 3) < 0) {
         HDfprintf(stderr,"    insert 3: %s\n", pathname);
         TEST_ERROR
     }
 
     /* Verify that the entries were moved */
-    if (H5PLget(4, pathname, 256) <= 0)
-        TEST_ERROR
-    if (HDstrcmp(pathname, "a_path_2") != 0){
+    if(H5PLget(4, pathname, 256) <= 0) TEST_ERROR
+    if(HDstrcmp(pathname, "a_path_2") != 0) {
         HDfprintf(stderr,"    get 4: %s\n", pathname);
         TEST_ERROR
     }
     PASSED();
 
     /* Verify the table is full */
-    if (H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     TESTING("    insert (exceed)");
     /* Exceed the max path insert */
@@ -970,15 +935,14 @@ test_filter_path_apis(void)
         HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 6);
         ret = H5PLinsert(pathname, 12);
     } H5E_END_TRY
-    if (ret >= 0)
-        TEST_ERROR
+    if(ret >= 0) TEST_ERROR
 
-    PASSED ();
+    PASSED();
 
-    return 0;
+    ret_value = 0;
 
 error:
-    return -1;
+    return ret_value;
 }
 
 
@@ -1000,24 +964,24 @@ int
 main(void)
 {
     char        filename[FILENAME_BUF_SIZE];
-    hid_t        file, fapl, fapl2;
-    unsigned new_format;
-    int mdc_nelmts;
-    size_t rdcc_nelmts;
-    size_t rdcc_nbytes;
-    double rdcc_w0;
-    int    nerrors = 0;
+    hid_t       file = -1;
+    hid_t       fapl = -1;
+    hid_t       fapl2 = -1;
+    unsigned    new_format;
+    int         mdc_nelmts;
+    size_t      rdcc_nelmts;
+    size_t      rdcc_nbytes;
+    double      rdcc_w0;
+    int         nerrors = 0;
 
     /* Testing setup */
     h5_reset();
     fapl = h5_fileaccess();
 
     /* Turn off the chunk cache, so all the chunks are immediately written to disk */
-    if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
-        TEST_ERROR
+    if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0) TEST_ERROR
     rdcc_nbytes = 0;
-    if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
-        TEST_ERROR
+    if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0) TEST_ERROR
 
     /* Copy the file access property list */
     if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
@@ -1042,8 +1006,7 @@ main(void)
         } /* end else */
 
         /* Create the file for this test */
-        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
-            TEST_ERROR
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) TEST_ERROR
 
         /* Test dynamically loaded filters for chunked dataset */
         nerrors += (test_filters_for_datasets(file) < 0    ? 1 : 0);
@@ -1051,8 +1014,7 @@ main(void)
         /* Test dynamically loaded filters for groups */
         nerrors += (test_filters_for_groups(file) < 0 ? 1 : 0);
 
-        if(H5Fclose(file) < 0)
-            TEST_ERROR
+        if(H5Fclose(file) < 0) TEST_ERROR
     } /* end for */
 
     /* Close FAPL */
@@ -1069,14 +1031,13 @@ main(void)
     fapl = h5_fileaccess();
 
     /* Reopen the file for testing data reading */
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        TEST_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Read the data with filters */
-    nerrors += (test_read_with_filters(file) < 0        ? 1 : 0);
+    nerrors += (test_read_with_filters(file) < 0 ? 1 : 0);
 
     /* Open the groups with filters */
-    nerrors += (test_groups_with_filters(file) < 0    ? 1 : 0);
+    nerrors += (test_groups_with_filters(file) < 0  ? 1 : 0);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -1086,20 +1047,18 @@ main(void)
     fapl = h5_fileaccess();
 
     /* Reopen the file for testing data reading */
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        TEST_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Read the data with disabled filters */
     nerrors += (test_noread_with_filters(file) < 0  ? 1 : 0);
 
-    if(H5Fclose(file) < 0)
-        TEST_ERROR
+    if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Test the APIs for access to the filter plugin path table */
     nerrors += (test_filter_path_apis() < 0  ? 1 : 0);
 
-    if(nerrors)
-        TEST_ERROR
+    if(nerrors) TEST_ERROR
+
     HDprintf("All plugin tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
@@ -1107,8 +1066,7 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d PLUGIN TEST%s FAILED! *****\n",
-            nerrors, 1 == nerrors ? "" : "S");
+    HDprintf("***** %d PLUGIN TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
 
