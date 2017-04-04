@@ -217,6 +217,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     -------
     - Outdated data structure was used in H5D_CHUNK_DEBUG blocks, causing
       compilation errors when H5D_CHUNK_DEBUG was defined.  This is fixed.
+
       (BMR, 2017/04/04, HDFFV-8089, PR#374)
 
     - SWMR implementation in the HDF5 1.10.0 and 1.10.0-patch1 releases has a broken
@@ -417,6 +418,13 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (BMR, 2016/04/25, HDFFV-9725)
 
+
+    Testing
+    -------
+    - Fixed a problem that caused tests using SWMR to occasionally fail when 
+      running "make check" using parallel make.
+
+      (LRK, 2016/03/22, PR#338, PR#346, PR#358)
 
 
 Supported Platforms
