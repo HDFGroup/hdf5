@@ -215,6 +215,10 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     Library
     -------
+    - Outdated data structure was used in H5D_CHUNK_DEBUG blocks, causing
+      compilation errors when H5D_CHUNK_DEBUG was defined.  This is fixed.
+      (BMR, 2017/04/04, HDFFV-8089, PR#374)
+
     - SWMR implementation in the HDF5 1.10.0 and 1.10.0-patch1 releases has a broken
       metadata flush dependency that manifested itself with the following error at the
       end of the HDF5 error stack:
