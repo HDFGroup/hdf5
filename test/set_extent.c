@@ -2603,10 +2603,12 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
     volatile unsigned i, j, k, l, m;            /* Local indices */
     char        filename[NAME_BUF_SIZE];
 
-    /*!FIXME Skip the test if a fixed array index is requested, as resizing
-     * fixed arrays is broken now.  Extensible arrays are also broken.  Remove
-     * these lines as appropriate when these problems are fixed. */
-    /* Fixed Array index type is now fixed */
+    /* *** FIXME ***
+     * Skip the test if an extensible array index is requested, as resizing
+     * them is broken.
+     *
+     * Remove these lines as appropriate when these problems are fixed.
+     */
     if(index_type == RANK4_INDEX_EARRAY)
         return 0;
 
@@ -2814,10 +2816,13 @@ static int test_random_rank4_vl( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
     volatile unsigned i, j, k, l, m;            /* Local indices */
     char        filename[NAME_BUF_SIZE];
 
-    /*!FIXME Skip the test if a fixed array index is requested, as resizing
-     * fixed arrays is broken now.  Extensible arrays are also broken.  Remove
-     * these lines as appropriate when these problems are fixed. */
-    if(index_type == RANK4_INDEX_FARRAY || index_type == RANK4_INDEX_EARRAY)
+    /* *** FIXME ***
+     * Skip the test if an extensible array index is requested, as resizing
+     * them is broken.
+     *
+     * Remove these lines as appropriate when these problems are fixed.
+     */
+    if(index_type == RANK4_INDEX_EARRAY)
         return 0;
 
     /* Initialize fill value buffers so they aren't freed in case of an error */
