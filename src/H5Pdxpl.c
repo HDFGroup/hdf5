@@ -137,6 +137,13 @@
 #define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_DEF		NULL
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE	sizeof(uint32_t)
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF	0
+/* Definitions for properties of direct chunk read */
+#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_SIZE        sizeof(hbool_t)
+#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_DEF         FALSE
+#define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_SIZE     sizeof(uint32_t)
+#define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_DEF      0
+#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_SIZE		sizeof(hsize_t *)
+#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_DEF		NULL
 
 /******************/
 /* Local Typedefs */
@@ -241,6 +248,9 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     uint32_t direct_chunk_filters = H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_DEF;	/* Default value for the filters of direct chunk write */
     hsize_t *direct_chunk_offset = H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_DEF; 	/* Default value for the offset of direct chunk write */
     uint32_t direct_chunk_datasize = H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF;    /* Default value for the datasize of direct chunk write */
+    hbool_t direct_chunk_read_flag = H5D_XFER_DIRECT_CHUNK_READ_FLAG_DEF;         /* Default value for the flag of direct chunk read */
+    hsize_t *direct_chunk_read_offset = H5D_XFER_DIRECT_CHUNK_READ_OFFSET_DEF; 	  /* Default value for the offset of direct chunk read */
+    uint32_t direct_chunk_read_filters = H5D_XFER_DIRECT_CHUNK_READ_FILTERS_DEF;    /* Default value for the filters of direct chunk read */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -362,6 +372,24 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     /* Register the property of datasize for direct chunk write */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE, &direct_chunk_datasize,
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the property of flag for direct chunk read */
+    /* (Note: this property should not have an encode/decode callback) */
+    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, H5D_XFER_DIRECT_CHUNK_READ_FLAG_SIZE, &direct_chunk_read_flag,
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the property of filter for direct chunk read */
+    /* (Note: this property should not have an encode/decode callback) */
+    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, H5D_XFER_DIRECT_CHUNK_READ_FILTERS_SIZE, &direct_chunk_read_filters,
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the property of offset for direct chunk read */
+    /* (Note: this property should not have an encode/decode callback) */
+    if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_SIZE, &direct_chunk_read_offset,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 

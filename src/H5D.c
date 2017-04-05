@@ -416,7 +416,7 @@ H5Dclose(hid_t dset_id)
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
-     * reaches zero.  
+     * reaches zero.
      *
      * Pass in TRUE for the 3rd parameter to tell the function to remove
      * dataset's ID even though the freeing function might fail.  Please
@@ -1001,4 +1001,45 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dset_extent() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_chunk_storage_size
+ *
+ * Purpose:     Returns the size of an allocated of chunk.
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:  Matthew Strong (GE Healthcare)
+ *              20 October 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_nbytes)
+{
+    H5D_t       *dset = NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("h", "i", dset_id);
+
+    /* Check arguments */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if( NULL == offset )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
+    if( NULL == chunk_nbytes )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
+
+    if(H5D_CHUNKED != dset->shared->layout.type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+
+    /* Call private function */
+    if(H5D__get_chunk_storage_size(dset, H5AC_ind_dxpl_id, offset, chunk_nbytes) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get storage size of chunk")
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
 
