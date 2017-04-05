@@ -69,6 +69,36 @@ public class TestH5PL {
         }
     }
 
+    @Test
+    public void TestH5PLpaths() {
+        try {
+            int original_entries = H5.H5PLsize();
+            H5.H5PLappend("path_one");
+            int plugin_entries = H5.H5PLsize();
+            assertTrue("H5.H5PLsize: "+plugin_entries, (original_entries+1) == plugin_entries);
+            H5.H5PLprepend("path_two");
+            plugin_entries = H5.H5PLsize();
+            assertTrue("H5.H5PLsize: "+plugin_entries, (original_entries+2) == plugin_entries);
+            H5.H5PLinsert("path_three", original_entries);
+            plugin_entries = H5.H5PLsize();
+            assertTrue("H5.H5PLsize: "+plugin_entries, (original_entries+3) == plugin_entries);
+            String first_path = H5.H5PLget(original_entries);
+            assertTrue("First path was : "+first_path + " ",first_path.compareToIgnoreCase("path_three")==0);
+            H5.H5PLreplace("path_four", original_entries);
+            first_path = H5.H5PLget(original_entries);
+            assertTrue("First path changed to : "+first_path + " ",first_path.compareToIgnoreCase("path_four")==0);
+            H5.H5PLremove(original_entries);
+            first_path = H5.H5PLget(original_entries);
+            assertTrue("First path now : "+first_path + " ",first_path.compareToIgnoreCase("path_two")==0);
+            plugin_entries = H5.H5PLsize();
+            assertTrue("H5.H5PLsize: "+plugin_entries, (original_entries+2) == plugin_entries);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("TestH5PLpaths " + err);
+        }
+    }
+
     @Ignore
     public void TestH5PLdlopen() {
         long file_id = -1;
