@@ -34,6 +34,19 @@ H5_HLDLL herr_t H5DOwrite_chunk(hid_t dset_id,
          		size_t data_size, 
 			const void *buf);
 
+/*-------------------------------------------------------------------------
+ *
+ * Direct chunk read function
+ *
+ *-------------------------------------------------------------------------
+ */
+
+H5_HLDLL herr_t H5DOread_chunk(hid_t dset_id, /*in*/
+            hid_t dxpl_id,         /*in*/
+            const hsize_t *offset, /*in*/
+            uint32_t *filters,     /*out*/
+            void *buf);            /*out*/
+
 #ifdef __cplusplus
 }
 #endif
