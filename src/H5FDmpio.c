@@ -95,6 +95,7 @@ static herr_t H5FD_mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static int H5FD_mpio_mpi_rank(const H5FD_t *_file);
 static int H5FD_mpio_mpi_size(const H5FD_t *_file);
 static MPI_Comm H5FD_mpio_communicator(const H5FD_t *_file);
+static herr_t  H5FD_mpio_get_info(H5FD_t *_file, void** mpi_info);
 
 /* The MPIO file driver information */
 static const H5FD_class_mpi_t H5FD_mpio_g = {
@@ -134,7 +135,8 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     },  /* End of superclass information */
     H5FD_mpio_mpi_rank,                         /*get_rank              */
     H5FD_mpio_mpi_size,                         /*get_size              */
-    H5FD_mpio_communicator                      /*get_comm              */
+    H5FD_mpio_communicator,                     /*get_comm              */
+    H5FD_mpio_get_info                          /*get_info              */
 };
 
 #ifdef H5FDmpio_DEBUG
@@ -1305,6 +1307,39 @@ H5FD_mpio_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void** file_handl
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5FD_mpio_get_info
+ *
+ * Purpose:        Returns the file info of MPIO file driver.
+ *
+ * Returns:        Non-negative if succeed or negative if fails.
+ *
+ * Programmer:     John Mainzer
+ *                 April 4, 2017
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+*/
+static herr_t
+H5FD_mpio_get_info(H5FD_t *_file, void** mpi_info)
+{
+    H5FD_mpio_t         *file = (H5FD_mpio_t *)_file;
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(!mpi_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mpi info not valid")
+
+    *mpi_info = &(file->info);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5FD_mpio_get_info() */
 
 
 /*-------------------------------------------------------------------------

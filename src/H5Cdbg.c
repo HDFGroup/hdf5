@@ -30,12 +30,16 @@
 
 #include "H5Cmodule.h"          /* This source code file is part of the H5C module */
 
+#define H5AC_FRIEND
+
+
+
 
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"      /* Generic Functions            */
-#include "H5ACprivate.h"    /* Metadata Cache               */
+#include "H5ACpkg.h"        /* Metadata Cache               */
 #include "H5Cpkg.h"         /* Cache                        */
 #include "H5Eprivate.h"     /* Error Handling               */
 
@@ -337,6 +341,112 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_dump_cache_skip_list() */
 #endif /* NDEBUG */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_dump_coll_write_list
+ *
+ * Purpose:     Debugging routine that prints a summary of the contents of 
+ *		the collective write skip list used by the metadata cache 
+ *              in the parallel case to maintain a list of entries to write 
+ *              collectively at a sync point.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              4/1/17
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_PARALLEL
+#ifndef NDEBUG
+herr_t
+H5C_dump_coll_write_list(H5C_t * cache_ptr, char * calling_fcn)
+{
+    herr_t              ret_value = SUCCEED;   /* Return value */
+    int                 i;
+    int                 list_len;
+    H5AC_aux_t *        aux_ptr = NULL;
+    H5C_cache_entry_t * entry_ptr = NULL;
+    H5SL_node_t *       node_ptr = NULL;
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->aux_ptr);
+
+    aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
+
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+
+    HDassert(calling_fcn != NULL);
+
+    list_len = (int)H5SL_count(cache_ptr->coll_write_list);
+
+    HDfprintf(stdout, "\n\nDumping MDC coll write list from %d:%s.\n", 
+              aux_ptr->mpi_rank, calling_fcn);
+    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
+
+    if ( list_len > 0 ) {
+
+        /* scan the collective write list generating the desired output */
+        HDfprintf(stdout,
+                  "Num:    Addr:               Len: Prot/Pind: Dirty: Type:\n");
+
+        i = 0;
+
+        node_ptr = H5SL_first(cache_ptr->coll_write_list);
+
+        if ( node_ptr != NULL )
+
+            entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+        else
+
+            entry_ptr = NULL;
+
+        while ( entry_ptr != NULL ) {
+
+            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+
+            HDfprintf(stdout,
+               "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n",
+               cache_ptr->prefix, i,
+               (long long)(entry_ptr->addr),
+               (long long)(entry_ptr->size),
+               (int)(entry_ptr->is_protected),
+               (int)(entry_ptr->is_pinned),
+               (int)(entry_ptr->is_dirty),
+               entry_ptr->type->name);
+
+            /* HDfprintf(stdout, "		node_ptr = 0x%llx, item = %p\n",
+                      (unsigned long long)node_ptr,
+                      H5SL_item(node_ptr));
+             */
+
+            node_ptr = H5SL_next(node_ptr);
+
+            if ( node_ptr != NULL )
+
+                entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+            else
+
+                entry_ptr = NULL;
+
+            i++;
+
+        } /* end while */
+    } /* end if */
+
+    HDfprintf(stdout, "\n\n");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_dump_coll_write_list() */
+#endif /* NDEBUG */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
