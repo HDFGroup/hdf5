@@ -82,6 +82,10 @@ New Features
       layer for improved I/O performance.  This feature works in conjunction
       with the paged aggregation feature.
 
+    - Filter plugin API added to access the table of paths to search for a
+      library. Java interface expanded with wrappers for the new functions.
+      (HDFFV-10143 ADB 2017/04/04)
+
     Parallel Library:
     -----------------
     -
