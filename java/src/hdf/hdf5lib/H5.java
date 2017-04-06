@@ -7229,6 +7229,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param plugin_path
      *            IN: Path for location of filter plugin libraries.
+     * @param index
+     *            IN: The table index (0-based).
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
@@ -7240,6 +7242,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param plugin_path
      *            IN: Path for location of filter plugin libraries.
+     * @param index
+     *            IN: The table index (0-based).
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
@@ -7249,6 +7253,9 @@ public class H5 implements java.io.Serializable {
     /**
      * H5PLremove removes the plugin path at the specified index.
      *
+     * @param index
+     *            IN: The table index (0-based).
+     *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
@@ -7256,6 +7263,9 @@ public class H5 implements java.io.Serializable {
 
     /**
      * H5PLget retrieves the plugin path at the specified index.
+     *
+     * @param index
+     *            IN: The table index (0-based).
      *
      * @return the current path at the index in plugin path table
      *
