@@ -774,6 +774,7 @@ test_filter_path_apis(void)
         ret = H5PLappend(pathname);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
+    PASSED();
 
     TESTING("    remove (exceed max)");
     /* Exceed the max path removal */
