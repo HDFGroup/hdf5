@@ -104,11 +104,62 @@ ________________________________________
 Other New Features and Enhancements
 ===================================
 
+    Library
+    -------
+    - Added a mechanism for disabling the SWMR file locking scheme.
+
+      The file locking calls used in HDF5 1.10.0 (including patch1)
+      will fail when the underlying file system does not support file
+      locking or where locks have been disabled. To disable all file
+      locking operations, an environment variable named
+      HDF5_USE_FILE_LOCKING can be set to the five-character string
+      'FALSE'. This does not fundamentally change HDF5 library
+      operation (aside from initial file open/create, SWMR is lock-free),
+      but users will have to be more careful about opening files
+      to avoid problematic access patterns (i.e.: multiple writers)
+      that the file locking was designed to prevent.
+
+      Additionally, the error message that is emitted when file lock
+      operations set errno to ENOSYS (typical when file locking has been
+      disabled) has been updated to describe the problem and potential
+      resolution better.
+
+      (DER, 2016/10/26, HDFFV-9918)
+
+    - The return type of H5Pget_driver_info() has been changed from void *
+      to const void *.
+
+      The pointer returned by this function points to internal library
+      memory and should not be freed by the user.
+
+      (DER, 2016/11/04, HDFFV-10017)
+
+    - The direct I/O VFD has been removed from the list of VFDs that
+      support SWMR.
+
+      This configuration was never officially tested and several SWMR
+      tests fail when this VFD is set.
+
+      (DER, 2016/11/03, HDFFV-10169)
+
     Configuration:
     --------------
     - The minimum version of CMake required to build HDF5 is now 3.2.2.
 
       (ADB, 2017/01/10)
+
+    - An --enable/disable-developer-warnings option has been added to
+      configure.
+
+      This disables warnings that do not indicate poor code quality such
+      as -Winline and gcc's -Wsuggest-attribute. Developer warnings are
+      disabled by default.
+
+      (DER, 2017/01/10)
+
+    - A bin/restore.sh script was added that reverts autogen.sh processing.
+
+      (DER, 2016/11/08)
 
     
     Fortran Library:
@@ -303,6 +354,24 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (VC 2016/05/29, HDFFV-9434)
 
+    - Fixed a memory leak where an array used by the library to track SWMR
+      read retries was unfreed.
+
+      The leaked memory was small (on the order of a few tens of ints) and
+      allocated per-file. The memory was allocated (and lost) only when a
+      file was opened for SWMR access.
+
+      (DER, 2016/04/27, HDFFV-9786)
+
+    - Fixed a memory leak that could occur when opening a file for the first
+      time (including creating) and the call fails.
+
+      This occurred when the file-driver-specific info was not cleaned up.
+      The amount of memory leaked varied with the file driver, but would
+      normally be less than 1 kB.
+
+      (DER, 2016/12/06, HDFFV-10168)
+ 
 
     Parallel Library
     ----------------
