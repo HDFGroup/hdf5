@@ -54,12 +54,12 @@
  *-------------------------------------------------------------------------
  */
 static int Get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
-        size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p);
+		size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p);
 static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr);
 static int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
-        pack_opt_t *options);
+		pack_opt_t *options);
 static int copy_user_block(const char *infile, const char *outfile,
-        hsize_t size);
+		hsize_t size);
 #if defined (H5REPACK_DEBUG_USER_BLOCK)
 static void print_user_block(const char *filename, hid_t fid);
 #endif
@@ -67,10 +67,10 @@ static herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void
 
 /* get the major number from the error stack. */
 static herr_t walk_error_callback(H5_ATTR_UNUSED unsigned n, const H5E_error2_t *err_desc, void *udata) {
-    if (err_desc)
-        *((hid_t *) udata) = err_desc->maj_num;
+	if (err_desc)
+		*((hid_t *) udata) = err_desc->maj_num;
 
-    return 0;
+	return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -84,28 +84,18 @@ static herr_t walk_error_callback(H5_ATTR_UNUSED unsigned n, const H5E_error2_t 
  *
  * Date: October, 23, 2003
  *
- * Modification:
- *   Peter Cao, June 13, 2007
- *   Add "-L, --latest" and other options to pack a file with the latest file format
- *
- *   Peter Cao, September 25, 2007
- *   Copy user block when repacking a file
- *
- *   Pedro Vicente, August 20, 2008
- *   Add a user block to file if requested
- *
  *-------------------------------------------------------------------------
  */
 
 int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 {
-    int   ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t fidin;
-    hid_t fidout = -1;
-    trav_table_t *travt = NULL;
-    hsize_t ub_size = 0; /* size of user block */
-    hid_t fcpl = H5P_DEFAULT; /* file creation property list ID */
-    hid_t fapl = H5P_DEFAULT; /* file access property list ID */
+    int   	  ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    hid_t         fidin;
+    hid_t         fidout = -1;
+    trav_table_t  *travt = NULL;
+    hsize_t       ub_size = 0;        	/* size of user block */
+    hid_t         fcpl = H5P_DEFAULT; 	/* file creation property list ID */
+    hid_t         fapl = H5P_DEFAULT; 	/* file access property list ID */
 
     /*-------------------------------------------------------------------------
      * open input file
@@ -659,7 +649,7 @@ done:
  */
 
 int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
-        pack_opt_t *options) /* repack options */
+		pack_opt_t *options) /* repack options */
 {
     int   ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     hid_t grp_in = -1; /* group ID */
@@ -1497,65 +1487,65 @@ void print_user_block(const char *filename, hid_t fid)
 {
     int ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     int fh; /* file handle  */
-    hsize_t ub_size; /* user block size */
-    hsize_t size; /* size read */
-    hid_t fcpl; /* file creation property list ID for HDF5 file */
-    int i;
+	hsize_t ub_size; /* user block size */
+	hsize_t size; /* size read */
+	hid_t fcpl; /* file creation property list ID for HDF5 file */
+	int i;
 
-    /* get user block size */
-    if(( fcpl = H5Fget_create_plist(fid)) < 0) {
-        error_msg("failed to retrieve file creation property list\n");
+	/* get user block size */
+	if(( fcpl = H5Fget_create_plist(fid)) < 0) {
+		error_msg("failed to retrieve file creation property list\n");
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Fget_create_plist failed");
     }
 
-    if(H5Pget_userblock(fcpl, &ub_size) < 0) {
-        error_msg("failed to retrieve userblock size\n");
+	if(H5Pget_userblock(fcpl, &ub_size) < 0) {
+		error_msg("failed to retrieve userblock size\n");
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Pget_userblock failed");
     }
 
-    if(H5Pclose(fcpl) < 0) {
-        error_msg("failed to close property list\n");
+	if(H5Pclose(fcpl) < 0) {
+		error_msg("failed to close property list\n");
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Pclose failed");
     }
 
-    /* open file */
-    if((fh = HDopen(filename, O_RDONLY, 0)) < 0) {
+	/* open file */
+	if((fh = HDopen(filename, O_RDONLY, 0)) < 0) {
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "HDopen failed");
     }
 
-    size = ub_size;
+	size = ub_size;
 
-    /* read file */
-    while(size > 0) {
-        ssize_t nread; /* # of bytes read */
-        char rbuf[USERBLOCK_XFER_SIZE]; /* buffer for reading */
+	/* read file */
+	while(size > 0) {
+		ssize_t nread; /* # of bytes read */
+		char rbuf[USERBLOCK_XFER_SIZE]; /* buffer for reading */
 
-        /* read buffer */
-        if(size > USERBLOCK_XFER_SIZE)
-            nread = HDread(fh, rbuf, (size_t)USERBLOCK_XFER_SIZE);
-        else
-            nread = HDread(fh, rbuf, (size_t)size);
+		/* read buffer */
+		if(size > USERBLOCK_XFER_SIZE)
+			nread = HDread(fh, rbuf, (size_t)USERBLOCK_XFER_SIZE);
+		else
+			nread = HDread(fh, rbuf, (size_t)size);
 
-        for(i = 0; i < nread; i++) {
+		for(i = 0; i < nread; i++) {
 
-            printf("%c ", rbuf[i]);
+			printf("%c ", rbuf[i]);
 
-        }
-        printf("\n");
+		}
+		printf("\n");
 
-        if(nread < 0) {
+		if(nread < 0) {
             HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "nread < 0");
         }
 
-        /* update size of userblock left to transfer */
-        size -= nread;
-    }
+		/* update size of userblock left to transfer */
+		size -= nread;
+	}
 
 done:
-    if(fh > 0)
-        HDclose(fh);
+	if(fh > 0)
+		HDclose(fh);
 
-    return;
+	return;
 }
 #endif
 

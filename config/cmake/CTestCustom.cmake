@@ -1,5 +1,10 @@
 set (CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS 3000)
- 
+# Allow full output to go to CDash set to 0
+SET(CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE 50000)
+SET(CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE 50000)
+# WARNING!  This could be a lot of output and could overwhelm CDash and the
+# MySQL DB so this might not be a good idea!
+
 set (CTEST_CUSTOM_WARNING_EXCEPTION
     ${CTEST_CUSTOM_WARNING_EXCEPTION}
     "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning C4090:"
@@ -16,7 +21,7 @@ set (CTEST_CUSTOM_WARNING_EXCEPTION
     "note: expanded from macro"
 #    "fpp:[ \t]*warning:[ \t]*cannot remove H5_DEBUG_API - not a predefined macro"
 )
- 
+
 set (CTEST_CUSTOM_MEMCHECK_IGNORE
     ${CTEST_CUSTOM_MEMCHECK_IGNORE}
     H5TEST-flush1           #designed to fail
@@ -47,6 +52,7 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP_PACKED_BITS-clearall-objects
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
+    H5IMPORT-h5importtest-clear-objects
     H5IMPORT-clear-objects
     ######### tools/h5jam #########
     H5JAM-SETUP-N_twithub_u10_c-clear-objects
@@ -204,6 +210,7 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK_VERIFY_LAYOUT_ALL-layout_long_switches     #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT_ALL-layout_short_switches    #uses grepTest.cmake
     H5REPACK-plugin
+    H5REPACK_CMP-plugin_zero
     ######### tools/h5stat #########
     H5STAT-clearall-objects
     ######### tools/misc #########
@@ -212,4 +219,8 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     ######### examples #########
     EXAMPLES-clear-objects
     CPP_ex-clear-objects
+    CPP_ex_tutr-clear-objects
+    HL_ex-clear-objects
+    f90_ex-clear-objects
+    HL_FORTRAN_f90_ex-clear-objects
 )

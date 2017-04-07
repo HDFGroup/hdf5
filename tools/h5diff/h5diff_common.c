@@ -249,16 +249,17 @@ void parse_command_line(int argc,
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            options->count = atol( opt_arg );
-
+            options->count = HDstrtoull(opt_arg, NULL, 0);
             break;
 
         case 'N':
             options->do_nans = 0;
             break;
+
         case 'c':
             options->m_list_not_cmp = 1;
             break;
+
         case 'e':
             options->use_system_epsilon = 1;
             break;

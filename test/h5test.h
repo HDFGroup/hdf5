@@ -61,18 +61,18 @@
 /* Should be used internally by the libtest.a only. */
 #define HDGetTestVerbosity() (TestVerbosity)
 
-#define VERBOSE_NONE	(HDGetTestVerbosity()==VERBO_NONE)
-#define VERBOSE_DEF	(HDGetTestVerbosity()>=VERBO_DEF)
-#define VERBOSE_LO	(HDGetTestVerbosity()>=VERBO_LO)
-#define VERBOSE_MED	(HDGetTestVerbosity()>=VERBO_MED)
-#define VERBOSE_HI	(HDGetTestVerbosity()>=VERBO_HI)
+#define VERBOSE_NONE  (HDGetTestVerbosity()==VERBO_NONE)
+#define VERBOSE_DEF  (HDGetTestVerbosity()>=VERBO_DEF)
+#define VERBOSE_LO  (HDGetTestVerbosity()>=VERBO_LO)
+#define VERBOSE_MED  (HDGetTestVerbosity()>=VERBO_MED)
+#define VERBOSE_HI  (HDGetTestVerbosity()>=VERBO_HI)
 
 /*
  * Test controls definitions.
  */
-#define SKIPTEST	1	/* Skip this test */
-#define ONLYTEST	2	/* Do only this test */
-#define BEGINTEST	3	/* Skip all tests before this test */
+#define SKIPTEST  1  /* Skip this test */
+#define ONLYTEST  2  /* Do only this test */
+#define BEGINTEST  3  /* Skip all tests before this test */
 
 /*
  * This contains the filename prefix specificied as command line option for
@@ -86,8 +86,8 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 /*
  * Print the current location on the standard output stream.
  */
-#define AT()     printf ("   at %s:%d in %s()...\n",	    \
-				__FILE__, __LINE__, FUNC);
+#define AT()     printf ("   at %s:%d in %s()...\n",        \
+        __FILE__, __LINE__, FUNC);
 
 /*
  * The name of the test is printed by saying TESTING("something") which will
@@ -98,12 +98,13 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
  * spaces.  If the h5_errors() is used for automatic error handling then
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
-#define TESTING(WHAT)	{printf("Testing %-62s",WHAT); fflush(stdout);}
-#define TESTING_2(WHAT)	{printf(" Testing %-62s",WHAT); fflush(stdout);}
-#define PASSED()	{puts(" PASSED");fflush(stdout);}
-#define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
-#define H5_WARNING()	{puts("*WARNING*");fflush(stdout);}
-#define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
+#define TESTING(WHAT)  {printf("Testing %-62s",WHAT); fflush(stdout);}
+#define TESTING_2(WHAT)  {printf(" Testing %-62s",WHAT); fflush(stdout);}
+#define PASSED()  {puts(" PASSED");fflush(stdout);}
+#define H5_FAILED()  {puts("*FAILED*");fflush(stdout);}
+#define H5_WARNING()  {puts("*WARNING*");fflush(stdout);}
+#define SKIPPED()  {puts(" -SKIP-");fflush(stdout);}
+#define PUTS_ERROR(s)   {puts(s); AT(); goto error;}
 #define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
 #define STACK_ERROR     {H5Eprint2(H5E_DEFAULT, stdout); goto error;}
 #define FAIL_STACK_ERROR {H5_FAILED(); AT(); H5Eprint2(H5E_DEFAULT, stdout); \
@@ -113,9 +114,9 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 /*
  * Alarm definitions to wait up (terminate) a test that runs too long.
  */
-#define H5_ALARM_SEC	1200	/* default is 20 minutes */
-#define ALARM_ON	TestAlarmOn()
-#define ALARM_OFF	HDalarm(0)
+#define H5_ALARM_SEC  1200  /* default is 20 minutes */
+#define ALARM_ON  TestAlarmOn()
+#define ALARM_OFF  HDalarm(0)
 
 /*
  * The methods to compare the equality of floating-point values:
@@ -140,29 +141,42 @@ extern "C" {
 #endif
 
 /* Generally useful testing routines */
+H5TEST_DLL void h5_clean_files(const char *base_name[], hid_t fapl);
 H5TEST_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
 H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL char *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5TEST_DLL char *h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL hid_t h5_fileaccess(void);
 H5TEST_DLL void h5_no_hwconv(void);
 H5TEST_DLL const char *h5_rmprefix(const char *filename);
 H5TEST_DLL void h5_reset(void);
+H5TEST_DLL void h5_restore_err(void);
 H5TEST_DLL void h5_show_hostname(void);
 H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
 H5TEST_DLL int print_func(const char *format, ...);
 H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 
+/* Functions that will replace VFD-dependent functions that violate
+ * the single responsibility principle. Unlike their predecessors,
+ * these new functions do not have hidden side effects.
+ */
+/* h5_fileaccess() replacement */
+/* h5_clean_files() replacements */
+H5TEST_DLL void h5_delete_test_file(const char *base_name, hid_t fapl);
+H5TEST_DLL void h5_delete_all_test_files(const char *base_name[], hid_t fapl);
+
 /* Routines for operating on the list of tests (for the "all in one" tests) */
 H5TEST_DLL void TestUsage(void);
 H5TEST_DLL void AddTest(const char *TheName, void (*TheCall) (void),
-	     void (*Cleanup) (void), const char *TheDescr,
-	     const void *Parameters);
+       void (*Cleanup) (void), const char *TheDescr,
+       const void *Parameters);
 H5TEST_DLL void TestInfo(const char *ProgName);
 H5TEST_DLL void TestParseCmdLine(int argc, char *argv[]);
 H5TEST_DLL void PerformTests(void);
 H5TEST_DLL void TestSummary(void);
 H5TEST_DLL void TestCleanup(void);
+H5TEST_DLL void TestShutdown(void);
 H5TEST_DLL void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_parser)(int ac, char *av[]));
 H5TEST_DLL int  GetTestVerbosity(void);
 H5TEST_DLL int  SetTestVerbosity(int newval);

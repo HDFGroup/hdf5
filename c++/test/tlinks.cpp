@@ -615,7 +615,7 @@ void test_links()
 	/* Close 2nd FAPL */
 	H5Pclose(fapl2_id);
 
-	h5_cleanup(FILENAME, fapl_id);
+        h5_clean_files(FILENAME, fapl_id);
 
 	/* Test that external links can be used after a library reset.  MUST be
 	* called last so the reset doesn't interfere with the property lists.  This

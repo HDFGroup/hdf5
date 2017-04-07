@@ -293,7 +293,7 @@ ceil_log10(unsigned long x)
         ret++;
     } /* end while */
 
-    return(ret);
+    return ret;
 } /* ceil_log10() */
 
 

@@ -80,7 +80,7 @@
 ###           T H E   T E S T S  M A C R O S                               ###
 ##############################################################################
 ##############################################################################
-  MACRO (ADD_H5_TEST testname importfile conffile testfile)
+  macro (ADD_H5_TEST testname importfile conffile testfile)
     # If using memchecker skip macro based tests
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
@@ -126,9 +126,9 @@
       )
       set_tests_properties (H5IMPORT-${testname}-H5DMP_CMP PROPERTIES DEPENDS H5IMPORT-${testname}-H5DMP)
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_DUMPTEST testname datasetname testfile)
+  macro (ADD_H5_DUMPTEST testname datasetname testfile)
     # If using memchecker skip tests
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -194,16 +194,16 @@
       )
       set_tests_properties (H5IMPORT-DUMP-${testname}-H5DFF PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}")
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
+  macro (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5IMPORT-DUMP-${testname}-SKIPPED
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
       )
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
   # --------------------------------------------------------------------
   # Determine if filter is available for h5diff

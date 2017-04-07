@@ -108,7 +108,7 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_H5_PBITS_TEST resultfile resultcode)
+  macro (ADD_H5_PBITS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
@@ -132,7 +132,7 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################

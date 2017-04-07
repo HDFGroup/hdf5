@@ -63,7 +63,10 @@ New Features
 
     Library
     -------
-    - None
+
+    - Filter plugin API added to access the table of paths to search for a
+      library.
+      (HDFFV-10143 ADB 2017/04/04)
 
 
     Parallel Library

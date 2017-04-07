@@ -19,7 +19,7 @@
       set (VFD_LIST ${VFD_LIST} direct)
     endif ()
 
-    MACRO (ADD_VFD_TEST vfdname resultcode)
+    macro (ADD_VFD_TEST vfdname resultcode)
       add_test (
         NAME H5REPACK-VFD-${vfdname}-h5repacktest
         COMMAND "${CMAKE_COMMAND}"
@@ -35,7 +35,7 @@
         set_tests_properties (H5REPACK-VFD-${vfdname}-h5repacktest PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "H5REPACK-VFD-${vfdname}-h5repacktest")
-    ENDMACRO ()
+    endmacro ()
   endif ()
 
   # --------------------------------------------------------------------
@@ -109,7 +109,7 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_HELP_TEST testname resultcode)
+  macro (ADD_HELP_TEST testname resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5REPACK-${testname} COMMAND $<TARGET_FILE:h5repack> ${ARGN})
@@ -131,9 +131,9 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST_OLD testname testtype testfile)
+  macro (ADD_H5_TEST_OLD testname testtype testfile)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
@@ -155,9 +155,9 @@
       )
       set_tests_properties (H5REPACK_OLD-${testname}_DFF PROPERTIES DEPENDS H5REPACK_OLD-${testname})
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST testname testtype testfile)
+  macro (ADD_H5_TEST testname testtype testfile)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
@@ -179,9 +179,9 @@
       )
       set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES DEPENDS H5REPACK-${testname})
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_CMP_TEST testname testfilter testtype resultcode resultfile)
+  macro (ADD_H5_CMP_TEST testname testfilter testtype resultcode resultfile)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
@@ -213,9 +213,9 @@
         set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_DMP_TEST testname testtype resultcode resultfile)
+  macro (ADD_H5_DMP_TEST testname testtype resultcode resultfile)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
@@ -246,9 +246,9 @@
         set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_DMP-${testname}")
       endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_VERIFY_TEST testname testtype resultcode testfile testdset testfilter)
+  macro (ADD_H5_VERIFY_TEST testname testtype resultcode testfile testdset testfilter)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
@@ -310,9 +310,9 @@
         endif ()
       endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST_META testname testfile)
+  macro (ADD_H5_TEST_META testname testfile)
       add_test (
           NAME H5REPACK_META-${testname}_N
           COMMAND $<TARGET_FILE:h5repack> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5
@@ -329,9 +329,9 @@
       add_test (NAME H5REPACK_META-${testname} COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5 ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5)
       set_tests_properties (H5REPACK_META-${testname} PROPERTIES WILL_FAIL "true")
       set_tests_properties (H5REPACK_META-${testname} PROPERTIES DEPENDS H5REPACK_META-${testname}_M)
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_UD_TEST testname resultcode resultfile)
+  macro (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
@@ -370,7 +370,7 @@
       )
       set_tests_properties (H5REPACK_UD-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_UD-${testname}")
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################
@@ -982,7 +982,7 @@
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-  ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,4,9,1,8,18)
+  ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,4,9,${H5_VERS_MAJOR},${H5_VERS_MINOR},${H5_VERS_RELEASE})
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
   # check for no parameters

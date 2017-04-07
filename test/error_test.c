@@ -756,7 +756,7 @@ main(void)
     if(test_filter_error(filename) < 0)
         TEST_ERROR;
 
-    h5_cleanup(FILENAME, fapl);
+    h5_clean_files(FILENAME, fapl);
 
     HDfprintf(stderr, "\nAll error API tests passed.\n");
     return 0;

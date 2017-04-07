@@ -106,11 +106,9 @@ static void table_attrs_free( table_attrs_t *table )
  *------------------------------------------------------------------------*/
 static void table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *table)
 {
-    size_t curr_val;
-
+    if(table->nattrs == table->size) {
     match_attr_t *new_attrs;
 
-    if(table->nattrs == table->size) {
         table->size = MAX(1, table->size * 2);
         new_attrs = (match_attr_t *)HDrealloc(table->attrs, table->size * sizeof(match_attr_t));
         if(new_attrs)
@@ -118,6 +116,8 @@ static void table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *ta
     } /* end if */
 
     if(table->nattrs < table->size) {
+        size_t curr_val;
+
         curr_val = table->nattrs;
         table->attrs[curr_val].exist[0] = exist[0];
         table->attrs[curr_val].exist[1] = exist[1];

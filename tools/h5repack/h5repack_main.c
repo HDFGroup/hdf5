@@ -191,14 +191,12 @@ static void usage(const char *prog) {
  * Programmer:  Quincey Koziol
  *              Saturday, 31. January 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static void leave(int ret) {
-	h5tools_close();
-
-	HDexit(ret);
+static void leave(int ret)
+{
+    h5tools_close();
+    HDexit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -214,134 +212,133 @@ static void leave(int ret) {
  *
  *-------------------------------------------------------------------------
  */
-
 static
-int read_info(const char *filename, pack_opt_t *options) {
+int read_info(const char *filename, pack_opt_t *options)
+{
+    char stype[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    char comp_info[1024];
+    FILE *fp = NULL;
+    char c;
+    int i, rc = 1;
+    int ret_value = EXIT_SUCCESS;
 
-	char stype[10];
-	char comp_info[1024];
-	FILE *fp = NULL;
-	char c;
-	int i, rc = 1;
-	int ret_value = EXIT_SUCCESS;
+    if ((fp = HDfopen(filename, "r")) == (FILE *) NULL) {
+        error_msg("cannot open options file %s\n", filename);
+        h5tools_setstatus(EXIT_FAILURE);
+        ret_value = EXIT_FAILURE;
+        goto done;
+    }
 
-	if ((fp = HDfopen(filename, "r")) == (FILE *) NULL) {
-		error_msg("cannot open options file %s\n", filename);
-		h5tools_setstatus(EXIT_FAILURE);
-		ret_value = EXIT_FAILURE;
-		goto done;
-	}
+    /* cycle until end of file reached */
+    while (1) {
+        rc = fscanf(fp, "%s", stype);
+        if (rc == -1)
+            break;
 
-	/* cycle until end of file reached */
-	while (1) {
-		rc = fscanf(fp, "%s", stype);
-		if (rc == -1)
-			break;
-
-		/*-------------------------------------------------------------------------
-		 * filter
-		 *-------------------------------------------------------------------------
-		 */
-		if (HDstrcmp(stype,"-f") == 0) {
-			/* find begining of info */
-			i = 0;
-			c = '0';
-			while (c != ' ') {
-				if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+        /*-------------------------------------------------------------------------
+         * filter
+         *-------------------------------------------------------------------------
+         */
+        if (HDstrcmp(stype,"-f") == 0) {
+            /* find begining of info */
+            i = 0;
+            c = '0';
+            while (c != ' ') {
+                if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
                     error_msg("fscanf error\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = EXIT_FAILURE;
                     goto done;
                 } /* end if */
-				if (HDfeof(fp))
-					break;
-			}
-			c = '0';
-			/* go until end */
-			while (c != ' ') {
-				if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+                if (HDfeof(fp))
+                    break;
+            }
+            c = '0';
+            /* go until end */
+            while (c != ' ') {
+                if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
                     error_msg("fscanf error\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = EXIT_FAILURE;
                     goto done;
                 } /* end if */
-				comp_info[i] = c;
-				i++;
-				if (HDfeof(fp))
-					break;
-				if (c == 10 /*eol*/)
-					break;
-			}
-			comp_info[i - 1] = '\0'; /*cut the last " */
+                comp_info[i] = c;
+                i++;
+                if (HDfeof(fp))
+                    break;
+                if (c == 10 /*eol*/)
+                    break;
+            }
+            comp_info[i - 1] = '\0'; /*cut the last " */
 
-			if (h5repack_addfilter(comp_info, options) == -1) {
-				error_msg("could not add compression option\n");
-				h5tools_setstatus(EXIT_FAILURE);
-				ret_value = EXIT_FAILURE;
-				goto done;
-			}
-		}
-		/*-------------------------------------------------------------------------
-		 * layout
-		 *-------------------------------------------------------------------------
-		 */
-		else if (HDstrcmp(stype,"-l") == 0) {
+            if (h5repack_addfilter(comp_info, options) == -1) {
+                error_msg("could not add compression option\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                ret_value = EXIT_FAILURE;
+                goto done;
+            }
+        }
+        /*-------------------------------------------------------------------------
+         * layout
+         *-------------------------------------------------------------------------
+         */
+        else if (HDstrcmp(stype,"-l") == 0) {
 
-			/* find begining of info */
-			i = 0;
-			c = '0';
-			while (c != ' ') {
-				if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+            /* find begining of info */
+            i = 0;
+            c = '0';
+            while (c != ' ') {
+                if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
                     error_msg("fscanf error\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = EXIT_FAILURE;
                     goto done;
                 } /* end if */
-				if (HDfeof(fp))
-					break;
-			}
-			c = '0';
-			/* go until end */
-			while (c != ' ') {
-				if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+                if (HDfeof(fp))
+                    break;
+            }
+            c = '0';
+            /* go until end */
+            while (c != ' ') {
+                if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
                     error_msg("fscanf error\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = EXIT_FAILURE;
                     goto done;
                 } /* end if */
-				comp_info[i] = c;
-				i++;
-				if (HDfeof(fp))
-					break;
-				if (c == 10 /*eol*/)
-					break;
-			}
-			comp_info[i - 1] = '\0'; /*cut the last " */
+                comp_info[i] = c;
+                i++;
+                if (HDfeof(fp))
+                    break;
+                if (c == 10 /*eol*/)
+                    break;
+            }
+            comp_info[i - 1] = '\0'; /*cut the last " */
 
-			if (h5repack_addlayout(comp_info, options) == -1) {
-				error_msg("could not add chunck option\n");
-				h5tools_setstatus(EXIT_FAILURE);
-				ret_value = EXIT_FAILURE;
-				goto done;
-			}
-		}
-		/*-------------------------------------------------------------------------
-		 * not valid
-		 *-------------------------------------------------------------------------
-		 */
-		else {
-			error_msg("bad file format for %s", filename);
-			h5tools_setstatus(EXIT_FAILURE);
-			ret_value = EXIT_FAILURE;
-			goto done;
-		}
-	}
+            if (h5repack_addlayout(comp_info, options) == -1) {
+                error_msg("could not add chunck option\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                ret_value = EXIT_FAILURE;
+                goto done;
+            }
+        }
+        /*-------------------------------------------------------------------------
+         * not valid
+         *-------------------------------------------------------------------------
+         */
+        else {
+            error_msg("bad file format for %s", filename);
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = EXIT_FAILURE;
+            goto done;
+        }
+    }
 
 done:
-	if (fp)
-		HDfclose(fp);
+    if (fp)
+        HDfclose(fp);
 
-	return ret_value;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -351,184 +348,178 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 static
-int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
+int parse_command_line(int argc, const char **argv, pack_opt_t* options)
+{
+    int opt;
+    int ret_value = 0;
 
-	int opt;
-	int ret_value = 0;
+    /* parse command line options */
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+        switch ((char) opt) {
 
-	/* parse command line options */
-	while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
-		switch ((char) opt) {
+            /* -i for backward compability */
+            case 'i':
+                infile = opt_arg;
+                has_i_o = 1;
+                break;
 
-		/* -i for backward compability */
-		case 'i':
-			infile = opt_arg;
-			has_i_o = 1;
-			break;
+            /* -o for backward compability */
+            case 'o':
+                outfile = opt_arg;
+                has_i_o = 1;
+                break;
 
-		/* -o for backward compability */
-		case 'o':
-			outfile = opt_arg;
-			has_i_o = 1;
-			break;
+            case 'h':
+                usage(h5tools_getprogname());
+                h5tools_setstatus(EXIT_SUCCESS);
+                ret_value = -1;
+                goto done;
 
-		case 'h':
-			usage(h5tools_getprogname());
-			h5tools_setstatus(EXIT_SUCCESS);
-			ret_value = -1;
-			goto done;
+            case 'V':
+                print_version(h5tools_getprogname());
+                h5tools_setstatus(EXIT_SUCCESS);
+                ret_value = -1;
+                goto done;
 
-		case 'V':
-			print_version(h5tools_getprogname());
-			h5tools_setstatus(EXIT_SUCCESS);
-			ret_value = -1;
-			goto done;
+            case 'v':
+                options->verbose = 1;
+                break;
 
-		case 'v':
-			options->verbose = 1;
-			break;
+            case 'f':
+                /* parse the -f filter option */
+                if (h5repack_addfilter(opt_arg, options) < 0) {
+                    error_msg("in parsing filter\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
 
-		case 'f':
-			/* parse the -f filter option */
-			if (h5repack_addfilter(opt_arg, options) < 0) {
-				error_msg("in parsing filter\n");
-				h5tools_setstatus(EXIT_FAILURE);
-				ret_value = -1;
-				goto done;
-			}
-			break;
+            case 'l':
+                /* parse the -l layout option */
+                if (h5repack_addlayout(opt_arg, options) < 0) {
+                    error_msg("in parsing layout\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
 
-		case 'l':
-			/* parse the -l layout option */
-			if (h5repack_addlayout(opt_arg, options) < 0) {
-				error_msg("in parsing layout\n");
-				h5tools_setstatus(EXIT_FAILURE);
-				ret_value = -1;
-				goto done;
-			}
-			break;
+            case 'm':
+                options->min_comp = HDstrtoull(opt_arg , NULL, 0);
+                if ((int) options->min_comp <= 0) {
+                    error_msg("invalid minimum compress size <%s>\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
 
-		case 'm':
-			options->min_comp = HDstrtoull(opt_arg , NULL, 0);
-			if ((int) options->min_comp <= 0) {
-				error_msg("invalid minimum compress size <%s>\n", opt_arg);
-				h5tools_setstatus(EXIT_FAILURE);
-				ret_value = -1;
-				goto done;
-			}
-			break;
+            case 'e':
+                ret_value = read_info(opt_arg, options);
+                if (ret_value < 0)
+                    goto done;
+                break;
 
-		case 'e':
-			ret_value = read_info(opt_arg, options);
-			if (ret_value < 0)
-				goto done;
-			break;
+            case 'n':
+                options->use_native = 1;
+                break;
 
-		case 'n':
-			options->use_native = 1;
-			break;
+            case 'L':
+                options->latest = TRUE;
+                break;
 
-		case 'L':
-			options->latest = 1;
-			break;
+            case 'c':
+                options->grp_compact = HDatoi( opt_arg );
+                if (options->grp_compact > 0)
+                    options->latest = TRUE; /* must use latest format */
+                break;
 
-		case 'c':
-			options->grp_compact = HDatoi( opt_arg );
-			if (options->grp_compact > 0)
-				options->latest = 1; /* must use latest format */
-			break;
+            case 'd':
+                options->grp_indexed = HDatoi( opt_arg );
+                if (options->grp_indexed > 0)
+                    options->latest = TRUE; /* must use latest format */
+                break;
 
-		case 'd':
-			options->grp_indexed = HDatoi( opt_arg );
-			if (options->grp_indexed > 0)
-				options->latest = 1; /* must use latest format */
-			break;
+            case 's':
+                {
+                    int idx = 0;
+                    int ssize = 0;
+                    char *msgPtr = HDstrchr( opt_arg, ':');
+                    options->latest = TRUE; /* must use latest format */
+                    if (msgPtr == NULL) {
+                        ssize = HDatoi( opt_arg );
+                        for (idx = 0; idx < 5; idx++)
+                            options->msg_size[idx] = ssize;
+                    }
+                    else {
+                        char msgType[10];
 
-		case 's':
-			{
-				int idx = 0;
-				int ssize = 0;
-				char *msgPtr = HDstrchr( opt_arg, ':');
-				options->latest = 1; /* must use latest format */
-				if (msgPtr == NULL) {
-					ssize = HDatoi( opt_arg );
-					for (idx = 0; idx < 5; idx++)
-						options->msg_size[idx] = ssize;
-				}
-				else {
-					char msgType[10];
-					HDstrcpy(msgType, msgPtr + 1);
-					msgPtr[0] = '\0';
-					ssize = HDatoi( opt_arg );
-					if (HDstrncmp(msgType, "dspace",6) == 0) {
-						options->msg_size[0] = ssize;
-					}
-					else if (HDstrncmp(msgType, "dtype", 5) == 0) {
-						options->msg_size[1] = ssize;
-					}
-					else if (HDstrncmp(msgType, "fill", 4) == 0) {
-						options->msg_size[2] = ssize;
-					}
-					else if (HDstrncmp(msgType, "pline", 5) == 0) {
-						options->msg_size[3] = ssize;
-					}
-					else if (HDstrncmp(msgType, "attr", 4) == 0) {
-						options->msg_size[4] = ssize;
-					}
-				}
-			}
-			break;
+                        HDstrcpy(msgType, msgPtr + 1);
+                        msgPtr[0] = '\0';
+                        ssize = HDatoi( opt_arg );
+                        if (HDstrncmp(msgType, "dspace",6) == 0)
+                            options->msg_size[0] = ssize;
+                        else if (HDstrncmp(msgType, "dtype", 5) == 0)
+                            options->msg_size[1] = ssize;
+                        else if (HDstrncmp(msgType, "fill", 4) == 0)
+                            options->msg_size[2] = ssize;
+                        else if (HDstrncmp(msgType, "pline", 5) == 0)
+                            options->msg_size[3] = ssize;
+                        else if (HDstrncmp(msgType, "attr", 4) == 0)
+                            options->msg_size[4] = ssize;
+                    }
+                }
+                break;
 
-		case 'u':
-			options->ublock_filename = opt_arg;
-			break;
+            case 'u':
+                options->ublock_filename = opt_arg;
+                break;
 
-		case 'b':
-			options->ublock_size = (hsize_t) HDatol( opt_arg );
-			break;
+            case 'b':
+                options->ublock_size = (hsize_t) HDatol( opt_arg );
+                break;
 
-		case 'M':
-			options->meta_block_size = (hsize_t) HDatol( opt_arg );
-			break;
+            case 'M':
+                options->meta_block_size = (hsize_t) HDatol( opt_arg );
+                break;
 
-		case 't':
-			options->threshold = (hsize_t) HDatol( opt_arg );
-			break;
+            case 't':
+                options->threshold = (hsize_t) HDatol( opt_arg );
+                break;
 
-		case 'a':
-			options->alignment = HDstrtoull(opt_arg , NULL, 0);
-			if (options->alignment < 1) {
-				error_msg("invalid alignment size\n", opt_arg);
-				h5tools_setstatus(EXIT_FAILURE);
-				ret_value = -1;
-				goto done;
-			}
-			break;
+            case 'a':
+                options->alignment = HDstrtoull(opt_arg , NULL, 0);
+                if (options->alignment < 1) {
+                    error_msg("invalid alignment size\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
 
-        case 'E':
-            enable_error_stack = TRUE;
-            break;
+	    case 'E':
+		enable_error_stack = TRUE;
+		break;
 
-        default:
-            break;
+            default:
+                break;
         } /* switch */
-
     } /* while */
 
     if (has_i_o == 0) {
-		/* check for file names to be processed */
-		if (argc <= opt_ind || argv[opt_ind + 1] == NULL) {
-			error_msg("missing file names\n");
-			usage(h5tools_getprogname());
-			h5tools_setstatus(EXIT_FAILURE);
-			ret_value = -1;
-		}
-	}
+        /* check for file names to be processed */
+        if (argc <= opt_ind || argv[opt_ind + 1] == NULL) {
+            error_msg("missing file names\n");
+            usage(h5tools_getprogname());
+            h5tools_setstatus(EXIT_FAILURE);
+            ret_value = -1;
+        }
+    }
 
 done:
-	return ret_value;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -548,16 +539,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int main(int argc, const char **argv) {
+int main(int argc, const char **argv)
+{
+    pack_opt_t options; /*the global options */
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;
     void               *edata;
     void               *tools_edata;
 
-	pack_opt_t options; /*the global options */
-
-	h5tools_setprogname(PROGRAMNAME);
-	h5tools_setstatus(EXIT_SUCCESS);
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
 
     /* Disable error reporting */
     H5Eget_auto2(H5E_DEFAULT, &func, &edata);
@@ -610,12 +601,12 @@ int main(int argc, const char **argv) {
     }
 
     /* pack it */
-	h5tools_setstatus(h5repack(infile, outfile, &options));
+    h5tools_setstatus(h5repack(infile, outfile, &options));
 
 done:
-	/* free tables */
-	h5repack_end(&options);
+    /* free tables */
+    h5repack_end(&options);
 
-	leave(h5tools_getstatus());
+    leave(h5tools_getstatus());
 }
 
