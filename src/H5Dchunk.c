@@ -462,8 +462,8 @@ H5D__chunk_direct_read(const H5D_t *dset, hid_t dxpl_id, hsize_t *offset,
         H5D_rdcc_ent_t *ent = rdcc->slot[udata.idx_hint];
 
         /* Sanity checks  */
-        HDassert(udata->idx_hint < rdcc->nslots);
-        HDassert(rdcc->slot[udata->idx_hint]);
+        HDassert(udata.idx_hint < rdcc->nslots);
+        HDassert(rdcc->slot[udata.idx_hint]);
 
         /* If the cached chunk is dirty, it must be flushed to get accurate size */
         if( ent->dirty == TRUE ) {
@@ -533,8 +533,7 @@ H5D__get_chunk_storage_size(H5D_t *dset, hid_t dxpl_id, const hsize_t *offset, h
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(offset);
-    HDassert(filters);
-    HDassert(buf);
+    HDassert(storage_size);
 
     /* Retrieve the dataset dimensions */
     space_ndims = dset->shared->layout.u.chunk.ndims - 1;
@@ -571,8 +570,8 @@ H5D__get_chunk_storage_size(H5D_t *dset, hid_t dxpl_id, const hsize_t *offset, h
         /* Check if the requested chunk exists in the chunk cache */
         if(UINT_MAX != udata.idx_hint) {
             /* Sanity checks  */
-            HDassert(udata->idx_hint < rdcc->nslots);
-            HDassert(rdcc->slot[udata->idx_hint]);
+            HDassert(udata.idx_hint < rdcc->nslots);
+            HDassert(rdcc->slot[udata.idx_hint]);
             H5D_rdcc_ent_t *ent = rdcc->slot[udata.idx_hint];
 
             /* If the cached chunk is dirty, it must be flushed to get accurate size */
