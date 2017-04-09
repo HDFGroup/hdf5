@@ -2637,7 +2637,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
 
         if (H5D__mpio_array_gatherv(local_info_array, num_chunks_selected, sizeof(*local_info_array),
                 (void **) &shared_chunks_info_array, &shared_chunks_info_array_num_entries, mpi_size,
-                false, 0, io_info->comm, H5D__cmp_filtered_collective_io_info_entry) < 0)
+                true, 0, io_info->comm, H5D__cmp_filtered_collective_io_info_entry) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather array")
 
         for (i = 0, num_chunks_selected = 0, num_send_requests = 0; i < shared_chunks_info_array_num_entries;) {
