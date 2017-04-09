@@ -1842,7 +1842,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
             /* Gather the new chunk sizes to all processes for a collective re-allocation
              * of the chunks in the file
              */
-            if (H5D__mpio_array_gatherv(io_info, &chunk_list[i], have_chunk_to_process ? 1 : 0, sizeof(*chunk_list),
+            if (H5D__mpio_array_gatherv(&chunk_list[i], have_chunk_to_process ? 1 : 0, sizeof(*chunk_list),
                     (void **) &collective_chunk_list, &collective_chunk_list_num_entries, mpi_size,
                     true, 0, io_info->comm, NULL) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather new chunk sizes")
@@ -2633,9 +2633,9 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
         if (NULL == (mem_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(H5S_sel_iter_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate memory iterator")
 
-        if (H5D__mpio_array_gather(local_info_array, num_chunks_selected, sizeof(*local_info_array),
+        if (H5D__mpio_array_gatherv(local_info_array, num_chunks_selected, sizeof(*local_info_array),
                 (void **) &shared_chunks_info_array, &shared_chunks_info_array_num_entries, mpi_size,
-                false, 0, H5D__cmp_filtered_collective_io_info_entry) < 0)
+                false, 0, io_info->comm, H5D__cmp_filtered_collective_io_info_entry) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather array")
 
         for (i = 0, num_chunks_selected = 0, num_send_requests = 0; i < shared_chunks_info_array_num_entries;) {
