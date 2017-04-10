@@ -1475,10 +1475,6 @@ H5VL_daosm_file_flush(H5VL_daosm_file_t *file)
 
     /* Commit the epoch */
     if(file->my_rank == 0) {
-        /* Commit the epoch */
-        if(0 != (ret = daos_epoch_commit(file->coh, file->epoch, NULL /*state*/, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to commit epoch: %d", ret)
-
         /* Save a snapshot of this epoch if requested */
         /* Disabled until snapshots are supported in DAOS DSMINC */
 #if 0
@@ -1487,13 +1483,9 @@ H5VL_daosm_file_flush(H5VL_daosm_file_t *file)
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "can't create snapshot: %d", ret)
 #endif
 
-        /* Slip the epoch, indicating we don't need to reference
-         * anything prior */
-        /* Disabled until snapshots are supported in DAOS DSMINC */
-#if 0
-        if(0 != (ret = daos_epoch_slip(file->coh, file->epoch, NULL /*state*/, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to slip epoch: %d", ret)
-#endif
+        /* Commit the epoch.  This should slip previous epochs automatically. */
+        if(0 != (ret = daos_epoch_commit(file->coh, file->epoch, NULL /*state*/, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to commit epoch: %d", ret)
     } /* end if */
 
     /* Advance the epoch */
