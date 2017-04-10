@@ -396,12 +396,12 @@ H5D__mpio_array_gatherv(void *local_array, size_t local_array_num_entries,
             if (MPI_SUCCESS != (mpi_code = MPI_Allgatherv(local_array, sendcount, MPI_BYTE,
                     gathered_array, receive_counts_array, displacements_array, MPI_BYTE, comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code)
-        }
+        } /* end if */
         else {
             if (MPI_SUCCESS != (mpi_code = MPI_Gatherv(local_array, sendcount, MPI_BYTE,
                     gathered_array, receive_counts_array, displacements_array, MPI_BYTE, root, comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code)
-        }
+        } /* end else */
 
         if (sort_func) HDqsort(gathered_array, gathered_array_num_entries, array_entry_size, sort_func);
     } /* end if */
@@ -2588,6 +2588,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     if ((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
 
+    /* Each process builds a local list of the chunks they have selected */
     if ((num_chunks_selected = H5SL_count(fm->sel_chunks))) {
         H5D_chunk_info_t *chunk_info;
         H5D_chunk_ud_t    udata;
