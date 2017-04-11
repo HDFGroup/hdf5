@@ -950,12 +950,15 @@ H5C__collective_write(H5F_t *f, hid_t dxpl_id)
 
     /* Get original transfer mode */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
+                    "not a data transfer property list")
+
     if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &orig_xfer_mode) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
 
     /* Get number of entries in collective write list */
     count = (int)H5SL_count(cache_ptr->coll_write_list);
+
     if(count > 0) {
         H5FD_mpio_xfer_t    xfer_mode = H5FD_MPIO_COLLECTIVE;
         H5SL_node_t         *node;
@@ -964,21 +967,34 @@ H5C__collective_write(H5F_t *f, hid_t dxpl_id)
         int                 i;
 
         if(H5P_set(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, \
+                        "can't set MPI-I/O property")
 
         /* Allocate arrays */
-        if(NULL == (length_array = (int *)H5MM_malloc((size_t)count * sizeof(int))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for collective write table length array")
-        if(NULL == (buf_array = (MPI_Aint *)H5MM_malloc((size_t)count * sizeof(MPI_Aint))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for collective buf table length array")
-        if(NULL == (offset_array = (MPI_Aint *)H5MM_malloc((size_t)count * sizeof(MPI_Aint))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for collective offset table length array")
+        if ( NULL == (length_array = 
+                      (int *)H5MM_malloc((size_t)count * sizeof(int))) )
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, \
+            "memory allocation failed for collective write table length array")
+
+        if ( NULL == (buf_array = 
+                 (MPI_Aint *)H5MM_malloc((size_t)count * sizeof(MPI_Aint))) )
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, \
+              "memory allocation failed for collective buf table length array")
+
+        if(NULL == (offset_array = 
+                    (MPI_Aint *)H5MM_malloc((size_t)count * sizeof(MPI_Aint))) )
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, \
+            "memory allocation failed for collective offset table length array")
 
         /* Fill arrays */
         node = H5SL_first(cache_ptr->coll_write_list);
         HDassert(node);
         if(NULL == (entry_ptr = (H5C_cache_entry_t *)H5SL_item(node)))
-            HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't retrieve skip list item")
+            HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, \
+                        "can't retrieve skip list item")
 
         /* Set up initial array position & buffer base address */
         length_array[0] = (int)entry_ptr->size;
@@ -989,8 +1005,10 @@ H5C__collective_write(H5F_t *f, hid_t dxpl_id)
         node = H5SL_next(node);
         i = 1;
         while(node) {
+
             if(NULL == (entry_ptr = (H5C_cache_entry_t *)H5SL_item(node)))
-                HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't retrieve skip list item")
+                HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, \
+                            "can't retrieve skip list item")
 
             /* Set up array position */
             length_array[i] = (int)entry_ptr->size;
@@ -1003,48 +1021,85 @@ H5C__collective_write(H5F_t *f, hid_t dxpl_id)
         } /* end while */
 
         /* Create memory MPI type */
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed(count, length_array, buf_array, MPI_BYTE, &btype)))
+        if(MPI_SUCCESS != (mpi_code = 
+                           MPI_Type_create_hindexed(count, length_array, 
+                                                    buf_array, MPI_BYTE, 
+                                                    &btype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+
         btype_created = TRUE;
+
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&btype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
         /* Create file MPI type */
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed(count, length_array, offset_array, MPI_BYTE, &ftype)))
+        if(MPI_SUCCESS != (mpi_code = 
+                           MPI_Type_create_hindexed(count, length_array, 
+                                                    offset_array, MPI_BYTE, 
+                                                    &ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+
         ftype_created = TRUE;
+
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
         /* Pass buf type, file type to the file driver */
         if(H5FD_mpi_setup_collective(dxpl_id, &btype, &ftype) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, \
+                        "can't set MPI-I/O properties")
 
         /* Write data */
-        if(H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)0, (size_t)1, dxpl_id, base_buf) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to write entries collectively")
+        if(H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)0, 
+                           (size_t)1, dxpl_id, base_buf) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                        "unable to write entries collectively")
+
     } /* end if */
     else {
         MPI_Status mpi_stat;
-        MPI_File mpi_fh_p;
+        MPI_File *mpi_fh_p;
         MPI_File mpi_fh;
+        MPI_Info *info_p;
+        MPI_Info info;
 
         if(H5F_get_mpi_handle(f, (MPI_File **)&mpi_fh_p) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, \
+                        "can't get mpi file handle")
+
         mpi_fh = *(MPI_File*)mpi_fh_p;
 
-        /* just to match up with the 1st MPI_File_set_view from H5FD_mpio_write() */
-        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
+        if (H5F_get_mpi_info(f, &info_p) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, \
+                        "can't get mpi file info")
+
+        info = *info_p;
+
+        /* just to match up with the 1st MPI_File_set_view from 
+         * H5FD_mpio_write() 
+         */
+        if(MPI_SUCCESS != (mpi_code = 
+                           MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, 
+                                             MPI_BYTE, "native", 
+                                             info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
 
         /* just to match up with MPI_File_write_at_all from H5FD_mpio_write() */
         HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
-        if(MPI_SUCCESS != (mpi_code = MPI_File_write_at_all(mpi_fh, (MPI_Offset)0, NULL, 0, MPI_BYTE, &mpi_stat)))
+        if(MPI_SUCCESS != (mpi_code = 
+                           MPI_File_write_at_all(mpi_fh, (MPI_Offset)0, 
+                                                 NULL, 0, MPI_BYTE, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
 
-        /* just to match up with the 2nd MPI_File_set_view (reset) in H5FD_mpio_write() */
-        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)))
+        /* just to match up with the 2nd MPI_File_set_view (reset) in 
+         * H5FD_mpio_write() 
+         */
+        if(MPI_SUCCESS != (mpi_code = 
+                           MPI_File_set_view(mpi_fh, (MPI_Offset)0, MPI_BYTE, 
+                                             MPI_BYTE, "native", 
+                                             info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+
     } /* end else */
 
 done:
@@ -1063,7 +1118,8 @@ done:
     if(orig_xfer_mode != H5FD_MPIO_COLLECTIVE) {
         HDassert(plist);
         if(H5P_set(plist, H5D_XFER_IO_XFER_MODE_NAME, &orig_xfer_mode) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, \
+                        "can't set MPI-I/O property")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
