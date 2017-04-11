@@ -81,6 +81,10 @@
 #define DBLOCK_SIZE(fh, r) H5HF_get_dblock_size_test(fh, r)     /* Size of a direct block in a given row */
 #define DBLOCK_FREE(fh, r) H5HF_get_dblock_free_test(fh, r)     /* Free space in a direct block of a given row */
 
+/* The number of settings for testing: page buffering, file space strategy and persisting free-space */
+#define NUM_PB_FS                   6
+#define PAGE_BUFFER_PAGE_SIZE       4096 
+
 const char *FILENAME[] = {
     "fheap",
     NULL
@@ -16367,21 +16371,31 @@ main(void)
     fheap_test_param_t tparam;          /* Testing parameters */
     H5HF_create_t small_cparam;         /* Creation parameters for "small" heap */
     H5HF_create_t large_cparam;         /* Creation parameters for "large" heap */
-    hid_t	fapl = -1;              /* File access property list for data files */
-    hid_t	fcpl = -1;              /* File creation property list for data files */
-    hid_t	fcpl2 = -1;             /* File creation property list for data files */
+    hid_t	fapl = -1, def_fapl = -1;   /* File access property list for data files */
+    hid_t	pb_fapl = -1;               /* File access property list for data files */
+    hid_t	fcpl = -1, def_fcpl = -1;   /* File creation property list for data files */
     fheap_test_type_t curr_test;        /* Current test being worked on */
-    unsigned    u;                      /* Local index variable */
+    unsigned    u, v;                   /* Local index variable */
     unsigned	nerrors = 0;            /* Cumulative error count */
-    int		ExpressMode;            /* Express testing level */
+    unsigned num_pb_fs = 1;             /* The number of settings to test for page buffering and file space handling */
+    int	ExpressMode;                    /* Express testing level */
 
     /* Reset library */
     h5_reset();
 
-    fapl = h5_fileaccess();
+    def_fapl = h5_fileaccess();
     ExpressMode = GetTestExpress();
+
+    /* 
+     * Caution when turning on ExpressMode 0:
+     *   It will activate testing with different combinations of
+     *       page buffering and file space strategy and the
+     *       running time will be long.
+     */
     if(ExpressMode > 1)
-	printf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
+    else if(ExpressMode == 0)
+        num_pb_fs = NUM_PB_FS;
 
     /* Initialize heap creation parameters */
     init_small_cparam(&small_cparam);
@@ -16392,359 +16406,409 @@ main(void)
     shared_wobj_g = (unsigned char *)H5MM_malloc(shared_obj_size_g);
     shared_robj_g = (unsigned char *)H5MM_malloc(shared_obj_size_g);
 
-    /* create a file creation property list */
-    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+    /* Create a copy def_fapl and enable page buffering */
+    if((pb_fapl = H5Pcopy(def_fapl)) < 0)
         TEST_ERROR
-    if((fcpl2 = H5Pcopy(fcpl)) < 0) TEST_ERROR
+    if(H5Pset_page_buffer_size(pb_fapl, PAGE_BUFFER_PAGE_SIZE, 0, 0) < 0)
+        TEST_ERROR
 
-    /* Set file space strategy and persisting free-space */
-    /* This will be modified later on to run the test with different file space strategy setting */
-    if(H5Pset_file_space_strategy(fcpl2, H5F_FSPACE_STRATEGY_FSM_AGGR, FALSE, (hsize_t)1) < 0)
+    /* Create a file creation property list */
+    if((def_fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         TEST_ERROR
 
     /* Initialize the shared write buffer for objects */
     for(u = 0; u < shared_obj_size_g; u++)
         shared_wobj_g[u] = (unsigned char)u;
 
-    /* Iterate over the testing parameters */
-    for(curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; H5_INC_ENUM(fheap_test_type_t, curr_test)) {
-        /* Clear the testing parameters */
-        HDmemset(&tparam, 0, sizeof(fheap_test_param_t));
-        tparam.actual_id_len = HEAP_ID_LEN;
+    for(v = 0; v < num_pb_fs; v++) {
 
-        /* This will be modified later on to run the test with different file space strategy setting */
-        tparam.my_fcpl = fcpl2;
+        if((fcpl = H5Pcopy(def_fcpl)) < 0) 
+            TEST_ERROR
 
-        /* Set appropriate testing parameters for each test */
-        switch(curr_test) {
-            /* "Normal" testing parameters */
-            case FHEAP_TEST_NORMAL:
-                puts("Testing with normal parameters");
+        switch(v) {
+            case 0:
+                if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, FALSE, (hsize_t)1) < 0)
+                    TEST_ERROR
+                fapl = def_fapl;
+                break;
+            case 1:
+                if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+                    TEST_ERROR
+                fapl = def_fapl;
+                break;
+            case 2:
+                if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+                    TEST_ERROR
+                fapl = def_fapl;
+                break;
+            case 3:
+                if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+                    TEST_ERROR
+                fapl = def_fapl;
+                break;
+            case 4:
+                if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+                    TEST_ERROR
+                fapl = pb_fapl;
+                break;
+            case 5:
+                if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+                    TEST_ERROR
+                fapl = pb_fapl;
                 break;
 
-            /* "Re-open heap" testing parameters */
-            case FHEAP_TEST_REOPEN:
-                puts("Testing with reopen heap flag set");
-                tparam.reopen_heap = FHEAP_TEST_REOPEN;
-                break;
-
-            /* An unknown test? */
-            case FHEAP_TEST_NTESTS:
+            case NUM_PB_FS:
             default:
                 goto error;
-        } /* end switch */
+        }
 
-        /* Test fractal heap creation */
-        nerrors += test_create(fapl, &small_cparam, &tparam);
-        nerrors += test_reopen(fapl, &small_cparam, &tparam);
-        nerrors += test_open_twice(fapl, &small_cparam, &tparam);
-        nerrors += test_delete_open(fapl, &small_cparam, &tparam);
+        /* Iterate over the testing parameters */
+        for(curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; H5_INC_ENUM(fheap_test_type_t, curr_test)) {
+            /* Clear the testing parameters */
+            HDmemset(&tparam, 0, sizeof(fheap_test_param_t));
+            tparam.actual_id_len = HEAP_ID_LEN;
 
-        nerrors += test_id_limits(fapl, &small_cparam, tparam.my_fcpl);
-        nerrors += test_filtered_create(fapl, &small_cparam, tparam.my_fcpl);
-        nerrors += test_size(fapl, &small_cparam, tparam.my_fcpl);
-        nerrors += test_reopen_hdr(fapl, &small_cparam, tparam.my_fcpl);
-
-        {
-        fheap_test_fill_t fill;        /* Size of objects to fill heap blocks with */
-
-        /* Filling with different sized objects */
-        for(fill = FHEAP_TEST_FILL_LARGE; fill < FHEAP_TEST_FILL_N; H5_INC_ENUM(fheap_test_fill_t, fill)) {
-            tparam.fill = fill;
+            /* Set to run with different file space setting */
+            tparam.my_fcpl = fcpl;
 
             /* Set appropriate testing parameters for each test */
-            switch(fill) {
-                /* "Bulk fill" heap blocks with 'large' objects */
-                case FHEAP_TEST_FILL_LARGE:
-                    puts("Bulk-filling blocks w/large objects");
+            switch(curr_test) {
+                /* "Normal" testing parameters */
+                case FHEAP_TEST_NORMAL:
+                    puts("Testing with normal parameters");
                     break;
 
-                /* "Bulk fill" heap blocks with 'single' objects */
-                case FHEAP_TEST_FILL_SINGLE:
-                    puts("Bulk-filling blocks w/single object");
+                /* "Re-open heap" testing parameters */
+                case FHEAP_TEST_REOPEN:
+                    puts("Testing with reopen heap flag set");
+                    tparam.reopen_heap = FHEAP_TEST_REOPEN;
                     break;
 
                 /* An unknown test? */
-                case FHEAP_TEST_FILL_N:
+                case FHEAP_TEST_NTESTS:
                 default:
                     goto error;
             } /* end switch */
 
-            /*
-             * Test fractal heap managed object insertion
-             */
+            /* Test fractal heap creation */
+            nerrors += test_create(fapl, &small_cparam, &tparam);
+            nerrors += test_reopen(fapl, &small_cparam, &tparam);
+            nerrors += test_open_twice(fapl, &small_cparam, &tparam);
+            nerrors += test_delete_open(fapl, &small_cparam, &tparam);
 
-            /* "Weird" sized objects */
-            nerrors += test_man_insert_weird(fapl, &small_cparam, &tparam);
-
-#ifdef ALL_INSERT_TESTS
-            /* "Standard" sized objects, building from simple to complex heaps */
-            nerrors += test_man_insert_first(fapl, &small_cparam, &tparam);
-            nerrors += test_man_insert_second(fapl, &small_cparam, &tparam);
-            nerrors += test_man_insert_root_mult(fapl, &small_cparam, &tparam);
-            nerrors += test_man_insert_force_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_insert_fill_second(fapl, &small_cparam, &tparam);
-            nerrors += test_man_insert_third_direct(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_first_row(fapl, &small_cparam, &tparam);
-            nerrors += test_man_start_second_row(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_second_row(fapl, &small_cparam, &tparam);
-            nerrors += test_man_start_third_row(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_fourth_row(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_all_root_direct(fapl, &small_cparam, &tparam);
-            nerrors += test_man_first_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_second_direct_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_first_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_second_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_second_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_recursive_indirect_row(fapl, &small_cparam, &tparam);
-            nerrors += test_man_start_2nd_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_recursive_indirect_two_deep(fapl, &small_cparam, &tparam);
-            nerrors += test_man_start_3rd_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_first_3rd_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_3rd_recursive_indirect_row(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_all_3rd_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_start_4th_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_first_4th_recursive_indirect(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_4th_recursive_indirect_row(fapl, &small_cparam, &tparam);
-            nerrors += test_man_fill_all_4th_recursive_indirect(fapl, &small_cparam, &tparam);
-#endif /* ALL_INSERT_TESTS */
-            /* If this test fails, uncomment the tests above, which build up to this
-             * level of complexity gradually. -QAK
-             */
-            if(ExpressMode > 1)
-                printf("***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
-            else
-                nerrors += test_man_start_5th_recursive_indirect(fapl, &small_cparam, &tparam);
-
-            /*
-             * Test fractal heap object deletion
-             */
-            /* Simple removal */
-            nerrors += test_man_remove_bogus(fapl, &small_cparam, &tparam);
-            nerrors += test_man_remove_one(fapl, &small_cparam, &tparam);
-            nerrors += test_man_remove_two(fapl, &small_cparam, &tparam);
-            nerrors += test_man_remove_one_larger(fapl, &small_cparam, &tparam);
-            tparam.del_dir = FHEAP_DEL_FORWARD;
-            nerrors += test_man_remove_two_larger(fapl, &small_cparam, &tparam);
-            tparam.del_dir = FHEAP_DEL_REVERSE;
-            nerrors += test_man_remove_two_larger(fapl, &small_cparam, &tparam);
-            tparam.del_dir = FHEAP_DEL_FORWARD;
-            nerrors += test_man_remove_three_larger(fapl, &small_cparam, &tparam);
-            tparam.del_dir = FHEAP_DEL_REVERSE;
-            nerrors += test_man_remove_three_larger(fapl, &small_cparam, &tparam);
-
-            /* Incremental insert & removal */
-            tparam.del_dir = FHEAP_DEL_FORWARD;
-            nerrors += test_man_incr_insert_remove(fapl, &small_cparam, &tparam);
+            nerrors += test_id_limits(fapl, &small_cparam, tparam.my_fcpl);
+            nerrors += test_filtered_create(fapl, &small_cparam, tparam.my_fcpl);
+            nerrors += test_size(fapl, &small_cparam, tparam.my_fcpl);
+            nerrors += test_reopen_hdr(fapl, &small_cparam, tparam.my_fcpl);
 
             {
-            fheap_test_del_dir_t del_dir;        /* Deletion direction */
-            fheap_test_del_drain_t drain_half;   /* Deletion draining */
+            fheap_test_fill_t fill;        /* Size of objects to fill heap blocks with */
 
-            /* More complex removal patterns */
-            for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
-                tparam.del_dir = del_dir;
-                for(drain_half = FHEAP_DEL_DRAIN_ALL; drain_half < FHEAP_DEL_DRAIN_N; H5_INC_ENUM(fheap_test_del_drain_t, drain_half)) {
-                    tparam.drain_half = drain_half;
-                    /* Don't need to test deletion directions when deleting entire heap */
-                    if(tparam.del_dir == FHEAP_DEL_HEAP && tparam.drain_half > FHEAP_DEL_DRAIN_ALL)
+            /* Filling with different sized objects */
+            for(fill = FHEAP_TEST_FILL_LARGE; fill < FHEAP_TEST_FILL_N; H5_INC_ENUM(fheap_test_fill_t, fill)) {
+                tparam.fill = fill;
+
+                /* Set appropriate testing parameters for each test */
+                switch(fill) {
+                    /* "Bulk fill" heap blocks with 'large' objects */
+                    case FHEAP_TEST_FILL_LARGE:
+                        puts("Bulk-filling blocks w/large objects");
                         break;
 
-                    /* Simple insertion patterns */
-                    nerrors += test_man_remove_root_direct(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_remove_two_direct(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_remove_first_row(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
-                    if(ExpressMode > 1)
-                        printf("***Express test mode on.  Some tests skipped\n");
-                    else {
-                        nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
-                        nerrors += test_man_remove_2nd_indirect(fapl, &small_cparam, &tparam);
-                        nerrors += test_man_remove_3rd_indirect(fapl, &small_cparam, &tparam);
-                    } /* end else */
+                    /* "Bulk fill" heap blocks with 'single' objects */
+                    case FHEAP_TEST_FILL_SINGLE:
+                        puts("Bulk-filling blocks w/single object");
+                        break;
 
-                    /* Skip blocks insertion */
-                    /* (covers insertion & deletion of skipped blocks) */
-                    nerrors += test_man_skip_start_block(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_skip_start_block_add_back(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_skip_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_skip_2nd_block(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_skip_2nd_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_one_partial_skip_2nd_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_row_skip_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_skip_direct_skip_indirect_two_rows_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_direct_skip_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_direct_skip_indirect_two_rows_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_2nd_direct_skip_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    if(ExpressMode > 1)
-                        printf("***Express test mode on.  Some tests skipped\n");
-                    else {
-                        nerrors += test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                        nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                        nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                        nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                        nerrors += test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    } /* end else */
+                    /* An unknown test? */
+                    case FHEAP_TEST_FILL_N:
+                    default:
+                        goto error;
+                } /* end switch */
 
-                    /* Fragmented insertion patterns */
-                    /* (covers insertion & deletion of fragmented blocks) */
-                    nerrors += test_man_frag_simple(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_frag_direct(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_frag_2nd_direct(fapl, &small_cparam, &tparam);
-                    nerrors += test_man_frag_3rd_direct(fapl, &small_cparam, &tparam);
+                /*
+                 * Test fractal heap managed object insertion
+                 */
+
+                 /* "Weird" sized objects */
+                 nerrors += test_man_insert_weird(fapl, &small_cparam, &tparam);
+
+#ifdef ALL_INSERT_TESTS
+                 /* "Standard" sized objects, building from simple to complex heaps */
+                 nerrors += test_man_insert_first(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_insert_second(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_insert_root_mult(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_insert_force_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_insert_fill_second(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_insert_third_direct(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_first_row(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_start_second_row(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_second_row(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_start_third_row(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_fourth_row(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_all_root_direct(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_first_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_second_direct_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_first_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_second_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_second_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_recursive_indirect_row(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_start_2nd_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_recursive_indirect_two_deep(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_start_3rd_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_first_3rd_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_3rd_recursive_indirect_row(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_all_3rd_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_start_4th_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_first_4th_recursive_indirect(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_4th_recursive_indirect_row(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_fill_all_4th_recursive_indirect(fapl, &small_cparam, &tparam);
+#endif /* ALL_INSERT_TESTS */
+                /* If this test fails, uncomment the tests above, which build up to this
+                 * level of complexity gradually. -QAK
+                 */
+                if(ExpressMode > 1)
+                    printf("***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
+                else
+                    nerrors += test_man_start_5th_recursive_indirect(fapl, &small_cparam, &tparam);
+
+                /*
+                 * Test fractal heap object deletion
+                 */
+                 /* Simple removal */
+                 nerrors += test_man_remove_bogus(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_remove_one(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_remove_two(fapl, &small_cparam, &tparam);
+                 nerrors += test_man_remove_one_larger(fapl, &small_cparam, &tparam);
+                 tparam.del_dir = FHEAP_DEL_FORWARD;
+                 nerrors += test_man_remove_two_larger(fapl, &small_cparam, &tparam);
+                 tparam.del_dir = FHEAP_DEL_REVERSE;
+                 nerrors += test_man_remove_two_larger(fapl, &small_cparam, &tparam);
+                 tparam.del_dir = FHEAP_DEL_FORWARD;
+                 nerrors += test_man_remove_three_larger(fapl, &small_cparam, &tparam);
+                 tparam.del_dir = FHEAP_DEL_REVERSE;
+                nerrors += test_man_remove_three_larger(fapl, &small_cparam, &tparam);
+
+                /* Incremental insert & removal */
+                tparam.del_dir = FHEAP_DEL_FORWARD;
+                nerrors += test_man_incr_insert_remove(fapl, &small_cparam, &tparam);
+
+                {
+                fheap_test_del_dir_t del_dir;        /* Deletion direction */
+                fheap_test_del_drain_t drain_half;   /* Deletion draining */
+
+                /* More complex removal patterns */
+                for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
+                    tparam.del_dir = del_dir;
+                    for(drain_half = FHEAP_DEL_DRAIN_ALL; drain_half < FHEAP_DEL_DRAIN_N; H5_INC_ENUM(fheap_test_del_drain_t, drain_half)) {
+                        tparam.drain_half = drain_half;
+                        /* Don't need to test deletion directions when deleting entire heap */
+                        if(tparam.del_dir == FHEAP_DEL_HEAP && tparam.drain_half > FHEAP_DEL_DRAIN_ALL)
+                            break;
+
+                        /* Simple insertion patterns */
+                        nerrors += test_man_remove_root_direct(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_remove_two_direct(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_remove_first_row(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
+                        if(ExpressMode > 1)
+                            printf("***Express test mode on.  Some tests skipped\n");
+                        else {
+                            nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
+                            nerrors += test_man_remove_2nd_indirect(fapl, &small_cparam, &tparam);
+                            nerrors += test_man_remove_3rd_indirect(fapl, &small_cparam, &tparam);
+                        } /* end else */
+
+                        /* Skip blocks insertion */
+                        /* (covers insertion & deletion of skipped blocks) */
+                        nerrors += test_man_skip_start_block(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_skip_start_block_add_back(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_skip_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_skip_2nd_block(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_skip_2nd_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_one_partial_skip_2nd_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_row_skip_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_skip_direct_skip_indirect_two_rows_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_direct_skip_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_direct_skip_indirect_two_rows_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_2nd_direct_skip_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        if(ExpressMode > 1)
+                            printf("***Express test mode on.  Some tests skipped\n");
+                        else {
+                            nerrors += test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                            nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                            nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                            nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                            nerrors += test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
+                        } /* end else */
+
+                        /* Fragmented insertion patterns */
+                        /* (covers insertion & deletion of fragmented blocks) */
+                        nerrors += test_man_frag_simple(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_frag_direct(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_frag_2nd_direct(fapl, &small_cparam, &tparam);
+                        nerrors += test_man_frag_3rd_direct(fapl, &small_cparam, &tparam);
+                    } /* end for */
+                } /* end for */
+
+                /* Reset deletion drain parameter */
+                tparam.drain_half = FHEAP_DEL_DRAIN_ALL;
+
+                } /* end block */
+            } /* end for */
+            } /* end block */
+
+            /*
+             * Test fractal heap 'huge' & 'tiny' object insertion & deletion
+             */
+            {
+            fheap_test_del_dir_t del_dir;   /* Deletion direction */
+            unsigned id_len;                /* Length of heap IDs */
+
+            /* Test "normal" & "direct" storage of 'huge' & 'tiny' heap IDs */
+            for(id_len = 0; id_len < 3; id_len++) {
+                /* Set the ID length for this test */
+                small_cparam.id_len = (uint16_t)id_len;
+
+                /* Print information about each test */
+                switch(id_len) {
+                    /* Use "normal" form for 'huge' object's heap IDs */
+                    case 0:
+                        puts("Using 'normal' heap ID format for 'huge' objects");
+                        break;
+
+                    /* Use "direct" form for 'huge' object's heap IDs */
+                    case 1:
+                        puts("Using 'direct' heap ID format for 'huge' objects");
+
+                        /* Adjust actual length of heap IDs for directly storing 'huge' object's file offset & length in heap ID */
+                        tparam.actual_id_len = 17;   /* 1 + 8 (file address size) + 8 (file length size) */
+                        break;
+
+                    /* Use "direct" storage for 'huge' objects and larger IDs for 'tiny' objects */
+                    case 2:
+                        small_cparam.id_len = 37;
+                        puts("Using 'direct' heap ID format for 'huge' objects and larger IDs for 'tiny' objects");
+                        tparam.actual_id_len = 37;
+                        break;
+
+                    /* An unknown test? */
+                    default:
+                        goto error;
+                } /* end switch */
+
+                /* Try several different methods of deleting objects */
+                for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
+                    tparam.del_dir = del_dir;
+
+                    /* Test 'huge' object insert & delete */
+                    nerrors += test_huge_insert_one(fapl, &small_cparam, &tparam);
+                    nerrors += test_huge_insert_two(fapl, &small_cparam, &tparam);
+                    nerrors += test_huge_insert_three(fapl, &small_cparam, &tparam);
+                    nerrors += test_huge_insert_mix(fapl, &small_cparam, &tparam);
+                    nerrors += test_filtered_huge(fapl, &small_cparam, &tparam);
+
+                    /* Test 'tiny' object insert & delete */
+                    nerrors += test_tiny_insert_one(fapl, &small_cparam, &tparam);
+                    nerrors += test_tiny_insert_two(fapl, &small_cparam, &tparam);
+                    nerrors += test_tiny_insert_mix(fapl, &small_cparam, &tparam);
                 } /* end for */
             } /* end for */
 
-            /* Reset deletion drain parameter */
-            tparam.drain_half = FHEAP_DEL_DRAIN_ALL;
-
+            /* Reset the "normal" heap ID lengths */
+            small_cparam.id_len = 0;
+            tparam.actual_id_len = HEAP_ID_LEN;
             } /* end block */
-            } /* end for */
-        } /* end block */
 
-        /*
-         * Test fractal heap 'huge' & 'tiny' object insertion & deletion
-         */
-        {
-        fheap_test_del_dir_t del_dir;   /* Deletion direction */
-        unsigned id_len;                /* Length of heap IDs */
-
-        /* Test "normal" & "direct" storage of 'huge' & 'tiny' heap IDs */
-        for(id_len = 0; id_len < 3; id_len++) {
-            /* Set the ID length for this test */
-            small_cparam.id_len = (uint16_t)id_len;
-
-            /* Print information about each test */
-            switch(id_len) {
-                /* Use "normal" form for 'huge' object's heap IDs */
-                case 0:
-                    puts("Using 'normal' heap ID format for 'huge' objects");
-                    break;
-
-                /* Use "direct" form for 'huge' object's heap IDs */
-                case 1:
-                    puts("Using 'direct' heap ID format for 'huge' objects");
-
-                    /* Adjust actual length of heap IDs for directly storing 'huge' object's file offset & length in heap ID */
-                    tparam.actual_id_len = 17;   /* 1 + 8 (file address size) + 8 (file length size) */
-                    break;
-
-                /* Use "direct" storage for 'huge' objects and larger IDs for 'tiny' objects */
-                case 2:
-                    small_cparam.id_len = 37;
-                    puts("Using 'direct' heap ID format for 'huge' objects and larger IDs for 'tiny' objects");
-                    tparam.actual_id_len = 37;
-                    break;
-
-                /* An unknown test? */
-                default:
-                    goto error;
-            } /* end switch */
+            /* Test I/O filter support */
 
             /* Try several different methods of deleting objects */
+            {
+            fheap_test_del_dir_t del_dir;   /* Deletion direction */
+
             for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
                 tparam.del_dir = del_dir;
 
-                /* Test 'huge' object insert & delete */
-                nerrors += test_huge_insert_one(fapl, &small_cparam, &tparam);
-                nerrors += test_huge_insert_two(fapl, &small_cparam, &tparam);
-                nerrors += test_huge_insert_three(fapl, &small_cparam, &tparam);
-                nerrors += test_huge_insert_mix(fapl, &small_cparam, &tparam);
-                nerrors += test_filtered_huge(fapl, &small_cparam, &tparam);
+                /* Controlled tests */
+                /* XXX: Re-enable file size checks in these tests, after the file has persistent free space tracking working */
+                nerrors += test_filtered_man_root_direct(fapl, &small_cparam, &tparam);
+                nerrors += test_filtered_man_root_indirect(fapl, &small_cparam, &tparam);
 
-                /* Test 'tiny' object insert & delete */
-                nerrors += test_tiny_insert_one(fapl, &small_cparam, &tparam);
-                nerrors += test_tiny_insert_two(fapl, &small_cparam, &tparam);
-                nerrors += test_tiny_insert_mix(fapl, &small_cparam, &tparam);
+                /* Random tests, with compressed blocks */
+                tparam.comp = FHEAP_TEST_COMPRESS;
+                nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(50*1000*1000) : (hsize_t)(25*1000*1000)), fapl, &small_cparam, &tparam);
+                nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(50*1000*1000) : (hsize_t)(2*1000*1000)), fapl, &small_cparam, &tparam);
+
+                /* Reset block compression */
+                tparam.comp = FHEAP_TEST_NO_COMPRESS;
             } /* end for */
-        } /* end for */
+            } /* end block */
 
-        /* Reset the "normal" heap ID lengths */
-        small_cparam.id_len = 0;
-        tparam.actual_id_len = HEAP_ID_LEN;
-        } /* end block */
+            /* Random object insertion & deletion */
+            if(ExpressMode > 1)
+                printf("***Express test mode on.  Some tests skipped\n");
+            else {
+                /* Random tests using "small" heap creation parameters */
+                puts("Using 'small' heap creation parameters");
 
-        /* Test I/O filter support */
+                /* (reduce size of tests when re-opening each time) */
+                /* XXX: Try to speed things up enough that these tests don't have to be reduced when re-opening */
+                tparam.del_dir = FHEAP_DEL_FORWARD;
+                nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &small_cparam, &tparam);
+                nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &small_cparam, &tparam);
 
-        /* Try several different methods of deleting objects */
-        {
-        fheap_test_del_dir_t del_dir;   /* Deletion direction */
+                tparam.del_dir = FHEAP_DEL_HEAP;
+                nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &small_cparam, &tparam);
+                nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &small_cparam, &tparam);
 
-        for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
-            tparam.del_dir = del_dir;
+                /* Random tests using "large" heap creation parameters */
+                puts("Using 'large' heap creation parameters");
+                tparam.actual_id_len = LARGE_HEAP_ID_LEN;
 
-            /* Controlled tests */
-/* XXX: Re-enable file size checks in these tests, after the file has persistent free space tracking working */
-            nerrors += test_filtered_man_root_direct(fapl, &small_cparam, &tparam);
-            nerrors += test_filtered_man_root_indirect(fapl, &small_cparam, &tparam);
+                /* (reduce size of tests when re-opening each time) */
+                /* XXX: Try to speed things up enough that these tests don't have to be reduced when re-opening */
+                tparam.del_dir = FHEAP_DEL_FORWARD;
+                nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &large_cparam, &tparam);
+                nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &large_cparam, &tparam);
 
-            /* Random tests, with compressed blocks */
+                tparam.del_dir = FHEAP_DEL_HEAP;
+                nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &large_cparam, &tparam);
+                nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &large_cparam, &tparam);
+
+                /* Reset the "normal" heap ID length */
+                tparam.actual_id_len = SMALL_HEAP_ID_LEN;
+            } /* end else */
+
+            /* Test object writing support */
+
+            /* Basic object writing */
+            nerrors += test_write(fapl, &small_cparam, &tparam);
+
+            /* Writing objects in heap with filters */
             tparam.comp = FHEAP_TEST_COMPRESS;
-            nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(50*1000*1000) : (hsize_t)(25*1000*1000)), fapl, &small_cparam, &tparam);
-            nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(50*1000*1000) : (hsize_t)(2*1000*1000)), fapl, &small_cparam, &tparam);
+            nerrors += test_write(fapl, &small_cparam, &tparam);
 
             /* Reset block compression */
             tparam.comp = FHEAP_TEST_NO_COMPRESS;
         } /* end for */
-        } /* end block */
 
-        /* Random object insertion & deletion */
-        if(ExpressMode > 1)
-            printf("***Express test mode on.  Some tests skipped\n");
-        else {
-            /* Random tests using "small" heap creation parameters */
-            puts("Using 'small' heap creation parameters");
+        if(H5Pclose(fcpl) < 0)
+            TEST_ERROR
+    } /* end num_pb_fs */
 
-            /* (reduce size of tests when re-opening each time) */
-/* XXX: Try to speed things up enough that these tests don't have to be reduced when re-opening */
-            tparam.del_dir = FHEAP_DEL_FORWARD;
-            nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &small_cparam, &tparam);
-            nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &small_cparam, &tparam);
-
-            tparam.del_dir = FHEAP_DEL_HEAP;
-            nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &small_cparam, &tparam);
-            nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &small_cparam, &tparam);
-
-            /* Random tests using "large" heap creation parameters */
-            puts("Using 'large' heap creation parameters");
-            tparam.actual_id_len = LARGE_HEAP_ID_LEN;
-
-            /* (reduce size of tests when re-opening each time) */
-/* XXX: Try to speed things up enough that these tests don't have to be reduced when re-opening */
-            tparam.del_dir = FHEAP_DEL_FORWARD;
-            nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &large_cparam, &tparam);
-            nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &large_cparam, &tparam);
-
-            tparam.del_dir = FHEAP_DEL_HEAP;
-            nerrors += test_random((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(50*1000*1000)), fapl, &large_cparam, &tparam);
-            nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &large_cparam, &tparam);
-
-            /* Reset the "normal" heap ID length */
-            tparam.actual_id_len = SMALL_HEAP_ID_LEN;
-        } /* end else */
-
-        /* Test object writing support */
-
-        /* Basic object writing */
-        nerrors += test_write(fapl, &small_cparam, &tparam);
-
-        /* Writing objects in heap with filters */
-        tparam.comp = FHEAP_TEST_COMPRESS;
-        nerrors += test_write(fapl, &small_cparam, &tparam);
-
-        /* Reset block compression */
-        tparam.comp = FHEAP_TEST_NO_COMPRESS;
-    } /* end for */
+    /* Tests that address specific bugs */
+    tparam.my_fcpl = def_fcpl;
+    fapl = def_fapl;
 
     /* Tests that address specific bugs */
     nerrors += test_bug1(fapl, &small_cparam, &tparam);
@@ -16763,12 +16827,12 @@ main(void)
     H5MM_xfree(shared_lens_g);
     H5MM_xfree(shared_offs_g);
 
-    if(H5Pclose(fcpl) < 0) TEST_ERROR
-    if(H5Pclose(fcpl2) < 0) TEST_ERROR
+    if(H5Pclose(def_fcpl) < 0) TEST_ERROR
+    if(H5Pclose(pb_fapl) < 0) TEST_ERROR
 
     /* Clean up file used */
 #ifndef QAK
-    h5_cleanup(FILENAME, fapl);
+    h5_cleanup(FILENAME, def_fapl);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment cleanup!\n");
 #endif /* QAK */
@@ -16783,7 +16847,10 @@ error:
         H5MM_xfree(shared_ids_g);
         H5MM_xfree(shared_lens_g);
         H5MM_xfree(shared_offs_g);
-	H5Pclose(fapl);
+        H5Pclose(def_fapl);
+        H5Pclose(pb_fapl);
+        H5Pclose(def_fcpl);
+        H5Pclose(fcpl);
     } H5E_END_TRY;
     return 1;
 } /* end main() */

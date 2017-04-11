@@ -6056,9 +6056,9 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
 #endif
 
     if (headers) {
-        if (rdcc->nhits>0 || rdcc->nmisses>0) {
-            miss_rate = 100.0 * rdcc->nmisses /
-                    (rdcc->nhits + rdcc->nmisses);
+        if (rdcc->stats.nhits>0 || rdcc->stats.nmisses>0) {
+            miss_rate = 100.0 * rdcc->stats.nmisses /
+                    (rdcc->stats.nhits + rdcc->stats.nmisses);
         } else {
             miss_rate = 0.0;
         }
@@ -6069,8 +6069,8 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
         }
 
         fprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n",
-            "raw data chunks", rdcc->nhits, rdcc->nmisses, ascii,
-            rdcc->ninits, (long)(rdcc->nflushes)-(long)(rdcc->ninits));
+            "raw data chunks", rdcc->stats.nhits, rdcc->stats.nmisses, ascii,
+            rdcc->stats.ninits, (long)(rdcc->stats.nflushes)-(long)(rdcc->stats.ninits));
     }
 
 done:

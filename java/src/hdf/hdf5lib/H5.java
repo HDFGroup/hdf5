@@ -7202,6 +7202,88 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native int H5PLget_loading_state() throws HDF5LibraryException;
 
+    /**
+     * H5PLappend inserts the plugin path at the end of the table.
+     *
+     * @param plugin_path
+     *            IN: Path for location of filter plugin libraries.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5PLappend(String plugin_path) throws HDF5LibraryException;
+
+    /**
+     * H5PLprepend inserts the plugin path at the beginning of the table.
+     *
+     * @param plugin_path
+     *            IN: Path for location of filter plugin libraries.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5PLprepend(String plugin_path) throws HDF5LibraryException;
+
+    /**
+     * H5PLreplace replaces the plugin path at the specified index.
+     *
+     * @param plugin_path
+     *            IN: Path for location of filter plugin libraries.
+     * @param index
+     *            IN: The table index (0-based).
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5PLreplace(String plugin_path, int index) throws HDF5LibraryException;
+
+    /**
+     * H5PLinsert inserts the plugin path at the specified index.
+     *
+     * @param plugin_path
+     *            IN: Path for location of filter plugin libraries.
+     * @param index
+     *            IN: The table index (0-based).
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5PLinsert(String plugin_path, int index) throws HDF5LibraryException;
+
+    /**
+     * H5PLremove removes the plugin path at the specified index.
+     *
+     * @param index
+     *            IN: The table index (0-based).
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5PLremove(int index) throws HDF5LibraryException;
+
+    /**
+     * H5PLget retrieves the plugin path at the specified index.
+     *
+     * @param index
+     *            IN: The table index (0-based).
+     *
+     * @return the current path at the index in plugin path table
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native String H5PLget(int index) throws HDF5LibraryException;
+
+    /**
+     * H5PLsize retrieves the size of the current list of plugin paths.
+     *
+     * @return the current number of paths in the plugin path table
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native int H5PLsize() throws HDF5LibraryException;
+
     // ////////////////////////////////////////////////////////////
     // //
     // H5R: HDF5 1.8 Reference API Functions //
