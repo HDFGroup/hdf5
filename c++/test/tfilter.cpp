@@ -36,15 +36,15 @@ using namespace H5;
 
 #include "h5cpputil.h"  // C++ utilility header file
 
-#define DSET_DIM1	  100
-#define DSET_DIM2	  200
+#define DSET_DIM1         100
+#define DSET_DIM2         200
 #define FILTER_CHUNK_DIM1 2
 #define FILTER_CHUNK_DIM2 25
 
 // will do this function later or use it as guideline - BMR - 2007/01/26
 #if 0
 static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl,
-		int if_fletcher32, int corrupted, hsize_t *dset_size)
+                int if_fletcher32, int corrupted, hsize_t *dset_size)
 {
     cerr << "do nothing right now" << endl;
     return(0);
@@ -98,17 +98,17 @@ filter_bogus(size_t nbytes)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_null_filter
+ * Function:    test_null_filter
  *
- * Purpose:	Test null I/O filter by itself.
+ * Purpose:     Test null I/O filter by itself.
  *
- * Return:	None
+ * Return:      None
  *
- * Programmer:	Binh-Minh Ribler (use C version, from dsets.c/test_filters)
- *		January, 2007
+ * Programmer:  Binh-Minh Ribler (use C version, from dsets.c/test_filters)
+ *              January, 2007
  *
  * Modifications:
- *		Note: H5Z interface is not implemented yet.
+ *              Note: H5Z interface is not implemented yet.
  *
  *-------------------------------------------------------------------------
  */
@@ -121,25 +121,25 @@ static void test_null_filter()
     // Output message about test being performed
     SUBTEST("'Null' filter");
     try {
-	//hsize_t  null_size;          // Size of dataset with null filter
+        //hsize_t  null_size;          // Size of dataset with null filter
 
-	// Prepare dataset create property list
-	DSetCreatPropList dsplist;
-	dsplist.setChunk(2, chunk_size);
+        // Prepare dataset create property list
+        DSetCreatPropList dsplist;
+        dsplist.setChunk(2, chunk_size);
 
-	if (H5Zregister (H5Z_BOGUS)<0)
+        if (H5Zregister (H5Z_BOGUS)<0)
             throw Exception("test_null_filter", "H5Zregister failed");
 
-	// Set some pretent filter
-	dsplist.setFilter(H5Z_FILTER_BOGUS);
+        // Set some pretent filter
+        dsplist.setFilter(H5Z_FILTER_BOGUS);
 
-	// this function is just a stub right now; will work on it later - BMR
-	//if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&null_size)<0)
+        // this function is just a stub right now; will work on it later - BMR
+        //if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&null_size)<0)
         //  throw Exception("test_null_filter", "test_filter_internal failed");
 
-	// Close objects.
-	dsplist.close();
-	PASSED();
+        // Close objects.
+        dsplist.close();
+        PASSED();
     } // end of try
 
     // catch all other exceptions
@@ -150,17 +150,17 @@ static void test_null_filter()
 }  // test_null_filter
 
 /*-------------------------------------------------------------------------
- * Function:	test_szip_filter
+ * Function:    test_szip_filter
  *
- * Purpose:	Test SZIP filter by itself.
+ * Purpose:     Test SZIP filter by itself.
  *
- * Return:	None
+ * Return:      None
  *
- * Programmer:	Binh-Minh Ribler (partly from dsets.c/test_filters)
- *		January, 2007
+ * Programmer:  Binh-Minh Ribler (partly from dsets.c/test_filters)
+ *              January, 2007
  *
  * Modifications:
- *		Note: H5Z interface is not implemented yet.
+ *              Note: H5Z interface is not implemented yet.
  *
  *-------------------------------------------------------------------------
  */
@@ -235,7 +235,7 @@ static void test_szip_filter(H5File& file1)
         delete[] tconv_buf;
     } // if szip presents
     else {
-	SKIPPED();
+        SKIPPED();
     }
 
 #else /* H5_HAVE_FILTER_SZIP */
@@ -269,9 +269,9 @@ void test_filters()
 
         H5File file1(FILE1, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
-	// Test basic VL string datatype
-	test_null_filter();
-	test_szip_filter(file1);
+        // Test basic VL string datatype
+        test_null_filter();
+        test_szip_filter(file1);
     }
     catch (Exception& E)
     {
@@ -280,13 +280,13 @@ void test_filters()
 }   // test_filters()
 
 /*-------------------------------------------------------------------------
- * Function:	cleanup_filters
+ * Function:    cleanup_filters
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:     Cleanup temporary test files
  *
- * Return:	none
+ * Return:      none
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              September 10, 1999
  *
  * Modifications:

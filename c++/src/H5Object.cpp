@@ -32,23 +32,23 @@
 #include "H5File.h"
 #include "H5DataSet.h"
 #include "H5Attribute.h"
-#include "H5private.h"		// for HDmemset
+#include "H5private.h"          // for HDmemset
 
 namespace H5 {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:	H5Object default constructor (protected)
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object default constructor (protected)
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Object::H5Object() : H5Location() {}
 
 //--------------------------------------------------------------------------
-// Function:	H5Object overloaded constructor (protected)
-// Purpose	Creates an H5Object object using the id of an existing HDF5
-// 		object.
-// Parameters	object_id - IN: Id of an existing HDF5 object
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object overloaded constructor (protected)
+// Purpose      Creates an H5Object object using the id of an existing HDF5
+//              object.
+// Parameters   object_id - IN: Id of an existing HDF5 object
+// Programmer   Binh-Minh Ribler - 2000
 // *** Deprecation warning ***
 // This constructor is no longer appropriate because the data member "id" had
 // been moved to the sub-classes.  It will be removed in 1.10 release.  If its
@@ -59,11 +59,11 @@ H5Object::H5Object() : H5Location() {}
 //H5Object::H5Object(const hid_t object_id) : H5Location() {}
 
 //--------------------------------------------------------------------------
-// Function:	H5Object copy constructor
-///\brief	Copy constructor: makes a copy of the original H5Object
-///		instance.
-///\param	original - IN: H5Object instance to copy
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object copy constructor
+///\brief       Copy constructor: makes a copy of the original H5Object
+///             instance.
+///\param       original - IN: H5Object instance to copy
+// Programmer   Binh-Minh Ribler - 2000
 // *** Deprecation warning ***
 // This constructor is no longer appropriate because the data member "id" had
 // been moved to the sub-classes.  It is removed from 1.8.15 because it is
@@ -183,9 +183,9 @@ ssize_t H5Object::getObjName(H5std_string& obj_name, size_t len) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object destructor
-///\brief	Noop destructor.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object destructor
+///\brief       Noop destructor.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Object::~H5Object() {}
 #endif // DOXYGEN_SHOULD_SKIP_THIS

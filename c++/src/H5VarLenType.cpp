@@ -30,37 +30,37 @@ namespace H5 {
 
 
 //--------------------------------------------------------------------------
-// Function:	VarLenType default constructor
-///\brief	Default constructor: Creates a stub variable-length datatype.
+// Function:    VarLenType default constructor
+///\brief       Default constructor: Creates a stub variable-length datatype.
 //--------------------------------------------------------------------------
 VarLenType::VarLenType() : DataType() {}
 
 //--------------------------------------------------------------------------
-// Function:	VarLenType overloaded constructor
-///\brief	Creates an VarLenType object using an existing id.
-///\param	existing_id - IN: Id of an existing datatype
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    VarLenType overloaded constructor
+///\brief       Creates an VarLenType object using an existing id.
+///\param       existing_id - IN: Id of an existing datatype
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 VarLenType::VarLenType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
-// Function:	VarLenType copy constructor
-///\brief	Copy constructor: makes a copy of the original VarLenType object.
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    VarLenType copy constructor
+///\brief       Copy constructor: makes a copy of the original VarLenType object.
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 VarLenType::VarLenType(const VarLenType& original) : DataType(original) {}
 
 //--------------------------------------------------------------------------
-// Function:	VarLenType overloaded constructor
-///\brief	Creates a new variable-length datatype based on the specified
-///		\a base_type.
-///\param	base_type - IN: Pointer to existing datatype
-///\exception	H5::DataTypeIException
+// Function:    VarLenType overloaded constructor
+///\brief       Creates a new variable-length datatype based on the specified
+///             \a base_type.
+///\param       base_type - IN: Pointer to existing datatype
+///\exception   H5::DataTypeIException
 // Description
-//		DataType passed by pointer to avoid clashing with copy
-//		constructor.
-// Programmer	Binh-Minh Ribler - May, 2004
+//              DataType passed by pointer to avoid clashing with copy
+//              constructor.
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 VarLenType::VarLenType(const DataType* base_type) : DataType()
 {
@@ -73,9 +73,9 @@ VarLenType::VarLenType(const DataType* base_type) : DataType()
 }
 
 //--------------------------------------------------------------------------
-// Function:	VarLenType destructor
-///\brief	Properly terminates access to this datatype.
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    VarLenType destructor
+///\brief       Properly terminates access to this datatype.
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 VarLenType::~VarLenType() {}
 

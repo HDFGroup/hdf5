@@ -18,22 +18,22 @@
 #define __H5Object_H
 
 #include "H5Location.h"
-#include "H5Classes.h"		// constains forward class declarations
+#include "H5Classes.h"          // constains forward class declarations
 
 // H5Object is a baseclass.  It has these subclasses:
 // Group, DataSet, and DataType.
 // DataType, in turn, has several specific datatypes as subclasses.
 // Modification:
-//	Sept 18, 2012: Added class H5Location in between IdComponent and
-//		H5Object.  An H5File now inherits from H5Location.  All HDF5
-//		wrappers in H5Object are moved up to H5Location.  H5Object
-//		is left mostly empty for future wrappers that are only for
-//		group, dataset, and named datatype.  Note that the reason for
-//		adding H5Location instead of simply moving H5File to be under
-//		H5Object is H5File is not an HDF5 object, and renaming H5Object
-//		to H5Location will risk breaking user applications.
-//		-BMR
-//	Apr 2, 2014: Added wrapper getObjName for H5Iget_name 
+//      Sept 18, 2012: Added class H5Location in between IdComponent and
+//              H5Object.  An H5File now inherits from H5Location.  All HDF5
+//              wrappers in H5Object are moved up to H5Location.  H5Object
+//              is left mostly empty for future wrappers that are only for
+//              group, dataset, and named datatype.  Note that the reason for
+//              adding H5Location instead of simply moving H5File to be under
+//              H5Object is H5File is not an HDF5 object, and renaming H5Object
+//              to H5Location will risk breaking user applications.
+//              -BMR
+//      Apr 2, 2014: Added wrapper getObjName for H5Iget_name 
 namespace H5 {
 
 /*! \class H5Object
@@ -45,18 +45,18 @@ namespace H5 {
 class H5_DLLCPP H5Object : public H5Location {
    public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Gets the name of this HDF5 object, i.e., Group, DataSet, or
-	// DataType.  These should have const but are retiring anyway.
-	ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
-	ssize_t getObjName(H5std_string& obj_name, size_t len = 0) const;
-	H5std_string getObjName() const;
+        // Gets the name of this HDF5 object, i.e., Group, DataSet, or
+        // DataType.  These should have const but are retiring anyway.
+        ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
+        ssize_t getObjName(H5std_string& obj_name, size_t len = 0) const;
+        H5std_string getObjName() const;
 
-	// Noop destructor.
-	virtual ~H5Object();
+        // Noop destructor.
+        virtual ~H5Object();
 
    protected:
-	// Default constructor
-	H5Object();
+        // Default constructor
+        H5Object();
 
         // *** Deprecation warning ***
         // The following two constructors are no longer appropriate after the
@@ -65,11 +65,11 @@ class H5_DLLCPP H5Object : public H5Location {
         // other will be removed from 1.10 release, and then from 1.8 if its
         // removal does not raise any problems in two 1.10 releases.
 
-	// Creates a copy of an existing object giving the object id
-	H5Object( const hid_t object_id );
+        // Creates a copy of an existing object giving the object id
+        H5Object( const hid_t object_id );
 
-	// Copy constructor: makes copy of an H5Object object.
-	// H5Object(const H5Object& original);
+        // Copy constructor: makes copy of an H5Object object.
+        // H5Object(const H5Object& original);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

@@ -35,18 +35,18 @@
 namespace H5 {
 
 //--------------------------------------------------------------------------
-// Function:	FloatType default constructor
-///\brief	Default constructor: Creates a stub floating-point datatype
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    FloatType default constructor
+///\brief       Default constructor: Creates a stub floating-point datatype
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType::FloatType() {}
 
 //--------------------------------------------------------------------------
-// Function:	FloatType overloaded constructor
-///\brief	Creates a floating-point datatype using a predefined type.
-///\param	pred_type - IN: Predefined datatype
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    FloatType overloaded constructor
+///\brief       Creates a floating-point datatype using a predefined type.
+///\param       pred_type - IN: Predefined datatype
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType::FloatType( const PredType& pred_type ) : AtomType()
 {
@@ -55,29 +55,29 @@ FloatType::FloatType( const PredType& pred_type ) : AtomType()
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType overloaded constructor
-///\brief	Creates an FloatType object using the id of an existing
-///		datatype.
-///\param	existing_id - IN: Id of an existing datatype
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    FloatType overloaded constructor
+///\brief       Creates an FloatType object using the id of an existing
+///             datatype.
+///\param       existing_id - IN: Id of an existing datatype
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType::FloatType( const hid_t existing_id ) : AtomType( existing_id ) {}
 
 //--------------------------------------------------------------------------
-// Function:	FloatType copy constructor
-///\brief	Copy constructor: makes a copy of the original FloatType object.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    FloatType copy constructor
+///\brief       Copy constructor: makes a copy of the original FloatType object.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType::FloatType( const FloatType&  original ) : AtomType( original ){}
 
 //--------------------------------------------------------------------------
-// Function:	EnumType overloaded constructor
-///\brief	Gets the floating-point datatype of the specified dataset
-///\param	dataset - IN: Dataset that this floating-point datatype
-///		associates with
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    EnumType overloaded constructor
+///\brief       Gets the floating-point datatype of the specified dataset
+///\param       dataset - IN: Dataset that this floating-point datatype
+///             associates with
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType::FloatType( const DataSet& dataset ) : AtomType()
 {
@@ -91,15 +91,15 @@ FloatType::FloatType( const DataSet& dataset ) : AtomType()
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType::getFields
-///\brief	Retrieves floating point datatype bit field information.
-///\param	spos  - OUT: Retrieved floating-point sign bit
-///\param	epos  - OUT: Retrieved exponent bit-position
-///\param	esize - OUT: Retrieved size of exponent, in bits
-///\param	mpos  - OUT: Retrieved mantissa bit-position
-///\param	msize - OUT: Retrieved size of mantissa, in bits
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    FloatType::getFields
+///\brief       Retrieves floating point datatype bit field information.
+///\param       spos  - OUT: Retrieved floating-point sign bit
+///\param       epos  - OUT: Retrieved exponent bit-position
+///\param       esize - OUT: Retrieved size of exponent, in bits
+///\param       mpos  - OUT: Retrieved mantissa bit-position
+///\param       msize - OUT: Retrieved size of mantissa, in bits
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FloatType::getFields( size_t& spos, size_t& epos, size_t& esize, size_t& mpos, size_t& msize ) const
 {
@@ -111,16 +111,16 @@ void FloatType::getFields( size_t& spos, size_t& epos, size_t& esize, size_t& mp
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType::setFields
-///\brief	Sets locations and sizes of floating point bit fields.
-///\param	spos  - OUT: Sign position, i.e., the bit offset of the
-///		floating-point sign bit.
-///\param	epos  - OUT: Exponent bit position
-///\param	esize - OUT: Size of exponent, in bits
-///\param	mpos  - OUT: Mantissa bit-position
-///\param	msize - OUT: Size of mantissa, in bits
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    FloatType::setFields
+///\brief       Sets locations and sizes of floating point bit fields.
+///\param       spos  - OUT: Sign position, i.e., the bit offset of the
+///             floating-point sign bit.
+///\param       epos  - OUT: Exponent bit position
+///\param       esize - OUT: Size of exponent, in bits
+///\param       mpos  - OUT: Mantissa bit-position
+///\param       msize - OUT: Size of mantissa, in bits
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FloatType::setFields( size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize ) const
 {
@@ -132,11 +132,11 @@ void FloatType::setFields( size_t spos, size_t epos, size_t esize, size_t mpos, 
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType::getEbias
-///\brief	Retrieves the exponent bias of a floating-point type.
-///\return	Exponent bias
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    FloatType::getEbias
+///\brief       Retrieves the exponent bias of a floating-point type.
+///\return      Exponent bias
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 size_t FloatType::getEbias() const
 {
@@ -150,11 +150,11 @@ size_t FloatType::getEbias() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType::setEbias
-///\brief	Sets the exponent bias of a floating-point type.
-///\param	ebias - Exponent bias value
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    FloatType::setEbias
+///\brief       Sets the exponent bias of a floating-point type.
+///\param       ebias - Exponent bias value
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FloatType::setEbias( size_t ebias ) const
 {
@@ -166,19 +166,19 @@ void FloatType::setEbias( size_t ebias ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType::getNorm
-///\brief	Retrieves mantissa normalization of a floating-point datatype.
-///\param	norm_string - OUT: Text string of the normalization type
-///\return	Valid normalization type, which can be:
-///		\li \c H5T_NORM_IMPLIED (0) - MSB of mantissa is not stored
-///		\li \c H5T_NORM_MSBSET (1) - MSB of mantissa is always 1
-///		\li \c H5T_NORM_NONE (2) - Mantissa is not normalized
-///\exception	H5::DataTypeIException
+// Function:    FloatType::getNorm
+///\brief       Retrieves mantissa normalization of a floating-point datatype.
+///\param       norm_string - OUT: Text string of the normalization type
+///\return      Valid normalization type, which can be:
+///             \li \c H5T_NORM_IMPLIED (0) - MSB of mantissa is not stored
+///             \li \c H5T_NORM_MSBSET (1) - MSB of mantissa is always 1
+///             \li \c H5T_NORM_NONE (2) - Mantissa is not normalized
+///\exception   H5::DataTypeIException
 ///\par Description
-///		For your convenience, this function also provides the text
-///		string of the returned normalization type, via parameter
-///		\a norm_string.
-// Programmer	Binh-Minh Ribler - 2000
+///             For your convenience, this function also provides the text
+///             string of the returned normalization type, via parameter
+///             \a norm_string.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5T_norm_t FloatType::getNorm( H5std_string& norm_string ) const
 {
@@ -198,16 +198,16 @@ H5T_norm_t FloatType::getNorm( H5std_string& norm_string ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType::setNorm
-///\brief	Sets the mantissa normalization of a floating-point datatype.
-///\param	norm - IN: Mantissa normalization type
-///\exception	H5::DataTypeIException
+// Function:    FloatType::setNorm
+///\brief       Sets the mantissa normalization of a floating-point datatype.
+///\param       norm - IN: Mantissa normalization type
+///\exception   H5::DataTypeIException
 ///\par Description
-///		Valid values for normalization type include:
-///		\li \c H5T_NORM_IMPLIED (0) - MSB of mantissa is not stored
-///		\li \c H5T_NORM_MSBSET (1) - MSB of mantissa is always 1
-///		\li \c H5T_NORM_NONE (2) - Mantissa is not normalized
-// Programmer	Binh-Minh Ribler - 2000
+///             Valid values for normalization type include:
+///             \li \c H5T_NORM_IMPLIED (0) - MSB of mantissa is not stored
+///             \li \c H5T_NORM_MSBSET (1) - MSB of mantissa is always 1
+///             \li \c H5T_NORM_NONE (2) - Mantissa is not normalized
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FloatType::setNorm( H5T_norm_t norm ) const
 {
@@ -219,19 +219,19 @@ void FloatType::setNorm( H5T_norm_t norm ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType::getInpad
-///\brief	Retrieves the internal padding type for unused bits in
-///		this floating-point datatypes.
-///\return	Internal padding type, which can be:
-///		\li \c H5T_PAD_ZERO (0) - Set background to zeros
-///		\li \c H5T_PAD_ONE (1) - Set background to ones
-///		\li \c H5T_PAD_BACKGROUND (2) - Leave background alone
-///\exception	H5::DataTypeIException
+// Function:    FloatType::getInpad
+///\brief       Retrieves the internal padding type for unused bits in
+///             this floating-point datatypes.
+///\return      Internal padding type, which can be:
+///             \li \c H5T_PAD_ZERO (0) - Set background to zeros
+///             \li \c H5T_PAD_ONE (1) - Set background to ones
+///             \li \c H5T_PAD_BACKGROUND (2) - Leave background alone
+///\exception   H5::DataTypeIException
 ///\par Description
-///		For your convenience, this function also provides the text
-///		string of the returned internal padding type, via parameter
-///		\a pad_string.
-// Programmer	Binh-Minh Ribler - 2000
+///             For your convenience, this function also provides the text
+///             string of the returned internal padding type, via parameter
+///             \a pad_string.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5T_pad_t FloatType::getInpad( H5std_string& pad_string ) const
 {
@@ -251,21 +251,21 @@ H5T_pad_t FloatType::getInpad( H5std_string& pad_string ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType::setInpad
-///\brief	Fills unused internal floating point bits.
-///\param	inpad - IN: Internal padding type
-///\exception	H5::DataTypeIException
+// Function:    FloatType::setInpad
+///\brief       Fills unused internal floating point bits.
+///\param       inpad - IN: Internal padding type
+///\exception   H5::DataTypeIException
 ///\par Description
-///		If any internal bits of a floating point type are unused
-///		(that is, those significant bits which are not part of the
-///		sign, exponent, or mantissa), then they will be filled
-///		according to the padding value provided by \a inpad.
+///             If any internal bits of a floating point type are unused
+///             (that is, those significant bits which are not part of the
+///             sign, exponent, or mantissa), then they will be filled
+///             according to the padding value provided by \a inpad.
 ///\par
-///		Valid values for normalization type include:
-///		\li \c H5T_PAD_ZERO (0) - Set background to zeros
-///		\li \c H5T_PAD_ONE (1) - Set background to ones
-///		\li \c H5T_PAD_BACKGROUND (2) - Leave background alone
-// Programmer	Binh-Minh Ribler - 2000
+///             Valid values for normalization type include:
+///             \li \c H5T_PAD_ZERO (0) - Set background to zeros
+///             \li \c H5T_PAD_ONE (1) - Set background to ones
+///             \li \c H5T_PAD_BACKGROUND (2) - Leave background alone
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FloatType::setInpad( H5T_pad_t inpad ) const
 {
@@ -277,9 +277,9 @@ void FloatType::setInpad( H5T_pad_t inpad ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	FloatType destructor
-///\brief	Noop destructor.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    FloatType destructor
+///\brief       Noop destructor.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType::~FloatType() {}
 
