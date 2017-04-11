@@ -113,8 +113,8 @@ int main (void)
        * Write the data to the hyperslab.
        */
       int       data1[3][3] = { {1, 1, 1},       /* data to write */
-				{1, 1, 1},
-				{1, 1, 1} };
+                                {1, 1, 1},
+                                {1, 1, 1} };
       dataset.write( data1, PredType::NATIVE_INT, mspace1, fspace1 );
 
       /*
@@ -187,16 +187,16 @@ int main (void)
       /*
        * Resulting dataset
        *
-       *	 1 1 1 3 3
-       *	 1 1 1 3 3
-       *	 1 1 1 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
+       *         1 1 1 3 3
+       *         1 1 1 3 3
+       *         1 1 1 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
        */
       /*
        * Display the result.

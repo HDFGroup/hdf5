@@ -46,17 +46,17 @@ namespace H5 {
 #endif  // H5_NO_STD
 
 //--------------------------------------------------------------------------
-// Function:	Group default constructor
-///\brief	Default constructor: creates a stub Group.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    Group default constructor
+///\brief       Default constructor: creates a stub Group.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
-// Function:	Group copy constructor
-///\brief	Copy constructor: makes a copy of the original Group object.
-///\param	original - IN: Original group to copy
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    Group copy constructor
+///\brief       Copy constructor: makes a copy of the original Group object.
+///\param       original - IN: Original group to copy
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group::Group(const Group& original) : H5Object(), CommonFG(), id(original.id)
 {
@@ -64,10 +64,10 @@ Group::Group(const Group& original) : H5Object(), CommonFG(), id(original.id)
 }
 
 //--------------------------------------------------------------------------
-// Function:	Group::getLocId
-///\brief	Returns the id of this group.
-///\return	Id of this group
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    Group::getLocId
+///\brief       Returns the id of this group.
+///\return      Id of this group
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 hid_t Group::getLocId() const
 {
@@ -75,10 +75,10 @@ hid_t Group::getLocId() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	Group overloaded constructor
-///\brief	Creates a Group object using the id of an existing group.
-///\param	existing_id - IN: Id of an existing group
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    Group overloaded constructor
+///\brief       Creates a Group object using the id of an existing group.
+///\param       existing_id - IN: Id of an existing group
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group::Group(const hid_t existing_id) : H5Object(), CommonFG(), id(existing_id)
 {
@@ -86,16 +86,16 @@ Group::Group(const hid_t existing_id) : H5Object(), CommonFG(), id(existing_id)
 }
 
 //--------------------------------------------------------------------------
-// Function:	Group overload constructor - dereference
-///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
-///\param	loc - IN: Specifying location referenced object is in
-///\param	ref - IN: Reference pointer
-///\param	ref_type - IN: Reference type - default to H5R_OBJECT
-///\exception	H5::ReferenceException
+// Function:    Group overload constructor - dereference
+///\brief       Given a reference, ref, to an hdf5 group, creates a Group object
+///\param       loc - IN: Specifying location referenced object is in
+///\param       ref - IN: Reference pointer
+///\param       ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception   H5::ReferenceException
 ///\par Description
-///		\c obj can be DataSet, Group, or named DataType, that
-///		is a datatype that has been named by DataType::commit.
-// Programmer	Binh-Minh Ribler - Oct, 2006
+///             \c obj can be DataSet, Group, or named DataType, that
+///             is a datatype that has been named by DataType::commit.
+// Programmer   Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
 Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type) : H5Object(), id(H5I_INVALID_HID)
 {
@@ -103,13 +103,13 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type) : H5Ob
 }
 
 //--------------------------------------------------------------------------
-// Function:	Group overload constructor - dereference
-///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
-///\param	attr - IN: Specifying location where the referenced object is in
-///\param	ref - IN: Reference pointer
-///\param	ref_type - IN: Reference type - default to H5R_OBJECT
-///\exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - Oct, 2006
+// Function:    Group overload constructor - dereference
+///\brief       Given a reference, ref, to an hdf5 group, creates a Group object
+///\param       attr - IN: Specifying location where the referenced object is in
+///\param       ref - IN: Reference pointer
+///\param       ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception   H5::ReferenceException
+// Programmer   Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
 Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object(), id(H5I_INVALID_HID)
 {
@@ -118,14 +118,14 @@ Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Ob
 
 //--------------------------------------------------------------------------
 // Function:    Group::getId
-///\brief	Get the id of this group
-///\return	Group identifier
+///\brief       Get the id of this group
+///\return      Group identifier
 // Modification:
 //      May 2008 - BMR
-//		Class hierarchy is revised to address bugzilla 1068.  Class
-//		AbstractDS and Attribute are moved out of H5Object.  In
-//		addition, member IdComponent::id is moved into subclasses, and
-//		IdComponent::getId now becomes pure virtual function.
+//              Class hierarchy is revised to address bugzilla 1068.  Class
+//              AbstractDS and Attribute are moved out of H5Object.  In
+//              addition, member IdComponent::id is moved into subclasses, and
+//              IdComponent::getId now becomes pure virtual function.
 // Programmer   Binh-Minh Ribler - May, 2008
 //--------------------------------------------------------------------------
 hid_t Group::getId() const
@@ -139,11 +139,11 @@ hid_t Group::getId() const
 ///\brief       Sets the identifier of this object to a new value.
 ///
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
-///		object fails
+///             object fails
 // Description:
-//		The underlaying reference counting in the C library ensures
-//		that the current valid id of this object is properly closed.
-//		Then the object's id is reset to the new id.
+//              The underlaying reference counting in the C library ensures
+//              that the current valid id of this object is properly closed.
+//              Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void Group::p_setId(const hid_t new_id)
@@ -161,39 +161,39 @@ void Group::p_setId(const hid_t new_id)
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:	Group::close
-///\brief	Closes this group.
+// Function:    Group::close
+///\brief       Closes this group.
 ///
-///\exception	H5::GroupIException
-// Programmer	Binh-Minh Ribler - Mar 9, 2005
+///\exception   H5::GroupIException
+// Programmer   Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------
 void Group::close()
 {
     if (p_valid_id(id))
     {
-	herr_t ret_value = H5Gclose( id );
-	if( ret_value < 0 )
-	{
-	    throw GroupIException("Group::close", "H5Gclose failed");
-	}
-	// reset the id
-	id = H5I_INVALID_HID;
+        herr_t ret_value = H5Gclose( id );
+        if( ret_value < 0 )
+        {
+            throw GroupIException("Group::close", "H5Gclose failed");
+        }
+        // reset the id
+        id = H5I_INVALID_HID;
     }
 }
 
 //--------------------------------------------------------------------------
-// Function:	Group::throwException
-///\brief	Throws H5::GroupIException.
-///\param	func_name - Name of the function where failure occurs
-///\param	msg       - Message describing the failure
-///\exception	H5::GroupIException
+// Function:    Group::throwException
+///\brief       Throws H5::GroupIException.
+///\param       func_name - Name of the function where failure occurs
+///\param       msg       - Message describing the failure
+///\exception   H5::GroupIException
 // Description
-//		This function is used in CommonFG implementation so that
-//		proper exception can be thrown for file or group.  The
-//		argument func_name is a member of CommonFG and "Group::"
-//		will be inserted to indicate the function called is an
-//		implementation of Group.
-// Programmer	Binh-Minh Ribler - 2000
+//              This function is used in CommonFG implementation so that
+//              proper exception can be thrown for file or group.  The
+//              argument func_name is a member of CommonFG and "Group::"
+//              will be inserted to indicate the function called is an
+//              implementation of Group.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void Group::throwException(const H5std_string& func_name, const H5std_string& msg) const
 {
@@ -203,22 +203,22 @@ void Group::throwException(const H5std_string& func_name, const H5std_string& ms
 }
 
 //--------------------------------------------------------------------------
-// Function:	Group destructor
-///\brief	Properly terminates access to this group.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    Group destructor
+///\brief       Properly terminates access to this group.
+// Programmer   Binh-Minh Ribler - 2000
 // Modification
-//		- Replaced resetIdComponent() with decRefCount() to use C
-//		library ID reference counting mechanism - BMR, Feb 20, 2005
-//		- Replaced decRefCount with close() to let the C library
-//		handle the reference counting - BMR, Jun 1, 2006
+//              - Replaced resetIdComponent() with decRefCount() to use C
+//              library ID reference counting mechanism - BMR, Feb 20, 2005
+//              - Replaced decRefCount with close() to let the C library
+//              handle the reference counting - BMR, Jun 1, 2006
 //--------------------------------------------------------------------------
 Group::~Group()
 {
     try {
-	close();
+        close();
     }
     catch (Exception& close_error) {
-	cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
+        cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
 }
 

@@ -30,11 +30,11 @@
     using namespace H5;
 #endif
 
-const H5std_string	FILE_NAME( "SDS.h5" );
-const H5std_string	DATASET_NAME( "IntArray" );
-const int 	NX = 5;                    // dataset dimensions
-const int 	NY = 6;
-const int 	RANK = 2;
+const H5std_string      FILE_NAME( "SDS.h5" );
+const H5std_string      DATASET_NAME( "IntArray" );
+const int       NX = 5;                    // dataset dimensions
+const int       NY = 6;
+const int       RANK = 2;
 
 int main (void)
 {
@@ -46,7 +46,7 @@ int main (void)
    for (j = 0; j < NX; j++)
    {
       for (i = 0; i < NY; i++)
-	 data[j][i] = i + j;
+         data[j][i] = i + j;
    }
    /*
     * 0 1 2 3 4 5

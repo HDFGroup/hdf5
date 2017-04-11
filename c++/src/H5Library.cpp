@@ -36,11 +36,11 @@
 namespace H5 {
 
 //--------------------------------------------------------------------------
-// Function:	H5Library::open (static)
-///\brief	Initializes the HDF5 library.
+// Function:    H5Library::open (static)
+///\brief       Initializes the HDF5 library.
 ///
-///\exception	H5::LibraryIException
-// Programmer	Binh-Minh Ribler - 2000
+///\exception   H5::LibraryIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Library::open()
 {
@@ -52,11 +52,11 @@ void H5Library::open()
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Library::close (static)
-///\brief	Flushes all data to disk, closes files, and cleans up memory.
+// Function:    H5Library::close (static)
+///\brief       Flushes all data to disk, closes files, and cleans up memory.
 ///
-///\exception	H5::LibraryIException
-// Programmer	Binh-Minh Ribler - 2000
+///\exception   H5::LibraryIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Library::close()
 {
@@ -68,14 +68,14 @@ void H5Library::close()
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Library::dontAtExit (static)
-///\brief	Instructs library not to install the C \c atexit cleanup routine
+// Function:    H5Library::dontAtExit (static)
+///\brief       Instructs library not to install the C \c atexit cleanup routine
 ///
-///\exception	H5::LibraryIException
-// Programmer	Binh-Minh Ribler - 2000
+///\exception   H5::LibraryIException
+// Programmer   Binh-Minh Ribler - 2000
 // Modification
-//		Removed the check for failure returned from H5dont_atexit.
-//		will be fixed to not fail (HDFFV-9540)
+//              Removed the check for failure returned from H5dont_atexit.
+//              will be fixed to not fail (HDFFV-9540)
 //--------------------------------------------------------------------------
 void H5Library::dontAtExit()
 {
@@ -83,13 +83,13 @@ void H5Library::dontAtExit()
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Library::getLibVersion (static)
-///\brief	Returns the HDF library release number.
-///\param	majnum - OUT: Major version of the library
-///\param	minnum - OUT: Minor version of the library
-///\param	relnum - OUT: Release number of the library
-///\exception	H5::LibraryIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Library::getLibVersion (static)
+///\brief       Returns the HDF library release number.
+///\param       majnum - OUT: Major version of the library
+///\param       minnum - OUT: Minor version of the library
+///\param       relnum - OUT: Release number of the library
+///\exception   H5::LibraryIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Library::getLibVersion( unsigned& majnum, unsigned& minnum, unsigned& relnum )
 {
@@ -101,18 +101,18 @@ void H5Library::getLibVersion( unsigned& majnum, unsigned& minnum, unsigned& rel
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Library::checkVersion (static)
-///\brief	Verifies that the arguments match the version numbers
-///		compiled into the library
-///\param	majnum - IN: Major version of the library
-///\param	minnum - IN: Minor version of the library
-///\param	relnum - IN: Release number of the library
-///\exception	H5::LibraryIException
+// Function:    H5Library::checkVersion (static)
+///\brief       Verifies that the arguments match the version numbers
+///             compiled into the library
+///\param       majnum - IN: Major version of the library
+///\param       minnum - IN: Minor version of the library
+///\param       relnum - IN: Release number of the library
+///\exception   H5::LibraryIException
 ///\par Description
-///		For information about library version, please refer to
-///		the C layer Reference Manual at:
+///             For information about library version, please refer to
+///             the C layer Reference Manual at:
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5.html#Library-VersCheck
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Library::checkVersion(unsigned majnum, unsigned minnum, unsigned relnum)
 {
@@ -124,24 +124,24 @@ void H5Library::checkVersion(unsigned majnum, unsigned minnum, unsigned relnum)
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Library::garbageCollect (static)
-///\brief	Walks through all the garbage collection routines for the
-///		library, which are supposed to free any unused memory they
-///		have allocated.
+// Function:    H5Library::garbageCollect (static)
+///\brief       Walks through all the garbage collection routines for the
+///             library, which are supposed to free any unused memory they
+///             have allocated.
 ///
-///\exception	H5::LibraryIException
+///\exception   H5::LibraryIException
 ///\par Description
-///		It is not required that H5Library::garbageCollect be called
-///		at any particular time; it is only necessary in certain
-///		situations, such as when the application has performed actions
-///		that cause the library to allocate many objects. The
-///		application should call H5Library::garbageCollect if it
-///		eventually releases those objects and wants to reduce the
-///		memory used by the library from the peak usage required.
+///             It is not required that H5Library::garbageCollect be called
+///             at any particular time; it is only necessary in certain
+///             situations, such as when the application has performed actions
+///             that cause the library to allocate many objects. The
+///             application should call H5Library::garbageCollect if it
+///             eventually releases those objects and wants to reduce the
+///             memory used by the library from the peak usage required.
 ///\par
-///		The library automatically garbage collects all the free
-///		lists when the application ends.
-// Programmer	Binh-Minh Ribler - May, 2004
+///             The library automatically garbage collects all the free
+///             lists when the application ends.
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Library::garbageCollect()
 {
@@ -155,8 +155,8 @@ void H5Library::garbageCollect()
 //--------------------------------------------------------------------------
 // Function:    H5Library::initH5cpp (static)
 ///\brief       Initializes C++ library and registers terminating functions at
-///		exit.  Only for the library functions, not for user-defined
-///		functions.
+///             exit.  Only for the library functions, not for user-defined
+///             functions.
 // Description
 //              initH5cpp registers the following functions with std::atexit():
 //                      termH5cpp() - calls H5close() after all cleanup in
@@ -225,25 +225,25 @@ void H5Library::termH5cpp()
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Library::setFreeListLimits (static)
-///\brief	Sets limits on the different kinds of free lists.
-///\param	reg_global_lim - IN: Limit on all "regular" free list memory used
-///\param	reg_list_lim   - IN: Limit on memory used in each "regular" free list
-///\param	arr_global_lim - IN: Limit on all "array" free list memory used
-///\param	arr_list_lim   - IN: Limit on memory used in each "array" free list
-///\param	blk_global_lim - IN: Limit on all "block" free list memory used
-///\param	blk_list_lim   - IN: Limit on memory used in each "block" free list
-///\exception	H5::LibraryIException
+// Function:    H5Library::setFreeListLimits (static)
+///\brief       Sets limits on the different kinds of free lists.
+///\param       reg_global_lim - IN: Limit on all "regular" free list memory used
+///\param       reg_list_lim   - IN: Limit on memory used in each "regular" free list
+///\param       arr_global_lim - IN: Limit on all "array" free list memory used
+///\param       arr_list_lim   - IN: Limit on memory used in each "array" free list
+///\param       blk_global_lim - IN: Limit on all "block" free list memory used
+///\param       blk_list_lim   - IN: Limit on memory used in each "block" free list
+///\exception   H5::LibraryIException
 ///\par Description
-///		Setting a value of -1 for a limit means no limit of that type.
-///		For more information on free list limits, please refer to C
-///		layer Reference Manual at:
+///             Setting a value of -1 for a limit means no limit of that type.
+///             For more information on free list limits, please refer to C
+///             layer Reference Manual at:
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5.html#Library-SetFreeListLimits
-// Programmer	Binh-Minh Ribler - May, 2004
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim,
-	int arr_global_lim, int arr_list_lim, int blk_global_lim,
-	int blk_list_lim)
+        int arr_global_lim, int arr_list_lim, int blk_global_lim,
+        int blk_list_lim)
 {
    herr_t ret_value = H5set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim);
    if( ret_value < 0 )

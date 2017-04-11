@@ -33,7 +33,7 @@
 #include "H5File.h"
 #include "H5DataSet.h"
 #include "H5Attribute.h"
-#include "H5private.h"		// for HDmemset
+#include "H5private.h"          // for HDmemset
 
 namespace H5 {
 
@@ -55,17 +55,17 @@ extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location default constructor (protected)
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location default constructor (protected)
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Location::H5Location() : IdComponent() {}
 
 //--------------------------------------------------------------------------
-// Function:	H5Location overloaded constructor (protected)
-// Purpose	Creates an H5Location object using the id of an existing HDF5
-//		object.
-// Parameters	object_id - IN: Id of an existing HDF5 object
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location overloaded constructor (protected)
+// Purpose      Creates an H5Location object using the id of an existing HDF5
+//              object.
+// Parameters   object_id - IN: Id of an existing HDF5 object
+// Programmer   Binh-Minh Ribler - 2000
 
 // *** Deprecation warning ***
 // This constructor is no longer appropriate because the data member "id" had
@@ -77,11 +77,11 @@ H5Location::H5Location() : IdComponent() {}
 // H5Location::H5Location(const hid_t object_id) : IdComponent() {}
 
 //--------------------------------------------------------------------------
-// Function:	H5Location copy constructor
-// Purpose:	This noop copy constructor is removed as a result of the data
-//		member "id" being moved down to sub-classes. (Mar 2015)
-///\param	original - IN: H5Location instance to copy
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location copy constructor
+// Purpose:     This noop copy constructor is removed as a result of the data
+//              member "id" being moved down to sub-classes. (Mar 2015)
+///\param       original - IN: H5Location instance to copy
+// Programmer   Binh-Minh Ribler - 2000
 //
 // *** Deprecation warning ***
 // This constructor is no longer appropriate because the data member "id" had
@@ -93,25 +93,25 @@ H5Location::H5Location() : IdComponent() {}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::createAttribute
-///\brief	Creates an attribute for a group, dataset, or named datatype.
-///\param	name - IN: Name of the attribute
-///\param	data_type - IN: Datatype for the attribute
-///\param	data_space - IN: Dataspace for the attribute - only simple
-///		dataspaces are allowed at this time
-///\param	create_plist - IN: Creation property list - default to
-///		PropList::DEFAULT
-///\return	Attribute instance
-///\exception	H5::AttributeIException
+// Function:    H5Location::createAttribute
+///\brief       Creates an attribute for a group, dataset, or named datatype.
+///\param       name - IN: Name of the attribute
+///\param       data_type - IN: Datatype for the attribute
+///\param       data_space - IN: Dataspace for the attribute - only simple
+///             dataspaces are allowed at this time
+///\param       create_plist - IN: Creation property list - default to
+///             PropList::DEFAULT
+///\return      Attribute instance
+///\exception   H5::AttributeIException
 ///\par Description
-///		The attribute name specified in \a name must be unique.
-///		Attempting to create an attribute with the same name as an
-///		existing attribute will raise an exception, leaving the
-///		pre-existing attribute intact. To overwrite an existing
-///		attribute with a new attribute of the same name, first
-///		delete the existing one with \c H5Location::removeAttr, then
-///		recreate it with this function.
-// Programmer	Binh-Minh Ribler - 2000
+///             The attribute name specified in \a name must be unique.
+///             Attempting to create an attribute with the same name as an
+///             existing attribute will raise an exception, leaving the
+///             pre-existing attribute intact. To overwrite an existing
+///             attribute with a new attribute of the same name, first
+///             delete the existing one with \c H5Location::removeAttr, then
+///             recreate it with this function.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Location::createAttribute( const char* name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
 {
@@ -123,20 +123,20 @@ Attribute H5Location::createAttribute( const char* name, const DataType& data_ty
    // If the attribute id is valid, create and return the Attribute object
    if( attr_id > 0 )
    {
-	Attribute attr;
-	f_Attribute_setId(&attr, attr_id);
-	return( attr );
+        Attribute attr;
+        f_Attribute_setId(&attr, attr_id);
+        return( attr );
    }
    else
       throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate2 failed");
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::createAttribute
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location::createAttribute
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Location::createAttribute( const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
 {
@@ -144,21 +144,21 @@ Attribute H5Location::createAttribute( const H5std_string& name, const DataType&
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::openAttribute
-///\brief	Opens an attribute given its name.
-///\param	name - IN: Name of the attribute
-///\return	Attribute instance
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location::openAttribute
+///\brief       Opens an attribute given its name.
+///\param       name - IN: Name of the attribute
+///\return      Attribute instance
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Location::openAttribute( const char* name ) const
 {
    hid_t attr_id = H5Aopen(getId(), name, H5P_DEFAULT);
    if( attr_id > 0 )
    {
-	Attribute attr;
-	f_Attribute_setId(&attr, attr_id);
-	return( attr );
+        Attribute attr;
+        f_Attribute_setId(&attr, attr_id);
+        return( attr );
    }
    else
    {
@@ -167,11 +167,11 @@ Attribute H5Location::openAttribute( const char* name ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::openAttribute
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location::openAttribute
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Location::openAttribute( const H5std_string& name ) const
 {
@@ -179,46 +179,46 @@ Attribute H5Location::openAttribute( const H5std_string& name ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::openAttribute
-///\brief	Opens an attribute given its index.
-///\param	idx - IN: Index of the attribute, a 0-based, non-negative integer
-///\return	Attribute instance
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location::openAttribute
+///\brief       Opens an attribute given its index.
+///\param       idx - IN: Index of the attribute, a 0-based, non-negative integer
+///\return      Attribute instance
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Location::openAttribute( const unsigned int idx ) const
 {
    hid_t attr_id = H5Aopen_by_idx(getId(), ".", H5_INDEX_CRT_ORDER,
-		H5_ITER_INC, static_cast<hsize_t>(idx), H5P_DEFAULT, H5P_DEFAULT);
+                H5_ITER_INC, static_cast<hsize_t>(idx), H5P_DEFAULT, H5P_DEFAULT);
    if( attr_id > 0 )
    {
-	Attribute attr;
-	f_Attribute_setId(&attr, attr_id);
-	return(attr);
+        Attribute attr;
+        f_Attribute_setId(&attr, attr_id);
+        return(attr);
    }
    else
    {
-	throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_by_idx failed");
+        throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_by_idx failed");
    }
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::iterateAttrs
-///\brief	Iterates a user's function over all the attributes of an H5
-///		object, which may be a group, dataset or named datatype.
-///\param	user_op - IN: User's function to operate on each attribute
-///\param	_idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
-///\param	op_data - IN: User's data to pass to user's operator function
-///\return	Returned value of the last operator if it was non-zero, or
-///		zero if all attributes were processed
-///\exception	H5::AttributeIException
+// Function:    H5Location::iterateAttrs
+///\brief       Iterates a user's function over all the attributes of an H5
+///             object, which may be a group, dataset or named datatype.
+///\param       user_op - IN: User's function to operate on each attribute
+///\param       _idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
+///\param       op_data - IN: User's data to pass to user's operator function
+///\return      Returned value of the last operator if it was non-zero, or
+///             zero if all attributes were processed
+///\exception   H5::AttributeIException
 ///\par Description
-///		The signature of user_op is
-///		void (*)(H5::H5Location&, H5std_string, void*).
-///		For information, please refer to the C layer Reference Manual
-///		at:
+///             The signature of user_op is
+///             void (*)(H5::H5Location&, H5std_string, void*).
+///             For information, please refer to the C layer Reference Manual
+///             at:
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Iterate
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_data )
 {
@@ -231,7 +231,7 @@ int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_
    // call the C library routine H5Aiterate2 to iterate the attributes
    hsize_t idx = _idx ? static_cast<hsize_t>(*_idx) : 0;
    int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
-			userAttrOpWrpr, static_cast<void *>(userData));
+                        userAttrOpWrpr, static_cast<void *>(userData));
 
    // release memory
    delete userData;
@@ -239,7 +239,7 @@ int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_
    if( ret_value >= 0 ) {
       /* Pass back update index value to calling code */
       if (_idx)
-	 *_idx = static_cast<unsigned>(idx);
+         *_idx = static_cast<unsigned>(idx);
 
       return( ret_value );
    }
@@ -248,11 +248,11 @@ int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::getNumAttrs
-///\brief	Returns the number of attributes attached to this HDF5 object.
-///\return	Number of attributes
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location::getNumAttrs
+///\brief       Returns the number of attributes attached to this HDF5 object.
+///\return      Number of attributes
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Location::getNumAttrs() const
 {
@@ -265,11 +265,11 @@ int H5Location::getNumAttrs() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::attrExists
-///\brief	Checks whether the named attribute exists at this location.
-///\param	name - IN: Name of the attribute to be queried
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2013
+// Function:    H5Location::attrExists
+///\brief       Checks whether the named attribute exists at this location.
+///\param       name - IN: Name of the attribute to be queried
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2013
 //--------------------------------------------------------------------------
 bool H5Location::attrExists(const char* name) const
 {
@@ -286,11 +286,11 @@ bool H5Location::attrExists(const char* name) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::attrExists
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location::attrExists
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 bool H5Location::attrExists(const H5std_string& name) const
 {
@@ -298,11 +298,11 @@ bool H5Location::attrExists(const H5std_string& name) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::removeAttr
-///\brief	Removes the named attribute from this object.
-///\param	name - IN: Name of the attribute to be removed
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location::removeAttr
+///\brief       Removes the named attribute from this object.
+///\param       name - IN: Name of the attribute to be removed
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Location::removeAttr( const char* name ) const
 {
@@ -312,11 +312,11 @@ void H5Location::removeAttr( const char* name ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::removeAttr
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location::removeAttr
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Location::removeAttr( const H5std_string& name ) const
 {
@@ -324,12 +324,12 @@ void H5Location::removeAttr( const H5std_string& name ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::renameAttr
-///\brief	Renames the named attribute from this object.
-///\param	oldname - IN: Name of the attribute to be renamed
-///\param	newname - IN: New name ame of the attribute
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - Mar, 2005
+// Function:    H5Location::renameAttr
+///\brief       Renames the named attribute from this object.
+///\param       oldname - IN: Name of the attribute to be renamed
+///\param       newname - IN: New name ame of the attribute
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 void H5Location::renameAttr(const char* oldname, const char* newname) const
 {
@@ -339,11 +339,11 @@ void H5Location::renameAttr(const char* oldname, const char* newname) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::renameAttr
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for the names.
-// Programmer	Binh-Minh Ribler - Mar, 2005
+// Function:    H5Location::renameAttr
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for the names.
+// Programmer   Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& newname) const
 {
@@ -351,19 +351,19 @@ void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& new
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::flush
-///\brief	Flushes all buffers associated with a location to disk.
-///\param	scope - IN: Specifies the scope of the flushing action,
-///		which can be either of these values:
-///		\li \c H5F_SCOPE_GLOBAL - Flushes the entire virtual file
-///		\li \c H5F_SCOPE_LOCAL - Flushes only the specified file
-///\exception	H5::Exception
+// Function:    H5Location::flush
+///\brief       Flushes all buffers associated with a location to disk.
+///\param       scope - IN: Specifies the scope of the flushing action,
+///             which can be either of these values:
+///             \li \c H5F_SCOPE_GLOBAL - Flushes the entire virtual file
+///             \li \c H5F_SCOPE_LOCAL - Flushes only the specified file
+///\exception   H5::Exception
 ///\par Description
-///		This location is used to identify the file to be flushed.
-// Programmer	Binh-Minh Ribler - 2012
+///             This location is used to identify the file to be flushed.
+// Programmer   Binh-Minh Ribler - 2012
 // Modification
-//	Sep 2012 - BMR
-//		Moved from H5File/H5Object
+//      Sep 2012 - BMR
+//              Moved from H5File/H5Object
 //--------------------------------------------------------------------------
 void H5Location::flush(H5F_scope_t scope) const
 {
@@ -375,11 +375,11 @@ void H5Location::flush(H5F_scope_t scope) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::getFileName
-///\brief	Gets the name of the file, in which this HDF5 object belongs.
-///\return	File name
-///\exception	H5::LocationException
-// Programmer	Binh-Minh Ribler - Jul, 2004
+// Function:    H5Location::getFileName
+///\brief       Gets the name of the file, in which this HDF5 object belongs.
+///\return      File name
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
 H5std_string H5Location::getFileName() const
 {
@@ -392,24 +392,24 @@ H5std_string H5Location::getFileName() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::setComment
-///\brief	Sets or resets the comment for an object specified by its name.
-///\param	name  - IN: Name of the object
-///\param	comment - IN: New comment
-///\exception	H5::LocationException
-///\par	Description
-///		If \a comment is an empty string or a null pointer, the comment
-///		message is removed from the object.
-///		Comments should be relatively short, null-terminated, ASCII
-///		strings.  They can be attached to any object that has an
-///		object header, e.g., data sets, groups, named data types,
-///		and data spaces, but not symbolic links.
-// Programmer	Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
+// Function:    H5Location::setComment
+///\brief       Sets or resets the comment for an object specified by its name.
+///\param       name  - IN: Name of the object
+///\param       comment - IN: New comment
+///\exception   H5::LocationException
+///\par Description
+///             If \a comment is an empty string or a null pointer, the comment
+///             message is removed from the object.
+///             Comments should be relatively short, null-terminated, ASCII
+///             strings.  They can be attached to any object that has an
+///             object header, e.g., data sets, groups, named data types,
+///             and data spaces, but not symbolic links.
+// Programmer   Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
 // Modification
-//	2007: QAK modified to use H5O APIs; however the first parameter is
-//		no longer just file or group, this function should be moved
-//		to another class to accommodate attribute, dataset, and named
-//		datatype. - BMR
+//      2007: QAK modified to use H5O APIs; however the first parameter is
+//              no longer just file or group, this function should be moved
+//              to another class to accommodate attribute, dataset, and named
+//              datatype. - BMR
 //--------------------------------------------------------------------------
 void H5Location::setComment(const char* name, const char* comment) const
 {
@@ -419,11 +419,11 @@ void H5Location::setComment(const char* name, const char* comment) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::setComment
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name and \a comment.
-// Programmer	Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
+// Function:    H5Location::setComment
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a name and \a comment.
+// Programmer   Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
 //--------------------------------------------------------------------------
 void H5Location::setComment(const H5std_string& name, const H5std_string& comment) const
 {
@@ -431,11 +431,11 @@ void H5Location::setComment(const H5std_string& name, const H5std_string& commen
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::setComment
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it doesn't take
-///		an object name.
-// Programmer	Binh-Minh Ribler - Sep 2013
+// Function:    H5Location::setComment
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it doesn't take
+///             an object name.
+// Programmer   Binh-Minh Ribler - Sep 2013
 // Modification
 //--------------------------------------------------------------------------
 void H5Location::setComment(const char* comment) const
@@ -446,11 +446,11 @@ void H5Location::setComment(const char* comment) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::setComment
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a comment.
-// Programmer	Binh-Minh Ribler - Sep 2013
+// Function:    H5Location::setComment
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a comment.
+// Programmer   Binh-Minh Ribler - Sep 2013
 //--------------------------------------------------------------------------
 void H5Location::setComment(const H5std_string& comment) const
 {
@@ -458,15 +458,15 @@ void H5Location::setComment(const H5std_string& comment) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::removeComment
-///\brief	Removes the comment from an object specified by its name.
-///\param	name  - IN: Name of the object
-///\exception	H5::LocationException
-// Programmer	Binh-Minh Ribler - May 2005 (moved from CommonFG, Sep 2013)
-//	2007: QAK modified to use H5O APIs; however the first parameter is
-//		no longer just file or group, this function should be moved
-//		to another class to accommodate attribute, dataset, and named
-//		datatype. - BMR
+// Function:    H5Location::removeComment
+///\brief       Removes the comment from an object specified by its name.
+///\param       name  - IN: Name of the object
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - May 2005 (moved from CommonFG, Sep 2013)
+//      2007: QAK modified to use H5O APIs; however the first parameter is
+//              no longer just file or group, this function should be moved
+//              to another class to accommodate attribute, dataset, and named
+//              datatype. - BMR
 //--------------------------------------------------------------------------
 void H5Location::removeComment(const char* name) const
 {
@@ -476,11 +476,11 @@ void H5Location::removeComment(const char* name) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::removeComment
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - May 2005 (moved from CommonFG, Sep 2013)
+// Function:    H5Location::removeComment
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - May 2005 (moved from CommonFG, Sep 2013)
 //--------------------------------------------------------------------------
 void H5Location::removeComment(const H5std_string& name) const
 {
@@ -488,19 +488,19 @@ void H5Location::removeComment(const H5std_string& name) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::getComment
-///\brief	Retrieves the comment for this location, returning its length.
-///\param	name     - IN: Name of the object
-///\param	buf_size - IN: Length of the comment to retrieve
-///\param	comment  - OUT: Retrieved comment
-///\return	Actual length of the comment
-///\exception	H5::LocationException
+// Function:    H5Location::getComment
+///\brief       Retrieves the comment for this location, returning its length.
+///\param       name     - IN: Name of the object
+///\param       buf_size - IN: Length of the comment to retrieve
+///\param       comment  - OUT: Retrieved comment
+///\return      Actual length of the comment
+///\exception   H5::LocationException
 ///\par Description
-///		This function retrieves \a buf_size characters of the comment
-///		including the null terminator.  Thus, if the actual length
-///		of the comment is more than buf_size-1, the retrieved comment
-///		will be truncated to accommodate the null terminator.
-// Programmer	Binh-Minh Ribler - Mar 2014
+///             This function retrieves \a buf_size characters of the comment
+///             including the null terminator.  Thus, if the actual length
+///             of the comment is more than buf_size-1, the retrieved comment
+///             will be truncated to accommodate the null terminator.
+// Programmer   Binh-Minh Ribler - Mar 2014
 //--------------------------------------------------------------------------
 ssize_t H5Location::getComment(const char* name, size_t buf_size, char* comment) const
 {
@@ -517,21 +517,21 @@ ssize_t H5Location::getComment(const char* name, size_t buf_size, char* comment)
     // If the comment is longer than the provided buffer size, the C library
     // will not null terminate it
     if (static_cast<size_t>(comment_len) >= buf_size)
-	comment[buf_size-1] = '\0';
+        comment[buf_size-1] = '\0';
 
     // Return the actual comment length, which might be different from buf_size
     return(comment_len);
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::getComment
-///\brief	Returns the comment as \a string for this location,
-///		returning its length.
-///\param	name     - IN: Name of the object
-///\param	buf_size - IN: Length of the comment to retrieve, default to 0
-///\return	Comment string
-///\exception	H5::LocationException
-// Programmer	Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
+// Function:    H5Location::getComment
+///\brief       Returns the comment as \a string for this location,
+///             returning its length.
+///\param       name     - IN: Name of the object
+///\param       buf_size - IN: Length of the comment to retrieve, default to 0
+///\return      Comment string
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
 //--------------------------------------------------------------------------
 H5std_string H5Location::getComment(const char* name, size_t buf_size) const
 {
@@ -551,29 +551,29 @@ H5std_string H5Location::getComment(const char* name, size_t buf_size) const
     // If comment exists, calls C routine again to get it
     else if (comment_len > 0)
     {
-	size_t tmp_len = buf_size;
+        size_t tmp_len = buf_size;
 
-	// If buffer size is not provided, use comment length
-	if (tmp_len == 0)
-	    tmp_len = comment_len;
+        // If buffer size is not provided, use comment length
+        if (tmp_len == 0)
+            tmp_len = comment_len;
 
-	// Temporary buffer for char* comment
-	char* comment_C = new char[tmp_len+1];
-	HDmemset(comment_C, 0, tmp_len+1); // clear buffer
+        // Temporary buffer for char* comment
+        char* comment_C = new char[tmp_len+1];
+        HDmemset(comment_C, 0, tmp_len+1); // clear buffer
 
-	// Used overloaded function
-	ssize_t temp_len = getComment(name, tmp_len+1, comment_C);
-	if (temp_len < 0)
-	{
-	    delete []comment_C;
-	    throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
-	}
+        // Used overloaded function
+        ssize_t temp_len = getComment(name, tmp_len+1, comment_C);
+        if (temp_len < 0)
+        {
+            delete []comment_C;
+            throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
+        }
 
-	// Convert the C comment to return
-	comment = comment_C;
+        // Convert the C comment to return
+        comment = comment_C;
 
-	// Clean up resource
-	delete []comment_C;
+        // Clean up resource
+        delete []comment_C;
     }
 
     // Return the string comment
@@ -581,11 +581,11 @@ H5std_string H5Location::getComment(const char* name, size_t buf_size) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::getComment
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
+// Function:    H5Location::getComment
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000 (moved from CommonFG, Sep 2013)
 //--------------------------------------------------------------------------
 H5std_string H5Location::getComment(const H5std_string& name, size_t buf_size) const
 {
@@ -594,14 +594,14 @@ H5std_string H5Location::getComment(const H5std_string& name, size_t buf_size) c
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::p_reference (protected)
-// Purpose	Creates a reference to an HDF5 object or a dataset region.
+// Function:    H5Location::p_reference (protected)
+// Purpose      Creates a reference to an HDF5 object or a dataset region.
 // Parameters
-//		name - IN: Name of the object to be referenced
-//		dataspace - IN: Dataspace with selection
-//		ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-// Exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - May, 2004
+//              name - IN: Name of the object to be referenced
+//              dataspace - IN: Dataspace with selection
+//              ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+// Exception    H5::ReferenceException
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Location::p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const
 {
@@ -615,18 +615,18 @@ void H5Location::p_reference(void* ref, const char* name, hid_t space_id, H5R_ty
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::reference
-///\brief	Creates a reference to an HDF5 object or a dataset region.
-///\param	ref - IN: Reference pointer
-///\param	name - IN: Name of the object to be referenced
-///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT         - Reference is an object reference.
-///		\li \c H5R_DATASET_REGION - Reference is a dataset region
-///			reference. (default)
-///\exception	H5::ReferenceException
-///\note	This method is more suitable for a dataset region reference.
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    H5Location::reference
+///\brief       Creates a reference to an HDF5 object or a dataset region.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced
+///\param       dataspace - IN: Dataspace with selection
+///\param       ref_type - IN: Type of reference to query, valid values are:
+///             \li \c H5R_OBJECT         - Reference is an object reference.
+///             \li \c H5R_DATASET_REGION - Reference is a dataset region
+///                     reference. (default)
+///\exception   H5::ReferenceException
+///\note        This method is more suitable for a dataset region reference.
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const char* name, const DataSpace& dataspace, H5R_type_t ref_type) const
 {
@@ -639,20 +639,20 @@ void H5Location::reference(void* ref, const char* name, const DataSpace& dataspa
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::reference
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-///\param	ref - IN: Reference pointer
-///\param	name - IN: Name of the object to be referenced
-///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT         - Reference is an object reference.
-///		\li \c H5R_DATASET_REGION - Reference is a dataset region
-///			reference. (default)
-///\exception	H5::ReferenceException
-///\note	This method is more suitable for a dataset region reference.
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    H5Location::reference
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a name.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced
+///\param       dataspace - IN: Dataspace with selection
+///\param       ref_type - IN: Type of reference to query, valid values are:
+///             \li \c H5R_OBJECT         - Reference is an object reference.
+///             \li \c H5R_DATASET_REGION - Reference is a dataset region
+///                     reference. (default)
+///\exception   H5::ReferenceException
+///\note        This method is more suitable for a dataset region reference.
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const H5std_string& name, const DataSpace& dataspace, H5R_type_t ref_type) const
 {
@@ -665,18 +665,18 @@ void H5Location::reference(void* ref, const H5std_string& name, const DataSpace&
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it does not take
-///		a DataSpace object and the reference type must be specified.
-///\param	ref - IN: Reference pointer
-///\param	name - IN: Name of the object to be referenced
-///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT         - Reference is an object reference (default)
-///		\li \c H5R_DATASET_REGION - Reference is a dataset region
-///\exception	H5::ReferenceException
-///\note	This method is more suitable for an object reference.
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    H5Location::reference
+///\brief       This is an overloaded function, provided for your convenience.
+///             It differs from the above function in that it does not take
+///             a DataSpace object and the reference type must be specified.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced
+///\param       ref_type - IN: Type of reference to query, valid values are:
+///             \li \c H5R_OBJECT         - Reference is an object reference (default)
+///             \li \c H5R_DATASET_REGION - Reference is a dataset region
+///\exception   H5::ReferenceException
+///\note        This method is more suitable for an object reference.
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const char* name, H5R_type_t ref_type) const
 {
@@ -689,17 +689,17 @@ void H5Location::reference(void* ref, const char* name, H5R_type_t ref_type) con
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::reference
-///\brief	This is an overloaded function, provided for your convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for the object's name.
-///\param	ref - IN: Reference pointer
-///\param	name - IN: Name of the object to be referenced - \c H5std_string
-///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT         - Reference is an object reference (default)
-///		\li \c H5R_DATASET_REGION - Reference is a dataset region
-///\note	This method is more suitable for an object reference.
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    H5Location::reference
+///\brief       This is an overloaded function, provided for your convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for the object's name.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced - \c H5std_string
+///\param       ref_type - IN: Type of reference to query, valid values are:
+///             \li \c H5R_OBJECT         - Reference is an object reference (default)
+///             \li \c H5R_DATASET_REGION - Reference is a dataset region
+///\note        This method is more suitable for an object reference.
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_type) const
 {
@@ -708,18 +708,18 @@ void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_t
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:	H5Location::p_dereference (protected)
-// Purpose	Dereference a ref into an hdf5 object.
+// Function:    H5Location::p_dereference (protected)
+// Purpose      Dereference a ref into an hdf5 object.
 // Parameters
-//		loc_id - IN: An hdf5 identifier specifying the location of the
-//			 referenced object
-//		ref - IN: Reference pointer
-//		ref_type - IN: Reference type
-// Exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - Oct, 2006
+//              loc_id - IN: An hdf5 identifier specifying the location of the
+//                       referenced object
+//              ref - IN: Reference pointer
+//              ref_type - IN: Reference type
+// Exception    H5::ReferenceException
+// Programmer   Binh-Minh Ribler - Oct, 2006
 // Modification
-//	May 2008 - BMR
-//		Moved from IdComponent.
+//      May 2008 - BMR
+//              Moved from IdComponent.
 //--------------------------------------------------------------------------
 hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type, const char* from_func)
 {
@@ -734,16 +734,16 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::dereference
-///\brief	Dereferences a reference into an HDF5 object, given an HDF5 object.
-///\param	loc - IN: Location of the referenced object
-///\param	ref - IN: Reference pointer
-///\param	ref_type - IN: Reference type
-///\exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - Oct, 2006
+// Function:    H5Location::dereference
+///\brief       Dereferences a reference into an HDF5 object, given an HDF5 object.
+///\param       loc - IN: Location of the referenced object
+///\param       ref - IN: Reference pointer
+///\param       ref_type - IN: Reference type
+///\exception   H5::ReferenceException
+// Programmer   Binh-Minh Ribler - Oct, 2006
 // Modification
-//	May, 2008
-//		Corrected missing parameters. - BMR
+//      May, 2008
+//              Corrected missing parameters. - BMR
 //--------------------------------------------------------------------------
 void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t ref_type)
 {
@@ -751,16 +751,16 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::dereference
-///\brief	Dereferences a reference into an HDF5 object, given an attribute.
-///\param	attr - IN: Attribute specifying the location of the referenced object
-///\param	ref - IN: Reference pointer
-///\param	ref_type - IN: Reference type
-///\exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - Oct, 2006
+// Function:    H5Location::dereference
+///\brief       Dereferences a reference into an HDF5 object, given an attribute.
+///\param       attr - IN: Attribute specifying the location of the referenced object
+///\param       ref - IN: Reference pointer
+///\param       ref_type - IN: Reference type
+///\exception   H5::ReferenceException
+// Programmer   Binh-Minh Ribler - Oct, 2006
 // Modification
-//	May, 2008
-//		Corrected missing parameters. - BMR
+//      May, 2008
+//              Corrected missing parameters. - BMR
 //--------------------------------------------------------------------------
 void H5Location::dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type)
 {
@@ -769,23 +769,23 @@ void H5Location::dereference(const Attribute& attr, const void* ref, H5R_type_t 
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
-// Function:	H5Location::getObjType
-///\brief	Retrieves the type of object that an object reference points to.
-///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT - Reference is an object reference.
-///		\li \c H5R_DATASET_REGION - Reference is a dataset region reference.
-///\param	ref      - IN: Reference to query
-///\return	An object type, which can be one of the following:
-///		\li \c H5G_UNKNOWN  - A failure occurs. (-1)
-///		\li \c H5G_GROUP  - Object is a group.
-///		\li \c H5G_DATASET - Object is a dataset.
-///		\li \c H5G_TYPE Object - is a named datatype
-///		\li \c H5G_LINK  - Object is a symbolic link.
-///		\li \c H5G_UDLINK  - Object is a user-defined link.
-///\exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    H5Location::getObjType
+///\brief       Retrieves the type of object that an object reference points to.
+///\param       ref_type - IN: Type of reference to query, valid values are:
+///             \li \c H5R_OBJECT - Reference is an object reference.
+///             \li \c H5R_DATASET_REGION - Reference is a dataset region reference.
+///\param       ref      - IN: Reference to query
+///\return      An object type, which can be one of the following:
+///             \li \c H5G_UNKNOWN  - A failure occurs. (-1)
+///             \li \c H5G_GROUP  - Object is a group.
+///             \li \c H5G_DATASET - Object is a dataset.
+///             \li \c H5G_TYPE Object - is a named datatype
+///             \li \c H5G_LINK  - Object is a symbolic link.
+///             \li \c H5G_UDLINK  - Object is a user-defined link.
+///\exception   H5::ReferenceException
+// Programmer   Binh-Minh Ribler - May, 2004
 // Modification
-//	Sep 2012: Moved up from H5File, Group, DataSet, and DataType
+//      Sep 2012: Moved up from H5File, Group, DataSet, and DataType
 //--------------------------------------------------------------------------
 H5G_obj_t H5Location::getObjType(void *ref, H5R_type_t ref_type) const
 {
@@ -799,20 +799,20 @@ H5G_obj_t H5Location::getObjType(void *ref, H5R_type_t ref_type) const
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:	H5Location::p_get_obj_type (protected)
-// Purpose	Retrieves the type of object that an object reference points to.
+// Function:    H5Location::p_get_obj_type (protected)
+// Purpose      Retrieves the type of object that an object reference points to.
 // Parameters
-//		ref      - IN: Reference to query
-//		ref_type - IN: Type of reference to query
-// Return	An object type, which can be one of the following:
-//			H5G_UNKNOWN \tFailure occurs (-1)
-//			H5G_GROUP \tObject is a group.
-//			H5G_DATASET \tObject is a dataset.
-//			H5G_TYPE Object \tis a named datatype.
-//			H5G_LINK \tObject is a symbolic link.
-//			H5G_UDLINK \tObject is a user-defined link.
-// Exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - May, 2004
+//              ref      - IN: Reference to query
+//              ref_type - IN: Type of reference to query
+// Return       An object type, which can be one of the following:
+//                      H5G_UNKNOWN \tFailure occurs (-1)
+//                      H5G_GROUP \tObject is a group.
+//                      H5G_DATASET \tObject is a dataset.
+//                      H5G_TYPE Object \tis a named datatype.
+//                      H5G_LINK \tObject is a symbolic link.
+//                      H5G_UDLINK \tObject is a user-defined link.
+// Exception    H5::ReferenceException
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5G_obj_t H5Location::p_get_obj_type(void *ref, H5R_type_t ref_type) const
 {
@@ -828,20 +828,20 @@ H5G_obj_t H5Location::p_get_obj_type(void *ref, H5R_type_t ref_type) const
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::getRefObjType
-///\brief	Retrieves the type of object that an object reference points to.
-///\param	ref      - IN: Reference to query
-///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT         - Reference is an object reference.
-///		\li \c H5R_DATASET_REGION - Reference is a dataset region reference.
-///\return	An object type, which can be one of the following:
-///		\li \c H5O_TYPE_UNKNOWN	- Unknown object type (-1)
-///		\li \c H5O_TYPE_GROUP	- Object is a group
-///		\li \c H5O_TYPE_DATASET	- Object is a dataset
-///		\li \c H5O_TYPE_NAMED_DATATYPE - Object is a named datatype
-///		\li \c H5O_TYPE_NTYPES	- Number of different object types
-///\exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    H5Location::getRefObjType
+///\brief       Retrieves the type of object that an object reference points to.
+///\param       ref      - IN: Reference to query
+///\param       ref_type - IN: Type of reference to query, valid values are:
+///             \li \c H5R_OBJECT         - Reference is an object reference.
+///             \li \c H5R_DATASET_REGION - Reference is a dataset region reference.
+///\return      An object type, which can be one of the following:
+///             \li \c H5O_TYPE_UNKNOWN - Unknown object type (-1)
+///             \li \c H5O_TYPE_GROUP   - Object is a group
+///             \li \c H5O_TYPE_DATASET - Object is a dataset
+///             \li \c H5O_TYPE_NAMED_DATATYPE - Object is a named datatype
+///             \li \c H5O_TYPE_NTYPES  - Number of different object types
+///\exception   H5::ReferenceException
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5O_type_t H5Location::getRefObjType(void *ref, H5R_type_t ref_type) const
 {
@@ -855,19 +855,19 @@ H5O_type_t H5Location::getRefObjType(void *ref, H5R_type_t ref_type) const
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:	H5Location::p_get_ref_obj_type (protected)
-// Purpose	Retrieves the type of object that an object reference points to.
+// Function:    H5Location::p_get_ref_obj_type (protected)
+// Purpose      Retrieves the type of object that an object reference points to.
 // Parameters
-//		ref      - IN: Reference to query
-//		ref_type - IN: Type of reference to query
-// Return	An object type, which can be one of the following:
-//			H5O_TYPE_UNKNOWN	- Unknown object type (-1)
-//			H5O_TYPE_GROUP		- Object is a group
-//			H5O_TYPE_DATASET	- Object is a dataset
-//			H5O_TYPE_NAMED_DATATYPE - Object is a named datatype
-//			H5O_TYPE_NTYPES		- Number of object types
-// Exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - May, 2004
+//              ref      - IN: Reference to query
+//              ref_type - IN: Type of reference to query
+// Return       An object type, which can be one of the following:
+//                      H5O_TYPE_UNKNOWN        - Unknown object type (-1)
+//                      H5O_TYPE_GROUP          - Object is a group
+//                      H5O_TYPE_DATASET        - Object is a dataset
+//                      H5O_TYPE_NAMED_DATATYPE - Object is a named datatype
+//                      H5O_TYPE_NTYPES         - Number of object types
+// Exception    H5::ReferenceException
+// Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 H5O_type_t H5Location::p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const
 {
@@ -887,20 +887,20 @@ H5O_type_t H5Location::p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:	H5Location::getRegion
-///\brief	Retrieves a dataspace with the region pointed to selected.
-///\param	ref	 - IN: Reference to get region of
-///\param	ref_type - IN: Type of reference to get region of - default
-//				to H5R_DATASET_REGION
-///\return	DataSpace object
-///\exception	H5::ReferenceException
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:    H5Location::getRegion
+///\brief       Retrieves a dataspace with the region pointed to selected.
+///\param       ref      - IN: Reference to get region of
+///\param       ref_type - IN: Type of reference to get region of - default
+//                              to H5R_DATASET_REGION
+///\return      DataSpace object
+///\exception   H5::ReferenceException
+// Programmer   Binh-Minh Ribler - May, 2004
 // Modification
-//	Mar 29, 2015
-//		Used friend function to set id for DataSpace instead of the
-//		existing id constructor or the setId method to avoid incrementing
-//		ref count, as a work-around for a problem described in the JIRA
-//		issue HDFFV-7947. -BMR
+//      Mar 29, 2015
+//              Used friend function to set id for DataSpace instead of the
+//              existing id constructor or the setId method to avoid incrementing
+//              ref count, as a work-around for a problem described in the JIRA
+//              issue HDFFV-7947. -BMR
 //--------------------------------------------------------------------------
 DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
 {
@@ -910,9 +910,9 @@ DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
       throw ReferenceException(inMemFunc("getRegion"), "H5Rget_region failed");
    }
    try {
-	DataSpace dataspace;
-	f_DataSpace_setId(&dataspace, space_id);
-	return(dataspace);
+        DataSpace dataspace;
+        f_DataSpace_setId(&dataspace, space_id);
+        return(dataspace);
    }
    catch (DataSpaceIException& E) {
       throw ReferenceException(inMemFunc("getRegion"), E.getDetailMsg());
@@ -921,21 +921,21 @@ DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
 
 
 //--------------------------------------------------------------------------
-// Function:	H5Location destructor
-///\brief	Noop destructor.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Location destructor
+///\brief       Noop destructor.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Location::~H5Location() {}
 
 //--------------------------------------------------------------------------
-// Function:	f_Attribute_setId - friend
-// Purpose:	This function is friend to class H5::Attribute so that it
-//		can set Attribute::id in order to work around a problem
-//		described in the JIRA issue HDFFV-7947.
-//		Applications shouldn't need to use it.
-// param	attr   - IN/OUT: Attribute object to be changed
-// param	new_id - IN: New id to set
-// Programmer	Binh-Minh Ribler - 2015
+// Function:    f_Attribute_setId - friend
+// Purpose:     This function is friend to class H5::Attribute so that it
+//              can set Attribute::id in order to work around a problem
+//              described in the JIRA issue HDFFV-7947.
+//              Applications shouldn't need to use it.
+// param        attr   - IN/OUT: Attribute object to be changed
+// param        new_id - IN: New id to set
+// Programmer   Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
 void f_Attribute_setId(Attribute* attr, hid_t new_id)
 {
@@ -943,14 +943,14 @@ void f_Attribute_setId(Attribute* attr, hid_t new_id)
 }
 
 //--------------------------------------------------------------------------
-// Function:	f_DataSpace_setId - friend
-// Purpose:	This function is friend to class H5::DataSpace so that it can
-//		can set DataSpace::id in order to work around a problem
-//		described in the JIRA issue HDFFV-7947.
-//		Applications shouldn't need to use it.
-// param	dspace   - IN/OUT: DataSpace object to be changed
-// param	new_id - IN: New id to set
-// Programmer	Binh-Minh Ribler - 2015
+// Function:    f_DataSpace_setId - friend
+// Purpose:     This function is friend to class H5::DataSpace so that it can
+//              can set DataSpace::id in order to work around a problem
+//              described in the JIRA issue HDFFV-7947.
+//              Applications shouldn't need to use it.
+// param        dspace   - IN/OUT: DataSpace object to be changed
+// param        new_id - IN: New id to set
+// Programmer   Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
 void f_DataSpace_setId(DataSpace* dspace, hid_t new_id)
 {
