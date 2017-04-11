@@ -553,7 +553,7 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc,
     del_str = get_del_string(tparam);
     HDassert(del_str);
     test_desc = (char *)H5MM_malloc(HDstrlen(del_str) + HDstrlen(base_desc));
-    sprintf(test_desc, base_desc, del_str);
+    HDsprintf(test_desc, base_desc, del_str);
     TESTING(test_desc);
     H5MM_xfree(del_str);
     H5MM_xfree(test_desc);
@@ -7683,10 +7683,10 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     TESTING("incremental object insertion and removal")
 
     for(i = 0; i < 100; i++) {
-        sprintf(obj1.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
+        HDsprintf(obj1.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
 
         for(j = 0; j < i; j++) {
-            sprintf(obj2.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
+            HDsprintf(obj2.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
 
             if(H5HF_remove(fh, dxpl, heap_id[j]) < 0)
                 FAIL_STACK_ERROR
@@ -16393,7 +16393,7 @@ main(void)
      *       running time will be long.
      */
     if(ExpressMode > 1)
-        printf("***Express test mode on.  Some tests may be skipped\n");
+        HDprintf("***Express test mode on.  Some tests may be skipped\n");
     else if(ExpressMode == 0)
         num_pb_fs = NUM_PB_FS;
 
@@ -16475,12 +16475,12 @@ main(void)
             switch(curr_test) {
                 /* "Normal" testing parameters */
                 case FHEAP_TEST_NORMAL:
-                    puts("Testing with normal parameters");
+                    HDputs("Testing with normal parameters");
                     break;
 
                 /* "Re-open heap" testing parameters */
                 case FHEAP_TEST_REOPEN:
-                    puts("Testing with reopen heap flag set");
+                    HDputs("Testing with reopen heap flag set");
                     tparam.reopen_heap = FHEAP_TEST_REOPEN;
                     break;
 
@@ -16512,12 +16512,12 @@ main(void)
                 switch(fill) {
                     /* "Bulk fill" heap blocks with 'large' objects */
                     case FHEAP_TEST_FILL_LARGE:
-                        puts("Bulk-filling blocks w/large objects");
+                        HDputs("Bulk-filling blocks w/large objects");
                         break;
 
                     /* "Bulk fill" heap blocks with 'single' objects */
                     case FHEAP_TEST_FILL_SINGLE:
-                        puts("Bulk-filling blocks w/single object");
+                        HDputs("Bulk-filling blocks w/single object");
                         break;
 
                     /* An unknown test? */
@@ -16568,25 +16568,25 @@ main(void)
                  * level of complexity gradually. -QAK
                  */
                 if(ExpressMode > 1)
-                    printf("***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
+                    HDprintf("***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
                 else
                     nerrors += test_man_start_5th_recursive_indirect(fapl, &small_cparam, &tparam);
 
                 /*
                  * Test fractal heap object deletion
                  */
-                 /* Simple removal */
-                 nerrors += test_man_remove_bogus(fapl, &small_cparam, &tparam);
-                 nerrors += test_man_remove_one(fapl, &small_cparam, &tparam);
-                 nerrors += test_man_remove_two(fapl, &small_cparam, &tparam);
-                 nerrors += test_man_remove_one_larger(fapl, &small_cparam, &tparam);
-                 tparam.del_dir = FHEAP_DEL_FORWARD;
-                 nerrors += test_man_remove_two_larger(fapl, &small_cparam, &tparam);
-                 tparam.del_dir = FHEAP_DEL_REVERSE;
-                 nerrors += test_man_remove_two_larger(fapl, &small_cparam, &tparam);
-                 tparam.del_dir = FHEAP_DEL_FORWARD;
-                 nerrors += test_man_remove_three_larger(fapl, &small_cparam, &tparam);
-                 tparam.del_dir = FHEAP_DEL_REVERSE;
+                /* Simple removal */
+                nerrors += test_man_remove_bogus(fapl, &small_cparam, &tparam);
+                nerrors += test_man_remove_one(fapl, &small_cparam, &tparam);
+                nerrors += test_man_remove_two(fapl, &small_cparam, &tparam);
+                nerrors += test_man_remove_one_larger(fapl, &small_cparam, &tparam);
+                tparam.del_dir = FHEAP_DEL_FORWARD;
+                nerrors += test_man_remove_two_larger(fapl, &small_cparam, &tparam);
+                tparam.del_dir = FHEAP_DEL_REVERSE;
+                nerrors += test_man_remove_two_larger(fapl, &small_cparam, &tparam);
+                tparam.del_dir = FHEAP_DEL_FORWARD;
+                nerrors += test_man_remove_three_larger(fapl, &small_cparam, &tparam);
+                tparam.del_dir = FHEAP_DEL_REVERSE;
                 nerrors += test_man_remove_three_larger(fapl, &small_cparam, &tparam);
 
                 /* Incremental insert & removal */
@@ -16613,7 +16613,7 @@ main(void)
                         nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
                         nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
                         if(ExpressMode > 1)
-                            printf("***Express test mode on.  Some tests skipped\n");
+                            HDprintf("***Express test mode on.  Some tests skipped\n");
                         else {
                             nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
                             nerrors += test_man_remove_2nd_indirect(fapl, &small_cparam, &tparam);
@@ -16643,7 +16643,7 @@ main(void)
                         nerrors += test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
                         nerrors += test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
                         if(ExpressMode > 1)
-                            printf("***Express test mode on.  Some tests skipped\n");
+                            HDprintf("***Express test mode on.  Some tests skipped\n");
                         else {
                             nerrors += test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &small_cparam, &tparam);
                             nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
@@ -16684,12 +16684,12 @@ main(void)
                 switch(id_len) {
                     /* Use "normal" form for 'huge' object's heap IDs */
                     case 0:
-                        puts("Using 'normal' heap ID format for 'huge' objects");
+                        HDputs("Using 'normal' heap ID format for 'huge' objects");
                         break;
 
                     /* Use "direct" form for 'huge' object's heap IDs */
                     case 1:
-                        puts("Using 'direct' heap ID format for 'huge' objects");
+                        HDputs("Using 'direct' heap ID format for 'huge' objects");
 
                         /* Adjust actual length of heap IDs for directly storing 'huge' object's file offset & length in heap ID */
                         tparam.actual_id_len = 17;   /* 1 + 8 (file address size) + 8 (file length size) */
@@ -16698,7 +16698,7 @@ main(void)
                     /* Use "direct" storage for 'huge' objects and larger IDs for 'tiny' objects */
                     case 2:
                         small_cparam.id_len = 37;
-                        puts("Using 'direct' heap ID format for 'huge' objects and larger IDs for 'tiny' objects");
+                        HDputs("Using 'direct' heap ID format for 'huge' objects and larger IDs for 'tiny' objects");
                         tparam.actual_id_len = 37;
                         break;
 
@@ -16756,10 +16756,10 @@ main(void)
 
             /* Random object insertion & deletion */
             if(ExpressMode > 1)
-                printf("***Express test mode on.  Some tests skipped\n");
+                HDprintf("***Express test mode on.  Some tests skipped\n");
             else {
                 /* Random tests using "small" heap creation parameters */
-                puts("Using 'small' heap creation parameters");
+                HDputs("Using 'small' heap creation parameters");
 
                 /* (reduce size of tests when re-opening each time) */
                 /* XXX: Try to speed things up enough that these tests don't have to be reduced when re-opening */
@@ -16772,7 +16772,7 @@ main(void)
                 nerrors += test_random_pow2((curr_test == FHEAP_TEST_NORMAL ? (hsize_t)(100*1000*1000) : (hsize_t)(4*1000*1000)), fapl, &small_cparam, &tparam);
 
                 /* Random tests using "large" heap creation parameters */
-                puts("Using 'large' heap creation parameters");
+                HDputs("Using 'large' heap creation parameters");
                 tparam.actual_id_len = LARGE_HEAP_ID_LEN;
 
                 /* (reduce size of tests when re-opening each time) */
@@ -16818,7 +16818,7 @@ main(void)
 
     if(nerrors)
         goto error;
-    puts("All fractal heap tests passed.");
+    HDputs("All fractal heap tests passed.");
 
     /* Release space for the shared objects */
     H5MM_xfree(shared_wobj_g);
@@ -16840,7 +16840,7 @@ HDfprintf(stderr, "Uncomment cleanup!\n");
     return 0;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5MM_xfree(shared_wobj_g);
         H5MM_xfree(shared_robj_g);
