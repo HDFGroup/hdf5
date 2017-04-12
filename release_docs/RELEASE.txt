@@ -167,8 +167,8 @@ Other New Features and Enhancements
     - A bin/restore.sh script was added that reverts autogen.sh processing.
 
       (DER, 2016/11/08)
-
     
+
     Fortran Library:
     ----------------
 
@@ -356,7 +356,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
       (VC, 2016/05/29, HDFFV-9434)
 
     - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
-      (b) Modifications to better handle error recovery when conversion by 
+      (b) Modifications to better handle error recovery when conversion by
           h5format_convert fails.
 
       (VC 2016/05/29, HDFFV-9434)

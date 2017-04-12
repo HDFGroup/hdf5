@@ -2349,9 +2349,11 @@ H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     if(name == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
-    /* Check for removing '.' */
+    /* Check for non-existent (NULL) link.
+     * Note that this can also occur when attempting to remove '.'
+     */
     if(lnk == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "can't delete self")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "callback link pointer is NULL (specified link may be '.' or not exist)")
 
     /* Remove the link from the group */
     if(H5G_obj_remove(grp_loc->oloc, grp_loc->path->full_path_r, name, udata->dxpl_id) < 0)
