@@ -2601,13 +2601,6 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
     volatile unsigned i, j, k, l, m;            /* Local indices */
     char        filename[NAME_BUF_SIZE];
 
-    /*!FIXME Skip the test if a fixed array index is requested, as resizing
-     * fixed arrays is broken now.  Extensible arrays are also broken.  Remove
-     * these lines as appropriate when these problems are fixed. */
-    /* Fixed Array index type is now fixed */
-    if(index_type == RANK4_INDEX_EARRAY)
-        return 0;
-
     /* create a new file */
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -2811,12 +2804,6 @@ static int test_random_rank4_vl( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
     unsigned    scalar_iter;                    /* Iteration to shrink dset to 1x1x1x1 */
     volatile unsigned i, j, k, l, m;            /* Local indices */
     char        filename[NAME_BUF_SIZE];
-
-    /*!FIXME Skip the test if a fixed array index is requested, as resizing
-     * fixed arrays is broken now.  Extensible arrays are also broken.  Remove
-     * these lines as appropriate when these problems are fixed. */
-    if(index_type == RANK4_INDEX_FARRAY || index_type == RANK4_INDEX_EARRAY)
-        return 0;
 
     /* Initialize fill value buffers so they aren't freed in case of an error */
     fill_value.len = 0;

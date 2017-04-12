@@ -850,6 +850,7 @@ H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
+H5_DLL herr_t H5F_get_mpi_info(const H5F_t *f, MPI_Info **f_info);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */
