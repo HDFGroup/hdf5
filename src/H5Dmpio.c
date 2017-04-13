@@ -809,8 +809,6 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 }
 #endif
 
-io_option = H5D_MULTI_CHUNK_IO;
-
     /* step 2:  Go ahead to do IO.*/
     switch (io_option) {
         case H5D_ONE_LINK_CHUNK_IO:
@@ -2591,7 +2589,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     MPI_Status                        *send_statuses = NULL; /* Array of MPI_Isend chunk modification send statuses */
     hbool_t                            mem_iter_init = FALSE;
     size_t                             num_chunks_selected;
-    size_t                             i;
+    size_t                             i, last_assigned_idx;
     int                               *send_counts = NULL;
     int                               *send_displacements = NULL;
     int                                mpi_rank, mpi_size, mpi_code;
@@ -2737,7 +2735,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
         /* Now that the chunks have been redistributed, each process must send its modification data
          * to the new owners of any of the chunks it previously possessed
          */
-        for (i = 0; i < num_chunks_selected; i++) {
+        for (i = 0, last_assigned_idx = 0; i < num_chunks_selected; i++) {
             if (mpi_rank != local_info_array[i].owners.new_owner) {
                 H5D_filtered_collective_io_info_t  chunk_entry = local_info_array[i];
                 H5D_chunk_info_t                  *chunk_info = NULL;
@@ -2794,7 +2792,12 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
                     mod_data = NULL;
                 } /* end if */
             } /* end if */
+            else {
+                local_info_array[last_assigned_idx++] = local_info_array[i];
+            } /* end else */
         } /* end for */
+
+        num_chunks_selected = last_assigned_idx;
 
         /* Wait for all async send requests to complete before returning */
         if (num_send_requests) {
@@ -2885,14 +2888,12 @@ H5D__mpio_filtered_collective_write_type(H5D_filtered_collective_io_info_t *chun
 
         base_buf = chunk_list[0].buf;
         for (i = 0; i < num_entries; i++) {
-            if (chunk_list[i].owners.original_owner == chunk_list[i].owners.new_owner) {
-                /* Set up the offset in the file, the length of the chunk data, and the relative
-                 * displacement of the chunk data write buffer
-                 */
-                file_offset_array[i] = (MPI_Aint) chunk_list[i].chunk_states.new_chunk.offset;
-                length_array[i] = (int) chunk_list[i].chunk_states.new_chunk.length;
-                write_buf_array[i] = (MPI_Aint) chunk_list[i].buf - (MPI_Aint) base_buf;
-            }
+            /* Set up the offset in the file, the length of the chunk data, and the relative
+             * displacement of the chunk data write buffer
+             */
+            file_offset_array[i] = (MPI_Aint) chunk_list[i].chunk_states.new_chunk.offset;
+            length_array[i] = (int) chunk_list[i].chunk_states.new_chunk.length;
+            write_buf_array[i] = (MPI_Aint) chunk_list[i].buf - (MPI_Aint) base_buf;
         } /* end for */
 
         /* Create memory MPI type */
