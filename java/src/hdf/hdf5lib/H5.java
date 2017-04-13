@@ -1798,6 +1798,9 @@ public class H5 implements java.io.Serializable {
         return H5Dread_short(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf, true);
     }
 
+    public synchronized static native int H5DreadVL(long dataset_id, long mem_type_id, long mem_space_id,
+            long file_space_id, long xfer_plist_id, Object[] buf) throws HDF5LibraryException, NullPointerException;
+
     public synchronized static native int H5Dread_string(long dataset_id, long mem_type_id, long mem_space_id,
             long file_space_id, long xfer_plist_id, String[] buf) throws HDF5LibraryException, NullPointerException;
 
