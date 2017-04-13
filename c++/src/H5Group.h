@@ -18,11 +18,10 @@
 #define __H5Group_H
 
 namespace H5 {
-
 /*! \class Group
     \brief Class Group represents an HDF5 group.
 
-    It inherits many operations from H5Location and CommonFG.
+    Inheritance: CommonFG/H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
@@ -66,6 +65,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
    private:
         hid_t id;       // HDF5 group id
 
-};
-}
+}; // end of Group
+} // namespace H5
+
 #endif // __H5Group_H

@@ -20,7 +20,16 @@
 #include "H5Classes.h"          // constains forward class declarations
 
 namespace H5 {
+/*! \class H5Location
+    \brief H5Location is an abstract base class, added in version 1.8.12.
 
+    It provides a collection of wrappers for the C functions that take a
+    location identifier to specify the HDF5 object.  The location identifier
+    can be either file, group, dataset, attribute, or named datatype.
+    Wrappers for H5A functions stay in H5Object.
+
+    Inheritance: IdComponent
+*/
 class H5_DLLCPP H5Location;  // forward declaration for UserData4Aiterate
 
 // Define the operator function pointer for H5Aiterate().
@@ -169,7 +178,7 @@ class H5_DLLCPP H5Location : public IdComponent {
         // Noop destructor.
         virtual ~H5Location();
 
-}; /* end class H5Location */
+}; // end of H5Location
+} // namespace H5
 
-}
 #endif // __H5Location_H

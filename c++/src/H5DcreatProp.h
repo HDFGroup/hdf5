@@ -14,17 +14,15 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class DSetCreatPropList represents the HDF5 dataset creation property list
-// and inherits from PropList.
-
 #ifndef __H5DSCreatPropList_H
 #define __H5DSCreatPropList_H
 
 namespace H5 {
-
 /*! \class DSetCreatPropList
-    \brief Class DSetCreatPropList represents the dataset creation property
-    list.
+    \brief Class DSetCreatPropList inherits from ObjCreatPropList and provides
+    wrappers for the HDF5 dataset creation property functions.
+
+    Inheritance: ObjCreatPropList -> PropList -> IdComponent
 */
 class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
    public:
@@ -140,6 +138,8 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         static DSetCreatPropList* getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-};
-}
+
+}; // end of DSetCreatPropList
+} // namespace H5
+
 #endif // __H5DSCreatPropList_H

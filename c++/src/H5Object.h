@@ -20,27 +20,24 @@
 #include "H5Location.h"
 #include "H5Classes.h"          // constains forward class declarations
 
-// H5Object is a baseclass.  It has these subclasses:
-// Group, DataSet, and DataType.
-// DataType, in turn, has several specific datatypes as subclasses.
-// Modification:
-//      Sept 18, 2012: Added class H5Location in between IdComponent and
-//              H5Object.  An H5File now inherits from H5Location.  All HDF5
-//              wrappers in H5Object are moved up to H5Location.  H5Object
-//              is left mostly empty for future wrappers that are only for
-//              group, dataset, and named datatype.  Note that the reason for
-//              adding H5Location instead of simply moving H5File to be under
-//              H5Object is H5File is not an HDF5 object, and renaming H5Object
-//              to H5Location will risk breaking user applications.
-//              -BMR
-//      Apr 2, 2014: Added wrapper getObjName for H5Iget_name 
 namespace H5 {
-
 /*! \class H5Object
     \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
      and Group.
 
-    All the wrappers in H5Object were moved to H5Location.
+    Modification:
+        Sept 18, 2012: Added class H5Location in between IdComponent and
+                H5Object.  An H5File now inherits from H5Location.  All HDF5
+                wrappers in H5Object are moved up to H5Location.  H5Object
+                is left mostly empty for future wrappers that are only for
+                group, dataset, and named datatype.  Note that the reason for
+                adding H5Location instead of simply moving H5File to be under
+                H5Object is H5File is not an HDF5 object, and renaming H5Object
+                to H5Location will risk breaking user applications.
+                -BMR
+        Apr 2, 2014: Added wrapper getObjName for H5Iget_name
+
+    Inheritance: H5Location -> IdComponent
 */
 class H5_DLLCPP H5Object : public H5Location {
    public:
@@ -73,7 +70,7 @@ class H5_DLLCPP H5Object : public H5Location {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-}; /* end class H5Object */
+}; // end of H5Object
+} // namespace H5
 
-}
 #endif // __H5Object_H

@@ -18,8 +18,13 @@
 #define __H5PropList_H
 
 namespace H5 {
-
 //! Class PropList provides operations for generic property lists.
+/*! \class PropList
+    \brief Class PropList inherits from IdComponent and provides wrappers for
+    the HDF5 generic property list.
+
+    Inheritance: IdComponent
+*/
 class H5_DLLCPP PropList : public IdComponent {
    public:
         ///\brief Default property list
@@ -129,7 +134,8 @@ class H5_DLLCPP PropList : public IdComponent {
         friend void f_PropList_setId(PropList* plist, hid_t new_id);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-};
 
-}
+}; // end of PropList
+} // namespace H5
+
 #endif  // __H5PropList_H

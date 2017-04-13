@@ -18,8 +18,12 @@
 #define __H5EnumType_H
 
 namespace H5 {
+/*! \class EnumType
+    \brief EnumType is a derivative of a DataType and operates on HDF5
+    enum datatypes.
 
-//! Class EnumType operates on HDF5 enum datatypes.
+    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
+*/
 class H5_DLLCPP EnumType : public DataType {
 
    public:
@@ -69,6 +73,8 @@ class H5_DLLCPP EnumType : public DataType {
         EnumType( const EnumType& original );
 
         virtual ~EnumType();
-};
-}
+
+}; // end of EnumType
+} // namespace H5
+
 #endif // __H5EnumType_H

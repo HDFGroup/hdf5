@@ -18,8 +18,12 @@
 #define __H5ObjCreatPropList_H
 
 namespace H5 {
+/*! \class ObjCreatPropList
+    \brief Class ObjCreatPropList inherits from PropList and provides
+    wrappers for the HDF5 file create property list.
 
-//! Class ObjCreatPropList represents the HDF5 object creation property list.
+    Inheritance: PropList -> IdComponent
+*/
 class H5_DLLCPP ObjCreatPropList : public PropList {
    public:
         ///\brief Default object creation property list.
@@ -67,6 +71,7 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-};
-}
+}; // end of ObjCreatPropList
+} // namespace H5
+
 #endif // __H5ObjCreatPropList_H
