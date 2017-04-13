@@ -768,11 +768,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
-
-# Add libtool shared library version numbers to the HDF5 library
-# See libtool versioning documentation online.
-# After making changes, run bin/reconfigure to update other configure related
-# files like Makefile.in.
 LT_VERS_INTERFACE = 101
 LT_VERS_REVISION = 0
 LT_VERS_AGE = 0
@@ -1406,17 +1401,6 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 
 help:
 	@$(top_srcdir)/bin/makehelp
-
-# Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
-# All rights reserved.
-#
-# This file is part of HDF5.  The full HDF5 copyright notice, including
-# terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
-# If you do not have access to either file, you may request a copy from
-# help@hdfgroup.org.
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules
