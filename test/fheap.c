@@ -16386,14 +16386,23 @@ main(void)
 
     /* 
      * Caution when turning on ExpressMode 0:
-     *   It will activate testing with different combinations of
+     *  It will activate testing with different combinations of
      *       page buffering and file space strategy and the
      *       running time will be long.
+     *  For parallel build, the last two tests for page buffering
+     *      are skipped because this feature is disabled in parallel.
+     *      Activate full testing when this feature is re-enabled
+     *      in the future for parallel build.
      */
     if(ExpressMode > 1)
         HDprintf("***Express test mode on.  Some tests may be skipped\n");
-    else if(ExpressMode == 0)
+    else if(ExpressMode == 0) {
+#ifdef H5_HAVE_PARALLEL
+        num_pb_fs = NUM_PB_FS - 2;
+#else
         num_pb_fs = NUM_PB_FS;
+#endif
+    }
 
     /* Initialize heap creation parameters */
     init_small_cparam(&small_cparam);
