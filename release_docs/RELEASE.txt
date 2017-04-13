@@ -1,4 +1,4 @@
-HDF5 version 1.10.1-pre2 released on 2017-04-12
+HDF5 version 1.10.1-pre2 released on 2017-04-13
 ================================================================================
 
 INTRODUCTION
