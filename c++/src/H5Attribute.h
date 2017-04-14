@@ -18,7 +18,6 @@
 #define __H5Attribute_H
 
 namespace H5 {
-
 /*! \class Attribute
     \brief Class Attribute operates on HDF5 attributes.
 
@@ -26,6 +25,8 @@ namespace H5 {
     Attribute and DataSet are derivatives of AbstractDs.  Attribute also
     inherits from IdComponent because an attribute is an HDF5 component that
     is identified by an identifier.
+
+    Inheritance: multiple IdComponent/AbstractDs
 */
 class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
    public:
@@ -112,6 +113,7 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
         // Friend function to set Attribute id.  For library use only.
         friend void f_Attribute_setId(Attribute* attr, hid_t new_id);
 
-};
-}
+}; // end of Attribute
+} // namespace H5
+
 #endif // __H5Attribute_H

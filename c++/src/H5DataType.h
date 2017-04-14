@@ -14,20 +14,18 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class DataType inherits from H5Object and has several subclasses for
-// specific HDF5 data types.
-
 #ifndef __H5DataType_H
 #define __H5DataType_H
 
 namespace H5 {
-
 /*! \class DataType
     \brief Class DataType provides generic operations on HDF5 datatypes.
 
     DataType inherits from H5Object because a named datatype is an HDF5
     object and is a base class of ArrayType, AtomType, CompType, EnumType,
     and VarLenType.
+
+    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP DataType : public H5Object {
    public:
@@ -141,6 +139,8 @@ class H5_DLLCPP DataType : public H5Object {
         friend void f_DataType_setId(DataType* dtype, hid_t new_id);
 
         void p_commit(hid_t loc_id, const char* name);
-};
-}
+
+}; // end of DataType
+} // namespace H5
+
 #endif // __H5DataType_H

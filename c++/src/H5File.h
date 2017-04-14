@@ -18,11 +18,10 @@
 #define __H5File_H
 
 namespace H5 {
-
 /*! \class H5File
     \brief Class H5File represents an HDF5 file.
 
-    It inherits from H5Location and CommonFG.
+    Inheritance: CommonFG/H5Location -> IdComponent
 */
 class H5_DLLCPP H5File : public H5Location, public CommonFG {
    public:
@@ -118,6 +117,7 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
         // constructors taking a string or a char*
         void p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist );
 
-};
-}
+}; // end of H5File
+} // namespace H5
+
 #endif // __H5File_H
