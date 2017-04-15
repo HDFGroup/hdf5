@@ -312,7 +312,6 @@ out:
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
  *  based on HDF5 Image and Palette Specification
- *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
  *
@@ -406,7 +405,6 @@ herr_t H5IMmake_palettef(hid_t loc_id,
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
  *  based on HDF5 Image and Palette Specification
- *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
  *
@@ -449,7 +447,6 @@ herr_t H5IMget_palettef(hid_t loc_id,
  *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
  *
  * Modifications:
  *
