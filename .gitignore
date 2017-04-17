@@ -40,3 +40,4 @@ src/H5config.h.in
 src/H5overflow.h
 src/H5version.h
 
+/.classpath
