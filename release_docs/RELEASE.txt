@@ -379,7 +379,10 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (DER, 2016/12/06, HDFFV-10168)
 
-    - Fixed a failure in collective metadata writes.
+    - Fixed a failure in collective metadata writes.  
+
+      This failure only appeared when collective metadata writes 
+      were enabled (via H5Pset_coll_metadata_write()).
 
       (JRM, 2017/04/10, HDFFV-10055)
 
