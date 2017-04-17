@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 package test;
@@ -543,8 +541,8 @@ public class TestH5E {
         }
         assertFalse("testH5Ewalk:H5Ewalk2 ",((H5E_walk_data)walk_data).walkdata.isEmpty());
         assertTrue("testH5Ewalk:H5Ewalk2 "+((H5E_walk_data)walk_data).walkdata.size(),((H5E_walk_data)walk_data).walkdata.size()==3);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line==3767);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line==5506);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line==3765);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line==5504);
         assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).func_name,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).func_name.compareToIgnoreCase("H5P_verify_apl_and_dxpl")==0);
         assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).err_desc,((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).err_desc.compareToIgnoreCase("not a property list")==0);
         assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).err_desc,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).err_desc.compareToIgnoreCase("not the required access property list")==0);
