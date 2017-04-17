@@ -112,9 +112,6 @@ if HAVE_SHARED_CONDITIONAL
   libdynlib3_la_SOURCES=dynlib3.c
   libdynlib4_la_SOURCES=dynlib4.c
 
-install-exec-hook:
-	$(RM) $(DESTDIR)$(libdir)/*dynlib*
-
 else
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la
