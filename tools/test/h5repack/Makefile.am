@@ -47,7 +47,7 @@ h5repacktst_SOURCES=h5repacktst.c
 
 if HAVE_SHARED_CONDITIONAL
   # Build it as shared library if configure is enabled for shared library.
-  lib_LTLIBRARIES=libdynlibadd.la libdynlibvers.la
+  noinst_LTLIBRARIES=libdynlibadd.la libdynlibvers.la
   libdynlibadd_la_SOURCES=dynlib_rpk.c
   libdynlibvers_la_SOURCES=dynlib_vrpk.c
 
