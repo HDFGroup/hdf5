@@ -415,7 +415,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLappend(const char* plugin_path)
+H5PLappend(const char *plugin_path)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
@@ -448,7 +448,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLprepend(const char* plugin_path)
+H5PLprepend(const char *plugin_path)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
@@ -484,7 +484,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLreplace(const char* plugin_path, unsigned int index)
+H5PLreplace(const char *plugin_path, unsigned int index)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
@@ -518,7 +518,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLinsert(const char* plugin_path, unsigned int index)
+H5PLinsert(const char *plugin_path, unsigned int index)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
