@@ -54,6 +54,7 @@ if HAVE_SHARED_CONDITIONAL
   # Build it as shared library if configure is enabled for shared library.
   lib_LTLIBRARIES=libdynlibdiff.la
   libdynlibdiff_la_SOURCES=dynlib_diff.c
+  libdynlibdiff_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
 
 install-exec-hook:
 	$(RM) $(DESTDIR)$(libdir)/*dynlib*
