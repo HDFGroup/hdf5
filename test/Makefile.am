@@ -75,10 +75,10 @@ if BUILD_ALL_CONDITIONAL
   noinst_PROGRAMS=$(BUILD_ALL_PROGS)
 endif
 
-if HAVE_SHARED_CONDITIONAL
-  # The libh5test library provides common support code for the tests.
-  noinst_LTLIBRARIES=libh5test.la
+# The libh5test library provides common support code for the tests.
+noinst_LTLIBRARIES=libh5test.la
 
+if HAVE_SHARED_CONDITIONAL
   # The libdynlib1, libdynlib2, libdynlib3, and libdynlib4 library for testing plugin module plugin.c.
   # Build it as shared library if configure is enabled for shared library.
   lib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
@@ -86,13 +86,13 @@ if HAVE_SHARED_CONDITIONAL
   libdynlib2_la_SOURCES=dynlib2.c
   libdynlib3_la_SOURCES=dynlib3.c
   libdynlib4_la_SOURCES=dynlib4.c
+  libdynlib1_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlib2_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlib3_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlib4_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
 
 install-exec-hook:
 	$(RM) $(DESTDIR)$(libdir)/*dynlib*
-
-else
-  # The libh5test library provides common support code for the tests.
-  noinst_LTLIBRARIES=libh5test.la
 endif
 
 libh5test_la_SOURCES=h5test.c testframe.c cache_common.c

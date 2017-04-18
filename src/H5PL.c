@@ -408,12 +408,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLappend(const char* plugin_path)
+H5PLappend(const char *plugin_path)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "*s", plugin_path);
     if(H5PL_num_paths_g == H5PL_MAX_PATH_NUM)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
     if(NULL == plugin_path)
@@ -441,13 +442,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLprepend(const char* plugin_path)
+H5PLprepend(const char *plugin_path)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
     unsigned int plindex;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "*s", plugin_path);
     if(H5PL_num_paths_g == H5PL_MAX_PATH_NUM)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
     if(NULL == plugin_path)
@@ -477,12 +479,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLreplace(const char* plugin_path, unsigned int index)
+H5PLreplace(const char *plugin_path, unsigned int index)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "*sIu", plugin_path, index);
     if(NULL == plugin_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
     if(index >= H5PL_MAX_PATH_NUM)
@@ -511,13 +514,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLinsert(const char* plugin_path, unsigned int index)
+H5PLinsert(const char *plugin_path, unsigned int index)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char        *dl_path = NULL;
     unsigned int plindex;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "*sIu", plugin_path, index);
     if(H5PL_num_paths_g == H5PL_MAX_PATH_NUM)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
     if(NULL == plugin_path)
@@ -555,6 +559,7 @@ H5PLremove(unsigned int index)
     unsigned int plindex;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "Iu", index);
     if(H5PL_num_paths_g == 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "no directories in table")
     if(index >= H5PL_MAX_PATH_NUM)
@@ -599,6 +604,7 @@ H5PLget(unsigned int index, char *pathname/*out*/, size_t size)
     char        *dl_path = NULL;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("Zs", "Iuxz", index, pathname, size);
     if(H5PL_num_paths_g == 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "no directories in table")
     if(index >= H5PL_MAX_PATH_NUM)

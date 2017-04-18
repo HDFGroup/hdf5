@@ -164,31 +164,41 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libdynlib1_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libdynlib1_la_LDFLAGS) $(LDFLAGS) -o $@
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib1_la_rpath = -rpath \
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 libdynlib2_la_LIBADD =
 am__libdynlib2_la_SOURCES_DIST = dynlib2.c
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib2_la_OBJECTS = dynlib2.lo
 libdynlib2_la_OBJECTS = $(am_libdynlib2_la_OBJECTS)
+libdynlib2_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libdynlib2_la_LDFLAGS) $(LDFLAGS) -o $@
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib2_la_rpath = -rpath \
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 libdynlib3_la_LIBADD =
 am__libdynlib3_la_SOURCES_DIST = dynlib3.c
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib3_la_OBJECTS = dynlib3.lo
 libdynlib3_la_OBJECTS = $(am_libdynlib3_la_OBJECTS)
+libdynlib3_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libdynlib3_la_LDFLAGS) $(LDFLAGS) -o $@
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib3_la_rpath = -rpath \
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 libdynlib4_la_LIBADD =
 am__libdynlib4_la_SOURCES_DIST = dynlib4.c
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib4_la_OBJECTS = dynlib4.lo
 libdynlib4_la_OBJECTS = $(am_libdynlib4_la_OBJECTS)
+libdynlib4_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libdynlib4_la_LDFLAGS) $(LDFLAGS) -o $@
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib4_la_rpath = -rpath \
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 libh5test_la_LIBADD =
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
-@HAVE_SHARED_CONDITIONAL_FALSE@am_libh5test_la_rpath =
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libh5test_la_rpath =
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
 	pool$(EXEEXT) accum$(EXEEXT) hyperslab$(EXEEXT) \
@@ -1111,13 +1121,18 @@ BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_i
     gen_noencoder gen_nullspace gen_udlinks space_overflow gen_sizes_lheap \
     gen_file_image
 
-@HAVE_SHARED_CONDITIONAL_FALSE@noinst_LTLIBRARIES = libh5test.la
-@HAVE_SHARED_CONDITIONAL_TRUE@noinst_LTLIBRARIES = libh5test.la
+
+# The libh5test library provides common support code for the tests.
+noinst_LTLIBRARIES = libh5test.la
 @HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib1_la_SOURCES = dynlib1.c
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib2_la_SOURCES = dynlib2.c
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib3_la_SOURCES = dynlib3.c
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib4_la_SOURCES = dynlib4.c
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib1_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib2_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib3_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib4_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
 libh5test_la_SOURCES = h5test.c testframe.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
@@ -1253,19 +1268,19 @@ clean-noinstLTLIBRARIES:
 	}
 
 libdynlib1.la: $(libdynlib1_la_OBJECTS) $(libdynlib1_la_DEPENDENCIES) $(EXTRA_libdynlib1_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) $(am_libdynlib1_la_rpath) $(libdynlib1_la_OBJECTS) $(libdynlib1_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libdynlib1_la_LINK) $(am_libdynlib1_la_rpath) $(libdynlib1_la_OBJECTS) $(libdynlib1_la_LIBADD) $(LIBS)
 
 libdynlib2.la: $(libdynlib2_la_OBJECTS) $(libdynlib2_la_DEPENDENCIES) $(EXTRA_libdynlib2_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) $(am_libdynlib2_la_rpath) $(libdynlib2_la_OBJECTS) $(libdynlib2_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libdynlib2_la_LINK) $(am_libdynlib2_la_rpath) $(libdynlib2_la_OBJECTS) $(libdynlib2_la_LIBADD) $(LIBS)
 
 libdynlib3.la: $(libdynlib3_la_OBJECTS) $(libdynlib3_la_DEPENDENCIES) $(EXTRA_libdynlib3_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) $(am_libdynlib3_la_rpath) $(libdynlib3_la_OBJECTS) $(libdynlib3_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libdynlib3_la_LINK) $(am_libdynlib3_la_rpath) $(libdynlib3_la_OBJECTS) $(libdynlib3_la_LIBADD) $(LIBS)
 
 libdynlib4.la: $(libdynlib4_la_OBJECTS) $(libdynlib4_la_DEPENDENCIES) $(EXTRA_libdynlib4_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) $(am_libdynlib4_la_rpath) $(libdynlib4_la_OBJECTS) $(libdynlib4_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libdynlib4_la_LINK) $(am_libdynlib4_la_rpath) $(libdynlib4_la_OBJECTS) $(libdynlib4_la_LIBADD) $(LIBS)
 
 libh5test.la: $(libh5test_la_OBJECTS) $(libh5test_la_DEPENDENCIES) $(EXTRA_libh5test_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) $(am_libh5test_la_rpath) $(libh5test_la_OBJECTS) $(libh5test_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK)  $(libh5test_la_OBJECTS) $(libh5test_la_LIBADD) $(LIBS)
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -2398,15 +2413,11 @@ uninstall-am: uninstall-libLTLIBRARIES
 help:
 	@$(top_srcdir)/bin/makehelp
 
-@HAVE_SHARED_CONDITIONAL_TRUE@  # The libh5test library provides common support code for the tests.
-
 @HAVE_SHARED_CONDITIONAL_TRUE@  # The libdynlib1, libdynlib2, libdynlib3, and libdynlib4 library for testing plugin module plugin.c.
 @HAVE_SHARED_CONDITIONAL_TRUE@  # Build it as shared library if configure is enabled for shared library.
 
 @HAVE_SHARED_CONDITIONAL_TRUE@install-exec-hook:
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(RM) $(DESTDIR)$(libdir)/*dynlib*
-
-@HAVE_SHARED_CONDITIONAL_FALSE@  # The libh5test library provides common support code for the tests.
 
 # Additional target for running timing test
 timings _timings: testmeta

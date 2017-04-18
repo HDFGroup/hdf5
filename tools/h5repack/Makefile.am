@@ -66,6 +66,8 @@ if HAVE_SHARED_CONDITIONAL
   lib_LTLIBRARIES=libdynlibadd.la libdynlibvers.la
   libdynlibadd_la_SOURCES=dynlib_rpk.c
   libdynlibvers_la_SOURCES=dynlib_vrpk.c
+  libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
 
 install-exec-hook:
 	$(RM) $(DESTDIR)$(libdir)/*dynlib*
