@@ -111,6 +111,10 @@ if HAVE_SHARED_CONDITIONAL
   libdynlib2_la_SOURCES=dynlib2.c
   libdynlib3_la_SOURCES=dynlib3.c
   libdynlib4_la_SOURCES=dynlib4.c
+  libdynlib1_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlib2_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlib3_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlib4_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
 
 else
   # The libh5test library provides common support code for the tests.
