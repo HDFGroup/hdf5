@@ -39,9 +39,10 @@ LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 if HAVE_SHARED_CONDITIONAL
   # Build it as shared library if configure is enabled for shared library.
-  noinst_LTLIBRARIES=libdynlibdump.la
+  lib_LTLIBRARIES=libdynlibdump.la
   libdynlibdump_la_SOURCES=dynlib_dump.c
   libdynlibdump_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+
 install-exec-hook:
 	$(RM) $(DESTDIR)$(libdir)/*dynlib*
 endif
