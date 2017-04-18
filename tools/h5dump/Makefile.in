@@ -160,6 +160,10 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libdynlibdump_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(libdynlibdump_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibdump_la_rpath = -rpath \
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 am__EXEEXT_1 = h5dumpgentest$(EXEEXT)
@@ -714,6 +718,7 @@ LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 h5dump_SOURCES = h5dump.c h5dump_ddl.c h5dump_xml.c
 @HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlibdump.la
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlibdump_la_SOURCES = dynlib_dump.c
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibdump_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
 DISTCLEANFILES = testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
@@ -814,7 +819,7 @@ clean-libLTLIBRARIES:
 	}
 
 libdynlibdump.la: $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_DEPENDENCIES) $(EXTRA_libdynlibdump_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) $(am_libdynlibdump_la_rpath) $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libdynlibdump_la_LINK) $(am_libdynlibdump_la_rpath) $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \

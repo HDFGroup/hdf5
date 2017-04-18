@@ -1022,7 +1022,7 @@ H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_n
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("h", "i", dset_id);
+    H5TRACE3("e", "i*h*h", dset_id, offset, chunk_nbytes);
 
     /* Check arguments */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
