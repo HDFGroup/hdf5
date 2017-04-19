@@ -174,6 +174,10 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libdynlibadd_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(libdynlibadd_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibadd_la_rpath = -rpath \
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 libdynlibvers_la_LIBADD =
@@ -181,6 +185,10 @@ am__libdynlibvers_la_SOURCES_DIST = dynlib_vrpk.c
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibvers_la_OBJECTS =  \
 @HAVE_SHARED_CONDITIONAL_TRUE@	dynlib_vrpk.lo
 libdynlibvers_la_OBJECTS = $(am_libdynlibvers_la_OBJECTS)
+libdynlibvers_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(libdynlibvers_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibvers_la_rpath = -rpath \
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 PROGRAMS = $(noinst_PROGRAMS)
@@ -773,6 +781,8 @@ h5repacktst_SOURCES = h5repacktst.c
 @HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlibadd.la libdynlibvers.la
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd_la_SOURCES = dynlib_rpk.c
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlibvers_la_SOURCES = dynlib_vrpk.c
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
 DISTCLEANFILES = h5repack.sh h5repack_plugin.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
@@ -869,10 +879,10 @@ clean-libLTLIBRARIES:
 	}
 
 libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) $(LIBS)
 
 libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) $(LIBS)
 
 clean-noinstPROGRAMS:
 	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
