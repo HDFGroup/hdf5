@@ -62,7 +62,10 @@ static unsigned cache_image_api_error_check_3(void);
 static unsigned cache_image_api_error_check_4(void);
 
 static unsigned get_free_sections_test(void);
+
+#ifndef H5_HAVE_PARALLEL
 static unsigned evict_on_close_test(void);
+#endif /* H5_HAVE_PARALLEL */
 
 
 /****************************************************************************/
@@ -7711,6 +7714,7 @@ get_free_sections_test(void)
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_HAVE_PARALLEL
 static unsigned
 evict_on_close_test(void)
 {
@@ -8015,6 +8019,7 @@ evict_on_close_test(void)
     return !pass;
 
 } /* evict_on_close_test() */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
@@ -8066,7 +8071,10 @@ main(void)
     nerrs += cache_image_api_error_check_4();
 
     nerrs += get_free_sections_test();
+
+#ifndef H5_HAVE_PARALLEL
     nerrs += evict_on_close_test();
+#endif /* H5_HAVE_PARALLEL */
 
     return(nerrs > 0);
 
