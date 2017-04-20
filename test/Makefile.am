@@ -106,7 +106,7 @@ noinst_LTLIBRARIES=libh5test.la
 if HAVE_SHARED_CONDITIONAL
   # The libdynlib1, libdynlib2, libdynlib3, and libdynlib4 library for testing plugin module plugin.c.
   # Build it as shared library if configure is enabled for shared library.
-  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
+  pkglib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
   libdynlib1_la_SOURCES=dynlib1.c
   libdynlib2_la_SOURCES=dynlib2.c
   libdynlib3_la_SOURCES=dynlib3.c
@@ -124,6 +124,8 @@ libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
+
+LIBADD=pkglib_LTLIBRARIES
 
 # List the source files for tests that have more than one
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
@@ -147,6 +149,18 @@ timings _timings: testmeta
 
 # The flush1 test must run before the flush2 test
 flush2.chkexe_: flush1.chkexe_
+
+libdynlib1.la: $(libdynlib1_la_OBJECTS) $(libdynlib1_la_DEPENDENCIES) $(EXTRA_libdynlib1_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib1_la_LINK) $(am_libdynlib1_la_rpath) $(libdynlib1_la_OBJECTS) $(libdynlib1_la_LIBADD)
+
+libdynlib2.la: $(libdynlib2_la_OBJECTS) $(libdynlib2_la_DEPENDENCIES) $(EXTRA_libdynlib2_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib2_la_LINK) $(am_libdynlib2_la_rpath) $(libdynlib2_la_OBJECTS) $(libdynlib2_la_LIBADD)
+
+libdynlib3.la: $(libdynlib3_la_OBJECTS) $(libdynlib3_la_DEPENDENCIES) $(EXTRA_libdynlib3_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib3_la_LINK) $(am_libdynlib3_la_rpath) $(libdynlib3_la_OBJECTS) $(libdynlib3_la_LIBADD)
+
+libdynlib4.la: $(libdynlib4_la_OBJECTS) $(libdynlib4_la_DEPENDENCIES) $(EXTRA_libdynlib4_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib4_la_LINK) $(am_libdynlib4_la_rpath) $(libdynlib4_la_OBJECTS) $(libdynlib4_la_LIBADD) 
 
 # Temporary files.  These files are the ones created by setting the
 # HDF5_NOCLEANUP environment variable and running `make test' without
