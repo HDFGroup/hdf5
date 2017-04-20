@@ -1478,6 +1478,7 @@
 ./tools/test/misc/testfiles/h5clear_sec2_v3.h5
 ./tools/test/misc/testfiles/latest_h5clear_log_v3.h5
 ./tools/test/misc/testfiles/latest_h5clear_sec2_v3.h5
+./tools/test/misc/testfiles/mod_h5clear_mdc_image.h5
 ./tools/test/misc/testfiles/h5mkgrp_help.txt
 ./tools/test/misc/testfiles/h5mkgrp_version.txt.in
 ./tools/test/misc/h5perf_gentest.c
