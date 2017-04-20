@@ -8,19 +8,31 @@
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
+  set (HDF5_TEST_FILES
+      h5clear_log_v3.h5
+      h5clear_mdc_image.h5
+      mod_h5clear_mdc_image.h5
+      latest_h5clear_log_v3.h5
+      latest_h5clear_sec2_v3.h5
+  )
+  set (HDF5_SEC2_TEST_FILES
+      h5clear_sec2_v0.h5
+      h5clear_sec2_v2.h5
+      h5clear_sec2_v3.h5
+  )
   set (HDF5_REFERENCE_TEST_FILES
       h5clear_usage.ddl
       h5clear_open_fail.ddl
       h5clear_missing_file.ddl
       h5clear_no_mdc_image.ddl
-      orig_h5clear_sec2_v0.h5
-      orig_h5clear_sec2_v2.h5
-      orig_h5clear_sec2_v3.h5
-      mod_h5clear_mdc_image.h5
   )
 
-  foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  foreach (h5_file ${HDF5_TEST_FILES} ${HDF5_SEC2_TEST_FILES} ${HDF5_REFERENCE_TEST_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5clear_files")
+  endforeach ()
+  # make second copy of h5clear_sec2.h5
+  foreach (h5_file ${HDF5_SEC2_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/orig_${h5_file}" "h5clear_files")
   endforeach ()
   # make second copy of mod_h5clear_mdc_image.h5
   HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/mod_h5clear_mdc_image.h5" "${PROJECT_BINARY_DIR}/testfiles/mod_h5clear_mdc_image2.h5" "h5clear_files")
@@ -73,6 +85,16 @@
 
   macro (ADD_H5_TEST testname resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5CLEAR-clear_open_chk-copy_${testname}.h5
+          COMMAND    ${CMAKE_COMMAND}
+              -E copy_if_different
+              "${PROJECT_SOURCE_DIR}/testfiles/${testname}.h5" "${PROJECT_BINARY_DIR}/testfiles/${testname}.h5"
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5CLEAR-clear_open_chk-copy_${testname}.h5 PROPERTIES DEPENDS ${last_test})
+      endif ()
+      set (last_test "H5CLEAR-clear_open_chk-copy_${testname}.h5")
       # Initial file open fails OR
       # File open succeeds because the library does not check status_flags for file with < v3 superblock
       add_test (NAME H5CLEAR-clear_open_chk-${testname}_${resultcode} COMMAND $<TARGET_FILE:clear_open_chk> ${testname}.h5)
@@ -101,6 +123,7 @@
 #
 #
 # The following are tests to verify the status_flags field is cleared properly:
+if (HDF5_ENABLE_USING_MEMCHECKER)
   # Remove any output file left over from previous test run
   add_test (
     NAME H5CLEAR-clearall-objects
@@ -111,19 +134,66 @@
         h5clear_sec2_v0.h5
         h5clear_sec2_v2.h5
         h5clear_sec2_v3.h5
+        orig_h5clear_sec2_v0.h5
+        orig_h5clear_sec2_v2.h5
+        orig_h5clear_sec2_v3.h5
         latest_h5clear_log_v3.h5
         latest_h5clear_sec2_v3.h5
+        mod_h5clear_mdc_image.h5
+        mod_h5clear_mdc_image2.h5
   )
   if (NOT "${last_test}" STREQUAL "")
     set_tests_properties (H5CLEAR-clearall-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "H5CLEAR-clearall-objects")
 
-  # create the output files to be used.
-  add_test (NAME H5CLEAR-h5clear_gentest COMMAND $<TARGET_FILE:h5clear_gentest>)
-  set_tests_properties (H5CLEAR-h5clear_gentest PROPERTIES DEPENDS "H5CLEAR-clearall-objects")
-  set_tests_properties (H5CLEAR-h5clear_gentest PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-  set (last_test "H5CLEAR-h5clear_gentest")
+  foreach (h5_file ${HDF5_TEST_FILES} ${HDF5_SEC2_TEST_FILES})
+    add_test (
+      NAME H5CLEAR-copy_${h5_file}
+      COMMAND    ${CMAKE_COMMAND}
+          -E copy_if_different
+          "${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}"
+    )
+    if (NOT "${last_test}" STREQUAL "")
+      set_tests_properties (H5CLEAR-copy_${h5_file} PROPERTIES DEPENDS ${last_test})
+    endif ()
+    set (last_test "H5CLEAR-copy_${h5_file}")
+  endforeach ()
+  # make second copy of h5clear_sec2.h5
+  foreach (h5_file ${HDF5_SEC2_TEST_FILES})
+    add_test (
+      NAME H5CLEAR-copy_orig_${h5_file}
+      COMMAND    ${CMAKE_COMMAND}
+          -E copy_if_different
+          "${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/orig_${h5_file}"
+    )
+    if (NOT "${last_test}" STREQUAL "")
+      set_tests_properties (H5CLEAR-copy_orig_${h5_file} PROPERTIES DEPENDS ${last_test})
+    endif ()
+    set (last_test "H5CLEAR-copy_orig_${h5_file}")
+  endforeach ()
+  add_test (
+      NAME H5CLEAR-copy_mod_h5clear_mdc_image.h5
+      COMMAND    ${CMAKE_COMMAND}
+          -E copy_if_different
+          "${PROJECT_SOURCE_DIR}/testfiles/mod_h5clear_mdc_image.h5" "${PROJECT_BINARY_DIR}/testfiles/mod_h5clear_mdc_image.h5"
+  )
+  if (NOT "${last_test}" STREQUAL "")
+    set_tests_properties (H5CLEAR-copy_mod_h5clear_mdc_image.h5 PROPERTIES DEPENDS ${last_test})
+  endif ()
+  set (last_test "H5CLEAR-copy_mod_h5clear_mdc_image.h5")
+  # make second copy of mod_h5clear_mdc_image.h5
+  add_test (
+      NAME H5CLEAR-copy_mod_h5clear_mdc_image2.h5
+      COMMAND    ${CMAKE_COMMAND}
+          -E copy_if_different
+          "${PROJECT_SOURCE_DIR}/testfiles/mod_h5clear_mdc_image.h5" "${PROJECT_BINARY_DIR}/testfiles/mod_h5clear_mdc_image2.h5"
+  )
+  if (NOT "${last_test}" STREQUAL "")
+    set_tests_properties (H5CLEAR-copy_mod_h5clear_mdc_image2.h5 PROPERTIES DEPENDS ${last_test})
+  endif ()
+  set (last_test "H5CLEAR-copy_mod_h5clear_mdc_image2.h5")
+endif()
 
 #
 #
@@ -191,7 +261,3 @@
   ADD_H5_TEST (latest_h5clear_log_v3 "true")
   ADD_H5_TEST (h5clear_sec2_v0 "false")
   ADD_H5_TEST (h5clear_sec2_v2 "false")
-
-  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
-        h5clear_gentest
-  )
