@@ -200,15 +200,15 @@ endif()
 #
 # The following are tests to verify the expected output from h5clear
 # "h5clear -h"
-# "h5clear"                             (no options, no file)
-# "h5clear junk.h5"                     (no options, nonexisting file)
-# "h5clear orig_h5clear_sec2_v3.h5"          (no options, existing file)
-# "h5clear -m"                          (valid 1 option, no file)
-# "h5clear -s junk.h5"                  (valid 1 option, nonexisting file)
-# "h5clear -m -s junk.h5"               (valid 2 options, no file)
-# "h5clear -m -s junk.h5"               (valid 2 options, nonexisting file)
-# "h5clear -m orig_h5clear_sec2_v2.h5"       (valid 1 option, existing file, no cache image)
-# "h5clear -s -m orig_h5clear_sec2_v0.h5"    (valid 2 options, existing file, no cache image)
+# "h5clear"                                 (no options, no file)
+# "h5clear junk.h5"                         (no options, nonexisting file)
+# "h5clear orig_h5clear_sec2_v3.h5"         (no options, existing file)
+# "h5clear -m"                              (valid 1 option, no file)
+# "h5clear -s junk.h5"                      (valid 1 option, nonexisting file)
+# "h5clear -m -s"                           (valid 2 options, no file)
+# "h5clear -m -s junk.h5"                   (valid 2 options, nonexisting file)
+# "h5clear -m orig_h5clear_sec2_v2.h5"      (valid 1 option, existing file, no cache image)
+# "h5clear -s -m orig_h5clear_sec2_v0.h5"   (valid 2 options, existing file, no cache image)
   ADD_H5_CMP (h5clear_usage_h h5clear_usage 0 "-h")
   ADD_H5_CMP (h5clear_usage h5clear_usage 1 "")
   ADD_H5_CMP (h5clear_usage_junk h5clear_usage 1 "" junk.h5)
@@ -218,7 +218,7 @@ endif()
   ADD_H5_CMP (h5clear_missing_file_ms h5clear_missing_file 1 "-m" "-s")
   ADD_H5_CMP (h5clear_open_fail_ms h5clear_open_fail 1 "-m" "-s"  junk.h5)
   ADD_H5_CMP (h5clear_no_mdc_image_m h5clear_no_mdc_image 0 "-m" orig_h5clear_sec2_v2.h5)
-  ADD_H5_CMP (h5clear_no_mdc_image_ms h5clear_no_mdc_image 0 "-m" "-s" orig_h5clear_sec2_v0.h5)
+  ADD_H5_CMP (h5clear_no_mdc_image_ms h5clear_no_mdc_image 0 "-s" "-m" orig_h5clear_sec2_v0.h5)
 #
 #
 #
@@ -230,9 +230,9 @@ endif()
 # "h5clear -l h5clear_sec2_v2.h5"       (invalid 1 option, existing file, fail exit code)
 # "h5clear -m -k"                       (valid/invalid 2 options, nofile, fail exit code)
 # "h5clear -l -m"                       (invalid/valid 2 options, nofile, fail exit code)
-# "h5clear -m -k junk.h5"               (valid/invalid 2 options, nonexisting file, fail exit code)
+# "h5clear -m -l junk.h5"               (valid/invalid 2 options, nonexisting file, fail exit code)
 # "h5clear -l -m junk.h5"               (invalid/valid 2 options, nonexisting file, fail exit code)
-# "h5clear -m -k h5clear_sec2_v0.h5"    (valid/invalid 2 options, existing file, fail exit code)
+# "h5clear -m -l h5clear_sec2_v0.h5"    (valid/invalid 2 options, existing file, fail exit code)
 # "h5clear -l -m h5clear_sec2_v0.h5"    (invalid/valid 2 options, existing file, fail exit code)
   ADD_H5_RETTEST (h5clear_mdc_image "false" "-m" h5clear_mdc_image.h5)
   ADD_H5_RETTEST (h5clear_vers "false" "--vers")
@@ -243,14 +243,14 @@ endif()
   ADD_H5_RETTEST (h5clear_lm "true" "-l" "-m")
   ADD_H5_RETTEST (h5clear_ml_junk "true" "-m" "-l" junk.h5)
   ADD_H5_RETTEST (h5clear_lm_junk "true" "-l" "-m" junk.h5)
-  ADD_H5_RETTEST (h5clear_ml_sec2 "true" "-m" "-l" h5clear_sec2_v2.h5)
-  ADD_H5_RETTEST (h5clear_lm_sec2 "true" "-l" "-m" h5clear_sec2_v2.h5)
+  ADD_H5_RETTEST (h5clear_ml_sec2 "true" "-m" "-l" h5clear_sec2_v0.h5)
+  ADD_H5_RETTEST (h5clear_lm_sec2 "true" "-l" "-m" h5clear_sec2_v0.h5)
 #
 #
 #
 # h5clear_mdc_image.h5 already has cache image removed earlier, verify the expected warning from h5clear:
   ADD_H5_CMP (h5clear_mdc_image_m h5clear_no_mdc_image 0 "-m" mod_h5clear_mdc_image.h5)
-  ADD_H5_CMP (h5clear_mdc_image_sm h5clear_no_mdc_image 0 "-m" "-s" mod_h5clear_mdc_image2.h5)
+  ADD_H5_CMP (h5clear_mdc_image_sm h5clear_no_mdc_image 0 "-s" "-m" mod_h5clear_mdc_image2.h5)
 #
 #
 #
