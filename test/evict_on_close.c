@@ -808,7 +808,6 @@ error:
 
 } /* check_dset_scheme() */
 
-
 
 /*-------------------------------------------------------------------------
  * Function:    check_evict_on_close_api()

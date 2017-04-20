@@ -62,10 +62,7 @@ static unsigned cache_image_api_error_check_3(void);
 static unsigned cache_image_api_error_check_4(void);
 
 static unsigned get_free_sections_test(void);
-
-#ifndef H5_HAVE_PARALLEL
 static unsigned evict_on_close_test(void);
-#endif /* H5_HAVE_PARALLEL */
 
 
 /****************************************************************************/
@@ -7714,10 +7711,10 @@ get_free_sections_test(void)
  *
  *-------------------------------------------------------------------------
  */
-#ifndef H5_HAVE_PARALLEL
 static unsigned
 evict_on_close_test(void)
 {
+#ifndef H5_HAVE_PARALLEL
     const char * fcn_name = "evict_on_close_test()";
     char filename[512];
     hbool_t show_progress = FALSE;
@@ -7726,8 +7723,15 @@ evict_on_close_test(void)
     H5F_t *file_ptr = NULL;
     H5C_t *cache_ptr = NULL;
     int cp = 0;
+#endif /* H5_HAVE_PARALLEL */
 
     TESTING("Cache image / evict on close interaction");
+
+#ifdef H5_HAVE_PARALLEL
+    SKIPPED();
+    HDputs("    EoC not supported in the parallel library.");
+    return 0;
+#else
 
     pass = TRUE;
 
@@ -8017,9 +8021,9 @@ evict_on_close_test(void)
                   FUNC, failure_mssg);
 
     return !pass;
+#endif /* H5_HAVE_PARALLEL */
 
 } /* evict_on_close_test() */
-#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
@@ -8071,13 +8075,9 @@ main(void)
     nerrs += cache_image_api_error_check_4();
 
     nerrs += get_free_sections_test();
-
-#ifndef H5_HAVE_PARALLEL
     nerrs += evict_on_close_test();
-#endif /* H5_HAVE_PARALLEL */
 
     return(nerrs > 0);
 
 } /* main() */
-
 

@@ -4401,7 +4401,6 @@ H5Pset_evict_on_close(
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", fapl_id, evict_on_close);
 
-
     /* Compare the property list's class against the other class */
     if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
