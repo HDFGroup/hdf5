@@ -26,6 +26,7 @@
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
 ./COPYING
+./COPYING_LBNL_HDF5
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.am
@@ -246,7 +247,6 @@
 ./fortran/src/HDF5.F90
 ./fortran/src/Makefile.am
 ./fortran/src/README
-./fortran/src/README_DEVELOPEMENT   _DO_NOT_DISTRIBUTE_
 ./fortran/src/h5fc.in
 ./fortran/src/hdf5_fortrandll.def.in
 
@@ -800,6 +800,7 @@
 ./src/H5PBprivate.h
 ./src/H5PL.c
 ./src/H5PLmodule.h
+./src/H5PLpkg.h
 ./src/H5PLprivate.h
 ./src/H5PLpublic.h
 ./src/H5PLextern.h
@@ -1470,10 +1471,14 @@
 ./tools/test/misc/testfiles/h5clear_no_mdc_image.ddl
 ./tools/test/misc/testfiles/h5clear_open_fail.ddl
 ./tools/test/misc/testfiles/h5clear_usage.ddl
+./tools/test/misc/testfiles/h5clear_log_v3.h5
+./tools/test/misc/testfiles/h5clear_mdc_image.h5
+./tools/test/misc/testfiles/h5clear_sec2_v0.h5
+./tools/test/misc/testfiles/h5clear_sec2_v2.h5
+./tools/test/misc/testfiles/h5clear_sec2_v3.h5
+./tools/test/misc/testfiles/latest_h5clear_log_v3.h5
+./tools/test/misc/testfiles/latest_h5clear_sec2_v3.h5
 ./tools/test/misc/testfiles/mod_h5clear_mdc_image.h5
-./tools/test/misc/testfiles/orig_h5clear_sec2_v0.h5
-./tools/test/misc/testfiles/orig_h5clear_sec2_v2.h5
-./tools/test/misc/testfiles/orig_h5clear_sec2_v3.h5
 ./tools/test/misc/testfiles/h5mkgrp_help.txt
 ./tools/test/misc/testfiles/h5mkgrp_version.txt.in
 ./tools/test/misc/h5perf_gentest.c

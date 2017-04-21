@@ -750,7 +750,7 @@ if (NOT CYGWIN)
   endif ()
   set_tests_properties (H5TEST-cache PROPERTIES
       DEPENDS H5TEST-clear-cache-objects
-      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=3"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
   set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT 1800)
@@ -768,7 +768,7 @@ add_test (
 add_test (NAME H5TEST-cache_image COMMAND $<TARGET_FILE:cache_image>)
 set_tests_properties (H5TEST-cache_image PROPERTIES
     DEPENDS H5TEST-clear-cache_image-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=3"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
