@@ -167,6 +167,17 @@ Other New Features and Enhancements
     - A bin/restore.sh script was added that reverts autogen.sh processing.
 
       (DER, 2016/11/08)
+
+    - CMake: Added NAMESPACE hdf5:: to package configuration files to allow
+      projects using installed HDF5 binaries built with CMake to link with
+      them without specifying the HDF5 library location via IMPORTED_LOCATION.
+
+      (ABD, 2016/10/17, HDFFV-10003)
+
+    - CMake: Changed the CTEST_BUILD_CONFIGURATION option to
+      CTEST_CONFIGURATION_TYPE as recommended by the CMake documentation.
+
+      (ABD, 2016/10/17, HDFFV-9971)
     
 
     Fortran Library:
@@ -276,7 +287,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     - Outdated data structure was used in H5D_CHUNK_DEBUG blocks, causing
       compilation errors when H5D_CHUNK_DEBUG was defined.  This is fixed.
 
-      (BMR, 2017/04/04, HDFFV-8089, PR#374)
+      (BMR, 2017/04/04, HDFFV-8089)
 
     - SWMR implementation in the HDF5 1.10.0 and 1.10.0-patch1 releases has a broken
       metadata flush dependency that manifested itself with the following error at the
@@ -321,10 +332,6 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (VC, 2016/08/24, HDFFV-7991)
 
-    - Fix error when copying dataset with attribute which is a compound datatype
-      consisting of a variable length string.
-      (HDFFV-7991 VC 2016/08/19, 2016/08/21, 2016/08/24)
-
     - H5DOappend will no longer fail if a dataset has no append callback registered.
 
       (VC, 2016/08/14, HDFFV-9960)
@@ -334,9 +341,11 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (NAF, 2016/08/11, HDFFV-9948)
 
-    - H5DOappend will not fail if a dataset has no append callback registered.
+    - Fixed a problem where a plugin compiled into a DLL in the default plugin
+      directory could not be found by the HDF5 library at runtime on Windows
+      when the HDF5_PLUGIN_PATH environment variable was not set.
 
-      (VC 2016/08/05, 2016/08/14, HDFFV-9960)
+      (ABD, 2016/08/01, HDFFV-9706)
 
     - Fixed an error that would occur when calling H5Adelete on an attribute
       which is attached to an externally linked object in the target file and
@@ -344,22 +353,11 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (VC, 2016/07/06, HDFFV-9940)
 
-    - Fix the problem where the committed datatype's file location is different
-      from the file location of an attribute with that committed datatype.
-
-      (VC 2016/07/03, 2016/07/06, HDFFV-9940)
-
     - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
       (b) Modifications to better handle error recovery when conversion by
           h5format_convert fails.
 
       (VC, 2016/05/29, HDFFV-9434)
-
-    - (a) Throw an error instead of assertion when v1 btree level hits the 1 byte limit.
-      (b) Modifications to better handle error recovery when conversion by
-          h5format_convert fails.
-
-      (VC 2016/05/29, HDFFV-9434)
 
     - Fixed a memory leak where an array used by the library to track SWMR
       read retries was unfreed.
@@ -426,6 +424,24 @@ Bug Fixes since HDF5-1.10.0-patch1 release
     
       (ABD, 2016/10/27, HDFFV-9719)
 
+    - CMake: Fixed a timeout error that would occasionally occur when running
+      the virtual file driver tests simultaneously due to test directory
+      and file name collisions.
+
+      (ABD, 2016/09/19, HDFFV-9431)
+
+    - CMake: Fixed a command length overflow error by converting custom
+      commands inside CMakeTest.cmake files into regular dependencies and
+      targets.
+
+      (ABD, 2016/07/12, HDFFV-9939)
+
+    - Fixed a problem preventing HDF5 to be built on 32-bit CYGWIN by
+      condensing cygwin configuration files into a single file and
+      removing outdated compiler settings.
+
+      (ABD, 2016/07/12, HDFFV-9946)
+
 
     Fortran
     --------
@@ -444,7 +460,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (ABD, 2017/01/24, HDFFV-10046)
 
-    - h5diff correctly indicates error when it cannot read data due
+    - h5diff now correctly returns an error when it cannot read data due
       to an unavailable filter plugin.
 
       (ADB 2017/01/18, HDFFV-9994 )
@@ -456,9 +472,16 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (LRK, 2016/11/04, HDFFV-9938, HDFFV-9530) 
 
+    - h5repack User Defined (UD) filter parameters were not parsed correctly.
+
+      The UD filter parameters were not being parsed correctly. Reworked coding
+      section to parse the correct values and verify number of parameters.
+
+      (ABD, 2016/10/19, HDFFV-9996, HDFFV-9974, HDFFV-9515, HDFFV-9039) 
+
     - h5repack allows the --enable-error-stack option on the command line.
 
-      (ADB 2016/08/08, HDFFV-9775)
+      (ADB, 2016/08/08, HDFFV-9775)
 
 
     C++ APIs
