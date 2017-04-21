@@ -996,6 +996,12 @@ set_tests_properties (H5PLUGIN-plugin PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
 )
 
+add_test (NAME H5PLUGIN-pluginRelative COMMAND $<TARGET_FILE:plugin>)
+set_tests_properties (H5PLUGIN-pluginRelative PROPERTIES
+    ENVIRONMENT "HDF5_PLUGIN_PATH=@/../testdir1${CMAKE_SEP}@/../testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+)
+
 ##############################################################################
 ###    S W M R  T E S T S
 ##############################################################################

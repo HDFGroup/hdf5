@@ -105,7 +105,9 @@ typedef const void *(*H5PL_get_plugin_info_t)(void);
 #define H5PL_NO_PLUGIN          "::"
 
 /* Special symbol to indicate relative path from environment */
-#define H5PL_PLUGIN_ENV_SPECIALCHAR    '@'
+/* Restrict usage of special char only for the default path H5_DEFAULT_PLUGINDIR
+ * or when using the environment variable HDF5_PLUGIN_PATH */
+#define H5PL_PLUGIN_ENV_RELEXEC_CHAR    '@'
 
 /* Maximum size for path to executable */
 #ifndef    MAX_EXEC_PATH
@@ -128,6 +130,7 @@ typedef struct H5PL_table_t {
 /* Local Prototypes */
 /********************/
 
+static char *H5PL__env_strdup(const char *plpath);
 static herr_t H5PL__init_path_table(void);
 static htri_t H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info);
 static htri_t H5PL__open(H5PL_type_t pl_type, char *libname, int plugin_id, const void **pl_info);
@@ -182,50 +185,54 @@ DESCRIPTION
 herr_t
 H5PL__init_package(void)
 {
-    char        *preload_path;
-    char         *tempbuf;
+    herr_t       ret_value = SUCCEED;   /* Return value */
+    char        *preload_path = NULL;
+    char        *tempbuf = NULL;
+    char        pathsep = '/';
+    char        *bs = NULL;
+    size_t       ncopy = MAX_EXEC_PATH;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Retrieve pathnames from HDF5_PLUGIN_PRELOAD if the user sets it
      * to tell the library to load plugin libraries without search.
      */
     if(NULL != (preload_path = HDgetenv("HDF5_PLUGIN_PRELOAD")))
-        /* Special symbal "::" means no plugin during data reading. */
+        /* Special symbol "::" means no plugin during data reading. */
         if(!HDstrcmp(preload_path, H5PL_NO_PLUGIN))
             H5PL_plugin_g = 0;
 
-    /* Retrieve the executable path for use with H5PL_PLUGIN_ENV_SPECIALCHAR
+    /* Retrieve the executable path for use with H5PL_PLUGIN_ENV_RELEXEC_CHAR
      * if the user uses it in a plugin path.
      */
     if(NULL == (tempbuf = (char *)H5MM_malloc(MAX_EXEC_PATH)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for executable path")
-#if    defined(_WIN32) || defined(_WIN64) || defined(H5_HAVE_WIN32_API)
-    const char PathSep = '\\';
+#if defined(_WIN32) || defined(_WIN64) || defined(H5_HAVE_WIN32_API)
+    pathsep = (char)'\\';
     GetModuleFileName(NULL, tempbuf, MAX_EXEC_PATH);
 #elif defined(__APPLE__)
-    const char PathSep = '/';
-    uint32_t size = sizeof(result);
-    _NSGetExecutablePath(tempbuf, &size);
+    pathsep = (char)'/';
+    {
+        uint32_t size = sizeof(tempbuf);
+        _NSGetExecutablePath(tempbuf, &size);
+    }
 #else
-    const char PathSep = '/';
+    pathsep = (char)'/';
     {
         ssize_t count = readlink("/proc/self/exe", tempbuf, MAX_EXEC_PATH);
         tempbuf[count] = '\0';
     }
 #endif
-    {
-        char *bs = strrchr(tempbuf,  PathSep);
-        size_t    ncopy = MAX_EXEC_PATH;
-        if (bs)
-            ncopy = bs - tempbuf;
-        tempbuf[ncopy] = '\0';
-    }
+    if ((bs = HDstrrchr(tempbuf,  pathsep)))
+        ncopy = (size_t)(bs - tempbuf);
+    tempbuf[ncopy] = '\0';
+
     H5PL_executable_path_g = H5MM_strdup(tempbuf);
     if(tempbuf)
         tempbuf = (char *)H5MM_xfree(tempbuf);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__init_package() */
 
 
@@ -291,28 +298,33 @@ H5PL_term_package(void)
 } /* end H5PL_term_package() */
 
 static char*
-H5PL_env_strdup(const char *plpath)
+H5PL__env_strdup(const char *plpath)
 {
-    char        *dl_path = NULL;
+    char        *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
     if(NULL == plpath)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no path provided")
-    if (*plpath == H5PL_PLUGIN_ENV_SPECIALCHAR) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, NULL, "no path provided")
+    if (*plpath == H5PL_PLUGIN_ENV_RELEXEC_CHAR) {
         char         *tempbuf;
-        int ExecPathLength = strlen(H5PL_executable_path_g);
-        int PluginPathLength = strlen(plpath);
+        size_t ExecPathLength = HDstrlen(H5PL_executable_path_g);
+        size_t PluginPathLength = HDstrlen(plpath);
 
         if(NULL == (tempbuf = (char *)H5MM_malloc(ExecPathLength + PluginPathLength)))
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for plugin path")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, NULL, "can't allocate memory for plugin path")
 
         HDstrncpy(tempbuf, H5PL_executable_path_g, ExecPathLength);
-        HDstrncpy(tempbuf+ExecPathLength, s+1, PluginPathLength-1);
+        HDstrncpy(tempbuf+ExecPathLength, plpath+2, PluginPathLength-1);
         tempbuf[ExecPathLength + PluginPathLength] = '\0';
-        dl_path = H5MM_strdup(tempbuf);
+        ret_value = H5MM_strdup(tempbuf);
         tempbuf = (char *)H5MM_xfree(tempbuf);
     }
     else
-        dl_path = H5MM_strdup(plpath);
-    return dl_path;
+        ret_value = H5MM_strdup(plpath);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL_env_strdup() */
 
 
@@ -730,9 +742,9 @@ H5PLget(unsigned int index)
 
     FUNC_ENTER_API(NULL)
     if(H5PL_num_paths_g == 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "no directories in table")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, NULL, "no directories in table")
     if(NULL == (ret_value = H5PL_path_table_g[index]))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "no directory path at index")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, NULL, "no directory path at index")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -782,9 +794,9 @@ H5PL__init_path_table(void)
      */
     origin_dl_path = HDgetenv("HDF5_PLUGIN_PATH");
     if(NULL == origin_dl_path)
-        dl_path = H5MM_strdup(H5PL_DEFAULT_PATH);
+        dl_path = H5PL__env_strdup(H5PL_DEFAULT_PATH);
     else
-        dl_path = H5MM_strdup(origin_dl_path);
+        dl_path = H5PL__env_strdup(origin_dl_path);
     if(NULL == dl_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
