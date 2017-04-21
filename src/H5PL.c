@@ -638,14 +638,20 @@ done:
  *
  * Purpose: Query the size of the current list of plugin paths.
  *
- * Return: Non-negative or success.
+ * Return: Plugin path size (can't indicate failure due to unsigned type)
  *
  *-------------------------------------------------------------------------
  */
 unsigned int
 H5PLsize(void)
 {
-    return (unsigned int)H5PL_num_paths_g;
+    unsigned int ret_value = (unsigned int)H5PL_num_paths_g;
+
+    FUNC_ENTER_API(0)
+    H5TRACE0("Iu","");
+
+done:
+    FUNC_LEAVE_API(ret_value)
 } /* end H5PLsize() */
 
 
