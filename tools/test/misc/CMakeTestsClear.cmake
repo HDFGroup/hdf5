@@ -172,16 +172,6 @@ if (HDF5_ENABLE_USING_MEMCHECKER)
     endif ()
     set (last_test "H5CLEAR-copy_orig_${h5_file}")
   endforeach ()
-  add_test (
-      NAME H5CLEAR-copy_mod_h5clear_mdc_image.h5
-      COMMAND    ${CMAKE_COMMAND}
-          -E copy_if_different
-          "${PROJECT_SOURCE_DIR}/testfiles/mod_h5clear_mdc_image.h5" "${PROJECT_BINARY_DIR}/testfiles/mod_h5clear_mdc_image.h5"
-  )
-  if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (H5CLEAR-copy_mod_h5clear_mdc_image.h5 PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "H5CLEAR-copy_mod_h5clear_mdc_image.h5")
   # make second copy of mod_h5clear_mdc_image.h5
   add_test (
       NAME H5CLEAR-copy_mod_h5clear_mdc_image2.h5
