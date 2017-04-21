@@ -333,7 +333,7 @@ H5PL__env_strdup(const char *plpath)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, NULL, "can't allocate memory for plugin path")
 
         HDstrncpy(tempbuf, H5PL_executable_path_g, ExecPathLength);
-        HDstrncpy(tempbuf+ExecPathLength, plpath+2, PluginPathLength-1);
+        HDstrncpy(tempbuf+ExecPathLength, plpath+1, PluginPathLength-1);
         tempbuf[ExecPathLength + PluginPathLength] = '\0';
         ret_value = H5MM_strdup(tempbuf);
         tempbuf = (char *)H5MM_xfree(tempbuf);
@@ -685,7 +685,7 @@ ssize_t
 H5PLget(unsigned int index, char *pathname/*out*/, size_t size)
 {
     ssize_t      ret_value = 0;    /* Return value */
-    ssize_t      len = 0;      /* Length of pathname */
+    size_t       len = 0;          /* Length of pathname */
     char        *dl_path = NULL;
 
     FUNC_ENTER_API(FAIL)
@@ -704,7 +704,7 @@ H5PLget(unsigned int index, char *pathname/*out*/, size_t size)
     } /* end if */
 
     /* Set return value */
-    ret_value = len;
+    ret_value = (ssize_t)len;
 
 done:
     FUNC_LEAVE_API(ret_value)
