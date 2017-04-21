@@ -4379,19 +4379,7 @@ H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_evict_on_close(
-#if defined(H5_HAVE_PARALLEL) && !defined(H5_DEBUG_BUILD)
-                        hid_t H5_ATTR_UNUSED fapl_id,
-#else
-                        hid_t fapl_id,
-#endif /* H5_HAVE_PARALLEL and !H5_DEBUG_BUILD */
-
-#ifdef H5_HAVE_PARALLEL
-                        hbool_t H5_ATTR_UNUSED evict_on_close
-#else
-                        hbool_t evict_on_close
-#endif /* H5_HAVE_PARALLEL */
-)
+H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close)
 {
     H5P_genplist_t *plist;          /* property list pointer */
     herr_t ret_value = SUCCEED;     /* return value */
