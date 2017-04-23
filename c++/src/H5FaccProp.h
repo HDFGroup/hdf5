@@ -58,7 +58,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
         void getCore (size_t& increment, hbool_t& backing_store) const;
 
         // Sets this file access properties list to the family driver.
-        void setFamily( hsize_t memb_size, const FileAccPropList& memb_plist ) const;
+        void setFamily(hsize_t memb_size, const FileAccPropList& memb_plist) const;
 
         // Returns information about the family file access property list.
         void getFamily(hsize_t& memb_size, FileAccPropList& memb_plist) const;
@@ -68,7 +68,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
         void setSplit(const FileAccPropList& meta_plist,
                       const FileAccPropList& raw_plist,
                       const char* meta_ext = ".meta",
-                      const char* raw_ext = ".raw" ) const;
+                      const char* raw_ext = ".raw") const;
         void setSplit(const FileAccPropList& meta_plist,
                       const FileAccPropList& raw_plist,
                       const H5std_string& meta_ext = ".meta",
@@ -92,11 +92,11 @@ class H5_DLLCPP FileAccPropList : public PropList {
         void setLog(const H5std_string& logfile, unsigned flags, size_t buf_size) const;
 
         // Sets alignment properties of this file access property list
-        void setAlignment( hsize_t threshold = 1, hsize_t alignment = 1 ) const;
+        void setAlignment(hsize_t threshold = 1, hsize_t alignment = 1) const;
 
         // Retrieves the current settings for alignment properties from
         // this property list.
-        void getAlignment( hsize_t& threshold, hsize_t& alignment ) const;
+        void getAlignment(hsize_t& threshold, hsize_t& alignment) const;
 
         // Sets data type for multi driver.
         void setMultiType(H5FD_mem_t dtype) const;
@@ -105,10 +105,10 @@ class H5_DLLCPP FileAccPropList : public PropList {
         H5FD_mem_t getMultiType() const;
 
         // Sets the meta data cache and raw data chunk cache parameters.
-        void setCache( int mdc_nelmts, size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const;
+        void setCache(int mdc_nelmts, size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0) const;
 
         // Queries the meta data cache and raw data chunk cache parameters.
-        void getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
+        void getCache(int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0) const;
 
         // Sets the degree for the file close behavior.
         void setFcloseDegree(H5F_close_degree_t degree) const;
@@ -117,7 +117,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
         H5F_close_degree_t getFcloseDegree() const;
 
         // Sets garbage collecting references flag.
-        void setGcReferences( unsigned gc_ref = 0 ) const;
+        void setGcReferences(unsigned gc_ref = 0) const;
 
         // Returns garbage collecting references setting.
         unsigned getGcReferences() const;
@@ -133,7 +133,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
         virtual H5std_string fromClass () const { return("FileAccPropList"); }
 
         // Copy constructor: creates a copy of a FileAccPropList object.
-        FileAccPropList( const FileAccPropList& original );
+        FileAccPropList(const FileAccPropList& original);
 
         // Creates a copy of an existing file access property list
         // using the property list id.

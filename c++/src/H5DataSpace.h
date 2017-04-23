@@ -42,7 +42,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
         DataSpace(const DataSpace& original);
 
         // Assignment operator
-        DataSpace& operator=( const DataSpace& rhs );
+        DataSpace& operator=(const DataSpace& rhs);
 
         // Closes this dataspace.
         virtual void close();
@@ -56,16 +56,16 @@ class H5_DLLCPP DataSpace : public IdComponent {
         //void extentCopy(DataSpace& dest_space) const;
 
         // Gets the bounding box containing the current selection.
-        void getSelectBounds( hsize_t* start, hsize_t* end ) const;
+        void getSelectBounds(hsize_t* start, hsize_t* end) const;
 
         // Gets the number of element points in the current selection.
         hssize_t getSelectElemNpoints() const;
 
         // Retrieves the list of element points currently selected.
-        void getSelectElemPointlist( hsize_t startpoint, hsize_t numpoints, hsize_t *buf ) const;
+        void getSelectElemPointlist(hsize_t startpoint, hsize_t numpoints, hsize_t *buf) const;
 
         // Gets the list of hyperslab blocks currently selected.
-        void getSelectHyperBlocklist( hsize_t startblock, hsize_t numblocks, hsize_t *buf ) const;
+        void getSelectHyperBlocklist(hsize_t startblock, hsize_t numblocks, hsize_t *buf) const;
 
         // Get number of hyperslab blocks.
         hssize_t getSelectHyperNblocks() const;
@@ -74,7 +74,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
         hssize_t getSelectNpoints() const;
 
         // Retrieves dataspace dimension size and maximum size.
-        int getSimpleExtentDims( hsize_t *dims, hsize_t *maxdims = NULL ) const;
+        int getSimpleExtentDims(hsize_t *dims, hsize_t *maxdims = NULL) const;
 
         // Gets the dimensionality of this dataspace.
         int getSimpleExtentNdims() const;
@@ -90,17 +90,17 @@ class H5_DLLCPP DataSpace : public IdComponent {
         bool isSimple() const;
 
         // Sets the offset of this simple dataspace.
-        void offsetSimple( const hssize_t* offset ) const;
+        void offsetSimple(const hssize_t* offset) const;
 
         // Selects the entire dataspace.
         void selectAll() const;
 
         // Selects array elements to be included in the selection for
         // this dataspace.
-        void selectElements( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord) const;
+        void selectElements(H5S_seloper_t op, const size_t num_elements, const hsize_t *coord) const;
 
         // Selects a hyperslab region to add to the current selected region.
-        void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hsize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;
+        void selectHyperslab(H5S_seloper_t op, const hsize_t *count, const hsize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL) const;
 
         // Resets the selection region to include no elements.
         void selectNone() const;
@@ -112,7 +112,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
         void setExtentNone() const;
 
         // Sets or resets the size of this dataspace.
-        void setExtentSimple( int rank, const hsize_t *current_size, const hsize_t *maximum_size = NULL ) const;
+        void setExtentSimple(int rank, const hsize_t *current_size, const hsize_t *maximum_size = NULL) const;
 
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DataSpace"); }

@@ -63,7 +63,7 @@ class H5_DLLCPP H5Object : public H5Location {
         // removal does not raise any problems in two 1.10 releases.
 
         // Creates a copy of an existing object giving the object id
-        H5Object( const hid_t object_id );
+        H5Object(const hid_t object_id);
 
         // Copy constructor: makes copy of an H5Object object.
         // H5Object(const H5Object& original);

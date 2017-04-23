@@ -44,11 +44,11 @@ namespace H5 {
 //--------------------------------------------------------------------------
 void H5Library::open()
 {
-   herr_t ret_value = H5open();
-   if( ret_value < 0 )
-   {
-      throw LibraryIException("H5Library::open", "H5open failed");
-   }
+    herr_t ret_value = H5open();
+    if(ret_value < 0)
+    {
+        throw LibraryIException("H5Library::open", "H5open failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -60,11 +60,11 @@ void H5Library::open()
 //--------------------------------------------------------------------------
 void H5Library::close()
 {
-   herr_t ret_value = H5close();
-   if( ret_value < 0 )
-   {
-      throw LibraryIException("H5Library::close", "H5close failed");
-   }
+    herr_t ret_value = H5close();
+    if(ret_value < 0)
+    {
+        throw LibraryIException("H5Library::close", "H5close failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -79,7 +79,7 @@ void H5Library::close()
 //--------------------------------------------------------------------------
 void H5Library::dontAtExit()
 {
-   herr_t ret_value = H5dont_atexit();
+    herr_t ret_value = H5dont_atexit();
 }
 
 //--------------------------------------------------------------------------
@@ -91,13 +91,13 @@ void H5Library::dontAtExit()
 ///\exception   H5::LibraryIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5Library::getLibVersion( unsigned& majnum, unsigned& minnum, unsigned& relnum )
+void H5Library::getLibVersion(unsigned& majnum, unsigned& minnum, unsigned& relnum)
 {
-   herr_t ret_value = H5get_libversion( &majnum, &minnum, &relnum );
-   if( ret_value < 0 )
-   {
-      throw LibraryIException("H5Library::getLibVersion", "H5get_libversion failed");
-   }
+    herr_t ret_value = H5get_libversion(&majnum, &minnum, &relnum);
+    if(ret_value < 0)
+    {
+        throw LibraryIException("H5Library::getLibVersion", "H5get_libversion failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -116,11 +116,11 @@ void H5Library::getLibVersion( unsigned& majnum, unsigned& minnum, unsigned& rel
 //--------------------------------------------------------------------------
 void H5Library::checkVersion(unsigned majnum, unsigned minnum, unsigned relnum)
 {
-   herr_t ret_value = H5check_version(majnum, minnum, relnum);
-   if( ret_value < 0 )
-   {
-      throw LibraryIException("H5Library::checkVersion", "H5check_version failed");
-   }
+    herr_t ret_value = H5check_version(majnum, minnum, relnum);
+    if(ret_value < 0)
+    {
+        throw LibraryIException("H5Library::checkVersion", "H5check_version failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -145,11 +145,11 @@ void H5Library::checkVersion(unsigned majnum, unsigned minnum, unsigned relnum)
 //--------------------------------------------------------------------------
 void H5Library::garbageCollect()
 {
-   herr_t ret_value = H5garbage_collect();
-   if( ret_value < 0 )
-   {
-      throw LibraryIException("H5Library::garbageCollect", "H5garbage_collect failed");
-   }
+    herr_t ret_value = H5garbage_collect();
+    if(ret_value < 0)
+    {
+        throw LibraryIException("H5Library::garbageCollect", "H5garbage_collect failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -184,23 +184,23 @@ void H5Library::initH5cpp()
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating PropList::deleteConstants failed");
 
-     ret_value = std::atexit(FileAccPropList::deleteConstants);
+    ret_value = std::atexit(FileAccPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating FileAccPropList::deleteConstants failed");
 
-     ret_value = std::atexit(FileCreatPropList::deleteConstants);
+    ret_value = std::atexit(FileCreatPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating FileCreatPropList::deleteConstants failed");
 
-     ret_value = std::atexit(DSetMemXferPropList::deleteConstants);
+    ret_value = std::atexit(DSetMemXferPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating DSetMemXferPropList::deleteConstants failed");
 
-     ret_value = std::atexit(DSetCreatPropList::deleteConstants);
+    ret_value = std::atexit(DSetCreatPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating DSetCreatPropList::deleteConstants failed");
 
-     ret_value = std::atexit(ObjCreatPropList::deleteConstants);
+    ret_value = std::atexit(ObjCreatPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating ObjCreatPropList::deleteConstants failed");
 
@@ -245,11 +245,11 @@ void H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim,
         int arr_global_lim, int arr_list_lim, int blk_global_lim,
         int blk_list_lim)
 {
-   herr_t ret_value = H5set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim);
-   if( ret_value < 0 )
-   {
-      throw LibraryIException("H5Library::setFreeListLimits", "H5set_free_list_limits failed");
-   }
+    herr_t ret_value = H5set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim);
+    if(ret_value < 0)
+    {
+        throw LibraryIException("H5Library::setFreeListLimits", "H5set_free_list_limits failed");
+    }
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

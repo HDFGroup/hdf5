@@ -86,7 +86,7 @@ class H5_DLLCPP AbstractDs {
         // Mar 2016 -BMR, AbstractDs(const hid_t h5_id);
 
         // Copy constructor
-        // AbstractDs( const AbstractDs& original );
+        // AbstractDs(const AbstractDs& original);
 
    private:
         // This member function is implemented by DataSet and Attribute - pure virtual.

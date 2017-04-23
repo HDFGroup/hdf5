@@ -54,7 +54,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
         virtual ~Group();
 
         // Creates a copy of an existing group using its id.
-        Group( const hid_t group_id );
+        Group(const hid_t group_id);
 
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

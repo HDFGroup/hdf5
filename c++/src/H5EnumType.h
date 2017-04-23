@@ -29,13 +29,13 @@ class H5_DLLCPP EnumType : public DataType {
    public:
         // Creates an empty enumeration datatype based on a native signed
         // integer type, whose size is given by size.
-        EnumType( size_t size );
+        EnumType(size_t size);
 
         // Gets the enum datatype of the specified dataset
-        EnumType( const DataSet& dataset );  // H5Dget_type
+        EnumType(const DataSet& dataset);  // H5Dget_type
 
         // Creates a new enum datatype based on an integer datatype
-        EnumType( const IntType& data_type );  // H5Tenum_create
+        EnumType(const IntType& data_type);  // H5Tenum_create
 
         // Returns the number of members in this enumeration datatype.
         int getNmembers () const;
@@ -45,20 +45,20 @@ class H5_DLLCPP EnumType : public DataType {
         int getMemberIndex(const H5std_string& name) const;
 
         // Returns the value of an enumeration datatype member
-        void getMemberValue( unsigned memb_no, void *value ) const;
+        void getMemberValue(unsigned memb_no, void *value) const;
 
         // Inserts a new member to this enumeration type.
-        void insert( const char* name, void *value ) const;
-        void insert( const H5std_string& name, void *value ) const;
+        void insert(const char* name, void *value) const;
+        void insert(const H5std_string& name, void *value) const;
 
         // Returns the symbol name corresponding to a specified member
         // of this enumeration datatype.
-        H5std_string nameOf( void *value, size_t size ) const;
+        H5std_string nameOf(void *value, size_t size) const;
 
         // Returns the value corresponding to a specified member of this
         // enumeration datatype.
-        void valueOf( const char* name, void *value ) const;
-        void valueOf( const H5std_string& name, void *value ) const;
+        void valueOf(const char* name, void *value) const;
+        void valueOf(const H5std_string& name, void *value) const;
 
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("EnumType"); }
@@ -67,10 +67,10 @@ class H5_DLLCPP EnumType : public DataType {
         EnumType();
 
         // Creates an enumeration datatype using an existing id
-        EnumType( const hid_t existing_id );
+        EnumType(const hid_t existing_id);
 
         // Copy constructor: makes a copy of the original EnumType object.
-        EnumType( const EnumType& original );
+        EnumType(const EnumType& original);
 
         virtual ~EnumType();
 

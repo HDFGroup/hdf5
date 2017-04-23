@@ -45,7 +45,7 @@ CompType::CompType() : DataType() {}
 ///\param       original - IN: Original CompType instance
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType::CompType( const CompType& original ) : DataType( original ) {}
+CompType::CompType(const CompType& original) : DataType(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    CompType overloaded constructor
@@ -53,7 +53,7 @@ CompType::CompType( const CompType& original ) : DataType( original ) {}
 ///\param       existing_id - IN: Id of an existing compound datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType::CompType( const hid_t existing_id ) : DataType( existing_id ) {}
+CompType::CompType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    CompType overloaded constructor
@@ -65,7 +65,7 @@ CompType::CompType( const hid_t existing_id ) : DataType( existing_id ) {}
 //              the compound datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType::CompType( size_t size ) : DataType( H5T_COMPOUND, size ) {}
+CompType::CompType(size_t size) : DataType(H5T_COMPOUND, size) {}
 
 //--------------------------------------------------------------------------
 // Function:    CompType overloaded constructor
@@ -75,16 +75,16 @@ CompType::CompType( size_t size ) : DataType( H5T_COMPOUND, size ) {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType::CompType( const DataSet& dataset ) : DataType()
+CompType::CompType(const DataSet& dataset) : DataType()
 {
-   // Calls C function H5Dget_type to get the id of the datatype
-   id = H5Dget_type( dataset.getId() );
+    // Calls C function H5Dget_type to get the id of the datatype
+    id = H5Dget_type(dataset.getId());
 
-   // If the datatype id is invalid, throw exception
-   if( id < 0 )
-   {
-      throw DataSetIException("CompType constructor", "H5Dget_type failed");
-   }
+    // If the datatype id is invalid, throw exception
+    if(id < 0)
+    {
+        throw DataSetIException("CompType constructor", "H5Dget_type failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -96,13 +96,13 @@ CompType::CompType( const DataSet& dataset ) : DataType()
 //--------------------------------------------------------------------------
 int CompType::getNmembers() const
 {
-   int num_members = H5Tget_nmembers( id );
-   if( num_members < 0 )
-   {
-      throw DataTypeIException("CompType::getNmembers",
+    int num_members = H5Tget_nmembers(id);
+    if(num_members < 0)
+    {
+        throw DataTypeIException("CompType::getNmembers",
                 "H5Tget_nmembers returns negative number of members");
-   }
-   return( num_members );
+    }
+    return(num_members);
 }
 
 //--------------------------------------------------------------------------
@@ -113,17 +113,17 @@ int CompType::getNmembers() const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5std_string CompType::getMemberName( unsigned member_num ) const
+H5std_string CompType::getMemberName(unsigned member_num) const
 {
-    char* member_name_C = H5Tget_member_name( id, member_num );
-    if( member_name_C == NULL )  // NULL means failure
+    char* member_name_C = H5Tget_member_name(id, member_num);
+    if(member_name_C == NULL)  // NULL means failure
     {
         throw DataTypeIException("CompType::getMemberName",
                 "H5Tget_member_name returns NULL for member name");
     }
     H5std_string member_name = H5std_string(member_name_C); // convert C string to string
     H5free_memory(member_name_C); // free the C string
-    return( member_name ); // return the member name string
+    return(member_name); // return the member name string
 }
 
 //--------------------------------------------------------------------------
@@ -140,17 +140,17 @@ H5std_string CompType::getMemberName( unsigned member_num ) const
 //--------------------------------------------------------------------------
 int CompType::getMemberIndex(const char* name) const
 {
-   int member_index = H5Tget_member_index(id, name);
-   if( member_index < 0 )
-   {
-      throw DataTypeIException("CompType::getMemberIndex",
+    int member_index = H5Tget_member_index(id, name);
+    if(member_index < 0)
+    {
+        throw DataTypeIException("CompType::getMemberIndex",
                 "H5Tget_member_index returns negative value");
-   }
-   return( member_index );
+    }
+    return(member_index);
 }
 int CompType::getMemberIndex(const H5std_string& name) const
 {
-   return(getMemberIndex(name.c_str()));
+    return(getMemberIndex(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -169,10 +169,10 @@ int CompType::getMemberIndex(const H5std_string& name) const
 //              Note that byte offset being returned as 0 doesn't indicate
 //              a failure. (According to Quincey)
 //--------------------------------------------------------------------------
-size_t CompType::getMemberOffset( unsigned member_num ) const
+size_t CompType::getMemberOffset(unsigned member_num) const
 {
-   size_t offset = H5Tget_member_offset( id, member_num );
-   return( offset );
+    size_t offset = H5Tget_member_offset(id, member_num);
+    return(offset);
 }
 
 //--------------------------------------------------------------------------
@@ -185,15 +185,15 @@ size_t CompType::getMemberOffset( unsigned member_num ) const
 // Modification
 //              Modified to use H5Tget_member_class instead. - Jul, 2005
 //--------------------------------------------------------------------------
-H5T_class_t CompType::getMemberClass( unsigned member_num ) const
+H5T_class_t CompType::getMemberClass(unsigned member_num) const
 {
-   H5T_class_t member_class = H5Tget_member_class(id, member_num);
-   if( member_class == H5T_NO_CLASS )
-   {
-      throw DataTypeIException("CompType::getMemberClass",
+    H5T_class_t member_class = H5Tget_member_class(id, member_num);
+    if(member_class == H5T_NO_CLASS)
+    {
+        throw DataTypeIException("CompType::getMemberClass",
                 "H5Tget_member_class returns H5T_NO_CLASS");
-   }
-   return(member_class);
+    }
+    return(member_class);
 }
 
 // This private member function calls the C API to get the identifier
@@ -202,16 +202,16 @@ H5T_class_t CompType::getMemberClass( unsigned member_num ) const
 // the sub-types.
 hid_t CompType::p_get_member_type(unsigned member_num) const
 {
-   // get the id of the specified member first
-   hid_t member_type_id = H5Tget_member_type( id, member_num );
-   if( member_type_id > 0 )
-      return( member_type_id );
-   else
-   {
-      // p_get_member_type is private, caller will catch this exception
-      // then throw another with appropriate API name
-      throw DataTypeIException("", "H5Tget_member_type failed");
-   }
+    // get the id of the specified member first
+    hid_t member_type_id = H5Tget_member_type(id, member_num);
+    if(member_type_id > 0)
+        return(member_type_id);
+    else
+    {
+        // p_get_member_type is private, caller will catch this exception
+        // then throw another with appropriate API name
+        throw DataTypeIException("", "H5Tget_member_type failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -223,16 +223,16 @@ hid_t CompType::p_get_member_type(unsigned member_num) const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType CompType::getMemberDataType( unsigned member_num ) const
+DataType CompType::getMemberDataType(unsigned member_num) const
 {
-   try {
+    try {
         DataType datatype;
         f_DataType_setId(&datatype, p_get_member_type(member_num));
         return(datatype);
-   }
-   catch (DataTypeIException& E) {
+    }
+    catch (DataTypeIException& E) {
         throw DataTypeIException("CompType::getMemberDataType", E.getDetailMsg());
-   }
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -244,16 +244,16 @@ DataType CompType::getMemberDataType( unsigned member_num ) const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
-ArrayType CompType::getMemberArrayType( unsigned member_num ) const
+ArrayType CompType::getMemberArrayType(unsigned member_num) const
 {
-   try {
+    try {
         ArrayType arraytype(p_get_member_type(member_num));
         f_DataType_setId(&arraytype, p_get_member_type(member_num));
         return(arraytype);
-   }
-   catch (DataTypeIException& E) {
-      throw DataTypeIException("CompType::getMemberArrayType", E.getDetailMsg());
-   }
+    }
+    catch (DataTypeIException& E) {
+        throw DataTypeIException("CompType::getMemberArrayType", E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -265,16 +265,16 @@ ArrayType CompType::getMemberArrayType( unsigned member_num ) const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CompType CompType::getMemberCompType( unsigned member_num ) const
+CompType CompType::getMemberCompType(unsigned member_num) const
 {
-   try {
+    try {
       CompType comptype(p_get_member_type(member_num));
         f_DataType_setId(&comptype, p_get_member_type(member_num));
-      return(comptype);
-   }
-   catch (DataTypeIException& E) {
-      throw DataTypeIException("CompType::getMemberCompType", E.getDetailMsg());
-   }
+        return(comptype);
+    }
+    catch (DataTypeIException& E) {
+        throw DataTypeIException("CompType::getMemberCompType", E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -286,16 +286,16 @@ CompType CompType::getMemberCompType( unsigned member_num ) const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType CompType::getMemberEnumType( unsigned member_num ) const
+EnumType CompType::getMemberEnumType(unsigned member_num) const
 {
-   try {
+    try {
       EnumType enumtype(p_get_member_type(member_num));
         f_DataType_setId(&enumtype, p_get_member_type(member_num));
-      return(enumtype);
-   }
-   catch (DataTypeIException& E) {
-      throw DataTypeIException("CompType::getMemberEnumType", E.getDetailMsg());
-   }
+        return(enumtype);
+    }
+    catch (DataTypeIException& E) {
+        throw DataTypeIException("CompType::getMemberEnumType", E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -307,16 +307,16 @@ EnumType CompType::getMemberEnumType( unsigned member_num ) const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType CompType::getMemberIntType( unsigned member_num ) const
+IntType CompType::getMemberIntType(unsigned member_num) const
 {
-   try {
+    try {
       IntType inttype(p_get_member_type(member_num));
         f_DataType_setId(&inttype, p_get_member_type(member_num));
-      return(inttype);
-   }
-   catch (DataTypeIException& E) {
-      throw DataTypeIException("CompType::getMemberIntType", E.getDetailMsg());
-   }
+        return(inttype);
+    }
+    catch (DataTypeIException& E) {
+        throw DataTypeIException("CompType::getMemberIntType", E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -328,16 +328,16 @@ IntType CompType::getMemberIntType( unsigned member_num ) const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType CompType::getMemberFloatType( unsigned member_num ) const
+FloatType CompType::getMemberFloatType(unsigned member_num) const
 {
-   try {
+    try {
       FloatType floatype(p_get_member_type(member_num));
         f_DataType_setId(&floatype, p_get_member_type(member_num));
-      return(floatype);
-   }
-   catch (DataTypeIException& E) {
-      throw DataTypeIException("CompType::getMemberFloatType", E.getDetailMsg());
-   }
+        return(floatype);
+    }
+    catch (DataTypeIException& E) {
+        throw DataTypeIException("CompType::getMemberFloatType", E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -349,16 +349,16 @@ FloatType CompType::getMemberFloatType( unsigned member_num ) const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrType CompType::getMemberStrType( unsigned member_num ) const
+StrType CompType::getMemberStrType(unsigned member_num) const
 {
-   try {
+    try {
       StrType strtype(p_get_member_type(member_num));
         f_DataType_setId(&strtype, p_get_member_type(member_num));
-      return(strtype);
-   }
-   catch (DataTypeIException& E) {
-      throw DataTypeIException("CompType::getMemberStrType", E.getDetailMsg());
-   }
+        return(strtype);
+    }
+    catch (DataTypeIException& E) {
+        throw DataTypeIException("CompType::getMemberStrType", E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -370,45 +370,45 @@ StrType CompType::getMemberStrType( unsigned member_num ) const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
-VarLenType CompType::getMemberVarLenType( unsigned member_num ) const
+VarLenType CompType::getMemberVarLenType(unsigned member_num) const
 {
-   try {
+    try {
       VarLenType varlentype(p_get_member_type(member_num));
         f_DataType_setId(&varlentype, p_get_member_type(member_num));
-      return(varlentype);
-   }
-   catch (DataTypeIException& E) {
-      throw DataTypeIException("CompType::getMemberVarLenType", E.getDetailMsg());
-   }
+        return(varlentype);
+    }
+    catch (DataTypeIException& E) {
+        throw DataTypeIException("CompType::getMemberVarLenType", E.getDetailMsg());
+    }
 }
 
 /* old style of getMemberType - using overloads; new style above
-   returns the appropriate datatypes but has different named functions.
+    returns the appropriate datatypes but has different named functions.
    In the old style, a datatype must be passed into the function.
    May, 2004: These should be reconsidered to provide more convenience.
 // Returns the datatype of the specified member in this compound datatype.
 // Several overloading of getMemberType are for different datatypes
-void CompType::getMemberType( unsigned member_num, EnumType& enumtype ) const
+void CompType::getMemberType(unsigned member_num, EnumType& enumtype) const
 {
    p_get_member_type(member_num, enumtype);
 }
 
-void CompType::getMemberType( unsigned member_num, CompType& comptype ) const
+void CompType::getMemberType(unsigned member_num, CompType& comptype) const
 {
    p_get_member_type(member_num, comptype);
 }
 
-void CompType::getMemberType( unsigned member_num, IntType& inttype ) const
+void CompType::getMemberType(unsigned member_num, IntType& inttype) const
 {
    p_get_member_type(member_num, inttype);
 }
 
-void CompType::getMemberType( unsigned member_num, FloatType& floatype ) const
+void CompType::getMemberType(unsigned member_num, FloatType& floatype) const
 {
    p_get_member_type(member_num, floatype);
 }
 
-void CompType::getMemberType( unsigned member_num, StrType& strtype ) const
+void CompType::getMemberType(unsigned member_num, StrType& strtype) const
 {
    p_get_member_type(member_num, strtype);
 }
@@ -424,20 +424,20 @@ void CompType::getMemberType( unsigned member_num, StrType& strtype ) const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CompType::insertMember( const H5std_string& name, size_t offset, const DataType& new_member ) const
+void CompType::insertMember(const H5std_string& name, size_t offset, const DataType& new_member) const
 {
-   // Convert string to C-string
-   const char* name_C;
-   name_C = name.c_str();  // name_C refers to the contents of name as a C-str
+    // Convert string to C-string
+    const char* name_C;
+    name_C = name.c_str();  // name_C refers to the contents of name as a C-str
 
-   hid_t new_member_id = new_member.getId();  // get new_member id for C API
+    hid_t new_member_id = new_member.getId();  // get new_member id for C API
 
-   // Call C routine H5Tinsert to add the new member
-   herr_t ret_value = H5Tinsert( id, name_C, offset, new_member_id );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException("CompType::insertMember", "H5Tinsert failed");
-   }
+    // Call C routine H5Tinsert to add the new member
+    herr_t ret_value = H5Tinsert(id, name_C, offset, new_member_id);
+    if(ret_value < 0)
+    {
+        throw DataTypeIException("CompType::insertMember", "H5Tinsert failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -449,12 +449,12 @@ void CompType::insertMember( const H5std_string& name, size_t offset, const Data
 //--------------------------------------------------------------------------
 void CompType::pack() const
 {
-   // Calls C routine H5Tpack to remove padding
-   herr_t ret_value = H5Tpack( id );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException("CompType::pack", "H5Tpack failed");
-   }
+    // Calls C routine H5Tpack to remove padding
+    herr_t ret_value = H5Tpack(id);
+    if(ret_value < 0)
+    {
+        throw DataTypeIException("CompType::pack", "H5Tpack failed");
+    }
 }
 
 //--------------------------------------------------------------------------

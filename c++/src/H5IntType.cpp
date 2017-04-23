@@ -47,7 +47,7 @@ IntType::IntType() {}
 ///\brief       Copy constructor: makes a copy of the original IntType object.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType::IntType( const IntType& original ) : AtomType( original ) {}
+IntType::IntType(const IntType& original) : AtomType(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    IntType overloaded constructor
@@ -56,10 +56,10 @@ IntType::IntType( const IntType& original ) : AtomType( original ) {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType::IntType( const PredType& pred_type ) : AtomType()
+IntType::IntType(const PredType& pred_type) : AtomType()
 {
-   // use DataType::copy to make a copy of this predefined type
-   copy( pred_type );
+    // use DataType::copy to make a copy of this predefined type
+    copy(pred_type);
 }
 
 //--------------------------------------------------------------------------
@@ -70,7 +70,7 @@ IntType::IntType( const PredType& pred_type ) : AtomType()
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType::IntType( const hid_t existing_id ) : AtomType( existing_id ) {}
+IntType::IntType(const hid_t existing_id) : AtomType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    IntType overloaded constructor
@@ -79,15 +79,15 @@ IntType::IntType( const hid_t existing_id ) : AtomType( existing_id ) {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IntType::IntType( const DataSet& dataset ) : AtomType()
+IntType::IntType(const DataSet& dataset) : AtomType()
 {
-   // Calls C function H5Dget_type to get the id of the datatype
-   id = H5Dget_type( dataset.getId() );
+    // Calls C function H5Dget_type to get the id of the datatype
+    id = H5Dget_type(dataset.getId());
 
-   if( id < 0 )
-   {
-      throw DataSetIException("IntType constructor", "H5Dget_type failed");
-   }
+    if(id < 0)
+    {
+        throw DataSetIException("IntType constructor", "H5Dget_type failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -99,15 +99,15 @@ IntType::IntType( const DataSet& dataset ) : AtomType()
 //--------------------------------------------------------------------------
 H5T_sign_t IntType::getSign() const
 {
-   H5T_sign_t type_sign = H5Tget_sign( id );  // C routine
+    H5T_sign_t type_sign = H5Tget_sign(id);  // C routine
 
-   // Returns a valid sign type if no errors
-   if( type_sign == H5T_SGN_ERROR )
-   {
-      throw DataTypeIException("IntType::getSign",
+    // Returns a valid sign type if no errors
+    if(type_sign == H5T_SGN_ERROR)
+    {
+        throw DataTypeIException("IntType::getSign",
                 "H5Tget_sign failed - returned H5T_SGN_ERROR for the sign type");
-   }
-   return( type_sign );
+    }
+    return(type_sign);
 }
 
 //--------------------------------------------------------------------------
@@ -117,14 +117,14 @@ H5T_sign_t IntType::getSign() const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void IntType::setSign( H5T_sign_t sign ) const
+void IntType::setSign(H5T_sign_t sign) const
 {
-   // Call C routine to set the sign property
-   herr_t ret_value = H5Tset_sign( id, sign );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException("IntType::setSign", "H5Tset_sign failed");
-   }
+    // Call C routine to set the sign property
+    herr_t ret_value = H5Tset_sign(id, sign);
+    if(ret_value < 0)
+    {
+        throw DataTypeIException("IntType::setSign", "H5Tset_sign failed");
+    }
 }
 
 //--------------------------------------------------------------------------

@@ -69,7 +69,7 @@ PredType::PredType(const PredType& original) : AtomType(original) {}
 //              the new id in the left hand side object.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PredType& PredType::operator=( const PredType& rhs )
+PredType& PredType::operator=(const PredType& rhs)
 {
     if (this != &rhs)
         copy(rhs);
@@ -79,19 +79,19 @@ PredType& PredType::operator=( const PredType& rhs )
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // These dummy functions do not inherit from DataType - they'll
 // throw an DataTypeIException if invoked.
-void PredType::commit(H5Location& loc, const char* name )
+void PredType::commit(H5Location& loc, const char* name)
 {
-   throw DataTypeIException("PredType::commit", "Error: Attempted to commit a predefined datatype.  Invalid operation!" );
+    throw DataTypeIException("PredType::commit", "Error: Attempted to commit a predefined datatype.  Invalid operation!");
 }
 
-void PredType::commit(H5Location& loc, const H5std_string& name )
+void PredType::commit(H5Location& loc, const H5std_string& name)
 {
-   commit( loc, name.c_str());
+    commit(loc, name.c_str());
 }
 
 bool PredType::committed()
 {
-   throw DataTypeIException("PredType::committed", "Error: Attempting to check for commit status on a predefined datatype." );
+    throw DataTypeIException("PredType::committed", "Error: Attempting to check for commit status on a predefined datatype.");
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

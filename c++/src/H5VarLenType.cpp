@@ -64,12 +64,12 @@ VarLenType::VarLenType(const VarLenType& original) : DataType(original) {}
 //--------------------------------------------------------------------------
 VarLenType::VarLenType(const DataType* base_type) : DataType()
 {
-   id = H5Tvlen_create(base_type->getId());
-   if (id < 0)
-   {
-      throw DataTypeIException("VarLenType constructor",
+    id = H5Tvlen_create(base_type->getId());
+    if (id < 0)
+    {
+        throw DataTypeIException("VarLenType constructor",
                 "H5Tvlen_create returns negative value");
-   }
+    }
 }
 
 //--------------------------------------------------------------------------

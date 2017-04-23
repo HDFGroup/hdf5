@@ -36,16 +36,16 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         DSetMemXferPropList(const char* expression);
 
         // Sets type conversion and background buffers.
-        void setBuffer( size_t size, void* tconv, void* bkg ) const;
+        void setBuffer(size_t size, void* tconv, void* bkg) const;
 
         // Reads buffer settings.
-        size_t getBuffer( void** tconv, void** bkg ) const;
+        size_t getBuffer(void** tconv, void** bkg) const;
 
         // Sets B-tree split ratios for a dataset transfer property list.
-        void setBtreeRatios( double left, double middle, double right ) const;
+        void setBtreeRatios(double left, double middle, double right) const;
 
         // Gets B-tree split ratios for a dataset transfer property list.
-        void getBtreeRatios( double& left, double& middle, double& right ) const;
+        void getBtreeRatios(double& left, double& middle, double& right) const;
 
         // Sets data transform expression.
         void setDataTransform(const char* expression) const;
@@ -56,21 +56,21 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         H5std_string getDataTransform() const;
 
         // Sets the dataset transfer property list status to TRUE or FALSE.
-        void setPreserve( bool status ) const;
+        void setPreserve(bool status) const;
 
         // Checks status of the dataset transfer property list.
         bool getPreserve() const;
 
         // Sets an exception handling callback for datatype conversion.
-        void setTypeConvCB( H5T_conv_except_func_t op, void *user_data) const;
+        void setTypeConvCB(H5T_conv_except_func_t op, void *user_data) const;
 
         // Gets the exception handling callback for datatype conversion.
-        void getTypeConvCB( H5T_conv_except_func_t *op, void **user_data) const;
+        void getTypeConvCB(H5T_conv_except_func_t *op, void **user_data) const;
 
         // Sets the memory manager for variable-length datatype
         // allocation in H5Dread and H5Dvlen_reclaim.
-        void setVlenMemManager( H5MM_allocate_t alloc, void* alloc_info,
-                                H5MM_free_t free, void* free_info ) const;
+        void setVlenMemManager(H5MM_allocate_t alloc, void* alloc_info,
+                                H5MM_free_t free, void* free_info) const;
 
         // alloc and free are set to NULL, indicating that system
         // malloc and free are to be used.
@@ -78,8 +78,8 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 
         // Gets the memory manager for variable-length datatype
         // allocation in H5Dread and H5Tvlen_reclaim.
-        void getVlenMemManager( H5MM_allocate_t& alloc, void** alloc_info,
-                                H5MM_free_t& free, void** free_info ) const;
+        void getVlenMemManager(H5MM_allocate_t& alloc, void** alloc_info,
+                                H5MM_free_t& free, void** free_info) const;
 
         // Sets the size of a contiguous block reserved for small data.
         void setSmallDataBlockSize(hsize_t size) const;

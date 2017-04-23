@@ -30,10 +30,10 @@ namespace H5 {
 class H5_DLLCPP DataType : public H5Object {
    public:
         // Creates a datatype given its class and size
-        DataType( const H5T_class_t type_class, size_t size );
+        DataType(const H5T_class_t type_class, size_t size);
 
         // Copy constructor: makes a copy of the original object
-        DataType( const DataType& original );
+        DataType(const DataType& original);
 
         // Creates a copy of a predefined type
         DataType(const PredType& pred_type);
@@ -69,16 +69,16 @@ class H5_DLLCPP DataType : public H5Object {
 
         // Finds a conversion function that can handle the conversion
         // this datatype to the given datatype, dest.
-        H5T_conv_t find( const DataType& dest, H5T_cdata_t **pcdata ) const;
+        H5T_conv_t find(const DataType& dest, H5T_cdata_t **pcdata) const;
 
         // Converts data from between specified datatypes.
-        void convert( const DataType& dest, size_t nelmts, void *buf, void *background, const PropList& plist=PropList::DEFAULT) const;
+        void convert(const DataType& dest, size_t nelmts, void *buf, void *background, const PropList& plist=PropList::DEFAULT) const;
 
         // Assignment operator
-        DataType& operator=( const DataType& rhs );
+        DataType& operator=(const DataType& rhs);
 
         // Determines whether two datatypes are the same.
-        bool operator==(const DataType& compared_type ) const;
+        bool operator==(const DataType& compared_type) const;
 
         // Locks a datatype.
         void lock() const;
@@ -91,16 +91,16 @@ class H5_DLLCPP DataType : public H5Object {
         DataType getSuper() const;
 
         // Registers a conversion function.
-        void registerFunc(H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const;
-        void registerFunc(H5T_pers_t pers, const H5std_string& name, const DataType& dest, H5T_conv_t func ) const;
+        void registerFunc(H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func) const;
+        void registerFunc(H5T_pers_t pers, const H5std_string& name, const DataType& dest, H5T_conv_t func) const;
 
         // Removes a conversion function from all conversion paths.
-        void unregister( H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const;
-        void unregister( H5T_pers_t pers, const H5std_string& name, const DataType& dest, H5T_conv_t func ) const;
+        void unregister(H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func) const;
+        void unregister(H5T_pers_t pers, const H5std_string& name, const DataType& dest, H5T_conv_t func) const;
 
         // Tags an opaque datatype.
-        void setTag( const char* tag ) const;
-        void setTag( const H5std_string& tag ) const;
+        void setTag(const char* tag) const;
+        void setTag(const H5std_string& tag) const;
 
         // Gets the tag associated with an opaque datatype.
         H5std_string getTag() const;
@@ -115,7 +115,7 @@ class H5_DLLCPP DataType : public H5Object {
         virtual H5std_string fromClass () const { return("DataType"); }
 
         // Creates a copy of an existing DataType using its id
-        DataType( const hid_t type_id );
+        DataType(const hid_t type_id);
 
         // Default constructor
         DataType();

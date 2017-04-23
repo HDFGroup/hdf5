@@ -71,7 +71,7 @@ Group::Group(const Group& original) : H5Object(), CommonFG(), id(original.id)
 //--------------------------------------------------------------------------
 hid_t Group::getLocId() const
 {
-   return( getId() );
+    return(getId());
 }
 
 //--------------------------------------------------------------------------
@@ -130,7 +130,7 @@ Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Ob
 //--------------------------------------------------------------------------
 hid_t Group::getId() const
 {
-   return(id);
+    return(id);
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -155,8 +155,8 @@ void Group::p_setId(const hid_t new_id)
     catch (Exception& close_error) {
         throw GroupIException("Group::p_setId", close_error.getDetailMsg());
     }
-   // reset object's id to the given id
-   id = new_id;
+    // reset object's id to the given id
+    id = new_id;
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -171,8 +171,8 @@ void Group::close()
 {
     if (p_valid_id(id))
     {
-        herr_t ret_value = H5Gclose( id );
-        if( ret_value < 0 )
+        herr_t ret_value = H5Gclose(id);
+        if(ret_value < 0)
         {
             throw GroupIException("Group::close", "H5Gclose failed");
         }
@@ -197,9 +197,9 @@ void Group::close()
 //--------------------------------------------------------------------------
 void Group::throwException(const H5std_string& func_name, const H5std_string& msg) const
 {
-   H5std_string full_name = func_name;
-   full_name.insert(0, "Group::");
-   throw GroupIException(full_name, msg);
+    H5std_string full_name = func_name;
+    full_name.insert(0, "Group::");
+    throw GroupIException(full_name, msg);
 }
 
 //--------------------------------------------------------------------------

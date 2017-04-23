@@ -34,7 +34,7 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
         virtual void close();
 
         // Extends the dataset with unlimited dimension.
-        void extend( const hsize_t* size ) const;
+        void extend(const hsize_t* size) const;
 
         // Fills a selection in memory with a value
         void fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space) const;
@@ -63,27 +63,27 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
         virtual size_t getInMemDataSize() const;
 
         // Returns the number of bytes required to store VL data.
-        hsize_t getVlenBufSize(const DataType& type, const DataSpace& space ) const;
+        hsize_t getVlenBufSize(const DataType& type, const DataSpace& space) const;
         //hsize_t getVlenBufSize(DataType& type, DataSpace& space) const; // removed from 1.8.18 and 1.10.1
 
         // Reclaims VL datatype memory buffers.
-        static void vlenReclaim(const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist, void* buf );
+        static void vlenReclaim(const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist, void* buf);
         static void vlenReclaim(void *buf, const DataType& type, const DataSpace& space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT);
 
         // Reads the data of this dataset and stores it in the provided buffer.
         // The memory and file dataspaces and the transferring property list
         // can be defaults.
-        void read( void* buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
-        void read( H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
+        void read(void* buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT) const;
+        void read(H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT) const;
 
         // Writes the buffered data to this dataset.
         // The memory and file dataspaces and the transferring property list
         // can be defaults.
-        void write( const void* buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
-        void write( const H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
+        void write(const void* buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT) const;
+        void write(const H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT) const;
 
         // Iterates the selected elements in the specified dataspace - not implemented in C++ style yet
-        int iterateElems( void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data = NULL );
+        int iterateElems(void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data = NULL);
 
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DataSet"); }
@@ -96,7 +96,7 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
         DataSet();
 
         // Copy constructor.
-        DataSet( const DataSet& original );
+        DataSet(const DataSet& original);
 
         // Creates a copy of an existing DataSet using its id.
         DataSet(const hid_t existing_id);
