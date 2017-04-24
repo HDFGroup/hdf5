@@ -720,17 +720,19 @@ done:
  *
  * Purpose: Query the size of the current list of plugin paths.
  *
- * Return: Plugin path size (can't indicate failure due to unsigned type)
+ * Return: Plugin path size
  *
  *-------------------------------------------------------------------------
  */
-unsigned int
-H5PLsize(void)
+herr_t
+H5PLsize(unsigned int *listsize)
 {
-    unsigned int ret_value = (unsigned int)H5PL_num_paths_g;
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(0)
-    H5TRACE0("Iu","");
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "*Iu", listsize);
+
+    *listsize = (unsigned int)H5PL_num_paths_g;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -778,7 +780,7 @@ H5PL__init_path_table(void)
         /* Check for too many directories in path */
         if(H5PL_num_paths_g == H5PL_MAX_PATH_NUM)
             HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
-        if(NULL == (H5PL_path_table_g[H5PL_num_paths_g] = H5PL__env_strdup(dir)))
+        if(NULL == (H5PL_path_table_g[H5PL_num_paths_g] = H5MM_strdup(dir)))
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
         H5PL_num_paths_g++;
         dir = HDstrtok(NULL, H5PL_PATH_SEPARATOR);
