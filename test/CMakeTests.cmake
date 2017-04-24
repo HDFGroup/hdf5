@@ -986,8 +986,10 @@ endif ()
 ##############################################################################
 if (WIN32)
   set (CMAKE_SEP "\;")
+  set (BIN_REL_PATH "../../")
 else ()
   set (CMAKE_SEP ":")
+  set (BIN_REL_PATH "../")
 endif ()
 
 add_test (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:plugin>)
@@ -998,7 +1000,7 @@ set_tests_properties (H5PLUGIN-plugin PROPERTIES
 
 add_test (NAME H5PLUGIN-pluginRelative COMMAND $<TARGET_FILE:plugin>)
 set_tests_properties (H5PLUGIN-pluginRelative PROPERTIES
-    ENVIRONMENT "HDF5_PLUGIN_PATH=@/../testdir1${CMAKE_SEP}@/../testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+    ENVIRONMENT "HDF5_PLUGIN_PATH=@/${BIN_REL_PATH}testdir1${CMAKE_SEP}@/${BIN_REL_PATH}testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
 )
 
