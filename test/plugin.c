@@ -733,7 +733,7 @@ test_filter_path_apis(void)
 
     if(H5Zfilter_avail(H5Z_FILTER_DYNLIB1) != TRUE) TEST_ERROR
 
-    H5PLsize(ndx);
+    H5PLsize(&ndx);
 
     TESTING("    remove");
     /* Remove all existing paths*/
@@ -743,7 +743,7 @@ test_filter_path_apis(void)
             TEST_ERROR
         } /* end if */
     /* Verify the table is empty */
-    H5PLsize(ndx);
+    H5PLsize(&ndx);
     if(ndx > 0) TEST_ERROR
     PASSED();
 
@@ -765,7 +765,7 @@ test_filter_path_apis(void)
         }
     }
     /* Verify the table is full */
-    H5PLsize(ndx);
+    H5PLsize(&ndx);
     if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
     PASSED();
 
@@ -837,7 +837,7 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is not full */
-    H5PLsize(ndx);
+    H5PLsize(&ndx);
     if (ndx != H5PL_MAX_PATH_NUM - 1) TEST_ERROR
 
     TESTING("    prepend");
@@ -849,7 +849,7 @@ test_filter_path_apis(void)
     }
 
     /* Verify the table is full */
-    H5PLsize(ndx);
+    H5PLsize(&ndx);
     if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were moved */
@@ -884,7 +884,7 @@ test_filter_path_apis(void)
     }
 
     /* Verify the table is full */
-    H5PLsize(ndx);
+    H5PLsize(&ndx);
     if(ndx) != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were not moved */
@@ -914,7 +914,7 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is not full */
-    H5PLsize(ndx);
+    H5PLsize(&ndx);
     if(ndx != 15) TEST_ERROR
 
     TESTING("    insert");
@@ -934,7 +934,7 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is full */
-    H5PLsize(ndx);
+    H5PLsize(&ndx);
     if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     TESTING("    insert (exceed)");
