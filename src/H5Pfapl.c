@@ -4395,9 +4395,13 @@ H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close)
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Set values */
+#ifndef H5_HAVE_PARALLEL
+    /* Set value */
     if(H5P_set(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property")
+#else
+    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "evict on close is currently not supported in parallel HDF5")
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_API(ret_value)

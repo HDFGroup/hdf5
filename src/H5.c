@@ -942,7 +942,7 @@ H5allocate_memory(size_t size, hbool_t clear)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT;
+    FUNC_ENTER_API_NOINIT
     H5TRACE2("*x", "zb", size, clear);
 
     if(clear)
@@ -983,7 +983,7 @@ H5resize_memory(void *mem, size_t size)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT;
+    FUNC_ENTER_API_NOINIT
     H5TRACE2("*x", "*xz", mem, size);
 
     ret_value = H5MM_realloc(mem, size);
@@ -1007,7 +1007,7 @@ H5resize_memory(void *mem, size_t size)
 herr_t
 H5free_memory(void *mem)
 {
-    FUNC_ENTER_API_NOINIT;
+    FUNC_ENTER_API_NOINIT
     H5TRACE1("e", "*x", mem);
 
     /* At this time, it is impossible for this to fail. */
