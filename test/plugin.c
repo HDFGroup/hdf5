@@ -885,7 +885,7 @@ test_filter_path_apis(void)
 
     /* Verify the table is full */
     H5PLsize(&ndx);
-    if(ndx) != H5PL_MAX_PATH_NUM) TEST_ERROR
+    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were not moved */
     if(H5PLget(0, pathname, 256) <= 0) TEST_ERROR
