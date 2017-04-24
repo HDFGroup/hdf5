@@ -181,7 +181,7 @@ H5I_type_t IdComponent::getHDFObjType() const
 //              care of close() and setId takes care incRefCount().
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IdComponent& IdComponent::operator=( const IdComponent& rhs )
+IdComponent& IdComponent::operator=(const IdComponent& rhs)
 {
     if (this != &rhs)
     {
@@ -221,11 +221,11 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 //--------------------------------------------------------------------------
 void IdComponent::setId(const hid_t new_id)
 {
-   // set to new_id
-   p_setId(new_id);
+    // set to new_id
+    p_setId(new_id);
 
-   // increment the reference counter of the new id
-   incRefCount();
+    // increment the reference counter of the new id
+    incRefCount();
 }
 
 //--------------------------------------------------------------------------
@@ -255,10 +255,10 @@ IdComponent::~IdComponent() {}
 //--------------------------------------------------------------------------
 H5std_string IdComponent::inMemFunc(const char* func_name) const
 {
-   H5std_string full_name = func_name;
-   full_name.insert(0, "::");
-   full_name.insert(0, fromClass());
-   return (full_name);
+    H5std_string full_name = func_name;
+    full_name.insert(0, "::");
+    full_name.insert(0, fromClass());
+    return (full_name);
 }
 
 //--------------------------------------------------------------------------
@@ -289,34 +289,34 @@ IdComponent::IdComponent()
 //--------------------------------------------------------------------------
 H5std_string IdComponent::p_get_file_name() const
 {
-   hid_t temp_id = getId();
+    hid_t temp_id = getId();
 
-   // Preliminary call to H5Fget_name to get the length of the file name
-   ssize_t name_size = H5Fget_name(temp_id, NULL, 0);
+    // Preliminary call to H5Fget_name to get the length of the file name
+    ssize_t name_size = H5Fget_name(temp_id, NULL, 0);
 
-   // If H5Aget_name returns a negative value, raise an exception,
-   if( name_size < 0 )
-   {
-      throw IdComponentException("", "H5Fget_name failed");
-   }
+    // If H5Aget_name returns a negative value, raise an exception,
+    if(name_size < 0)
+    {
+        throw IdComponentException("", "H5Fget_name failed");
+    }
 
-   // Call H5Fget_name again to get the actual file name
-   char* name_C = new char[name_size+1];  // temporary C-string for C API
-   HDmemset(name_C, 0, name_size+1); // clear buffer
+    // Call H5Fget_name again to get the actual file name
+    char* name_C = new char[name_size+1];  // temporary C-string for C API
+    HDmemset(name_C, 0, name_size+1); // clear buffer
 
-   name_size = H5Fget_name(temp_id, name_C, name_size+1);
+    name_size = H5Fget_name(temp_id, name_C, name_size+1);
 
-   // Check for failure again
-   if( name_size < 0 )
-   {
+    // Check for failure again
+    if(name_size < 0)
+    {
       delete []name_C;
-      throw IdComponentException("", "H5Fget_name failed");
-   }
+        throw IdComponentException("", "H5Fget_name failed");
+    }
 
-   // Convert the C file name and return
-   H5std_string file_name(name_C);
-   delete []name_C;
-   return(file_name);
+    // Convert the C file name and return
+    H5std_string file_name(name_C);
+    delete []name_C;
+    return(file_name);
 }
 
 //

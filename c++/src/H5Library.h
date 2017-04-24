@@ -36,11 +36,11 @@ class H5_DLLCPP H5Library {
         static void dontAtExit();
 
         // Returns the HDF library release number.
-        static void getLibVersion( unsigned& majnum, unsigned& minnum, unsigned& relnum );
+        static void getLibVersion(unsigned& majnum, unsigned& minnum, unsigned& relnum);
 
         // Verifies that the arguments match the version numbers compiled
         // into the library
-        static void checkVersion( unsigned majnum, unsigned minnum, unsigned relnum );
+        static void checkVersion(unsigned majnum, unsigned minnum, unsigned relnum);
 
         // Walks through all the garbage collection routines for the library,
         // which are supposed to free any unused memory they have allocated.

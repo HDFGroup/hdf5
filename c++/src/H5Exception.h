@@ -39,11 +39,11 @@ class H5_DLLCPP Exception {
 
         // Returns a character string that describes the error specified by
         // a major error number.
-        H5std_string getMajorString( hid_t err_major_id ) const;
+        H5std_string getMajorString(hid_t err_major_id) const;
 
         // Returns a character string that describes the error specified by
         // a minor error number.
-        H5std_string getMinorString( hid_t err_minor_id ) const;
+        H5std_string getMinorString(hid_t err_minor_id) const;
 
         // Returns the detailed message set at the time the exception is thrown
         H5std_string getDetailMsg() const;
@@ -52,21 +52,21 @@ class H5_DLLCPP Exception {
         const char* getCFuncName() const;       // function name as a char string
 
         // Turns on the automatic error printing.
-        static void setAutoPrint( H5E_auto2_t& func, void* client_data);
+        static void setAutoPrint(H5E_auto2_t& func, void* client_data);
 
         // Turns off the automatic error printing.
         static void dontPrint();
 
         // Retrieves the current settings for the automatic error stack
         // traversal function and its data.
-        static void getAutoPrint( H5E_auto2_t& func, void** client_data);
+        static void getAutoPrint(H5E_auto2_t& func, void** client_data);
 
         // Clears the error stack for the current thread.
         static void clearErrorStack();
 
         // Walks the error stack for the current thread, calling the
         // specified function.
-        static void walkErrorStack( H5E_direction_t direction,
+        static void walkErrorStack(H5E_direction_t direction,
                                 H5E_walk2_t func, void* client_data);
 
         // Prints the error stack in a default manner.
@@ -78,7 +78,7 @@ class H5_DLLCPP Exception {
         Exception();
 
         // copy constructor
-        Exception( const Exception& orig);
+        Exception(const Exception& orig);
 
         // virtual Destructor
         virtual ~Exception() throw();
@@ -94,14 +94,14 @@ class H5_DLLCPP Exception {
 
 class H5_DLLCPP FileIException : public Exception {
    public:
-        FileIException( const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
+        FileIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
         FileIException();
         virtual ~FileIException() throw();
 };
 
 class H5_DLLCPP GroupIException : public Exception {
    public:
-        GroupIException( const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
+        GroupIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
         GroupIException();
         virtual ~GroupIException() throw();
 };

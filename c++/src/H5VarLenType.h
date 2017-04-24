@@ -34,10 +34,10 @@ class H5_DLLCPP VarLenType : public DataType {
         virtual H5std_string fromClass () const { return("VarLenType"); }
 
         // Copy constructor: makes copy of the original object.
-        VarLenType( const VarLenType& original );
+        VarLenType(const VarLenType& original);
 
         // Constructor that takes an existing id
-        VarLenType( const hid_t existing_id );
+        VarLenType(const hid_t existing_id);
 
         // Noop destructor
         virtual ~VarLenType();

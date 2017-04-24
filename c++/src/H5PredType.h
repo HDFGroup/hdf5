@@ -34,10 +34,10 @@ class H5_DLLCPP PredType : public AtomType {
 
         // Makes a copy of the predefined type and stores the new
         // id in the left hand side object.
-        PredType& operator=( const PredType& rhs );
+        PredType& operator=(const PredType& rhs);
 
         // Copy constructor - makes copy of the original object
-        PredType( const PredType& original );
+        PredType(const PredType& original);
 
         // Noop destructor
         virtual ~PredType();
@@ -45,11 +45,11 @@ class H5_DLLCPP PredType : public AtomType {
         /*! \brief This dummy function do not inherit from DataType - it will
             throw a DataTypeIException if invoked.
         */
-        void commit(H5Location& loc, const H5std_string& name );
+        void commit(H5Location& loc, const H5std_string& name);
         /*! \brief This dummy function do not inherit from DataType - it will
             throw a DataTypeIException if invoked.
         */
-        void commit(H5Location& loc, const char* name );
+        void commit(H5Location& loc, const char* name);
         /*! \brief This dummy function do not inherit from DataType - it will
             throw a DataTypeIException if invoked.
         */
@@ -245,7 +245,7 @@ class H5_DLLCPP PredType : public AtomType {
         PredType();
 
         // Creates a pre-defined type using an HDF5 pre-defined constant
-        PredType( const hid_t predtype_id );  // used by the library only
+        PredType(const hid_t predtype_id);  // used by the library only
 
    private:
         // Activates the creation of the PredType global constants

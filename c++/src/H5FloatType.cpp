@@ -48,10 +48,10 @@ FloatType::FloatType() {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType( const PredType& pred_type ) : AtomType()
+FloatType::FloatType(const PredType& pred_type) : AtomType()
 {
-   // use DataType::copy to make a copy of this predefined type
-   copy( pred_type );
+    // use DataType::copy to make a copy of this predefined type
+    copy(pred_type);
 }
 
 //--------------------------------------------------------------------------
@@ -62,14 +62,14 @@ FloatType::FloatType( const PredType& pred_type ) : AtomType()
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType( const hid_t existing_id ) : AtomType( existing_id ) {}
+FloatType::FloatType(const hid_t existing_id) : AtomType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    FloatType copy constructor
 ///\brief       Copy constructor: makes a copy of the original FloatType object.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType( const FloatType&  original ) : AtomType( original ){}
+FloatType::FloatType(const FloatType&  original) : AtomType(original){}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -79,15 +79,15 @@ FloatType::FloatType( const FloatType&  original ) : AtomType( original ){}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType( const DataSet& dataset ) : AtomType()
+FloatType::FloatType(const DataSet& dataset) : AtomType()
 {
-   // Calls C function H5Dget_type to get the id of the datatype
-   id = H5Dget_type( dataset.getId() );
+    // Calls C function H5Dget_type to get the id of the datatype
+    id = H5Dget_type(dataset.getId());
 
-   if( id < 0 )
-   {
-      throw DataSetIException("FloatType constructor", "H5Dget_type failed");
-   }
+    if(id < 0)
+    {
+        throw DataSetIException("FloatType constructor", "H5Dget_type failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -101,13 +101,13 @@ FloatType::FloatType( const DataSet& dataset ) : AtomType()
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FloatType::getFields( size_t& spos, size_t& epos, size_t& esize, size_t& mpos, size_t& msize ) const
+void FloatType::getFields(size_t& spos, size_t& epos, size_t& esize, size_t& mpos, size_t& msize) const
 {
-   herr_t ret_value = H5Tget_fields( id, &spos, &epos, &esize, &mpos, &msize );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException("FloatType::getFields", "H5Tget_fields failed");
-   }
+    herr_t ret_value = H5Tget_fields(id, &spos, &epos, &esize, &mpos, &msize);
+    if(ret_value < 0)
+    {
+        throw DataTypeIException("FloatType::getFields", "H5Tget_fields failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -122,13 +122,13 @@ void FloatType::getFields( size_t& spos, size_t& epos, size_t& esize, size_t& mp
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FloatType::setFields( size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize ) const
+void FloatType::setFields(size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize) const
 {
-   herr_t ret_value = H5Tset_fields( id, spos, epos, esize, mpos, msize );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException("FloatType::setFields", "H5Tset_fields failed");
-   }
+    herr_t ret_value = H5Tset_fields(id, spos, epos, esize, mpos, msize);
+    if(ret_value < 0)
+    {
+        throw DataTypeIException("FloatType::setFields", "H5Tset_fields failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -140,13 +140,13 @@ void FloatType::setFields( size_t spos, size_t epos, size_t esize, size_t mpos, 
 //--------------------------------------------------------------------------
 size_t FloatType::getEbias() const
 {
-   size_t ebias = H5Tget_ebias( id );
-   // Returns the bias if successful
-   if( ebias == 0 )
-   {
-      throw DataTypeIException("FloatType::getEbias", "H5Tget_ebias failed - returned exponent bias as 0");
-   }
-   return( ebias );
+    size_t ebias = H5Tget_ebias(id);
+    // Returns the bias if successful
+    if(ebias == 0)
+    {
+        throw DataTypeIException("FloatType::getEbias", "H5Tget_ebias failed - returned exponent bias as 0");
+    }
+    return(ebias);
 }
 
 //--------------------------------------------------------------------------
@@ -156,13 +156,13 @@ size_t FloatType::getEbias() const
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FloatType::setEbias( size_t ebias ) const
+void FloatType::setEbias(size_t ebias) const
 {
-   herr_t ret_value = H5Tset_ebias( id, ebias );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException("FloatType::setEbias", "H5Tset_ebias failed");
-   }
+    herr_t ret_value = H5Tset_ebias(id, ebias);
+    if(ret_value < 0)
+    {
+        throw DataTypeIException("FloatType::setEbias", "H5Tset_ebias failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -180,21 +180,21 @@ void FloatType::setEbias( size_t ebias ) const
 ///             \a norm_string.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5T_norm_t FloatType::getNorm( H5std_string& norm_string ) const
+H5T_norm_t FloatType::getNorm(H5std_string& norm_string) const
 {
-   H5T_norm_t norm = H5Tget_norm( id );  // C routine
-   // Returns a valid normalization type if successful
-   if( norm == H5T_NORM_ERROR )
-   {
-      throw DataTypeIException("FloatType::getNorm", "H5Tget_norm failed - returned H5T_NORM_ERROR");
-   }
-   if( norm == H5T_NORM_IMPLIED )
-      norm_string = "H5T_NORM_IMPLIED (0)";
-   else if( norm == H5T_NORM_MSBSET )
-      norm_string = "H5T_NORM_MSBSET (1)";
-   else if( norm == H5T_NORM_NONE )
-      norm_string = "H5T_NORM_NONE (2)";
-   return( norm );
+    H5T_norm_t norm = H5Tget_norm(id);  // C routine
+    // Returns a valid normalization type if successful
+    if(norm == H5T_NORM_ERROR)
+    {
+        throw DataTypeIException("FloatType::getNorm", "H5Tget_norm failed - returned H5T_NORM_ERROR");
+    }
+    if(norm == H5T_NORM_IMPLIED)
+        norm_string = "H5T_NORM_IMPLIED (0)";
+    else if(norm == H5T_NORM_MSBSET)
+        norm_string = "H5T_NORM_MSBSET (1)";
+    else if(norm == H5T_NORM_NONE)
+        norm_string = "H5T_NORM_NONE (2)";
+    return(norm);
 }
 
 //--------------------------------------------------------------------------
@@ -209,13 +209,13 @@ H5T_norm_t FloatType::getNorm( H5std_string& norm_string ) const
 ///             \li \c H5T_NORM_NONE (2) - Mantissa is not normalized
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FloatType::setNorm( H5T_norm_t norm ) const
+void FloatType::setNorm(H5T_norm_t norm) const
 {
-   herr_t ret_value = H5Tset_norm( id, norm );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException("FloatType::setNorm", "H5Tset_norm failed");
-   }
+    herr_t ret_value = H5Tset_norm(id, norm);
+    if(ret_value < 0)
+    {
+        throw DataTypeIException("FloatType::setNorm", "H5Tset_norm failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -233,21 +233,21 @@ void FloatType::setNorm( H5T_norm_t norm ) const
 ///             \a pad_string.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5T_pad_t FloatType::getInpad( H5std_string& pad_string ) const
+H5T_pad_t FloatType::getInpad(H5std_string& pad_string) const
 {
-   H5T_pad_t pad_type = H5Tget_inpad( id );
-   // Returns a valid padding type if successful
-   if( pad_type == H5T_PAD_ERROR )
-   {
-      throw DataTypeIException("FloatType::getInpad", "H5Tget_inpad failed - returned H5T_PAD_ERROR");
-   }
-   if( pad_type == H5T_PAD_ZERO )
-      pad_string = "H5T_PAD_ZERO (0)";
-   else if( pad_type == H5T_PAD_ONE )
-      pad_string = "H5T_PAD_ONE (1)";
-   else if( pad_type == H5T_PAD_BACKGROUND )
-      pad_string = "H5T_PAD_BACKGROUD (2)";
-   return( pad_type );
+    H5T_pad_t pad_type = H5Tget_inpad(id);
+    // Returns a valid padding type if successful
+    if(pad_type == H5T_PAD_ERROR)
+    {
+        throw DataTypeIException("FloatType::getInpad", "H5Tget_inpad failed - returned H5T_PAD_ERROR");
+    }
+    if(pad_type == H5T_PAD_ZERO)
+        pad_string = "H5T_PAD_ZERO (0)";
+    else if(pad_type == H5T_PAD_ONE)
+        pad_string = "H5T_PAD_ONE (1)";
+    else if(pad_type == H5T_PAD_BACKGROUND)
+        pad_string = "H5T_PAD_BACKGROUD (2)";
+    return(pad_type);
 }
 
 //--------------------------------------------------------------------------
@@ -267,13 +267,13 @@ H5T_pad_t FloatType::getInpad( H5std_string& pad_string ) const
 ///             \li \c H5T_PAD_BACKGROUND (2) - Leave background alone
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void FloatType::setInpad( H5T_pad_t inpad ) const
+void FloatType::setInpad(H5T_pad_t inpad) const
 {
-   herr_t ret_value = H5Tset_inpad( id, inpad );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException("FloatType::setInpad", "H5Tset_inpad failed");
-   }
+    herr_t ret_value = H5Tset_inpad(id, inpad);
+    if(ret_value < 0)
+    {
+        throw DataTypeIException("FloatType::setInpad", "H5Tset_inpad failed");
+    }
 }
 
 //--------------------------------------------------------------------------

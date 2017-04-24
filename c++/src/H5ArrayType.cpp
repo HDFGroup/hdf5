@@ -42,7 +42,7 @@ ArrayType::ArrayType() : DataType() {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id ) {}
+ArrayType::ArrayType(const hid_t existing_id) : DataType( existing_id ) {}
 
 //--------------------------------------------------------------------------
 // Function:    ArrayType copy constructor

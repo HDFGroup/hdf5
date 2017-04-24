@@ -44,14 +44,14 @@ namespace H5 {
 extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
     const H5A_info_t *ainfo, void *op_data)
 {
-   H5std_string s_attr_name = H5std_string( attr_name );
+    H5std_string s_attr_name = H5std_string(attr_name);
 #ifdef NO_STATIC_CAST
-   UserData4Aiterate* myData = (UserData4Aiterate *) op_data;
+    UserData4Aiterate* myData = (UserData4Aiterate *) op_data;
 #else
-   UserData4Aiterate* myData = static_cast <UserData4Aiterate *> (op_data);
+    UserData4Aiterate* myData = static_cast <UserData4Aiterate *> (op_data);
 #endif
-   myData->op( *myData->location, s_attr_name, myData->opData );
-   return 0;
+    myData->op(*myData->location, s_attr_name, myData->opData);
+    return 0;
 }
 
 //--------------------------------------------------------------------------
@@ -113,22 +113,22 @@ H5Location::H5Location() : IdComponent() {}
 ///             recreate it with this function.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Location::createAttribute( const char* name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
+Attribute H5Location::createAttribute(const char* name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist) const
 {
-   hid_t type_id = data_type.getId();
-   hid_t space_id = data_space.getId();
-   hid_t plist_id = create_plist.getId();
-   hid_t attr_id = H5Acreate2(getId(), name, type_id, space_id, plist_id, H5P_DEFAULT );
+    hid_t type_id = data_type.getId();
+    hid_t space_id = data_space.getId();
+    hid_t plist_id = create_plist.getId();
+    hid_t attr_id = H5Acreate2(getId(), name, type_id, space_id, plist_id, H5P_DEFAULT);
 
-   // If the attribute id is valid, create and return the Attribute object
-   if( attr_id > 0 )
-   {
+    // If the attribute id is valid, create and return the Attribute object
+    if(attr_id > 0)
+    {
         Attribute attr;
         f_Attribute_setId(&attr, attr_id);
-        return( attr );
-   }
-   else
-      throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate2 failed");
+        return(attr);
+    }
+    else
+        throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate2 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -138,9 +138,9 @@ Attribute H5Location::createAttribute( const char* name, const DataType& data_ty
 ///             a reference to an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Location::createAttribute( const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
+Attribute H5Location::createAttribute(const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist) const
 {
-   return( createAttribute( name.c_str(), data_type, data_space, create_plist ));
+    return(createAttribute(name.c_str(), data_type, data_space, create_plist));
 }
 
 //--------------------------------------------------------------------------
@@ -151,19 +151,19 @@ Attribute H5Location::createAttribute( const H5std_string& name, const DataType&
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Location::openAttribute( const char* name ) const
+Attribute H5Location::openAttribute(const char* name) const
 {
-   hid_t attr_id = H5Aopen(getId(), name, H5P_DEFAULT);
-   if( attr_id > 0 )
-   {
+    hid_t attr_id = H5Aopen(getId(), name, H5P_DEFAULT);
+    if(attr_id > 0)
+    {
         Attribute attr;
         f_Attribute_setId(&attr, attr_id);
-        return( attr );
-   }
-   else
-   {
-      throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen failed");
-   }
+        return(attr);
+    }
+    else
+    {
+        throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -173,9 +173,9 @@ Attribute H5Location::openAttribute( const char* name ) const
 ///             a reference to an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Location::openAttribute( const H5std_string& name ) const
+Attribute H5Location::openAttribute(const H5std_string& name) const
 {
-   return( openAttribute( name.c_str()) );
+    return(openAttribute(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -186,20 +186,20 @@ Attribute H5Location::openAttribute( const H5std_string& name ) const
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Location::openAttribute( const unsigned int idx ) const
+Attribute H5Location::openAttribute(const unsigned int idx) const
 {
-   hid_t attr_id = H5Aopen_by_idx(getId(), ".", H5_INDEX_CRT_ORDER,
+    hid_t attr_id = H5Aopen_by_idx(getId(), ".", H5_INDEX_CRT_ORDER,
                 H5_ITER_INC, static_cast<hsize_t>(idx), H5P_DEFAULT, H5P_DEFAULT);
-   if( attr_id > 0 )
-   {
+    if(attr_id > 0)
+    {
         Attribute attr;
         f_Attribute_setId(&attr, attr_id);
         return(attr);
-   }
-   else
-   {
+    }
+    else
+    {
         throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_by_idx failed");
-   }
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -220,31 +220,31 @@ Attribute H5Location::openAttribute( const unsigned int idx ) const
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Iterate
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_data )
+int H5Location::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
 {
-   // store the user's function and data
-   UserData4Aiterate* userData = new UserData4Aiterate;
-   userData->opData = op_data;
-   userData->op = user_op;
-   userData->location = this;
+    // store the user's function and data
+    UserData4Aiterate* userData = new UserData4Aiterate;
+    userData->opData = op_data;
+    userData->op = user_op;
+    userData->location = this;
 
-   // call the C library routine H5Aiterate2 to iterate the attributes
-   hsize_t idx = _idx ? static_cast<hsize_t>(*_idx) : 0;
-   int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
+    // call the C library routine H5Aiterate2 to iterate the attributes
+    hsize_t idx = _idx ? static_cast<hsize_t>(*_idx) : 0;
+    int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
                         userAttrOpWrpr, static_cast<void *>(userData));
 
-   // release memory
-   delete userData;
+    // release memory
+    delete userData;
 
-   if( ret_value >= 0 ) {
-      /* Pass back update index value to calling code */
-      if (_idx)
-         *_idx = static_cast<unsigned>(idx);
+    if(ret_value >= 0) {
+        /* Pass back update index value to calling code */
+        if (_idx)
+            *_idx = static_cast<unsigned>(idx);
 
-      return( ret_value );
-   }
-   else  // raise exception when H5Aiterate returns a negative value
-      throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
+        return(ret_value);
+    }
+    else  // raise exception when H5Aiterate returns a negative value
+        throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -258,10 +258,10 @@ int H5Location::getNumAttrs() const
 {
    H5O_info_t oinfo;    /* Object info */
 
-   if(H5Oget_info(getId(), &oinfo) < 0)
-      throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
-   else
-      return(static_cast<int>(oinfo.num_attrs));
+    if(H5Oget_info(getId(), &oinfo) < 0)
+        throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
+    else
+        return(static_cast<int>(oinfo.num_attrs));
 }
 
 //--------------------------------------------------------------------------
@@ -273,16 +273,16 @@ int H5Location::getNumAttrs() const
 //--------------------------------------------------------------------------
 bool H5Location::attrExists(const char* name) const
 {
-   // Call C routine H5Aexists to determine whether an attribute exists
-   // at this location, which could be specified by a file, group, dataset,
-   // or named datatype.
-   herr_t ret_value = H5Aexists(getId(), name);
-   if( ret_value > 0 )
-      return true;
-   else if(ret_value == 0)
-      return false;
-   else // Raise exception when H5Aexists returns a negative value
-      throw AttributeIException(inMemFunc("attrExists"), "H5Aexists failed");
+    // Call C routine H5Aexists to determine whether an attribute exists
+    // at this location, which could be specified by a file, group, dataset,
+    // or named datatype.
+    herr_t ret_value = H5Aexists(getId(), name);
+    if(ret_value > 0)
+        return true;
+    else if(ret_value == 0)
+        return false;
+    else // Raise exception when H5Aexists returns a negative value
+        throw AttributeIException(inMemFunc("attrExists"), "H5Aexists failed");
 }
 
 //--------------------------------------------------------------------------
@@ -294,7 +294,7 @@ bool H5Location::attrExists(const char* name) const
 //--------------------------------------------------------------------------
 bool H5Location::attrExists(const H5std_string& name) const
 {
-   return(attrExists(name.c_str()));
+    return(attrExists(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -304,11 +304,11 @@ bool H5Location::attrExists(const H5std_string& name) const
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5Location::removeAttr( const char* name ) const
+void H5Location::removeAttr(const char* name) const
 {
-   herr_t ret_value = H5Adelete(getId(), name);
-   if( ret_value < 0 )
-      throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete failed");
+    herr_t ret_value = H5Adelete(getId(), name);
+    if(ret_value < 0)
+        throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete failed");
 }
 
 //--------------------------------------------------------------------------
@@ -318,9 +318,9 @@ void H5Location::removeAttr( const char* name ) const
 ///             a reference to an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5Location::removeAttr( const H5std_string& name ) const
+void H5Location::removeAttr(const H5std_string& name) const
 {
-   removeAttr( name.c_str() );
+    removeAttr(name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -333,9 +333,9 @@ void H5Location::removeAttr( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 void H5Location::renameAttr(const char* oldname, const char* newname) const
 {
-   herr_t ret_value = H5Arename(getId(), oldname, newname);
-   if (ret_value < 0)
-      throw AttributeIException(inMemFunc("renameAttr"), "H5Arename failed");
+    herr_t ret_value = H5Arename(getId(), oldname, newname);
+    if (ret_value < 0)
+        throw AttributeIException(inMemFunc("renameAttr"), "H5Arename failed");
 }
 
 //--------------------------------------------------------------------------
@@ -367,11 +367,11 @@ void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& new
 //--------------------------------------------------------------------------
 void H5Location::flush(H5F_scope_t scope) const
 {
-   herr_t ret_value = H5Fflush(getId(), scope);
-   if( ret_value < 0 )
-   {
-      throw LocationException(inMemFunc("flush"), "H5Fflush failed");
-   }
+    herr_t ret_value = H5Fflush(getId(), scope);
+    if(ret_value < 0)
+    {
+        throw LocationException(inMemFunc("flush"), "H5Fflush failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -383,12 +383,12 @@ void H5Location::flush(H5F_scope_t scope) const
 //--------------------------------------------------------------------------
 H5std_string H5Location::getFileName() const
 {
-   try {
-      return(p_get_file_name());
-   }
-   catch (LocationException& E) {
-      throw FileIException(inMemFunc("getFileName"), E.getDetailMsg());
-   }
+    try {
+        return(p_get_file_name());
+    }
+    catch (LocationException& E) {
+        throw FileIException(inMemFunc("getFileName"), E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -413,9 +413,9 @@ H5std_string H5Location::getFileName() const
 //--------------------------------------------------------------------------
 void H5Location::setComment(const char* name, const char* comment) const
 {
-   herr_t ret_value = H5Oset_comment_by_name(getId(), name, comment, H5P_DEFAULT);
-   if( ret_value < 0 )
-      throw LocationException(inMemFunc("setComment"), "H5Oset_comment_by_name failed");
+    herr_t ret_value = H5Oset_comment_by_name(getId(), name, comment, H5P_DEFAULT);
+    if(ret_value < 0)
+        throw LocationException(inMemFunc("setComment"), "H5Oset_comment_by_name failed");
 }
 
 //--------------------------------------------------------------------------
@@ -427,7 +427,7 @@ void H5Location::setComment(const char* name, const char* comment) const
 //--------------------------------------------------------------------------
 void H5Location::setComment(const H5std_string& name, const H5std_string& comment) const
 {
-   setComment(name.c_str(), comment.c_str());
+    setComment(name.c_str(), comment.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -440,9 +440,9 @@ void H5Location::setComment(const H5std_string& name, const H5std_string& commen
 //--------------------------------------------------------------------------
 void H5Location::setComment(const char* comment) const
 {
-   herr_t ret_value = H5Oset_comment_by_name(getId(), ".", comment, H5P_DEFAULT);
-   if( ret_value < 0 )
-      throw LocationException(inMemFunc("setComment"), "H5Oset_comment_by_name failed");
+    herr_t ret_value = H5Oset_comment_by_name(getId(), ".", comment, H5P_DEFAULT);
+    if(ret_value < 0)
+        throw LocationException(inMemFunc("setComment"), "H5Oset_comment_by_name failed");
 }
 
 //--------------------------------------------------------------------------
@@ -454,7 +454,7 @@ void H5Location::setComment(const char* comment) const
 //--------------------------------------------------------------------------
 void H5Location::setComment(const H5std_string& comment) const
 {
-   setComment(comment.c_str());
+    setComment(comment.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -470,9 +470,9 @@ void H5Location::setComment(const H5std_string& comment) const
 //--------------------------------------------------------------------------
 void H5Location::removeComment(const char* name) const
 {
-   herr_t ret_value = H5Oset_comment_by_name(getId(), name, NULL, H5P_DEFAULT);
-   if( ret_value < 0 )
-      throw LocationException(inMemFunc("removeComment"), "H5Oset_comment_by_name failed");
+    herr_t ret_value = H5Oset_comment_by_name(getId(), name, NULL, H5P_DEFAULT);
+    if(ret_value < 0)
+        throw LocationException(inMemFunc("removeComment"), "H5Oset_comment_by_name failed");
 }
 
 //--------------------------------------------------------------------------
@@ -484,7 +484,7 @@ void H5Location::removeComment(const char* name) const
 //--------------------------------------------------------------------------
 void H5Location::removeComment(const H5std_string& name) const
 {
-   removeComment (name.c_str());
+    removeComment (name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -605,11 +605,11 @@ H5std_string H5Location::getComment(const H5std_string& name, size_t buf_size) c
 //--------------------------------------------------------------------------
 void H5Location::p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const
 {
-   herr_t ret_value = H5Rcreate(ref, getId(), name, ref_type, space_id);
-   if (ret_value < 0)
-   {
-      throw ReferenceException(inMemFunc("reference"), "H5Rcreate failed");
-   }
+    herr_t ret_value = H5Rcreate(ref, getId(), name, ref_type, space_id);
+    if (ret_value < 0)
+    {
+        throw ReferenceException(inMemFunc("reference"), "H5Rcreate failed");
+    }
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
@@ -630,12 +630,12 @@ void H5Location::p_reference(void* ref, const char* name, hid_t space_id, H5R_ty
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const char* name, const DataSpace& dataspace, H5R_type_t ref_type) const
 {
-   try {
+    try {
       p_reference(ref, name, dataspace.getId(), ref_type);
-   }
-   catch (ReferenceException& E) {
-      throw ReferenceException(inMemFunc("reference"), E.getDetailMsg());
-   }
+    }
+    catch (ReferenceException& E) {
+        throw ReferenceException(inMemFunc("reference"), E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -656,12 +656,12 @@ void H5Location::reference(void* ref, const char* name, const DataSpace& dataspa
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const H5std_string& name, const DataSpace& dataspace, H5R_type_t ref_type) const
 {
-   try {
+    try {
       p_reference(ref, name.c_str(), dataspace.getId(), ref_type);
-   }
-   catch (ReferenceException& E) {
-      throw ReferenceException(inMemFunc("reference"), E.getDetailMsg());
-   }
+    }
+    catch (ReferenceException& E) {
+        throw ReferenceException(inMemFunc("reference"), E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -680,12 +680,12 @@ void H5Location::reference(void* ref, const H5std_string& name, const DataSpace&
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const char* name, H5R_type_t ref_type) const
 {
-   try {
+    try {
       p_reference(ref, name, -1, ref_type);
-   }
-   catch (ReferenceException& E) {
-      throw ReferenceException(inMemFunc("reference"), E.getDetailMsg());
-   }
+    }
+    catch (ReferenceException& E) {
+        throw ReferenceException(inMemFunc("reference"), E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -703,7 +703,7 @@ void H5Location::reference(void* ref, const char* name, H5R_type_t ref_type) con
 //--------------------------------------------------------------------------
 void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_type) const
 {
-   reference(ref, name.c_str(), ref_type);
+    reference(ref, name.c_str(), ref_type);
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -723,13 +723,13 @@ void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_t
 //--------------------------------------------------------------------------
 hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type, const char* from_func)
 {
-   hid_t temp_id = H5Rdereference(loc_id, ref_type, ref);
-   if (temp_id < 0)
-   {
-      throw ReferenceException(inMemFunc(from_func), "H5Rdereference failed");
-   }
+    hid_t temp_id = H5Rdereference(loc_id, ref_type, ref);
+    if (temp_id < 0)
+    {
+        throw ReferenceException(inMemFunc(from_func), "H5Rdereference failed");
+    }
 
-   return(temp_id);
+    return(temp_id);
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -747,7 +747,7 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
 //--------------------------------------------------------------------------
 void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t ref_type)
 {
-   p_setId(p_dereference(loc.getId(), ref, ref_type, "dereference"));
+    p_setId(p_dereference(loc.getId(), ref, ref_type, "dereference"));
 }
 
 //--------------------------------------------------------------------------
@@ -764,7 +764,7 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 //--------------------------------------------------------------------------
 void H5Location::dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type)
 {
-   p_setId(p_dereference(attr.getId(), ref, ref_type, "dereference"));
+    p_setId(p_dereference(attr.getId(), ref, ref_type, "dereference"));
 }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -789,12 +789,12 @@ void H5Location::dereference(const Attribute& attr, const void* ref, H5R_type_t 
 //--------------------------------------------------------------------------
 H5G_obj_t H5Location::getObjType(void *ref, H5R_type_t ref_type) const
 {
-   try {
-      return(p_get_obj_type(ref, ref_type));
-   }
-   catch (ReferenceException& E) {
-      throw ReferenceException(inMemFunc("getObjType"), E.getDetailMsg());
-   }
+    try {
+        return(p_get_obj_type(ref, ref_type));
+    }
+    catch (ReferenceException& E) {
+        throw ReferenceException(inMemFunc("getObjType"), E.getDetailMsg());
+    }
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -816,13 +816,13 @@ H5G_obj_t H5Location::getObjType(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 H5G_obj_t H5Location::p_get_obj_type(void *ref, H5R_type_t ref_type) const
 {
-   H5G_obj_t obj_type = H5Rget_obj_type1(getId(), ref_type, ref);
+    H5G_obj_t obj_type = H5Rget_obj_type1(getId(), ref_type, ref);
 
-   if (obj_type == H5G_UNKNOWN)
-   {
-      throw ReferenceException(inMemFunc("getObjType"), "H5Rget_obj_type1 failed");
-   }
-   return(obj_type);
+    if (obj_type == H5G_UNKNOWN)
+    {
+        throw ReferenceException(inMemFunc("getObjType"), "H5Rget_obj_type1 failed");
+    }
+    return(obj_type);
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -845,12 +845,12 @@ H5G_obj_t H5Location::p_get_obj_type(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 H5O_type_t H5Location::getRefObjType(void *ref, H5R_type_t ref_type) const
 {
-   try {
-      return(p_get_ref_obj_type(ref, ref_type));
-   }
-   catch (ReferenceException& E) {
-      throw ReferenceException(inMemFunc("getRefObjType"), E.getDetailMsg());
-   }
+    try {
+        return(p_get_ref_obj_type(ref, ref_type));
+    }
+    catch (ReferenceException& E) {
+        throw ReferenceException(inMemFunc("getRefObjType"), E.getDetailMsg());
+    }
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -871,17 +871,17 @@ H5O_type_t H5Location::getRefObjType(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 H5O_type_t H5Location::p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const
 {
-   H5O_type_t obj_type = H5O_TYPE_UNKNOWN;
-   herr_t ret_value = H5Rget_obj_type2(getId(), ref_type, ref, &obj_type);
-   if (ret_value < 0)
-   {
-      throw ReferenceException(inMemFunc("getRefObjType"), "H5Rget_obj_type2 failed");
-   }
-   if (obj_type == H5O_TYPE_UNKNOWN || obj_type >= H5O_TYPE_NTYPES)
-   {
-      throw ReferenceException(inMemFunc("getRefObjType"), "H5Rget_obj_type2 returned invalid type");
-   }
-   return(obj_type);
+    H5O_type_t obj_type = H5O_TYPE_UNKNOWN;
+    herr_t ret_value = H5Rget_obj_type2(getId(), ref_type, ref, &obj_type);
+    if (ret_value < 0)
+    {
+        throw ReferenceException(inMemFunc("getRefObjType"), "H5Rget_obj_type2 failed");
+    }
+    if (obj_type == H5O_TYPE_UNKNOWN || obj_type >= H5O_TYPE_NTYPES)
+    {
+        throw ReferenceException(inMemFunc("getRefObjType"), "H5Rget_obj_type2 returned invalid type");
+    }
+    return(obj_type);
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
@@ -904,19 +904,19 @@ H5O_type_t H5Location::p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const
 //--------------------------------------------------------------------------
 DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
 {
-   hid_t space_id = H5Rget_region(getId(), ref_type, ref);
-   if (space_id < 0)
-   {
-      throw ReferenceException(inMemFunc("getRegion"), "H5Rget_region failed");
-   }
-   try {
+    hid_t space_id = H5Rget_region(getId(), ref_type, ref);
+    if (space_id < 0)
+    {
+        throw ReferenceException(inMemFunc("getRegion"), "H5Rget_region failed");
+    }
+    try {
         DataSpace dataspace;
         f_DataSpace_setId(&dataspace, space_id);
         return(dataspace);
-   }
-   catch (DataSpaceIException& E) {
-      throw ReferenceException(inMemFunc("getRegion"), E.getDetailMsg());
-   }
+    }
+    catch (DataSpaceIException& E) {
+        throw ReferenceException(inMemFunc("getRegion"), E.getDetailMsg());
+    }
 }
 
 

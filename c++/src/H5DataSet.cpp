@@ -130,18 +130,18 @@ DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type) : 
 //--------------------------------------------------------------------------
 DataSpace DataSet::getSpace() const
 {
-   // Calls C function H5Dget_space to get the id of the dataspace
-   hid_t dataspace_id = H5Dget_space( id );
+    // Calls C function H5Dget_space to get the id of the dataspace
+    hid_t dataspace_id = H5Dget_space(id);
 
-   // If the dataspace id is invalid, throw an exception
-   if( dataspace_id < 0 )
-   {
-      throw DataSetIException("DataSet::getSpace", "H5Dget_space failed");
-   }
-   //create dataspace object using the existing id then return the object
-   DataSpace data_space;
-   f_DataSpace_setId(&data_space, dataspace_id);
-   return( data_space );
+    // If the dataspace id is invalid, throw an exception
+    if(dataspace_id < 0)
+    {
+        throw DataSetIException("DataSet::getSpace", "H5Dget_space failed");
+    }
+    //create dataspace object using the existing id then return the object
+    DataSpace data_space;
+    f_DataSpace_setId(&data_space, dataspace_id);
+    return(data_space);
 }
 
 // This private member function calls the C API to get the identifier
@@ -149,13 +149,13 @@ DataSpace DataSet::getSpace() const
 // by the various AbstractDs functions to get the specific datatype.
 hid_t DataSet::p_get_type() const
 {
-   hid_t type_id = H5Dget_type( id );
-   if( type_id > 0 )
-      return( type_id );
-   else
-   {
-      throw DataSetIException("", "H5Dget_type failed");
-   }
+    hid_t type_id = H5Dget_type(id);
+    if(type_id > 0)
+        return(type_id);
+    else
+    {
+        throw DataSetIException("", "H5Dget_type failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -167,16 +167,16 @@ hid_t DataSet::p_get_type() const
 //--------------------------------------------------------------------------
 DSetCreatPropList DataSet::getCreatePlist() const
 {
-   hid_t create_plist_id = H5Dget_create_plist( id );
-   if( create_plist_id < 0 )
-   {
-      throw DataSetIException("DataSet::getCreatePlist", "H5Dget_create_plist failed");
-   }
+    hid_t create_plist_id = H5Dget_create_plist(id);
+    if(create_plist_id < 0)
+    {
+        throw DataSetIException("DataSet::getCreatePlist", "H5Dget_create_plist failed");
+    }
 
-   // create and return the DSetCreatPropList object
-   DSetCreatPropList create_plist;
-   f_PropList_setId(&create_plist, create_plist_id);
-   return(create_plist);
+    // create and return the DSetCreatPropList object
+    DSetCreatPropList create_plist;
+    f_PropList_setId(&create_plist, create_plist_id);
+    return(create_plist);
 }
 
 //--------------------------------------------------------------------------
@@ -190,8 +190,8 @@ DSetCreatPropList DataSet::getCreatePlist() const
 //--------------------------------------------------------------------------
 hsize_t DataSet::getStorageSize() const
 {
-   hsize_t storage_size = H5Dget_storage_size(id);
-   return(storage_size);
+    hsize_t storage_size = H5Dget_storage_size(id);
+    return(storage_size);
 }
 
 //--------------------------------------------------------------------------
@@ -207,7 +207,7 @@ size_t DataSet::getInMemDataSize() const
 
     // Get the data type of this dataset
     hid_t mem_type_id = H5Dget_type(id);
-    if( mem_type_id < 0 )
+    if(mem_type_id < 0)
     {
         throw DataSetIException(func, "H5Dget_type failed");
     }
@@ -268,14 +268,14 @@ size_t DataSet::getInMemDataSize() const
 //--------------------------------------------------------------------------
 haddr_t DataSet::getOffset() const
 {
-   haddr_t ds_addr; // for address of dataset
+    haddr_t ds_addr; // for address of dataset
 
-   ds_addr = H5Dget_offset(id);
-   if( ds_addr == HADDR_UNDEF )
-   {
-      throw DataSetIException("DataSet::getOffset", "H5Dget_offset returned HADDR_UNDEF");
-   }
-   return(ds_addr);
+    ds_addr = H5Dget_offset(id);
+    if(ds_addr == HADDR_UNDEF)
+    {
+        throw DataSetIException("DataSet::getOffset", "H5Dget_offset returned HADDR_UNDEF");
+    }
+    return(ds_addr);
 }
 
 //--------------------------------------------------------------------------
@@ -287,11 +287,11 @@ haddr_t DataSet::getOffset() const
 //--------------------------------------------------------------------------
 void DataSet::getSpaceStatus(H5D_space_status_t& status) const
 {
-   herr_t ret_value = H5Dget_space_status(id, &status);
-   if( ret_value < 0 )
-   {
-      throw DataSetIException("DataSet::getSpaceStatus", "H5Dget_space_status failed");
-   }
+    herr_t ret_value = H5Dget_space_status(id, &status);
+    if(ret_value < 0)
+    {
+        throw DataSetIException("DataSet::getSpaceStatus", "H5Dget_space_status failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -305,20 +305,20 @@ void DataSet::getSpaceStatus(H5D_space_status_t& status) const
 // Modification
 //              Replaced the version without const parameter - Apr, 2014
 //--------------------------------------------------------------------------
-hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space ) const
+hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space) const
 {
-   // Obtain identifiers for C API
-   hid_t type_id = type.getId();
-   hid_t space_id = space.getId();
+    // Obtain identifiers for C API
+    hid_t type_id = type.getId();
+    hid_t space_id = space.getId();
 
-   hsize_t size; // for amount of storage
+    hsize_t size; // for amount of storage
 
-   herr_t ret_value = H5Dvlen_get_buf_size( id, type_id, space_id, &size );
-   if( ret_value < 0 )
-   {
-      throw DataSetIException("DataSet::getVlenBufSize", "H5Dvlen_get_buf_size failed");
-   }
-   return( size );
+    herr_t ret_value = H5Dvlen_get_buf_size(id, type_id, space_id, &size);
+    if(ret_value < 0)
+    {
+        throw DataSetIException("DataSet::getVlenBufSize", "H5Dvlen_get_buf_size failed");
+    }
+    return(size);
 }
 
 //--------------------------------------------------------------------------
@@ -334,9 +334,9 @@ hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space ) c
 //              Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
 //              Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
 //--------------------------------------------------------------------------
-//hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
+//hsize_t DataSet::getVlenBufSize(DataType& type, DataSpace& space) const
 //{
-//    return(getVlenBufSize(type, space));
+//  return(getVlenBufSize(type, space));
 //}
 
 //--------------------------------------------------------------------------
@@ -350,18 +350,18 @@ hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space ) c
 ///\exception   H5::DataSetIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::vlenReclaim(const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist, void* buf )
+void DataSet::vlenReclaim(const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist, void* buf)
 {
-   // Obtain identifiers for C API
-   hid_t type_id = type.getId();
-   hid_t space_id = space.getId();
-   hid_t xfer_plist_id = xfer_plist.getId();
+    // Obtain identifiers for C API
+    hid_t type_id = type.getId();
+    hid_t space_id = space.getId();
+    hid_t xfer_plist_id = xfer_plist.getId();
 
-   herr_t ret_value = H5Dvlen_reclaim( type_id, space_id, xfer_plist_id, buf );
-   if( ret_value < 0 )
-   {
-      throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
-   }
+    herr_t ret_value = H5Dvlen_reclaim(type_id, space_id, xfer_plist_id, buf);
+    if(ret_value < 0)
+    {
+        throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -380,16 +380,16 @@ void DataSet::vlenReclaim(const DataType& type, const DataSpace& space, const DS
 //--------------------------------------------------------------------------
 void DataSet::vlenReclaim(void* buf, const DataType& type, const DataSpace& space, const DSetMemXferPropList& xfer_plist)
 {
-   // Obtain identifiers for C API
-   hid_t type_id = type.getId();
-   hid_t space_id = space.getId();
-   hid_t xfer_plist_id = xfer_plist.getId();
+    // Obtain identifiers for C API
+    hid_t type_id = type.getId();
+    hid_t space_id = space.getId();
+    hid_t xfer_plist_id = xfer_plist.getId();
 
-   herr_t ret_value = H5Dvlen_reclaim(type_id, space_id, xfer_plist_id, buf);
-   if (ret_value < 0)
-   {
-      throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
-   }
+    herr_t ret_value = H5Dvlen_reclaim(type_id, space_id, xfer_plist_id, buf);
+    if (ret_value < 0)
+    {
+        throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -407,19 +407,19 @@ void DataSet::vlenReclaim(void* buf, const DataType& type, const DataSpace& spac
 ///             to memory datatype \a mem_type and dataspace \a mem_space.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::read( void* buf, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
+void DataSet::read(void* buf, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist) const
 {
-   // Obtain identifiers for C API
-   hid_t mem_type_id = mem_type.getId();
-   hid_t mem_space_id = mem_space.getId();
-   hid_t file_space_id = file_space.getId();
-   hid_t xfer_plist_id = xfer_plist.getId();
+    // Obtain identifiers for C API
+    hid_t mem_type_id = mem_type.getId();
+    hid_t mem_space_id = mem_space.getId();
+    hid_t file_space_id = file_space.getId();
+    hid_t xfer_plist_id = xfer_plist.getId();
 
-   herr_t ret_value = H5Dread( id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf );
-   if( ret_value < 0 )
-   {
-      throw DataSetIException("DataSet::read", "H5Dread failed");
-   }
+    herr_t ret_value = H5Dread(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf);
+    if(ret_value < 0)
+    {
+        throw DataSetIException("DataSet::read", "H5Dread failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -483,19 +483,19 @@ void DataSet::read(H5std_string& strg, const DataType& mem_type, const DataSpace
 ///             and dataspace.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::write( const void* buf, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
+void DataSet::write(const void* buf, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist) const
 {
-   // Obtain identifiers for C API
-   hid_t mem_type_id = mem_type.getId();
-   hid_t mem_space_id = mem_space.getId();
-   hid_t file_space_id = file_space.getId();
-   hid_t xfer_plist_id = xfer_plist.getId();
+    // Obtain identifiers for C API
+    hid_t mem_type_id = mem_type.getId();
+    hid_t mem_space_id = mem_space.getId();
+    hid_t file_space_id = file_space.getId();
+    hid_t xfer_plist_id = xfer_plist.getId();
 
-   herr_t ret_value = H5Dwrite( id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf );
-   if( ret_value < 0 )
-   {
-      throw DataSetIException("DataSet::write", "H5Dwrite failed");
-   }
+    herr_t ret_value = H5Dwrite(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf);
+    if(ret_value < 0)
+    {
+        throw DataSetIException("DataSet::write", "H5Dwrite failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -508,7 +508,7 @@ void DataSet::write( const void* buf, const DataType& mem_type, const DataSpace&
 //              Modified to pass the buffer into H5Dwrite properly depending
 //              whether the dataset has variable- or fixed-length string.
 //--------------------------------------------------------------------------
-void DataSet::write( const H5std_string& strg, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist ) const
+void DataSet::write(const H5std_string& strg, const DataType& mem_type, const DataSpace& mem_space, const DataSpace& file_space, const DSetMemXferPropList& xfer_plist) const
 {
     // Check if this attribute has variable-len string or fixed-len string and
     // proceed appropriately.
@@ -518,11 +518,11 @@ void DataSet::write( const H5std_string& strg, const DataType& mem_type, const D
         throw DataSetIException("DataSet::write", "H5Tis_variable_str failed");
     }
 
-   // Obtain identifiers for C API
-   hid_t mem_type_id = mem_type.getId();
-   hid_t mem_space_id = mem_space.getId();
-   hid_t file_space_id = file_space.getId();
-   hid_t xfer_plist_id = xfer_plist.getId();
+    // Obtain identifiers for C API
+    hid_t mem_type_id = mem_type.getId();
+    hid_t mem_space_id = mem_space.getId();
+    hid_t file_space_id = file_space.getId();
+    hid_t xfer_plist_id = xfer_plist.getId();
 
     // Convert string to C-string
     const char* strg_C;
@@ -532,12 +532,12 @@ void DataSet::write( const H5std_string& strg, const DataType& mem_type, const D
     // Pass string in differently depends on variable or fixed length
     if (!is_variable_len)
     {
-        ret_value = H5Dwrite( id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, strg_C );
+        ret_value = H5Dwrite(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, strg_C);
     }
     else
     {
         // passing string argument by address
-        ret_value = H5Dwrite( id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, &strg_C );
+        ret_value = H5Dwrite(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, &strg_C);
     }
     if (ret_value < 0)
     {
@@ -562,18 +562,18 @@ void DataSet::write( const H5std_string& strg, const DataType& mem_type, const D
 ///             under development.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-int DataSet::iterateElems( void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data )
+int DataSet::iterateElems(void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data)
 {
-   // Obtain identifiers for C API
-   hid_t type_id = type.getId();
-   hid_t space_id = space.getId();
-   herr_t ret_value = H5Diterate( buf, type_id, space_id, op, op_data );
-   if( ret_value >= 0 )
-      return( ret_value );
-   else  // raise exception when H5Diterate returns a negative value
-   {
-      throw DataSetIException("DataSet::iterateElems", "H5Diterate failed");
-   }
+    // Obtain identifiers for C API
+    hid_t type_id = type.getId();
+    hid_t space_id = space.getId();
+    herr_t ret_value = H5Diterate(buf, type_id, space_id, op, op_data);
+    if(ret_value >= 0)
+        return(ret_value);
+    else  // raise exception when H5Diterate returns a negative value
+    {
+        throw DataSetIException("DataSet::iterateElems", "H5Diterate failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -588,11 +588,11 @@ int DataSet::iterateElems( void* buf, const DataType& type, const DataSpace& spa
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5D.html#Dataset-Extend
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSet::extend( const hsize_t* size ) const
+void DataSet::extend(const hsize_t* size) const
 {
-   herr_t ret_value = H5Dset_extent( id, size );
-   if( ret_value < 0 )  // raise exception when H5Dset_extent returns a neg value
-      throw DataSetIException("DataSet::extend", "H5Dset_extent failed");
+    herr_t ret_value = H5Dset_extent(id, size);
+    if(ret_value < 0)  // raise exception when H5Dset_extent returns a neg value
+        throw DataSetIException("DataSet::extend", "H5Dset_extent failed");
 }
 
 //--------------------------------------------------------------------------
@@ -613,7 +613,7 @@ void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf,
     hid_t buf_type_id = buf_type.getId();
     hid_t space_id = space.getId();
     herr_t ret_value = H5Dfill(fill, fill_type_id, buf, buf_type_id, space_id);
-    if( ret_value < 0 )
+    if(ret_value < 0)
     {
         throw DataSetIException("DataSet::fillMemBuf", "H5Dfill failed");
     }
@@ -657,7 +657,7 @@ void DataSet::fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& s
     hid_t buf_type_id = buf_type.getId();
     hid_t space_id = space.getId();
     herr_t ret_value = H5Dfill(NULL, buf_type_id, buf, buf_type_id, space_id);
-    if( ret_value < 0 )
+    if(ret_value < 0)
     {
         throw DataSetIException("DataSet::fillMemBuf", "H5Dfill failed");
     }
@@ -696,7 +696,7 @@ void DataSet::fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& s
 //--------------------------------------------------------------------------
 hid_t DataSet::getId() const
 {
-   return(id);
+    return(id);
 }
 
 //--------------------------------------------------------------------------
@@ -725,7 +725,7 @@ void DataSet::p_read_fixed_len(const hid_t mem_type_id, const hid_t mem_space_id
 
         herr_t ret_value = H5Dread(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, strg_C);
 
-        if( ret_value < 0 )
+        if(ret_value < 0)
         {
             delete []strg_C;    // de-allocate for fixed-len string
             throw DataSetIException("DataSet::read", "H5Dread failed for fixed length string");
@@ -756,7 +756,7 @@ void DataSet::p_read_variable_len(const hid_t mem_type_id, const hid_t mem_space
     // Read dataset, no allocation for variable-len string; C library will
     herr_t ret_value = H5Dread(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, &strg_C);
 
-    if( ret_value < 0 )
+    if(ret_value < 0)
     {
         throw DataSetIException("DataSet::read", "H5Dread failed for variable length string");
     }
@@ -788,8 +788,8 @@ void DataSet::p_setId(const hid_t new_id)
     catch (Exception& close_error) {
         throw DataSetIException(inMemFunc("p_setId"), close_error.getDetailMsg());
     }
-   // reset object's id to the given id
-   id = new_id;
+    // reset object's id to the given id
+    id = new_id;
 }
 
 //--------------------------------------------------------------------------
@@ -820,8 +820,8 @@ void DataSet::close()
 {
     if (p_valid_id(id))
     {
-        herr_t ret_value = H5Dclose( id );
-        if( ret_value < 0 )
+        herr_t ret_value = H5Dclose(id);
+        if(ret_value < 0)
         {
             throw DataSetIException("DataSet::close", "H5Dclose failed");
         }

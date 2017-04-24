@@ -33,7 +33,7 @@ namespace H5 {
 class H5_DLLCPP H5Location;  // forward declaration for UserData4Aiterate
 
 // Define the operator function pointer for H5Aiterate().
-typedef void (*attr_operator_t)( H5Location& loc/*in*/,
+typedef void (*attr_operator_t)(H5Location& loc/*in*/,
                                  const H5std_string attr_name/*in*/,
                                  void *operator_data/*in,out*/);
 
@@ -57,20 +57,20 @@ class H5_DLLCPP H5Location : public IdComponent {
    public:
         // Creates an attribute for the specified object at this location
         // PropList is currently not used, so always be default.
-        Attribute createAttribute( const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT ) const;
-        Attribute createAttribute( const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT ) const;
+        Attribute createAttribute(const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
+        Attribute createAttribute(const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
 
         // Given its name, opens the attribute that belongs to an object at
         // this location.
-        Attribute openAttribute( const char* name ) const;
-        Attribute openAttribute( const H5std_string& name ) const;
+        Attribute openAttribute(const char* name) const;
+        Attribute openAttribute(const H5std_string& name) const;
 
         // Given its index, opens the attribute that belongs to an object at
         // this location.
-        Attribute openAttribute( const unsigned int idx ) const;
+        Attribute openAttribute(const unsigned int idx) const;
 
         // Flushes all buffers associated with this location to disk.
-        void flush( H5F_scope_t scope ) const;
+        void flush(H5F_scope_t scope) const;
 
         // Gets the name of the file, specified by this location.
         H5std_string getFileName() const;

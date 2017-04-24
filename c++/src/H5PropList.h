@@ -35,7 +35,7 @@ class H5_DLLCPP PropList : public IdComponent {
         PropList(const hid_t plist_id);
 
         // Make a copy of the given property list using assignment statement
-        PropList& operator=( const PropList& rhs );
+        PropList& operator=(const PropList& rhs);
 
         // Compares this property list or class against the given list or class.
         bool operator==(const PropList& rhs) const;
@@ -47,15 +47,15 @@ class H5_DLLCPP PropList : public IdComponent {
         void closeClass() const;
 
         // Makes a copy of the given property list.
-        void copy( const PropList& like_plist );
+        void copy(const PropList& like_plist);
 
         // Copies a property from this property list or class to another
-        void copyProp( PropList& dest, const char* name) const;
-        void copyProp( PropList& dest, const H5std_string& name) const;
+        void copyProp(PropList& dest, const char* name) const;
+        void copyProp(PropList& dest, const H5std_string& name) const;
 
         // Copies a property from one property list or property class to another
-        void copyProp( PropList& dest, PropList& src, const char* name) const;
-        void copyProp( PropList& dest, PropList& src, const H5std_string& name) const;
+        void copyProp(PropList& dest, PropList& src, const char* name) const;
+        void copyProp(PropList& dest, PropList& src, const H5std_string& name) const;
 
         // Gets the class of this property list, i.e. H5P_FILE_CREATE,
         // H5P_FILE_ACCESS, ...

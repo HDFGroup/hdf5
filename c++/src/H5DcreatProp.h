@@ -43,13 +43,13 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         void setAllocTime(H5D_alloc_time_t alloc_time) const;
 
         // Retrieves the size of the chunks used to store a chunked layout dataset.
-        int getChunk( int max_ndims, hsize_t* dim ) const;
+        int getChunk(int max_ndims, hsize_t* dim) const;
 
         // Sets the size of the chunks used to store a chunked layout dataset.
-        void setChunk( int ndims, const hsize_t* dim ) const;
+        void setChunk(int ndims, const hsize_t* dim) const;
 
         // Returns information about an external file.
-        void getExternal( unsigned idx, size_t name_size, char* name, off_t& offset, hsize_t& size ) const;
+        void getExternal(unsigned idx, size_t name_size, char* name, off_t& offset, hsize_t& size) const;
 
         // Returns the number of external files for a dataset.
         int getExternalCount() const;
@@ -61,10 +61,10 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         void setFillTime(H5D_fill_time_t fill_time) const;
 
         // Retrieves a dataset fill value.
-        void getFillValue( const DataType& fvalue_type, void* value ) const;
+        void getFillValue(const DataType& fvalue_type, void* value) const;
 
         // Sets a dataset fill value.
-        void setFillValue( const DataType& fvalue_type, const void* value ) const;
+        void setFillValue(const DataType& fvalue_type, const void* value) const;
 
         // Returns information about a filter in a pipeline.
         H5Z_filter_t getFilter(int filter_number, unsigned int& flags, size_t& cd_nelmts, unsigned int* cd_values, size_t namelen, char name[], unsigned int &filter_config) const;
@@ -87,19 +87,19 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         H5D_fill_value_t isFillValueDefined() const;
 
         // Modifies the specified filter.
-        void modifyFilter( H5Z_filter_t filter_id, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const;
+        void modifyFilter(H5Z_filter_t filter_id, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[]) const;
 
         // Remove one or all filters from the filter pipeline.
-        void removeFilter( H5Z_filter_t filter_id) const;
+        void removeFilter(H5Z_filter_t filter_id) const;
 
         // Sets compression method and compression level.
-        void setDeflate( int level ) const;
+        void setDeflate(int level) const;
 
         // Adds an external file to the list of external files.
-        void setExternal( const char* name, off_t offset, hsize_t size ) const;
+        void setExternal(const char* name, off_t offset, hsize_t size) const;
 
         // Adds a filter to the filter pipeline.
-        void setFilter( H5Z_filter_t filter, unsigned int flags = 0, size_t cd_nelmts = 0, const unsigned int cd_values[] = NULL) const;
+        void setFilter(H5Z_filter_t filter, unsigned int flags = 0, size_t cd_nelmts = 0, const unsigned int cd_values[] = NULL) const;
 
         // Sets Fletcher32 checksum of EDC for this property list.
         void setFletcher32() const;

@@ -45,7 +45,7 @@ Exception::Exception(const H5std_string& func, const H5std_string& message) : de
 ///\param       orig - IN: Exception instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception( const Exception& orig ) : detail_message(orig.detail_message), func_name(orig.func_name) {}
+Exception::Exception(const Exception& orig) : detail_message(orig.detail_message), func_name(orig.func_name) {}
 
 //--------------------------------------------------------------------------
 // Function:    Exception::getMajorString
@@ -58,32 +58,32 @@ Exception::Exception( const Exception& orig ) : detail_message(orig.detail_messa
 ///             will be returned.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5std_string Exception::getMajorString( hid_t err_major ) const
+H5std_string Exception::getMajorString(hid_t err_major) const
 {
-   // Preliminary call to H5Eget_msg() to get the length of the message
-   ssize_t mesg_size = H5Eget_msg(err_major, NULL, NULL, 0);
+    // Preliminary call to H5Eget_msg() to get the length of the message
+    ssize_t mesg_size = H5Eget_msg(err_major, NULL, NULL, 0);
 
-   // If H5Eget_msg() returns a negative value, raise an exception,
-   if( mesg_size < 0 )
-      throw IdComponentException("Exception::getMajorString",
+    // If H5Eget_msg() returns a negative value, raise an exception,
+    if(mesg_size < 0)
+        throw IdComponentException("Exception::getMajorString",
                                 "H5Eget_msg failed");
 
-   // Call H5Eget_msg again to get the actual message
-   char* mesg_C = new char[mesg_size+1];  // temporary C-string for C API
-   mesg_size = H5Eget_msg(err_major, NULL, mesg_C, mesg_size+1);
+    // Call H5Eget_msg again to get the actual message
+    char* mesg_C = new char[mesg_size+1];  // temporary C-string for C API
+    mesg_size = H5Eget_msg(err_major, NULL, mesg_C, mesg_size+1);
 
-   // Check for failure again
-   if( mesg_size < 0 )
-   {
-      delete []mesg_C;
-      throw IdComponentException("Exception::getMajorString",
+    // Check for failure again
+    if(mesg_size < 0)
+    {
+        delete []mesg_C;
+        throw IdComponentException("Exception::getMajorString",
                                 "H5Eget_msg failed");
-   }
+    }
 
-   // Convert the C error description and return
-   H5std_string major_str(mesg_C);
-   delete []mesg_C;
-   return( major_str );
+    // Convert the C error description and return
+    H5std_string major_str(mesg_C);
+    delete []mesg_C;
+    return(major_str);
 }
 
 //--------------------------------------------------------------------------
@@ -97,32 +97,32 @@ H5std_string Exception::getMajorString( hid_t err_major ) const
 ///             will be returned.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5std_string Exception::getMinorString( hid_t err_minor ) const
+H5std_string Exception::getMinorString(hid_t err_minor) const
 {
-   // Preliminary call to H5Eget_msg() to get the length of the message
-   ssize_t mesg_size = H5Eget_msg(err_minor, NULL, NULL, 0);
+    // Preliminary call to H5Eget_msg() to get the length of the message
+    ssize_t mesg_size = H5Eget_msg(err_minor, NULL, NULL, 0);
 
-   // If H5Eget_msg() returns a negative value, raise an exception,
-   if( mesg_size < 0 )
-      throw IdComponentException("Exception::getMinorString",
+    // If H5Eget_msg() returns a negative value, raise an exception,
+    if(mesg_size < 0)
+        throw IdComponentException("Exception::getMinorString",
                                 "H5Eget_msg failed");
 
-   // Call H5Eget_msg again to get the actual message
-   char* mesg_C = new char[mesg_size+1];  // temporary C-string for C API
-   mesg_size = H5Eget_msg(err_minor, NULL, mesg_C, mesg_size+1);
+    // Call H5Eget_msg again to get the actual message
+    char* mesg_C = new char[mesg_size+1];  // temporary C-string for C API
+    mesg_size = H5Eget_msg(err_minor, NULL, mesg_C, mesg_size+1);
 
-   // Check for failure again
-   if( mesg_size < 0 )
-   {
-      delete []mesg_C;
-      throw IdComponentException("Exception::getMinorString",
+    // Check for failure again
+    if(mesg_size < 0)
+    {
+        delete []mesg_C;
+        throw IdComponentException("Exception::getMinorString",
                                 "H5Eget_msg failed");
-   }
+    }
 
-   // Convert the C error description and return
-   H5std_string minor_str(mesg_C);
-   delete []mesg_C;
-   return( minor_str );
+    // Convert the C error description and return
+    H5std_string minor_str(mesg_C);
+    delete []mesg_C;
+    return(minor_str);
 }
 
 //--------------------------------------------------------------------------
@@ -141,13 +141,13 @@ H5std_string Exception::getMinorString( hid_t err_minor ) const
 ///             handlers
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::setAutoPrint( H5E_auto2_t& func, void* client_data )
+void Exception::setAutoPrint(H5E_auto2_t& func, void* client_data)
 {
-   // calls the C API routine H5Eset_auto to set the auto printing to
-   // the specified function.
-   herr_t ret_value = H5Eset_auto2( H5E_DEFAULT, func, client_data );
-   if( ret_value < 0 )
-      throw Exception( "Exception::setAutoPrint", "H5Eset_auto failed" );
+    // calls the C API routine H5Eset_auto to set the auto printing to
+    // the specified function.
+    herr_t ret_value = H5Eset_auto2(H5E_DEFAULT, func, client_data);
+    if(ret_value < 0)
+        throw Exception("Exception::setAutoPrint", "H5Eset_auto failed");
 }
 
 //--------------------------------------------------------------------------
@@ -157,11 +157,11 @@ void Exception::setAutoPrint( H5E_auto2_t& func, void* client_data )
 //--------------------------------------------------------------------------
 void Exception::dontPrint()
 {
-   // calls the C API routine H5Eset_auto with NULL parameters to turn
-   // off the automatic error printing.
-   herr_t ret_value = H5Eset_auto2( H5E_DEFAULT, NULL, NULL );
-   if( ret_value < 0 )
-      throw Exception( "Exception::dontPrint", "H5Eset_auto failed" );
+    // calls the C API routine H5Eset_auto with NULL parameters to turn
+    // off the automatic error printing.
+    herr_t ret_value = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    if(ret_value < 0)
+        throw Exception("Exception::dontPrint", "H5Eset_auto failed");
 }
 
 //--------------------------------------------------------------------------
@@ -174,13 +174,13 @@ void Exception::dontPrint()
 ///                                     the error function
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::getAutoPrint( H5E_auto2_t& func, void** client_data )
+void Exception::getAutoPrint(H5E_auto2_t& func, void** client_data)
 {
-   // calls the C API routine H5Eget_auto to get the current setting of
-   // the automatic error printing
-   herr_t ret_value = H5Eget_auto2( H5E_DEFAULT, &func, client_data );
-   if( ret_value < 0 )
-      throw Exception( "Exception::getAutoPrint", "H5Eget_auto failed" );
+    // calls the C API routine H5Eget_auto to get the current setting of
+    // the automatic error printing
+    herr_t ret_value = H5Eget_auto2(H5E_DEFAULT, &func, client_data);
+    if(ret_value < 0)
+        throw Exception("Exception::getAutoPrint", "H5Eget_auto failed");
 }
 
 //--------------------------------------------------------------------------
@@ -193,10 +193,10 @@ void Exception::getAutoPrint( H5E_auto2_t& func, void** client_data )
 //--------------------------------------------------------------------------
 void Exception::clearErrorStack()
 {
-   // calls the C API routine H5Eclear to clear the error stack
-   herr_t ret_value = H5Eclear2(H5E_DEFAULT);
-   if( ret_value < 0 )
-      throw Exception( "Exception::clearErrorStack", "H5Eclear failed" );
+    // calls the C API routine H5Eclear to clear the error stack
+    herr_t ret_value = H5Eclear2(H5E_DEFAULT);
+    if(ret_value < 0)
+        throw Exception("Exception::clearErrorStack", "H5Eclear failed");
 }
 
 //--------------------------------------------------------------------------
@@ -240,12 +240,12 @@ void Exception::clearErrorStack()
 ///\endcode
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk2_t func, void* client_data )
+void Exception::walkErrorStack(H5E_direction_t direction, H5E_walk2_t func, void* client_data)
 {
-   // calls the C API routine H5Ewalk to walk the error stack
-   herr_t ret_value = H5Ewalk2( H5E_DEFAULT, direction, func, client_data );
-   if( ret_value < 0 )
-      throw Exception( "Exception::walkErrorStack", "H5Ewalk failed" );
+    // calls the C API routine H5Ewalk to walk the error stack
+    herr_t ret_value = H5Ewalk2(H5E_DEFAULT, direction, func, client_data);
+    if(ret_value < 0)
+        throw Exception("Exception::walkErrorStack", "H5Ewalk failed");
 }
 
 //--------------------------------------------------------------------------
@@ -257,7 +257,7 @@ void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk2_t func, voi
 //--------------------------------------------------------------------------
 H5std_string Exception::getDetailMsg() const
 {
-   return(detail_message);
+    return(detail_message);
 }
 
 //--------------------------------------------------------------------------
@@ -269,7 +269,7 @@ H5std_string Exception::getDetailMsg() const
 //--------------------------------------------------------------------------
 const char* Exception::getCDetailMsg() const
 {
-   return(detail_message.c_str());
+    return(detail_message.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -280,7 +280,7 @@ const char* Exception::getCDetailMsg() const
 //--------------------------------------------------------------------------
 H5std_string Exception::getFuncName() const
 {
-   return(func_name);
+    return(func_name);
 }
 
 //--------------------------------------------------------------------------
@@ -291,7 +291,7 @@ H5std_string Exception::getFuncName() const
 //--------------------------------------------------------------------------
 const char* Exception::getCFuncName() const
 {
-   return(func_name.c_str());
+    return(func_name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -304,8 +304,8 @@ const char* Exception::getCFuncName() const
 void Exception::printErrorStack(FILE* stream, hid_t err_stack)
 {
     herr_t ret_value = H5Eprint2(err_stack, stream);
-    if( ret_value < 0 )
-        throw Exception( "Printing error stack", "H5Eprint2 failed" );
+    if(ret_value < 0)
+        throw Exception("Printing error stack", "H5Eprint2 failed");
 }
 
 //--------------------------------------------------------------------------

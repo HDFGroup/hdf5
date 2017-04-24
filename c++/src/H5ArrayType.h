@@ -45,10 +45,10 @@ class H5_DLLCPP ArrayType : public DataType {
         virtual H5std_string fromClass () const { return("ArrayType"); }
 
         // Copy constructor: makes copy of the original object.
-        ArrayType( const ArrayType& original );
+        ArrayType(const ArrayType& original);
 
         // Constructor that takes an existing id
-        ArrayType( const hid_t existing_id );
+        ArrayType(const hid_t existing_id);
 
         // Noop destructor
         virtual ~ArrayType();

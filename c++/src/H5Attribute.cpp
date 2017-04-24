@@ -84,13 +84,13 @@ Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent(), id(
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Attribute::write( const DataType& mem_type, const void *buf ) const
+void Attribute::write(const DataType& mem_type, const void *buf) const
 {
-   herr_t ret_value = H5Awrite( id, mem_type.getId(), buf );
-   if( ret_value < 0 )
-   {
-      throw AttributeIException("Attribute::write", "H5Awrite failed");
-   }
+    herr_t ret_value = H5Awrite(id, mem_type.getId(), buf);
+    if(ret_value < 0)
+    {
+        throw AttributeIException("Attribute::write", "H5Awrite failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -140,13 +140,13 @@ void Attribute::write(const DataType& mem_type, const H5std_string& strg) const
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Attribute::read( const DataType& mem_type, void *buf ) const
+void Attribute::read(const DataType& mem_type, void *buf) const
 {
-   herr_t ret_value = H5Aread( id, mem_type.getId(), buf );
-   if( ret_value < 0 )
-   {
-      throw AttributeIException("Attribute::read", "H5Aread failed");
-   }
+    herr_t ret_value = H5Aread(id, mem_type.getId(), buf);
+    if(ret_value < 0)
+    {
+        throw AttributeIException("Attribute::read", "H5Aread failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -202,7 +202,7 @@ size_t Attribute::getInMemDataSize() const
 
     // Get the data type of this attribute
     hid_t mem_type_id = H5Aget_type(id);
-    if( mem_type_id < 0 )
+    if(mem_type_id < 0)
     {
         throw AttributeIException(func, "H5Aget_type failed");
     }
@@ -263,20 +263,20 @@ size_t Attribute::getInMemDataSize() const
 //--------------------------------------------------------------------------
 DataSpace Attribute::getSpace() const
 {
-   // Calls C function H5Aget_space to get the id of the dataspace
-   hid_t dataspace_id = H5Aget_space( id );
+    // Calls C function H5Aget_space to get the id of the dataspace
+    hid_t dataspace_id = H5Aget_space(id);
 
-   // If the dataspace id is valid, create and return the DataSpace object
-   if( dataspace_id > 0 )
-   {
+    // If the dataspace id is valid, create and return the DataSpace object
+    if(dataspace_id > 0)
+    {
         DataSpace dataspace;
         f_DataSpace_setId(&dataspace, dataspace_id);
         return(dataspace);
-   }
-   else
-   {
-      throw AttributeIException("Attribute::getSpace", "H5Aget_space failed");
-   }
+    }
+    else
+    {
+        throw AttributeIException("Attribute::getSpace", "H5Aget_space failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -288,12 +288,12 @@ DataSpace Attribute::getSpace() const
 //--------------------------------------------------------------------------
 H5std_string Attribute::getFileName() const
 {
-   try {
-      return(p_get_file_name());
-   }
-   catch (IdComponentException& E) {
-      throw FileIException("Attribute::getFileName", E.getDetailMsg());
-   }
+    try {
+        return(p_get_file_name());
+    }
+    catch (IdComponentException& E) {
+        throw FileIException("Attribute::getFileName", E.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -463,9 +463,9 @@ ssize_t Attribute::getName(H5std_string& attr_name, size_t len) const
 //              Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
 //              Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
 //--------------------------------------------------------------------------
-//ssize_t Attribute::getName( size_t len, H5std_string& attr_name ) const
+//ssize_t Attribute::getName(size_t len, H5std_string& attr_name) const
 //{
-//    return (getName(attr_name, len));
+//  return (getName(attr_name, len));
 //}
 
 //--------------------------------------------------------------------------
@@ -479,8 +479,8 @@ ssize_t Attribute::getName(H5std_string& attr_name, size_t len) const
 //--------------------------------------------------------------------------
 hsize_t Attribute::getStorageSize() const
 {
-   hsize_t storage_size = H5Aget_storage_size(id);
-   return (storage_size);
+    hsize_t storage_size = H5Aget_storage_size(id);
+    return (storage_size);
 }
 
 //--------------------------------------------------------------------------
@@ -501,11 +501,11 @@ hsize_t Attribute::getStorageSize() const
 //--------------------------------------------------------------------------
 void Attribute::flush(H5F_scope_t scope) const
 {
-   herr_t ret_value = H5Fflush(getId(), scope);
-   if( ret_value < 0 )
-   {
-      throw AttributeIException("Attribute::flush", "H5Fflush failed");
-   }
+    herr_t ret_value = H5Fflush(getId(), scope);
+    if(ret_value < 0)
+    {
+        throw AttributeIException("Attribute::flush", "H5Fflush failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -521,7 +521,7 @@ void Attribute::flush(H5F_scope_t scope) const
 //--------------------------------------------------------------------------
 hid_t Attribute::getId() const
 {
-   return(id);
+    return(id);
 }
 
 //--------------------------------------------------------------------------
@@ -535,13 +535,13 @@ hid_t Attribute::getId() const
 //--------------------------------------------------------------------------
 hid_t Attribute::p_get_type() const
 {
-   hid_t type_id = H5Aget_type( id );
-   if( type_id > 0 )
-      return( type_id );
-   else
-   {
-      throw AttributeIException("", "H5Aget_type failed");
-   }
+    hid_t type_id = H5Aget_type(id);
+    if(type_id > 0)
+        return(type_id);
+    else
+    {
+        throw AttributeIException("", "H5Aget_type failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -568,7 +568,7 @@ void Attribute::p_read_fixed_len(const DataType& mem_type, H5std_string& strg) c
     {
         char *strg_C = new char[attr_size+1];
         herr_t ret_value = H5Aread(id, mem_type.getId(), strg_C);
-        if( ret_value < 0 )
+        if(ret_value < 0)
         {
             delete []strg_C;    // de-allocate for fixed-len string
             throw AttributeIException("Attribute::read", "H5Aread failed");
@@ -600,7 +600,7 @@ void Attribute::p_read_variable_len(const DataType& mem_type, H5std_string& strg
     // Read attribute, no allocation for variable-len string; C library will
     herr_t ret_value = H5Aread(id, mem_type.getId(), &strg_C);
 
-    if( ret_value < 0 )
+    if(ret_value < 0)
     {
         throw AttributeIException("Attribute::read", "H5Aread failed");
     }
@@ -632,8 +632,8 @@ void Attribute::p_setId(const hid_t new_id)
     catch (Exception& close_error) {
         throw AttributeIException("Attribute::p_setId", close_error.getDetailMsg());
     }
-   // reset object's id to the given id
-   id = new_id;
+    // reset object's id to the given id
+    id = new_id;
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -649,7 +649,7 @@ void Attribute::close()
     if (p_valid_id(id))
     {
         herr_t ret_value = H5Aclose(id);
-        if( ret_value < 0 )
+        if(ret_value < 0)
         {
             throw AttributeIException("Attribute::close", "H5Aclose failed");
         }

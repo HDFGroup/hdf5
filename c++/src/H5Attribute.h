@@ -32,13 +32,13 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
    public:
 
         // Copy constructor: makes a copy of an existing Attribute object.
-        Attribute( const Attribute& original );
+        Attribute(const Attribute& original);
 
         // Default constructor
         Attribute();
 
         // Creates a copy of an existing attribute using the attribute id
-        Attribute( const hid_t attr_id );
+        Attribute(const hid_t attr_id);
 
         // Closes this attribute.
         virtual void close();
@@ -53,7 +53,7 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
         ssize_t getName(H5std_string& attr_name, size_t len = 0) const;
         // The overloaded function below is replaced by the one above and it
         // is kept for backward compatibility purpose.
-        ssize_t getName( size_t buf_size, H5std_string& attr_name ) const;
+        ssize_t getName(size_t buf_size, H5std_string& attr_name) const;
 
         // Gets a copy of the dataspace for this attribute.
         virtual DataSpace getSpace() const;
@@ -65,16 +65,16 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
         virtual size_t getInMemDataSize() const;
 
         // Reads data from this attribute.
-        void read( const DataType& mem_type, void *buf ) const;
-        void read( const DataType& mem_type, H5std_string& strg ) const;
+        void read(const DataType& mem_type, void *buf) const;
+        void read(const DataType& mem_type, H5std_string& strg) const;
 
         // Writes data to this attribute.
-        void write(const DataType& mem_type, const void *buf ) const;
-        void write(const DataType& mem_type, const H5std_string& strg ) const;
+        void write(const DataType& mem_type, const void *buf) const;
+        void write(const DataType& mem_type, const H5std_string& strg) const;
 
         // Flushes all buffers associated with the file specified by this
         // attribute to disk.
-        void flush( H5F_scope_t scope ) const;
+        void flush(H5F_scope_t scope) const;
 
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("Attribute"); }

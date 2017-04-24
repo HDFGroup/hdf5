@@ -82,7 +82,7 @@ H5File::H5File() : H5Location(), CommonFG(), id(H5I_INVALID_HID) {}
 //              to catch then re-throw it. -BMR 2013/03/21
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), CommonFG(), id(H5I_INVALID_HID)
+H5File::H5File(const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist) : H5Location(), CommonFG(), id(H5I_INVALID_HID)
 {
     try {
         p_get_file(name, flags, create_plist, access_plist);
@@ -107,7 +107,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 //              to catch then re-throw it. -BMR 2013/03/21
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), CommonFG(), id(H5I_INVALID_HID)
+H5File::H5File(const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist) : H5Location(), CommonFG(), id(H5I_INVALID_HID)
 {
     try {
         p_get_file(name.c_str(), flags, create_plist, access_plist);
@@ -129,12 +129,12 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 {
     // These bits only set for creation, so if any of them are set,
     // create the file.
-    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC))
+    if(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC))
     {
         hid_t create_plist_id = create_plist.getId();
         hid_t access_plist_id = access_plist.getId();
-        id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
-        if( id < 0 )  // throw an exception when open/create fail
+        id = H5Fcreate(name, flags, create_plist_id, access_plist_id);
+        if(id < 0)  // throw an exception when open/create fail
         {
             throw FileIException("H5File constructor", "H5Fcreate failed");
         }
@@ -143,8 +143,8 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
     else
     {
         hid_t access_plist_id = access_plist.getId();
-        id = H5Fopen( name, flags, access_plist_id );
-        if( id < 0 )  // throw an exception when open/create fail
+        id = H5Fopen(name, flags, access_plist_id);
+        if(id < 0)  // throw an exception when open/create fail
         {
             throw FileIException("H5File constructor", "H5Fopen failed");
         }
@@ -195,17 +195,17 @@ H5File::H5File(const H5File& original) : H5Location(), CommonFG()
 //--------------------------------------------------------------------------
 bool H5File::isHdf5(const char* name)
 {
-   // Calls C routine H5Fis_hdf5 to determine whether the file is in
-   // HDF5 format.  It returns positive value, 0, or negative value
-   htri_t ret_value = H5Fis_hdf5( name );
-   if( ret_value > 0 )
-      return true;
-   else if( ret_value == 0 )
-      return false;
-   else // Raise exception when H5Fis_hdf5 returns a negative value
-   {
-      throw FileIException("H5File::isHdf5", "H5Fis_hdf5 returned negative value");
-   }
+    // Calls C routine H5Fis_hdf5 to determine whether the file is in
+    // HDF5 format.  It returns positive value, 0, or negative value
+    htri_t ret_value = H5Fis_hdf5(name);
+    if(ret_value > 0)
+        return true;
+    else if(ret_value == 0)
+        return false;
+    else // Raise exception when H5Fis_hdf5 returns a negative value
+    {
+        throw FileIException("H5File::isHdf5", "H5Fis_hdf5 returned negative value");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -215,9 +215,9 @@ bool H5File::isHdf5(const char* name)
 ///\param       name - IN: Name of the file - \c H5std_string
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-bool H5File::isHdf5(const H5std_string& name )
+bool H5File::isHdf5(const H5std_string& name)
 {
-   return( isHdf5( name.c_str()) );
+    return(isHdf5(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
@@ -296,11 +296,11 @@ void H5File::reOpen()
         throw FileIException("H5File::reOpen", close_error.getDetailMsg());
     }
 
-   // call C routine to reopen the file - Note: not sure about this,
-   // which id to be the parameter when closing?
-   id = H5Freopen( id );
-   if( id < 0 ) // Raise exception when H5Freopen returns a neg value
-      throw FileIException("H5File::reOpen", "H5Freopen failed");
+    // call C routine to reopen the file - Note: not sure about this,
+    // which id to be the parameter when closing?
+    id = H5Freopen(id);
+    if(id < 0) // Raise exception when H5Freopen returns a neg value
+        throw FileIException("H5File::reOpen", "H5Freopen failed");
 }
 
 //--------------------------------------------------------------------------
@@ -312,19 +312,19 @@ void H5File::reOpen()
 //--------------------------------------------------------------------------
 FileCreatPropList H5File::getCreatePlist() const
 {
-   hid_t create_plist_id = H5Fget_create_plist( id );
+    hid_t create_plist_id = H5Fget_create_plist(id);
 
-   // if H5Fget_create_plist returns a valid id, create and return
-   // the FileCreatPropList object for this property list
-   if( create_plist_id > 0 )
-   {
-      FileCreatPropList create_plist( create_plist_id );
-      return( create_plist );
-   }
-   else
-   {
-      throw FileIException("H5File::getCreatePlist", "H5Fget_create_plist failed");
-   }
+    // if H5Fget_create_plist returns a valid id, create and return
+    // the FileCreatPropList object for this property list
+    if(create_plist_id > 0)
+    {
+      FileCreatPropList create_plist(create_plist_id);
+        return(create_plist);
+    }
+    else
+    {
+        throw FileIException("H5File::getCreatePlist", "H5Fget_create_plist failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -336,19 +336,19 @@ FileCreatPropList H5File::getCreatePlist() const
 //--------------------------------------------------------------------------
 FileAccPropList H5File::getAccessPlist() const
 {
-   hid_t access_plist_id = H5Fget_access_plist( id );
+    hid_t access_plist_id = H5Fget_access_plist(id);
 
-   // if H5Fget_access_plist returns a valid id, create and return
-   // the FileAccPropList object for this property list
-   if( access_plist_id > 0 )
-   {
-      FileAccPropList access_plist( access_plist_id );
-      return access_plist;
-   }
-   else // Raise an exception
-   {
-      throw FileIException("H5File::getAccessPlist", "H5Fget_access_plist failed");
-   }
+    // if H5Fget_access_plist returns a valid id, create and return
+    // the FileAccPropList object for this property list
+    if(access_plist_id > 0)
+    {
+      FileAccPropList access_plist(access_plist_id);
+        return access_plist;
+    }
+    else // Raise an exception
+    {
+        throw FileIException("H5File::getAccessPlist", "H5Fget_access_plist failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -360,12 +360,12 @@ FileAccPropList H5File::getAccessPlist() const
 //--------------------------------------------------------------------------
 hssize_t H5File::getFreeSpace() const
 {
-   hssize_t free_space = H5Fget_freespace(id);
-   if( free_space < 0 )
-   {
-      throw FileIException("H5File::getFreeSpace", "H5Fget_freespace failed");
-   }
-   return (free_space);
+    hssize_t free_space = H5Fget_freespace(id);
+    if(free_space < 0)
+    {
+        throw FileIException("H5File::getFreeSpace", "H5Fget_freespace failed");
+    }
+    return (free_space);
 }
 
 
@@ -392,12 +392,12 @@ hssize_t H5File::getFreeSpace() const
 //--------------------------------------------------------------------------
 ssize_t H5File::getObjCount(unsigned types) const
 {
-   ssize_t num_objs = H5Fget_obj_count(id, types);
-   if( num_objs < 0 )
-   {
-      throw FileIException("H5File::getObjCount", "H5Fget_obj_count failed");
-   }
-   return (num_objs);
+    ssize_t num_objs = H5Fget_obj_count(id, types);
+    if(num_objs < 0)
+    {
+        throw FileIException("H5File::getObjCount", "H5Fget_obj_count failed");
+    }
+    return (num_objs);
 }
 
 //--------------------------------------------------------------------------
@@ -427,11 +427,11 @@ ssize_t H5File::getObjCount(unsigned types) const
 //--------------------------------------------------------------------------
 void H5File::getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const
 {
-   ssize_t ret_value = H5Fget_obj_ids(id, types, max_objs, oid_list);
-   if( ret_value < 0 )
-   {
-      throw FileIException("H5File::getObjIDs", "H5Fget_obj_ids failed");
-   }
+    ssize_t ret_value = H5Fget_obj_ids(id, types, max_objs, oid_list);
+    if(ret_value < 0)
+    {
+        throw FileIException("H5File::getObjIDs", "H5Fget_obj_ids failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -457,12 +457,12 @@ void H5File::getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const
 //--------------------------------------------------------------------------
 void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 {
-   hid_t fapl_id = fapl.getId();
-   herr_t ret_value = H5Fget_vfd_handle(id, fapl_id, file_handle);
-   if( ret_value < 0 )
-   {
-      throw FileIException("H5File::getVFDHandle", "H5Fget_vfd_handle failed");
-   }
+    hid_t fapl_id = fapl.getId();
+    herr_t ret_value = H5Fget_vfd_handle(id, fapl_id, file_handle);
+    if(ret_value < 0)
+    {
+        throw FileIException("H5File::getVFDHandle", "H5Fget_vfd_handle failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -497,11 +497,11 @@ void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 //--------------------------------------------------------------------------
 void H5File::getVFDHandle(void **file_handle) const
 {
-   herr_t ret_value = H5Fget_vfd_handle(id, H5P_DEFAULT, file_handle);
-   if( ret_value < 0 )
-   {
-      throw FileIException("H5File::getVFDHandle", "H5Fget_vfd_handle failed");
-   }
+    herr_t ret_value = H5Fget_vfd_handle(id, H5P_DEFAULT, file_handle);
+    if(ret_value < 0)
+    {
+        throw FileIException("H5File::getVFDHandle", "H5Fget_vfd_handle failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -516,13 +516,13 @@ void H5File::getVFDHandle(void **file_handle) const
 //--------------------------------------------------------------------------
 hsize_t H5File::getFileSize() const
 {
-   hsize_t file_size;
-   herr_t ret_value = H5Fget_filesize(id, &file_size);
-   if (ret_value < 0)
-   {
-      throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
-   }
-   return (file_size);
+    hsize_t file_size;
+    herr_t ret_value = H5Fget_filesize(id, &file_size);
+    if (ret_value < 0)
+    {
+        throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
+    }
+    return (file_size);
 }
 
 //--------------------------------------------------------------------------
@@ -539,7 +539,7 @@ hsize_t H5File::getFileSize() const
 //--------------------------------------------------------------------------
 hid_t H5File::getId() const
 {
-   return(id);
+    return(id);
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -553,7 +553,7 @@ hid_t H5File::getId() const
 //--------------------------------------------------------------------------
 void H5File::reopen()
 {
-   H5File::reOpen();
+    H5File::reOpen();
 }
 
 //--------------------------------------------------------------------------
@@ -566,7 +566,7 @@ void H5File::reopen()
 //--------------------------------------------------------------------------
 hid_t H5File::getLocId() const
 {
-   return( getId() );
+    return(getId());
 }
 
 //--------------------------------------------------------------------------
@@ -590,8 +590,8 @@ void H5File::p_setId(const hid_t new_id)
     catch (Exception& E) {
         throw FileIException("H5File::p_setId", E.getDetailMsg());
     }
-   // reset object's id to the given id
-   id = new_id;
+    // reset object's id to the given id
+    id = new_id;
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -606,8 +606,8 @@ void H5File::close()
 {
     if (p_valid_id(id))
     {
-        herr_t ret_value = H5Fclose( id );
-        if( ret_value < 0 )
+        herr_t ret_value = H5Fclose(id);
+        if(ret_value < 0)
         {
             throw FileIException("H5File::close", "H5Fclose failed");
         }
@@ -632,9 +632,9 @@ void H5File::close()
 //--------------------------------------------------------------------------
 void H5File::throwException(const H5std_string& func_name, const H5std_string& msg) const
 {
-   H5std_string full_name = func_name;
-   full_name.insert(0, "H5File::");
-   throw FileIException(full_name, msg);
+    H5std_string full_name = func_name;
+    full_name.insert(0, "H5File::");
+    throw FileIException(full_name, msg);
 }
 
 //--------------------------------------------------------------------------

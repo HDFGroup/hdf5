@@ -26,12 +26,12 @@ namespace H5 {
 class H5_DLLCPP H5File : public H5Location, public CommonFG {
    public:
         // Creates or opens an HDF5 file.
-        H5File( const char* name, unsigned int flags,
+        H5File(const char* name, unsigned int flags,
            const FileCreatPropList& create_plist = FileCreatPropList::DEFAULT,
-           const FileAccPropList& access_plist = FileAccPropList::DEFAULT );
-        H5File( const H5std_string& name, unsigned int flags,
+           const FileAccPropList& access_plist = FileAccPropList::DEFAULT);
+        H5File(const H5std_string& name, unsigned int flags,
            const FileCreatPropList& create_plist = FileCreatPropList::DEFAULT,
-           const FileAccPropList& access_plist = FileAccPropList::DEFAULT );
+           const FileAccPropList& access_plist = FileAccPropList::DEFAULT);
 
         // Open the file
         void openFile(const H5std_string& name, unsigned int flags,
@@ -68,8 +68,8 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
         //void getVFDHandle(FileAccPropList& fapl, void **file_handle) const; // removed from 1.8.18 and 1.10.1
 
         // Determines if a file, specified by its name, is in HDF5 format
-        static bool isHdf5(const char* name );
-        static bool isHdf5(const H5std_string& name );
+        static bool isHdf5(const char* name);
+        static bool isHdf5(const H5std_string& name);
 
         // Reopens this file.
         void reOpen();  // added for better name
@@ -115,7 +115,7 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 
         // This function is private and contains common code between the
         // constructors taking a string or a char*
-        void p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist );
+        void p_get_file(const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist);
 
 }; // end of H5File
 } // namespace H5
