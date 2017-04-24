@@ -88,22 +88,23 @@ if [ $? != 0 ]; then
 fi
 
 # setup plugin path relative to test
-ENVCMD="env HDF5_PLUGIN_PATH=@/${PLUGIN_LIBDIR1}:@/${PLUGIN_LIBDIR2}"
+# actual executable is in the .libs folder
+ENVCMD="env HDF5_PLUGIN_PATH=@/../${PLUGIN_LIBDIR1}:@/../${PLUGIN_LIBDIR2}"
 
 # Run the test
-#$ENVCMD $TEST_BIN
-#if [ $? != 0 ]; then
-#    nerrors=`expr $nerrors + 1`
-#fi
+$ENVCMD $TEST_BIN
+if [ $? != 0 ]; then
+    nerrors=`expr $nerrors + 1`
+fi
 
 # print results
-#if test $nerrors -ne 0 ; then
-#    echo "$nerrors errors encountered"
-#    exit_code=$EXIT_FAILURE
-#else
-#    echo "All Plugin API tests passed."
-#    exit_code=$EXIT_SUCCESS
-#fi
+if test $nerrors -ne 0 ; then
+    echo "$nerrors errors encountered"
+    exit_code=$EXIT_FAILURE
+else
+    echo "All Plugin API tests passed."
+    exit_code=$EXIT_SUCCESS
+fi
 
 # Clean up temporary files/directories and leave
 $RM $PLUGIN_LIBDIR1 $PLUGIN_LIBDIR2
