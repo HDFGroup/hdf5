@@ -213,13 +213,11 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5PLsize
   (JNIEnv *env, jclass clss)
 {
-    int retVal = -1;
-
-    retVal = H5PLsize();
-    if (retVal < 0)
+    unsigned int listsize = 0;
+    if (H5PLget_loading_state(&listsize) < 0) {
         h5libraryError(env);
-
-    return (jint)retVal;
+    }
+    return (jint)listsize;
 } /* end Java_hdf_hdf5lib_H5_H5PLsize */
 
 #ifdef __cplusplus
