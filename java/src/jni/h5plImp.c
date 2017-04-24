@@ -214,7 +214,7 @@ Java_hdf_hdf5lib_H5_H5PLsize
   (JNIEnv *env, jclass clss)
 {
     unsigned int listsize = 0;
-    if (H5PLget_loading_state(&listsize) < 0) {
+    if (H5PLsize(&listsize) < 0) {
         h5libraryError(env);
     }
     return (jint)listsize;
