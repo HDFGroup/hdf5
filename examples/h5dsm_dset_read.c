@@ -30,6 +30,8 @@ int main(int argc, char *argv[]) {
         ERROR;
     if(H5Pset_fapl_daosm(fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
         ERROR;
+    if(H5Pset_all_coll_metadata_ops(fapl, true) < 0)
+        ERROR;
 
     /* Open snapshot if specified */
     if(argc == 5) {

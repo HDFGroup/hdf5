@@ -78,6 +78,7 @@ typedef struct H5VL_daosm_file_t {
     MPI_Info info;
     int my_rank;
     int num_procs;
+    hbool_t collective;
 } H5VL_daosm_file_t;
 
 /* The group struct */

@@ -56,6 +56,8 @@ int main(int argc, char *argv[]) {
         ERROR;
     if(H5Pset_fapl_daosm(fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
         ERROR;
+    if(H5Pset_all_coll_metadata_ops(fapl, true) < 0)
+        ERROR;
 
     /* Create file */
     if((file = H5Fcreate(FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
