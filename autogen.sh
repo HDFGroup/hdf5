@@ -205,6 +205,39 @@ Darwin*)
     ;;
 esac
 
+# Run scripts that process source.
+#
+# These should be run before the autotools so that failures here block
+# compilation.
+
+# Run trace script
+# The trace script adds H5TRACE macros to library source files.  It should
+# have no effect on files that don't have HDF5 API macros in them.
+echo "Running trace script:"
+bin/trace src/H5*.c || exit 1
+echo
+
+# Run make_err
+# make_err automatically generates the H5E headers that create error message
+# types for HDF5.
+echo "Running error generation script:"
+bin/make_err src/H5err.txt || exit 1
+echo
+
+# Run make_vers
+# make_vers automatically generates the public headers that define the API version
+# macros for HDF5.
+echo "Running API version generation script:"
+bin/make_vers src/H5vers.txt || exit 1
+echo
+
+# Run make_overflow
+# make_overflow automatically generates macros for detecting overflows for type
+# conversion.
+echo "Running overflow macro generation script:"
+bin/make_overflow src/H5overflow.txt || exit 1
+echo
+
 # Run autotools in order
 #
 # When available, we use the --force option to ensure all files are
@@ -267,35 +300,7 @@ fi
 ${autoconf_cmd} || exit 1
 echo
 
-# Run scripts that process source.
-
-# Run trace script
-# The trace script adds H5TRACE macros to library source files.  It should
-# have no effect on files that don't have HDF5 API macros in them.
-echo
-echo "Running trace script:"
-bin/trace src/H5*.c || exit 1
-
-# Run make_err
-# make_err automatically generates the H5E headers that create error message
-# types for HDF5.
-echo
-echo "Running error generation script:"
-bin/make_err src/H5err.txt || exit 1
-
-# Run make_vers
-# make_vers automatically generates the public headers that define the API version
-# macros for HDF5.
-echo
-echo "Running API version generation script:"
-bin/make_vers src/H5vers.txt || exit 1
-
-# Run make_overflow
-# make_overflow automatically generates macros for detecting overflows for type
-# conversion.
-echo
-echo "Running overflow macro generation script:"
-bin/make_overflow src/H5overflow.txt || exit 1
+echo "*** SUCCESS ***"
 
 echo
 exit 0
