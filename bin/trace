@@ -163,6 +163,8 @@ $Source = "";
 ##############################################################################
 # Print an error message.
 #
+my $found_errors = 0;
+
 sub errmesg ($$@) {
   my ($file, $func, @mesg) = @_;
   my ($mesg) = join "", @mesg;
@@ -171,6 +173,8 @@ sub errmesg ($$@) {
     local $_ = $1;
     $lineno = tr/\n/\n/;
   }
+
+  $found_errors = 1;
 
   print "$file: in function \`$func\':\n";
   print "$file:$lineno: $mesg\n";
@@ -341,4 +345,13 @@ for $file (@ARGV) {
   }
 }
 
-printf "Finished processing HDF5 API calls\n"
+if ($found_errors eq 1) {
+    printf "\n";
+    printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    printf "*** ERRORS FOUND *** ERRORS FOUND *** ERRORS FOUND ****\n";
+    printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    exit 1;
+} else {
+    printf "Finished processing HDF5 API calls\n";
+}
+
