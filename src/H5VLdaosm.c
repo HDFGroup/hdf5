@@ -54,6 +54,7 @@ hid_t H5VL_DAOSM_g = -1;
 #define H5VL_DAOSM_FOI_BUF_SIZE 1024
 #define H5VL_DAOSM_LINK_VAL_BUF_SIZE 256
 #define H5VL_DAOSM_GINFO_BUF_SIZE 256
+#define H5VL_DAOSM_DINFO_BUF_SIZE 1024
 #define H5VL_DAOSM_SEQ_LIST_LEN 128
 
 /* DAOSM-specific file access properties */
@@ -1116,8 +1117,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     ret_value = (void *)file;
 
 done:
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     if(NULL == ret_value) {
         /* Bcast bcast_buf_64 as '0' if necessary - this will trigger failures
          * in the other processes so we do not need to do the second bcast. */
@@ -1275,7 +1275,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         } /* end else */
 
         /* Open global metadata object */
-        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, epoch, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, epoch, flags & H5F_ACC_RDWR ? DAOS_COO_RW : DAOS_COO_RO, &file->glob_md_oh, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
 
         /* Read max OID from gmd obj */
@@ -1419,7 +1419,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local container handle: %d", ret)
 
         /* Open global metadata object */
-        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, file->epoch, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, file->epoch, flags & H5F_ACC_RDWR ? DAOS_COO_RW : DAOS_COO_RO, &file->glob_md_oh, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
 
         /* Reconstitute root group from revieved GCPL */
@@ -1436,8 +1436,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     ret_value = (void *)file;
 
 done:
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     if(NULL == ret_value) {
         /* Bcast bcast_buf_64 as '0' if necessary - this will trigger failures
          * in the other processes so we do not need to do the second bcast. */
@@ -2287,8 +2286,7 @@ H5VL_daosm_group_traverse(H5VL_daosm_item_t *item, const char *path,
     ret_value = grp;
 
 done:
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     if(NULL == ret_value)
         /* Close group */
         if(grp && H5VL_daosm_group_close(grp, dxpl_id, req) < 0)
@@ -2362,7 +2360,7 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
 
         /* Open group */
         if(0 != (ret = daos_obj_open(file->coh, grp->obj.oid, file->epoch, DAOS_OO_RW, &grp->obj.obj_oh, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open group: %d", ret)
 
         /* Encode GCPL */
         if(H5Pencode(gcpl_id, NULL, &gcpl_size) < 0)
@@ -2421,7 +2419,7 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
 
         /* Open group */
         if(0 != (ret = daos_obj_open(file->coh, grp->obj.oid, file->epoch, DAOS_OO_RW, &grp->obj.obj_oh, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open group: %d", ret)
     } /* end else */
 
     /* Finish setting up group struct */
@@ -2433,16 +2431,15 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
     ret_value = (void *)grp;
 
 done:
-    /* Free memory */
-    gcpl_buf = H5MM_xfree(gcpl_buf);
-
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     /* Destroy DAOS object if created before failure DSMINC */
     if(NULL == ret_value)
         /* Close group */
         if(grp && H5VL_daosm_group_close(grp, dxpl_id, req) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, NULL, "can't close group")
+
+    /* Free memory */
+    gcpl_buf = H5MM_xfree(gcpl_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_group_create_helper() */
@@ -2493,6 +2490,7 @@ H5VL_daosm_group_create(void *_item,
     if(NULL == (grp = (H5VL_daosm_group_t *)H5VL_daosm_group_create_helper(item->file, gcpl_id, gapl_id, dxpl_id, req, target_grp, target_name, target_name ? HDstrlen(target_name) : 0, collective)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create group")
 
+    /* Set return value */
     ret_value = (void *)grp;
 
 done:
@@ -2500,8 +2498,7 @@ done:
     if(target_grp && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close group")
 
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     /* Destroy DAOS object if created before failure DSMINC */
     if(NULL == ret_value)
         /* Close group */
@@ -2557,8 +2554,8 @@ H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file, daos_obj_id_t oid,
     grp->gapl_id = FAIL;
 
     /* Open group */
-    if(0 != (ret = daos_obj_open(file->coh, oid, file->epoch, DAOS_OO_RW, &grp->obj.obj_oh, NULL /*event*/)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+    if(0 != (ret = daos_obj_open(file->coh, oid, file->epoch, file->flags & H5F_ACC_RDWR ? DAOS_COO_RW : DAOS_COO_RO, &grp->obj.obj_oh, NULL /*event*/)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open group: %d", ret)
 
     /* Set up operation to read GCPL size from group */
     /* Set up dkey */
@@ -2619,8 +2616,7 @@ H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file, daos_obj_id_t oid,
     ret_value = (void *)grp;
 
 done:
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     if(NULL == ret_value)
         /* Close group */
         if(grp && H5VL_daosm_group_close(grp, dxpl_id, req) < 0)
@@ -2668,8 +2664,8 @@ H5VL_daosm_group_reconstitute(H5VL_daosm_file_t *file, daos_obj_id_t oid,
     grp->gapl_id = FAIL;
 
     /* Open group */
-    if(0 != (ret = daos_obj_open(file->coh, oid, file->epoch, DAOS_OO_RW, &grp->obj.obj_oh, NULL /*event*/)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+    if(0 != (ret = daos_obj_open(file->coh, oid, file->epoch, file->flags & H5F_ACC_RDWR ? DAOS_COO_RW : DAOS_COO_RO, &grp->obj.obj_oh, NULL /*event*/)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open group: %d", ret)
 
     /* Decode GCPL */
     if((grp->gcpl_id = H5Pdecode(gcpl_buf)) < 0)
@@ -2682,8 +2678,7 @@ H5VL_daosm_group_reconstitute(H5VL_daosm_file_t *file, daos_obj_id_t oid,
     ret_value = (void *)grp;
 
 done:
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     if(NULL == ret_value)
         /* Close group */
         if(grp && H5VL_daosm_group_close(grp, dxpl_id, req) < 0)
@@ -2763,7 +2758,7 @@ H5VL_daosm_group_open(void *_item,
         /* Broadcast group info if there are other processes that need it */
         if(collective && (item->file->num_procs > 1)) {
             HDassert(gcpl_buf);
-            HDassert(sizeof(ginfo_buf_static) > 4 * sizeof(uint64_t));
+            HDassert(sizeof(ginfo_buf_static) >= 4 * sizeof(uint64_t));
 
             /* Encode oid */
             p = (uint8_t *)ginfo_buf_static;
@@ -2784,14 +2779,14 @@ H5VL_daosm_group_open(void *_item,
 
             /* Need a second bcast if it did not fit in the receivers' static
              * buffer */
-            if((gcpl_len + 4 * sizeof(uint64_t)) > sizeof(ginfo_buf_static))
+            if(gcpl_len + 4 * sizeof(uint64_t) > sizeof(ginfo_buf_static))
                 if(MPI_SUCCESS != MPI_Bcast((char *)gcpl_buf, (int)gcpl_len, MPI_BYTE, 0, item->file->comm))
                     HGOTO_ERROR(H5E_SYM, H5E_MPI, NULL, "can't bcast GCPL")
         } /* end if */
     } /* end if */
     else {
         /* Receive GCPL */
-        if(MPI_SUCCESS != MPI_Bcast(ginfo_buf_static, sizeof(ginfo_buf_static), MPI_BYTE, 0, item->file->comm))
+        if(MPI_SUCCESS != MPI_Bcast((char *)ginfo_buf_static, sizeof(ginfo_buf_static), MPI_BYTE, 0, item->file->comm))
             HGOTO_ERROR(H5E_SYM, H5E_MPI, NULL, "can't bcast group info")
 
         /* Decode oid */
@@ -2803,21 +2798,24 @@ H5VL_daosm_group_open(void *_item,
         /* Decode GCPL length */
         UINT64DECODE(p, gcpl_len)
 
-        /* Check for ginfo_buf_size set to 0 - indicates failure */
+        /* Check for gcpl_len set to 0 - indicates failure */
         if(gcpl_len == 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "lead process failed to open group")
 
         /* Check if we need to perform another bcast */
-        if((gcpl_len + 4 * sizeof(uint64_t)) > sizeof(ginfo_buf_static)) {
+        if(gcpl_len + 4 * sizeof(uint64_t) > sizeof(ginfo_buf_static)) {
             /* Allocate a dynamic buffer if necessary */
-            if(gcpl_len > H5VL_DAOSM_GINFO_BUF_SIZE)
+            if(gcpl_len > sizeof(ginfo_buf_static)) {
                 if(NULL == (gcpl_buf = (uint8_t *)H5MM_malloc(gcpl_len)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate space for global pool handle")
+                p = gcpl_buf;
+            } /* end if */
+            else
+                p = ginfo_buf_static;
 
             /* Receive GCPL */
-            if(MPI_SUCCESS != MPI_Bcast(gcpl_buf, (int)gcpl_len, MPI_BYTE, 0, item->file->comm))
+            if(MPI_SUCCESS != MPI_Bcast((char *)p, (int)gcpl_len, MPI_BYTE, 0, item->file->comm))
                 HGOTO_ERROR(H5E_SYM, H5E_MPI, NULL, "can't bcast GCPL")
-
-            p = (uint8_t *)gcpl_buf;
         } /* end if */
 
         /* Reconstitute group from received oid and GCPL buffer */
@@ -2829,15 +2827,14 @@ H5VL_daosm_group_open(void *_item,
     ret_value = (void *)grp;
 
 done:
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     if(NULL == ret_value) {
         /* Bcast gcpl_buf as '0' if necessary - this will trigger failures in
          * in other processes so we do not need to do the second bcast. */
         if(must_bcast) {
             HDmemset(ginfo_buf_static, 0, sizeof(ginfo_buf_static));
             if(MPI_SUCCESS != MPI_Bcast(ginfo_buf_static, sizeof(ginfo_buf_static), MPI_BYTE, 0, item->file->comm))
-                HDONE_ERROR(H5E_SYM, H5E_MPI, NULL, "can't bcast empty GCPL")
+                HDONE_ERROR(H5E_SYM, H5E_MPI, NULL, "can't bcast empty group info")
         } /* end if */
 
         /* Close group */
@@ -3191,23 +3188,10 @@ H5VL_daosm_dataset_create(void *_item,
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     hid_t type_id, space_id;
     H5VL_daosm_group_t *target_grp = NULL;
-    const char *target_name = NULL;
-    H5VL_daosm_link_val_t link_val;
-    daos_key_t dkey;
-    daos_vec_iod_t iod[3];
-    daos_recx_t recx[3];
-    daos_sg_list_t sgl[3];
-    daos_iov_t sg_iov[3];
-    size_t type_size = 0;
-    size_t space_size = 0;
-    size_t dcpl_size = 0;
     void *type_buf = NULL;
     void *space_buf = NULL;
     void *dcpl_buf = NULL;
-    char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
-    char type_key[] = H5VL_DAOSM_TYPE_KEY;
-    char space_key[] = H5VL_DAOSM_SPACE_KEY;
-    char dcpl_key[] = H5VL_DAOSM_CPL_KEY;
+    hbool_t collective = item->file->collective;
     int ret;
     void *ret_value = NULL;
 
@@ -3216,6 +3200,11 @@ H5VL_daosm_dataset_create(void *_item,
     /* Check for write access */
     if(!(item->file->flags & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "no write intent on file")
+ 
+    /* Check for collective access, if not already set by the file */
+    if(!collective)
+        if(H5Pget_all_coll_metadata_ops(dapl_id, &collective) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get collective access property")
 
     /* Get the dcpl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
@@ -3226,10 +3215,6 @@ H5VL_daosm_dataset_create(void *_item,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id")
     if(H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id")
-
-    /* Traverse the path */
-    if(NULL == (target_grp = H5VL_daosm_group_traverse(item, name, dxpl_id, req, &target_name, NULL, NULL)))
-        HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "can't traverse path")
 
     /* Allocate the dataset object that is returned to the user */
     if(NULL == (dset = H5FL_CALLOC(H5VL_daosm_dset_t)))
@@ -3243,95 +3228,135 @@ H5VL_daosm_dataset_create(void *_item,
     dset->dcpl_id = FAIL;
     dset->dapl_id = FAIL;
 
-    /* Create dataset */
+    /* Generate dataset oid */
     dset->obj.oid.lo = item->file->max_oid + (uint64_t)1;
     daos_obj_id_generate(&dset->obj.oid, DAOS_OC_LARGE_RW);
-    if(0 != (ret = daos_obj_declare(item->file->coh, dset->obj.oid, item->file->epoch, NULL /*oa*/, NULL /*event*/)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create dataset: %d", ret)
-    item->file->max_oid = dset->obj.oid.lo;
 
-    /* Write max OID */
-    if(H5VL_daosm_write_max_oid(item->file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't write max OID")
+    /* Create dataset and write metadata if this process should */
+    if(!collective || (item->file->my_rank == 0)) {
+        const char *target_name = NULL;
+        H5VL_daosm_link_val_t link_val;
+        daos_key_t dkey;
+        daos_vec_iod_t iod[3];
+        daos_recx_t recx[3];
+        daos_sg_list_t sgl[3];
+        daos_iov_t sg_iov[3];
+        size_t type_size = 0;
+        size_t space_size = 0;
+        size_t dcpl_size = 0;
+        char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
+        char type_key[] = H5VL_DAOSM_TYPE_KEY;
+        char space_key[] = H5VL_DAOSM_SPACE_KEY;
+        char dcpl_key[] = H5VL_DAOSM_CPL_KEY;
 
-    /* Create link to dataset */
-    link_val.type = H5L_TYPE_HARD;
-    link_val.target.hard = dset->obj.oid;
-    if(H5VL_daosm_link_write(target_grp, target_name, HDstrlen(target_name), &link_val) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create link to dataset")
+        /* Traverse the path */
+        if(NULL == (target_grp = H5VL_daosm_group_traverse(item, name, dxpl_id, req, &target_name, NULL, NULL)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "can't traverse path")
 
-    /* Open dataset */
-    if(0 != (ret = daos_obj_open(item->file->coh, dset->obj.oid, item->file->epoch, DAOS_OO_RW, &dset->obj.obj_oh, NULL /*event*/)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+        /* Create dataset */
+        if(0 != (ret = daos_obj_declare(item->file->coh, dset->obj.oid, item->file->epoch, NULL /*oa*/, NULL /*event*/)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't create dataset: %d", ret)
+        item->file->max_oid = dset->obj.oid.lo;
 
-    /* Encode datatype */
-    if(H5Tencode(type_id, NULL, &type_size) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of datatype")
-    if(NULL == (type_buf = H5MM_malloc(type_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized datatype")
-    if(H5Tencode(type_id, type_buf, &type_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize datatype")
+        /* Write max OID */
+        if(H5VL_daosm_write_max_oid(item->file) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't write max OID")
 
-    /* Encode dataspace */
-    if(H5Sencode(space_id, NULL, &space_size) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of dataaspace")
-    if(NULL == (space_buf = H5MM_malloc(space_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dataaspace")
-    if(H5Sencode(space_id, space_buf, &space_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize dataaspace")
+        /* Open dataset */
+        if(0 != (ret = daos_obj_open(item->file->coh, dset->obj.oid, item->file->epoch, DAOS_OO_RW, &dset->obj.obj_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open dataset: %d", ret)
 
-    /* Encode DCPL */
-    if(H5Pencode(dcpl_id, NULL, &dcpl_size) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of dcpl")
-    if(NULL == (dcpl_buf = H5MM_malloc(dcpl_size)))
-        HGOTO_ERROR(dcpl_id, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dcpl")
-    if(H5Pencode(dcpl_id, dcpl_buf, &dcpl_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize dcpl")
+        /* Encode datatype */
+        if(H5Tencode(type_id, NULL, &type_size) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of datatype")
+        if(NULL == (type_buf = H5MM_malloc(type_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized datatype")
+        if(H5Tencode(type_id, type_buf, &type_size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize datatype")
 
-    /* Set up operation to write datatype, dataspace, and DCPL to dataset */
-    /* Set up dkey */
-    daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
+        /* Encode dataspace */
+        if(H5Sencode(space_id, NULL, &space_size) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of dataaspace")
+        if(NULL == (space_buf = H5MM_malloc(space_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dataaspace")
+        if(H5Sencode(space_id, space_buf, &space_size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize dataaspace")
 
-    /* Set up recx */
-    recx[0].rx_rsize = (uint64_t)type_size;
-    recx[0].rx_idx = (uint64_t)0;
-    recx[0].rx_nr = (uint64_t)1;
-    recx[1].rx_rsize = (uint64_t)space_size;
-    recx[1].rx_idx = (uint64_t)0;
-    recx[1].rx_nr = (uint64_t)1;
-    recx[2].rx_rsize = (uint64_t)dcpl_size;
-    recx[2].rx_idx = (uint64_t)0;
-    recx[2].rx_nr = (uint64_t)1;
+        /* Encode DCPL */
+        if(H5Pencode(dcpl_id, NULL, &dcpl_size) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of dcpl")
+        if(NULL == (dcpl_buf = H5MM_malloc(dcpl_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dcpl")
+        if(H5Pencode(dcpl_id, dcpl_buf, &dcpl_size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize dcpl")
 
-    /* Set up iod */
-    HDmemset(iod, 0, sizeof(iod));
-    daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
-    daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
-    iod[0].vd_nr = 1u;
-    iod[0].vd_recxs = &recx[0];
-    daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
-    daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
-    iod[1].vd_nr = 1u;
-    iod[1].vd_recxs = &recx[1];
-    daos_iov_set(&iod[2].vd_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
-    daos_csum_set(&iod[2].vd_kcsum, NULL, 0);
-    iod[2].vd_nr = 1u;
-    iod[2].vd_recxs = &recx[2];
+        /* Set up operation to write datatype, dataspace, and DCPL to dataset */
+        /* Set up dkey */
+        daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
-    /* Set up sgl */
-    daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)type_size);
-    sgl[0].sg_nr.num = 1;
-    sgl[0].sg_iovs = &sg_iov[0];
-    daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)space_size);
-    sgl[1].sg_nr.num = 1;
-    sgl[1].sg_iovs = &sg_iov[1];
-    daos_iov_set(&sg_iov[2], dcpl_buf, (daos_size_t)dcpl_size);
-    sgl[2].sg_nr.num = 1;
-    sgl[2].sg_iovs = &sg_iov[2];
+        /* Set up recx */
+        recx[0].rx_rsize = (uint64_t)type_size;
+        recx[0].rx_idx = (uint64_t)0;
+        recx[0].rx_nr = (uint64_t)1;
+        recx[1].rx_rsize = (uint64_t)space_size;
+        recx[1].rx_idx = (uint64_t)0;
+        recx[1].rx_nr = (uint64_t)1;
+        recx[2].rx_rsize = (uint64_t)dcpl_size;
+        recx[2].rx_idx = (uint64_t)0;
+        recx[2].rx_nr = (uint64_t)1;
 
-    /* Write internal metadata to dataset */
-    if(0 != (ret = daos_obj_update(dset->obj.obj_oh, item->file->epoch, &dkey, 3, iod, sgl, NULL /*event*/)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't write metadata to dataset: %d", ret)
+        /* Set up iod */
+        HDmemset(iod, 0, sizeof(iod));
+        daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
+        daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
+        iod[0].vd_nr = 1u;
+        iod[0].vd_recxs = &recx[0];
+        daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
+        daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
+        iod[1].vd_nr = 1u;
+        iod[1].vd_recxs = &recx[1];
+        daos_iov_set(&iod[2].vd_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
+        daos_csum_set(&iod[2].vd_kcsum, NULL, 0);
+        iod[2].vd_nr = 1u;
+        iod[2].vd_recxs = &recx[2];
+
+        /* Set up sgl */
+        daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)type_size);
+        sgl[0].sg_nr.num = 1;
+        sgl[0].sg_iovs = &sg_iov[0];
+        daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)space_size);
+        sgl[1].sg_nr.num = 1;
+        sgl[1].sg_iovs = &sg_iov[1];
+        daos_iov_set(&sg_iov[2], dcpl_buf, (daos_size_t)dcpl_size);
+        sgl[2].sg_nr.num = 1;
+        sgl[2].sg_iovs = &sg_iov[2];
+
+        /* Write internal metadata to dataset */
+        if(0 != (ret = daos_obj_update(dset->obj.obj_oh, item->file->epoch, &dkey, 3, iod, sgl, NULL /*event*/)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't write metadata to dataset: %d", ret)
+
+        /* Create link to dataset */
+        link_val.type = H5L_TYPE_HARD;
+        link_val.target.hard = dset->obj.oid;
+        if(H5VL_daosm_link_write(target_grp, target_name, HDstrlen(target_name), &link_val) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't create link to dataset")
+    } /* end if */
+    else {
+        /* Update max_oid */
+        item->file->max_oid = dset->obj.oid.lo;
+
+        /* Note no barrier is currently needed here, daos_obj_open is a local
+         * operation and can occur before the lead process executes
+         * daos_obj_declare.  For app-level synchronization we could add a
+         * barrier or bcast though it could only be an issue with dataset reopen
+         * so we'll skip it for now.  There is probably never an issue with file
+         * reopen since all commits are from process 0, same as the dataset
+         * create above. */
+
+        /* Open dataset */
+        if(0 != (ret = daos_obj_open(item->file->coh, dset->obj.oid, item->file->epoch, DAOS_OO_RW, &dset->obj.obj_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open dataset: %d", ret)
+    } /* end else */
 
     /* Finish setting up dataset struct */
     if((dset->type_id = H5Tcopy(type_id)) < 0)
@@ -3345,25 +3370,25 @@ H5VL_daosm_dataset_create(void *_item,
     if((dset->dapl_id = H5Pcopy(dapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl")
 
+    /* Set return value */
     ret_value = (void *)dset;
 
 done:
-    /* Free memory */
-    type_buf = H5MM_xfree(type_buf);
-    space_buf = H5MM_xfree(space_buf);
-    dcpl_buf = H5MM_xfree(dcpl_buf);
-
     /* Close target group */
     if(target_grp && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "can't close group")
 
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     /* Destroy DAOS object if created before failure DSMINC */
     if(NULL == ret_value)
         /* Close dataset */
         if(dset && H5VL_daosm_dataset_close(dset, dxpl_id, req) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "can't close dataset")
+
+    /* Free memory */
+    type_buf = H5MM_xfree(type_buf);
+    space_buf = H5MM_xfree(space_buf);
+    dcpl_buf = H5MM_xfree(dcpl_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_dataset_create() */
@@ -3396,21 +3421,33 @@ H5VL_daosm_dataset_open(void *_item,
     daos_recx_t recx[3];
     daos_sg_list_t sgl[3];
     daos_iov_t sg_iov[3];
-    void *type_buf = NULL;
-    void *space_buf = NULL;
-    void *dcpl_buf = NULL;
+    uint64_t type_len = 0;
+    uint64_t space_len = 0;
+    uint64_t dcpl_len = 0;
+    uint64_t tot_len;
+    uint8_t dinfo_buf_static[H5VL_DAOSM_DINFO_BUF_SIZE];
+    uint8_t *dinfo_buf_dyn = NULL;
+    uint8_t *dinfo_buf = dinfo_buf_static;
     char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
     char type_key[] = H5VL_DAOSM_TYPE_KEY;
     char space_key[] = H5VL_DAOSM_SPACE_KEY;
     char dcpl_key[] = H5VL_DAOSM_CPL_KEY;
+    uint8_t *p;
+    hbool_t collective = item->file->collective;
+    hbool_t must_bcast = FALSE;
     int ret;
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
+ 
+    /* Check for collective access, if not already set by the file */
+    if(!collective)
+        if(H5Pget_all_coll_metadata_ops(dapl_id, &collective) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get collective access property")
 
     /* Traverse the path */
     if(NULL == (target_grp = H5VL_daosm_group_traverse(item, name, dxpl_id, req, &target_name, NULL, NULL)))
-        HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "can't traverse path")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "can't traverse path")
 
     /* Allocate the dataset object that is returned to the user */
     if(NULL == (dset = H5FL_CALLOC(H5VL_daosm_dset_t)))
@@ -3424,109 +3461,203 @@ H5VL_daosm_dataset_open(void *_item,
     dset->dcpl_id = FAIL;
     dset->dapl_id = FAIL;
 
-    /* Follow link to dataset */
-    if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &dset->obj.oid, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't follow link to dataset")
+    /* Check if we're actually opening the group or just receiving the dataset
+     * info from the leader */
+    if(!collective || (item->file->my_rank == 0)) {
+        if(collective && (item->file->num_procs > 1))
+            must_bcast = TRUE;
 
-    /* Open dataset */
-    if(0 != (ret = daos_obj_open(item->file->coh, dset->obj.oid, item->file->epoch, DAOS_OO_RW, &dset->obj.obj_oh, NULL /*event*/)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+        /* Follow link to dataset */
+        if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &dset->obj.oid, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't follow link to dataset")
 
-    /* Set up operation to read datatype, dataspace, and DCPL sizes from dataset
-     */
-    /* Set up dkey */
-    daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
+        /* Open dataset */
+        if(0 != (ret = daos_obj_open(item->file->coh, dset->obj.oid, item->file->epoch, item->file->flags & H5F_ACC_RDWR ? DAOS_COO_RW : DAOS_COO_RO, &dset->obj.obj_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open dataset: %d", ret)
 
-    /* Set up recx */
-    recx[0].rx_rsize = DAOS_REC_ANY;
-    recx[0].rx_idx = (uint64_t)0;
-    recx[0].rx_nr = (uint64_t)1;
-    recx[1].rx_rsize = DAOS_REC_ANY;
-    recx[1].rx_idx = (uint64_t)0;
-    recx[1].rx_nr = (uint64_t)1;
-    recx[2].rx_rsize = DAOS_REC_ANY;
-    recx[2].rx_idx = (uint64_t)0;
-    recx[2].rx_nr = (uint64_t)1;
+        /* Set up operation to read datatype, dataspace, and DCPL sizes from dataset
+         */
+        /* Set up dkey */
+        daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
-    /* Set up iod */
-    HDmemset(iod, 0, sizeof(iod));
-    daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
-    daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
-    iod[0].vd_nr = 1u;
-    iod[0].vd_recxs = &recx[0];
-    daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
-    daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
-    iod[1].vd_nr = 1u;
-    iod[1].vd_recxs = &recx[1];
-    daos_iov_set(&iod[2].vd_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
-    daos_csum_set(&iod[2].vd_kcsum, NULL, 0);
-    iod[2].vd_nr = 1u;
-    iod[2].vd_recxs = &recx[2];
+        /* Set up recx */
+        recx[0].rx_rsize = DAOS_REC_ANY;
+        recx[0].rx_idx = (uint64_t)0;
+        recx[0].rx_nr = (uint64_t)1;
+        recx[1].rx_rsize = DAOS_REC_ANY;
+        recx[1].rx_idx = (uint64_t)0;
+        recx[1].rx_nr = (uint64_t)1;
+        recx[2].rx_rsize = DAOS_REC_ANY;
+        recx[2].rx_idx = (uint64_t)0;
+        recx[2].rx_nr = (uint64_t)1;
 
-    /* Read internal metadata sizes from dataset */
-    if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, item->file->epoch, &dkey, 3, iod, NULL, NULL /*maps*/, NULL /*event*/)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata sizes from dataset: %d", ret)
+        /* Set up iod */
+        HDmemset(iod, 0, sizeof(iod));
+        daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
+        daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
+        iod[0].vd_nr = 1u;
+        iod[0].vd_recxs = &recx[0];
+        daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
+        daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
+        iod[1].vd_nr = 1u;
+        iod[1].vd_recxs = &recx[1];
+        daos_iov_set(&iod[2].vd_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
+        daos_csum_set(&iod[2].vd_kcsum, NULL, 0);
+        iod[2].vd_nr = 1u;
+        iod[2].vd_recxs = &recx[2];
 
-    /* Check for metadata not found */
-    if((recx[0].rx_rsize == (uint64_t)0) || (recx[1].rx_rsize == (uint64_t)0)
-            || (recx[2].rx_rsize == (uint64_t)0))
-        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "internal metadata not found")
+        /* Read internal metadata sizes from dataset */
+        if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, item->file->epoch, &dkey, 3, iod, NULL, NULL /*maps*/, NULL /*event*/)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata sizes from dataset: %d", ret)
 
-    /* Allocate buffers for datatype, dataspace, and DCPL */
-    if(NULL == (type_buf = H5MM_malloc(recx[0].rx_rsize)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized datatype")
-    if(NULL == (space_buf = H5MM_malloc(recx[1].rx_rsize)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dataaspace")
-    if(NULL == (dcpl_buf = H5MM_malloc(recx[2].rx_rsize)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dcpl")
+        /* Check for metadata not found */
+        if((recx[0].rx_rsize == (uint64_t)0) || (recx[1].rx_rsize == (uint64_t)0)
+                || (recx[2].rx_rsize == (uint64_t)0))
+            HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "internal metadata not found")
 
-    /* Set up sgl */
-    daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)recx[0].rx_rsize);
-    sgl[0].sg_nr.num = 1;
-    sgl[0].sg_iovs = &sg_iov[0];
-    daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)recx[1].rx_rsize);
-    sgl[1].sg_nr.num = 1;
-    sgl[1].sg_iovs = &sg_iov[1];
-    daos_iov_set(&sg_iov[2], dcpl_buf, (daos_size_t)recx[2].rx_rsize);
-    sgl[2].sg_nr.num = 1;
-    sgl[2].sg_iovs = &sg_iov[2];
+        /* Compute dataset info buffer size */
+        type_len = recx[0].rx_rsize;
+        space_len = recx[1].rx_rsize;
+        dcpl_len = recx[2].rx_rsize;
+        tot_len = type_len + space_len + dcpl_len;
 
-    /* Read internal metadata from dataset */
-    if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, item->file->epoch, &dkey, 3, iod, sgl, NULL /*maps*/, NULL /*event*/)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata from dataset: %d", ret)
+        /* Allocate dataset info buffer if necessary */
+        if(tot_len > sizeof(dinfo_buf_static)) {
+            if(NULL == (dinfo_buf_dyn = (uint8_t *)H5MM_malloc(tot_len + (6 * sizeof(uint64_t)))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate dataset info buffer")
+            dinfo_buf = dinfo_buf_dyn;
+        } /* end if */
+
+        /* Set up sgl */
+        p = dinfo_buf + (6 * sizeof(uint64_t));
+        daos_iov_set(&sg_iov[0], p, (daos_size_t)type_len);
+        sgl[0].sg_nr.num = 1;
+        sgl[0].sg_iovs = &sg_iov[0];
+        p += type_len;
+        daos_iov_set(&sg_iov[1], p, (daos_size_t)space_len);
+        sgl[1].sg_nr.num = 1;
+        sgl[1].sg_iovs = &sg_iov[1];
+        p += space_len;
+        daos_iov_set(&sg_iov[2], p, (daos_size_t)dcpl_len);
+        sgl[2].sg_nr.num = 1;
+        sgl[2].sg_iovs = &sg_iov[2];
+
+        /* Read internal metadata from dataset */
+        if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, item->file->epoch, &dkey, 3, iod, sgl, NULL /*maps*/, NULL /*event*/)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata from dataset: %d", ret)
+
+        /* Broadcast dataset info if there are other processes that need it */
+        if(collective && (item->file->num_procs > 1)) {
+            HDassert(dinfo_buf);
+            HDassert(sizeof(dinfo_buf_static) >= 6 * sizeof(uint64_t));
+
+            /* Encode oid */
+            p = (uint8_t *)dinfo_buf;
+            UINT64ENCODE(p, dset->obj.oid.lo)
+            UINT64ENCODE(p, dset->obj.oid.mid)
+            UINT64ENCODE(p, dset->obj.oid.hi)
+
+            /* Encode serialized info lengths */
+            UINT64ENCODE(p, type_len)
+            UINT64ENCODE(p, space_len)
+            UINT64ENCODE(p, dcpl_len)
+
+            /* MPI_Bcast dinfo_buf */
+            if(MPI_SUCCESS != MPI_Bcast((char *)dinfo_buf, sizeof(dinfo_buf_static), MPI_BYTE, 0, item->file->comm))
+                HGOTO_ERROR(H5E_DATASET, H5E_MPI, NULL, "can't bcast dataset info")
+
+            /* Need a second bcast if it did not fit in the receivers' static
+             * buffer */
+            if(tot_len + (6 * sizeof(uint64_t)) > sizeof(dinfo_buf_static))
+                if(MPI_SUCCESS != MPI_Bcast((char *)p, (int)tot_len, MPI_BYTE, 0, item->file->comm))
+                    HGOTO_ERROR(H5E_DATASET, H5E_MPI, NULL, "can't bcast dataset info (second bcast)")
+        } /* end if */
+        else
+            p = dinfo_buf + (6 * sizeof(uint64_t));
+    } /* end if */
+    else {
+        /* Receive dataset info */
+        if(MPI_SUCCESS != MPI_Bcast((char *)dinfo_buf, sizeof(dinfo_buf_static), MPI_BYTE, 0, item->file->comm))
+            HGOTO_ERROR(H5E_DATASET, H5E_MPI, NULL, "can't bcast dataset info")
+
+        /* Decode oid */
+        p = (uint8_t *)dinfo_buf_static;
+        UINT64DECODE(p, dset->obj.oid.lo)
+        UINT64DECODE(p, dset->obj.oid.mid)
+        UINT64DECODE(p, dset->obj.oid.hi)
+
+        /* Decode serialized info lengths */
+        UINT64DECODE(p, type_len)
+        UINT64DECODE(p, space_len)
+        UINT64DECODE(p, dcpl_len)
+        tot_len = type_len + space_len + dcpl_len;
+
+        /* Check for type_len set to 0 - indicates failure */
+        if(type_len == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "lead process failed to open dataset")
+
+        /* Check if we need to perform another bcast */
+        if(tot_len + (6 * sizeof(uint64_t)) > sizeof(dinfo_buf_static)) {
+            /* Allocate a dynamic buffer if necessary */
+            if(tot_len > sizeof(dinfo_buf_static)) {
+                if(NULL == (dinfo_buf_dyn = (uint8_t *)H5MM_malloc(tot_len)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate space for dataset info")
+                dinfo_buf = dinfo_buf_dyn;
+            } /* end if */
+
+            /* Receive dataset info */
+            if(MPI_SUCCESS != MPI_Bcast((char *)dinfo_buf, (int)tot_len, MPI_BYTE, 0, item->file->comm))
+                HGOTO_ERROR(H5E_DATASET, H5E_MPI, NULL, "can't bcast dataset info (second bcast)")
+
+            p = dinfo_buf;
+        } /* end if */
+
+        /* Open dataset */
+        if(0 != (ret = daos_obj_open(item->file->coh, dset->obj.oid, item->file->epoch, item->file->flags & H5F_ACC_RDWR ? DAOS_COO_RW : DAOS_COO_RO, &dset->obj.obj_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open dataset: %d", ret)
+    } /* end else */
 
     /* Decode datatype, dataspace, and DCPL */
-    if((dset->type_id = H5Tdecode(type_buf)) < 0)
+    if((dset->type_id = H5Tdecode(p)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTDECODE, NULL, "can't deserialize datatype")
-    if((dset->space_id = H5Sdecode(space_buf)) < 0)
+    p += type_len;
+    if((dset->space_id = H5Sdecode(p)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTDECODE, NULL, "can't deserialize datatype")
     if(H5Sselect_all(dset->space_id) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, NULL, "can't change selection")
-    if((dset->dcpl_id = H5Pdecode(dcpl_buf)) < 0)
+    p += space_len;
+    if((dset->dcpl_id = H5Pdecode(p)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTDECODE, NULL, "can't deserialize datatype")
 
     /* Finish setting up dataset struct */
     if((dset->dapl_id = H5Pcopy(dapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
 
+    /* Set return value */
     ret_value = (void *)dset;
 
 done:
-    /* Free memory */
-    type_buf = H5MM_xfree(type_buf);
-    space_buf = H5MM_xfree(space_buf);
-    dcpl_buf = H5MM_xfree(dcpl_buf);
+    /* Cleanup on failure */
+    if(NULL == ret_value) {
+        /* Bcast dinfo_buf as '0' if necessary - this will trigger failures in
+         * in other processes so we do not need to do the second bcast. */
+        if(must_bcast) {
+            HDmemset(dinfo_buf_static, 0, sizeof(dinfo_buf_static));
+            if(MPI_SUCCESS != MPI_Bcast(dinfo_buf_static, sizeof(dinfo_buf_static), MPI_BYTE, 0, item->file->comm))
+                HDONE_ERROR(H5E_DATASET, H5E_MPI, NULL, "can't bcast empty dataset info")
+        } /* end if */
+
+        /* Close dataset */
+        if(dset && H5VL_daosm_dataset_close(dset, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "can't close dataset")
+    } /* end if */
 
     /* Close target group */
     if(target_grp && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "can't close group")
 
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
-    if(NULL == ret_value)
-        /* Close dataset */
-        if(dset && H5VL_daosm_dataset_close(dset, dxpl_id, req) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "can't close dataset")
+    /* Free memory */
+    dinfo_buf_dyn = (uint8_t *)H5MM_xfree(dinfo_buf_dyn);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_dataset_open() */
@@ -4423,8 +4554,7 @@ done:
     type_key = (char *)H5MM_xfree(type_key);
     space_key = (char *)H5MM_xfree(space_key);
 
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     /* Destroy DAOS object if created before failure DSMINC */
     if(NULL == ret_value)
         /* Close attribute */
@@ -4572,8 +4702,7 @@ done:
     type_key = (char *)H5MM_xfree(type_key);
     space_key = (char *)H5MM_xfree(space_key);
 
-    /* If the operation is synchronous and it failed at the server, or it failed
-     * locally, then cleanup and return fail */
+    /* Cleanup on failure */
     /* Destroy DAOS object if created before failure DSMINC */
     if(NULL == ret_value)
         /* Close attribute */
