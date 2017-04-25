@@ -40,8 +40,8 @@ namespace H5 {
     Inheritance: H5Location -> IdComponent
 */
 // Class forwarding
-class H5_DLLCPP H5Object;
-class H5_DLLCPP Attribute;
+class H5Object;
+class Attribute;
 
 // Define the operator function pointer for H5Aiterate().
 typedef void (*attr_operator_t)(H5Object& loc/*in*/,
@@ -77,9 +77,6 @@ class H5_DLLCPP H5Object : public H5Location {
 
         // Returns the object header version of an object
         unsigned objVersion() const;
-
-        // Determines the number of attributes belong to this object.
-        int getNumAttrs() const;
 
         // Checks whether the named attribute exists for this object.
         bool attrExists(const char* name) const;

@@ -115,6 +115,23 @@ void Group::closeObjId(hid_t obj_id) const
 }
 
 //--------------------------------------------------------------------------
+// Function:    Group::getNumObjs
+///\brief       Returns the number of objects in this group.
+///\return      Number of objects
+///\exception   H5::FileIException or H5::GroupIException
+// Programmer   Binh-Minh Ribler - January, 2003
+//--------------------------------------------------------------------------
+hsize_t Group::getNumObjs() const
+{
+    H5G_info_t ginfo;      // Group information
+
+    herr_t ret_value = H5Gget_info(getId(), &ginfo);
+    if(ret_value < 0)
+        throwException("getNumObjs", "H5Gget_info failed");
+    return (ginfo.nlinks);
+}
+
+//--------------------------------------------------------------------------
 // Function:    Group::getLocId
 // Purpose:     Get the id of this group
 // Programmer   Binh-Minh Ribler - 2000

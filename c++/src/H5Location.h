@@ -30,9 +30,9 @@ namespace H5 {
     Inheritance: IdComponent
 */
 // Class forwarding
-class H5_DLLCPP ArrayType;
-class H5_DLLCPP LinkAccPropList;
-class H5_DLLCPP VarLenType;
+class ArrayType;
+class LinkAccPropList;
+class VarLenType;
 class H5_DLLCPP H5Location : public IdComponent {
    public:
         // Checks if a link of a given name exists in a location
@@ -113,8 +113,8 @@ class H5_DLLCPP H5Location : public IdComponent {
         H5std_string getLinkval(const char* link_name, size_t size=0) const;
         H5std_string getLinkval(const H5std_string& link_name, size_t size=0) const;
 
-        // Returns the number of objects in this group.
-        hsize_t getNumObjs() const;
+        // Determines the number of attributes belong to this object.
+        int getNumAttrs() const;
 
         // Retrieves the name of an object in this group, given the
         // object's index.
