@@ -288,23 +288,6 @@ unsigned H5Object::objVersion() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5Object::getNumAttrs
-///\brief       Returns the number of attributes attached to this HDF5 object.
-///\return      Number of attributes
-///\exception   H5::AttributeIException
-// Programmer   Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-int H5Object::getNumAttrs() const
-{
-    H5O_info_t oinfo;    /* Object info */
-
-    if(H5Oget_info(getId(), &oinfo) < 0)
-        throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
-    else
-        return(static_cast<int>(oinfo.num_attrs));
-}
-
-//--------------------------------------------------------------------------
 // Function:    H5Object::attrExists
 ///\brief       Checks whether the named attribute exists at this location.
 ///\param       name - IN: Name of the attribute to be queried

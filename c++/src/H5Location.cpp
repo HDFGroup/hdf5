@@ -1282,20 +1282,20 @@ int H5Location::iterateElems(const H5std_string& name, int *idx, H5G_iterate_t o
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
-// Function:    H5Location::getNumObjs
-///\brief       Returns the number of objects in this group.
-///\return      Number of objects
-///\exception   H5::FileIException or H5::GroupIException
-// Programmer   Binh-Minh Ribler - January, 2003
+// Function:    H5Location::getNumAttrs
+///\brief       Returns the number of attributes attached to this HDF5 object.
+///\return      Number of attributes
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-hsize_t H5Location::getNumObjs() const
+int H5Location::getNumAttrs() const
 {
-    H5G_info_t ginfo;      // Group information
+    H5O_info_t oinfo;    /* Object info */
 
-    herr_t ret_value = H5Gget_info(getId(), &ginfo);
-    if(ret_value < 0)
-        throwException("getNumObjs", "H5Gget_info failed");
-    return (ginfo.nlinks);
+    if(H5Oget_info(getId(), &oinfo) < 0)
+        throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
+    else
+        return(static_cast<int>(oinfo.num_attrs));
 }
 
 //--------------------------------------------------------------------------

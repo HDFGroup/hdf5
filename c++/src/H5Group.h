@@ -28,14 +28,6 @@ class VarLenType;
 
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
-        // Group constructor to create a group or file (aka root group).
-        Group(const char* name, size_t size_hint = 0);
-        Group(const H5std_string& name, size_t size_hint = 0);
-
-        // Group constructor to open a group or file (aka root group).
-        Group(const char* name);
-        Group(const H5std_string& name);
-
         // Close this group.
         virtual void close();
 
@@ -59,6 +51,9 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
         // Closes an object opened by getObjId().
         void closeObjId(hid_t obj_id) const;
+
+        // Returns the number of objects in this group.
+        hsize_t getNumObjs() const;
 
         // default constructor
         Group();
