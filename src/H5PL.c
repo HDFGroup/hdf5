@@ -607,7 +607,7 @@ ssize_t
 H5PLget(unsigned int index, char *pathname/*out*/, size_t size)
 {
     ssize_t      ret_value = 0;    /* Return value */
-    ssize_t      len = 0;      /* Length of pathname */
+    size_t       len = 0;          /* Length of pathname */
     char        *dl_path = NULL;
 
     FUNC_ENTER_API(FAIL)
@@ -626,7 +626,7 @@ H5PLget(unsigned int index, char *pathname/*out*/, size_t size)
     } /* end if */
 
     /* Set return value */
-    ret_value = len;
+    ret_value = (ssize_t)len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -638,17 +638,19 @@ done:
  *
  * Purpose: Query the size of the current list of plugin paths.
  *
- * Return: Plugin path size (can't indicate failure due to unsigned type)
+ * Return: Plugin path size
  *
  *-------------------------------------------------------------------------
  */
-unsigned int
-H5PLsize(void)
+herr_t
+H5PLsize(unsigned int *listsize)
 {
-    unsigned int ret_value = (unsigned int)H5PL_num_paths_g;
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(0)
-    H5TRACE0("Iu","");
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "*Iu", listsize);
+
+    *listsize = (unsigned int)H5PL_num_paths_g;
 
 done:
     FUNC_LEAVE_API(ret_value)
