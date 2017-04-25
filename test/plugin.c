@@ -731,7 +731,7 @@ test_filter_path_apis(void)
 
     if(H5Zfilter_avail(H5Z_FILTER_DYNLIB1) != TRUE) TEST_ERROR
 
-    ndx = H5PLsize();
+    H5PLsize(&ndx);
 
     TESTING("    remove");
     /* Remove all existing paths*/
@@ -741,7 +741,8 @@ test_filter_path_apis(void)
             TEST_ERROR
         } /* end if */
     /* Verify the table is empty */
-    if(H5PLsize() > 0) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx > 0) TEST_ERROR
     PASSED();
 
     TESTING("    remove (exceed min)");
@@ -762,7 +763,8 @@ test_filter_path_apis(void)
         }
     }
     /* Verify the table is full */
-    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
     PASSED();
 
     TESTING("    append (exceed)");
@@ -833,7 +835,8 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is not full */
-    if (H5PLsize() != H5PL_MAX_PATH_NUM - 1) TEST_ERROR
+    H5PLsize(&ndx);
+    if (ndx != H5PL_MAX_PATH_NUM - 1) TEST_ERROR
 
     TESTING("    prepend");
     /* Prepend one path*/
@@ -844,7 +847,8 @@ test_filter_path_apis(void)
     }
 
     /* Verify the table is full */
-    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were moved */
     if(H5PLget(8, pathname, 256) <= 0) TEST_ERROR
@@ -878,7 +882,8 @@ test_filter_path_apis(void)
     }
 
     /* Verify the table is full */
-    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were not moved */
     if(H5PLget(0, pathname, 256) <= 0) TEST_ERROR
@@ -907,7 +912,8 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is not full */
-    if(H5PLsize() != 15) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != 15) TEST_ERROR
 
     TESTING("    insert");
     /* Insert one path*/
@@ -926,7 +932,8 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is full */
-    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     TESTING("    insert (exceed)");
     /* Exceed the max path insert */
