@@ -20,6 +20,10 @@
 #ifndef _H5Epubgen_H
 #define _H5Epubgen_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*********************/
 /* Major error codes */
 /*********************/
@@ -364,5 +368,9 @@ H5_DLLVAR hid_t H5E_CANTREMOVE_g;    /* Unable to remove object */
 #define H5E_BADSIZE          (H5OPEN H5E_BADSIZE_g)
 H5_DLLVAR hid_t H5E_CANTCONVERT_g;   /* Can't convert datatypes */
 H5_DLLVAR hid_t H5E_BADSIZE_g;       /* Bad size for object */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* H5Epubgen_H */
