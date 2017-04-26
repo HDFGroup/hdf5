@@ -24,9 +24,8 @@ class ArrayType;
 class VarLenType;
 
 /*! \class CommonFG
-    \brief \a CommonFG is an abstract base class of H5File and H5Group.
-
-    It provides common operations of H5File and H5Group.
+    \brief CommonFG will be deprecated in future releases.
+    In 1.10.1, most member functions are moved to H5Location.
 */
 class H5_DLLCPP CommonFG {
    public:

@@ -486,6 +486,13 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     C++ APIs
     --------
+    - The member function H5Location::getNumObjs() is moved to
+      class Group because the objects are in a group or a file only,
+      and H5Object::getNumAttrs to H5Location to get the number of
+      attributes at a given location.
+
+      (BMR, 2017/03/17, PR#466)
+
     - Due to the change in the C API, the overloaded functions of
       PropList::setProperty now need const for some arguments.  They are
       planned for deprecation and are replaced by new versions with proper

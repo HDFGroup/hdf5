@@ -98,7 +98,7 @@ void f_Attribute_setId(Attribute* attr, hid_t new_id)
 {
     attr->p_setId(new_id);
 }
-#endif
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    H5Object::createAttribute
@@ -373,7 +373,6 @@ void H5Object::renameAttr(const H5std_string& oldname, const H5std_string& newna
     renameAttr (oldname.c_str(), newname.c_str());
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    getObjName
 ///\brief       Given an id, returns the type of the object.
@@ -485,6 +484,7 @@ ssize_t H5Object::getObjName(H5std_string& obj_name, size_t len) const
     return(name_size);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    H5Object destructor
 ///\brief       Noop destructor.

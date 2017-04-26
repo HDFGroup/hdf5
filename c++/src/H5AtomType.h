@@ -20,12 +20,8 @@ namespace H5 {
 /*! \class AtomType
     \brief AtomType is a base class, inherited by IntType, FloatType,
      StrType, and PredType.
-
-    AtomType provides operations on HDF5 atomic datatypes.  It also inherits
-    from DataType.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+// Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP AtomType : public DataType {
    public:
         // Returns the byte order of an atomic datatype.

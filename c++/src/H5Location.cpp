@@ -373,6 +373,38 @@ void H5Location::p_reference(void* ref, const char* name, hid_t space_id, H5R_ty
     }
 }
 
+//--------------------------------------------------------------------------
+// Function:    H5Location::p_dereference (protected)
+// Purpose      Dereference a ref into an hdf5 object.
+// Parameters
+//              loc_id - IN: An hdf5 identifier specifying the location of the
+//                          referenced object
+//              ref - IN: Reference pointer
+//              ref_type - IN: Reference type
+//              plist - IN: Property list - default to PropList::DEFAULT
+//              from_func - IN: Name of the calling function
+// Exception    H5::ReferenceException
+// Programmer   Binh-Minh Ribler - Oct, 2006
+// Modification
+//        May 2008 - BMR
+//              Moved from IdComponent.
+//--------------------------------------------------------------------------
+hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type, const PropList& plist, const char* from_func)
+{
+    hid_t plist_id;
+    if (p_valid_id(plist.getId()))
+        plist_id = plist.getId();
+    else
+        plist_id = H5P_DEFAULT;
+
+    hid_t temp_id = H5Rdereference2(loc_id, plist_id, ref_type, ref);
+    if (temp_id < 0)
+    {
+        throw ReferenceException(inMemFunc(from_func), "H5Rdereference failed");
+    }
+
+    return(temp_id);
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -467,41 +499,6 @@ void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_t
    reference(ref, name.c_str(), ref_type);
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-//--------------------------------------------------------------------------
-// Function:    H5Location::p_dereference (protected)
-// Purpose      Dereference a ref into an hdf5 object.
-// Parameters
-//              loc_id - IN: An hdf5 identifier specifying the location of the
-//                          referenced object
-//              ref - IN: Reference pointer
-//              ref_type - IN: Reference type
-//              plist - IN: Property list - default to PropList::DEFAULT
-//              from_func - IN: Name of the calling function
-// Exception    H5::ReferenceException
-// Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//        May 2008 - BMR
-//              Moved from IdComponent.
-//--------------------------------------------------------------------------
-hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type, const PropList& plist, const char* from_func)
-{
-    hid_t plist_id;
-    if (p_valid_id(plist.getId()))
-        plist_id = plist.getId();
-    else
-        plist_id = H5P_DEFAULT;
-
-    hid_t temp_id = H5Rdereference2(loc_id, plist_id, ref_type, ref);
-    if (temp_id < 0)
-    {
-        throw ReferenceException(inMemFunc(from_func), "H5Rdereference failed");
-    }
-
-    return(temp_id);
-}
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 //--------------------------------------------------------------------------
 // Function:    H5Location::dereference
 ///\brief       Dereferences a reference into an HDF5 object, given an HDF5 object.
@@ -542,64 +539,6 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 }
  */ 
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-//--------------------------------------------------------------------------
-// Function:    H5Location::getObjType
-///\brief       Retrieves the type of object that an object reference points to.
-///\param       ref_type - IN: Type of reference to query, valid values are:
-///             \li \c H5R_OBJECT - Reference is an object reference.
-///             \li \c H5R_DATASET_REGION - Reference is a dataset region reference.
-///\param       ref      - IN: Reference to query
-///\return      An object type, which can be one of the following:
-///             \li \c H5G_UNKNOWN  - A failure occurs. (-1)
-///             \li \c H5G_GROUP  - Object is a group.
-///             \li \c H5G_DATASET - Object is a dataset.
-///             \li \c H5G_TYPE Object - is a named datatype
-///             \li \c H5G_LINK  - Object is a symbolic link.
-///             \li \c H5G_UDLINK  - Object is a user-defined link.
-///\exception   H5::ReferenceException
-// Programmer   Binh-Minh Ribler - May, 2004
-// Modification
-//      Sep 2012: Moved up from H5File, Group, DataSet, and DataType
-//--------------------------------------------------------------------------
-H5G_obj_t H5Location::getObjType(void *ref, H5R_type_t ref_type) const
-{
-    try {
-        return(p_get_obj_type(ref, ref_type));
-    }
-    catch (ReferenceException& E) {
-        throw ReferenceException(inMemFunc("getObjType"), E.getDetailMsg());
-    }
-}
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-//--------------------------------------------------------------------------
-// Function:    H5Location::p_get_obj_type (protected)
-// Purpose      Retrieves the type of object that an object reference points to.
-// Parameters
-//              ref      - IN: Reference to query
-//              ref_type - IN: Type of reference to query
-// Return       An object type, which can be one of the following:
-//                      H5G_UNKNOWN \tFailure occurs (-1)
-//                      H5G_GROUP \tObject is a group.
-//                      H5G_DATASET \tObject is a dataset.
-//                      H5G_TYPE Object \tis a named datatype.
-//                      H5G_LINK \tObject is a symbolic link.
-//                      H5G_UDLINK \tObject is a user-defined link.
-// Exception    H5::ReferenceException
-// Programmer   Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-H5G_obj_t H5Location::p_get_obj_type(void *ref, H5R_type_t ref_type) const
-{
-   H5G_obj_t obj_type = H5Rget_obj_type1(getId(), ref_type, ref);
-   if (obj_type == H5G_UNKNOWN)
-    {
-        throw ReferenceException(inMemFunc("getObjType"), "H5Rget_obj_type1 failed");
-    }
-   return(obj_type);
-}
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getRefObjType
@@ -657,7 +596,7 @@ H5O_type_t H5Location::p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const
     }
     return(obj_type);
 }
-
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getRegion
@@ -1564,7 +1503,35 @@ unsigned H5Location::childObjVersion(const H5std_string& objname) const
 }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjType
+///\brief       Retrieves the type of object that an object reference points to.
+///\param       ref_type - IN: Type of reference to query, valid values are:
+///             \li \c H5R_OBJECT - Reference is an object reference.
+///             \li \c H5R_DATASET_REGION - Reference is a dataset region reference.
+///\param       ref      - IN: Reference to query
+///\return      An object type, which can be one of the following:
+///             \li \c H5G_UNKNOWN  - A failure occurs. (-1)
+///             \li \c H5G_GROUP  - Object is a group.
+///             \li \c H5G_DATASET - Object is a dataset.
+///             \li \c H5G_TYPE Object - is a named datatype
+///             \li \c H5G_LINK  - Object is a symbolic link.
+///             \li \c H5G_UDLINK  - Object is a user-defined link.
+///\exception   H5::ReferenceException
+// Programmer   Binh-Minh Ribler - May, 2004
+// Modification
+//      Sep 2012: Moved up from H5File, Group, DataSet, and DataType
+//--------------------------------------------------------------------------
+H5G_obj_t H5Location::getObjType(void *ref, H5R_type_t ref_type) const
+{
+    try {
+        return(p_get_obj_type(ref, ref_type));
+    }
+    catch (ReferenceException& E) {
+        throw ReferenceException(inMemFunc("getObjType"), E.getDetailMsg());
+    }
+}
+
 //--------------------------------------------------------------------------
 // Function:    H5Location::getObjTypeByIdx
 ///\brief       Returns the type of an object in this group, given the
@@ -1632,9 +1599,37 @@ H5G_obj_t H5Location::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) cons
     return (obj_type);
 }
 
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:    H5Location::p_get_obj_type (protected)
+// Purpose      Retrieves the type of object that an object reference points to.
+// Parameters
+//              ref      - IN: Reference to query
+//              ref_type - IN: Type of reference to query
+// Return       An object type, which can be one of the following:
+//                      H5G_UNKNOWN \tFailure occurs (-1)
+//                      H5G_GROUP \tObject is a group.
+//                      H5G_DATASET \tObject is a dataset.
+//                      H5G_TYPE Object \tis a named datatype.
+//                      H5G_LINK \tObject is a symbolic link.
+//                      H5G_UDLINK \tObject is a user-defined link.
+// Exception    H5::ReferenceException
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+H5G_obj_t H5Location::p_get_obj_type(void *ref, H5R_type_t ref_type) const
+{
+   H5G_obj_t obj_type = H5Rget_obj_type1(getId(), ref_type, ref);
+   if (obj_type == H5G_UNKNOWN)
+    {
+        throw ReferenceException(inMemFunc("getObjType"), "H5Rget_obj_type1 failed");
+    }
+   return(obj_type);
+}
 
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+#endif // H5_NO_DEPRECATED_SYMBOLS
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    H5Location::throwException
 ///\brief       Invokes subclass' throwException

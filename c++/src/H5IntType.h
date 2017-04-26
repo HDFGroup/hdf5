@@ -18,11 +18,10 @@
 namespace H5 {
 
 /*! \class IntType
-    \brief IntType is a derivative of a DataType and operates on HDF5
+    \brief IntType is derived from a DataType and operates on HDF5
     integer datatype.
-
-    Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP IntType : public AtomType {
    public:
         // Creates an integer type using a predefined type

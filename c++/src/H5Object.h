@@ -20,7 +20,8 @@ namespace H5 {
 /*! \class H5Object
     \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
      and Group.
-
+*/
+/*
     Modification:
         Sept 18, 2012: Added class H5Location in between IdComponent and
                 H5Object.  An H5File now inherits from H5Location.  All HDF5
@@ -36,8 +37,6 @@ namespace H5 {
                 into H5Object.  This way, C functions that takes attribute id
                 can be in H5Location and those that cannot take attribute id
                 can be in H5Object.
-
-    Inheritance: H5Location -> IdComponent
 */
 // Class forwarding
 class H5Object;
@@ -56,6 +55,7 @@ class UserData4Aiterate {
         H5Object* location;
 };
 
+//  Inheritance: H5Location -> IdComponent
 class H5_DLLCPP H5Object : public H5Location {
    public:
         // Creates an attribute for the specified object
