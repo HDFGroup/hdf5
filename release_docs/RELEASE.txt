@@ -99,7 +99,7 @@ Support for New Platforms, Languages, and Compilers
 
 
 
-Bug Fixes since HDF5-1.8.17
+Bug Fixes since HDF5-1.8.18
 ===========================
 
     Configuration
@@ -109,7 +109,9 @@ Bug Fixes since HDF5-1.8.17
 
     Library
     -------
-    - None
+    - Missing #ifdef __cplusplus macros were added to the generated H5Epubgen.h file.
+
+    (HDFFV-9638, DER, 4/25/2017)
 
 
     Parallel Library
