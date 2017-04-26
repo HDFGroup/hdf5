@@ -94,7 +94,7 @@ done:
             ret_value = FAIL;
     }
 
-    return(ret_value);
+    return ret_value;
 } /* end H5DOwrite_chunk() */
 
 
@@ -163,7 +163,7 @@ done:
             ret_value = FAIL;
     }
 
-    return(ret_value);
+    return ret_value;
 } /* end H5DOread_chunk() */
 
 

@@ -1126,4 +1126,4 @@ H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_n
 
 done:
     FUNC_LEAVE_API(ret_value);
-}
+} /* H5Dget_chunk_storage_size() */
