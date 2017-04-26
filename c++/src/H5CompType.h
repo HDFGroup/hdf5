@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class CompType
     \brief CompType is a derivative of a DataType and operates on HDF5
     compound datatypes.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP CompType : public DataType {
    public:
         // Default constructor

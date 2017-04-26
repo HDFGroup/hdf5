@@ -102,6 +102,7 @@ hid_t Group::getObjId(const H5std_string& obj_name, const PropList& plist) const
 //--------------------------------------------------------------------------
 // Function:    Group::closeObjId
 ///\brief       Closes an object, which was opened with Group::getObjId
+///
 ///\exception   H5::FileIException or H5::GroupIException
 // Programmer   Binh-Minh Ribler - March, 2017
 //--------------------------------------------------------------------------
