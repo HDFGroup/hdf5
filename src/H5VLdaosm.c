@@ -56,6 +56,8 @@ hid_t H5VL_DAOSM_g = -1;
 #define H5VL_DAOSM_GINFO_BUF_SIZE 256
 #define H5VL_DAOSM_DINFO_BUF_SIZE 1024
 #define H5VL_DAOSM_SEQ_LIST_LEN 128
+#define H5VL_DAOSM_ITER_LEN 128
+#define H5VL_DAOSM_ITER_SIZE_INIT (4 * 1024)
 
 /* DAOSM-specific file access properties */
 typedef struct H5VL_daosm_fapl_t {
@@ -140,6 +142,9 @@ static herr_t H5VL_daosm_attribute_read(void *_attr, hid_t mem_type_id,
     void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL_daosm_attribute_write(void *_attr, hid_t mem_type_id,
     const void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL_daosm_attribute_specific(void *_item,
+    H5VL_loc_params_t loc_params, H5VL_attr_specific_t specific_type,
+    hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_daosm_attribute_close(void *_attr, hid_t dxpl_id,
     void **req);
 
@@ -204,7 +209,7 @@ static H5VL_class_t H5VL_daosm_g = {
         H5VL_daosm_attribute_read,              /* read */
         H5VL_daosm_attribute_write,             /* write */
         NULL,//H5VL_iod_attribute_get,                 /* get */
-        NULL,//H5VL_iod_attribute_specific,            /* specific */
+        H5VL_daosm_attribute_specific,          /* specific */
         NULL,                                   /* optional */
         H5VL_daosm_attribute_close              /* close */
     },
@@ -306,7 +311,8 @@ done:
  *              registering the driver with the library.  pool_comm
  *              identifies the communicator used to connect to the DAOS
  *              pool.  This should include all processes that will
- *              participate in I/O.
+ *              participate in I/O.  This call is collective across
+ *              pool_comm.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2986,6 +2992,8 @@ H5VL_daosm_need_bkg(hid_t src_type_id, hid_t dst_type_id, size_t *dst_type_size,
 
                 /* Check if all the space in the type is used.  If not, we must
                  * fill the background buffer. */
+                /* TODO: This is only necessary on read, we don't care about
+                 * compound gaps in the "file" DSMINC */
                 HDassert(size_used <= *dst_type_size);
                 if(size_used != *dst_type_size)
                     *fill_bkg = TRUE;
@@ -4913,6 +4921,228 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_attribute_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_attribute_specific
+ *
+ * Purpose:     Specific operations with attributes
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              February, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_attribute_specific(void *_item, H5VL_loc_params_t loc_params,
+    H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req,
+    va_list arguments)
+{
+    H5VL_daosm_item_t *item = (H5VL_daosm_item_t *)_item;
+    H5VL_daosm_obj_t *target_obj = NULL;
+    hid_t target_obj_id = -1;
+    char *akey_buf = NULL;
+    size_t akey_buf_len = 0;
+    H5VL_daosm_attr_t *attr = NULL;
+    int ret;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Determine the target group */
+    if(H5VL_OBJECT_BY_SELF == loc_params.type) {
+        target_obj = (H5VL_daosm_obj_t *)item;
+        target_obj->item.rc++;
+    } /* end if */
+    else {
+        HDassert(H5VL_OBJECT_BY_NAME == loc_params.type);
+        /* Object open DSMINC */
+    } /* end else */
+
+    switch (specific_type) {
+        /* H5Lexists */
+        case H5VL_ATTR_DELETE:
+        case H5VL_ATTR_EXISTS:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unsupported specific operation")
+        case H5VL_ATTR_ITER:
+            {
+                H5_index_t H5_ATTR_UNUSED idx_type = (H5_index_t)va_arg(arguments, int);
+                H5_iter_order_t order = (H5_iter_order_t)va_arg(arguments, int);
+                hsize_t *idx = va_arg(arguments, hsize_t *);
+                H5A_operator2_t op = va_arg(arguments, H5A_operator2_t);
+                void *op_data = va_arg(arguments, void *);
+                daos_hash_out_t anchor;
+                char attr_key[] = H5VL_DAOSM_ATTR_KEY;
+                daos_key_t dkey;
+                uint32_t nr;
+                daos_key_desc_t kds[H5VL_DAOSM_ITER_LEN];
+                daos_sg_list_t sgl;
+                daos_iov_t sg_iov;
+                H5VL_loc_params_t sub_loc_params;
+                H5A_info_t ainfo;
+                herr_t op_ret;
+                char tmp_char;
+                char *p;
+                uint32_t i;
+
+                /* Iteration restart not supported */
+                if(*idx != 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "iteration restart not supported (must start from 0)")
+
+                /* Ordered iteration not supported */
+                if(order != H5_ITER_NATIVE)
+                    HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "ordered iteration not supported (order must be H5_ITER_NATIVE)")
+
+                /* Initialize sub_loc_params */
+                sub_loc_params.obj_type = target_obj->item.type;
+                sub_loc_params.type = H5VL_OBJECT_BY_SELF;
+
+                /* Initialize const ainfo info */
+                ainfo.corder_valid = FALSE;
+                ainfo.corder = 0;
+                ainfo.cset = H5T_CSET_ASCII;
+
+                /* Register id for target_obj */
+                if((target_obj_id = H5VL_object_register(target_obj, target_obj->item.type, H5VL_DAOSM_g, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
+
+                /* Initialize anchor */
+                HDmemset(&anchor, 0, sizeof(anchor));
+
+                /* Set up dkey */
+                daos_iov_set(&dkey, attr_key, (daos_size_t)(sizeof(attr_key) - 1));
+
+                /* Allocate akey_buf */
+                if(NULL == (akey_buf = (char *)H5MM_malloc(H5VL_DAOSM_ITER_SIZE_INIT)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for akeys")
+                akey_buf_len = H5VL_DAOSM_ITER_SIZE_INIT;
+
+                /* Set up sgl.  Report size as 1 less than buffer size so we
+                 * always have room for a null terminator. */
+                daos_iov_set(&sg_iov, akey_buf, (daos_size_t)(akey_buf_len - 1));
+                sgl.sg_nr.num = 1;
+                sgl.sg_iovs = &sg_iov;
+
+                /* Loop to retrieve keys and make callbacks */
+                do {
+                    /* Loop to retrieve keys (exit as soon as we get at least 1
+                     * key) */
+                    do {
+                        /* Reset nr */
+                        nr = H5VL_DAOSM_ITER_LEN;
+
+                        /* Ask daos for a list of akeys, break out if we succeed
+                         */
+                        if(0 == (ret = daos_obj_list_akey(target_obj->obj_oh, target_obj->item.file->epoch, &dkey, &nr, kds, &sgl, &anchor, NULL /*event*/)))
+                            break;
+
+                        /* Call failed, if the buffer is too small double it and
+                         * try again, otherwise fail */
+                        if(ret == -DER_KEY2BIG) {
+                            /* Allocate larger buffer */
+                            H5MM_free(akey_buf);
+                            akey_buf_len *= 2;
+                            if(NULL == (akey_buf = (char *)H5MM_malloc(akey_buf_len)))
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for akeys")
+
+                            /* Update sgl */
+                            daos_iov_set(&sg_iov, akey_buf, (daos_size_t)(akey_buf_len - 1));
+                        } /* end if */
+                        else
+                            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve attributes: %d", ret)
+                    } while(1);
+
+                    /* Loop over returned akeys */
+                    p = akey_buf;
+                    op_ret = 0;
+                    for(i = 0; (i < nr) && (op_ret == 0); i++) {
+                        /* Check for invalid key */
+                        if(kds[i].kd_key_len < 3)
+                            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, FAIL, "attribute akey too short")
+                        if(p[1] != '-')
+                            HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, FAIL, "invalid attribute akey format")
+
+                        /* Only do callbacks for "S-" (dataspace) keys, to avoid
+                         * duplication */
+                        if(p[0] == 'S') {
+                            hssize_t npoints;
+                            size_t type_size;
+
+                            /* Add null terminator temporarily */
+                            tmp_char = p[kds[i].kd_key_len];
+                            p[kds[i].kd_key_len] = '\0';
+
+                            /* Open attribute */
+                            if(NULL == (attr = (H5VL_daosm_attr_t *)H5VL_daosm_attribute_open(target_obj, sub_loc_params, &p[2], H5P_DEFAULT, dxpl_id, req)))
+                                HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
+
+                            /* Get number of elements in attribute */
+                            if((npoints = (H5Sget_simple_extent_npoints(attr->space_id))) < 0)
+                                HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get number of elements in attribute")
+
+                            /* Get attribute datatype size */
+                            if(0 == (type_size = H5Tget_size(attr->type_id)))
+                                HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute datatype size")
+
+                            /* Set attribute size */
+                            ainfo.data_size = (hsize_t)npoints * (hsize_t)type_size;
+
+                            /* Make callback */
+                            if((op_ret = op(target_obj_id, &p[2], &ainfo, op_data)) < 0)
+                                HGOTO_ERROR(H5E_ATTR, H5E_BADITER, op_ret, "operator function returned failure")
+
+                            /* Close attribute */
+                            if(H5VL_daosm_attribute_close(attr, dxpl_id, req) < 0)
+                                HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close attribute")
+
+                            /* Replace null terminator */
+                            p[kds[i].kd_key_len] = tmp_char;
+
+                            /* Advance idx */
+                            (*idx)++;
+                        } /* end if */
+
+                        /* Advance to next akey */
+                        p += kds[i].kd_key_len + kds[i].kd_csum_len;
+                    } /* end for */
+                } while(!daos_hash_is_eof(&anchor) && (op_ret == 0));
+
+                /* Set return value */
+                ret_value = op_ret;
+
+                break;
+            } /* end block */
+
+        case H5VL_ATTR_RENAME:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unsupported specific operation")
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid specific operation")
+    } /* end switch */
+
+done:
+    if(target_obj_id >= 0) {
+        if(H5I_dec_app_ref(target_obj_id) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close object id")
+        target_obj_id = -1;
+    } /* end if */
+    else
+        if(target_obj) {
+            if(H5VL_daosm_object_close(target_obj, dxpl_id, req) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close object")
+            target_obj = NULL;
+        } /* end else */
+    if(attr) {
+        if(H5VL_daosm_attribute_close(attr, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close attribute")
+        attr = NULL;
+    } /* end if */
+    akey_buf = (char *)H5MM_xfree(akey_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_attribute_specific() */
 
 
 /*-------------------------------------------------------------------------
