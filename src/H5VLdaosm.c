@@ -17,7 +17,7 @@
  * Programmer:  Neil Fortner <nfortne2@hdfgroup.org>
  *              September, 2016
  *
- * Purpose:	The DAOS-M VOL plugin where access is forwarded to the DAOS-M
+ * Purpose: The DAOS-M VOL plugin where access is forwarded to the DAOS-M
  * library 
  */
 
@@ -509,6 +509,7 @@ H5VLdaosm_term(void)
     herr_t ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE0("e","");
 
     /* Terminate the plugin */
     if(H5VL_daosm_term(-1) < 0)
@@ -581,6 +582,7 @@ H5Pset_fapl_daosm(hid_t fapl_id, MPI_Comm file_comm, MPI_Info file_info)
     herr_t          ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iMcMi", fapl_id, file_comm, file_info);
 
     if(H5VL_DAOSM_g < 0)
         HGOTO_ERROR(H5E_VOL, H5E_UNINITIALIZED, FAIL, "DAOS-M VOL plugin not initialized")
@@ -1236,8 +1238,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         daos_epoch_t held_epoch;
         daos_epoch_state_t epoch_state;
         daos_key_t dkey;
-        daos_vec_iod_t iod;
-        daos_recx_t recx;
+        daos_iod_t iod;
         daos_sg_list_t sgl;
         daos_iov_t sg_iov;
         char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
@@ -1282,17 +1283,13 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         /* Set up dkey */
         daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
-        /* Set up recx */
-        recx.rx_rsize = (uint64_t)8;
-        recx.rx_idx = (uint64_t)0;
-        recx.rx_nr = (uint64_t)1;
-
         /* Set up iod */
         HDmemset(&iod, 0, sizeof(iod));
-        daos_iov_set(&iod.vd_name, (void *)max_oid_key, (daos_size_t)(sizeof(max_oid_key) - 1));
-        daos_csum_set(&iod.vd_kcsum, NULL, 0);
-        iod.vd_nr = 1u;
-        iod.vd_recxs = &recx;
+        daos_iov_set(&iod.iod_name, (void *)max_oid_key, (daos_size_t)(sizeof(max_oid_key) - 1));
+        daos_csum_set(&iod.iod_kcsum, NULL, 0);
+        iod.iod_nr = 1u;
+        iod.iod_size = (uint64_t)8;
+        iod.iod_type = DAOS_IOD_SINGLE;
 
         /* Set up sgl */
         daos_iov_set(&sg_iov, &file->max_oid, (daos_size_t)8);
@@ -1682,8 +1679,7 @@ static herr_t
 H5VL_daosm_write_max_oid(H5VL_daosm_file_t *file)
 {
     daos_key_t dkey;
-    daos_vec_iod_t iod;
-    daos_recx_t recx;
+    daos_iod_t iod;
     daos_sg_list_t sgl;
     daos_iov_t sg_iov;
     char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
@@ -1696,17 +1692,13 @@ H5VL_daosm_write_max_oid(H5VL_daosm_file_t *file)
     /* Set up dkey */
     daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
-    /* Set up recx */
-    recx.rx_rsize = (uint64_t)8;
-    recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = (uint64_t)1;
-
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)max_oid_key, (daos_size_t)(sizeof(max_oid_key) - 1));
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
-    iod.vd_nr = 1u;
-    iod.vd_recxs = &recx;
+    daos_iov_set(&iod.iod_name, (void *)max_oid_key, (daos_size_t)(sizeof(max_oid_key) - 1));
+    daos_csum_set(&iod.iod_kcsum, NULL, 0);
+    iod.iod_nr = 1u;
+    iod.iod_size = (uint64_t)8;
+    iod.iod_type = DAOS_IOD_SINGLE;
 
     /* Set up sgl */
     daos_iov_set(&sg_iov, &file->max_oid, (daos_size_t)8);
@@ -1743,8 +1735,7 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
 {
     char const_link_key[] = H5VL_DAOSM_LINK_KEY;
     daos_key_t dkey;
-    daos_vec_iod_t iod;
-    daos_recx_t recx;
+    daos_iod_t iod;
     daos_sg_list_t sgl;
     daos_iov_t sg_iov;
     uint8_t *val_buf;
@@ -1764,17 +1755,13 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
      * DSMINC */
     daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
 
-    /* Set up recx */
-    recx.rx_rsize = DAOS_REC_ANY;
-    recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = (uint64_t)1;
-
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)name, (daos_size_t)name_len);
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
-    iod.vd_nr = 1u;
-    iod.vd_recxs = &recx;
+    daos_iov_set(&iod.iod_name, (void *)name, (daos_size_t)name_len);
+    daos_csum_set(&iod.iod_kcsum, NULL, 0);
+    iod.iod_nr = 1u;
+    iod.iod_size = DAOS_REC_ANY;
+    iod.iod_type = DAOS_IOD_SINGLE;
 
     /* Set up sgl */
     daos_iov_set(&sg_iov, val_buf, (daos_size_t)H5VL_DAOSM_LINK_VAL_BUF_SIZE);
@@ -1786,18 +1773,18 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link: %d", ret)
 
     /* Check for no link found */
-    if(recx.rx_rsize == (uint64_t)0)
+    if(iod.iod_size == (uint64_t)0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found")
 
     /* Check if val_buf was large enough */
-    if(recx.rx_rsize > (uint64_t)H5VL_DAOSM_LINK_VAL_BUF_SIZE) {
+    if(iod.iod_size > (uint64_t)H5VL_DAOSM_LINK_VAL_BUF_SIZE) {
         /* Allocate new value buffer */
-        if(NULL == (val_buf_dyn = (uint8_t *)H5MM_malloc(recx.rx_rsize)))
+        if(NULL == (val_buf_dyn = (uint8_t *)H5MM_malloc(iod.iod_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate link value buffer")
 
         /* Point to new buffer */
         val_buf = val_buf_dyn;
-        daos_iov_set(&sg_iov, val_buf, (daos_size_t)recx.rx_rsize);
+        daos_iov_set(&sg_iov, val_buf, (daos_size_t)iod.iod_size);
 
         /* Reissue read */
         if(0 != (ret = daos_obj_fetch(grp->obj.obj_oh, grp->obj.item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*maps */, NULL /*event*/)))
@@ -1826,16 +1813,16 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
             if(val_buf_dyn) {
                 val->target.soft = (char *)val_buf_dyn;
                 val_buf_dyn = NULL;
-                HDmemmove(val->target.soft,  val->target.soft + 1, recx.rx_rsize - 1);
+                HDmemmove(val->target.soft,  val->target.soft + 1, iod.iod_size - 1);
             } /* end if */
             else {
-                if(NULL == (val->target.soft = (char *)H5MM_malloc(recx.rx_rsize)))
+                if(NULL == (val->target.soft = (char *)H5MM_malloc(iod.iod_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate link value buffer")
-                HDmemcpy(val->target.soft, val_buf + 1, recx.rx_rsize - 1);
+                HDmemcpy(val->target.soft, val_buf + 1, iod.iod_size - 1);
             } /* end else */
 
             /* Add null terminator */
-            val->target.soft[recx.rx_rsize - 1] = '\0';
+            val->target.soft[iod.iod_size - 1] = '\0';
 
             break;
 
@@ -1875,8 +1862,7 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
 {
     char const_link_key[] = H5VL_DAOSM_LINK_KEY;
     daos_key_t dkey;
-    daos_vec_iod_t iod;
-    daos_recx_t recx;
+    daos_iod_t iod;
     daos_sg_list_t sgl;
     daos_iov_t sg_iov[2];
     uint8_t iov_buf[25];
@@ -1894,10 +1880,13 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
     /* For now always use dkey = const, akey = name. Add option to switch these
      * DSMINC */
     daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
- 
+
     /* Encode link type */
     p = iov_buf;
     *p++ = (uint8_t)val->type;
+
+    /* Initialized iod */
+    HDmemset(&iod, 0, sizeof(iod));
 
     /* Encode type specific value information */
     switch(val->type) {
@@ -1909,8 +1898,7 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
             UINT64ENCODE(p, val->target.hard.mid)
             UINT64ENCODE(p, val->target.hard.hi)
 
-            /* Set up type specific recx */
-            recx.rx_rsize = (uint64_t)25;
+            iod.iod_size = (uint64_t)25;
 
             /* Set up type specific sgl */
             daos_iov_set(&sg_iov[0], iov_buf, (daos_size_t)sizeof(iov_buf));
@@ -1919,14 +1907,13 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
             break;
 
         case H5L_TYPE_SOFT:
-            /* Set up type specific recx.  We need an extra byte for the link
-             * type (encoded above). */
-            recx.rx_rsize = (uint64_t)(HDstrlen(val->target.soft) + 1);
+            /* We need an extra byte for the link type (encoded above). */
+            iod.iod_size = (uint64_t)(HDstrlen(val->target.soft) + 1);
 
             /* Set up type specific sgl.  We use two entries, the first for the
              * link type, the second for the string. */
             daos_iov_set(&sg_iov[0], iov_buf, (daos_size_t)1);
-            daos_iov_set(&sg_iov[1], val->target.soft, (daos_size_t)(recx.rx_rsize - (uint64_t)1));
+            daos_iov_set(&sg_iov[1], val->target.soft, (daos_size_t)(iod.iod_size - (uint64_t)1));
             sgl.sg_nr.num = 2;
 
             break;
@@ -1938,16 +1925,12 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "invalid or unsupported link type")
     } /* end switch */
 
-    /* Set up general recx */
-    recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = (uint64_t)1;
 
-    /* Set up iod */
-    HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)name, (daos_size_t)name_len);
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
-    iod.vd_nr = 1u;
-    iod.vd_recxs = &recx;
+    /* Finish setting up iod */
+    daos_iov_set(&iod.iod_name, (void *)name, (daos_size_t)name_len);
+    daos_csum_set(&iod.iod_kcsum, NULL, 0);
+    iod.iod_nr = 1u;
+    iod.iod_type = DAOS_IOD_SINGLE;
 
     /* Set up general sgl */
     sgl.sg_iovs = sg_iov;
@@ -2076,32 +2059,27 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
                 htri_t *lexists_ret = va_arg(arguments, htri_t *);
                 char const_link_key[] = H5VL_DAOSM_LINK_KEY;
                 daos_key_t dkey;
-                daos_vec_iod_t iod;
-                daos_recx_t recx;
+                daos_iod_t iod;
 
                 /* Set up dkey */
                 /* For now always use dkey = const, akey = name. Add option to switch these
                  * DSMINC */
                 daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
 
-                /* Set up recx */
-                recx.rx_rsize = DAOS_REC_ANY;
-                recx.rx_idx = (uint64_t)0;
-                recx.rx_nr = (uint64_t)1;
-
                 /* Set up iod */
                 HDmemset(&iod, 0, sizeof(iod));
-                daos_iov_set(&iod.vd_name, (void *)target_name, HDstrlen(target_name));
-                daos_csum_set(&iod.vd_kcsum, NULL, 0);
-                iod.vd_nr = 1u;
-                iod.vd_recxs = &recx;
+                daos_iov_set(&iod.iod_name, (void *)target_name, HDstrlen(target_name));
+                daos_csum_set(&iod.iod_kcsum, NULL, 0);
+                iod.iod_nr = 1u;
+                iod.iod_size = DAOS_REC_ANY;
+                iod.iod_type = DAOS_IOD_SINGLE;
 
                 /* Read link */
                 if(0 != (ret = daos_obj_fetch(target_grp->obj.obj_oh, target_grp->obj.item.file->epoch, &dkey, 1, &iod, NULL /*sgl*/, NULL /*maps*/, NULL /*event*/)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link: %d", ret)
 
                 /* Set return value */
-                *lexists_ret = recx.rx_rsize != (uint64_t)0;
+                *lexists_ret = iod.iod_size != (uint64_t)0;
 
                 break;
             } /* end block */
@@ -2341,8 +2319,7 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
     /* Create group and write metadata if this process should */
     if(!collective || (file->my_rank == 0)) {
         daos_key_t dkey;
-        daos_vec_iod_t iod;
-        daos_recx_t recx;
+        daos_iod_t iod;
         daos_sg_list_t sgl;
         daos_iov_t sg_iov;
         size_t gcpl_size = 0;
@@ -2374,17 +2351,13 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
         /* Set up dkey */
         daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
-        /* Set up recx */
-        recx.rx_rsize = (uint64_t)gcpl_size;
-        recx.rx_idx = (uint64_t)0;
-        recx.rx_nr = (uint64_t)1;
-
         /* Set up iod */
         HDmemset(&iod, 0, sizeof(iod));
-        daos_iov_set(&iod.vd_name, (void *)gcpl_key, (daos_size_t)(sizeof(gcpl_key) - 1));
-        daos_csum_set(&iod.vd_kcsum, NULL, 0);
-        iod.vd_nr = 1u;
-        iod.vd_recxs = &recx;
+        daos_iov_set(&iod.iod_name, (void *)gcpl_key, (daos_size_t)(sizeof(gcpl_key) - 1));
+        daos_csum_set(&iod.iod_kcsum, NULL, 0);
+        iod.iod_nr = 1u;
+        iod.iod_size = (uint64_t)gcpl_size;
+        iod.iod_type = DAOS_IOD_SINGLE;
 
         /* Set up sgl */
         daos_iov_set(&sg_iov, gcpl_buf, (daos_size_t)gcpl_size);
@@ -2529,8 +2502,7 @@ H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file, daos_obj_id_t oid,
 {
     H5VL_daosm_group_t *grp = NULL;
     daos_key_t dkey;
-    daos_vec_iod_t iod;
-    daos_recx_t recx;
+    daos_iod_t iod;
     daos_sg_list_t sgl;
     daos_iov_t sg_iov;
     void *gcpl_buf = NULL;
@@ -2561,28 +2533,24 @@ H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file, daos_obj_id_t oid,
     /* Set up dkey */
     daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
-    /* Set up recx */
-    recx.rx_rsize = DAOS_REC_ANY;
-    recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = (uint64_t)1;
-
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)gcpl_key, (daos_size_t)(sizeof(gcpl_key) - 1));
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
-    iod.vd_nr = 1u;
-    iod.vd_recxs = &recx;
+    daos_iov_set(&iod.iod_name, (void *)gcpl_key, (daos_size_t)(sizeof(gcpl_key) - 1));
+    daos_csum_set(&iod.iod_kcsum, NULL, 0);
+    iod.iod_nr = 1u;
+    iod.iod_size = DAOS_REC_ANY;
+    iod.iod_type = DAOS_IOD_SINGLE;
 
     /* Read internal metadata size from group */
     if(0 != (ret = daos_obj_fetch(grp->obj.obj_oh, file->epoch, &dkey, 1, &iod, NULL, NULL /*maps*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata size from group: %d", ret)
 
     /* Check for metadata not found */
-    if(recx.rx_rsize == (uint64_t)0)
+    if(iod.iod_size == (uint64_t)0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "internal metadata not found")
 
     /* Allocate buffer for GCPL */
-    gcpl_len = recx.rx_rsize;
+    gcpl_len = iod.iod_size;
     if(NULL == (gcpl_buf = H5MM_malloc(gcpl_len)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized gcpl")
 
@@ -3148,7 +3116,7 @@ H5VL_daosm_tconv_init(hid_t src_type_id, size_t *src_type_size,
         /* Allocate background buffer if one is needed and it is not being
          * reused */
         if(need_bkg && (!reuse || (*reuse != H5VL_DAOSM_TCONV_REUSE_BKG)))
-            if(NULL == (*bkg_buf = H5MM_malloc(num_elem * *dst_type_size)))
+            if(NULL == (*bkg_buf = H5MM_calloc(num_elem * *dst_type_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate background buffer")
     } /* end else */
 
@@ -3237,8 +3205,7 @@ H5VL_daosm_dataset_create(void *_item,
         const char *target_name = NULL;
         H5VL_daosm_link_val_t link_val;
         daos_key_t dkey;
-        daos_vec_iod_t iod[3];
-        daos_recx_t recx[3];
+        daos_iod_t iod[3];
         daos_sg_list_t sgl[3];
         daos_iov_t sg_iov[3];
         size_t type_size = 0;
@@ -3294,31 +3261,25 @@ H5VL_daosm_dataset_create(void *_item,
         /* Set up dkey */
         daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
-        /* Set up recx */
-        recx[0].rx_rsize = (uint64_t)type_size;
-        recx[0].rx_idx = (uint64_t)0;
-        recx[0].rx_nr = (uint64_t)1;
-        recx[1].rx_rsize = (uint64_t)space_size;
-        recx[1].rx_idx = (uint64_t)0;
-        recx[1].rx_nr = (uint64_t)1;
-        recx[2].rx_rsize = (uint64_t)dcpl_size;
-        recx[2].rx_idx = (uint64_t)0;
-        recx[2].rx_nr = (uint64_t)1;
-
         /* Set up iod */
         HDmemset(iod, 0, sizeof(iod));
-        daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
-        daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
-        iod[0].vd_nr = 1u;
-        iod[0].vd_recxs = &recx[0];
-        daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
-        daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
-        iod[1].vd_nr = 1u;
-        iod[1].vd_recxs = &recx[1];
-        daos_iov_set(&iod[2].vd_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
-        daos_csum_set(&iod[2].vd_kcsum, NULL, 0);
-        iod[2].vd_nr = 1u;
-        iod[2].vd_recxs = &recx[2];
+        daos_iov_set(&iod[0].iod_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
+        daos_csum_set(&iod[0].iod_kcsum, NULL, 0);
+        iod[0].iod_nr = 1u;
+        iod[0].iod_size = (uint64_t)type_size;
+        iod[0].iod_type = DAOS_IOD_SINGLE;
+
+        daos_iov_set(&iod[1].iod_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
+        daos_csum_set(&iod[1].iod_kcsum, NULL, 0);
+        iod[1].iod_nr = 1u;
+        iod[1].iod_size = (uint64_t)space_size;
+        iod[1].iod_type = DAOS_IOD_SINGLE;
+
+        daos_iov_set(&iod[2].iod_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
+        daos_csum_set(&iod[2].iod_kcsum, NULL, 0);
+        iod[2].iod_nr = 1u;
+        iod[2].iod_size = (uint64_t)dcpl_size;
+        iod[2].iod_type = DAOS_IOD_SINGLE;
 
         /* Set up sgl */
         daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)type_size);
@@ -3417,8 +3378,7 @@ H5VL_daosm_dataset_open(void *_item,
     H5VL_daosm_group_t *target_grp = NULL;
     const char *target_name = NULL;
     daos_key_t dkey;
-    daos_vec_iod_t iod[3];
-    daos_recx_t recx[3];
+    daos_iod_t iod[3];
     daos_sg_list_t sgl[3];
     daos_iov_t sg_iov[3];
     uint64_t type_len = 0;
@@ -3480,45 +3440,40 @@ H5VL_daosm_dataset_open(void *_item,
         /* Set up dkey */
         daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
-        /* Set up recx */
-        recx[0].rx_rsize = DAOS_REC_ANY;
-        recx[0].rx_idx = (uint64_t)0;
-        recx[0].rx_nr = (uint64_t)1;
-        recx[1].rx_rsize = DAOS_REC_ANY;
-        recx[1].rx_idx = (uint64_t)0;
-        recx[1].rx_nr = (uint64_t)1;
-        recx[2].rx_rsize = DAOS_REC_ANY;
-        recx[2].rx_idx = (uint64_t)0;
-        recx[2].rx_nr = (uint64_t)1;
-
         /* Set up iod */
         HDmemset(iod, 0, sizeof(iod));
-        daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
-        daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
-        iod[0].vd_nr = 1u;
-        iod[0].vd_recxs = &recx[0];
-        daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
-        daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
-        iod[1].vd_nr = 1u;
-        iod[1].vd_recxs = &recx[1];
-        daos_iov_set(&iod[2].vd_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
-        daos_csum_set(&iod[2].vd_kcsum, NULL, 0);
-        iod[2].vd_nr = 1u;
-        iod[2].vd_recxs = &recx[2];
+        daos_iov_set(&iod[0].iod_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
+        daos_csum_set(&iod[0].iod_kcsum, NULL, 0);
+        iod[0].iod_nr = 1u;
+        iod[0].iod_size = DAOS_REC_ANY;
+        iod[0].iod_type = DAOS_IOD_SINGLE;
+
+        daos_iov_set(&iod[1].iod_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
+        daos_csum_set(&iod[1].iod_kcsum, NULL, 0);
+        iod[1].iod_nr = 1u;
+        iod[1].iod_size = DAOS_REC_ANY;
+        iod[1].iod_type = DAOS_IOD_SINGLE;
+
+        daos_iov_set(&iod[2].iod_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
+        daos_csum_set(&iod[2].iod_kcsum, NULL, 0);
+        iod[2].iod_nr = 1u;
+        iod[2].iod_size = DAOS_REC_ANY;
+        iod[2].iod_type = DAOS_IOD_SINGLE;
 
         /* Read internal metadata sizes from dataset */
-        if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, item->file->epoch, &dkey, 3, iod, NULL, NULL /*maps*/, NULL /*event*/)))
+        if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, item->file->epoch, &dkey, 3, iod, NULL,
+                      NULL /*maps*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata sizes from dataset: %d", ret)
 
         /* Check for metadata not found */
-        if((recx[0].rx_rsize == (uint64_t)0) || (recx[1].rx_rsize == (uint64_t)0)
-                || (recx[2].rx_rsize == (uint64_t)0))
+        if((iod[0].iod_size == (uint64_t)0) || (iod[1].iod_size == (uint64_t)0)
+                || (iod[2].iod_size == (uint64_t)0))
             HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "internal metadata not found")
 
         /* Compute dataset info buffer size */
-        type_len = recx[0].rx_rsize;
-        space_len = recx[1].rx_rsize;
-        dcpl_len = recx[2].rx_rsize;
+        type_len = iod[0].iod_size;
+        space_len = iod[1].iod_size;
+        dcpl_len = iod[2].iod_size;
         tot_len = type_len + space_len + dcpl_len;
 
         /* Allocate dataset info buffer if necessary */
@@ -3745,7 +3700,6 @@ H5VL_daosm_sel_to_recx_iov(H5S_t *space, size_t type_size, void *buf,
         /* Copy offsets/lengths to recxs and sg_iovs */
         for(szi = 0; szi < nseq; szi++) {
             if(recxs) {
-                (*recxs)[szi + *list_nused].rx_rsize = (uint64_t)type_size;
                 (*recxs)[szi + *list_nused].rx_idx = (uint64_t)off[szi];
                 (*recxs)[szi + *list_nused].rx_nr = (uint64_t)len[szi];
             } /* end if */
@@ -3822,7 +3776,7 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5S_t *space = NULL;
     uint64_t chunk_coords[H5S_MAX_RANK];
     daos_key_t dkey;
-    daos_vec_iod_t iod;
+    daos_iod_t iod;
     daos_recx_t recx;
     daos_recx_t *recxs = &recx;
     daos_sg_list_t sgl;
@@ -3877,8 +3831,10 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)&akey, (daos_size_t)(sizeof(akey)));
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    daos_iov_set(&iod.iod_name, (void *)&akey, (daos_size_t)(sizeof(akey)));
+    daos_csum_set(&iod.iod_kcsum, NULL, 0);
+    iod.iod_size = file_type_size;
+    iod.iod_type = DAOS_IOD_ARRAY;
 
     /* Get file dataspace object */
     if(NULL == (space = (H5S_t *)H5I_object(real_file_space_id)))
@@ -3894,14 +3850,14 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         /* Calculate both recxs and sg_iovs at the same time from file space */
             if(H5VL_daosm_sel_to_recx_iov(space, file_type_size, buf, &recxs, &sg_iovs, &tot_nseq) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
-            iod.vd_nr = (unsigned)tot_nseq;
+            iod.iod_nr = (unsigned)tot_nseq;
             sgl.sg_nr.num = (uint32_t)tot_nseq;
         } /* end if */
         else {
             /* Calculate recxs from file space */
             if(H5VL_daosm_sel_to_recx_iov(space, file_type_size, buf, &recxs, NULL, &tot_nseq) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
-            iod.vd_nr = (unsigned)tot_nseq;
+            iod.iod_nr = (unsigned)tot_nseq;
 
             /* Get memory dataspace object */
             if(NULL == (space = (H5S_t *)H5I_object(real_mem_space_id)))
@@ -3914,7 +3870,7 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         } /* end else */
 
         /* Point iod and sgl to lists generated above */
-        iod.vd_recxs = recxs;
+        iod.iod_recxs = recxs;
         sgl.sg_iovs = sg_iovs;
 
         /* Read data from dataset */
@@ -3939,8 +3895,8 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         /* Calculate recxs from file space */
         if(H5VL_daosm_sel_to_recx_iov(space, file_type_size, buf, &recxs, NULL, &tot_nseq) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
-        iod.vd_nr = (unsigned)tot_nseq;
-        iod.vd_recxs = recxs;
+        iod.iod_nr = (unsigned)tot_nseq;
+        iod.iod_recxs = recxs;
 
         /* Set up constant sgl info */
         sgl.sg_nr.num = 1;
@@ -4049,7 +4005,7 @@ H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id,
     hssize_t num_elem;
     uint64_t chunk_coords[H5S_MAX_RANK];
     daos_key_t dkey;
-    daos_vec_iod_t iod;
+    daos_iod_t iod;
     daos_recx_t recx;
     daos_recx_t *recxs = &recx;
     daos_sg_list_t sgl;
@@ -4112,8 +4068,10 @@ H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id,
 
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)&akey, (daos_size_t)(sizeof(akey)));
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    daos_iov_set(&iod.iod_name, (void *)&akey, (daos_size_t)(sizeof(akey)));
+    daos_csum_set(&iod.iod_kcsum, NULL, 0);
+    iod.iod_size = file_type_size;
+    iod.iod_type = DAOS_IOD_ARRAY;
 
     /* Build recxs and sg_iovs */
     /* Get file dataspace object */
@@ -4125,8 +4083,8 @@ H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id,
         /* Calculate recxs from file space */
         if(H5VL_daosm_sel_to_recx_iov(space, file_type_size, (void *)buf, &recxs, NULL, &tot_nseq) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
-        iod.vd_nr = (unsigned)tot_nseq;
-        iod.vd_recxs = recxs;
+        iod.iod_nr = (unsigned)tot_nseq;
+        iod.iod_recxs = recxs;
 
         /* Set up constant sgl info */
         sgl.sg_nr.num = 1;
@@ -4142,6 +4100,10 @@ H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id,
             /* Read data from dataset to background buffer */
             if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, dset->obj.item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %d", ret)
+
+            /* Reset iod_size, if the dataset was not allocated then it could
+             * have been overwritten by daos_obj_fetch */
+            iod.iod_size = file_type_size;
         } /* end if */
 
         /* Gather data to conversion buffer */
@@ -4161,14 +4123,14 @@ H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id,
             /* Calculate both recxs and sg_iovs at the same time from file space */
             if(H5VL_daosm_sel_to_recx_iov(space, file_type_size, (void *)buf, &recxs, &sg_iovs, &tot_nseq) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
-            iod.vd_nr = (unsigned)tot_nseq;
+            iod.iod_nr = (unsigned)tot_nseq;
             sgl.sg_nr.num = (uint32_t)tot_nseq;
         } /* end if */
         else {
             /* Calculate recxs from file space */
             if(H5VL_daosm_sel_to_recx_iov(space, file_type_size, (void *)buf, &recxs, NULL, &tot_nseq) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
-            iod.vd_nr = (unsigned)tot_nseq;
+            iod.iod_nr = (unsigned)tot_nseq;
 
             /* Get memory dataspace object */
             if(NULL == (space = (H5S_t *)H5I_object(real_mem_space_id)))
@@ -4181,7 +4143,7 @@ H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id,
         } /* end else */
 
         /* Point iod and sgl to lists generated above */
-        iod.vd_recxs = recxs;
+        iod.iod_recxs = recxs;
         sgl.sg_iovs = sg_iovs;
     } /* end else */
 
@@ -4423,8 +4385,7 @@ H5VL_daosm_attribute_create(void *_item, H5VL_loc_params_t loc_params,
     daos_key_t dkey;
     char *type_key = NULL;
     char *space_key = NULL;
-    daos_vec_iod_t iod[2];
-    daos_recx_t recx[2];
+    daos_iod_t iod[2];
     daos_sg_list_t sgl[2];
     daos_iov_t sg_iov[2];
     size_t type_size = 0;
@@ -4504,24 +4465,19 @@ H5VL_daosm_attribute_create(void *_item, H5VL_loc_params_t loc_params,
     (void)HDstrcpy(type_key + 2, name);
     (void)HDstrcpy(space_key + 2, name);
 
-    /* Set up recx */
-    recx[0].rx_rsize = (uint64_t)type_size;
-    recx[0].rx_idx = (uint64_t)0;
-    recx[0].rx_nr = (uint64_t)1;
-    recx[1].rx_rsize = (uint64_t)space_size;
-    recx[1].rx_idx = (uint64_t)0;
-    recx[1].rx_nr = (uint64_t)1;
-
     /* Set up iod */
     HDmemset(iod, 0, sizeof(iod));
-    daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)akey_len);
-    daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
-    iod[0].vd_nr = 1u;
-    iod[0].vd_recxs = &recx[0];
-    daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)akey_len);
-    daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
-    iod[1].vd_nr = 1u;
-    iod[1].vd_recxs = &recx[1];
+    daos_iov_set(&iod[0].iod_name, (void *)type_key, (daos_size_t)akey_len);
+    daos_csum_set(&iod[0].iod_kcsum, NULL, 0);
+    iod[0].iod_nr = 1u;
+    iod[0].iod_size = (uint64_t)type_size;
+    iod[0].iod_type = DAOS_IOD_SINGLE;
+
+    daos_iov_set(&iod[1].iod_name, (void *)space_key, (daos_size_t)akey_len);
+    daos_csum_set(&iod[1].iod_kcsum, NULL, 0);
+    iod[1].iod_nr = 1u;
+    iod[1].iod_size = (uint64_t)space_size;
+    iod[1].iod_type = DAOS_IOD_SINGLE;
 
     /* Set up sgl */
     daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)type_size);
@@ -4588,8 +4544,7 @@ H5VL_daosm_attribute_open(void *_item, H5VL_loc_params_t loc_params,
     daos_key_t dkey;
     char *type_key = NULL;
     char *space_key = NULL;
-    daos_vec_iod_t iod[2];
-    daos_recx_t recx[2];
+    daos_iod_t iod[2];
     daos_sg_list_t sgl[2];
     daos_iov_t sg_iov[2];
     void *type_buf = NULL;
@@ -4637,43 +4592,38 @@ H5VL_daosm_attribute_open(void *_item, H5VL_loc_params_t loc_params,
     (void)HDstrcpy(type_key + 2, name);
     (void)HDstrcpy(space_key + 2, name);
 
-    /* Set up recx */
-    recx[0].rx_rsize = DAOS_REC_ANY;
-    recx[0].rx_idx = (uint64_t)0;
-    recx[0].rx_nr = (uint64_t)1;
-    recx[1].rx_rsize = DAOS_REC_ANY;
-    recx[1].rx_idx = (uint64_t)0;
-    recx[1].rx_nr = (uint64_t)1;
-
     /* Set up iod */
     HDmemset(iod, 0, sizeof(iod));
-    daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)akey_len);
-    daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
-    iod[0].vd_nr = 1u;
-    iod[0].vd_recxs = &recx[0];
-    daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)akey_len);
-    daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
-    iod[1].vd_nr = 1u;
-    iod[1].vd_recxs = &recx[1];
+    daos_iov_set(&iod[0].iod_name, (void *)type_key, (daos_size_t)akey_len);
+    daos_csum_set(&iod[0].iod_kcsum, NULL, 0);
+    iod[0].iod_nr = 1u;
+    iod[0].iod_size = DAOS_REC_ANY;
+    iod[0].iod_type = DAOS_IOD_SINGLE;
+
+    daos_iov_set(&iod[1].iod_name, (void *)space_key, (daos_size_t)akey_len);
+    daos_csum_set(&iod[1].iod_kcsum, NULL, 0);
+    iod[1].iod_nr = 1u;
+    iod[1].iod_size = DAOS_REC_ANY;
+    iod[1].iod_type = DAOS_IOD_SINGLE;
 
     /* Read attribute metadata sizes from parent object */
     if(0 != (ret = daos_obj_fetch(attr->parent->obj_oh, attr->parent->item.file->epoch, &dkey, 2, iod, NULL, NULL /*maps*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't read attribute metadata sizes: %d", ret)
 
-    if(recx[0].rx_rsize == (uint64_t)0 || recx[1].rx_rsize == (uint64_t)0)
+    if(iod[0].iod_size == (uint64_t)0 || iod[1].iod_size == (uint64_t)0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "attribute not found")
 
     /* Allocate buffers for datatype and dataspace */
-    if(NULL == (type_buf = H5MM_malloc(recx[0].rx_rsize)))
+    if(NULL == (type_buf = H5MM_malloc(iod[0].iod_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized datatype")
-    if(NULL == (space_buf = H5MM_malloc(recx[1].rx_rsize)))
+    if(NULL == (space_buf = H5MM_malloc(iod[1].iod_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dataaspace")
 
     /* Set up sgl */
-    daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)recx[0].rx_rsize);
+    daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)iod[0].iod_size);
     sgl[0].sg_nr.num = 1;
     sgl[0].sg_iovs = &sg_iov[0];
-    daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)recx[1].rx_rsize);
+    daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)iod[1].iod_size);
     sgl[1].sg_nr.num = 1;
     sgl[1].sg_iovs = &sg_iov[1];
 
@@ -4736,7 +4686,7 @@ H5VL_daosm_attribute_read(void *_attr, hid_t mem_type_id, void *buf,
     size_t akey_len;
     daos_key_t dkey;
     char *akey = NULL;
-    daos_vec_iod_t iod;
+    daos_iod_t iod;
     daos_recx_t recx;
     daos_sg_list_t sgl;
     daos_iov_t sg_iov;
@@ -4792,16 +4742,17 @@ H5VL_daosm_attribute_read(void *_attr, hid_t mem_type_id, void *buf,
     (void)HDstrcpy(akey + 2, attr->name);
 
     /* Set up recx */
-    recx.rx_rsize = (uint64_t)file_type_size;
     recx.rx_idx = (uint64_t)0;
     recx.rx_nr = attr_size;
 
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)akey, (daos_size_t)akey_len);
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
-    iod.vd_nr = 1u;
-    iod.vd_recxs = &recx;
+    daos_iov_set(&iod.iod_name, (void *)akey, (daos_size_t)akey_len);
+    daos_csum_set(&iod.iod_kcsum, NULL, 0);
+    iod.iod_nr = 1u;
+    iod.iod_recxs = &recx;
+    iod.iod_size = (uint64_t)file_type_size;
+    iod.iod_type = DAOS_IOD_ARRAY;
 
     /* Set up sgl */
     daos_iov_set(&sg_iov, tconv_buf ? tconv_buf : buf, (daos_size_t)(attr_size * (uint64_t)file_type_size));
@@ -4858,7 +4809,7 @@ H5VL_daosm_attribute_write(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     size_t akey_len;
     daos_key_t dkey;
     char *akey = NULL;
-    daos_vec_iod_t iod;
+    daos_iod_t iod;
     daos_recx_t recx;
     daos_sg_list_t sgl;
     daos_iov_t sg_iov;
@@ -4907,16 +4858,17 @@ H5VL_daosm_attribute_write(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     (void)HDstrcpy(akey + 2, attr->name);
 
     /* Set up recx */
-    recx.rx_rsize = (uint64_t)file_type_size;
     recx.rx_idx = (uint64_t)0;
     recx.rx_nr = attr_size;
 
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)akey, (daos_size_t)akey_len);
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
-    iod.vd_nr = 1u;
-    iod.vd_recxs = &recx;
+    daos_iov_set(&iod.iod_name, (void *)akey, (daos_size_t)akey_len);
+    daos_csum_set(&iod.iod_kcsum, NULL, 0);
+    iod.iod_nr = 1u;
+    iod.iod_recxs = &recx;
+    iod.iod_size = (uint64_t)file_type_size;
+    iod.iod_type = DAOS_IOD_ARRAY;
 
     /* Set up constant sgl info */
     sgl.sg_nr.num = 1;
