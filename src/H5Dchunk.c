@@ -684,10 +684,11 @@ H5D__get_chunk_storage_size(H5D_t *dset, hid_t dxpl_id, const hsize_t *offset, h
     if( dset->shared->dcpl_cache.pline.nused > 0 ) {
         /* Check if the requested chunk exists in the chunk cache */
         if(UINT_MAX != udata.idx_hint) {
+            H5D_rdcc_ent_t *ent = rdcc->slot[udata.idx_hint];
+
             /* Sanity checks  */
             HDassert(udata.idx_hint < rdcc->nslots);
             HDassert(rdcc->slot[udata.idx_hint]);
-            H5D_rdcc_ent_t *ent = rdcc->slot[udata.idx_hint];
 
             /* If the cached chunk is dirty, it must be flushed to get accurate size */
             if( ent->dirty == TRUE ) {
