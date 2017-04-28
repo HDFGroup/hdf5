@@ -638,7 +638,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
              ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
     HDmemset(&sb, 0, sizeof(sb));
     if((file_image_info.buffer != NULL) && !(H5F_ACC_CREAT & flags)) {
-        if(HDopen(name, o_flags, 0666) >= 0)
+        if(HDopen(name, o_flags, H5_POSIX_OPEN_MODE_0666) >= 0)
             HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file already exists")
         
         /* If backing store is requested, create and stat the file
@@ -646,7 +646,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
          * technically an open.
          */
         if(fa->backing_store) {
-            if((fd = HDopen(name, o_flags | O_CREAT, 0666)) < 0)
+            if((fd = HDopen(name, o_flags | O_CREAT, H5_POSIX_OPEN_MODE_0666)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
             if(HDfstat(fd, &sb) < 0)
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
@@ -656,7 +656,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
      * store is off is when  the backing_store flag is off and H5F_ACC_CREAT is
      * on. */
     else if(fa->backing_store || !(H5F_ACC_CREAT & flags)) {
-        if((fd = HDopen(name, o_flags, 0666)) < 0)
+        if((fd = HDopen(name, o_flags, H5_POSIX_OPEN_MODE_0666)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
         if(HDfstat(fd, &sb) < 0)
             HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")

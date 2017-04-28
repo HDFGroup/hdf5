@@ -231,7 +231,7 @@ int create_wo_file(void)
     int	   ret_code;
 
     /* Create the data file */
-    if ((write_fd_g = HDopen(DATAFILE, O_RDWR|O_TRUNC|O_CREAT, 0664)) < 0) {
+    if ((write_fd_g = HDopen(DATAFILE, O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_OPEN_MODE_0666)) < 0) {
 	printf("WRITER: error from open\n");
 	return -1;
     }
@@ -297,7 +297,7 @@ int read_wo_file(void)
     char buffer[BLOCKSIZE_DFT];
 
     /* Open the data file */
-    if ((read_fd = HDopen(DATAFILE, O_RDONLY, 0)) < 0) {
+    if ((read_fd = HDopen(DATAFILE, O_RDONLY, H5_POSIX_OPEN_MODE_0000)) < 0) {
 	printf("READER: error from open\n");
 	return -1;
     }

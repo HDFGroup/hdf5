@@ -495,6 +495,24 @@
 #   define H5_POSIX_MAX_IO_BYTES        SSIZET_MAX
 #endif
 
+/* POSIX I/O mode used as the fourth parameter to open/_open
+ * when creating a new file (O_CREAT is set).
+ *
+ * It's a little awkward to put the Unix file permissions
+ * in the symbol name, but that is what is most important
+ * and we only need the symbol to handle Windows' less-capable
+ * system.
+ */
+#if defined(H5_HAVE_WIN32_API)
+#   define H5_POSIX_OPEN_MODE_0666      (_S_IREAD | _S_IWRITE)
+#   define H5_POSIX_OPEN_MODE_0644      _S_IREAD 
+#   define H5_POSIX_OPEN_MODE_0000      0 
+#else
+#   define H5_POSIX_OPEN_MODE_0666      0666
+#   define H5_POSIX_OPEN_MODE_0644      0644 
+#   define H5_POSIX_OPEN_MODE_0000      0000 
+#endif
+
 /*
  * A macro to portably increment enumerated types.
  */

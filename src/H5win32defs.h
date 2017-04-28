@@ -48,7 +48,8 @@ typedef __int64             h5_stat_size_t;
 #define HDnanosleep(N, O)   Wnanosleep(N, O)
 #define HDoff_t             __int64
 /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
- * transformations when performing I/O.
+ * transformations when performing I/O. Note that this will
+ * produce Unix-style text files, though.
  */
 #define HDopen(S,F,M)       _open(S,F|_O_BINARY,M)
 #define HDread(F,M,Z)       _read(F,M,Z)
