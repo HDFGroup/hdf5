@@ -73,7 +73,7 @@ is_sparse(void)
     int		fd;
     h5_stat_t	sb;
 
-    if ((fd=HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0) return 0;
+    if ((fd=HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_OPEN_MODE_0666)) < 0) return 0;
     if (HDlseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
     if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
     if (HDclose(fd) < 0) return 0;

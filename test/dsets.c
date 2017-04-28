@@ -569,7 +569,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         if(H5Fclose(file) < 0) goto error;
             file = -1;
 
-        f = HDopen(filename, O_RDONLY, 0);
+        f = HDopen(filename, O_RDONLY, H5_POSIX_OPEN_MODE_0000);
         HDlseek(f, (off_t)offset, SEEK_SET);
         if(HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2) < 0)
             goto error;
@@ -683,7 +683,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(H5Fclose(file) < 0) goto error;
         file = -1;
 
-        f = HDopen(filename, O_RDONLY, 0);
+        f = HDopen(filename, O_RDONLY, H5_POSIX_OPEN_MODE_0000);
         HDlseek(f, (off_t)offset, SEEK_SET);
         if(HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2) < 0)
             goto error;

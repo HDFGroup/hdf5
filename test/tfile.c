@@ -1611,7 +1611,7 @@ test_file_ishdf5(void)
 
 
     /* Create non-HDF5 file and check it */
-    fd=HDopen(FILE1, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    fd=HDopen(FILE1, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_OPEN_MODE_0666);
     CHECK(fd, FAIL, "HDopen");
 
     /* Initialize information to write */
@@ -2657,7 +2657,7 @@ cal_chksum(const char *file, uint32_t *chksum)
     herr_t ret;                                 /* Generic return value */
 
     /* Open the file */
-    fdes = HDopen(file, O_RDONLY, 0);
+    fdes = HDopen(file, O_RDONLY, H5_POSIX_OPEN_MODE_0000);
     CHECK(fdes, FAIL, "HDopen");
 
     /* Retrieve the file's size */
@@ -2720,7 +2720,7 @@ test_rw_noupdate(void)
 
     /* Calculate checksum for the file */
     ret = cal_chksum(FILE1, &chksum1);
-    CHECK(ret, FAIL, "HDopen");
+    CHECK(ret, FAIL, "cal_chksum");
 
     /* Open and close File With Read/Write Permission */
     fid = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -2732,7 +2732,7 @@ test_rw_noupdate(void)
 
     /* Calculate checksum for the file */
     ret = cal_chksum(FILE1, &chksum2);
-    CHECK(ret, FAIL, "HDopen");
+    CHECK(ret, FAIL, "cal_chksum");
 
     /* The two checksums are the same, i.e. the file is not changed */
     VERIFY(chksum1, chksum2, "Checksum");
@@ -4340,9 +4340,9 @@ test_filespace_compatible(void)
         const char *filename = H5_get_srcdir_filename(OLD_FILENAME[j]); /* Corrected test file name */
 
         /* Open and copy the test file into a temporary file */
-	fd_old = HDopen(filename, O_RDONLY, 0666);
+	fd_old = HDopen(filename, O_RDONLY, H5_POSIX_OPEN_MODE_0666);
 	CHECK(fd_old, FAIL, "HDopen");
-	fd_new = HDopen(FILE5, O_RDWR|O_CREAT|O_TRUNC, 0666);
+	fd_new = HDopen(FILE5, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_OPEN_MODE_0666);
 	CHECK(fd_new, FAIL, "HDopen");
 
 	/* Copy data */
