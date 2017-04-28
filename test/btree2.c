@@ -8736,7 +8736,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         /* Make a copy of the file in memory, in order to speed up deletion testing */
 
         /* Open the file just created */
-        if((fd = HDopen(filename, O_RDONLY, H5_POSIX_OPEN_MODE_0000)) < 0)
+        if((fd = HDopen(filename, O_RDONLY)) < 0)
             TEST_ERROR
 
         /* Retrieve the file's size */
@@ -8833,7 +8833,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         /* Re-write the file's data with the copy in memory */
 
         /* Open the file just created */
-        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_OPEN_MODE_0666)) < 0)
+        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
             TEST_ERROR
 
         /* Write file's data from memory */
@@ -8920,7 +8920,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         /* Re-write the file's data with the copy in memory */
 
         /* Open the file just created */
-        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_OPEN_MODE_0666)) < 0)
+        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
             TEST_ERROR
 
         /* Write file's data from memory */
@@ -9005,7 +9005,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         /* Re-write the file's data with the copy in memory */
 
         /* Open the file just created */
-        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_OPEN_MODE_0666)) < 0)
+        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
             TEST_ERROR
 
         /* Write file's data from memory */

@@ -341,7 +341,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         o_flags |= O_EXCL;
 
     /* Open the file */
-    if((fd = HDopen(name, o_flags, H5_POSIX_OPEN_MODE_0666)) < 0) {
+    if((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW)) < 0) {
         int myerrno = errno;
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', errno = %d, error message = '%s', flags = %x, o_flags = %x", name, myerrno, HDstrerror(myerrno), flags, (unsigned)o_flags);
     } /* end if */

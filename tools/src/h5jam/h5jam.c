@@ -292,7 +292,7 @@ main (int argc, const char *argv[])
     H5Pclose(plist);
     H5Fclose(ifile);
 
-    ufid = HDopen(ub_file, O_RDONLY, H5_POSIX_OPEN_MODE_0000);
+    ufid = HDopen(ub_file, O_RDONLY);
     if(ufid < 0) {
         error_msg("unable to open user block file \"%s\"\n", ub_file);
         leave (EXIT_FAILURE);
@@ -307,7 +307,7 @@ main (int argc, const char *argv[])
 
     fsize = (off_t)sbuf.st_size;
 
-    h5fid = HDopen(input_file, O_RDONLY, H5_POSIX_OPEN_MODE_0000);
+    h5fid = HDopen(input_file, O_RDONLY);
     if(h5fid < 0) {
         error_msg("unable to open HDF5 file for read \"%s\"\n", input_file);
         HDclose (ufid);
@@ -325,7 +325,7 @@ main (int argc, const char *argv[])
     h5fsize = (hsize_t)sbuf2.st_size;
 
     if (output_file == NULL) {
-        ofid = HDopen (input_file, O_WRONLY, H5_POSIX_OPEN_MODE_0000);
+        ofid = HDopen(input_file, O_WRONLY);
 
         if (ofid < 0) {
             error_msg("unable to open output file \"%s\"\n", output_file);
@@ -335,7 +335,7 @@ main (int argc, const char *argv[])
         }
     }
     else {
-        ofid = HDopen (output_file, O_WRONLY | O_CREAT | O_TRUNC, H5_POSIX_OPEN_MODE_0644);
+        ofid = HDopen(output_file, O_WRONLY | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
 
         if (ofid < 0) {
             error_msg("unable to create output file \"%s\"\n", output_file);

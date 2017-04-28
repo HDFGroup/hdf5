@@ -50,8 +50,11 @@ typedef __int64             h5_stat_size_t;
 /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
  * transformations when performing I/O. Note that this will
  * produce Unix-style text files, though.
+ *
+ * Also note that the variadic macro is using a VC++ extension
+ * where the comma is dropped if nothing is passed to the ellipsis.
  */
-#define HDopen(S,F,M)       _open(S,F|_O_BINARY,M)
+#define HDopen(S,F,...)       _open(S, F | _O_BINARY, __VA_ARGS__)
 #define HDread(F,M,Z)       _read(F,M,Z)
 #define HDrmdir(S)          _rmdir(S)
 #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,(Z>1?Z:2))
