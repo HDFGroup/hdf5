@@ -232,9 +232,9 @@ main (int argc, char *argv[])
     sprintf (src_name, src_gen_name, src_membno);
     src_is_family = strcmp (src_name, src_gen_name);
 
-    if ((src=HDopen(src_name, O_RDONLY,0))<0) {
-        perror (src_name);
-        exit (EXIT_FAILURE);
+    if ((src = HDopen(src_name, O_RDONLY)) < 0) {
+        HDperror(src_name);
+        HDexit(EXIT_FAILURE);
     }
 
     if (HDfstat(src, &sb)<0) {
@@ -252,9 +252,9 @@ main (int argc, char *argv[])
     sprintf (dst_name, dst_gen_name, dst_membno);
     dst_is_family = strcmp (dst_name, dst_gen_name);
 
-    if ((dst=HDopen (dst_name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
-	perror (dst_name);
-	exit (EXIT_FAILURE);
+    if ((dst = HDopen(dst_name, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
+        HDperror(dst_name);
+        HDexit(EXIT_FAILURE);
     }
     if (verbose) fprintf (stderr, "> %s\n", dst_name);
 
@@ -333,9 +333,9 @@ main (int argc, char *argv[])
 		break;
 	    }
 	    sprintf (src_name, src_gen_name, ++src_membno);
-	    if ((src=HDopen (src_name, O_RDONLY,0))<0 && ENOENT==errno) {
-                dst_offset = dst_offset + (off_t)n;
-		break;
+	    if ((src = HDopen(src_name, O_RDONLY)) < 0 && ENOENT == errno) {
+            dst_offset = dst_offset + (off_t)n;
+            break;
 	    } else if (src<0) {
 		perror (src_name);
 		exit (EXIT_FAILURE);
@@ -380,9 +380,9 @@ main (int argc, char *argv[])
 	    }
 	    HDclose (dst);
 	    sprintf (dst_name, dst_gen_name, ++dst_membno);
-	    if ((dst=HDopen (dst_name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
-		perror (dst_name);
-		exit (EXIT_FAILURE);
+	    if ((dst = HDopen(dst_name, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
+            HDperror(dst_name);
+            HDexit(EXIT_FAILURE);
 	    }
 	    dst_offset = 0;
 	    need_seek = FALSE;
