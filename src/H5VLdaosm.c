@@ -2349,7 +2349,7 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
         if(H5Pencode(gcpl_id, NULL, &gcpl_size) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of gcpl")
         if(NULL == (gcpl_buf = H5MM_malloc(gcpl_size)))
-            HGOTO_ERROR(gcpl_id, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized gcpl")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized gcpl")
         if(H5Pencode(gcpl_id, gcpl_buf, &gcpl_size) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, NULL, "can't serialize gcpl")
 
@@ -2713,8 +2713,20 @@ H5VL_daosm_group_open(void *_item,
         /* Check for no target_name, in this case just return target_grp */
         if(target_name[0] == '\0'
                 || (target_name[0] == '.' && target_name[1] == '\0')) {
+            size_t gcpl_size;
+
+            /* Take ownership of target_grp */
             grp = target_grp;
             target_grp = NULL;
+
+            /* Encode GCPL */
+            if(H5Pencode(grp->gcpl_id, NULL, &gcpl_size) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of gcpl")
+            if(NULL == (gcpl_buf = H5MM_malloc(gcpl_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized gcpl")
+            gcpl_len = (uint64_t)gcpl_size;
+            if(H5Pencode(grp->gcpl_id, gcpl_buf, &gcpl_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, NULL, "can't serialize gcpl")
         } /* end if */
         else {
             gcpl_buf = (uint8_t *)H5MM_xfree(gcpl_buf);
@@ -3434,6 +3446,10 @@ H5VL_daosm_dataset_open(void *_item,
     if(!collective || (item->file->my_rank == 0)) {
         if(collective && (item->file->num_procs > 1))
             must_bcast = TRUE;
+
+        /* Traverse the path */
+        if(NULL == (target_grp = H5VL_daosm_group_traverse(item, name, dxpl_id, req, &target_name, NULL, NULL)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "can't traverse path")
 
         /* Follow link to dataset */
         if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &dset->obj.oid, NULL, NULL) < 0)
@@ -4647,7 +4663,7 @@ H5VL_daosm_attribute_open(void *_item, H5VL_loc_params_t loc_params,
     if(H5Sselect_all(attr->space_id) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, NULL, "can't change selection")
 
-    /* Finish setting up dataset struct */
+    /* Finish setting up attribute struct */
     if(NULL == (attr->name = H5MM_strdup(name)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't copy attribute name")
 
