@@ -4,7 +4,7 @@
 int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
     char *pool_grp = NULL;
-    hid_t file = -1, obj = -1, attr = -1, fapl = -1;
+    hid_t file = -1, attr = -1, fapl = -1;
     H5VL_daosm_snap_id_t snap_id;
     int buf[4][6];
     int i, j;
@@ -14,8 +14,8 @@ int main(int argc, char *argv[]) {
     /* Seed random number generator */
     srand(time(NULL));
 
-    if(argc < 6 || argc > 7)
-        PRINTF_ERROR("argc must be 6 or 7\n");
+    if(argc < 5 || argc > 6)
+        PRINTF_ERROR("argc must be 5 or 6\n");
 
     /* Parse UUID */
     if(0 != uuid_parse(argv[1], pool_uuid))
@@ -37,20 +37,8 @@ int main(int argc, char *argv[]) {
     if((file = H5Fopen(argv[2], H5F_ACC_RDWR, fapl)) < 0)
         ERROR;
 
-    /* Open object */
-    if(!strcmp(argv[3], "-d") || !strcmp(argv[3], "-D")) {
-        if((obj = H5Dopen2(file, argv[4], H5P_DEFAULT)) < 0)
-            ERROR;
-    }
-    else {
-        if(strcmp(argv[3], "-g") && strcmp(argv[3], "-G"))
-            PRINTF_ERROR("argv[3] must be -d, -D, -g, or -G\n");
-        if((obj = H5Gopen2(file, argv[4], H5P_DEFAULT)) < 0)
-            ERROR;
-    }
-
     /* Open attribute */
-    if((attr = H5Aopen(obj, argv[5], H5P_DEFAULT)) < 0)
+    if((attr = H5Aopen_by_name(file, argv[3], argv[4], H5P_DEFAULT, H5P_DEFAULT)) < 0)
         ERROR;
 
     /* Fill and print buffer */
@@ -68,7 +56,7 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Save snapshot if requested */
-    if(argc == 7) {
+    if(argc == 6) {
         if(H5VLdaosm_snap_create(file, &snap_id) < 0)
             ERROR;
         printf("Saved snapshot: snap_id = %llu\n", (long long unsigned)snap_id);
@@ -76,8 +64,6 @@ int main(int argc, char *argv[]) {
 
     /* Close */
     if(H5Aclose(attr) < 0)
-        ERROR;
-    if(H5Oclose(obj) < 0)
         ERROR;
     if(H5Fclose(file) < 0)
         ERROR;
@@ -92,7 +78,6 @@ int main(int argc, char *argv[]) {
 error:
     H5E_BEGIN_TRY {
         H5Aclose(attr);
-        H5Oclose(obj);
         H5Fclose(file);
         H5Pclose(fapl);
     } H5E_END_TRY;

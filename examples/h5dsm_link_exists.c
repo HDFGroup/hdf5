@@ -4,7 +4,6 @@ int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
     char *pool_grp = NULL;
     hid_t file = -1, fapl = -1;
-    hsize_t dims[1] = {1};
     H5VL_daosm_snap_id_t snap_id;
     htri_t link_exists;
 

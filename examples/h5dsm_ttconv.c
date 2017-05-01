@@ -1852,18 +1852,6 @@ int main(int argc, char *argv[]) {
                 PRINTF_ERROR("Member c at location %d, %d does not match", i, j);
         } /* end for */
 
-    /*! ----------------------------------------------*/
-    /*! Temporary hack until overwrites are supported */
-    /* Fill in unwritten parts of file_buf_2, as read above */
-    for(i = 0; i< dims[0]; i++) {
-        file_buf2[i][0].a = (int)buf2[i][0].a;
-        file_buf2[i][0].b = buf2[i][0].b;
-        file_buf2[i][0].c = (double)buf2[i][0].c;
-        file_buf2[i][1].b = buf2[i][1].b;
-        file_buf2[i][1].c = (double)buf2[i][1].c;
-    }
-    /*! ----------------------------------------------*/
-
     printf("\n");
 
     /*
@@ -1904,6 +1892,10 @@ int main(int argc, char *argv[]) {
     /* Check buffer */
     for(i = 0; i< dims[0]; i++)
         for(j = 0; j < dims[1]; j++) {
+            /*! ----------------------------------------------*/
+            /*! Temporary hack until overwrites are supported */
+            if((j == 1) || (i == 0) || (i == 3))
+            /*! ----------------------------------------------*/
             if(((i == 1 || i == 2)
                     ? (long long)file_buf2[i][j].a : buf2_init[i][j].a)
                     != buf2[i][j].a)
@@ -1955,6 +1947,10 @@ int main(int argc, char *argv[]) {
     /* Check buffer */
     for(i = 0; i< dims[0]; i++)
         for(j = 0; j < dims[1]; j++) {
+            /*! ----------------------------------------------*/
+            /*! Temporary hack until overwrites are supported */
+            if((j == 0) || (i == 1) || (i == 3))
+            /*! ----------------------------------------------*/
             if(((j == 1) ? (long long)file_buf2[i / 2 + 1][i % 2].a
                     : buf2_init[i][j].a)
                     != buf2[i][j].a)

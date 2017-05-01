@@ -20,15 +20,15 @@ error:
 int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
     char *pool_grp = NULL;
-    hid_t file = -1, obj = -1, fapl = -1;
+    hid_t file = -1, fapl = -1;
     hsize_t num_attr = 0;
     herr_t ret;
     H5VL_daosm_snap_id_t snap_id;
 
     (void)MPI_Init(&argc, &argv);
 
-    if(argc < 5 || argc > 6)
-        PRINTF_ERROR("argc must be 5 or 6\n");
+    if(argc < 4 || argc > 5)
+        PRINTF_ERROR("argc must be 4 or 5\n");
 
     /* Parse UUID */
     if(0 != uuid_parse(argv[1], pool_uuid))
@@ -47,8 +47,8 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Open snapshot if specified */
-    if(argc == 6) {
-        snap_id = (H5VL_daosm_snap_id_t)atoi(argv[5]);
+    if(argc == 5) {
+        snap_id = (H5VL_daosm_snap_id_t)atoi(argv[4]);
         printf("Opening snapshot %llu\n", (long long unsigned)snap_id);
         if(H5Pset_daosm_snap_open(fapl, snap_id) < 0)
             ERROR;
@@ -58,29 +58,15 @@ int main(int argc, char *argv[]) {
     if((file = H5Fopen(argv[2], H5F_ACC_RDONLY, fapl)) < 0)
         ERROR;
 
-    /* Open object */
-    if(!strcmp(argv[3], "-d") || !strcmp(argv[3], "-D")) {
-        if((obj = H5Dopen2(file, argv[4], H5P_DEFAULT)) < 0)
-            ERROR;
-    }
-    else {
-        if(strcmp(argv[3], "-g") && strcmp(argv[3], "-G"))
-            PRINTF_ERROR("argv[3] must be -d, -D, -g, or -G\n");
-        if((obj = H5Gopen2(file, argv[4], H5P_DEFAULT)) < 0)
-            ERROR;
-    }
-
     printf("Iterating over attributes\n");
 
     /* Iterate */
-    if((ret = H5Aiterate(obj, H5_INDEX_NAME, H5_ITER_NATIVE, &num_attr, iter_cb, &od_test_g)) < 0)
+    if((ret = H5Aiterate_by_name(file, argv[3], H5_INDEX_NAME, H5_ITER_NATIVE, &num_attr, iter_cb, &od_test_g, H5P_DEFAULT)) < 0)
         ERROR;
 
     printf("Complete.  Number of attributes: %d\n", (int)num_attr);
 
     /* Close */
-    if(H5Oclose(obj) < 0)
-        ERROR;
     if(H5Fclose(file) < 0)
         ERROR;
     if(H5Pclose(fapl) < 0)
@@ -93,7 +79,6 @@ int main(int argc, char *argv[]) {
 
 error:
     H5E_BEGIN_TRY {
-        H5Oclose(obj);
         H5Fclose(file);
         H5Pclose(fapl);
     } H5E_END_TRY;
