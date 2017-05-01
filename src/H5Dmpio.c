@@ -2683,19 +2683,20 @@ static herr_t
 H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     const H5D_chunk_map_t *fm, H5D_filtered_collective_io_info_t *local_chunk_array, size_t *local_chunk_array_num_entries)
 {
-    H5D_filtered_collective_io_info_t *shared_chunks_info_array = NULL; /* The list of all chunks selected in the operation by all processes */
-    H5S_sel_iter_t                    *mem_iter = NULL; /* Memory iterator for H5D__gather_mem */
-    unsigned char                    **mod_data = NULL; /* Array of chunk modification data buffers sent by a process to new chunk owners */
-    MPI_Request                       *send_requests = NULL; /* Array of MPI_Isend chunk modification data send requests */
-    MPI_Status                        *send_statuses = NULL; /* Array of MPI_Isend chunk modification send statuses */
-    hbool_t                            mem_iter_init = FALSE;
-    size_t                             shared_chunks_info_array_num_entries = 0;
-    size_t                             num_send_requests = 0;
-    size_t                             i, last_assigned_idx;
-    int                               *send_counts = NULL;
-    int                               *send_displacements = NULL;
-    int                                mpi_rank, mpi_size, mpi_code;
-    herr_t                             ret_value = SUCCEED;
+    H5D_filtered_collective_io_info_t  *shared_chunks_info_array = NULL; /* The list of all chunks selected in the operation by all processes */
+    H5S_sel_iter_t                     *mem_iter = NULL; /* Memory iterator for H5D__gather_mem */
+    unsigned char                     **mod_data = NULL; /* Array of chunk modification data buffers sent by a process to new chunk owners */
+    MPI_Request                        *send_requests = NULL; /* Array of MPI_Isend chunk modification data send requests */
+    MPI_Status                         *send_statuses = NULL; /* Array of MPI_Isend chunk modification send statuses */
+    hbool_t                             mem_iter_init = FALSE;
+    size_t                              shared_chunks_info_array_num_entries = 0;
+    size_t                              num_send_requests = 0;
+    size_t                             *num_assigned_chunks_array = NULL;
+    size_t                              i, last_assigned_idx;
+    int                                *send_counts = NULL;
+    int                                *send_displacements = NULL;
+    int                                 mpi_rank, mpi_size, mpi_code;
+    herr_t                              ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -2728,14 +2729,15 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
         if (NULL == (send_displacements = (int *) H5MM_malloc((size_t) mpi_size * sizeof(*send_displacements))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate send displacements buffer")
 
+        if (NULL == (num_assigned_chunks_array = (size_t *) H5MM_calloc((size_t) mpi_size * sizeof(*num_assigned_chunks_array))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate number of assigned chunks array")
+
         for (i = 0; i < shared_chunks_info_array_num_entries;) {
             H5D_filtered_collective_io_info_t chunk_entry;
             haddr_t                           last_seen_addr = shared_chunks_info_array[i].chunk_states.chunk_current.offset;
             size_t                            set_begin_index = i;
-            size_t                            total_io_size = 0;
-            size_t                            max_io_size = 0;
             size_t                            num_writers = 0;
-            int                               new_chunk_owner = 0;
+            int                               new_chunk_owner = shared_chunks_info_array[i].owners.original_owner;
 
             /* Process each set of duplicate entries caused by another process writing to the same chunk */
             do {
@@ -2743,16 +2745,12 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
 
                 send_counts[chunk_entry.owners.original_owner] += (int) sizeof(chunk_entry);
 
-                /* Add this chunk entry's I/O size to the running total */
-                total_io_size += chunk_entry.io_size;
-
                 /* The new owner of the chunk is determined by the process
-                 * which is writing the most data to the chunk
+                 * writing to the chunk which currently has the least amount
+                 * of chunks assigned to it
                  */
-                if (chunk_entry.io_size > max_io_size) {
-                    max_io_size = chunk_entry.io_size;
+                if (num_assigned_chunks_array[chunk_entry.owners.original_owner] < num_assigned_chunks_array[new_chunk_owner])
                     new_chunk_owner = chunk_entry.owners.original_owner;
-                }
 
                 num_writers++;
             } while (++i < shared_chunks_info_array_num_entries && shared_chunks_info_array[i].chunk_states.chunk_current.offset == last_seen_addr);
@@ -2762,6 +2760,8 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
                 shared_chunks_info_array[set_begin_index].owners.new_owner = new_chunk_owner;
                 shared_chunks_info_array[set_begin_index].num_writers = num_writers;
             } /* end for */
+
+            num_assigned_chunks_array[new_chunk_owner]++;
         } /* end for */
 
         /* Sort the new list in order of previous owner so that each original owner of a chunk
@@ -2925,6 +2925,8 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
     if (mem_iter)
         H5MM_free(mem_iter);
+    if (num_assigned_chunks_array)
+        H5MM_free(num_assigned_chunks_array);
     if (shared_chunks_info_array)
         H5MM_free(shared_chunks_info_array);
 
