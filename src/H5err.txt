@@ -247,6 +247,7 @@ MINOR, MPI, H5E_MPIERRSTR, MPI Error String
 MINOR, MPI, H5E_CANTRECV, Can't receive data
 MINOR, MPI, H5E_CANTGATHER, Can't gather data
 MINOR, MPI, H5E_NO_INDEPENDENT, Can't perform independent IO
+MINOR, MPI, H5E_CANTDISTRIBUTE, Can't distribute shared chunks
 
 # Heap errors
 MINOR, HEAP, H5E_CANTRESTORE, Can't restore condition
