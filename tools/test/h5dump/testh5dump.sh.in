@@ -487,6 +487,8 @@ TOOLTEST() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $xCMP $expect $actual > /dev/null 2>&1 ; then
      echo " PASSED"
     else
@@ -529,11 +531,15 @@ TOOLTEST2() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       if [ ! -f $expectdata ]; then
       # Create the expect data file if it doesn't yet exist.
         echo " CREATED"
         cp $actualdata $expectdata
+        echo "    Expected data (*.exp) missing"
+        nerrors="`expr $nerrors + 1`"
       elif $CMP $expectdata $actualdata; then
         echo " PASSED"
       else
@@ -584,16 +590,22 @@ TOOLTEST2A() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       if [ ! -f $expectdata ]; then
       # Create the expect data file if it doesn't yet exist.
         echo " CREATED"
         cp $actualdata $expectdata
+        echo "    Expected data (*.exp) missing"
+        nerrors="`expr $nerrors + 1`"
       elif $DIFF $expectdata $actualdata; then
         if [ ! -f $expectmeta ]; then
         # Create the expect meta file if it doesn't yet exist.
           echo " CREATED"
           cp $actualmeta $expectmeta
+          echo "    Expected metafile (*.ddl) missing"
+          nerrors="`expr $nerrors + 1`"
         elif $CMP $expectmeta $actualmeta; then
           echo " PASSED"
         else
@@ -645,6 +657,8 @@ TOOLTEST2B() {
     # Create the expect data file if it doesn't yet exist.
       echo " CREATED"
       cp $actualdata $expectdata
+      echo "    Expected data (*.exp) missing"
+      nerrors="`expr $nerrors + 1`"
     elif $CMP $expectdata $actualdata; then
       echo " PASSED"
     else
@@ -700,6 +714,8 @@ TOOLTEST3() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      echo " PASSED"
     else
@@ -757,15 +773,17 @@ TOOLTEST4() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      if $CMP $expect_err $actual_ext; then
       echo " PASSED"
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.err) differs from actual result (*.oerr)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
-    fi
+     else
+      echo "*FAILED*"
+      echo "    Expected result (*.err) differs from actual result (*.oerr)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+     fi
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"
@@ -821,15 +839,17 @@ TOOLTEST5() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      if $CMP $expect_err $actual_ext; then
       echo " PASSED"
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.err) differs from actual result (*.oerr)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
-    fi
+     else
+      echo "*FAILED*"
+      echo "    Expected result (*.err) differs from actual result (*.oerr)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+     fi
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"
@@ -863,6 +883,8 @@ TOOLTEST_HELP() {
     # Create the expect data file if it doesn't yet exist.
       echo " CREATED"
       cp $actual $expect-CREATED
+      echo "    Expected output (*.txt) missing"
+      nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       echo " PASSED"
     else
