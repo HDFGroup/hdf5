@@ -22,6 +22,7 @@
  */
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Fprivate.h"         /* Files                                */
 #include "H5FDprivate.h"        /* File drivers                         */
@@ -40,13 +41,13 @@ hid_t H5VL_DAOSM_g = -1;
  * Macros
  */
 /* Constant Keys */
-#define H5VL_DAOSM_INT_MD_KEY "Internal Metadata"
-#define H5VL_DAOSM_MAX_OID_KEY "Max OID"
-#define H5VL_DAOSM_CPL_KEY "Creation Property List"
-#define H5VL_DAOSM_LINK_KEY "Link"
-#define H5VL_DAOSM_TYPE_KEY "Datatype"
-#define H5VL_DAOSM_SPACE_KEY "Dataspace"
-#define H5VL_DAOSM_ATTR_KEY "Attribute"
+#define H5VL_DAOSM_INT_MD_KEY "/Internal Metadata"
+#define H5VL_DAOSM_MAX_OID_KEY "/Max OID"
+#define H5VL_DAOSM_CPL_KEY "/Creation Property List"
+#define H5VL_DAOSM_LINK_KEY "/Link"
+#define H5VL_DAOSM_TYPE_KEY "/Datatype"
+#define H5VL_DAOSM_SPACE_KEY "/Dataspace"
+#define H5VL_DAOSM_ATTR_KEY "/Attribute"
 #define H5VL_DAOSM_CHUNK_KEY 0u
 
 /* Stack allocation sizes */
@@ -1838,11 +1839,11 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
     /* Set up dkey */
     /* For now always use dkey = const, akey = name. Add option to switch these
      * DSMINC */
-    daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
+    daos_iov_set(&dkey, (void *)name, (daos_size_t)name_len);
 
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.iod_name, (void *)name, (daos_size_t)name_len);
+    daos_iov_set(&iod.iod_name, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
     daos_csum_set(&iod.iod_kcsum, NULL, 0);
     iod.iod_nr = 1u;
     iod.iod_size = DAOS_REC_ANY;
@@ -1964,7 +1965,7 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
     /* Set up dkey */
     /* For now always use dkey = const, akey = name. Add option to switch these
      * DSMINC */
-    daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
+    daos_iov_set(&dkey, (void *)name, (daos_size_t)name_len);
 
     /* Encode link type */
     p = iov_buf;
@@ -2012,7 +2013,7 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
 
 
     /* Finish setting up iod */
-    daos_iov_set(&iod.iod_name, (void *)name, (daos_size_t)name_len);
+    daos_iov_set(&iod.iod_name, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
     daos_csum_set(&iod.iod_kcsum, NULL, 0);
     iod.iod_nr = 1u;
     iod.iod_type = DAOS_IOD_SINGLE;
@@ -2238,7 +2239,7 @@ H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
                 /* Check for no target_name, in this case just return
                  * target_grp's oid */
                 if(target_name[0] == '\0'
-                        || (target_name[0] == '.' && target_name[1] == '\0'))
+                        || (target_name[0] == '.' && name_len == (size_t)1))
                     *oid = target_grp->obj.oid;
                 else
                     /* Follow the last element in the path */
@@ -3940,12 +3941,12 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if((file_type_size = H5Tget_size(dset->type_id)) == 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype size")
 
-    /* Encode dkey (chunk coordinates).  Prefix with '/' to avoid accidental
+    /* Encode dkey (chunk coordinates).  Prefix with '\0' to avoid accidental
      * collisions with other d-keys in this object.  For now just 1 chunk,
      * starting at 0. */
     HDmemset(chunk_coords, 0, sizeof(chunk_coords)); //DSMINC
     p = dkey_buf;
-    *p++ = (uint8_t)'/';
+    *p++ = (uint8_t)'\0';
     for(i = 0; i < ndims; i++)
         UINT64ENCODE(p, chunk_coords[i])
 
@@ -4177,12 +4178,12 @@ H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id,
     if(H5VL_daosm_tconv_init(mem_type_id, &mem_type_size, dset->type_id, &file_type_size, (size_t)num_elem, &tconv_buf, &bkg_buf, NULL, &fill_bkg) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize type conversion")
 
-    /* Encode dkey (chunk coordinates).  Prefix with '/' to avoid accidental
+    /* Encode dkey (chunk coordinates).  Prefix with '\0' to avoid accidental
      * collisions with other d-keys in this object.  For now just 1 chunk,
      * starting at 0. */
     HDmemset(chunk_coords, 0, sizeof(chunk_coords)); //DSMINC
     p = dkey_buf;
-    *p++ = (uint8_t)'/';
+    *p++ = (uint8_t)'\0';
     for(i = 0; i < ndims; i++)
         UINT64ENCODE(p, chunk_coords[i])
 
