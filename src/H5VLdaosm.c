@@ -42,11 +42,11 @@ hid_t H5VL_DAOSM_g = -1;
  */
 /* Constant Keys */
 #define H5VL_DAOSM_INT_MD_KEY "/Internal Metadata"
-#define H5VL_DAOSM_MAX_OID_KEY "/Max OID"
-#define H5VL_DAOSM_CPL_KEY "/Creation Property List"
-#define H5VL_DAOSM_LINK_KEY "/Link"
-#define H5VL_DAOSM_TYPE_KEY "/Datatype"
-#define H5VL_DAOSM_SPACE_KEY "/Dataspace"
+#define H5VL_DAOSM_MAX_OID_KEY "Max OID"
+#define H5VL_DAOSM_CPL_KEY "Creation Property List"
+#define H5VL_DAOSM_LINK_KEY "Link"
+#define H5VL_DAOSM_TYPE_KEY "Datatype"
+#define H5VL_DAOSM_SPACE_KEY "Dataspace"
 #define H5VL_DAOSM_ATTR_KEY "/Attribute"
 #define H5VL_DAOSM_CHUNK_KEY 0u
 
