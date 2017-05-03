@@ -29,19 +29,29 @@
 
 #define FILE_NAME "test_dectris.h5"
 
+/* Datasets for Direct Write tests */
 #define DATASETNAME1        "direct_write"
 #define DATASETNAME2        "skip_one_filter"
 #define DATASETNAME3        "skip_two_filters"
 #define DATASETNAME4        "data_conv"
 #define DATASETNAME5        "contiguous_dset"
 #define DATASETNAME6        "invalid_argue"
+/* Datasets for Direct Read tests */
+#define DATASETNAME7        "disabled_chunk_cache"
+#define DATASETNAME8        "read_w_valid_cache"
+#define DATASETNAME9        "flush_chunk_cache"
+#define DATASETNAME10       "unallocated_chunk"
+#define DATASETNAME11       "unfiltered_data"
+
+
+
 #define RANK         2
 #define NX     16
 #define NY     16
 #define CHUNK_NX     4
 #define CHUNK_NY     4
 
-#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001F)+12)
+#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001)+12)
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS1	305
@@ -79,10 +89,10 @@ const H5Z_class2_t H5Z_BOGUS2[1] = {{
 /*-------------------------------------------------------------------------
  * Function:	test_direct_chunk_write
  *
- * Purpose:	Test the basic functionality of H5DOwrite_chunk/H5DOread_chunk
+ * Purpose:	    Test the basic functionality of H5DOwrite_chunk
  *
- * Return:	Success:	0
- *		    Failure:	1
+ * Return:	    Success:	0
+ *		        Failure:	1
  *
  * Programmer:  Raymond Lu	
  *              30 November 2012
@@ -105,32 +115,24 @@ test_direct_chunk_write (hid_t file)
     int         i, j, n;
 
     unsigned    filter_mask = 0;
-    unsigned    read_filter_mask = 0;
     int         direct_buf[CHUNK_NX][CHUNK_NY];
     int         check_chunk[CHUNK_NX][CHUNK_NY];
     hsize_t     offset[2] = {0, 0};
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
 
     const Bytef *z_src = (const Bytef*)(direct_buf);
-    Bytef	    *z_dst;		        /*destination buffer		*/
+    Bytef	    *z_dst;		/*destination buffer		*/
     uLongf	     z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
     uLong	     z_src_nbytes = (uLong)buf_size;
-    int          aggression = 9;    /* Compression aggression setting */
-    void	*outbuf = NULL;         /* Pointer to new buffer */
-
-    /* For H5DOread_chunk() */
-    void        *readbuf = NULL;                    /* Buffer for reading data */
-    const Bytef *pt_readbuf;                        /* Point to the buffer for data read */
-    hsize_t     read_chunk_nbytes;                  /* Size of chunk on disk */
-    int         read_dst_buf[CHUNK_NX][CHUNK_NY];   /* Buffer to hold un-compressed data */
-
+    int          aggression = 9;     /* Compression aggression setting */
+    void	    *outbuf = NULL;     /* Pointer to new buffer */
 
     hsize_t start[2];  /* Start of hyperslab */
     hsize_t stride[2]; /* Stride of hyperslab */
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("basic functionality of H5DOwrite_chunk/H5DOread_chunk");
+    TESTING("basic functionality of H5DOwrite_chunk");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -161,75 +163,26 @@ test_direct_chunk_write (hid_t file)
 			cparms, H5P_DEFAULT)) < 0)
         goto error;
 
+    /* Initialize the dataset */
+    for(i = n = 0; i < NX; i++)
+        for(j = 0; j < NY; j++)
+	    data[i][j] = n++;
+
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         goto error;
 
-    HDmemset(data, 0, sizeof(data));
-    /* Initialize data for the first chunk */
-    for(i = n = 0; i < CHUNK_NX; i++)
-        for(j = 0; j < CHUNK_NY; j++)
-            data[i][j] = n++;
-
-     /* Write the data to the dataset. */ 
+    /*
+     * Write the data for the dataset.  It should stay in the chunk cache.
+     * It will be evicted from the cache by the H5DOwrite_chunk calls. 
+     */
     if((status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      dxpl, data)) < 0)
         goto error;
 
-    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
-        goto error;
-
-    if(H5Dclose(dataset) < 0)
-        goto error;
-
-    if((dataset = H5Dopen2(file, DATASETNAME1, H5P_DEFAULT)) < 0)
-        goto error;
-
-    offset[0] = offset[1] = 0;
-
-    /* Get the size of the compressed chunk */
-    ret = H5Dget_chunk_storage_size(dataset, offset, &read_chunk_nbytes);
-
-    readbuf = HDmalloc(read_chunk_nbytes);
-    pt_readbuf = (const Bytef *)readbuf;
-
-    /* Test to use H5DOread_chunk() to read the chunk back */
-    if((status = H5DOread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, readbuf)) < 0)
-        goto error;
-
-    /* uncompress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen) */
-    ret = uncompress((Bytef *)read_dst_buf, (uLongf *)&buf_size, pt_readbuf, (uLong)read_chunk_nbytes);
-
-    /* Check for various zlib errors */
-    if(Z_BUF_ERROR == ret) {
-        HDfprintf(stderr, "error: not enough room in output buffer");
-        goto error;
-    } else if(Z_MEM_ERROR == ret) {
-        HDfprintf(stderr, "error: not enough memory");
-        goto error;
-    } else if(Z_OK != ret) {
-        HDfprintf(stderr, "error: corrupted input data");
-        goto error;
-    }
-
-    /* Check that the values read are the same as the values written */
-    for(i = 0; i < CHUNK_NX; i++) {
-        for(j = 0; j < CHUNK_NY; j++) {
-            if(data[i][j] != read_dst_buf[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    data=%d, read_dst_buf=%d\n", data[i][j], read_dst_buf[i][j]);
-                goto error;
-            }
-        }
-    }
-
-    if(readbuf)
-        HDfree(readbuf);
-
     /* Initialize data for one chunk */
     for(i = n = 0; i < CHUNK_NX; i++)
         for(j = 0; j < CHUNK_NY; j++)
-            direct_buf[i][j] = n++;
+	    direct_buf[i][j] = n++;
 
     /* Allocate output (compressed) buffer */
     outbuf = HDmalloc(z_dst_nbytes);
@@ -273,59 +226,6 @@ test_direct_chunk_write (hid_t file)
     if((dataset = H5Dopen2(file, DATASETNAME1, H5P_DEFAULT)) < 0)
         goto error;
 
-    offset[0] = CHUNK_NX;
-    offset[1] = CHUNK_NY;
-
-    /* Get the size of the compressed chunk */
-    ret = H5Dget_chunk_storage_size(dataset, offset, &read_chunk_nbytes);
-
-    if(read_chunk_nbytes != (hsize_t)z_dst_nbytes) {
-        HDfprintf(stderr, "Read/write chunk size not the same.");
-        goto error;
-    }
-
-    readbuf = HDmalloc(read_chunk_nbytes);
-    pt_readbuf = (const Bytef *)readbuf;
-
-    /* Test to use H5DOread_chunk() to read the chunk back */
-    if((status = H5DOread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, readbuf)) < 0)
-        goto error;
-
-    if(read_filter_mask != filter_mask) {
-        HDfprintf(stderr, "    Read/write filter mask not the same.");
-        goto error;
-    }
-
-    /* uncompress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen) */
-    ret = uncompress((Bytef *)read_dst_buf, (uLongf *)&buf_size, pt_readbuf, (uLong)read_chunk_nbytes);
-
-    /* Check for various zlib errors */
-    if(Z_BUF_ERROR == ret) {
-        HDfprintf(stderr, "error: not enough room in output buffer");
-        goto error;
-    } else if(Z_MEM_ERROR == ret) {
-        HDfprintf(stderr, "error: not enough memory");
-        goto error;
-    } else if(Z_OK != ret) {
-        HDfprintf(stderr, "error: corrupted input data");
-        goto error;
-    }
-
-    /* Check that the values read are the same as the values written */
-    for(i = 0; i < CHUNK_NX; i++) {
-        for(j = 0; j < CHUNK_NY; j++) {
-            if(direct_buf[i][j] != read_dst_buf[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    direct_buf=%d, read_dst_buf=%d\n", direct_buf[i][j], read_dst_buf[i][j]); 
-                goto error;
-            }
-        }
-    }
-
-    if(readbuf)
-        HDfree(readbuf);
-
     /*
      * Select hyperslab for one chunk in the file
      */
@@ -336,7 +236,7 @@ test_direct_chunk_write (hid_t file)
     if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
         goto error;
 
-    /* Test to use H5Dread() to read the chunk back */
+    /* Read the chunk back */
     if((status = H5Dread(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, check_chunk)) < 0)
         goto error;
 
@@ -352,11 +252,10 @@ test_direct_chunk_write (hid_t file)
         }
     }
 
-
     /* Reinitialize different data for one chunk */
     for(i = 0; i < CHUNK_NX; i++)
         for(j = 0; j < CHUNK_NY; j++)
-            direct_buf[i][j] = i + j;
+	    direct_buf[i][j] = i + j;
 
     /* Allocate output (compressed) buffer */
     outbuf = HDmalloc(z_dst_nbytes);
@@ -401,60 +300,7 @@ test_direct_chunk_write (hid_t file)
     if((dataset = H5Dopen2(file, DATASETNAME1, H5P_DEFAULT)) < 0)
         goto error;
 
-    offset[0] = CHUNK_NX;
-    offset[1] = CHUNK_NY;
-
-    /* Get the size of the compressed chunk */
-    ret = H5Dget_chunk_storage_size(dataset, offset, &read_chunk_nbytes);
-
-    if(read_chunk_nbytes != (hsize_t)z_dst_nbytes) {
-        HDfprintf(stderr, "Read/write chunk size not the same.");
-        goto error;
-    }
-
-    readbuf = HDmalloc(read_chunk_nbytes);
-    pt_readbuf = (const Bytef *)readbuf;
-
-    /* Test to use H5DOread_chunk() to read the chunk back */
-    if((status = H5DOread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, readbuf)) < 0)
-        goto error;
-
-    if(read_filter_mask != filter_mask) {
-        HDfprintf(stderr, "    Read/write filter mask not the same.");
-        goto error;
-    }
-
-    /* uncompress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen) */
-    ret = uncompress((Bytef *)read_dst_buf, (uLongf *)&buf_size, pt_readbuf, (uLong)read_chunk_nbytes);
-
-    /* Check for various zlib errors */
-    if(Z_BUF_ERROR == ret) {
-        HDfprintf(stderr, "error: not enough room in output buffer");
-        goto error;
-    } else if(Z_MEM_ERROR == ret) {
-        HDfprintf(stderr, "error: not enough memory");
-        goto error;
-    } else if(Z_OK != ret) {
-        HDfprintf(stderr, "error: corrupted input data");
-        goto error;
-    }
-
-    /* Check that the values read are the same as the values written */
-    for(i = 0; i < CHUNK_NX; i++) {
-        for(j = 0; j < CHUNK_NY; j++) {
-            if(direct_buf[i][j] != read_dst_buf[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    direct_buf=%d, my_buf=%d\n", direct_buf[i][j], read_dst_buf[i][j]); 
-                goto error;
-            }
-        }
-    }
-
-    if(readbuf)
-        HDfree(readbuf);
-
-    /* Test to use H5Dread() to read the chunk back */
+    /* Read the chunk back */
     if((status = H5Dread(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, check_chunk)) < 0)
         goto error;
 
@@ -493,12 +339,10 @@ error:
 
     if(outbuf)
         HDfree(outbuf);
-    if(readbuf)
-        HDfree(readbuf);
 
     return 1;
-} /* test_direct_chunk_write() */
-#endif
+}
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
 /*-------------------------------------------------------------------------
  * Function:	test_skip_compress_write1
@@ -520,19 +364,22 @@ test_skip_compress_write1(hid_t file)
     hid_t       dataspace = -1, dataset = -1;
     hid_t       mem_space = -1;
     hid_t       cparms = -1, dxpl = -1;
-    hsize_t     dims[2]  = {NX, NY};        
+    hsize_t     dims[2]  = {NX, NY};
     hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t     chunk_dims[2] ={CHUNK_NX, CHUNK_NY};
     herr_t      status;
     int         i, j, n;
 
     unsigned    filter_mask = 0;
-    unsigned    read_filter_mask = 0;
     int         direct_buf[CHUNK_NX][CHUNK_NY];
     int         check_chunk[CHUNK_NX][CHUNK_NY];
     hsize_t     offset[2] = {0, 0};
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
     int         aggression = 9;     /* Compression aggression setting */
+
+    unsigned    read_filter_mask = 0; /* filter mask after direct read */
+    int         read_direct_buf[CHUNK_NX][CHUNK_NY];
+    hsize_t     read_buf_size = 0; /* buf size */
 
     hsize_t start[2];  /* Start of hyperslab */
     hsize_t stride[2]; /* Stride of hyperslab */
@@ -576,11 +423,11 @@ test_skip_compress_write1(hid_t file)
     /* Initialize data for one chunk */
     for(i = n = 0; i < CHUNK_NX; i++)
         for(j = 0; j < CHUNK_NY; j++) {
-            direct_buf[i][j] = n++;
-        }
+	    direct_buf[i][j] = n++;
+    }
 
-    /* write the uncompressed chunk data repeatedly to dataset, using the direct writing function. 
-     * Indicate skipping the compression filter.     */ 
+    /* write the uncompressed chunk data repeatedly to dataset, using the direct writing function.
+     * Indicate skipping the compression filter.     */
     offset[0] = CHUNK_NX;
     offset[1] = CHUNK_NY;
 
@@ -589,7 +436,7 @@ test_skip_compress_write1(hid_t file)
     if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
         goto error;
 
-    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0) 
+    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -598,29 +445,6 @@ test_skip_compress_write1(hid_t file)
     if((dataset = H5Dopen2(file, DATASETNAME2, H5P_DEFAULT)) < 0)
         goto error;
 
-    /* Use H5DOread_chunk() to read the uncompressed data */
-    if((status = H5DOread_chunk(dataset, dxpl, offset, &read_filter_mask, check_chunk)) < 0)
-        goto error;
-
-    if(read_filter_mask != filter_mask) {
-        HDfprintf(stderr, "    Read/write filter mask not the same.");
-        goto error;
-    }
-
-    /* Check that the values read are the same as the values written */
-    for(i = 0; i < CHUNK_NX; i++) {
-        for(j = 0; j < CHUNK_NY; j++) {
-            if(direct_buf[i][j] != check_chunk[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
-                goto error;
-            }
-        }
-    }
-
-    /* Clear the buffer */
-    HDmemset(check_chunk, 0, buf_size);
     /*
      * Select hyperslab for the chunk just written in the file
      */
@@ -631,7 +455,7 @@ test_skip_compress_write1(hid_t file)
     if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
         goto error;
 
-    /* Use H5Dread() to read the chunk back */
+    /* Read the chunk back */
     if((status = H5Dread(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, check_chunk)) < 0)
         goto error;
 
@@ -641,7 +465,32 @@ test_skip_compress_write1(hid_t file)
             if(direct_buf[i][j] != check_chunk[i][j]) {
                 printf("    1. Read different values than written.");
                 printf("    At index %d,%d\n", i, j);
-                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
+                goto error;
+            }
+        }
+    }
+
+    /* Query chunk storage size */
+    if((status = H5Dget_chunk_storage_size(dataset, offset, &read_buf_size)) < 0)
+        goto error;
+    if(read_buf_size != buf_size)
+        goto error;
+
+    /* Read the raw chunk back */
+    HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
+    if((status = H5DOread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
+        goto error;
+    if(read_filter_mask != filter_mask)
+        goto error;
+
+    /* Check that the direct chunk read is the same as the chunk written */
+    for(i = 0; i < CHUNK_NX; i++) {
+        for(j = 0; j < CHUNK_NY; j++) {
+            if(direct_buf[i][j] != read_direct_buf[i][j]) {
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
                 goto error;
             }
         }
@@ -655,7 +504,7 @@ test_skip_compress_write1(hid_t file)
     H5Sclose(dataspace);
     H5Pclose(cparms);
     H5Pclose(dxpl);
-    
+
     PASSED();
     return 0;
 
@@ -669,7 +518,7 @@ error:
     } H5E_END_TRY;
 
     return 1;
-}
+} /* test_skip_compress_write1() */
 
 /*-------------------------------------------------------------------------
  * Function:	filter_bogus1
@@ -707,7 +556,7 @@ filter_bogus1(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
     } /* end else */
 
     return nbytes;
-}
+} /* filter_bogus1() */
 
 /*-------------------------------------------------------------------------
  * Function:	filter_bogus2
@@ -744,7 +593,7 @@ filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
     } /* end else */
 
     return nbytes;
-}
+} /* filter_bogus2() */
 
 /*-------------------------------------------------------------------------
  * Function:	test_skip_compress_write2
@@ -766,25 +615,28 @@ test_skip_compress_write2(hid_t file)
     hid_t       dataspace = -1, dataset = -1;
     hid_t       mem_space = -1;
     hid_t       cparms = -1, dxpl = -1;
-    hsize_t     dims[2]  = {NX, NY};        
+    hsize_t     dims[2]  = {NX, NY};
     hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t     chunk_dims[2] ={CHUNK_NX, CHUNK_NY};
     herr_t      status;
     int         i, j, n;
 
-    unsigned    filter_mask = 0;
-    unsigned    read_filter_mask = 0;
+    unsigned    filter_mask = 0;    /* orig filter mask */
     int         origin_direct_buf[CHUNK_NX][CHUNK_NY];
     int         direct_buf[CHUNK_NX][CHUNK_NY];
     int         check_chunk[CHUNK_NX][CHUNK_NY];
     hsize_t     offset[2] = {0, 0};
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
-    int          aggression = 9;     /* Compression aggression setting */
+    int         aggression = 9;     /* Compression aggression setting */
 
-    hsize_t start[2];  /* Start of hyperslab */
-    hsize_t stride[2]; /* Stride of hyperslab */
-    hsize_t count[2];  /* Block count */
-    hsize_t block[2];  /* Block sizes */
+    unsigned    read_filter_mask = 0;   /* filter mask after direct read */
+    int         read_direct_buf[CHUNK_NX][CHUNK_NY];
+    hsize_t     read_buf_size = 0;  /* buf size */
+
+    hsize_t start[2];   /* Start of hyperslab */
+    hsize_t stride[2];  /* Stride of hyperslab */
+    hsize_t count[2];   /* Block count */
+    hsize_t block[2];   /* Block sizes */
 
     TESTING("skipping compression filters but keep two other filters");
 
@@ -808,10 +660,10 @@ test_skip_compress_write2(hid_t file)
         goto error;
 
     /* Register and enable first bogus filter */
-    if(H5Zregister (H5Z_BOGUS1) < 0) 
+    if(H5Zregister (H5Z_BOGUS1) < 0)
         goto error;
 
-    if(H5Pset_filter(cparms, H5Z_FILTER_BOGUS1, 0, (size_t)0, NULL) < 0) 
+    if(H5Pset_filter(cparms, H5Z_FILTER_BOGUS1, 0, (size_t)0, NULL) < 0)
         goto error;
 
     /* Enable compression filter */
@@ -819,10 +671,10 @@ test_skip_compress_write2(hid_t file)
         goto error;
 
     /* Register and enable second bogus filter */
-    if(H5Zregister (H5Z_BOGUS2) < 0) 
+    if(H5Zregister (H5Z_BOGUS2) < 0)
         goto error;
 
-    if(H5Pset_filter(cparms, H5Z_FILTER_BOGUS2, 0, (size_t)0, NULL) < 0) 
+    if(H5Pset_filter(cparms, H5Z_FILTER_BOGUS2, 0, (size_t)0, NULL) < 0)
         goto error;
 
     /*
@@ -843,8 +695,8 @@ test_skip_compress_write2(hid_t file)
             direct_buf[i][j] = (origin_direct_buf[i][j] + ADD_ON) * FACTOR;
         }
 
-    /* write the uncompressed chunk data repeatedly to dataset, using the direct writing function. 
-     * Indicate skipping the compression filter but keep the other two bogus filters */ 
+    /* write the uncompressed chunk data repeatedly to dataset, using the direct writing function.
+     * Indicate skipping the compression filter but keep the other two bogus filters */
     offset[0] = CHUNK_NX;
     offset[1] = CHUNK_NY;
 
@@ -854,7 +706,7 @@ test_skip_compress_write2(hid_t file)
     if((status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
         goto error;
 
-    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0) 
+    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -862,35 +714,6 @@ test_skip_compress_write2(hid_t file)
 
     if((dataset = H5Dopen2(file, DATASETNAME3, H5P_DEFAULT)) < 0)
         goto error;
-
-    /* Use H5DOread_chunk() to read the uncompressed data */
-    if((status = H5DOread_chunk(dataset, dxpl, offset, &read_filter_mask, check_chunk)) < 0)
-        goto error;
-
-    if(read_filter_mask != filter_mask) {
-        HDfprintf(stderr, "    Read/write filter mask not the same.");
-        goto error;
-    }
-
-    /* De-compress the operations of the two bogus filters to the chunk */
-    for(i = n = 0; i < CHUNK_NX; i++)
-        for(j = 0; j < CHUNK_NY; j++)
-            check_chunk[i][j] = (check_chunk[i][j]/FACTOR) - ADD_ON;
-
-    /* Check that the values read are the same as the values written */
-    for(i = 0; i < CHUNK_NX; i++) {
-        for(j = 0; j < CHUNK_NY; j++) {
-            if(origin_direct_buf[i][j] != check_chunk[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j], check_chunk[i][j]); 
-                goto error;
-            }
-        }
-    }
-
-    /* Clear the buffer */
-    HDmemset(check_chunk, 0, buf_size);
 
     /*
      * Select hyperslab for one chunk in the file
@@ -902,7 +725,7 @@ test_skip_compress_write2(hid_t file)
     if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
         goto error;
 
-    /* Use H5Dread() to read the chunk back */
+    /* Read the chunk back */
     if((status = H5Dread(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, check_chunk)) < 0)
         goto error;
 
@@ -912,7 +735,32 @@ test_skip_compress_write2(hid_t file)
             if(origin_direct_buf[i][j] != check_chunk[i][j]) {
                 printf("    1. Read different values than written.");
                 printf("    At index %d,%d\n", i, j);
-                printf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j], check_chunk[i][j]); 
+                printf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j], check_chunk[i][j]);
+                goto error;
+            }
+        }
+    }
+
+    /* Query chunk storage size */
+    if((status = H5Dget_chunk_storage_size(dataset, offset, &read_buf_size)) < 0)
+        goto error;
+    if(read_buf_size != buf_size)
+        goto error;
+
+    /* Read the raw chunk back */
+    HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
+    if((status = H5DOread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
+        goto error;
+    if(read_filter_mask != filter_mask)
+        goto error;
+
+    /* Check that the direct chunk read is the same as the chunk written */
+    for(i = 0; i < CHUNK_NX; i++) {
+        for(j = 0; j < CHUNK_NY; j++) {
+            if(direct_buf[i][j] != read_direct_buf[i][j]) {
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
                 goto error;
             }
         }
@@ -926,7 +774,7 @@ test_skip_compress_write2(hid_t file)
     H5Sclose(dataspace);
     H5Pclose(cparms);
     H5Pclose(dxpl);
-    
+
     PASSED();
     return 0;
 
@@ -940,7 +788,7 @@ error:
     } H5E_END_TRY;
 
     return 1;
-}
+} /* test_skip_compress_write2() */
 
 /*-------------------------------------------------------------------------
  * Function:	test_data_conv
@@ -1168,7 +1016,7 @@ error:
     } H5E_END_TRY;
 
     return 1;
-}
+} /* test_data_conv() */
 
 /*-------------------------------------------------------------------------
  * Function:	test_invalid_parameters
@@ -1379,7 +1227,629 @@ error:
     } H5E_END_TRY;
 
     return 1;
-}
+} /* test_invalid_parameters() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_direct_chunk_read_no_cache
+ *
+ * Purpose:     Test the basic functionality of H5DOread_chunk with the
+ *              chunk cache diabled.
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ * Programmer:  Matthew Strong (GE Healthcare)
+ *              14 February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_FILTER_DEFLATE
+static int
+test_direct_chunk_read_no_cache (hid_t file)
+{
+    hid_t       dataspace = -1, dataset = -1;
+    hid_t       mem_space = -1;
+    hid_t       cparms = -1, dxpl = -1, dapl = -1;
+    hsize_t     dims[2]  = {NX, NY};
+    hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t     chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
+    herr_t      status;         /* status from H5 function calls */
+    int         ret;            /* deflate return status */
+    int         data[NX][NY];
+    int         i, j, k, l, n;  /* local index variables */
+
+    unsigned    filter_mask = 0; /* filter mask returned from H5DOread_chunk */
+    int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5DOread and manually decompressed */
+    int         check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
+    hsize_t     offset[2]; /* chunk offset used for H5DOread_chunk */
+    size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
+
+    Bytef       *z_src;     /* source buffer        */
+    uLongf       z_src_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
+    Bytef       *z_dst = (Bytef*)(direct_buf);
+    uLong        z_dst_nbytes = (uLong)buf_size;
+    int          aggression = 9;     /* Compression aggression setting */
+    void        *outbuf = NULL;      /* Pointer to new buffer */
+
+    hsize_t start[2];  /* Start of hyperslab */
+    hsize_t stride[2]; /* Stride of hyperslab */
+    hsize_t count[2];  /* Block count */
+    hsize_t block[2];  /* Block sizes */
+
+    TESTING("basic functionality of H5DOread_chunk (chunk cache disabled)");
+
+    /* Create the data space with unlimited dimensions. */
+    if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
+        goto error;
+    if((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
+        goto error;
+
+    /* Modify dataset creation properties, i.e. enable chunking and compression */
+    if((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if((status = H5Pset_chunk( cparms, RANK, chunk_dims)) < 0)
+        goto error;
+    if((status = H5Pset_deflate( cparms, (unsigned) aggression)) < 0)
+        goto error;
+    if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        goto error;
+
+    /* Disable chunk cache by setting number of slots to 0 */
+    if((status = H5Pset_chunk_cache(dapl, 0, H5D_CHUNK_CACHE_NBYTES_DEFAULT, H5D_CHUNK_CACHE_W0_DEFAULT)) < 0)
+        goto error;
+
+    /* Create a new dataset within the file using cparms creation properties. */
+    if((dataset = H5Dcreate2(file, DATASETNAME7, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+            cparms, dapl)) < 0)
+        goto error;
+
+    /* Initialize the dataset */
+    for(i = n = 0; i < NX; i++)
+        for(j = 0; j < NY; j++)
+            data[i][j] = n++;
+
+    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        goto error;
+
+    /* Write the data for the dataset.
+     * Data will skip chunk cache and go directly to disk. */
+    if((status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+              dxpl, data)) < 0)
+        goto error;
+
+    /* Allocate output (compressed) buffer */
+    outbuf = HDmalloc(z_src_nbytes);
+    z_src = (Bytef *)outbuf;
+
+    /* For each chunk in the dataset, compare the result of H5Dread and H5DOread_chunk. */
+    for(i=0; i<NX/CHUNK_NX; i++) {
+        for(j=0; j<NY/CHUNK_NY; j++) {
+            /* Select hyperslab for one chunk in the file */
+            start[0]  = (hsize_t)i * CHUNK_NX; start[1]  = (hsize_t)j * CHUNK_NY;
+            stride[0] = 1; stride[1] = 1;
+            count[0]  = 1; count[1]  = 1;
+            block[0]  = CHUNK_NX; block[1]  = CHUNK_NY;
+
+            /* Hyperslab selection equals single chunk */
+            if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
+                goto error;
+
+            /* Read the chunk back */
+            if((status = H5Dread(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, check_chunk)) < 0)
+                goto error;
+
+            offset[0] = (hsize_t)i * CHUNK_NX; offset[1] = (hsize_t)j * CHUNK_NY;
+            /* Read the compressed chunk back using the direct read function. */
+            if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, outbuf)) < 0)
+                goto error;
+
+            /* Check filter mask return value */
+            if(filter_mask != 0)
+                goto error;
+
+            /* Perform decompression from the source to the destination buffer */
+            ret = uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
+
+            /* Check for various zlib errors */
+            if(Z_BUF_ERROR == ret) {
+                HDfprintf(stderr, "overflow\n");
+                goto error;
+            } else if(Z_MEM_ERROR == ret) {
+                HDfprintf(stderr, "deflate memory error\n");
+                goto error;
+            } else if(Z_DATA_ERROR == ret) {
+                HDfprintf(stderr, "corrupted data\n");
+                goto error;
+            } else if(Z_OK != ret) {
+                HDfprintf(stderr, "other deflate error\n");
+                goto error;
+            }
+
+            /* Check that the decompressed values match those read from H5Dread */
+            for(k = 0; k < CHUNK_NX; k++) {
+                for(l = 0; l < CHUNK_NY; l++) {
+                    if(direct_buf[k][l] != check_chunk[k][l]) {
+                        printf("\n    1. Read different values than written.");
+                        printf("    At index %d,%d\n", k, l);
+                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        goto error;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Close/release resources. */
+    H5Dclose(dataset);
+    H5Sclose(mem_space);
+    H5Sclose(dataspace);
+    H5Pclose(cparms);
+    H5Pclose(dxpl);
+    H5Pclose(dapl);
+
+    if(outbuf)
+        HDfree(outbuf);
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dataset);
+        H5Sclose(mem_space);
+        H5Sclose(dataspace);
+        H5Pclose(cparms);
+        H5Pclose(dxpl);
+        H5Pclose(dapl);
+    } H5E_END_TRY;
+
+    if(outbuf)
+        HDfree(outbuf);
+
+    return 1;
+} /* test_direct_chunk_read_no_cache() */
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+static int
+test_direct_chunk_read_cache (hid_t file, hbool_t flush)
+{
+    hid_t       dataspace = -1, dataset = -1;
+    hid_t       mem_space = -1;
+    hid_t       cparms = -1, dxpl = -1;
+    hsize_t     dims[2]  = {NX, NY};
+    hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t     chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
+    herr_t      status;         /* status from H5 function calls */
+    int         ret;            /* deflate return status */
+    int         data[NX][NY];
+    int         i, j, k, l, n;  /* local index variables */
+
+    unsigned    filter_mask = 0; /* filter mask returned from H5DOread_chunk */
+    int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5DOread and manually decompressed */
+    int         check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
+    hsize_t     offset[2]; /* chunk offset used for H5DOread_chunk */
+    size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
+
+    Bytef       *z_src;     /* source buffer        */
+    uLongf       z_src_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
+    Bytef       *z_dst = (Bytef*)(direct_buf);
+    uLong        z_dst_nbytes = (uLong)buf_size;
+    int          aggression = 9;     /* Compression aggression setting */
+    void        *outbuf = NULL;      /* Pointer to new buffer */
+    hsize_t     read_buf_size = 0;
+
+    hsize_t start[2];  /* Start of hyperslab */
+    hsize_t stride[2]; /* Stride of hyperslab */
+    hsize_t count[2];  /* Block count */
+    hsize_t block[2];  /* Block sizes */
+
+    if(flush) {
+        TESTING("basic functionality of H5DOread_chunk (flush chunk cache)");
+    } else {
+        TESTING("basic functionality of H5DOread_chunk (does not flush chunk cache)");
+    }
+
+    /* Create the data space with unlimited dimensions. */
+    if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
+        goto error;
+    if((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
+        goto error;
+
+    /* Modify dataset creation properties, i.e. enable chunking and compression */
+    if((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if((status = H5Pset_chunk( cparms, RANK, chunk_dims)) < 0)
+        goto error;
+    if((status = H5Pset_deflate( cparms, (unsigned) aggression)) < 0)
+        goto error;
+
+    /* Create a new dataset within the file using cparms creation properties. */
+    if((dataset = H5Dcreate2(file, flush?DATASETNAME8:DATASETNAME9, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+            cparms, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Initialize the dataset */
+    for(i = n = 0; i < NX; i++)
+        for(j = 0; j < NY; j++)
+            data[i][j] = n++;
+
+    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        goto error;
+
+    /* Write the data for the dataset.
+     * It should stay in the chunk cache. */
+    if((status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+              dxpl, data)) < 0)
+        goto error;
+
+    if(flush) {
+        /* Flush the chunk cache to disk. Cache entry is not evicted. */
+        if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
+            goto error;
+    }
+
+    /* Allocate output (compressed) buffer */
+    outbuf = HDmalloc(z_src_nbytes);
+    z_src = (Bytef *)outbuf;
+
+    /* For each chunk in the dataset, compare the result of H5Dread and H5DOread_chunk. */
+    for(i=0; i<NX/CHUNK_NX; i++) {
+        for(j=0; j<NY/CHUNK_NY; j++) {
+            /* Select hyperslab for one chunk in the file */
+            start[0]  = (hsize_t)i * CHUNK_NX; start[1]  = (hsize_t)j * CHUNK_NY;
+            stride[0] = 1; stride[1] = 1;
+            count[0]  = 1; count[1]  = 1;
+            block[0]  = CHUNK_NX; block[1]  = CHUNK_NY;
+
+            /* Hyperslab selection equals single chunk */
+            if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
+                goto error;
+
+            /* Read the chunk back */
+            if((status = H5Dread(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, check_chunk)) < 0)
+                goto error;
+
+            offset[0] = (hsize_t)i * CHUNK_NX; offset[1] = (hsize_t)j * CHUNK_NY;
+
+            /* Query chunk storage size */
+            if((status = H5Dget_chunk_storage_size(dataset, offset, &read_buf_size)) < 0)
+                goto error;
+            if(read_buf_size == 0)
+                goto error;
+        
+            /* Read the compressed chunk back using the direct read function. */
+            if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, outbuf)) < 0)
+                goto error;
+
+            /* Check filter mask return value */
+            if(filter_mask != 0)
+                goto error;
+
+            /* Perform decompression from the source to the destination buffer */
+            ret = uncompress(z_dst, &z_dst_nbytes, z_src, z_src_nbytes);
+
+            /* Check for various zlib errors */
+            if(Z_BUF_ERROR == ret) {
+                HDfprintf(stderr, "overflow\n");
+                goto error;
+            } else if(Z_MEM_ERROR == ret) {
+                HDfprintf(stderr, "deflate memory error\n");
+                goto error;
+            } else if(Z_DATA_ERROR == ret) {
+                HDfprintf(stderr, "corrupted data\n");
+                goto error;
+            } else if(Z_OK != ret) {
+                HDfprintf(stderr, "other deflate error\n");
+                goto error;
+            }
+
+            /* Check that the decompressed values match those read from H5Dread */
+            for(k = 0; k < CHUNK_NX; k++) {
+                for(l = 0; l < CHUNK_NY; l++) {
+                    if(direct_buf[k][l] != check_chunk[k][l]) {
+                        printf("\n    1. Read different values than written.");
+                        printf("    At index %d,%d\n", k, l);
+                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        goto error;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Close/release resources. */
+    H5Dclose(dataset);
+    H5Sclose(mem_space);
+    H5Sclose(dataspace);
+    H5Pclose(cparms);
+    H5Pclose(dxpl);
+
+    if(outbuf)
+        HDfree(outbuf);
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dataset);
+        H5Sclose(mem_space);
+        H5Sclose(dataspace);
+        H5Pclose(cparms);
+        H5Pclose(dxpl);
+    } H5E_END_TRY;
+
+    if(outbuf)
+        HDfree(outbuf);
+
+    return 1;
+} /* test_direct_chunk_read_cache() */
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_read_unfiltered_dset
+ *
+ * Purpose:     Test the basic functionality of H5DOread_chunk on a dataset
+ *              without no filters applied.
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ * Programmer:  Matthew Strong (GE Healthcare)
+ *              30 November 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_read_unfiltered_dset(hid_t file)
+{
+    hid_t       dataspace = -1, dataset = -1;
+    hid_t       mem_space = -1;
+    hid_t       cparms = -1, dxpl = -1;
+    hsize_t     dims[2]  = {NX, NY};
+    hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t     chunk_dims[2] ={CHUNK_NX, CHUNK_NY};
+    herr_t      status;
+    int         data[NX][NY];
+    int         i, j, k, l, n;
+
+    unsigned    filter_mask = 0;
+    int         direct_buf[CHUNK_NX][CHUNK_NY];
+    int         check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
+    hsize_t     offset[2] = {0, 0};
+    size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
+    hsize_t     read_buf_size = 0;
+
+    hsize_t start[2];  /* Start of hyperslab */
+    hsize_t stride[2]; /* Stride of hyperslab */
+    hsize_t count[2];  /* Block count */
+    hsize_t block[2];  /* Block sizes */
+
+    TESTING("basic functionality of H5DOread_chunk on unfiltered datasets");
+
+    /* Create the data space with unlimited dimensions. */
+    if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
+        goto error;
+    if((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
+        goto error;
+
+    /* Modify dataset creation properties, i.e. enable chunking, no compression */
+    if((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if((status = H5Pset_chunk( cparms, RANK, chunk_dims)) < 0)
+        goto error;
+
+    /* Create a new dataset within the file using cparms creation properties. */
+    if((dataset = H5Dcreate2(file, DATASETNAME11, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+            cparms, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Initialize the dataset */
+    for(i = n = 0; i < NX; i++)
+        for(j = 0; j < NY; j++)
+            data[i][j] = n++;
+
+    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        goto error;
+
+    /* Write the data for the dataset.
+     * It should stay in the chunk cache and will be evicted/flushed by
+     * the H5DOread_chunk function call. */
+    if((status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+              dxpl, data)) < 0)
+        goto error;
+
+    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
+        goto error;
+
+    /* For each chunk in the dataset, compare the result of H5Dread and H5DOread_chunk. */
+    for(i=0; i<NX/CHUNK_NX; i++) {
+        for(j=0; j<NY/CHUNK_NY; j++) {
+            /* Select hyperslab for one chunk in the file */
+            start[0]  = (hsize_t)i * CHUNK_NX; start[1]  = (hsize_t)j * CHUNK_NY;
+            stride[0] = 1; stride[1] = 1;
+            count[0]  = 1; count[1]  = 1;
+            block[0]  = CHUNK_NX; block[1]  = CHUNK_NY;
+
+            /* Hyperslab selection equals single chunk */
+            if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
+                goto error;
+
+            /* Read the chunk back */
+            if((status = H5Dread(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, check_chunk)) < 0)
+                goto error;
+
+            /* Query chunk storage size */
+            if((status = H5Dget_chunk_storage_size(dataset, offset, &read_buf_size)) < 0)
+                goto error;
+
+            if(read_buf_size != buf_size )
+                goto error;
+
+            offset[0] = (hsize_t)i * CHUNK_NX; offset[1] = (hsize_t)j * CHUNK_NY;
+            /* Read the raw chunk back */
+            HDmemset(&direct_buf, 0, sizeof(direct_buf));
+            filter_mask = UINT_MAX;
+            if((status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) < 0)
+                goto error;
+
+            /* Check filter mask return value */
+            if(filter_mask != 0)
+                goto error;
+
+            /* Check that the decompressed values match those read from H5Dread */
+            for(k = 0; k < CHUNK_NX; k++) {
+                for(l = 0; l < CHUNK_NY; l++) {
+                    if(direct_buf[k][l] != check_chunk[k][l]) {
+                        printf("\n    1. Read different values than written.");
+                        printf("    At index %d,%d\n", k, l);
+                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        goto error;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Close/release resources. */
+    H5Dclose(dataset);
+    H5Sclose(mem_space);
+    H5Sclose(dataspace);
+    H5Pclose(cparms);
+    H5Pclose(dxpl);
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dataset);
+        H5Sclose(mem_space);
+        H5Sclose(dataspace);
+        H5Pclose(cparms);
+        H5Pclose(dxpl);
+    } H5E_END_TRY;
+
+    return 1;
+} /* test_read_unfiltered_dset() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_read_unallocated_chunk
+ *
+ * Purpose:     Tests the H5DOread_chunk and H5Dget_chunk_storage_size with valid
+ *              offets to chunks that have not been written to the dataset and are
+ *              not allocated in the chunk storage on disk.
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ * Programmer:  Matthew Strong (GE Healthcare)
+ *              30 November 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_read_unallocated_chunk (hid_t file)
+{
+    hid_t       dataspace = -1, dataset = -1;
+    hid_t       mem_space = -1;
+    hid_t       cparms = -1, dxpl = -1;
+    hsize_t     dims[2]  = {NX, NY};
+    hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t     chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
+    hsize_t     chunk_nbytes = CHUNK_NX*CHUNK_NY*sizeof(int);
+    hsize_t     direct_chunk_nbytes = 0; /* size (bytes) of the on-disk chunk */
+    herr_t      status;         /* status from H5 function calls */
+    uint        i, j;     /* local index variables */
+
+    unsigned    filter_mask = 0; /* filter mask returned from H5DOread_chunk */
+    int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5DOread and manually decompressed */
+    hsize_t     offset[2]; /* chunk offset used for H5DOread_chunk */
+
+    TESTING("H5DOread_chunk with unallocated chunks");
+
+    /* Create the data space with unlimited dimensions. */
+    if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
+        goto error;
+    if((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
+        goto error;
+
+    /* Modify dataset creation properties, i.e. enable chunking, no compression */
+    if((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if((status = H5Pset_chunk( cparms, RANK, chunk_dims)) < 0)
+        goto error;
+
+    /* Create a new dataset within the file using cparms creation properties. */
+    if((dataset = H5Dcreate2(file, DATASETNAME10, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+            cparms, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        goto error;
+
+    /* Write a single chunk to intialize the chunk storage */
+    HDmemset(&chunk_dims, 0, sizeof(chunk_dims));
+    offset[0] = 0; offset[1] = 0;
+
+    if(H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, chunk_nbytes, &chunk_dims) < 0)
+        goto error;
+
+    /* Attempt to read each chunk in the dataset. Chunks are not allocated,
+     * therefore we expect the result of H5DOread_chunk to fail. Chunk idx starts
+     * at 1, since one chunk was written to init the chunk storage. */
+    for(i=1; i<NX/CHUNK_NX; i++) {
+        for(j=0; j<NY/CHUNK_NY; j++) {
+
+            offset[0] = i * CHUNK_NX;
+            offset[1] = j * CHUNK_NY;
+
+            /* Read a non-existant chunk using the direct read function. */
+            H5E_BEGIN_TRY {
+                status = H5DOread_chunk(dataset, dxpl, offset, &filter_mask, &direct_buf);
+            } H5E_END_TRY;
+
+            /* Check that the chunk read call does not succeed. */
+            if(status != -1)
+                goto error;
+
+            /* Query the size of the non-existant chunk */
+            direct_chunk_nbytes = ULONG_MAX;
+            H5E_BEGIN_TRY {
+                status = H5Dget_chunk_storage_size(dataset, offset, &direct_chunk_nbytes);
+            } H5E_END_TRY;
+
+            /* Check that the chunk storage size call does not succeed. */
+            if(status != -1 )
+                goto error;
+            if(direct_chunk_nbytes != 0 )
+                goto error;
+
+        }
+    }
+
+    /* Close/release resources. */
+    H5Dclose(dataset);
+    H5Sclose(mem_space);
+    H5Sclose(dataspace);
+    H5Pclose(cparms);
+    H5Pclose(dxpl);
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dataset);
+        H5Sclose(mem_space);
+        H5Sclose(dataspace);
+        H5Pclose(cparms);
+        H5Pclose(dxpl);
+    } H5E_END_TRY;
+
+    return 1;
+} /* test_read_unallocated_chunk() */
 
 /*-------------------------------------------------------------------------
  * Function:	Main function
@@ -1414,6 +1884,16 @@ int main( void )
     nerrors += test_skip_compress_write2(file_id);
     nerrors += test_data_conv(file_id);
     nerrors += test_invalid_parameters(file_id);
+
+
+    /* Test direct chunk read */
+#ifdef H5_HAVE_FILTER_DEFLATE
+    nerrors += test_direct_chunk_read_no_cache(file_id);
+    nerrors += test_direct_chunk_read_cache(file_id, TRUE);
+    nerrors += test_direct_chunk_read_cache(file_id, FALSE);
+#endif /* H5_HAVE_FILTER_DEFLATE */
+    nerrors += test_read_unfiltered_dset(file_id);
+    nerrors += test_read_unallocated_chunk(file_id);
 
     if(H5Fclose(file_id) < 0)
         goto error;

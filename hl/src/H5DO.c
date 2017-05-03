@@ -44,7 +44,6 @@ H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *o
 {
     hbool_t created_dxpl = FALSE;       /* Whether we created a DXPL */
     hbool_t do_direct_write = TRUE;     /* Flag for direct writes */
-    hbool_t tt=FALSE;     /* Flag for direct writes */
     uint32_t data_size_32;              /* Chunk data size (limited to 32-bits currently) */
     herr_t  ret_value = FAIL;           /* Return value */
 
