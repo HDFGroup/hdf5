@@ -1837,8 +1837,6 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
     val_buf = val_buf_static;
 
     /* Set up dkey */
-    /* For now always use dkey = const, akey = name. Add option to switch these
-     * DSMINC */
     daos_iov_set(&dkey, (void *)name, (daos_size_t)name_len);
 
     /* Set up iod */
@@ -1963,8 +1961,6 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no write intent on file")
 
     /* Set up dkey */
-    /* For now always use dkey = const, akey = name. Add option to switch these
-     * DSMINC */
     daos_iov_set(&dkey, (void *)name, (daos_size_t)name_len);
 
     /* Encode link type */
@@ -2120,7 +2116,6 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
     H5VL_daosm_item_t *item = (H5VL_daosm_item_t *)_item;
     H5VL_daosm_group_t *target_grp = NULL;
     hid_t target_grp_id = -1;
-    const char *target_name = NULL;
     char *dkey_buf = NULL;
     size_t dkey_buf_len = 0;
     int ret;
@@ -2128,46 +2123,28 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Determine the target group */
-    /* Determine attribute object */
-    if(loc_params.type == H5VL_OBJECT_BY_SELF) {
-        /* Use item as attribute parent object, or the root group if item is a
-         * file */
-        if(item->type == H5I_GROUP)
-            target_grp = (H5VL_daosm_group_t *)item;
-        else if(item->type == H5I_FILE)
-            target_grp = ((H5VL_daosm_file_t *)item)->root_grp;
-        else
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "item not a file or group")
-        target_grp->obj.item.rc++;
-    } /* end if */
-    else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
-        H5VL_loc_params_t sub_loc_params;
-
-        /* Open target_grp */
-        sub_loc_params.obj_type = item->type;
-        sub_loc_params.type = H5VL_OBJECT_BY_SELF;
-        if(NULL == (target_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open(item, sub_loc_params, loc_params.loc_data.loc_by_name.name, loc_params.loc_data.loc_by_name.lapl_id, dxpl_id, req)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "can't open group for link operation")
-    } /* end else */
-
     switch (specific_type) {
         /* H5Lexists */
         case H5VL_LINK_EXISTS:
             {
                 htri_t *lexists_ret = va_arg(arguments, htri_t *);
+                const char *target_name = NULL;
                 char const_link_key[] = H5VL_DAOSM_LINK_KEY;
                 daos_key_t dkey;
                 daos_iod_t iod;
 
+                HDassert(H5VL_OBJECT_BY_NAME == loc_params.type);
+
+                /* Traverse the path */
+                if(NULL == (target_grp = H5VL_daosm_group_traverse(item, loc_params.loc_data.loc_by_name.name, dxpl_id, req, &target_name, NULL, NULL)))
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't traverse path")
+
                 /* Set up dkey */
-                /* For now always use dkey = const, akey = name. Add option to switch these
-                 * DSMINC */
-                daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
+                daos_iov_set(&dkey, (void *)target_name, HDstrlen(target_name));
 
                 /* Set up iod */
                 HDmemset(&iod, 0, sizeof(iod));
-                daos_iov_set(&iod.iod_name, (void *)target_name, HDstrlen(target_name));
+                daos_iov_set(&iod.iod_name, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
                 daos_csum_set(&iod.iod_kcsum, NULL, 0);
                 iod.iod_nr = 1u;
                 iod.iod_size = DAOS_REC_ANY;
@@ -2186,8 +2163,8 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
         case H5VL_LINK_ITER:
             {
                 hbool_t recursive = va_arg(arguments, int);
-                H5_index_t H5_ATTR_UNUSED idx_type = (H5_index_t)va_arg(arguments, H5_index_t);
-                H5_iter_order_t order = (H5_iter_order_t)va_arg(arguments, H5_iter_order_t);
+                H5_index_t H5_ATTR_UNUSED idx_type = (H5_index_t)va_arg(arguments, int);
+                H5_iter_order_t order = (H5_iter_order_t)va_arg(arguments, int);
                 hsize_t *idx = va_arg(arguments, hsize_t *);
                 H5L_iterate_t op = va_arg(arguments, H5L_iterate_t);
                 void *op_data = va_arg(arguments, void *);
@@ -2202,6 +2179,28 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
                 char tmp_char;
                 char *p;
                 uint32_t i;
+
+                /* Determine the target group */
+                if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+                    /* Use item as attribute parent object, or the root group if item is a
+                     * file */
+                    if(item->type == H5I_GROUP)
+                        target_grp = (H5VL_daosm_group_t *)item;
+                    else if(item->type == H5I_FILE)
+                        target_grp = ((H5VL_daosm_file_t *)item)->root_grp;
+                    else
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "item not a file or group")
+                    target_grp->obj.item.rc++;
+                } /* end if */
+                else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
+                    H5VL_loc_params_t sub_loc_params;
+
+                    /* Open target_grp */
+                    sub_loc_params.obj_type = item->type;
+                    sub_loc_params.type = H5VL_OBJECT_BY_SELF;
+                    if(NULL == (target_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open(item, sub_loc_params, loc_params.loc_data.loc_by_name.name, loc_params.loc_data.loc_by_name.lapl_id, dxpl_id, req)))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "can't open group for link operation")
+                } /* end else */
 
                 /* Iteration restart not supported */
                 if(idx && (*idx != 0))
@@ -2290,7 +2289,7 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
                                 linfo.u.val_size = HDstrlen(link_val.target.soft) + 1;
 
                                 /* Free soft link value */
-                                link_val.target.soft = H5MM_xfree(link_val.target.soft);
+                                link_val.target.soft = (char *)H5MM_xfree(link_val.target.soft);
                             } /* end else */
 
                             /* Make callback */
