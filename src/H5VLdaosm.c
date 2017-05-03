@@ -2119,23 +2119,36 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
 {
     H5VL_daosm_item_t *item = (H5VL_daosm_item_t *)_item;
     H5VL_daosm_group_t *target_grp = NULL;
+    hid_t target_grp_id = -1;
     const char *target_name = NULL;
+    char *dkey_buf = NULL;
+    size_t dkey_buf_len = 0;
     int ret;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Determine the target group */
-    if(H5VL_OBJECT_BY_SELF == loc_params.type) {
-        target_grp = (H5VL_daosm_group_t *)item;
+    /* Determine attribute object */
+    if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+        /* Use item as attribute parent object, or the root group if item is a
+         * file */
+        if(item->type == H5I_GROUP)
+            target_grp = (H5VL_daosm_group_t *)item;
+        else if(item->type == H5I_FILE)
+            target_grp = ((H5VL_daosm_file_t *)item)->root_grp;
+        else
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "item not a file or group")
         target_grp->obj.item.rc++;
     } /* end if */
-    else {
-        HDassert(H5VL_OBJECT_BY_NAME == loc_params.type);
+    else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
+        H5VL_loc_params_t sub_loc_params;
 
-        /* Traverse the path */
-        if(NULL == (target_grp = H5VL_daosm_group_traverse(item, loc_params.loc_data.loc_by_name.name, dxpl_id, req, &target_name, NULL, NULL)))
-            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't traverse path")
+        /* Open target_grp */
+        sub_loc_params.obj_type = item->type;
+        sub_loc_params.type = H5VL_OBJECT_BY_SELF;
+        if(NULL == (target_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open(item, sub_loc_params, loc_params.loc_data.loc_by_name.name, loc_params.loc_data.loc_by_name.lapl_id, dxpl_id, req)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "can't open group for link operation")
     } /* end else */
 
     switch (specific_type) {
@@ -2170,16 +2183,156 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
                 break;
             } /* end block */
 
-        case H5VL_LINK_DELETE:
         case H5VL_LINK_ITER:
+            {
+                hbool_t recursive = va_arg(arguments, int);
+                H5_index_t H5_ATTR_UNUSED idx_type = (H5_index_t)va_arg(arguments, H5_index_t);
+                H5_iter_order_t order = (H5_iter_order_t)va_arg(arguments, H5_iter_order_t);
+                hsize_t *idx = va_arg(arguments, hsize_t *);
+                H5L_iterate_t op = va_arg(arguments, H5L_iterate_t);
+                void *op_data = va_arg(arguments, void *);
+                daos_hash_out_t anchor;
+                uint32_t nr;
+                daos_key_desc_t kds[H5VL_DAOSM_ITER_LEN];
+                daos_sg_list_t sgl;
+                daos_iov_t sg_iov;
+                H5VL_daosm_link_val_t link_val;
+                H5L_info_t linfo;
+                herr_t op_ret;
+                char tmp_char;
+                char *p;
+                uint32_t i;
+
+                /* Iteration restart not supported */
+                if(*idx != 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "iteration restart not supported (must start from 0)")
+
+                /* Ordered iteration not supported */
+                if(order != H5_ITER_NATIVE)
+                    HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "ordered iteration not supported (order must be H5_ITER_NATIVE)")
+
+                /* Recursive iteration not supported */
+                if(recursive)
+                    HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "recusive iteration not supported")
+
+                /* Initialize const linfo info */
+                linfo.corder_valid = FALSE;
+                linfo.corder = 0;
+                linfo.cset = H5T_CSET_ASCII;
+
+                /* Register id for target_grp */
+                if((target_grp_id = H5VL_object_register(target_grp, H5I_GROUP, H5VL_DAOSM_g, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
+
+                /* Initialize anchor */
+                HDmemset(&anchor, 0, sizeof(anchor));
+
+                /* Allocate dkey_buf */
+                if(NULL == (dkey_buf = (char *)H5MM_malloc(H5VL_DAOSM_ITER_SIZE_INIT)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for dkeys")
+                dkey_buf_len = H5VL_DAOSM_ITER_SIZE_INIT;
+
+                /* Set up sgl.  Report size as 1 less than buffer size so we
+                 * always have room for a null terminator. */
+                daos_iov_set(&sg_iov, dkey_buf, (daos_size_t)(dkey_buf_len - 1));
+                sgl.sg_nr.num = 1;
+                sgl.sg_iovs = &sg_iov;
+
+                /* Loop to retrieve keys and make callbacks */
+                do {
+                    /* Loop to retrieve keys (exit as soon as we get at least 1
+                     * key) */
+                    do {
+                        /* Reset nr */
+                        nr = H5VL_DAOSM_ITER_LEN;
+
+                        /* Ask daos for a list of akeys, break out if we succeed
+                         */
+                        if(0 == (ret = daos_obj_list_dkey(target_grp->obj.obj_oh, target_grp->obj.item.file->epoch, &nr, kds, &sgl, &anchor, NULL /*event*/)))
+                            break;
+
+                        /* Call failed, if the buffer is too small double it and
+                         * try again, otherwise fail */
+                        if(ret == -DER_KEY2BIG) {
+                            /* Allocate larger buffer */
+                            H5MM_free(dkey_buf);
+                            dkey_buf_len *= 2;
+                            if(NULL == (dkey_buf = (char *)H5MM_malloc(dkey_buf_len)))
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for dkeys")
+
+                            /* Update sgl */
+                            daos_iov_set(&sg_iov, dkey_buf, (daos_size_t)(dkey_buf_len - 1));
+                        } /* end if */
+                        else
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve attributes: %d", ret)
+                    } while(1);
+
+                    /* Loop over returned dkeys */
+                    p = dkey_buf;
+                    op_ret = 0;
+                    for(i = 0; (i < nr) && (op_ret == 0); i++) {
+                        /* Check if this key represents a link */
+                        if(p[0] != '/') {
+                            /* Add null terminator temporarily */
+                            tmp_char = p[kds[i].kd_key_len];
+                            p[kds[i].kd_key_len] = '\0';
+
+                            /* Read link */
+                            if(H5VL_daosm_link_read(target_grp, p, (size_t)kds[i].kd_key_len, &link_val) < 0)
+                                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link")
+
+                            /* Update linfo */
+                            linfo.type = link_val.type;
+                            if(link_val.type == H5L_TYPE_HARD)
+                                linfo.u.address = (haddr_t)link_val.target.hard.lo;
+                            else {
+                                HDassert(link_val.type == H5L_TYPE_SOFT);
+                                linfo.u.val_size = HDstrlen(link_val.target.soft) + 1;
+
+                                /* Free soft link value */
+                                link_val.target.soft = H5MM_xfree(link_val.target.soft);
+                            } /* end else */
+
+                            /* Make callback */
+                            if((op_ret = op(target_grp_id, p, &linfo, op_data)) < 0)
+                                HGOTO_ERROR(H5E_SYM, H5E_BADITER, op_ret, "operator function returned failure")
+
+                            /* Replace null terminator */
+                            p[kds[i].kd_key_len] = tmp_char;
+
+                            /* Advance idx */
+                            (*idx)++;
+                        } /* end if */
+
+                        /* Advance to next akey */
+                        p += kds[i].kd_key_len + kds[i].kd_csum_len;
+                    } /* end for */
+                } while(!daos_hash_is_eof(&anchor) && (op_ret == 0));
+
+                /* Set return value */
+                ret_value = op_ret;
+
+                break;
+            } /* end block */
+        case H5VL_LINK_DELETE:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unsupported specific operation")
         default:
             HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid specific operation")
     } /* end switch */
 
 done:
-    if(target_grp && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close group")
+    if(target_grp_id >= 0) {
+        if(H5I_dec_app_ref(target_grp_id) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close group id")
+        target_grp_id = -1;
+        target_grp = NULL;
+    } /* end if */
+    else if(target_grp) {
+        if(H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close group")
+        target_grp = NULL;
+    } /* end else */
+    dkey_buf = (char *)H5MM_xfree(dkey_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_specific() */
@@ -2217,7 +2370,7 @@ H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
 
     /* Read link to group */
    if(H5VL_daosm_link_read(grp, name, name_len, &link_val) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link to group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link")
 
     switch(link_val.type) {
        case H5L_TYPE_HARD:
@@ -2244,7 +2397,7 @@ H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
                 else
                     /* Follow the last element in the path */
                     if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, oid, gcpl_buf_out, gcpl_len_out) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't follow link to group")
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't follow link")
 
                 break;
             } /* end block */
@@ -4566,6 +4719,7 @@ H5VL_daosm_object_open(void *_item, H5VL_loc_params_t loc_params,
     } /* end else */
 
     /* Set up sub_loc_params */
+    sub_loc_params.obj_type = item->type;
     sub_loc_params.type = H5VL_OBJECT_BY_ADDR;
     sub_loc_params.loc_data.loc_by_addr.addr = (haddr_t)oid.lo;
 
@@ -5451,13 +5605,13 @@ done:
         if(H5I_dec_app_ref(target_obj_id) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close object id")
         target_obj_id = -1;
+        target_obj = NULL;
     } /* end if */
-    else
-        if(target_obj) {
-            if(H5VL_daosm_object_close(target_obj, dxpl_id, req) < 0)
-                HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close object")
-            target_obj = NULL;
-        } /* end else */
+    else if(target_obj) {
+        if(H5VL_daosm_object_close(target_obj, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close object")
+        target_obj = NULL;
+    } /* end else */
     if(attr) {
         if(H5VL_daosm_attribute_close(attr, dxpl_id, req) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close attribute")
