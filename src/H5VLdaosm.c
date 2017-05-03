@@ -2204,7 +2204,7 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
                 uint32_t i;
 
                 /* Iteration restart not supported */
-                if(*idx != 0)
+                if(idx && (*idx != 0))
                     HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "iteration restart not supported (must start from 0)")
 
                 /* Ordered iteration not supported */
@@ -2301,7 +2301,8 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
                             p[kds[i].kd_key_len] = tmp_char;
 
                             /* Advance idx */
-                            (*idx)++;
+                            if(idx)
+                                (*idx)++;
                         } /* end if */
 
                         /* Advance to next akey */
@@ -5467,7 +5468,7 @@ H5VL_daosm_attribute_specific(void *_item, H5VL_loc_params_t loc_params,
                 uint32_t i;
 
                 /* Iteration restart not supported */
-                if(*idx != 0)
+                if(idx && (*idx != 0))
                     HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "iteration restart not supported (must start from 0)")
 
                 /* Ordered iteration not supported */
@@ -5580,7 +5581,8 @@ H5VL_daosm_attribute_specific(void *_item, H5VL_loc_params_t loc_params,
                             p[kds[i].kd_key_len] = tmp_char;
 
                             /* Advance idx */
-                            (*idx)++;
+                            if(idx)
+                                (*idx)++;
                         } /* end if */
 
                         /* Advance to next akey */
