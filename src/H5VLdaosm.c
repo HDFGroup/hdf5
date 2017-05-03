@@ -827,7 +827,7 @@ H5VL_daosm_oid_encode(daos_obj_id_t *oid, H5I_type_t obj_type, uint64_t idx)
     oid->lo = type_bits | (idx & H5VL_DAOSM_IDX_MASK);
 
     /* Generate oid */
-    daos_obj_id_generate(oid, DAOS_OC_TINY_RW);
+    daos_obj_id_generate(oid, obj_type == H5I_DATASET ? DAOS_OC_LARGE_RW : DAOS_OC_TINY_RW);
 
     return;
 } /* end H5VL_daosm_oid_encode() */
