@@ -4,7 +4,7 @@ int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
     char *pool_grp = NULL;
     hid_t file = -1, obj = -1, fapl = -1;
-    H5I_type_t obj_type;
+    H5O_info_t oinfo;
     char *obj_str = NULL;
     H5VL_daosm_snap_id_t snap_id;
 
@@ -47,15 +47,17 @@ int main(int argc, char *argv[]) {
     if((obj = H5Oopen(file, argv[3], H5P_DEFAULT)) < 0)
         ERROR;
 
-    /* Get object type */
-    if(H5I_BADID == (obj_type = H5Iget_type(obj)))
+    /* Get object info */
+    if(H5Oget_info(obj, &oinfo) < 0)
         ERROR;
 
-    if(obj_type == H5I_GROUP)
+    printf("fileno = %lu\n", oinfo.fileno);
+    printf("addr = 0x%016llx\n", (unsigned long long)oinfo.addr);
+    if(oinfo.type == H5O_TYPE_GROUP)
         obj_str = "group";
-    else if(obj_type == H5I_DATASET)
+    else if(oinfo.type == H5O_TYPE_DATASET)
         obj_str = "dataset";
-    else if(obj_type == H5I_DATATYPE)
+    else if(oinfo.type == H5O_TYPE_NAMED_DATATYPE)
         obj_str = "datatype";
     else
         obj_str = "unknown";

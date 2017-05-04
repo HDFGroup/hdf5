@@ -20,6 +20,8 @@
  * Purpose: The DAOS-M VOL plugin where access is forwarded to the DAOS-M
  * library 
  */
+ 
+#define H5O_FRIEND              /* Suppress error about including H5Opkg */
 
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Dprivate.h"         /* Datasets                             */
@@ -29,6 +31,7 @@
 #include "H5FFprivate.h"        /* Fast Forward                         */
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5MMprivate.h"        /* Memory management                    */
+#include "H5Opkg.h"             /* Objects                              */
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5TRprivate.h"        /* Transactions                         */
@@ -145,6 +148,8 @@ static herr_t H5VL_daosm_datatype_close(void *_dtype, hid_t dxpl_id,
 /* Object callbacks */
 static void *H5VL_daosm_object_open(void *_item, H5VL_loc_params_t loc_params, 
     H5I_type_t *opened_type, hid_t dxpl_id, void **req);
+static herr_t H5VL_daosm_object_optional(void *_item, hid_t dxpl_id, void **req,
+    va_list arguments);
 
 /* Attribute callbacks */
 static void *H5VL_daosm_attribute_create(void *_obj,
@@ -275,7 +280,7 @@ static H5VL_class_t H5VL_daosm_g = {
         NULL,                                   /* copy */
         NULL,                                   /* get */
         NULL,//H5VL_iod_object_specific,               /* specific */
-        NULL,//H5VL_iod_object_optional                /* optional */
+        H5VL_daosm_object_optional              /* optional */
     },
     {
         NULL,//H5VL_iod_cancel,
@@ -806,10 +811,26 @@ done:
 } /* end H5VL_daosm_fapl_free() */
 
 
+/* Create a DAOS oid given the object type and a 64 bit address (with the object
+ * type already encoded) */
+static void
+H5VL_daosm_oid_generate(daos_obj_id_t *oid, uint64_t addr,
+    H5I_type_t obj_type)
+{
+    /* Encode type and address */
+    oid->lo = addr;
+
+    /* Generate oid */
+    daos_obj_id_generate(oid, obj_type == H5I_DATASET ? DAOS_OC_LARGE_RW : DAOS_OC_TINY_RW);
+
+    return;
+} /* end H5VL_daosm_oid_generate() */
+
+
 /* Create a DAOS oid given the object type and a 64 bit index (top 2 bits are
  * ignored) */
 static void
-H5VL_daosm_oid_encode(daos_obj_id_t *oid, H5I_type_t obj_type, uint64_t idx)
+H5VL_daosm_oid_encode(daos_obj_id_t *oid, uint64_t idx, H5I_type_t obj_type)
 {
     uint64_t type_bits;
 
@@ -823,11 +844,8 @@ H5VL_daosm_oid_encode(daos_obj_id_t *oid, H5I_type_t obj_type, uint64_t idx)
         type_bits = H5VL_DAOSM_TYPE_DTYPE;
     } /* end else */
 
-    /* Encode type and address */
-    oid->lo = type_bits | (idx & H5VL_DAOSM_IDX_MASK);
-
-    /* Generate oid */
-    daos_obj_id_generate(oid, obj_type == H5I_DATASET ? DAOS_OC_LARGE_RW : DAOS_OC_TINY_RW);
+    /* Encode type and address and generate oid */
+    H5VL_daosm_oid_generate(oid, type_bits | (idx & H5VL_DAOSM_IDX_MASK), obj_type);
 
     return;
 } /* end H5VL_daosm_oid_encode() */
@@ -835,12 +853,12 @@ H5VL_daosm_oid_encode(daos_obj_id_t *oid, H5I_type_t obj_type, uint64_t idx)
 
 /* Retrieve the 64 bit address from a DAOS oid  */
 static H5I_type_t
-H5VL_daosm_oid_to_type(daos_obj_id_t oid)
+H5VL_daosm_addr_to_type(uint64_t addr)
 {
     uint64_t type_bits;
 
     /* Retrieve type */
-    type_bits = oid.lo & H5VL_DAOSM_TYPE_MASK;
+    type_bits = addr & H5VL_DAOSM_TYPE_MASK;
     if(type_bits == H5VL_DAOSM_TYPE_GRP)
         return(H5I_GROUP);
     else if(type_bits == H5VL_DAOSM_TYPE_DSET)
@@ -849,6 +867,15 @@ H5VL_daosm_oid_to_type(daos_obj_id_t oid)
         return(H5I_DATATYPE);
     else
         return(H5I_BADID);
+} /* end H5VL_daosm_oid_to_type() */
+
+
+/* Retrieve the 64 bit address from a DAOS oid  */
+static H5I_type_t
+H5VL_daosm_oid_to_type(daos_obj_id_t oid)
+{
+    /* Retrieve type */
+    return H5VL_daosm_addr_to_type(oid.lo);
 } /* end H5VL_daosm_oid_to_type() */
 
 
@@ -1312,7 +1339,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     daos_obj_id_generate(&gmd_oid, DAOS_OC_TINY_RW);
 
     /* Generate root group oid */
-    H5VL_daosm_oid_encode(&root_grp_oid, H5I_GROUP, (uint64_t)1);
+    H5VL_daosm_oid_encode(&root_grp_oid, (uint64_t)1, H5I_GROUP);
 
     /* Determine if we requested collective object ops for the file */
     if(H5Pget_all_coll_metadata_ops(fapl_id, &file->collective) < 0)
@@ -2552,7 +2579,7 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
     grp->gapl_id = FAIL;
 
     /* Generate group oid */
-    H5VL_daosm_oid_encode(&grp->obj.oid, H5I_GROUP, file->max_oid + (uint64_t)1);
+    H5VL_daosm_oid_encode(&grp->obj.oid, file->max_oid + (uint64_t)1, H5I_GROUP);
 
     /* Create group and write metadata if this process should */
     if(!collective || (file->my_rank == 0)) {
@@ -2941,8 +2968,7 @@ H5VL_daosm_group_open(void *_item, H5VL_loc_params_t loc_params,
         if(H5VL_OBJECT_BY_ADDR == loc_params.type) {
             /* Generate oid from address */
             HDmemset(&oid, 0, sizeof(oid));
-            oid.lo = (uint64_t)loc_params.loc_data.loc_by_addr.addr;
-            daos_obj_id_generate(&oid, DAOS_OC_TINY_RW);
+            H5VL_daosm_oid_generate(&oid, (uint64_t)loc_params.loc_data.loc_by_addr.addr, H5I_GROUP);
 
             /* Open group */
             if(NULL == (grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open_helper(item->file, oid, gapl_id, dxpl_id, req, (collective && (item->file->num_procs > 1)) ? (void **)&gcpl_buf : NULL, &gcpl_len)))
@@ -3465,7 +3491,7 @@ H5VL_daosm_dataset_create(void *_item,
     dset->dapl_id = FAIL;
 
     /* Generate dataset oid */
-    H5VL_daosm_oid_encode(&dset->obj.oid, H5I_DATASET, item->file->max_oid + (uint64_t)1);
+    H5VL_daosm_oid_encode(&dset->obj.oid, item->file->max_oid + (uint64_t)1, H5I_DATASET);
 
     /* Create dataset and write metadata if this process should */
     if(!collective || (item->file->my_rank == 0)) {
@@ -3693,9 +3719,7 @@ H5VL_daosm_dataset_open(void *_item,
         /* Check for open by address */
         if(H5VL_OBJECT_BY_ADDR == loc_params.type) {
             /* Generate oid from address */
-            HDmemset(&dset->obj.oid, 0, sizeof(dset->obj.oid));
-            dset->obj.oid.lo = (uint64_t)loc_params.loc_data.loc_by_addr.addr;
-            daos_obj_id_generate(&dset->obj.oid, DAOS_OC_TINY_RW);
+            H5VL_daosm_oid_generate(&dset->obj.oid, (uint64_t)loc_params.loc_data.loc_by_addr.addr, H5I_DATASET);
         } /* end if */
         else {
             /* Open using name parameter */
@@ -4653,10 +4677,13 @@ H5VL_daosm_object_open(void *_item, H5VL_loc_params_t loc_params,
 
     /* Check loc_params type */
     if(H5VL_OBJECT_BY_ADDR == loc_params.type) {
+        /* Get object type */
+        if(H5I_BADID == (obj_type = H5VL_daosm_addr_to_type((uint64_t)loc_params.loc_data.loc_by_addr.addr)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't get object type")
+
         /* Generate oid from address */
         HDmemset(&oid, 0, sizeof(oid));
-        oid.lo = (uint64_t)loc_params.loc_data.loc_by_addr.addr;
-        daos_obj_id_generate(&oid, DAOS_OC_TINY_RW);
+        H5VL_daosm_oid_generate(&oid, (uint64_t)loc_params.loc_data.loc_by_addr.addr, obj_type);
     } /* end if */
     else {
         HDassert(H5VL_OBJECT_BY_NAME == loc_params.type);
@@ -4681,7 +4708,7 @@ H5VL_daosm_object_open(void *_item, H5VL_loc_params_t loc_params,
                     || (target_name[0] == '.' && target_name[1] == '\0'))
                 oid = target_grp->obj.oid;
             else
-                /* Follow link to group */
+                /* Follow link to object */
                 if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &oid, NULL, NULL) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't follow link to group")
 
@@ -4716,16 +4743,16 @@ H5VL_daosm_object_open(void *_item, H5VL_loc_params_t loc_params,
             if(oid.lo == 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "lead process failed to open object")
         } /* end else */
+
+        /* Get object type */
+        if(H5I_BADID == (obj_type = H5VL_daosm_oid_to_type(oid)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't get object type")
     } /* end else */
 
     /* Set up sub_loc_params */
     sub_loc_params.obj_type = item->type;
     sub_loc_params.type = H5VL_OBJECT_BY_ADDR;
     sub_loc_params.loc_data.loc_by_addr.addr = (haddr_t)oid.lo;
-
-    /* Get object type */
-    if(H5I_BADID == (obj_type = H5VL_daosm_oid_to_type(oid)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't get object type")
 
     /* Call type's open function */
     if(obj_type == H5I_GROUP) {
@@ -4775,6 +4802,109 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_object_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_object_optional
+ *
+ * Purpose:     Optional operations with objects
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              May, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_object_optional(void *_item, hid_t dxpl_id, void **req,
+    va_list arguments)
+{
+    H5VL_daosm_item_t *item = (H5VL_daosm_item_t *)_item;
+    H5VL_daosm_obj_t *target_obj = NULL;
+    H5VL_object_optional_t optional_type = (H5VL_object_optional_t)va_arg(arguments, int);
+    H5VL_loc_params_t loc_params = va_arg(arguments, H5VL_loc_params_t);
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Determine target object */
+    if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+        /* Use item as attribute parent object, or the root group if item is a
+         * file */
+        if(item->type == H5I_FILE)
+            target_obj = (H5VL_daosm_obj_t *)((H5VL_daosm_file_t *)item)->root_grp;
+        else
+            target_obj = (H5VL_daosm_obj_t *)item;
+        target_obj->item.rc++;
+    } /* end if */
+    else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
+        /* Open target_obj */
+        if(NULL == (target_obj = (H5VL_daosm_obj_t *)H5VL_daosm_object_open(item, loc_params, NULL, dxpl_id, req)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "can't open object")
+    } /* end else */
+    else
+        HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, FAIL, "unsupported object operation location parameters type")
+
+    switch (optional_type) {
+        /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
+        case H5VL_OBJECT_GET_INFO:
+            {
+                H5O_info_t  *obj_info = va_arg(arguments, H5O_info_t *);
+                uint64_t fileno64;
+                uint8_t *uuid_p = (uint8_t *)&target_obj->item.file->uuid;
+
+                /* Initialize obj_info - most fields are not valid and will
+                 * simply be set to 0 */
+                HDmemset(obj_info, 0, sizeof(*obj_info));
+
+                /* Fill in valid fields of obj_info */
+                /* Use the lower <sizeof(unsigned long)> bytes of the file uuid
+                 * as the fileno.  Ideally we would write separate 32 and 64 bit
+                 * hash functions but this should work almost as well. */
+                UINT64DECODE(uuid_p, fileno64)
+                obj_info->fileno = (unsigned long)fileno64;
+
+                /* Use lower 64 bits of oid as address - contains encode object
+                 * type */
+                obj_info->addr = (haddr_t)target_obj->oid.lo;
+
+                /* Set object type */
+                if(target_obj->item.type == H5I_GROUP)
+                    obj_info->type = H5O_TYPE_GROUP;
+                else if(target_obj->item.type == H5I_DATASET)
+                    obj_info->type = H5O_TYPE_DATASET;
+                else {
+                    HDassert(target_obj->item.type == H5I_DATATYPE);
+                    obj_info->type = H5O_TYPE_NAMED_DATATYPE;
+                } /* end else */
+
+                /* Reference count is always 1 - change this when
+                 * H5Lcreate_hard() is implemented */
+                obj_info->rc = 1;
+
+                /* Skip num_attrs for now to avoid server calls.  This function
+                 * should be replaced with something more flexible anyways. */
+                break;
+            } /* end block */
+                
+        case H5VL_OBJECT_GET_COMMENT:
+        case H5VL_OBJECT_SET_COMMENT:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unsupported optional operation")
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid optional operation")
+    } /* end switch */
+
+done:
+    if(target_obj) {
+        if(H5VL_daosm_object_close(target_obj, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "can't close object")
+        target_obj = NULL;
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_object_optional() */
 
 
 /*-------------------------------------------------------------------------

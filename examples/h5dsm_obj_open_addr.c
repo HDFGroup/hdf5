@@ -4,6 +4,7 @@ int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
     char *pool_grp = NULL;
     hid_t file = -1, obj = -1, fapl = -1;
+    unsigned long long addr;
     H5I_type_t obj_type;
     char *obj_str = NULL;
     H5VL_daosm_snap_id_t snap_id;
@@ -16,6 +17,9 @@ int main(int argc, char *argv[]) {
     /* Parse UUID */
     if(0 != uuid_parse(argv[1], pool_uuid))
         ERROR;
+
+    /* Parse address */
+    addr = strtoull(argv[3], NULL, 16);
 
     /* Initialize VOL */
     if(H5VLdaosm_init(MPI_COMM_WORLD, pool_uuid, pool_grp) < 0)
@@ -41,10 +45,10 @@ int main(int argc, char *argv[]) {
     if((file = H5Fopen(argv[2], H5F_ACC_RDONLY, fapl)) < 0)
         ERROR;
 
-    printf("Opening object\n");
+    printf("Opening object by address\n");
 
     /* Open object */
-    if((obj = H5Oopen(file, argv[3], H5P_DEFAULT)) < 0)
+    if((obj = H5Oopen_by_addr(file, (haddr_t)addr)) < 0)
         ERROR;
 
     /* Get object type */
