@@ -97,6 +97,7 @@ $SRC_H5DUMP_TESTFILES/tattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tattrreg.h5
 $SRC_H5DUMP_TESTFILES/tbigdims.h5
 $SRC_H5DUMP_TESTFILES/tbinary.h5
+$SRC_H5DUMP_TESTFILES/tbitopaque.h5
 $SRC_H5DUMP_TESTFILES/tchar.h5
 $SRC_H5DUMP_TESTFILES/tcmpdattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tcmpdintsize.h5
@@ -217,6 +218,7 @@ $SRC_H5DUMP_TESTFILES/tbin3.ddl
 $SRC_H5DUMP_TESTFILES/tbin4.ddl
 $SRC_H5DUMP_TESTFILES/tbinregR.ddl
 $SRC_H5DUMP_TESTFILES/tbigdims.ddl
+$SRC_H5DUMP_TESTFILES/tbitopaque.ddl
 $SRC_H5DUMP_TESTFILES/tboot1.ddl
 $SRC_H5DUMP_TESTFILES/tboot2.ddl
 $SRC_H5DUMP_TESTFILES/tboot2A.ddl
@@ -487,6 +489,8 @@ TOOLTEST() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $xCMP $expect $actual > /dev/null 2>&1 ; then
      echo " PASSED"
     else
@@ -529,11 +533,15 @@ TOOLTEST2() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       if [ ! -f $expectdata ]; then
       # Create the expect data file if it doesn't yet exist.
         echo " CREATED"
         cp $actualdata $expectdata
+        echo "    Expected data (*.exp) missing"
+        nerrors="`expr $nerrors + 1`"
       elif $CMP $expectdata $actualdata; then
         echo " PASSED"
       else
@@ -584,16 +592,22 @@ TOOLTEST2A() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       if [ ! -f $expectdata ]; then
       # Create the expect data file if it doesn't yet exist.
         echo " CREATED"
         cp $actualdata $expectdata
+        echo "    Expected data (*.exp) missing"
+        nerrors="`expr $nerrors + 1`"
       elif $DIFF $expectdata $actualdata; then
         if [ ! -f $expectmeta ]; then
         # Create the expect meta file if it doesn't yet exist.
           echo " CREATED"
           cp $actualmeta $expectmeta
+          echo "    Expected metafile (*.ddl) missing"
+          nerrors="`expr $nerrors + 1`"
         elif $CMP $expectmeta $actualmeta; then
           echo " PASSED"
         else
@@ -645,6 +659,8 @@ TOOLTEST2B() {
     # Create the expect data file if it doesn't yet exist.
       echo " CREATED"
       cp $actualdata $expectdata
+      echo "    Expected data (*.exp) missing"
+      nerrors="`expr $nerrors + 1`"
     elif $CMP $expectdata $actualdata; then
       echo " PASSED"
     else
@@ -700,6 +716,8 @@ TOOLTEST3() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      echo " PASSED"
     else
@@ -757,15 +775,17 @@ TOOLTEST4() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      if $CMP $expect_err $actual_ext; then
       echo " PASSED"
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.err) differs from actual result (*.oerr)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
-    fi
+     else
+      echo "*FAILED*"
+      echo "    Expected result (*.err) differs from actual result (*.oerr)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+     fi
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"
@@ -821,15 +841,17 @@ TOOLTEST5() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      if $CMP $expect_err $actual_ext; then
       echo " PASSED"
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.err) differs from actual result (*.oerr)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
-    fi
+     else
+      echo "*FAILED*"
+      echo "    Expected result (*.err) differs from actual result (*.oerr)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+     fi
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"
@@ -863,6 +885,8 @@ TOOLTEST_HELP() {
     # Create the expect data file if it doesn't yet exist.
       echo " CREATED"
       cp $actual $expect-CREATED
+      echo "    Expected output (*.txt) missing"
+      nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       echo " PASSED"
     else
@@ -1036,7 +1060,7 @@ TOOLTEST tcomp-2.ddl --enable-error-stack -N /type1 --any_path /type2 --any_path
 TOOLTEST4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl --enable-error-stack tcompound_complex.h5
-TOOLTEST tcompound_complex.ddl --enable-error-stack tcompound_complex2.h5
+TOOLTEST tcompound_complex2.ddl --enable-error-stack tcompound_complex2.h5
 # tests for bitfields and opaque data types
 TOOLTEST tbitnopaque.ddl --enable-error-stack tbitnopaque.h5
 

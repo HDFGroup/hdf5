@@ -177,7 +177,7 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+                $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
@@ -373,6 +373,8 @@ VERIFY_LAYOUT_VDS()
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual > /dev/null 2>&1 ; then
      echo " PASSED"
     else
@@ -384,7 +386,7 @@ VERIFY_LAYOUT_VDS()
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err
+    rm -f $actual $actual_err
     fi
 
     # clean up tmp files
@@ -539,11 +541,11 @@ TOOLTEST1()
     )
     RET=$?
     if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
     else
-	echo " PASSED"
-	DIFFTEST $infile $outfile
+    echo " PASSED"
+    DIFFTEST $infile $outfile
     fi
     rm -f $outfile
 }
@@ -570,11 +572,11 @@ TOOLTESTV()
     ) >$actual 2>$actual_err
     RET=$?
     if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
     else
-	echo " PASSED"
-	DIFFTEST $infile $outfile
+    echo " PASSED"
+    DIFFTEST $infile $outfile
     fi
 
     # display output compare
@@ -635,6 +637,8 @@ TOOLTESTM() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.tst) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       echo " PASSED"
     else
@@ -646,7 +650,7 @@ TOOLTESTM() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-   rm -f $actual $actual_err $actual_sav $actual_err_sav
+        rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 
 }
@@ -760,11 +764,11 @@ TOOLTEST_META()
     # verify sizes.
     MESSAGE "Verify the sizes of both output files ($size1 vs $size2)"
     if [ $size1 -lt $size2 ]; then
-    	# pass
-	echo " PASSED"
+        # pass
+    echo " PASSED"
     else
-	#fail
-	echo "*FAILED*"
+    #fail
+    echo "*FAILED*"
         nerrors="`expr $nerrors + 1`"
     fi
 
@@ -791,6 +795,8 @@ TOOLTEST_HELP() {
     # Create the expect data file if it doesn't yet exist.
       echo " CREATED"
       cp $actual $expect-CREATED
+      echo "    Expected result (*.txt) missing"
+      nerrors="`expr $nerrors + 1`"
     elif cmp -s $expect $actual; then
       echo " PASSED"
     else
@@ -838,7 +844,7 @@ USE_FILTER_SZIP_ENCODER=`$RUNSERIAL $H5DETECTSZIP_BIN`
 fi
 
 ##############################################################################
-###			  T H E   T E S T S
+###              T H E   T E S T S
 ##############################################################################
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
