@@ -19,8 +19,8 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    if(mpi_size != 2)
-        PRINTF_ERROR("mpi_size != 2\n");
+    if(mpi_size > 2)
+        PRINTF_ERROR("mpi_size > 2\n");
 
     /* Seed random number generator */
     srand(time(NULL));

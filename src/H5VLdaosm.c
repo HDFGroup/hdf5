@@ -37,7 +37,7 @@
 #include "H5TRprivate.h"        /* Transactions                         */
 #include "H5VLprivate.h"        /* VOL plugins                          */
 #include "H5VLdaosm.h"          /* DAOS-M plugin                        */
-
+int tmp_g=0;
 hid_t H5VL_DAOSM_g = -1;
 
 /*
@@ -178,8 +178,7 @@ static herr_t H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name,
 static herr_t H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
     size_t name_len, H5VL_daosm_link_val_t *val);
 static herr_t H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
-    size_t name_len, hid_t dxpl_id, void **req, daos_obj_id_t *oid,
-    void **gcpl_buf_out, uint64_t *gcpl_len_out);
+    size_t name_len, hid_t dxpl_id, void **req, daos_obj_id_t *oid);
 
 static H5VL_daosm_group_t *H5VL_daosm_group_traverse(H5VL_daosm_item_t *item,
     const char *path, hid_t dxpl_id, void **req, const char **obj_name,
@@ -2381,8 +2380,7 @@ done:
  */
 static herr_t
 H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
-    size_t name_len, hid_t dxpl_id, void **req, daos_obj_id_t *oid,
-    void **gcpl_buf_out, uint64_t *gcpl_len_out)
+    size_t name_len, hid_t dxpl_id, void **req, daos_obj_id_t *oid)
 {
     H5VL_daosm_link_val_t link_val;
     hbool_t link_val_alloc = FALSE;
@@ -2413,7 +2411,7 @@ H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
                 link_val_alloc = TRUE;
 
                 /* Traverse the soft link path */
-                if(NULL == (target_grp = H5VL_daosm_group_traverse(&grp->obj.item, link_val.target.soft, dxpl_id, req, &target_name, gcpl_buf_out, gcpl_len_out)))
+                if(NULL == (target_grp = H5VL_daosm_group_traverse(&grp->obj.item, link_val.target.soft, dxpl_id, req, &target_name, NULL, NULL)))
                     HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't traverse path")
 
                 /* Check for no target_name, in this case just return
@@ -2423,7 +2421,7 @@ H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
                     *oid = target_grp->obj.oid;
                 else
                     /* Follow the last element in the path */
-                    if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, oid, gcpl_buf_out, gcpl_len_out) < 0)
+                    if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, oid) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't follow link")
 
                 break;
@@ -2507,9 +2505,13 @@ H5VL_daosm_group_traverse(H5VL_daosm_item_t *item, const char *path,
 
     /* Traverse path */
     while(next_obj) {
+        /* Free gcpl_buf_out */
+        if(gcpl_buf_out)
+            *gcpl_buf_out = H5MM_free(*gcpl_buf_out);
+
         /* Follow link to next group in path */
         HDassert(next_obj > *obj_name);
-        if(H5VL_daosm_link_follow(grp, *obj_name, (size_t)(next_obj - *obj_name), dxpl_id, req, &oid, gcpl_buf_out, gcpl_len_out) < 0)
+        if(H5VL_daosm_link_follow(grp, *obj_name, (size_t)(next_obj - *obj_name), dxpl_id, req, &oid) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't follow link to group")
 
         /* Close previous group */
@@ -2839,6 +2841,7 @@ H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file, daos_obj_id_t oid,
     /* Return GCPL info if requested, relinquish ownership of gcpl_buf if so */
     if(gcpl_buf_out) {
         HDassert(gcpl_len_out);
+        HDassert(!*gcpl_buf_out);
 
         *gcpl_buf_out = gcpl_buf;
         gcpl_buf = NULL;
@@ -3003,7 +3006,7 @@ H5VL_daosm_group_open(void *_item, H5VL_loc_params_t loc_params,
                 gcpl_len = 0;
 
                 /* Follow link to group */
-                if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &oid, NULL, NULL) < 0)
+                if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &oid) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't follow link to group")
 
                 /* Open group */
@@ -3728,7 +3731,7 @@ H5VL_daosm_dataset_open(void *_item,
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "can't traverse path")
 
             /* Follow link to dataset */
-            if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &dset->obj.oid, NULL, NULL) < 0)
+            if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &dset->obj.oid) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't follow link to dataset")
         } /* end else */
 
@@ -4709,7 +4712,7 @@ H5VL_daosm_object_open(void *_item, H5VL_loc_params_t loc_params,
                 oid = target_grp->obj.oid;
             else
                 /* Follow link to object */
-                if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &oid, NULL, NULL) < 0)
+                if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &oid) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't follow link to group")
 
             /* Broadcast group info if there are other processes that need it */

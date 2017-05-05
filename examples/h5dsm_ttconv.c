@@ -40,8 +40,11 @@ int main(int argc, char *argv[]) {
     /* Seed random number generator */
     srand(time(NULL));
 
-    if(argc != 2)
-        PRINTF_ERROR("argc must be 2\n");
+    if((argc != 2) && (argc != 3))
+        PRINTF_ERROR("argc must be 2 or 3\n");
+
+    if(argc == 3)
+        verbose_g = 0;
 
     /* Parse UUID */
     if(0 != uuid_parse(argv[1], pool_uuid))
@@ -273,7 +276,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Full write/read, with member conversion
@@ -378,7 +382,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Write by parts
@@ -445,7 +450,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Fill buffer */
     for(i = 0; i < dims[0]; i++) {
@@ -509,7 +515,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Fill buffer */
     for(i = 0; i < dims[0]; i++) {
@@ -573,7 +580,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Read by parts
@@ -613,7 +621,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Read member b */
     memcpy(buf_conv, buf_conv_init, sizeof(buf_conv));
@@ -650,7 +659,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Read member c */
     memcpy(buf_conv, buf_conv_init, sizeof(buf_conv));
@@ -687,7 +697,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Write/read partial attributes
@@ -754,7 +765,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Fill buffer */
     for(i = 0; i < dims[0]; i++) {
@@ -818,7 +830,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Fill buffer */
     for(i = 0; i < dims[0]; i++) {
@@ -882,7 +895,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Test dataset
@@ -955,7 +969,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Full write/read, with member conversion
@@ -1060,7 +1075,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Write by parts
@@ -1127,7 +1143,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Fill buffer */
     for(i = 0; i < dims[0]; i++) {
@@ -1191,7 +1208,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Fill buffer */
     for(i = 0; i < dims[0]; i++) {
@@ -1255,7 +1273,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Read by parts
@@ -1295,7 +1314,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Read member b */
     memcpy(buf_conv, buf_conv_init, sizeof(buf_conv));
@@ -1332,7 +1352,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Read member c */
     memcpy(buf_conv, buf_conv_init, sizeof(buf_conv));
@@ -1369,7 +1390,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Write/read partial datasets
@@ -1436,7 +1458,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Fill buffer */
     for(i = 0; i < dims[0]; i++) {
@@ -1500,7 +1523,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /* Fill buffer */
     for(i = 0; i < dims[0]; i++) {
@@ -1564,7 +1588,8 @@ int main(int argc, char *argv[]) {
             PRINTF_ERROR("Member c at location %d does not match", i);
     } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Test dataset with selections
@@ -1652,7 +1677,8 @@ int main(int argc, char *argv[]) {
                 PRINTF_ERROR("Member c at location %d does not match", i);
         } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*! ----------------------------------------------*/
     /*! Temporary hack until overwrites are supported */
@@ -1753,7 +1779,8 @@ int main(int argc, char *argv[]) {
                 PRINTF_ERROR("Member c at location %d, %d does not match", i, j);
         } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*! ----------------------------------------------*/
     /*! Temporary hack until overwrites are supported */
@@ -1852,7 +1879,8 @@ int main(int argc, char *argv[]) {
                 PRINTF_ERROR("Member c at location %d, %d does not match", i, j);
         } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Partial read to contiguous buffer, member conversion to type "a"
@@ -1907,7 +1935,8 @@ int main(int argc, char *argv[]) {
                 PRINTF_ERROR("Member c at location %d, %d does not match", i, j);
         } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Partial read to non-contiguous buffer, member conversion to type "a"
@@ -1962,7 +1991,8 @@ int main(int argc, char *argv[]) {
                 PRINTF_ERROR("Member c at location %d, %d does not match", i, j);
         } /* end for */
 
-    printf("\n");
+    if(verbose_g)
+        printf("\n");
 
     /*
      * Close
