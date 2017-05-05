@@ -42,7 +42,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.10.0-patch1
+- Bug Fixes since HDF5-1.10.1
 - Supported Platforms
 - Tested Configuration Features Summary
 - More Tested Platforms
