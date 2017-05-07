@@ -593,6 +593,7 @@ herr_t
 H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t *plist)
 {
     htri_t msg_exists;                  /* Whether a particular type of message exists */
+    hbool_t layout_copied = FALSE;      /* Flag to indicate that layout message was copied */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -622,6 +623,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
      */
     if(NULL == H5O_msg_read(&(dataset->oloc), H5O_LAYOUT_ID, &(dataset->shared->layout), dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data layout message")
+    layout_copied = TRUE;
 
     /* Check for external file list message (which might not exist) */
     if((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_EFL_ID, dxpl_id)) < 0)
@@ -655,10 +657,16 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout")
 
     /* Set chunk sizes */
-    if(H5D__chunk_set_sizes(dataset) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes")
+    if(H5D_CHUNKED == dataset->shared->layout.type) {
+        if(H5D__chunk_set_sizes(dataset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes")
+    }
 
 done:
+    if(ret_value < 0 && layout_copied) {
+        if(H5O_msg_reset(H5O_LAYOUT_ID, &dataset->shared->layout) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset layout info")
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_oh_read() */
 
