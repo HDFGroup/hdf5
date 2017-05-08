@@ -28,7 +28,7 @@ namespace H5 {
                 a root group.  It is now done in 1.10 (Mar 30) and 1.8.19
                 releases. -BMR
 */
-//  Inheritance: CommonFG/H5Location -> IdComponent
+//  Inheritance: Group -> CommonFG/H5Object -> H5Location -> IdComponent
 class H5_DLLCPP H5File : public Group {
    public:
         // Creates or opens an HDF5 file.
