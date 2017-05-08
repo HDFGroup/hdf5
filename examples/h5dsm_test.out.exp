@@ -1,0 +1,55 @@
+Checking if link exists... FALSE
+Success
+Checking if link exists... TRUE
+Success
+Checking if link exists... FALSE
+Success
+Checking if link exists... TRUE
+Success
+Iterating over links
+dset2: hard, address = 0x4000000000000004
+slpath: soft, val_size = 19
+grp: hard, address = 0x0000000000000002
+slink: soft, val_size = 4
+grp2: hard, address = 0x0000000000000005
+dset: hard, address = 0x4000000000000003
+Complete.  Number of links: 6
+Success
+Iterating over links
+slroot: soft, val_size = 2
+Complete.  Number of links: 1
+Success
+Iterating over attributes
+attrroot: 96 bytes
+attrroot2: 96 bytes
+Complete.  Number of attributes: 2
+Success
+Iterating over attributes
+attrgrp: 96 bytes
+Complete.  Number of attributes: 1
+Success
+Iterating over attributes
+attrdset: 96 bytes
+Complete.  Number of attributes: 1
+Success
+Opening object
+fileno = 4889012549849695529
+addr = 0x0000000000000001
+Object type is group
+Success
+Opening object
+fileno = 4889012549849695529
+addr = 0x0000000000000002
+Object type is group
+Success
+Opening object
+fileno = 4889012549849695529
+addr = 0x4000000000000003
+Object type is dataset
+Success
+Opening snapshot 7
+Checking if link exists... FALSE
+Success
+Opening snapshot 8
+Checking if link exists... TRUE
+Success
