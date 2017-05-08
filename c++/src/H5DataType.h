@@ -18,15 +18,15 @@
 #define __H5DataType_H
 
 namespace H5 {
+
 /*! \class DataType
     \brief Class DataType provides generic operations on HDF5 datatypes.
 
     DataType inherits from H5Object because a named datatype is an HDF5
     object and is a base class of ArrayType, AtomType, CompType, EnumType,
     and VarLenType.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP DataType : public H5Object {
    public:
         // Creates a datatype given its class and size

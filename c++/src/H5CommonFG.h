@@ -19,17 +19,15 @@
 
 namespace H5 {
 
-// Class forwarding
-class Group;
-class H5File;
-class ArrayType;
-class VarLenType;
-
 /*! \class CommonFG
     \brief \a CommonFG is an abstract base class of H5File and H5Group.
 
     It provides common operations of H5File and H5Group.
 */
+
+class ArrayType;
+class VarLenType;
+
 class H5_DLLCPP CommonFG {
    public:
         // Creates a new group at this location which can be a file

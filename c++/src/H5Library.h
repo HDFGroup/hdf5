@@ -18,6 +18,7 @@
 #define __H5Library_H
 
 namespace H5 {
+
 /*! \class H5Library
     \brief Class H5Library operates the HDF5 library globably.
 

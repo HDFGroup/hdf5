@@ -19,7 +19,8 @@
 
 namespace H5 {
 
-class DataSpace;
+//class DataSpace;
+
 /*! \class IdComponent
     \brief Class IdComponent provides wrappers of the C functions that
      operate on an HDF5 identifier.

@@ -18,12 +18,18 @@
 #define __H5File_H
 
 namespace H5 {
+
 /*! \class H5File
     \brief Class H5File represents an HDF5 file.
 
-    Inheritance: CommonFG/H5Location -> IdComponent
+    Modification:
+        May 5, 2017: In the class rearrangement of 1.8.10, H5File should have
+                been moved to inherit from Group instead, because HDF5 file is
+                a root group.  It is now done in 1.10 (Mar 30) and 1.8.19
+                releases. -BMR
 */
-class H5_DLLCPP H5File : public H5Location, public CommonFG {
+//  Inheritance: CommonFG/H5Location -> IdComponent
+class H5_DLLCPP H5File : public Group {
    public:
         // Creates or opens an HDF5 file.
         H5File(const char* name, unsigned int flags,
