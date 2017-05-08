@@ -1083,6 +1083,10 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     /* Hash file name to create uuid */
     H5VL_daosm_hash128(name, &file->uuid);
 
+    /* Determine if we requested collective object ops for the file */
+    if(H5Pget_all_coll_metadata_ops(fapl_id, &file->collective) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get collective access property")
+
     /* Generate oid for global metadata object */
     daos_obj_id_generate(&gmd_oid, DAOS_OC_TINY_RW);
 
@@ -1342,7 +1346,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Determine if we requested collective object ops for the file */
     if(H5Pget_all_coll_metadata_ops(fapl_id, &file->collective) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get collective access property")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get collective access property")
 
     if(file->my_rank == 0) {
         daos_epoch_t epoch;
