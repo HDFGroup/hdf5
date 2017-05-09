@@ -33,15 +33,15 @@ print_dimensions (int rank, hsize_t *dims)
 {
     int  i;
 
-    if ( rank <= 0 ) 
+    if ( rank <= 0 )
     {
         parallel_print("H5S_SCALAR" );
     }
-    else 
+    else
     {
         if (!dims)
             parallel_print("dimension is NULL");
-        else 
+        else
         {
             parallel_print("[");
             for ( i = 0; i < rank-1; i++)
@@ -351,12 +351,12 @@ void print_found(hsize_t nfound)
 
 /*-----------------------------------------------------------------
  * Function: match_up_memsize
- *  
+ *
  * Purpose: match smaller memory size up to bigger memory size
  *------------------------------------------------------------------
  */
 herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
-                         hid_t *m_tid1, hid_t *m_tid2, 
+                         hid_t *m_tid1, hid_t *m_tid2,
                          size_t *m_size1, size_t  *m_size2)
 {
     herr_t ret = SUCCEED;
