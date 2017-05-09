@@ -2509,7 +2509,7 @@ H5VL_daosm_group_traverse(H5VL_daosm_item_t *item, const char *path,
     while(next_obj) {
         /* Free gcpl_buf_out */
         if(gcpl_buf_out)
-            *gcpl_buf_out = H5MM_free(*gcpl_buf_out);
+            *gcpl_buf_out = H5MM_xfree(*gcpl_buf_out);
 
         /* Follow link to next group in path */
         HDassert(next_obj > *obj_name);
