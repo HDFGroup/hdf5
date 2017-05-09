@@ -1122,10 +1122,6 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
         if(0 != (ret = daos_epoch_hold(file->coh, &file->epoch, NULL /*state*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't hold epoch: %d", ret)
 
-        /* Create global metadata object */
-        if(0 != (ret = daos_obj_declare(file->coh, gmd_oid, file->epoch, NULL /*oa*/, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create global metadata object: %d", ret)
-
         /* Open global metadata object */
         if(0 != (ret = daos_obj_open(file->coh, gmd_oid, file->epoch, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
@@ -2598,8 +2594,7 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
         char gcpl_key[] = H5VL_DAOSM_CPL_KEY;
 
         /* Create group */
-        if(0 != (ret = daos_obj_declare(file->coh, grp->obj.oid, file->epoch, NULL /*oa*/, NULL /*event*/)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create dataset: %d", ret)
+        /* Update max_oid */
         file->max_oid = H5VL_daosm_oid_to_idx(grp->obj.oid);
 
         /* Write max OID */
@@ -2654,12 +2649,12 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
         file->max_oid = grp->obj.oid.lo;
 
         /* Note no barrier is currently needed here, daos_obj_open is a local
-         * operation and can occur before the lead process executes
-         * daos_obj_declare.  For app-level synchronization we could add a
-         * barrier or bcast to the calling functions (file_create, group_create)
-         * though it could only be an issue with group reopen so we'll skip it
-         * for now.  There is probably never an issue with file reopen since all
-         * commits are from process 0, same as the group create above. */
+         * operation and can occur before the lead process writes metadata.  For
+         * app-level synchronization we could add a barrier or bcast to the
+         * calling functions (file_create, group_create) though it could only be
+         * an issue with group reopen so we'll skip it for now.  There is
+         * probably never an issue with file reopen since all commits are from
+         * process 0, same as the group create above. */
 
         /* Open group */
         if(0 != (ret = daos_obj_open(file->coh, grp->obj.oid, file->epoch, DAOS_OO_RW, &grp->obj.obj_oh, NULL /*event*/)))
@@ -3521,8 +3516,7 @@ H5VL_daosm_dataset_create(void *_item,
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "can't traverse path")
 
         /* Create dataset */
-        if(0 != (ret = daos_obj_declare(item->file->coh, dset->obj.oid, item->file->epoch, NULL /*oa*/, NULL /*event*/)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't create dataset: %d", ret)
+        /* Update max_oid */
         item->file->max_oid = H5VL_daosm_oid_to_idx(dset->obj.oid);
 
         /* Write max OID */
@@ -3607,12 +3601,11 @@ H5VL_daosm_dataset_create(void *_item,
         item->file->max_oid = dset->obj.oid.lo;
 
         /* Note no barrier is currently needed here, daos_obj_open is a local
-         * operation and can occur before the lead process executes
-         * daos_obj_declare.  For app-level synchronization we could add a
-         * barrier or bcast though it could only be an issue with dataset reopen
-         * so we'll skip it for now.  There is probably never an issue with file
-         * reopen since all commits are from process 0, same as the dataset
-         * create above. */
+         * operation and can occur before the lead process writes metadata.  For
+         * app-level synchronization we could add a barrier or bcast though it
+         * could only be an issue with dataset reopen so we'll skip it for now.
+         * There is probably never an issue with file reopen since all commits
+         * are from process 0, same as the dataset create above. */
 
         /* Open dataset */
         if(0 != (ret = daos_obj_open(item->file->coh, dset->obj.oid, item->file->epoch, DAOS_OO_RW, &dset->obj.obj_oh, NULL /*event*/)))
