@@ -161,6 +161,8 @@ static herr_t H5VL_daosm_attribute_read(void *_attr, hid_t mem_type_id,
     void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL_daosm_attribute_write(void *_attr, hid_t mem_type_id,
     const void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL_daosm_attribute_get(void *_item, H5VL_attr_get_t get_type,
+    hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_daosm_attribute_specific(void *_item,
     H5VL_loc_params_t loc_params, H5VL_attr_specific_t specific_type,
     hid_t dxpl_id, void **req, va_list arguments);
@@ -227,7 +229,7 @@ static H5VL_class_t H5VL_daosm_g = {
         H5VL_daosm_attribute_open,              /* open */
         H5VL_daosm_attribute_read,              /* read */
         H5VL_daosm_attribute_write,             /* write */
-        NULL,//H5VL_iod_attribute_get,                 /* get */
+        H5VL_daosm_attribute_get,               /* get */
         H5VL_daosm_attribute_specific,          /* specific */
         NULL,                                   /* optional */
         H5VL_daosm_attribute_close              /* close */
@@ -4492,50 +4494,53 @@ H5VL_daosm_dataset_get(void *_dset, H5VL_dataset_get_t get_type,
             {
                 hid_t *plist_id = va_arg(arguments, hid_t *);
 
-                /* Retrieve the file's access property list */
+                /* Retrieve the dataset's creation property list */
                 if((*plist_id = H5Pcopy(dset->dcpl_id)) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dset creation property list")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dset creation property list")
 
                 break;
-            }
+            } /* end block */
         case H5VL_DATASET_GET_DAPL:
             {
                 hid_t *plist_id = va_arg(arguments, hid_t *);
 
-                /* Retrieve the file's access property list */
+                /* Retrieve the dataset's access property list */
                 if((*plist_id = H5Pcopy(dset->dapl_id)) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dset access property list")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dset access property list")
 
                 break;
-            }
+            } /* end block */
         case H5VL_DATASET_GET_SPACE:
             {
                 hid_t *ret_id = va_arg(arguments, hid_t *);
 
+                /* Retrieve the dataset's dataspace */
                 if((*ret_id = H5Scopy(dset->space_id)) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get dataspace ID of dataset");
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace ID of dataset");
                 break;
-            }
+            } /* end block */
         case H5VL_DATASET_GET_SPACE_STATUS:
             {
                 H5D_space_status_t *allocation = va_arg(arguments, H5D_space_status_t *);
 
+                /* Retrieve the dataset's space status */
                 *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
                 break;
-            }
+            } /* end block */
         case H5VL_DATASET_GET_TYPE:
             {
                 hid_t *ret_id = va_arg(arguments, hid_t *);
 
+                /* Retrieve the dataset's datatype */
                 if((*ret_id = H5Tcopy(dset->type_id)) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
                 break;
-            }
+            } /* end block */
         case H5VL_DATASET_GET_STORAGE_SIZE:
         case H5VL_DATASET_GET_OFFSET:
         default:
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
-    }
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "can't get this type of information from dataset")
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5521,6 +5526,106 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_attribute_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_attribute_get
+ *
+ * Purpose:     Gets certain information about an attribute
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              May, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_attribute_get(void *_item, H5VL_attr_get_t get_type,
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+{
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        /* H5Aget_space */
+        case H5VL_ATTR_GET_SPACE:
+            {
+                hid_t *ret_id = va_arg(arguments, hid_t *);
+                H5VL_daosm_attr_t *attr = (H5VL_daosm_attr_t *)_item;
+
+                /* Retrieve the attribute's dataspace */
+                if((*ret_id = H5Scopy(attr->space_id)) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get dataspace ID of dataset");
+                break;
+            } /* end block */
+        /* H5Aget_type */
+        case H5VL_ATTR_GET_TYPE:
+            {
+                hid_t *ret_id = va_arg(arguments, hid_t *);
+                H5VL_daosm_attr_t *attr = (H5VL_daosm_attr_t *)_item;
+
+                /* Retrieve the attribute's datatype */
+                if((*ret_id = H5Tcopy(attr->type_id)) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
+                break;
+            } /* end block */
+        /* H5Aget_create_plist */
+        case H5VL_ATTR_GET_ACPL:
+            {
+                hid_t *ret_id = va_arg(arguments, hid_t *);
+                //H5VL_daosm_attr_t *attr = (H5VL_daosm_attr_t *)_item;
+
+                /* Retrieve the file's access property list */
+                if((*ret_id = H5Pcopy(H5P_ATTRIBUTE_CREATE_DEFAULT)) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attr creation property list");
+                break;
+            } /* end block */
+        /* H5Aget_name */
+        case H5VL_ATTR_GET_NAME:
+            {
+                H5VL_loc_params_t loc_params = va_arg(arguments, H5VL_loc_params_t);
+                size_t buf_size = va_arg(arguments, size_t);
+                char *buf = va_arg(arguments, char *);
+                ssize_t	*ret_val = va_arg(arguments, ssize_t *);
+                H5VL_daosm_attr_t *attr = (H5VL_daosm_attr_t *)_item;
+
+                if(H5VL_OBJECT_BY_SELF == loc_params.type) {
+                    size_t copy_len;
+                    size_t nbytes;
+
+                    nbytes = HDstrlen(attr->name);
+                    HDassert((ssize_t)nbytes >= 0); /*overflow, pretty unlikely --rpm*/
+
+                    /* compute the string length which will fit into the user's buffer */
+                    copy_len = MIN(buf_size - 1, nbytes);
+
+                    /* Copy all/some of the name */
+                    if(buf && copy_len > 0) {
+                        HDmemcpy(buf, attr->name, copy_len);
+
+                        /* Terminate the string */
+                        buf[copy_len]='\0';
+                    } /* end if */
+                    *ret_val = (ssize_t)nbytes;
+                } /* end if */
+                else if(H5VL_OBJECT_BY_IDX == loc_params.type) {
+                    HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "get attribute name by index unsupported");
+                } /* end else */
+                break;
+            } /* end block */
+        /* H5Aget_info */
+        case H5VL_ATTR_GET_INFO:
+        case H5VL_ATTR_GET_STORAGE_SIZE:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "can't get this type of information from attr")
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_attribute_get() */
 
 
 /*-------------------------------------------------------------------------
