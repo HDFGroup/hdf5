@@ -20,6 +20,7 @@
 #include <string>
 
 namespace H5 {
+
 #ifdef H5_NO_STD
     #define H5std_string ::string
 #else

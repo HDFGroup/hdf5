@@ -19,15 +19,6 @@
 
 namespace H5 {
 
-class ArrayType;
-class CompType;
-class EnumType;
-class FloatType;
-class IntType;
-class StrType;
-class VarLenType;
-class DataSpace;
-
 /*! \class AbstractDs
     \brief AbstractDs is an abstract base class, inherited by Attribute
      and DataSet.
@@ -35,6 +26,17 @@ class DataSpace;
     It provides a collection of services that are common to both Attribute
     and DataSet.
 */
+
+class DataType;
+class ArrayType;
+class IntType;
+class FloatType;
+class StrType;
+class CompType;
+class EnumType;
+class VarLenType;
+class DataSpace;
+
 class H5_DLLCPP AbstractDs {
    public:
         // Gets a copy the datatype of that this abstract dataset uses.

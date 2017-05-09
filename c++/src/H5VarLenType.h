@@ -18,12 +18,12 @@
 #define __H5VarLenType_H
 
 namespace H5 {
+
 /*! \class VarLenType
     \brief VarLenType is a derivative of a DataType and operates on HDF5
     C's Variable-length Datatypes.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP VarLenType : public DataType {
    public:
         // Constructor that creates a variable-length datatype based

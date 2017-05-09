@@ -18,12 +18,15 @@
 #define __H5DSCreatPropList_H
 
 namespace H5 {
+
 /*! \class DSetCreatPropList
     \brief Class DSetCreatPropList inherits from ObjCreatPropList and provides
     wrappers for the HDF5 dataset creation property functions.
-
-    Inheritance: ObjCreatPropList -> PropList -> IdComponent
 */
+//  Inheritance: ObjCreatPropList -> PropList -> IdComponent
+
+class DataType;
+
 class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
    public:
         ///\brief Default dataset creation property list.
