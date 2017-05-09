@@ -277,16 +277,16 @@ h5tools_set_attr_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-			if ((f = HDfopen(fname, "wb")) != NULL) {
-				rawattrstream = f;
-				retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "wb")) != NULL) {
+                rawattrstream = f;
+                retvalue = SUCCEED;
+            }
         }
         else {
-			if ((f = HDfopen(fname, "w")) != NULL) {
-				rawattrstream = f;
-				retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "w")) != NULL) {
+                rawattrstream = f;
+                retvalue = SUCCEED;
+            }
         }
     }
     else {
@@ -319,26 +319,26 @@ h5tools_set_input_file(const char *fname, int is_bin)
         if (HDfclose(rawinstream))
             HDperror("closing rawinstream");
         else
-        	rawinstream = NULL;
+            rawinstream = NULL;
     }
     /* First check if filename is string "NULL" */
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-			if ((f = HDfopen(fname, "rb")) != NULL) {
-				rawinstream = f;
-				retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "rb")) != NULL) {
+                rawinstream = f;
+                retvalue = SUCCEED;
+            }
         }
         else {
-			if ((f = HDfopen(fname, "r")) != NULL) {
-				rawinstream = f;
-				retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "r")) != NULL) {
+                rawinstream = f;
+                retvalue = SUCCEED;
+            }
         }
     }
     else {
-    	rawinstream = NULL;
+        rawinstream = NULL;
         retvalue = SUCCEED;
     }
 
@@ -373,16 +373,16 @@ h5tools_set_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-			if ((f = HDfopen(fname, "wb")) != NULL) {
-					rawoutstream = f;
-					retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "wb")) != NULL) {
+                rawoutstream = f;
+                retvalue = SUCCEED;
+            }
         }
         else {
-			if ((f = HDfopen(fname, "w")) != NULL) {
-					rawoutstream = f;
-					retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "w")) != NULL) {
+                rawoutstream = f;
+                retvalue = SUCCEED;
+            }
         }
     }
     else {
@@ -421,21 +421,21 @@ h5tools_set_error_file(const char *fname, int is_bin)
     /* First check if filename is string "NULL" */
     if (fname != NULL) {
     /* binary output */
-		if (is_bin) {
-			if ((f = HDfopen(fname, "wb")) != NULL) {
-				rawerrorstream = f;
-				retvalue = SUCCEED;
-			}
+        if (is_bin) {
+            if ((f = HDfopen(fname, "wb")) != NULL) {
+                rawerrorstream = f;
+                retvalue = SUCCEED;
+            }
         }
         else {
-			if ((f = HDfopen(fname, "w")) != NULL) {
-				rawerrorstream = f;
-				retvalue = SUCCEED;
-			}
-		}
+            if ((f = HDfopen(fname, "w")) != NULL) {
+                rawerrorstream = f;
+                retvalue = SUCCEED;
+            }
+        }
     }
     else {
-    	rawerrorstream = NULL;
+        rawerrorstream = NULL;
         retvalue = SUCCEED;
     }
 
