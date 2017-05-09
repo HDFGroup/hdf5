@@ -17,24 +17,16 @@
  *
  * Purpose:	Tests the dataset interface (H5D)
  */
-
-#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
-#define H5D_TESTING
-
 #define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
 #define H5FD_TESTING
 
 #define H5Z_FRIEND		/*suppress error about including H5Zpkg	  */
-#define H5D_FRIEND      /*suppress error about including H5Dpkg   */
 
 #include "h5test.h"
 #include "H5srcdir.h"
-#include "H5Dpkg.h"
 #include "H5FDpkg.h"
 #include "H5VMprivate.h"
-#include "H5Iprivate.h"
 #include "H5Zpkg.h"
-#include "H5Dpkg.h"
 #ifdef H5_HAVE_SZLIB_H
 #   include "szlib.h"
 #endif
@@ -12669,7 +12661,7 @@ test_compact_open_close_dirty(hid_t fapl)
     int         wbuf[10];       /* Data buffer */
     char	    filename[FILENAME_BUF_SIZE];    /* Filename */
     int         i;              /* Local index variable */
-    H5D_t       *dset = NULL;   /* Internal dataset pointer */
+    hbool_t     dirty;          /* The dirty flag */
 
     TESTING("compact dataset repeated open/close and dirty flag");
 
@@ -12721,16 +12713,17 @@ test_compact_open_close_dirty(hid_t fapl)
     if((did = H5Dopen2(fid, DSET_COMPACT_MAX_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    /* Get the internal dataset pointer */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    /* Retrieve the "dirty" flag from the compact dataset layout */
+    if(H5D__layout_compact_dirty_test(did, &dirty) < 0)
         TEST_ERROR
 
     /* Verify that the "dirty" flag is false */
-    if(dset->shared->layout.storage.u.compact.dirty)
+    if(dirty)
         TEST_ERROR
 
     /* Close the dataset */
-    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) 
+        TEST_ERROR
 
     /* Close the dataspace */
     if(H5Sclose(sid) < 0) 
