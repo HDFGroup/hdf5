@@ -46,7 +46,6 @@ h5tools_get_native_type(hid_t type)
     return(p_type);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function: h5tools_get_little_endian_type
  *
