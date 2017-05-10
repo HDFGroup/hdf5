@@ -12701,7 +12701,7 @@ test_compact_open_close_dirty(hid_t fapl)
     /* Verify the repeated open/close of the dataset will not fail */
     for(i = 0; i < 20;i++) {
         H5E_BEGIN_TRY {
-            did = H5Dopen (fid, DSET_COMPACT_MAX_NAME, H5P_DEFAULT);
+            did = H5Dopen2 (fid, DSET_COMPACT_MAX_NAME, H5P_DEFAULT);
         } H5E_END_TRY;
         if(did < 0)
             TEST_ERROR
