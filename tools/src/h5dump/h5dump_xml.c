@@ -136,8 +136,8 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_
 {
     hid_t             obj;
     herr_t            ret = SUCCEED;
-    char                *obj_path = NULL;    /* Full path of object */
-    h5tools_str_t       buffer;             /* string into which to render */
+    char             *obj_path = NULL;    /* Full path of object */
+    h5tools_str_t     buffer;             /* string into which to render */
     h5tools_context_t ctx;                /* print context */
     h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
@@ -1951,7 +1951,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
         else {  /* all other data */
             /* VL data special information */
             unsigned int vl_data = 0; /* contains VL datatypes */
-            
+
             p_type = h5tools_get_native_type(type);
 
             /* Check if we have VL data in the dataset's datatype */
