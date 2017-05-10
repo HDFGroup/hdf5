@@ -218,7 +218,8 @@ $SRC_H5DUMP_TESTFILES/tbin3.ddl
 $SRC_H5DUMP_TESTFILES/tbin4.ddl
 $SRC_H5DUMP_TESTFILES/tbinregR.ddl
 $SRC_H5DUMP_TESTFILES/tbigdims.ddl
-$SRC_H5DUMP_TESTFILES/tbitnopaque.ddl
+$SRC_H5DUMP_TESTFILES/tbitnopaque_be.ddl
+$SRC_H5DUMP_TESTFILES/tbitnopaque_le.ddl
 $SRC_H5DUMP_TESTFILES/tboot1.ddl
 $SRC_H5DUMP_TESTFILES/tboot2.ddl
 $SRC_H5DUMP_TESTFILES/tboot2A.ddl
@@ -1062,7 +1063,11 @@ TOOLTEST4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
 TOOLTEST tcomp-4.ddl --enable-error-stack tcompound_complex.h5
 TOOLTEST tcompound_complex2.ddl --enable-error-stack tcompound_complex2.h5
 # tests for bitfields and opaque data types
-TOOLTEST tbitnopaque.ddl --enable-error-stack tbitnopaque.h5
+if test $WORDS_BIGENDIAN != "yes"; then
+TOOLTEST tbitnopaque_le.ddl --enable-error-stack tbitnopaque.h5
+else
+TOOLTEST tbitnopaque_be.ddl --enable-error-stack tbitnopaque.h5
+fi
 
 #test for the nested compound type
 TOOLTEST tnestcomp-1.ddl --enable-error-stack tnestedcomp.h5

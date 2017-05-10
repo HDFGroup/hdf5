@@ -156,9 +156,30 @@ void print_type(hid_t type)
         }
         break;
 
+    case H5T_BITFIELD:
+        if (H5Tequal(type, H5T_STD_B8BE)) {
+            parallel_print("H5T_STD_B8BE");
+        } else if (H5Tequal(type, H5T_STD_B8LE)) {
+            parallel_print("H5T_STD_B8LE");
+        } else if (H5Tequal(type, H5T_STD_B16BE)) {
+            parallel_print("H5T_STD_B16BE");
+        } else if (H5Tequal(type, H5T_STD_B16LE)) {
+            parallel_print("H5T_STD_B16LE");
+        } else if (H5Tequal(type, H5T_STD_B32BE)) {
+            parallel_print("H5T_STD_B32BE");
+        } else if (H5Tequal(type, H5T_STD_B32LE)) {
+            parallel_print("H5T_STD_B32LE");
+        } else if (H5Tequal(type, H5T_STD_B64BE)) {
+            parallel_print("H5T_STD_B64BE");
+        } else if (H5Tequal(type, H5T_STD_B64LE)) {
+            parallel_print("H5T_STD_B64LE");
+        } else {
+            parallel_print("undefined bitfield");
+        }
+        break;
+
     case H5T_TIME:
     case H5T_STRING:
-    case H5T_BITFIELD:
     case H5T_OPAQUE:
     case H5T_COMPOUND:
     case H5T_REFERENCE:
@@ -367,7 +388,7 @@ herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
         {
             H5Tclose( *m_tid1 );
 
-            if(( (*m_tid1) = h5tools_get_native_type(f_tid2_id)) < 0)
+            if(( (*m_tid1) = H5Tget_native_type(f_tid2_id, H5T_DIR_DEFAULT)) < 0)
             {
                 ret = FAIL;
                 goto out;
@@ -378,7 +399,7 @@ herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
         else {
             H5Tclose(*m_tid2);
 
-            if(( (*m_tid2) = h5tools_get_native_type(f_tid1_id)) < 0)
+            if(( (*m_tid2) = H5Tget_native_type(f_tid1_id, H5T_DIR_DEFAULT)) < 0)
             {
                 ret = FAIL;
                 goto out;

@@ -1322,6 +1322,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
         case H5T_INTEGER:
         case H5T_FLOAT:
         case H5T_ENUM:
+        case H5T_BITFIELD:
             block_index = block_nelmts * size;
             while(block_index > 0) {
                 size_t bytes_in        = 0;    /* # of bytes to write  */
@@ -1488,7 +1489,6 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             break;
 
         case H5T_TIME:
-        case H5T_BITFIELD:
         case H5T_OPAQUE:
             for (block_index = 0; block_index < block_nelmts; block_index++) {
                 mem = ((unsigned char*)_mem) + block_index * size;

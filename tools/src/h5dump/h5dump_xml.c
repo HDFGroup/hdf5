@@ -1952,7 +1952,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
             /* VL data special information */
             unsigned int vl_data = 0; /* contains VL datatypes */
 
-            p_type = h5tools_get_native_type(type);
+            p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
 
             /* Check if we have VL data in the dataset's datatype */
             if (h5tools_detect_vlen(p_type) == TRUE)
