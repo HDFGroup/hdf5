@@ -126,8 +126,8 @@ int do_copy_refobjs(hid_t fidin,
                 for(k = 0; k < rank; k++)
                     nelmts *= dims[k];
 
-                if((mtype_id = h5tools_get_native_type(ftype_id)) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_get_native_type failed");
+                if((mtype_id = H5Tget_native_type(ftype_id, H5T_DIR_DEFAULT)) < 0)
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
 
                 if((msize = H5Tget_size(mtype_id)) == 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
@@ -484,8 +484,8 @@ static int copy_refs_attr(hid_t loc_in,
 
         type_class = H5Tget_class(ftype_id);
 
-        if((mtype_id = h5tools_get_native_type(ftype_id)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_get_native_type failed");
+        if((mtype_id = H5Tget_native_type(ftype_id, H5T_DIR_DEFAULT)) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
 
         if((msize = H5Tget_size(mtype_id)) == 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");

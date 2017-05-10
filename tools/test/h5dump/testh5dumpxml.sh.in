@@ -124,7 +124,8 @@ $SRC_H5DUMP_TESTFILES/tarray3.h5.xml
 $SRC_H5DUMP_TESTFILES/tarray6.h5.xml
 $SRC_H5DUMP_TESTFILES/tarray7.h5.xml
 $SRC_H5DUMP_TESTFILES/tattr.h5.xml
-$SRC_H5DUMP_TESTFILES/tbitfields.h5.xml
+$SRC_H5DUMP_TESTFILES/tbitfields_be.h5.xml
+$SRC_H5DUMP_TESTFILES/tbitfields_le.h5.xml
 $SRC_H5DUMP_TESTFILES/tcompound_complex.h5.xml
 $SRC_H5DUMP_TESTFILES/tcompound.h5.xml
 $SRC_H5DUMP_TESTFILES/tcompound2.h5.xml
@@ -299,7 +300,11 @@ COPY_TESTFILES_TO_TESTDIR
 # test XML
 TOOLTEST tall.h5.xml --xml tall.h5
 TOOLTEST tattr.h5.xml --xml tattr.h5
-TOOLTEST tbitfields.h5.xml --xml tbitfields.h5
+if test $WORDS_BIGENDIAN != "yes"; then
+TOOLTEST tbitfields_le.h5.xml --xml tbitfields.h5
+else
+TOOLTEST tbitfields_be.h5.xml --xml tbitfields.h5
+fi
 TOOLTEST tcompound.h5.xml --xml tcompound.h5
 TOOLTEST tcompound2.h5.xml --xml tcompound2.h5
 TOOLTEST tdatareg.h5.xml --xml tdatareg.h5

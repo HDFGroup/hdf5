@@ -291,7 +291,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
     * anonymously */
     if (dt_ret->id_out < 0) {
         if (options->use_native == 1)
-            dt_ret->id_out = h5tools_get_native_type(type_in);
+            dt_ret->id_out = H5Tget_native_type(type_in, H5T_DIR_DEFAULT);
         else
             dt_ret->id_out = H5Tcopy(type_in);
         if (dt_ret->id_out < 0)
@@ -422,7 +422,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
         } /* end if */
         else {
             if (options->use_native == 1)
-                wtype_id = h5tools_get_native_type(ftype_id);
+                wtype_id = H5Tget_native_type(ftype_id, H5T_DIR_DEFAULT);
             else
                 wtype_id = H5Tcopy(ftype_id);
         } /* end else */

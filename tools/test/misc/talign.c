@@ -86,8 +86,7 @@ int main(void)
     H5Tinsert(cmp, "Not Ok", sizeof(fok) + sizeof(string5), array_dt);
     H5Tclose(array_dt);
 
-    fix = h5tools_get_native_type(cmp);
-
+    fix = H5Tget_native_type(cmp, H5T_DIR_DEFAULT);
     cmp1 = H5Tcreate(H5T_COMPOUND, sizeof(fok));
 
     cdim[0] = sizeof(fok) / sizeof(float);
@@ -206,37 +205,5 @@ out:
     HDunlink(fname);
     fflush(stdout);
     return result;
-}
-
-/*-------------------------------------------------------------------------
- * Function: h5tools_get_native_type
- *
- * Purpose: Wrapper around H5Tget_native_type() to work around
- *  Problems with bitfields.
- *
- * Return: Success:    datatype ID
- *
- *  Failure:    FAIL
- *
- * Programmer: Quincey Koziol
- *              Tuesday, October  5, 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-h5tools_get_native_type(hid_t type)
-{
-    hid_t p_type;
-    H5T_class_t type_class;
-
-    type_class = H5Tget_class(type);
-    if(type_class==H5T_BITFIELD)
-        p_type=H5Tcopy(type);
-    else
-        p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
-
-    return(p_type);
 }
 

@@ -67,6 +67,19 @@
     dt->shared->type = H5T_BITFIELD;                        \
 }
 
+#define H5T_INIT_TYPE_BITFIELD_COMMON(ENDIANNESS) {            \
+    H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS)                       \
+    H5T_INIT_TYPE_BITFIELD_CORE;                               \
+}
+
+#define H5T_INIT_TYPE_BITFIELDLE_CORE {                        \
+    H5T_INIT_TYPE_BITFIELD_COMMON(H5T_ORDER_LE)                \
+}
+
+#define H5T_INIT_TYPE_BITFIELDBE_CORE {                        \
+    H5T_INIT_TYPE_BITFIELD_COMMON(H5T_ORDER_BE)                \
+}
+
 /* Define the code template for times for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_TIME_CORE {                           \
     dt->shared->type = H5T_TIME;                            \
@@ -896,29 +909,29 @@ H5T__init_package(void)
      */
 
     /* little-endian (order is irrelevant) 8-bit bitfield */
-    H5T_INIT_TYPE(BITFIELD, H5T_STD_B8LE_g, COPY, std_u8le, NOSET, -)
+    H5T_INIT_TYPE(BITFIELDLE, H5T_STD_B8LE_g, COPY, std_u8le, NOSET, -)
     bitfield=dt;    /* Keep type for later */
 
     /* big-endian (order is irrelevant) 8-bit bitfield */
-    H5T_INIT_TYPE(BITFIELD, H5T_STD_B8BE_g, COPY, std_u8be, NOSET, -)
+    H5T_INIT_TYPE(BITFIELDBE, H5T_STD_B8BE_g, COPY, std_u8be, NOSET, -)
 
     /* Little-endian 16-bit bitfield */
-    H5T_INIT_TYPE(BITFIELD, H5T_STD_B16LE_g, COPY, std_u16le, NOSET, -)
+    H5T_INIT_TYPE(BITFIELDLE, H5T_STD_B16LE_g, COPY, std_u16le, NOSET, -)
 
     /* Big-endian 16-bit bitfield */
-    H5T_INIT_TYPE(BITFIELD, H5T_STD_B16BE_g, COPY, std_u16be, NOSET, -)
+    H5T_INIT_TYPE(BITFIELDBE, H5T_STD_B16BE_g, COPY, std_u16be, NOSET, -)
 
     /* Little-endian 32-bit bitfield */
-    H5T_INIT_TYPE(BITFIELD, H5T_STD_B32LE_g, COPY, std_u32le, NOSET, -)
+    H5T_INIT_TYPE(BITFIELDLE, H5T_STD_B32LE_g, COPY, std_u32le, NOSET, -)
 
     /* Big-endian 32-bit bitfield */
-    H5T_INIT_TYPE(BITFIELD, H5T_STD_B32BE_g, COPY, std_u32be, NOSET, -)
+    H5T_INIT_TYPE(BITFIELDBE, H5T_STD_B32BE_g, COPY, std_u32be, NOSET, -)
 
     /* Little-endian 64-bit bitfield */
-    H5T_INIT_TYPE(BITFIELD, H5T_STD_B64LE_g, COPY, std_u64le, NOSET, -)
+    H5T_INIT_TYPE(BITFIELDLE, H5T_STD_B64LE_g, COPY, std_u64le, NOSET, -)
 
     /* Big-endian 64-bit bitfield */
-    H5T_INIT_TYPE(BITFIELD, H5T_STD_B64BE_g, COPY, std_u64be, NOSET, -)
+    H5T_INIT_TYPE(BITFIELDBE, H5T_STD_B64BE_g, COPY, std_u64be, NOSET, -)
 
     /*------------------------------------------------------------
      * The Unix architecture for dates and times.

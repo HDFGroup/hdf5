@@ -325,7 +325,7 @@ Gif2Mem(BYTE *MemGif, GIFTOMEM *GifMemoryStruct)
                         break;
 
                     default:
-                        printf("Unknown Extension Label: 0x%02x\n", Label);
+                        printf("Unknown Extension Label: %#02x\n", Label);
                         break;
                     }
 
@@ -333,7 +333,7 @@ Gif2Mem(BYTE *MemGif, GIFTOMEM *GifMemoryStruct)
 
             default:
                 fprintf(stderr,
-                        "Unknown Block Separator Character: 0x%02x\n", Identifier);
+                        "Unknown Block Separator Character: %#02x\n", Identifier);
         }
     }
 }

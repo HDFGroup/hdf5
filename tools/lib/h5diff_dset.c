@@ -329,10 +329,10 @@ hsize_t diff_datasetid( hid_t did1,
     *-------------------------------------------------------------------------
     */
     h5difftrace("check for memory type and sizes\n");
-    if ((m_tid1=h5tools_get_native_type(f_tid1)) < 0)
+    if ((m_tid1=H5Tget_native_type(f_tid1, H5T_DIR_DEFAULT)) < 0)
         goto error;
 
-    if ((m_tid2=h5tools_get_native_type(f_tid2)) < 0)
+    if ((m_tid2=H5Tget_native_type(f_tid2, H5T_DIR_DEFAULT)) < 0)
         goto error;
 
     m_size1 = H5Tget_size( m_tid1 );

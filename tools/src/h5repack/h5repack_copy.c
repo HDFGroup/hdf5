@@ -916,7 +916,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                     /* wtype_id will have already been set if using a named dtype */
                     if (!is_named) {
                         if (options->use_native == 1)
-                            wtype_id = h5tools_get_native_type(ftype_id);
+                            wtype_id = H5Tget_native_type(ftype_id, H5T_DIR_DEFAULT);
                         else
                             wtype_id = H5Tcopy(ftype_id);
                     } /* end if */
