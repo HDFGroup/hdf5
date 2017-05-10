@@ -746,7 +746,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         size_t i;
 
         if(1 == nsize)
-            h5tools_str_append(str, OPT(info->fmt_raw, "%#02x"), ucp_vp[0]);
+            h5tools_str_append(str, OPT(info->fmt_raw, "0x%02x"), ucp_vp[0]);
         else
             for(i = 0; i < nsize; i++) {
                 if(i)
@@ -1100,7 +1100,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     else {
                         size_t i;
                         if(1 == nsize)
-                            h5tools_str_append(str, "%#02x", ucp_vp[0]);
+                            h5tools_str_append(str, "0x%02x", ucp_vp[0]);
                         else
                             for(i = 0; i < nsize; i++)
                                 h5tools_str_append(str, "%s%02x", i ? ":" : "", ucp_vp[i]);
@@ -1283,7 +1283,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     /* All other types get printed as hexadecimal */
                     size_t i;
                     if(1 == nsize)
-                        h5tools_str_append(str, "%#02x", ucp_vp[0]);
+                        h5tools_str_append(str, "0x%02x", ucp_vp[0]);
                     else
                         for(i = 0; i < nsize; i++)
                             h5tools_str_append(str, "%s%02x", i ? ":" : "", ucp_vp[i]);
