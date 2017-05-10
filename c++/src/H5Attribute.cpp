@@ -49,7 +49,7 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub attribute
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-Attribute::Attribute() : AbstractDs(), IdComponent(), id(H5I_INVALID_HID) {}
+Attribute::Attribute() : AbstractDs(), H5Location(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:    Attribute copy constructor
@@ -57,7 +57,7 @@ Attribute::Attribute() : AbstractDs(), IdComponent(), id(H5I_INVALID_HID) {}
 ///\param       original  - IN: Original Attribute object to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent(), id(original.id)
+Attribute::Attribute(const Attribute& original) : AbstractDs(), H5Location(), id(original.id)
 {
     incRefCount(); // increment number of references to this id
 }
@@ -70,7 +70,7 @@ Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent(), i
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent(), id(existing_id)
+Attribute::Attribute(const hid_t existing_id) : AbstractDs(), H5Location(), id(existing_id)
 {
     incRefCount(); // increment number of references to this id
 }

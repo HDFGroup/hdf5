@@ -601,6 +601,18 @@ static void test_file_attribute()
         n_attrs = dataset.getNumAttrs();
         verify_val(n_attrs, 1, "DataSet::getNumAttrs()", __LINE__, __FILE__);
 
+        // Get and verify the number of attributes at the location specified
+        // by a dataset's attribute
+        n_attrs = 0;
+        n_attrs = dattr.getNumAttrs();
+        verify_val(n_attrs, 1, "Attribute::getNumAttrs()", __LINE__, __FILE__);
+
+        // Get and verify the number of attributes at the location specified
+        // by a file's attribute
+        n_attrs = 0;
+        n_attrs = fattr1.getNumAttrs();
+        verify_val(n_attrs, 2, "Attribute::getNumAttrs()", __LINE__, __FILE__);
+
         // Read back attribute's data
         HDmemset(rdata, 0, sizeof(rdata));
         dattr.read(PredType::NATIVE_INT, rdata);

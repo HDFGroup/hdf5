@@ -36,33 +36,26 @@ class UserData4Aiterate { // user data for attribute iteration
 };
 
 /*! \class H5Location
-    \brief H5Location is an abstract base class, added in version 1.8.12.
-
-    It provides a collection of wrappers for the C functions that take a
-    location identifier to specify the HDF5 object.  The location identifier
-    can be either file, group, dataset, attribute, or named datatype.
+    \brief H5Location is an abstract base class, providing a collection of
+    wrappers of the C functions that take a location identifier, which can be
+    either file, group, dataset, attribute, or named datatype.
 */
 //  Inheritance: IdComponent
-
-// Most of these methods were in H5Object but are now moved here because
-// a location can be a file, group, dataset, or named datatype. -BMR, 2013-10-1
-// Wrappers for H5A functions that operate existing attributes are in H5Object.
-// -BMR, 2017-05-04
 class H5_DLLCPP H5Location : public IdComponent {
    public:
         // Creates an attribute for the specified object at this location
         // PropList is currently not used, so always be default.
-        Attribute createAttribute(const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
-        Attribute createAttribute(const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
+        virtual Attribute createAttribute(const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
+        virtual Attribute createAttribute(const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
 
         // Given its name, opens the attribute that belongs to an object at
         // this location.
-        Attribute openAttribute(const char* name) const;
-        Attribute openAttribute(const H5std_string& name) const;
+        virtual Attribute openAttribute(const char* name) const;
+        virtual Attribute openAttribute(const H5std_string& name) const;
 
         // Given its index, opens the attribute that belongs to an object at
         // this location.
-        Attribute openAttribute(const unsigned int idx) const;
+        virtual Attribute openAttribute(const unsigned int idx) const;
 
         // Flushes all buffers associated with this location to disk.
         void flush(H5F_scope_t scope) const;
@@ -84,19 +77,19 @@ class H5_DLLCPP H5Location : public IdComponent {
         // misleading, so getRefObjType is used in the new function instead.
 
         // Iterate user's function over the attributes at this location.
-        int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL, void* op_data = NULL);
+        virtual int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL, void* op_data = NULL);
 
         // Checks whether the named attribute exists at this location.
-        bool attrExists(const char* name) const;
-        bool attrExists(const H5std_string& name) const;
+        virtual bool attrExists(const char* name) const;
+        virtual bool attrExists(const H5std_string& name) const;
 
         // Renames the named attribute to a new name.
-        void renameAttr(const char* oldname, const char* newname) const;
-        void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
+        virtual void renameAttr(const char* oldname, const char* newname) const;
+        virtual void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
 
         // Removes the named attribute from this location.
-        void removeAttr(const char* name) const;
-        void removeAttr(const H5std_string& name) const;
+        virtual void removeAttr(const char* name) const;
+        virtual void removeAttr(const H5std_string& name) const;
 
         // Sets the comment for an HDF5 object specified by its name.
         void setComment(const char* name, const char* comment) const;
@@ -177,3 +170,13 @@ class H5_DLLCPP H5Location : public IdComponent {
 } // namespace H5
 
 #endif // __H5Location_H
+
+// Modification
+//      Oct 1, 2013 -BMR
+//          H5Location is added in version 1.8.12.
+//          Most of these methods were in H5Object but are now moved here
+//          because a location can be a file, group, dataset, or named datatype.
+//      May 04, 2017 -BMR
+//          Wrappers for H5A functions are copied to H5Object because H5A
+//          functions do not take an attribute id as loc_id.  The original
+//          wrappers will be deprecated in future releases.

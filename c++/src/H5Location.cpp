@@ -84,9 +84,19 @@ H5Location::H5Location() : IdComponent() {}
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
+/***************************************************************************
+                           Notes for H5A wrappers
+                           ======================
+May, 2017 (1.8.19)
+        These H5A wrappers are copied from H5Object to prevent an attribute
+        id being passed in to H5A APIs.  The original H5A wrapper functions
+        here will be deprecated in future releases.
+
+***************************************************************************/
+
 //--------------------------------------------------------------------------
 // Function:    H5Location::createAttribute
-///\brief       Creates an attribute for a group, dataset, or named datatype.
+///\brief       Deprecated - Creates an attribute for a group, dataset, or named datatype.
 ///\param       name - IN: Name of the attribute
 ///\param       data_type - IN: Datatype for the attribute
 ///\param       data_space - IN: Dataspace for the attribute - only simple
@@ -125,7 +135,7 @@ Attribute H5Location::createAttribute(const char* name, const DataType& data_typ
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::createAttribute
-///\brief       This is an overloaded member function, provided for convenience.
+///\brief       Deprecated - This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
@@ -137,7 +147,7 @@ Attribute H5Location::createAttribute(const H5std_string& name, const DataType& 
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::openAttribute
-///\brief       Opens an attribute given its name.
+///\brief       Deprecated - Opens an attribute given its name.
 ///\param       name - IN: Name of the attribute
 ///\return      Attribute instance
 ///\exception   H5::AttributeIException
@@ -160,7 +170,7 @@ Attribute H5Location::openAttribute(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::openAttribute
-///\brief       This is an overloaded member function, provided for convenience.
+///\brief       Deprecated - This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
@@ -172,7 +182,7 @@ Attribute H5Location::openAttribute(const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::openAttribute
-///\brief       Opens an attribute given its index.
+///\brief       Deprecated - Opens an attribute given its index.
 ///\param       idx - IN: Index of the attribute, a 0-based, non-negative integer
 ///\return      Attribute instance
 ///\exception   H5::AttributeIException
@@ -196,7 +206,7 @@ Attribute H5Location::openAttribute(const unsigned int idx) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::iterateAttrs
-///\brief       Iterates a user's function over all the attributes of an H5
+///\brief       Deprecated - Iterates a user's function over all the attributes of an H5
 ///             object, which may be a group, dataset or named datatype.
 ///\param       user_op - IN: User's function to operate on each attribute
 ///\param       _idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
@@ -241,7 +251,7 @@ int H5Location::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_d
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getNumAttrs
-///\brief       Returns the number of attributes attached to this HDF5 object.
+///\brief       Deprecated - Returns the number of attributes attached to this HDF5 object.
 ///\return      Number of attributes
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
@@ -258,7 +268,7 @@ int H5Location::getNumAttrs() const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::attrExists
-///\brief       Checks whether the named attribute exists at this location.
+///\brief       Deprecated - Checks whether the named attribute exists at this location.
 ///\param       name - IN: Name of the attribute to be queried
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2013
@@ -279,7 +289,7 @@ bool H5Location::attrExists(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::attrExists
-///\brief       This is an overloaded member function, provided for convenience.
+///\brief       Deprecated - This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
@@ -291,7 +301,7 @@ bool H5Location::attrExists(const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::removeAttr
-///\brief       Removes the named attribute from this object.
+///\brief       Deprecated - Removes the named attribute from this object.
 ///\param       name - IN: Name of the attribute to be removed
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
@@ -305,7 +315,7 @@ void H5Location::removeAttr(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::removeAttr
-///\brief       This is an overloaded member function, provided for convenience.
+///\brief       Deprecated - This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
@@ -317,7 +327,7 @@ void H5Location::removeAttr(const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::renameAttr
-///\brief       Renames the named attribute from this object.
+///\brief       Deprecated - Renames the named attribute from this object.
 ///\param       oldname - IN: Name of the attribute to be renamed
 ///\param       newname - IN: New name ame of the attribute
 ///\exception   H5::AttributeIException
@@ -332,7 +342,7 @@ void H5Location::renameAttr(const char* oldname, const char* newname) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::renameAttr
-///\brief       This is an overloaded member function, provided for convenience.
+///\brief       Deprecated - This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for the names.
 // Programmer   Binh-Minh Ribler - Mar, 2005
