@@ -2080,7 +2080,8 @@
 ./tools/testfiles/tarray6.h5.xml
 ./tools/testfiles/tarray7.h5.xml
 ./tools/testfiles/tattr.h5.xml
-./tools/testfiles/tbitfields.h5.xml
+./tools/testfiles/tbitfields_be.h5.xml
+./tools/testfiles/tbitfields_le.h5.xml
 ./tools/testfiles/tcompound.h5.xml
 ./tools/testfiles/tcompound2.h5.xml
 ./tools/testfiles/tcompound_complex.h5.xml
