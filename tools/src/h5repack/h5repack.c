@@ -236,7 +236,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
     named_dt_t *dt = *named_dt_head_p; /* Stack pointer */
     named_dt_t *dt_ret = NULL;         /* Datatype to return */
     H5O_info_t  oinfo;                 /* Object info of input dtype */
-    hid_t ret_value = -1;              /* The identifier of the named dtype in the out file */
+    hid_t       ret_value = -1;        /* The identifier of the named dtype in the out file */
 
     if (H5Oget_info(type_in, &oinfo) < 0)
         goto done;
@@ -255,9 +255,8 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
         for (i = 0; i < travt->nobjs; i++) {
             if (travt->objs[i].type == H5TRAV_TYPE_NAMED_DATATYPE) {
                 /* Push onto the stack */
-                if (NULL == (dt = (named_dt_t *) HDmalloc(sizeof(named_dt_t)))) {
+                if (NULL == (dt = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
                     goto done;
-                }
                 dt->next = *named_dt_head_p;
                 *named_dt_head_p = dt;
 
@@ -278,9 +277,8 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
     * possible if the datatype was committed anonymously in the input file. */
     if (!dt_ret) {
         /* Push the new datatype onto the stack */
-        if (NULL == (dt_ret = (named_dt_t *) HDmalloc(sizeof(named_dt_t)))) {
+        if (NULL == (dt_ret = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
             goto done;
-        }
         dt_ret->next = *named_dt_head_p;
         *named_dt_head_p = dt_ret;
 
@@ -289,27 +287,26 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
         dt_ret->id_out = -1;
     } /* end if */
 
-	/* If the requested datatype does not yet exist in the output file, copy it
-	 * anonymously */
-	if (dt_ret->id_out < 0) {
-		if (options->use_native == 1)
-			dt_ret->id_out = h5tools_get_native_type(type_in);
-		else
-			dt_ret->id_out = H5Tcopy(type_in);
-		if (dt_ret->id_out < 0)
-			goto done;
-		if (H5Tcommit_anon(fidout, dt_ret->id_out, H5P_DEFAULT, H5P_DEFAULT) < 0)
-			goto done;
-	} /* end if */
+    /* If the requested datatype does not yet exist in the output file, copy it
+    * anonymously */
+    if (dt_ret->id_out < 0) {
+        if (options->use_native == 1)
+            dt_ret->id_out = h5tools_get_native_type(type_in);
+        else
+            dt_ret->id_out = H5Tcopy(type_in);
+        if (dt_ret->id_out < 0)
+            goto done;
+        if (H5Tcommit_anon(fidout, dt_ret->id_out, H5P_DEFAULT, H5P_DEFAULT) < 0)
+            goto done;
+    } /* end if */
 
     /* Set return value */
     ret_value = dt_ret->id_out;
 
     /* Increment the ref count on id_out, because the calling function will try
     * to close it */
-    if(H5Iinc_ref(ret_value) < 0) {
+    if(H5Iinc_ref(ret_value) < 0)
         ret_value = -1;
-    }
 
 done:
     return (ret_value);
@@ -466,7 +463,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
             int nmembers = H5Tget_nmembers(wtype_id);
 
             for (j = 0; j < nmembers; j++) {
-                hid_t mtid = H5Tget_member_type(wtype_id, (unsigned) j);
+                hid_t mtid = H5Tget_member_type(wtype_id, (unsigned)j);
                 H5T_class_t mtclass = H5Tget_class(mtid);
                 H5Tclose(mtid);
 
@@ -477,16 +474,13 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
             } /* for (j=0; i<nmembers; j++) */
         } /* if (type_class == H5T_COMPOUND) */
 
-        if (is_ref) {
-            ; /* handled by copy_refs_attr() */
-        }
-        else {
+        if (!is_ref) {
             /*-------------------------------------------------------------------------
              * read to memory
              *-------------------------------------------------------------------------
              */
 
-            buf = (void *) HDmalloc((size_t)(nelmts * msize));
+            buf = (void *)HDmalloc((size_t)(nelmts * msize));
             if (buf == NULL) {
                 error_msg("h5repack", "cannot read into memory\n");
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDmalloc failed");
