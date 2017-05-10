@@ -1,4 +1,4 @@
-HDF5 "./tools/test/h5dump/testfiles/std/tbitnopaque.h5" {
+HDF5 "tbitnopaque.h5" {
 GROUP "/" {
    GROUP "bittypetests" {
       DATASET "bitfield_1" {
