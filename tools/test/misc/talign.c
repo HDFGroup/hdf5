@@ -17,7 +17,7 @@
  */
 #include <string.h>
 #include <stdlib.h>
-/*#include <unistd.h>	*//* Required for unlink() */
+/*#include <unistd.h>    *//* Required for unlink() */
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -106,7 +106,7 @@ int main(void)
     H5Tclose(array_dt);
 
     plist = H5Pcreate(H5P_DATASET_XFER);
-    if((error = H5Pset_preserve(plist, 1)) < 0) 
+    if((error = H5Pset_preserve(plist, 1)) < 0)
         goto out;
 
     /*
