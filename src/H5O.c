@@ -1192,6 +1192,7 @@ H5Oclose(hid_t object_id)
         case H5I_GROUP:
         case H5I_DATATYPE:
         case H5I_DATASET:
+        case H5I_MAP:
             if(H5I_object(object_id) == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object")
             if(H5I_dec_app_ref(object_id) < 0)

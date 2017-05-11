@@ -9,11 +9,14 @@ Success
 Iterating over links
 dset2: hard, address = 0x4000000000000004
 slpath: soft, val_size = 19
+MAP_FIXED: hard, address = 0xc000000000000007
+MAP_VL_STR: hard, address = 0xc000000000000006
 grp: hard, address = 0x0000000000000002
 slink: soft, val_size = 4
-grp2: hard, address = 0x0000000000000005
+grp2: hard, address = 0x0000000000000008
+MAP_VL_T: hard, address = 0xc000000000000005
 dset: hard, address = 0x4000000000000003
-Complete.  Number of links: 6
+Complete.  Number of links: 9
 Success
 Iterating over links
 slroot: soft, val_size = 2
@@ -33,23 +36,28 @@ attrdset: 96 bytes
 Complete.  Number of attributes: 1
 Success
 Opening object
-fileno = 4889012549849695529
+fileno = 10997552374967658951
 addr = 0x0000000000000001
 Object type is group
 Success
 Opening object
-fileno = 4889012549849695529
+fileno = 10997552374967658951
 addr = 0x0000000000000002
 Object type is group
 Success
 Opening object
-fileno = 4889012549849695529
+fileno = 10997552374967658951
 addr = 0x4000000000000003
 Object type is dataset
 Success
-Opening snapshot 7
+Opening object
+fileno = 10997552374967658951
+addr = 0xc000000000000005
+Object type is unknown
+Success
+Opening snapshot 9
 Checking if link exists... FALSE
 Success
-Opening snapshot 8
+Opening snapshot 10
 Checking if link exists... TRUE
 Success

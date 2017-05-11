@@ -61,6 +61,8 @@ int main(int argc, char *argv[]) {
         obj_str = "dataset";
     else if(obj_type == H5I_DATATYPE)
         obj_str = "datatype";
+    else if(obj_type == H5I_MAP)
+        obj_str = "map";
     else
         obj_str = "unknown";
     printf("Object type is %s\n", obj_str);

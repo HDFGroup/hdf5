@@ -135,6 +135,14 @@ if test $? -ne 0; then
     exit 1
 fi
 
+# --------------- MAPS --------------- #
+echo h5dsm_map $FILE
+orterun -np 1 $EXEC_ARGS ./h5dsm_map $POOL_UUID $FILE
+if test $? -ne 0; then
+    echo FAILED
+    exit 1
+fi
+
 # --------------- LINKS --------------- #
 # H5Lexists (should be FALSE)
 echo h5dsm_link_exists $FILE grp2
@@ -412,6 +420,21 @@ if test $? -ne 0; then
     exit 1
 fi
 
+# H5Oopen map
+echo h5dsm_obj_open $FILE MAP_VL_T
+orterun -np 1 $EXEC_ARGS ./h5dsm_obj_open $POOL_UUID $FILE MAP_VL_T
+if test $? -ne 0; then
+    echo FAILED
+    exit 1
+fi
+
+echo h5dsm_obj_open $FILE MAP_VL_T \(2 processes\)
+orterun -np 2 $EXEC_ARGS ./h5dsm_obj_open $POOL_UUID $FILE MAP_VL_T
+if test $? -ne 0; then
+    echo FAILED
+    exit 1
+fi
+
 # H5Oget_info root group
 echo h5dsm_obj_info $FILE /
 orterun -np 1 $EXEC_ARGS ./h5dsm_obj_info $POOL_UUID $FILE / | tee -a h5dsm_test.out
@@ -431,6 +454,14 @@ fi
 # H5Oget_info dataset
 echo h5dsm_obj_info $FILE /dset
 orterun -np 1 $EXEC_ARGS ./h5dsm_obj_info $POOL_UUID $FILE /dset | tee -a h5dsm_test.out
+if test $? -ne 0; then
+    echo FAILED
+    exit 1
+fi
+
+# H5Oget_info map
+echo h5dsm_obj_info $FILE /MAP_VL_T
+orterun -np 1 $EXEC_ARGS ./h5dsm_obj_info $POOL_UUID $FILE /MAP_VL_T | tee -a h5dsm_test.out
 if test $? -ne 0; then
     echo FAILED
     exit 1
@@ -481,18 +512,33 @@ if test $? -ne 0; then
     exit 1
 fi
 
+# H5Oopen_by_addr dataset
+echo h5dsm_obj_open_addr $FILE 0xc000000000000005
+orterun -np 1 $EXEC_ARGS ./h5dsm_obj_open_addr $POOL_UUID $FILE 0xc000000000000005
+if test $? -ne 0; then
+    echo FAILED
+    exit 1
+fi
+
+echo h5dsm_obj_open_addr $FILE 0xc000000000000005 \(2 processes\)
+orterun -np 2 $EXEC_ARGS ./h5dsm_obj_open_addr $POOL_UUID $FILE 0xc000000000000005
+if test $? -ne 0; then
+    echo FAILED
+    exit 1
+fi
+
 # --------------- Snapshots --------------- #
 # H5Lexists before slink created (should be FALSE)
-echo h5dsm_link_exists $FILE grp2 7
-orterun -np 1 $EXEC_ARGS ./h5dsm_link_exists $POOL_UUID $FILE slink 7 | tee -a h5dsm_test.out
+echo h5dsm_link_exists $FILE grp2 9
+orterun -np 1 $EXEC_ARGS ./h5dsm_link_exists $POOL_UUID $FILE slink 9 | tee -a h5dsm_test.out
 if test $? -ne 0; then
     echo FAILED
     exit 1
 fi
 
 # H5Lexists after slink created (should be TRUE)
-echo h5dsm_link_exists $FILE grp2 8
-orterun -np 1 $EXEC_ARGS ./h5dsm_link_exists $POOL_UUID $FILE slink 8 | tee -a h5dsm_test.out
+echo h5dsm_link_exists $FILE grp2 10
+orterun -np 1 $EXEC_ARGS ./h5dsm_link_exists $POOL_UUID $FILE slink 10 | tee -a h5dsm_test.out
 if test $? -ne 0; then
     echo FAILED
     exit 1
@@ -507,13 +553,14 @@ if test $? -ne 0; then
 fi
 
 # --------------- Output Comparison --------------- #
-# Disabled due to DAOS debug messages
-#cmp h5dsm_test.out h5dsm_test.out.exp
-#if test $? -ne 0; then
-#    echo h5dsm_test.out does not match h5dsm_test.out.exp
-#    echo FAILED
-#    exit 1
-#fi
+sed -i -e 's/#.*//' -e 's/[ ^I]*$//' -e '/^$/ d' h5dsm_test.out
+echo cmp h5dsm_test.out h5dsm_test.out.exp
+cmp h5dsm_test.out h5dsm_test.out.exp
+if test $? -ne 0; then
+    echo h5dsm_test.out does not match h5dsm_test.out.exp
+    echo FAILED
+    exit 1
+fi
 
 echo PASSED
 exit 0

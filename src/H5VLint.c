@@ -331,7 +331,8 @@ H5VL_get_object(hid_t id)
     FUNC_ENTER_NOAPI(NULL)
 
     if(H5I_FILE == obj_type || H5I_GROUP == obj_type || H5I_ATTR == obj_type || 
-       H5I_DATASET == obj_type || H5I_DATATYPE == obj_type) {
+            H5I_DATASET == obj_type || H5I_DATATYPE == obj_type
+            || H5I_MAP == obj_type) {
         /* get the object */
         if(NULL == (obj = H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
