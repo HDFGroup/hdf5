@@ -121,11 +121,11 @@ test_direct_chunk_write (hid_t file)
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
 
     const Bytef *z_src = (const Bytef*)(direct_buf);
-    Bytef	    *z_dst;		/*destination buffer		*/
+    Bytef	    *z_dst = NULL;		    /*destination buffer		*/
     uLongf	     z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
     uLong	     z_src_nbytes = (uLong)buf_size;
-    int          aggression = 9;     /* Compression aggression setting */
-    void	    *outbuf = NULL;     /* Pointer to new buffer */
+    int          aggression = 9;        /* Compression aggression setting */
+    void	    *outbuf = NULL;         /* Pointer to new buffer */
 
     hsize_t start[2];  /* Start of hyperslab */
     hsize_t stride[2]; /* Stride of hyperslab */
@@ -244,9 +244,9 @@ test_direct_chunk_write (hid_t file)
     for(i = 0; i < CHUNK_NX; i++) {
         for(j = 0; j < CHUNK_NY; j++) {
             if(direct_buf[i][j] != check_chunk[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
+                HDprintf("    1. Read different values than written.");
+                HDprintf("    At index %d,%d\n", i, j);
+                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
                 goto error;
             }
         }
@@ -308,9 +308,9 @@ test_direct_chunk_write (hid_t file)
     for(i = 0; i < CHUNK_NX; i++) {
         for(j = 0; j < CHUNK_NY; j++) {
             if(direct_buf[i][j] != check_chunk[i][j]) {
-                printf("    2. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
+                HDprintf("    2. Read different values than written.");
+                HDprintf("    At index %d,%d\n", i, j);
+                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
                 goto error;
             }
         }
@@ -463,9 +463,9 @@ test_skip_compress_write1(hid_t file)
     for(i = 0; i < CHUNK_NX; i++) {
         for(j = 0; j < CHUNK_NY; j++) {
             if(direct_buf[i][j] != check_chunk[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
+                HDprintf("    1. Read different values than written.");
+                HDprintf("    At index %d,%d\n", i, j);
+                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -488,9 +488,9 @@ test_skip_compress_write1(hid_t file)
     for(i = 0; i < CHUNK_NX; i++) {
         for(j = 0; j < CHUNK_NY; j++) {
             if(direct_buf[i][j] != read_direct_buf[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
+                HDprintf("    1. Read different values than written.");
+                HDprintf("    At index %d,%d\n", i, j);
+                HDprintf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
                 goto error;
             }
         }
@@ -523,9 +523,9 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	filter_bogus1
  *
- * Purpose:	A bogus filter that adds ADD_ON to the original value
+ * Purpose:     A bogus filter that adds ADD_ON to the original value
  *
- * Return:	Success:	Data chunk size
+ * Return:      Success:	Data chunk size
  *
  * Programmer:  Raymond Lu	
  *              30 November 2012
@@ -733,9 +733,9 @@ test_skip_compress_write2(hid_t file)
     for(i = 0; i < CHUNK_NX; i++) {
         for(j = 0; j < CHUNK_NY; j++) {
             if(origin_direct_buf[i][j] != check_chunk[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j], check_chunk[i][j]);
+                HDprintf("    1. Read different values than written.");
+                HDprintf("    At index %d,%d\n", i, j);
+                HDprintf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -758,9 +758,9 @@ test_skip_compress_write2(hid_t file)
     for(i = 0; i < CHUNK_NX; i++) {
         for(j = 0; j < CHUNK_NY; j++) {
             if(direct_buf[i][j] != read_direct_buf[i][j]) {
-                printf("    1. Read different values than written.");
-                printf("    At index %d,%d\n", i, j);
-                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
+                HDprintf("    1. Read different values than written.");
+                HDprintf("    At index %d,%d\n", i, j);
+                HDprintf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
                 goto error;
             }
         }
@@ -938,12 +938,12 @@ test_data_conv(hid_t file)
                 (direct_buf[i][j]).c[3] != (read_chunk[i][j]).c[3] ||
                 (direct_buf[i][j]).d    != (read_chunk[i][j]).d    ||
                 (direct_buf[i][j]).e    != (read_chunk[i][j]).e) {
-                    printf("    1. Read different values than written.");
-                    printf("    At index %d,%d\n", i, j);
-                    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
+                    HDprintf("    1. Read different values than written.");
+                    HDprintf("    At index %d,%d\n", i, j);
+                    HDprintf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
                         (direct_buf[i][j]).a, (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1], 
                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d, (direct_buf[i][j]).e);
-                    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
+                    HDprintf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
                         (read_chunk[i][j]).a, (read_chunk[i][j]).b, (read_chunk[i][j]).c[0], (read_chunk[i][j]).c[1], 
                         (read_chunk[i][j]).c[2], (read_chunk[i][j]).c[3], (read_chunk[i][j]).d, (read_chunk[i][j]).e);
 
@@ -975,12 +975,12 @@ test_data_conv(hid_t file)
                 (direct_buf[i][j]).c[2] != (check_chunk[i][j]).c[2] ||
                 (direct_buf[i][j]).c[3] != (check_chunk[i][j]).c[3] ||
                 (direct_buf[i][j]).e    != (check_chunk[i][j]).e) {
-                    printf("    1. Read different values than written.");
-                    printf("    At index %d,%d\n", i, j);
-                    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
+                    HDprintf("    1. Read different values than written.");
+                    HDprintf("    At index %d,%d\n", i, j);
+                    HDprintf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
                         (direct_buf[i][j]).a, (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1], 
                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d, (direct_buf[i][j]).e);
-                    printf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n",
+                    HDprintf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n",
                         (check_chunk[i][j]).a, (check_chunk[i][j]).c[0], (check_chunk[i][j]).c[1], (check_chunk[i][j]).c[2], 
                         (check_chunk[i][j]).c[3], (check_chunk[i][j]).e);
 
@@ -1021,10 +1021,10 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_invalid_parameters
  *
- * Purpose:	Test invalid parameters for H5DOwrite_chunk and H5DOread_chunk
+ * Purpose:     Test invalid parameters for H5DOwrite_chunk and H5DOread_chunk
  *
- * Return:	Success:	0
- *		`   Failure:	1
+ * Return:      Success:	0
+ *              Failure:	1
  *
  * Programmer:  Raymond Lu	
  *              30 November 2012
@@ -1253,18 +1253,18 @@ test_direct_chunk_read_no_cache (hid_t file)
     hsize_t     dims[2]  = {NX, NY};
     hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t     chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
-    herr_t      status;         /* status from H5 function calls */
-    int         ret;            /* deflate return status */
+    herr_t      status;             /* status from H5 function calls */
+    int         ret;                /* deflate return status */
     int         data[NX][NY];
-    int         i, j, k, l, n;  /* local index variables */
+    int         i, j, k, l, n;      /* local index variables */
 
-    unsigned    filter_mask = 0; /* filter mask returned from H5DOread_chunk */
+    unsigned    filter_mask = 0;    /* filter mask returned from H5DOread_chunk */
     int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5DOread and manually decompressed */
     int         check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
     hsize_t     offset[2]; /* chunk offset used for H5DOread_chunk */
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
 
-    Bytef       *z_src;     /* source buffer        */
+    Bytef       *z_src = NULL;      /* source buffer        */
     uLongf       z_src_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
     Bytef       *z_dst = (Bytef*)(direct_buf);
     uLong        z_dst_nbytes = (uLong)buf_size;
@@ -1369,9 +1369,9 @@ test_direct_chunk_read_no_cache (hid_t file)
             for(k = 0; k < CHUNK_NX; k++) {
                 for(l = 0; l < CHUNK_NY; l++) {
                     if(direct_buf[k][l] != check_chunk[k][l]) {
-                        printf("\n    1. Read different values than written.");
-                        printf("    At index %d,%d\n", k, l);
-                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        HDprintf("\n    1. Read different values than written.");
+                        HDprintf("    At index %d,%d\n", k, l);
+                        HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
                         goto error;
                     }
                 }
@@ -1420,18 +1420,18 @@ test_direct_chunk_read_cache (hid_t file, hbool_t flush)
     hsize_t     dims[2]  = {NX, NY};
     hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t     chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
-    herr_t      status;         /* status from H5 function calls */
-    int         ret;            /* deflate return status */
+    herr_t      status;             /* status from H5 function calls */
+    int         ret;                /* deflate return status */
     int         data[NX][NY];
-    int         i, j, k, l, n;  /* local index variables */
+    int         i, j, k, l, n;      /* local index variables */
 
-    unsigned    filter_mask = 0; /* filter mask returned from H5DOread_chunk */
+    unsigned    filter_mask = 0;    /* filter mask returned from H5DOread_chunk */
     int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5DOread and manually decompressed */
     int         check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
     hsize_t     offset[2]; /* chunk offset used for H5DOread_chunk */
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
 
-    Bytef       *z_src;     /* source buffer        */
+    Bytef       *z_src = NULL;      /* source buffer        */
     uLongf       z_src_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
     Bytef       *z_dst = (Bytef*)(direct_buf);
     uLong        z_dst_nbytes = (uLong)buf_size;
@@ -1548,9 +1548,9 @@ test_direct_chunk_read_cache (hid_t file, hbool_t flush)
             for(k = 0; k < CHUNK_NX; k++) {
                 for(l = 0; l < CHUNK_NY; l++) {
                     if(direct_buf[k][l] != check_chunk[k][l]) {
-                        printf("\n    1. Read different values than written.");
-                        printf("    At index %d,%d\n", k, l);
-                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        HDprintf("\n    1. Read different values than written.");
+                        HDprintf("    At index %d,%d\n", k, l);
+                        HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
                         goto error;
                     }
                 }
@@ -1702,9 +1702,9 @@ test_read_unfiltered_dset(hid_t file)
             for(k = 0; k < CHUNK_NX; k++) {
                 for(l = 0; l < CHUNK_NY; l++) {
                     if(direct_buf[k][l] != check_chunk[k][l]) {
-                        printf("\n    1. Read different values than written.");
-                        printf("    At index %d,%d\n", k, l);
-                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        HDprintf("\n    1. Read different values than written.");
+                        HDprintf("    At index %d,%d\n", k, l);
+                        HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
                         goto error;
                     }
                 }
@@ -1759,13 +1759,13 @@ test_read_unallocated_chunk (hid_t file)
     hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t     chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
     hsize_t     chunk_nbytes = CHUNK_NX*CHUNK_NY*sizeof(int);
-    hsize_t     direct_chunk_nbytes = 0; /* size (bytes) of the on-disk chunk */
-    herr_t      status;         /* status from H5 function calls */
-    uint        i, j;     /* local index variables */
+    hsize_t     direct_chunk_nbytes = 0;        /* size (bytes) of the on-disk chunk */
+    herr_t      status;     /* status from H5 function calls */
+    uint        i, j;       /* local index variables */
 
-    unsigned    filter_mask = 0; /* filter mask returned from H5DOread_chunk */
-    int         direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5DOread and manually decompressed */
-    hsize_t     offset[2]; /* chunk offset used for H5DOread_chunk */
+    unsigned    filter_mask = 0;    /* filter mask returned from H5DOread_chunk */
+    int         direct_buf[CHUNK_NX][CHUNK_NY]; /* chunk read with H5DOread and manually decompressed */
+    hsize_t     offset[2];  /* chunk offset used for H5DOread_chunk */
 
     TESTING("H5DOread_chunk with unallocated chunks");
 
@@ -1902,8 +1902,8 @@ int main( void )
     if (nerrors)
         goto error;
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error:
-    return 1;
+    return EXIT_FAILURE;
 }
