@@ -53,7 +53,7 @@ Success
 Opening object
 fileno = 10997552374967658951
 addr = 0xc000000000000005
-Object type is unknown
+Object type is map
 Success
 Opening snapshot 9
 Checking if link exists... FALSE

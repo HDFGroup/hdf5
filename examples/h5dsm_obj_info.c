@@ -59,6 +59,8 @@ int main(int argc, char *argv[]) {
         obj_str = "dataset";
     else if(oinfo.type == H5O_TYPE_NAMED_DATATYPE)
         obj_str = "datatype";
+    else if(oinfo.type == H5I_MAP)
+        obj_str = "map";
     else
         obj_str = "unknown";
     printf("Object type is %s\n", obj_str);
