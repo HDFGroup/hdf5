@@ -431,6 +431,8 @@ H5D__chunk_direct_read(const H5D_t *dset, hid_t dxpl_id, hsize_t *offset,
     HDassert(filters);
     HDassert(buf);
 
+    *filters = 0;
+
     /* Retrieve the dataset dimensions */
     space_ndims = dset->shared->layout.u.chunk.ndims - 1;
 
@@ -460,31 +462,31 @@ H5D__chunk_direct_read(const H5D_t *dset, hid_t dxpl_id, hsize_t *offset,
     /* Check if the requested chunk exists in the chunk cache */
     if(UINT_MAX != udata.idx_hint) {
         H5D_rdcc_ent_t *ent = rdcc->slot[udata.idx_hint];
+        hbool_t flush;
 
         /* Sanity checks  */
         HDassert(udata.idx_hint < rdcc->nslots);
         HDassert(rdcc->slot[udata.idx_hint]);
 
-        /* If the cached chunk is dirty, it must be flushed to get accurate size */
-        if( ent->dirty == TRUE ) {
-            /* Fill the DXPL cache values for later use */
-            if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+        flush = (ent->dirty == TRUE) ? TRUE : FALSE;
 
-            /* Flush the chunk to disk and clear the cache entry */
-            if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache, rdcc->slot[udata.idx_hint], TRUE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk")
+        /* Fill the DXPL cache values for later use */
+        if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
-            /* Reset fields about the chunk we are looking for */
-            udata.nbytes = 0;
-            udata.filter_mask = 0;
-            udata.addr = HADDR_UNDEF;
-            udata.idx_hint = UINT_MAX;
+        /* Flush the chunk to disk and clear the cache entry */
+        if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache, rdcc->slot[udata.idx_hint], flush) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk")
 
-            /* Get the new file address / chunk size after flushing */
-            if(H5D__chunk_lookup(dset, dxpl_id, chunk_offset, chunk_idx, &udata) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
-        }
+        /* Reset fields about the chunk we are looking for */
+        udata.nbytes = 0;
+        udata.filter_mask = 0;
+        udata.addr = HADDR_UNDEF;
+        udata.idx_hint = UINT_MAX;
+
+        /* Get the new file address / chunk size after flushing */
+        if(H5D__chunk_lookup(dset, dxpl_id, chunk_offset, chunk_idx, &udata) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
     }
 
     /* Make sure the address of the chunk is returned. */
@@ -526,6 +528,7 @@ H5D__get_chunk_storage_size(H5D_t *dset, hid_t dxpl_id, const hsize_t *offset, h
     hsize_t            chunk_idx;      /* Index of chunk cache entry */
     H5D_dxpl_cache_t   _dxpl_cache;    /* Data transfer property cache buffer */
     H5D_dxpl_cache_t   *dxpl_cache = &_dxpl_cache; /* Data transfer property cache */
+    hbool_t flush;                      /* Flush cache or not */
     herr_t             ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -535,13 +538,13 @@ H5D__get_chunk_storage_size(H5D_t *dset, hid_t dxpl_id, const hsize_t *offset, h
     HDassert(offset);
     HDassert(storage_size);
 
+    *storage_size = 0;
+
     /* Retrieve the dataset dimensions */
     space_ndims = dset->shared->layout.u.chunk.ndims - 1;
     
-    if(H5D__chunk_is_space_alloc(&(layout->storage)) == FALSE) {
-        *storage_size = 0;
+    if(H5D__chunk_is_space_alloc(&(layout->storage)) == FALSE)
         HGOTO_DONE(SUCCEED)
-    }
 
     /* Initialize the chunk offset */
     HDmemcpy(chunk_offset, offset, (space_ndims * sizeof(chunk_offset[0])));
@@ -574,25 +577,24 @@ H5D__get_chunk_storage_size(H5D_t *dset, hid_t dxpl_id, const hsize_t *offset, h
             HDassert(rdcc->slot[udata.idx_hint]);
             H5D_rdcc_ent_t *ent = rdcc->slot[udata.idx_hint];
 
-            /* If the cached chunk is dirty, it must be flushed to get accurate size */
-            if( ent->dirty == TRUE ) {
-                /* Fill the DXPL cache values for later use */
-                if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+            flush = (ent->dirty == TRUE) ? TRUE : FALSE;
 
-                /* Flush the chunk to disk and clear the cache entry */
-                if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache, rdcc->slot[udata.idx_hint], TRUE) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk")
+            /* Fill the DXPL cache values for later use */
+            if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
-                /* Reset fields about the chunk we are looking for */
-                udata.nbytes = 0;
-                udata.addr = HADDR_UNDEF;
-                udata.idx_hint = UINT_MAX;
+            /* Flush the chunk to disk and clear the cache entry */
+            if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache, rdcc->slot[udata.idx_hint], flush) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk")
 
-                /* Get the new file address / chunk size after flushing */
-                if(H5D__chunk_lookup(dset, dxpl_id, chunk_offset, chunk_idx, &udata) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")            
-            }
+            /* Reset fields about the chunk we are looking for */
+            udata.nbytes = 0;
+            udata.addr = HADDR_UNDEF;
+            udata.idx_hint = UINT_MAX;
+
+            /* Get the new file address / chunk size after flushing */
+            if(H5D__chunk_lookup(dset, dxpl_id, chunk_offset, chunk_idx, &udata) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")            
         }
 
         /* Make sure the address of the chunk is returned. */

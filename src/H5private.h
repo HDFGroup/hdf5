@@ -1048,6 +1048,9 @@ typedef off_t               h5_stat_size_t;
     #define HDpow(X,Y)    pow(X,Y)
 #endif /* HDpow */
 /* printf() variable arguments */
+#ifndef HDprintf
+    #define HDprintf(...)   HDfprintf(stdout, __VA_ARGS__)
+#endif /* HDprintf */
 #ifndef HDputc
     #define HDputc(C,F)    putc(C,F)
 #endif /* HDputc*/
