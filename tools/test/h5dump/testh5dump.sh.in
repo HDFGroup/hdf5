@@ -42,6 +42,8 @@ AWK='awk'
 # Skip plugin module to test missing filter
 ENVCMD="env HDF5_PLUGIN_PRELOAD=::"
 
+WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
+
 nerrors=0
 verbose=yes
 
