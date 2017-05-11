@@ -27,6 +27,7 @@
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5FLprivate.h"        /* Free lists                           */
 #include "H5Lprivate.h"         /* Links                                */
+#include "H5Mprivate.h"         /* Maps                                 */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5SLprivate.h"        /* Skip lists                           */
@@ -305,6 +306,7 @@ H5_term_library(void)
         pending += DOWN(A_top);
         pending += DOWN(D_top);
         pending += DOWN(G_top);
+        pending += DOWN(M_top);
         pending += DOWN(R_top);
         pending += DOWN(S_top);
         pending += DOWN(T_top);
@@ -330,6 +332,7 @@ H5_term_library(void)
             pending += DOWN(A);
             pending += DOWN(D);
             pending += DOWN(G);
+            pending += DOWN(M);
             pending += DOWN(R);
             pending += DOWN(S);
             pending += DOWN(T);

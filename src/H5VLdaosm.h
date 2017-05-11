@@ -97,6 +97,13 @@ typedef struct H5VL_daosm_dset_t {
     hid_t dapl_id;
 } H5VL_daosm_dset_t;
 
+/* The map struct */
+typedef struct H5VL_daosm_map_t {
+    H5VL_daosm_obj_t obj; /* Must be first */
+    hid_t ktype_id;
+    hid_t vtype_id;
+} H5VL_daosm_map_t;
+
 /* The attribute struct */
 typedef struct H5VL_daosm_attr_t {
     H5VL_daosm_item_t item; /* Must be first */
@@ -118,6 +125,21 @@ typedef struct H5VL_daosm_link_val_t {
 extern hid_t H5VL_DAOSM_g;
 
 H5_DLL herr_t H5VL_daosm_init(void);
+
+H5_DLL void * H5VL_daosm_map_create(void *_item, H5VL_loc_params_t loc_params, const char *name,
+				    hid_t ktype_id, hid_t vtype_id, hid_t mcpl_id, hid_t mapl_id,
+				    hid_t dxpl_id, void **req);
+H5_DLL void * H5VL_daosm_map_open(void *_item, H5VL_loc_params_t loc_params, const char *name,
+				  hid_t mapl_id, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL_daosm_map_set(void *_map, hid_t key_mem_type_id, const void *key, 
+				 hid_t val_mem_type_id, const void *value, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL_daosm_map_get(void *_map, hid_t key_mem_type_id, const void *key, 
+				 hid_t val_mem_type_id, void *value, hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VL_daosm_map_get_types(void *_map, hid_t *key_type_id, hid_t *val_type_id, void **req);
+H5_DLL herr_t H5VL_daosm_map_get_count(void *_map, hsize_t *count, void **req);
+H5_DLL herr_t H5VL_daosm_map_exists(void *_map, hid_t key_mem_type_id, const void *key, 
+				    hbool_t *exists, void **req);
+H5_DLL herr_t H5VL_daosm_map_close(void *_map, hid_t dxpl_id, void **req);
 
 #endif /* H5_HAVE_EFF */
 

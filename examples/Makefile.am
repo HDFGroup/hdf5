@@ -43,7 +43,7 @@ EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
            h5_vds-exclim h5_vds-eiger h5_vds-simpleIO h5_vds-percival \
            h5_vds-percival-unlim h5_vds-percival-unlim-maxmin \
            h5dsm_file_create h5dsm_file_open h5dsm_dset_create h5dsm_dset_open \
-           h5dsm_dset_write h5dsm_dset_read
+           h5dsm_dset_write h5dsm_dset_read h5dsm_map
 TEST_SCRIPT=testh5cc.sh 
 TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 

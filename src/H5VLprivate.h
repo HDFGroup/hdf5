@@ -142,6 +142,7 @@ H5_DLL herr_t H5F_close_file(void *file);
 H5_DLL herr_t H5A_close_attr(void *attr);
 H5_DLL herr_t H5D_close_dataset(void *dset);
 H5_DLL herr_t H5G_close_group(void *grp);
+H5_DLL herr_t H5M_close_map(void *map);
 H5_DLL herr_t H5T_close_datatype(void *dt);
 
 H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);

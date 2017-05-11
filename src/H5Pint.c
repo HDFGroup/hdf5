@@ -145,6 +145,10 @@ hid_t H5P_CLS_ATTRIBUTE_CREATE_ID_g             = FAIL;
 H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g      = NULL;
 hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g             = FAIL;
 H5P_genclass_t *H5P_CLS_ATTRIBUTE_ACCESS_g      = NULL;
+hid_t H5P_CLS_MAP_CREATE_ID_g             	= FAIL;
+H5P_genclass_t *H5P_CLS_MAP_CREATE_g      	= NULL;
+hid_t H5P_CLS_MAP_ACCESS_ID_g             	= FAIL;
+H5P_genclass_t *H5P_CLS_MAP_ACCESS_g      	= NULL;
 hid_t H5P_CLS_OBJECT_COPY_ID_g                  = FAIL;
 H5P_genclass_t *H5P_CLS_OBJECT_COPY_g           = NULL;
 hid_t H5P_CLS_LINK_CREATE_ID_g                  = FAIL;
@@ -170,6 +174,8 @@ hid_t H5P_LST_DATATYPE_CREATE_ID_g      = FAIL;
 hid_t H5P_LST_DATATYPE_ACCESS_ID_g      = FAIL;
 hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g     = FAIL;
 hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g     = FAIL;
+hid_t H5P_LST_MAP_CREATE_ID_g     	= FAIL;
+hid_t H5P_LST_MAP_ACCESS_ID_g     	= FAIL;
 hid_t H5P_LST_OBJECT_COPY_ID_g          = FAIL;
 hid_t H5P_LST_LINK_CREATE_ID_g          = FAIL;
 hid_t H5P_LST_LINK_ACCESS_ID_g          = FAIL;
@@ -212,6 +218,47 @@ const H5P_libclass_t H5P_CLS_AACC[1] = {{
     NULL,			/* Class close callback         */
     NULL 		        /* Class close callback info    */
 }};
+
+/* Map access property list class library initialization object */
+/* (move to proper source code file when used for real) */
+const H5P_libclass_t H5P_CLS_MACC[1] = {{
+    "map access",		/* Class name for debugging     */
+    H5P_TYPE_MAP_ACCESS,  /* Class type                   */
+
+    &H5P_CLS_LINK_ACCESS_g,	/* Parent class                 */
+    &H5P_CLS_MAP_ACCESS_g,	/* Pointer to class             */
+    &H5P_CLS_MAP_ACCESS_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_MAP_ACCESS_ID_g,	/* Pointer to default property list ID */
+    NULL,			/* Default property registration routine */
+
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
+/* Map create property list class library initialization object */
+/* (move to proper source code file when used for real) */
+const H5P_libclass_t H5P_CLS_MCRT[1] = {{
+    "map create",		/* Class name for debugging     */
+    H5P_TYPE_MAP_CREATE,  /* Class type                   */
+
+    &H5P_CLS_LINK_CREATE_g,	/* Parent class                 */
+    &H5P_CLS_MAP_CREATE_g,	/* Pointer to class             */
+    &H5P_CLS_MAP_CREATE_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_MAP_CREATE_ID_g,	/* Pointer to default property list ID */
+    NULL,			/* Default property registration routine */
+
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
 
 /* Group access property list class library initialization object */
 /* (move to proper source code file when used for real) */
@@ -322,6 +369,8 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_TACC,       /* Datatype access */
     H5P_CLS_ACRT,       /* Attribute creation */
     H5P_CLS_AACC,       /* Attribute access */
+    H5P_CLS_MCRT,       /* Map creation */
+    H5P_CLS_MACC,       /* Map access */
     H5P_CLS_LCRT        /* Link creation */
 };
 
@@ -513,6 +562,8 @@ H5P_term_package(void)
                         H5P_LST_DATATYPE_ACCESS_ID_g =
                         H5P_LST_ATTRIBUTE_CREATE_ID_g =
                         H5P_LST_ATTRIBUTE_ACCESS_ID_g =
+                        H5P_LST_MAP_CREATE_ID_g =
+                        H5P_LST_MAP_ACCESS_ID_g =
                         H5P_LST_OBJECT_COPY_ID_g =
                         H5P_LST_LINK_CREATE_ID_g =
                         H5P_LST_LINK_ACCESS_ID_g =
@@ -540,6 +591,8 @@ H5P_term_package(void)
                         H5P_CLS_STRING_CREATE_g =
                         H5P_CLS_ATTRIBUTE_CREATE_g =
                         H5P_CLS_ATTRIBUTE_ACCESS_g =
+                        H5P_CLS_MAP_CREATE_g =
+                        H5P_CLS_MAP_ACCESS_g =
                         H5P_CLS_OBJECT_COPY_g =
                         H5P_CLS_LINK_CREATE_g =
                         H5P_CLS_LINK_ACCESS_g =
@@ -559,6 +612,8 @@ H5P_term_package(void)
                         H5P_CLS_STRING_CREATE_ID_g =
                         H5P_CLS_ATTRIBUTE_CREATE_ID_g =
                         H5P_CLS_ATTRIBUTE_ACCESS_ID_g =
+                        H5P_CLS_MAP_CREATE_ID_g =
+                        H5P_CLS_MAP_ACCESS_ID_g =
                         H5P_CLS_OBJECT_COPY_ID_g =
                         H5P_CLS_LINK_CREATE_ID_g =
                         H5P_CLS_LINK_ACCESS_ID_g =
@@ -5281,7 +5336,7 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_ATTRIBUTE_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
+    HDcompile_assert(H5P_TYPE_MAP_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
     HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
 
     /* Check arguments */
@@ -5346,6 +5401,14 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
         case H5P_TYPE_ATTRIBUTE_ACCESS:
             class_id = H5P_CLS_ATTRIBUTE_ACCESS_ID_g;
+            break;
+
+        case H5P_TYPE_MAP_CREATE:
+            class_id = H5P_CLS_MAP_CREATE_ID_g;
+            break;
+
+        case H5P_TYPE_MAP_ACCESS:
+            class_id = H5P_CLS_MAP_ACCESS_ID_g;
             break;
 
         case H5P_TYPE_OBJECT_COPY:

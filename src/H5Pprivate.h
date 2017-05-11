@@ -83,6 +83,8 @@ typedef enum H5P_plist_type_t {
     H5P_TYPE_LINK_CREATE       = 16,
     H5P_TYPE_LINK_ACCESS       = 17,
     H5P_TYPE_ATTRIBUTE_ACCESS  = 18,
+    H5P_TYPE_MAP_CREATE        = 19,
+    H5P_TYPE_MAP_ACCESS        = 20,
     H5P_TYPE_MAX_TYPE
 } H5P_plist_type_t;
 
@@ -131,6 +133,8 @@ H5_DLLVAR H5P_genclass_t *H5P_CLS_DATATYPE_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_DATATYPE_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_ATTRIBUTE_ACCESS_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_MAP_CREATE_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_MAP_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_OBJECT_COPY_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_LINK_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_LINK_ACCESS_g;
@@ -139,6 +143,8 @@ H5_DLLVAR H5P_genclass_t *H5P_CLS_STRING_CREATE_g;
 /* Internal property list classes */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_LACC[1];  /* Link access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_AACC[1];  /* Attribute access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_MACC[1];  /* Map access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_MCRT[1];  /* Map access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_DACC[1];  /* Dataset access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_GACC[1];  /* Group access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_TACC[1];  /* Named datatype access */

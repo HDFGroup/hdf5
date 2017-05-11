@@ -78,6 +78,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5HG.c H5HGcache.c H5HGdbg.c H5HGquery.c \
         H5HL.c H5HLcache.c H5HLdbg.c H5HLint.c H5HLprfx.c H5HLdblk.c\
         H5HP.c H5I.c H5Itest.c H5L.c H5Lexternal.c H5lib_settings.c \
+	H5M.c \
         H5MF.c H5MFaggr.c H5MFdbg.c H5MFsection.c \
         H5MM.c H5MP.c H5MPtest.c \
         H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
@@ -136,8 +137,8 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5FFpublic.h \
         H5VLpublic.h H5VLnative.h \
         H5VLdaosm_public.h \
-        H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
-        H5MMpublic.h H5Opublic.h H5Ppublic.h \
+        H5Gpublic.h H5Ipublic.h H5Lpublic.h \
+	H5Mpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
         H5Rpublic.h H5Spublic.h \
         H5Tpublic.h H5TRpublic.h H5Zpublic.h

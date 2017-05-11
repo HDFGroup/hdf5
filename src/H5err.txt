@@ -61,6 +61,7 @@ MAJOR, H5E_OHDR, Object header
 MAJOR, H5E_DATATYPE, Datatype
 MAJOR, H5E_DATASPACE, Dataspace
 MAJOR, H5E_DATASET, Dataset
+MAJOR, H5E_MAP, Map
 MAJOR, H5E_STORAGE, Data storage
 MAJOR, H5E_PLIST, Property lists
 MAJOR, H5E_ATTR, Attribute

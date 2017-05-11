@@ -99,10 +99,10 @@ H5FF__init_package(void)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init dataset interface")
 
     /*if(H5A_init() < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init attribute interface")
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init attribute interface")*/
 
     if(H5M_init() < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface") DSMINC*/
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface")
 
     if(H5TR_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface")

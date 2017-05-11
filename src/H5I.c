@@ -1990,7 +1990,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         H5I_type_t type = udata->obj_type;
         const void *obj_ptr = NULL;
 
-        if(H5I_FILE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
+        if(H5I_FILE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type || H5I_MAP == type) {
             const H5VL_object_t *obj = (const H5VL_object_t *)item->obj_ptr;
             obj_ptr = obj->vol_obj;
         }
@@ -2190,7 +2190,7 @@ H5Iget_file_id(hid_t obj_id)
     type = H5I_TYPE(obj_id);
 
     if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || 
-       H5I_DATASET == type || H5I_ATTR == type) {
+       H5I_DATASET == type || H5I_ATTR == type || H5I_MAP == type) {
         /* get the object pointer*/
         if(NULL == (obj = H5VL_get_object(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid identifier")
@@ -2257,7 +2257,7 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
         ret_value = obj_id;
     } /* end if */
-    else if(type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
+    else if(type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR || type == H5I_MAP) {
         H5G_loc_t loc;              /* Location of object */
 
         /* Get the object location information */
@@ -2303,7 +2303,7 @@ H5I__get_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     HDassert(item);
     HDassert(udata);
 
-    if(H5I_FILE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
+    if(H5I_FILE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type || H5I_MAP == type) {
         const H5VL_object_t *obj = (const H5VL_object_t *)item->obj_ptr;
         obj_ptr = obj->vol_obj;
     }
