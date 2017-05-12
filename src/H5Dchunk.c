@@ -447,7 +447,6 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters,
 
     if (0 == idx_info.pline->nused && H5F_addr_defined(old_chunk.offset)) {
         /* If there are no filters and we are overwriting the chunk we can just set values */
-        udata.chunk_block.offset = old_chunk.offset;
         need_insert = FALSE;
     }
     else {
