@@ -623,6 +623,7 @@ static hsize_t diff_datum(void       *_mem1,
     *-------------------------------------------------------------------------
     */
     case H5T_COMPOUND:
+        h5difftrace("diff_datum H5T_COMPOUND\n");
 
         nmembs = members->n;
 
@@ -655,23 +656,33 @@ static hsize_t diff_datum(void       *_mem1,
     *-------------------------------------------------------------------------
     */
     case H5T_STRING:
-
+        h5difftrace("diff_datum H5T_STRING\n");
         {
-            H5T_str_t pad;
             char      *s;
             char *s1;
             char *s2;
             size_t size1;
             size_t size2;
-
+            H5T_str_t pad = H5Tget_strpad(m_type);
+            
             /* if variable length string */
             if(H5Tis_variable_str(m_type))
             {
+                h5difftrace("diff_datum H5T_STRING variable\n");
                 /* Get pointer to first string */
                 s1 = *(char**) mem1;
                 size1 = HDstrlen(s1);
                 /* Get pointer to second string */
                 s2 = *(char**) mem2;
+                size2 = HDstrlen(s2);
+            }
+            else if (H5T_STR_NULLTERM == pad) {
+                h5difftrace("diff_datum H5T_STRING null term\n");
+                /* Get pointer to first string */
+                s1 = (char*) mem1;
+                size1 = HDstrlen(s1);
+                /* Get pointer to second string */
+                s2 = (char*) mem2;
                 size2 = HDstrlen(s2);
             }
             else
@@ -714,9 +725,6 @@ static hsize_t diff_datum(void       *_mem1,
                 /* try fast compare first */
                 if (HDmemcmp(s1, s2, size)==0)
                     break;
-
-                pad = H5Tget_strpad(m_type);
-
                 for (u=0; u<size; u++)
                     nfound+=character_compare(
                         s1 + u,
@@ -741,6 +749,7 @@ static hsize_t diff_datum(void       *_mem1,
     *-------------------------------------------------------------------------
     */
     case H5T_BITFIELD:
+        h5difftrace("diff_datum H5T_BITFIELD\n");
 
         /* byte-by-byte comparison */
         for (u=0; u<type_size; u++)
@@ -764,7 +773,7 @@ static hsize_t diff_datum(void       *_mem1,
      *-------------------------------------------------------------------------
      */
     case H5T_OPAQUE:
-
+        h5difftrace("diff_datum H5T_OPAQUE\n");
         /* byte-by-byte comparison */
         for (u=0; u<type_size; u++)
             nfound+=character_compare_opt(
@@ -788,6 +797,7 @@ static hsize_t diff_datum(void       *_mem1,
     *-------------------------------------------------------------------------
     */
     case H5T_ENUM:
+        h5difftrace("diff_datum H5T_ENUM\n");
 
     /* For enumeration types we compare the names instead of the
     integer values.  For each pair of elements being
