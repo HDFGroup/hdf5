@@ -445,11 +445,17 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters,
     /* Set up the size of chunk for user data */
     udata.chunk_block.length = data_size;
 
-    /* Create the chunk it if it doesn't exist, or reallocate the chunk
-     *  if its size changed.
-     */
-    if(H5D__chunk_file_alloc(&idx_info, &old_chunk, &udata.chunk_block, &need_insert, scaled) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
+    if (0 == idx_info.pline->nused && H5F_addr_defined(old_chunk.offset)) {
+        /* If there are no filters and we are overwriting the chunk we can just set values */
+        need_insert = FALSE;
+    }
+    else {
+        /* Otherwise, create the chunk it if it doesn't exist, or reallocate the chunk
+         * if its size has changed.
+         */
+        if (H5D__chunk_file_alloc(&idx_info, &old_chunk, &udata.chunk_block, &need_insert, scaled) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
+    }
 
     /* Make sure the address of the chunk is returned. */
     if(!H5F_addr_defined(udata.chunk_block.offset))
