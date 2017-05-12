@@ -36,14 +36,14 @@
 #define DATASETNAME4        "data_conv"
 #define DATASETNAME5        "contiguous_dset"
 #define DATASETNAME6        "invalid_argue"
+#define DATASETNAME7        "overwrite_chunk"
+
 /* Datasets for Direct Read tests */
-#define DATASETNAME7        "disabled_chunk_cache"
-#define DATASETNAME8        "read_w_valid_cache"
-#define DATASETNAME9        "flush_chunk_cache"
-#define DATASETNAME10       "unallocated_chunk"
-#define DATASETNAME11       "unfiltered_data"
-
-
+#define DATASETNAME8        "disabled_chunk_cache"
+#define DATASETNAME9        "read_w_valid_cache"
+#define DATASETNAME10       "flush_chunk_cache"
+#define DATASETNAME11       "unallocated_chunk"
+#define DATASETNAME12       "unfiltered_data"
 
 #define RANK         2
 #define NX     16
@@ -58,6 +58,13 @@
 #define H5Z_FILTER_BOGUS2    306
 #define ADD_ON            7
 #define FACTOR            3
+
+/* Constants for the overwrite test */
+#define OVERWRITE_NDIMS         3
+#define OVERWRITE_CHUNK_NX      3
+#define OVERWRITE_CHUNK_2NX     6
+#define OVERWRITE_CHUNK_NY      2
+#define OVERWRITE_VALUE         42
 
 /* Local prototypes for filter functions */
 static size_t filter_bogus1(unsigned int flags, size_t cd_nelmts,
@@ -345,7 +352,112 @@ error:
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
 /*-------------------------------------------------------------------------
- * Function:    test_skip_compress_write1
+ * Function:    test_direct_chunk_overwrite_data
+ *
+ * Purpose:     Test overwriting a chunk with new data.
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_direct_chunk_overwrite_data(hid_t fid)
+{
+    size_t      buf_size = OVERWRITE_CHUNK_NX * OVERWRITE_CHUNK_NY * sizeof(int16_t);
+    int16_t     data_buf[OVERWRITE_CHUNK_NY][OVERWRITE_CHUNK_NX];
+    int16_t     overwrite_buf[OVERWRITE_CHUNK_NY][OVERWRITE_CHUNK_NX];
+    uint32_t    filter_mask = 0;
+    hid_t       tid = H5T_NATIVE_UINT16;
+    hid_t       dcpl_id = -1;
+    hid_t       sid = -1;
+    hid_t       did = -1;
+    uint16_t    fill_value = 0;
+    hsize_t     dset_dims[] = {1, OVERWRITE_CHUNK_NY, OVERWRITE_CHUNK_2NX};
+    hsize_t     dset_max_dims[] = {H5S_UNLIMITED, OVERWRITE_CHUNK_NY, OVERWRITE_CHUNK_2NX};
+    hsize_t     chunk_dims[] = {1, OVERWRITE_CHUNK_NY, OVERWRITE_CHUNK_NX};
+    hsize_t     offset[] = {0, 0, 0};
+    hsize_t     i, j;
+    int16_t     n;
+    int16_t     read_buf[OVERWRITE_CHUNK_NY][OVERWRITE_CHUNK_2NX];
+
+    TESTING("overwriting existing data with H5DOwrite_chunk");
+
+    /* Create the dataset's data space */
+    if ((sid = H5Screate_simple(OVERWRITE_NDIMS, dset_dims, dset_max_dims)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set chunk size and filll value */
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if (H5Pset_fill_value(dcpl_id, tid, &fill_value) < 0)
+        FAIL_STACK_ERROR
+    if (H5Pset_chunk(dcpl_id, OVERWRITE_NDIMS, chunk_dims) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create dataset */
+    if ((did = H5Dcreate2(fid, DATASETNAME7, tid, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Initialize data buffers */
+    n = 0;
+    for (i = 0; i < OVERWRITE_CHUNK_NY; i++) {
+        for (j = 0; j < OVERWRITE_CHUNK_NX; j++) {
+            data_buf[i][j] = n++;
+            overwrite_buf[i][j] = OVERWRITE_VALUE;
+        }
+    }
+
+    /* Write chunk data using the direct write function. */
+    if (H5DOwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Write second chunk. */
+    offset[2] = OVERWRITE_CHUNK_NX;
+    if (H5DOwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Overwrite first chunk. */
+    offset[2] = 0;
+    if (H5DOwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, overwrite_buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Read the data back out */
+    if (H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Ensure that the data are correct in chunk 1 */
+    for (i = 0; i < OVERWRITE_CHUNK_NY; i++)
+        for (j = 0; j < OVERWRITE_CHUNK_NX; j++) {
+            if (read_buf[i][j] != OVERWRITE_VALUE)
+                TEST_ERROR
+        }
+
+    if (H5Pclose(dcpl_id) < 0)
+        FAIL_STACK_ERROR
+    if (H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR
+    if (H5Dclose(did) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl_id);
+        H5Sclose(sid);
+        H5Dclose(did);
+    } H5E_END_TRY;
+
+    return 1;
+} /* end test_direct_chunk_overwrite_data() */
+
+/*-------------------------------------------------------------------------
+ * Function:	test_skip_compress_write1
  *
  * Purpose:    Test skipping compression filter when it is the only filter
  *              for the dataset
@@ -1299,7 +1411,7 @@ test_direct_chunk_read_no_cache (hid_t file)
         goto error;
 
     /* Create a new dataset within the file using cparms creation properties. */
-    if((dataset = H5Dcreate2(file, DATASETNAME7, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+    if((dataset = H5Dcreate2(file, DATASETNAME8, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
             cparms, dapl)) < 0)
         goto error;
 
@@ -1465,7 +1577,7 @@ test_direct_chunk_read_cache (hid_t file, hbool_t flush)
         goto error;
 
     /* Create a new dataset within the file using cparms creation properties. */
-    if((dataset = H5Dcreate2(file, flush?DATASETNAME8:DATASETNAME9, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+    if((dataset = H5Dcreate2(file, flush?DATASETNAME9:DATASETNAME10, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
             cparms, H5P_DEFAULT)) < 0)
         goto error;
 
@@ -1641,7 +1753,7 @@ test_read_unfiltered_dset(hid_t file)
         goto error;
 
     /* Create a new dataset within the file using cparms creation properties. */
-    if((dataset = H5Dcreate2(file, DATASETNAME11, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+    if((dataset = H5Dcreate2(file, DATASETNAME12, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
             cparms, H5P_DEFAULT)) < 0)
         goto error;
 
@@ -1782,7 +1894,7 @@ test_read_unallocated_chunk (hid_t file)
         goto error;
 
     /* Create a new dataset within the file using cparms creation properties. */
-    if((dataset = H5Dcreate2(file, DATASETNAME10, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+    if((dataset = H5Dcreate2(file, DATASETNAME11, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
             cparms, H5P_DEFAULT)) < 0)
         goto error;
 
@@ -1880,6 +1992,7 @@ int main( void )
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += test_direct_chunk_write(file_id);
 #endif /* H5_HAVE_FILTER_DEFLATE */
+    nerrors += test_direct_chunk_overwrite_data(file_id);
     nerrors += test_skip_compress_write1(file_id);
     nerrors += test_skip_compress_write2(file_id);
     nerrors += test_data_conv(file_id);
