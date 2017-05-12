@@ -1633,7 +1633,7 @@ H5Fstart_swmr_write(hid_t file_id)
 
     if(file->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file superblock version should be at least 3")
-    HDassert(file->shared->latest_flags == H5F_LATEST_ALL_FLAGS);
+    HDassert((file->shared->latest_flags | H5F_LATEST_LAYOUT_MSG) > 0);
 
     /* Should not be marked for SWMR writing mode already */
     if(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)

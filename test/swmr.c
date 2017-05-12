@@ -21,6 +21,7 @@
 *       H5Fstart_swmr_write()
 *       H5Pget/set_object_flush_cb()
 *       H5Pget/set_append_flush()
+*       H5Pget/set_swmr_deltat()
 *
 *************************************************************/
 
@@ -54,6 +55,7 @@ const char *FILENAME[] = {
     "swmr0",        /* 0 */
     "swmr1",        /* 1 */
     "swmr2",        /* 2 */
+    "swmr3",        /* 3 */
     NULL
 };
 
@@ -101,6 +103,10 @@ static int test_refresh_concur(hid_t in_fapl, hbool_t new_format);
 
 /* Tests for multiple opens of files and datasets with H5Drefresh() & H5Fstart_swmr_write(): same process */
 static int test_multiple_same(hid_t in_fapl, hbool_t new_format);
+
+/* Tests for SWMR delta t */
+static int test_swmr_deltat_getset(hid_t fapl);
+static int test_swmr_deltat_file_create(hid_t fapl);
 
 /*
  * Tests for H5Pget/set_metadata_read_attemps(), H5Fget_metadata_read_retry_info()
@@ -6031,6 +6037,112 @@ error:
 
 /****************************************************************
 **
+**  test_swmr_deltat_getset():
+**    Test for setting and getting the SWMR delta T value.
+**
+*****************************************************************/
+static int
+test_swmr_deltat_getset(hid_t in_fapl)
+{
+    hid_t fapl;         /* File access property list */
+    unsigned deltat;    /* Delta t value retrieved */
+    herr_t status;      /* Status from API routine */
+
+    /* Output message about test being performed */
+    TESTING("Get/set SWMR delta t property");
+
+    /* Get a copy of the parameter in_fapl */
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /*
+     * Try an invalid value
+     */
+    H5E_BEGIN_TRY {
+        status = H5Pset_swmr_deltat(fapl, 0);
+    } H5E_END_TRY;
+    if(status >= 0)
+        TEST_ERROR
+
+    /*
+     * Set valid value
+     */
+    if(H5Pset_swmr_deltat(fapl, 17) < 0)
+        FAIL_STACK_ERROR
+
+    /*
+     * Get value
+     */
+    deltat = 0;
+    if(H5Pget_swmr_deltat(fapl, &deltat) < 0)
+        FAIL_STACK_ERROR
+    if(deltat != 17)
+        TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_deltat_getset() */
+
+/****************************************************************
+**
+**  test_swmr_deltat_file_create():
+**    Test for setting and getting the SWMR delta T value.
+**
+*****************************************************************/
+static int
+test_swmr_deltat_file_create(hid_t in_fapl)
+{
+    hid_t fid;                  /* File identifier */
+    hid_t fapl;                 /* File access property list */
+    unsigned deltat = 17;       /* Delta t value */
+    char filename[NAME_BUF_SIZE];       /* File name */
+    herr_t status;              /* Status from API routine */
+
+    /* Output message about test being performed */
+    TESTING("File create w/SWMR delta t");
+
+    /* Get a copy of the parameter in_fapl */
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[3], fapl, filename, sizeof(filename));
+
+    /* Set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a file. */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Closing */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_deltat_file_create() */
+
+/****************************************************************
+**
 **  test_file_lock_swmr_concur(): low-level file test routine.
 **    With the implementation of file locking, this test checks file
 **    open with different combinations of flags + SWMR flags.
@@ -7097,6 +7209,14 @@ main(void)
          */
         nerrors += test_file_lock_swmr_same(fapl);
         nerrors += test_file_lock_swmr_concur(fapl);
+
+        /*
+         * Tests for:
+         *   SWMR delta t values--single process access
+         *   SWMR delta t values--concurrent access
+         */
+        nerrors += test_swmr_deltat_getset(fapl);
+        nerrors += test_swmr_deltat_file_create(fapl);
     } /* end if */
 
     /* Tests SWMR VFD compatibility flag.

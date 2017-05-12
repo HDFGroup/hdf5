@@ -204,7 +204,8 @@ typedef struct H5O_copy_t {
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
 #define H5O_FSINFO_ID   0x0017          /* File space info message.  */
 #define H5O_MDCI_MSG_ID 0x0018		/* Metadata Cache Image Message */
-#define H5O_UNKNOWN_ID  0x0019          /* Placeholder message ID for unknown message.  */
+#define H5O_SWMR_DELTAT_ID 0x0019	/* SWMR delta t message. */
+#define H5O_UNKNOWN_ID  0x001a          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
 /* 
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
@@ -214,7 +215,7 @@ typedef struct H5O_copy_t {
  *
  * (this should never exist in a file)
  */
-#define H5O_BOGUS_INVALID_ID	0x001A  /* "Bogus invalid" Message.  */
+#define H5O_BOGUS_INVALID_ID	0x001B  /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -770,6 +771,12 @@ typedef struct H5O_ainfo_t {
     haddr_t     fheap_addr;             /* Address of fractal heap for storing "dense" attributes */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of "dense" attributes */
 } H5O_ainfo_t;
+
+/*
+ * SWMR deltat Message.
+ */
+typedef unsigned H5O_swmr_deltat_t;        /* Contains # of links to object, if >1 */
+
 
 /*
  * Reference Count Message.

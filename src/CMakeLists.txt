@@ -467,6 +467,7 @@ set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5Oshared.c
     ${HDF5_SRC_DIR}/H5Oshmesg.c
     ${HDF5_SRC_DIR}/H5Ostab.c
+    ${HDF5_SRC_DIR}/H5Oswmr_deltat.c
     ${HDF5_SRC_DIR}/H5Otest.c
     ${HDF5_SRC_DIR}/H5Ounknown.c
 )

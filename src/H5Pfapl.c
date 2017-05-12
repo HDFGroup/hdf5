@@ -244,6 +244,11 @@
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF            0
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC            H5P__encode_unsigned
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC            H5P__decode_unsigned
+/* Definition for SWMR delta t (microseconds) */
+#define H5F_ACS_SWMR_DELTAT_SIZE                sizeof(unsigned)
+#define H5F_ACS_SWMR_DELTAT_DEF                 0
+#define H5F_ACS_SWMR_DELTAT_ENC                 H5P__encode_unsigned
+#define H5F_ACS_SWMR_DELTAT_DEC                 H5P__decode_unsigned
 
 
 /******************/
@@ -375,6 +380,7 @@ static const H5AC_cache_image_config_t H5F_def_mdc_initCacheImageCfg_g = H5F_ACS
 static const size_t H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF;      /* Default page buffer size */
 static const unsigned H5F_def_page_buf_min_meta_perc_g = H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF;      /* Default page buffer minimum metadata size */
 static const unsigned H5F_def_page_buf_min_raw_perc_g = H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF;      /* Default page buffer minumum raw data size */
+static const unsigned H5F_def_swmr_deltat_g = H5F_ACS_SWMR_DELTAT_DEF;          /* Default SWMR delta t value */
 
 
 /*-------------------------------------------------------------------------
@@ -603,6 +609,12 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
     /* Register the size of the page buffer minimum raw data size */
     if(H5P_register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE, &H5F_def_page_buf_min_raw_perc_g, 
             NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register SWMR info */
+    if(H5P_register_real(pclass, H5F_ACS_SWMR_DELTAT_NAME, H5F_ACS_SWMR_DELTAT_SIZE, &H5F_def_swmr_deltat_g, 
+            NULL, NULL, NULL, H5F_ACS_SWMR_DELTAT_ENC, H5F_ACS_SWMR_DELTAT_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -4806,4 +4818,77 @@ H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_per
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_page_buffer_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_swmr_deltat
+ *
+ * Purpose:     Set the "delta t" value for SWMR to use when freeing file
+ *              space.  Delta t is a timeout value in microseconds.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Houjun Tang
+ *              May 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_swmr_deltat(hid_t plist_id, unsigned deltat)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iIu", plist_id, deltat);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(deltat == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Delta t must be greater than 0")
+
+    /* Set size */
+    if(H5P_set(plist, H5F_ACS_SWMR_DELTAT_NAME, &deltat) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set SWMR delta t")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_swmr_deltat() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_swmr_deltat
+ *
+ * Purpose:	Retrieves the SWMR delta t value.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Houjun Tang
+ *              May 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_swmr_deltat(hid_t plist_id, unsigned *deltat)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Iu", plist_id, deltat);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get SWMR delta t*/
+    if(deltat)
+        if(H5P_get(plist, H5F_ACS_SWMR_DELTAT_NAME, deltat) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get SWMR delta t")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_swmr_deltat() */
 

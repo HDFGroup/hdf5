@@ -731,7 +731,7 @@ H5O_msg_move_to_new_chunk_test(hid_t oid, unsigned msg_type)
 
             /* Allocate and initialize new chunk in the file, moving the found message */
             /* (*new_idx returned from this routine is unused here) */
-            if(H5O__alloc_chunk(loc->file, H5AC_ind_read_dxpl_id, oh, 40, oh->nmesgs, &found_msg, &new_idx) < 0)
+            if(H5O__alloc_chunk(loc->file, H5AC_ind_read_dxpl_id, oh, (curr_msg->raw_size + H5O_SIZEOF_MSGHDR_OH(oh)), oh->nmesgs, &found_msg, &new_idx) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate new object header chunk")
 
             /* Break out of loop, the message was found */

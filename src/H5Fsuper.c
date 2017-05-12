@@ -593,6 +593,7 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
         H5O_btreek_t btreek;    /* v1 B-tree 'K' value message from superblock extension */
         H5O_drvinfo_t drvinfo;  /* Driver info message from superblock extension */
+        H5O_swmr_deltat_t swmr_deltat;  /* SWMR delta t message from superblock extension */
 	size_t u; 		/* Local index variable */
         htri_t status;          /* Status for message existing */
 
@@ -616,6 +617,24 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
         /* Open the superblock extension */
 	if(H5F_super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
+
+// FULLSWMR TODO ask Quincey about the following
+/* QAK - Copy driver info for SWMR deltat */
+
+        /* Check for the extension having a 'swmr delta t' message */
+        if((status = H5O_msg_exists(&ext_loc, H5O_SWMR_DELTAT_ID, meta_dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header")
+        if(status) {
+            /* Check for ignoring the SWMR delta t info for this file */
+            // Check with Quincey about the udata.ignore_deltat
+                /* Retrieve the 'SWMR delta t' structure */
+                if(NULL == H5O_msg_read(&ext_loc, H5O_SWMR_DELTAT_ID, &swmr_deltat, meta_dxpl_id))
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
+
+                printf("SWMR delta t value = %u\n", swmr_deltat);
+                // store in the shared file struct
+        } /* end if */
+
 
         /* Check for the extension having a 'driver info' message */
         if((status = H5O_msg_exists(&ext_loc, H5O_DRVINFO_ID, meta_dxpl_id)) < 0)
@@ -974,6 +993,9 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
     /* Bump superblock version if latest superblock version support is enabled */
     if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_SUPERBLOCK))
         super_vers = HDF5_SUPERBLOCK_VERSION_LATEST;
+    /* Bump superblock version to use version 3 superblock for SWMR writing */
+    else if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
+        super_vers = HDF5_SUPERBLOCK_VERSION_3;
     /* Bump superblock version to create superblock extension for SOHM info */
     else if(f->shared->sohm_nindexes > 0)
         super_vers = HDF5_SUPERBLOCK_VERSION_2;
@@ -1101,6 +1123,11 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
      * Determine if we will need a superblock extension
      */
 
+    /* Files with SWMR delta t set need the superblock extension */
+    if(f->shared->swmr_deltat > 0) {
+        HDassert(super_vers >= HDF5_SUPERBLOCK_VERSION_3);
+        need_ext = TRUE;
+    } /* end if */
     /* Files with SOHM indices always need the superblock extension */
     if(f->shared->sohm_nindexes > 0) {
         HDassert(super_vers >= HDF5_SUPERBLOCK_VERSION_2);

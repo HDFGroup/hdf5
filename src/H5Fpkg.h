@@ -352,6 +352,10 @@ struct H5F_file_t {
 
     /* Object flush info */
     H5F_object_flush_t 	object_flush;		/* Information for object flush callback */
+
+    // FULLSWMR DONE
+    /* SWMR-related fields */
+    unsigned swmr_deltat;                       /* Delta t value for SWMR */
 };
 
 /*

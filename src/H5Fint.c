@@ -197,6 +197,12 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial metadata cache resize config.")
 
+//FULLSWMR DONE
+    /* QAK - Add H5P_set for SWMR deltat value from internal file struct */
+    if(H5P_set(new_plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set SWMR deltat.")
+
+
     /* Prepare the driver property */
     driver_prop.driver_id = f->shared->lf->driver_id;
     driver_prop.driver_info = H5FD_fapl_get(f->shared->lf);
@@ -678,8 +684,10 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
         /* For latest format or SWMR_WRITE, activate all latest version support */
-        if(latest_format || (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
+        if(latest_format)
             f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
+        else if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+            f->shared->latest_flags |= H5F_LATEST_LAYOUT_MSG;
         if(H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &(f->shared->use_mdc_logging)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'use mdc logging' flag")
         if(H5P_get(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &(f->shared->start_mdc_log_on_access)) < 0)
@@ -703,6 +711,11 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
 #endif /* H5_HAVE_PARALLEL */
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
+
+// FULLSWMR DONE
+/* QAK - Get SWMR delta t property */
+        if(H5P_get(plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SWMR delta t value")
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -1457,8 +1470,19 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             } /* version 3 superblock */
 
             file->shared->sblock->status_flags |= H5F_SUPER_WRITE_ACCESS;
-            if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)
+            if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) {
                 file->shared->sblock->status_flags |= H5F_SUPER_SWMR_WRITE_ACCESS;
+
+                // FULLSWMR  
+                /* Check for non-default SWMR delta t, and if so, write out the SWMR delta t message */
+                if(file->shared->swmr_deltat != 0)
+                    if(H5F_super_ext_write_msg(file, meta_dxpl_id, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "error in writing deltat message to superblock extension")
+
+                // FULLSWMR TODO
+                /* NOTE - Need to delete message when file closed */
+                /* NOTE2 - Need to write message when H5Fstart_swmr_write() called */
+            } /* end if */
 
             /* Flush the superblock */
             if(H5F_super_dirty(file) < 0)
