@@ -1561,10 +1561,19 @@ static void test_attr_exists()
         // Open a group.
         Group group = fid1.openGroup(GROUP1_NAME);
 
-        // Check for existence of attribute
+        // Check for existence of attribute, Group::attrExists
         attr_exists = group.attrExists(ATTR2_NAME);
         if (attr_exists == false)
             throw InvalidActionException("H5File::attrExists", "group, ATTR2_NAMEAttribute should exist but does not");
+
+        // Open attribute
+        Attribute attr = group.openAttribute(ATTR2_NAME);
+
+        // Test the existence of a name using attribute as location,
+        // Attribute::nameExists
+        bool name_exists = attr.nameExists(GROUP1_NAME);
+        if (name_exists == false)
+            throw InvalidActionException("Attribute::nameExists", "group GROUP1_NAME should exist but does not");
 
         PASSED();
     } // end try block

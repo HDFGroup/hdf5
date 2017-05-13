@@ -20,6 +20,7 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
+#include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -350,6 +351,42 @@ void H5Location::renameAttr(const char* oldname, const char* newname) const
 void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& newname) const
 {
    renameAttr (oldname.c_str(), newname.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::nameExists
+///\brief       Checks if a link of a given name exists in a location
+///\param       name - IN: Searched name
+///\param       lapl - IN: Link access property list
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - Nov, 2016
+// Modification
+//--------------------------------------------------------------------------
+bool H5Location::nameExists(const char* name, const LinkAccPropList& lapl) const
+{
+    htri_t ret_value = H5Lexists(getId(), name, lapl.getId());
+    if (ret_value > 0)
+        return true;
+    else if (ret_value == 0)
+        return false;
+    else // Raise exception when H5Lexists returns a negative value
+    {
+        throw LocationException(inMemFunc("nameExists"), "H5Lexists failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::nameExists
+///\brief       Checks if a link of a given name exists in a location
+///\param       name - IN: Searched name
+///\param       lapl - IN: Link access property list
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - Dec, 2016
+// Modification
+//--------------------------------------------------------------------------
+bool H5Location::nameExists(const H5std_string& name, const LinkAccPropList& lapl) const
+{
+    return(nameExists(name.c_str(), lapl));
 }
 
 //--------------------------------------------------------------------------

@@ -57,6 +57,10 @@ class H5_DLLCPP H5Location : public IdComponent {
         // this location.
         virtual Attribute openAttribute(const unsigned int idx) const;
 
+        // Checks if a link of a given name exists in this location
+        bool nameExists(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        bool nameExists(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
         // Flushes all buffers associated with this location to disk.
         void flush(H5F_scope_t scope) const;
 
