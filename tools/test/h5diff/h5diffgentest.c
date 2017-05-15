@@ -5466,6 +5466,34 @@ static void test_objs_strings(const char *fname1, const char *fname2)
     H5Sclose(space);
     H5Dclose(dataset);
 
+    /* string 5 : early term long string */
+    string4A[0][10] = 0;
+    string4A[0][11] = 0;
+    string4B[0][10] = 0;
+    
+    string4A[1][10] = 0;
+    string4A[1][11] = 'Z';
+    string4B[1][10] = 0;
+    string4B[1][11] = 'x';
+    
+    string4A[2][10] = 0;
+    string4B[2][10] = 0;
+    string4B[2][11] = 'a';
+    string4B[2][12] = 'B';
+    string4B[2][13] = 'c';
+    space = H5Screate_simple(1, dims4, NULL);
+    f_type = mkstr(168, H5T_STR_NULLTERM);
+    m_type = mkstr(21, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string5", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string5", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
 out:
     /*-----------------------------------------------------------------------
     * Close IDs
