@@ -121,7 +121,12 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     High-Level APIs:
     ------
-    -
+    - Fixed a bug in the H5DOwrite_chunk() API call where overwriting a chunk
+      with no filters caused an assert to trip (with assertions enabled /
+      debug builds) or additional chunks to be inserted instead of overwriting
+      the data (without assertions enabled / production builds).
+
+      (HDFFV-10187, DER, 2017/05/11)
 
     Fortran High-Level APIs:
     ------
