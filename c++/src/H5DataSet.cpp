@@ -25,6 +25,7 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
+#include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5OcreatProp.h"
