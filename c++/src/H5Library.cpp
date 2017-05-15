@@ -26,6 +26,8 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LaccProp.h"
+#include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -184,6 +186,10 @@ void H5Library::initH5cpp()
     ret_value = std::atexit(PropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating PropList::deleteConstants failed");
+
+    ret_value = std::atexit(LinkAccPropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registrating LinkAccPropList::deleteConstants failed");
 
     ret_value = std::atexit(FileAccPropList::deleteConstants);
     if (ret_value != 0)

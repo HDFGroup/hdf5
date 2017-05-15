@@ -27,8 +27,8 @@ namespace H5 {
     inherits from IdComponent because an attribute is an HDF5 component that
     is identified by an identifier.
 */
-//  Inheritance: multiple IdComponent/AbstractDs
-class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
+//  Inheritance: multiple H5Location/AbstractDs
+class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
    public:
 
         // Copy constructor: makes a copy of an existing Attribute object.
