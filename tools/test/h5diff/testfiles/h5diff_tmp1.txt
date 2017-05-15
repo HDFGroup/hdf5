@@ -1,5 +1,17 @@
+attribute: <EndDate of </HDFEOS/ADDITIONAL/FILE_ATTRIBUTES>> and <EndDate of </HDFEOS/ADDITIONAL/FILE_ATTRIBUTES>>
+3 differences found
+attribute: <Set2eqSet1 of </HDFEOS/ADDITIONAL/FILE_ATTRIBUTES>> and <Set2eqSet1 of </HDFEOS/ADDITIONAL/FILE_ATTRIBUTES>>
+1 differences found
+attribute: <VersionID of </HDFEOS/ADDITIONAL/FILE_ATTRIBUTES>> and <VersionID of </HDFEOS/ADDITIONAL/FILE_ATTRIBUTES>>
+1 differences found
+attribute: <LongName of </HDFEOS/GRIDS/SET1/Data Fields/STv>> and <LongName of </HDFEOS/GRIDS/SET1/Data Fields/STv>>
+1 differences found
+attribute: <LongName of </HDFEOS/GRIDS/SET1/Data Fields/Tot_Precip_Water>> and <LongName of </HDFEOS/GRIDS/SET1/Data Fields/Tot_Precip_Water>>
+1 differences found
+attribute: <LongName of </HDFEOS/GRIDS/SET2/Data Fields/STv>> and <LongName of </HDFEOS/GRIDS/SET2/Data Fields/STv>>
+1 differences found
 --------------------------------
 Some objects are not comparable
 --------------------------------
 Use -c for a list of objects.
-EXIT CODE: 0
+EXIT CODE: 1
