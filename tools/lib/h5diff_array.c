@@ -665,6 +665,7 @@ static hsize_t diff_datum(void       *_mem1,
             size_t     size1;
             size_t     size2;
             size_t     sizex;
+            size_t     size_mtype = H5Tget_size(m_type);
             H5T_str_t  pad = H5Tget_strpad(m_type);
 
             /* if variable length string */
@@ -682,17 +683,21 @@ static hsize_t diff_datum(void       *_mem1,
                 /* Get pointer to first string */
                 s1 = (char*) mem1;
                 size1 = HDstrlen(s1);
+                if (size1 > size_mtype)
+                    size1 = size_mtype;
                 /* Get pointer to second string */
                 s2 = (char*) mem2;
                 size2 = HDstrlen(s2);
+                if (size2 > size_mtype)
+                    size2 = size_mtype;
             }
             else {
                 /* Get pointer to first string */
                 s1 = (char *)mem1;
-                size1 = H5Tget_size(m_type);
+                size1 = size_mtype;
                 /* Get pointer to second string */
                 s2 = (char *)mem2;
-                size2 = H5Tget_size(m_type);
+                size2 = size_mtype;
             }
 
             /*
