@@ -91,7 +91,20 @@ New Features
 
     C++ API
     -------
-    - None
+    - The following C++ API wrappers have been added to the C++ Library:
+        // Determines if an object exists.
+        H5Location::exists - H5Lexists.
+
+        // Returns the header version of an HDF5 object.
+        H5Object::objVersion - H5Oget_info for version
+
+      (BMR, 2017/03/20, HDFFV-10004, HDFFV-10139, HDFFV-10145)
+
+    - New class LinkAccPropList is added for link access proprety list
+      (BMR, 2017/01/04, HDFFV-10145)
+
+    - New exception ObjHeaderIException for H5O interface
+      (BMR, 2017/01/04, HDFFV-10145)
 
 
 Support for New Platforms, Languages, and Compilers
