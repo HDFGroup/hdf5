@@ -1130,7 +1130,7 @@ ADD_H5_TEST (h5diff_631 0 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp18 g1/f
 # ##############################################################################
 ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6})
 # temporary test to verify HDF5-8625
-ADD_H5_TEST (h5diff_tmp1 1 tmptest2.he5 tmptest.he5)
+ADD_H5_TEST (h5diff_tmp1 0 tmptest2.he5 tmptest.he5)
 # temporary test to verify HDF5-8639
 ADD_H5_TEST (h5diff_tmp2 1 tmpSingleSiteBethe.output.h5 tmpSingleSiteBethe.reference.h5)
 
