@@ -1,0 +1,13 @@
+dataset: </g1/array> and </g1/array>
+Warning: different storage datatype
+size:           [2]           [2]
+position        array           array           difference          
+------------------------------------------------------------
+[ 0 ]          1               0               1              
+[ 0 ]          2               0               2              
+[ 0 ]          3               0               3              
+[ 1 ]          4               0               4              
+[ 1 ]          5               0               5              
+[ 1 ]          6               0               6              
+6 differences found
+EXIT CODE: 1
