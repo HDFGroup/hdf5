@@ -336,8 +336,8 @@ hsize_t diff_datasetid( hid_t did1,
     *-------------------------------------------------------------------------
     */
     if(can_compare) { /* it is possible to compare */
-        h5difftrace("can_compare attempt\n");
         H5T_class_t  tclass = H5Tget_class(f_tid1);
+        h5difftrace("can_compare attempt\n");
 
         /*-----------------------------------------------------------------
         * get number of elements
