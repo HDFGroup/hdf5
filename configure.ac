@@ -919,12 +919,10 @@ if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
 
-  ## Disable fortran shared libraries on Mac. (MAM - 03/30/11)
-
+  ## tell libtool to do the right thing with COMMON symbols
   case "`uname`" in
     Darwin*)
-    H5_FORTRAN_SHARED="no"
-    CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
+    H5_LDFLAGS="$H5_LDFLAGS -Wl,-commons,use_dylibs"
       ;;
   esac
 

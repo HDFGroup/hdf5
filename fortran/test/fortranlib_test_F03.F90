@@ -47,11 +47,11 @@ PROGRAM fortranlibtest_F03
   CALL h5get_libversion_f(majnum, minnum, relnum, total_error)
   IF(total_error .EQ. 0) THEN
      WRITE(*, '(" FORTRANLIB_TEST is linked with HDF5 Library version ")', advance="NO")
-     WRITE(*, '(I1)', advance="NO") majnum
+     WRITE(*, '(I0)', advance="NO") majnum
      WRITE(*, '(".")', advance="NO") 
-     WRITE(*, '(I1)', advance="NO") minnum
+     WRITE(*, '(I0)', advance="NO") minnum
      WRITE(*, '(" release ")', advance="NO")
-     WRITE(*, '(I3)') relnum
+     WRITE(*, '(I0)') relnum
   ELSE
      total_error = total_error + 1
   ENDIF
