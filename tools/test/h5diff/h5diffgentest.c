@@ -7237,7 +7237,7 @@ void write_dset_in(hid_t loc_id,
 
     n=1;
     for (i = 0; i < 24; i++) {
-        for (j = 0; j < (int)dimarray[0]; j++) {
+        for (j = 0; j < 3; j++) {
             if (make_diffs) buf63[i][j]=0;
             else buf63[i][j]=n++;
         }
