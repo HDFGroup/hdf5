@@ -95,6 +95,9 @@ class H5_DLLCPP H5Location : public IdComponent {
         virtual void removeAttr(const char* name) const;
         virtual void removeAttr(const H5std_string& name) const;
 
+        // Returns the object header version of an object
+        unsigned objVersion() const;
+
         // Sets the comment for an HDF5 object specified by its name.
         void setComment(const char* name, const char* comment) const;
         void setComment(const H5std_string& name, const H5std_string& comment) const;
@@ -128,6 +131,13 @@ class H5_DLLCPP H5Location : public IdComponent {
 
         // Retrieves a dataspace with the region pointed to selected.
         DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+        // Opens an object at this location, without knowing the object type.
+        hid_t openObjId(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        hid_t openObjId(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Closes an object opened by openObjId().
+        void closeObjId(hid_t obj_id) const;
 
         ///\brief Returns an identifier. (pure virtual)
         virtual hid_t getId() const = 0;
