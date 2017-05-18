@@ -91,7 +91,20 @@ New Features
 
     C++ API
     -------
-    - None
+    - The following C++ API wrappers have been added to the C++ Library:
+        // Determines if an object exists.
+        H5Location::exists - H5Lexists.
+
+        // Returns the header version of an HDF5 object.
+        H5Object::objVersion - H5Oget_info for version
+
+      (BMR, 2017/05/13, HDFFV-10004, HDFFV-10156)
+
+    - New class LinkAccPropList is added for link access proprety list
+      (BMR, 2017/05/13, HDFFV-10156)
+
+    - New exception ObjHeaderIException for H5O interface
+      (BMR, 2017/05/13, HDFFV-10156)
 
 
 Support for New Platforms, Languages, and Compilers
@@ -136,10 +149,13 @@ Bug Fixes since HDF5-1.8.18
 
     C++ API
     -------
-    - The macros H5_NO_NAMESPACE is deprecated from the HDF5 C++ API library.
-      In future releases, the macros H5_NO_STD and OLD_HEADER_FILENAME may
-      also be removed.
-      (BMR, 2016/10/27, HDFFV-9532)
+    - The class hierarchy is revised to better reflect the HDF5 model.
+      Class H5File is now derived from class Group instead of H5Location.
+      Class Attribute is now derived from H5Location instead of IdComponent.
+      Wrappers of H5A APIs in H5Location are now duplicated in H5Object,
+      the original wrappers in H5Location will be deprecated in future
+      releases.
+      (BMR, 2017/05/15, HDFFV-10156)
 
 
     High-Level APIs:
@@ -147,20 +163,6 @@ Bug Fixes since HDF5-1.8.18
 
     Packet Table APIs:
     ------------------
-    - The high-level API Packet Table (PT) did not write data correctly when
-      the datatype is a compound type that has string type as one of the
-      members.  This problem started in 1.8.15, after the fix of HDFFV-9042
-      was applied, which caused the Packet Table to use native type to access
-      the data.  It should be up to the application to specify whether the
-      buffer to be read into memory in the machine’s native architecture.
-      Thus, the PT is fixed to not use native type but to make a copy of the
-      user's provided datatype during creation or the packet table's datatype
-      during opening.  If an application wishes to use native type to read the
-      data, then the application will request that.  However, the Packet Table
-      doesn't provide a way to specify memory datatype in this release.  This
-      feature will be available in future releases, HDFFV-10023.
-      (BMR, 2016/10/27, HDFFV-9758)
-
 
     Fortran High-Level APIs:
     ------------------------
