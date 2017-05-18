@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -17,6 +28,7 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr2.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset3.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_hyper1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_hyper2.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_empty.h5
@@ -234,6 +246,8 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_709.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_710.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_80.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_800.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_801.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_ud.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_udfail.txt
@@ -418,6 +432,7 @@
   set (FILE6 h5diff_attr2.h5)
   set (FILE7 h5diff_dset1.h5)
   set (FILE8 h5diff_dset2.h5)
+  set (FILE8A h5diff_dset3.h5)
   set (FILE9 h5diff_hyper1.h5)
   set (FILE10 h5diff_hyper2.h5)
   set (FILE11 h5diff_empty.h5)
@@ -818,6 +833,10 @@
           h5diff_710.out.err
           h5diff_80.out
           h5diff_80.out.err
+          h5diff_800.out
+          h5diff_800.out.err
+          h5diff_801.out
+          h5diff_801.out.err
           h5diff_90.out
           h5diff_90.out.err
     )
@@ -1403,6 +1422,14 @@ ADD_H5_TEST (h5diff_643 1 -v -d 5 --use-system-epsilon ${FILE1} ${FILE2} /g1/dse
 ADD_H5_TEST (h5diff_644 1 -v --use-system-epsilon -d 5 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
 ADD_H5_TEST (h5diff_645 1 -v -p 0.05 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
 ADD_H5_TEST (h5diff_646 1 -v --use-system-epsilon -p 0.05 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+
+# ##############################################################################
+# # Test array variances
+# ##############################################################################
+#
+# Test with -d , -p and --use-system-epsilon.
+ADD_H5_TEST (h5diff_800 1 -v ${FILE7} ${FILE8} /g1/array /g1/array)
+ADD_H5_TEST (h5diff_801 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
 
 ##############################################################################
 ###    P L U G I N  T E S T S

@@ -6,19 +6,17 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 # Tests for the h5repack tool
 #
 # Modification:
 #  Pedro Vicente Nunes, 11/15/2006
 #  Added $FILEN variables for file names
-#   
+#
 
 srcdir=@srcdir@
 
@@ -47,8 +45,8 @@ DIRNAME='dirname'
 LS='ls'
 AWK='awk'
 
-H5DETECTSZIP=testh5repack_detect_szip              
-H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP    
+H5DETECTSZIP=testh5repack_detect_szip
+H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP
 
 
 nerrors=0
@@ -124,7 +122,7 @@ $SRC_H5REPACK_TESTFILES/ublock.bin
 $SRC_H5REPACK_TESTFILES/h5repack.info
 $SRC_H5REPACK_TESTFILES/deflate_limit.h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
-$SRC_H5REPACK_TESTFILES/h5repack_filters.h5.tst
+$SRC_H5REPACK_TESTFILES/h5repack_filters.h5-gzip_verbose_filters.tst
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
 $SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
 "
@@ -150,10 +148,10 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+                $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
-                
+
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
@@ -205,12 +203,12 @@ SKIP() {
 
 # Call the h5diff tool
 #
-DIFFTEST() 
+DIFFTEST()
 {
     VERIFY h5diff output $@
     (
         cd $TESTDIR
-        $RUNSERIAL $H5DIFF_BIN -q  "$@" 
+        $RUNSERIAL $H5DIFF_BIN -q  "$@"
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -219,7 +217,7 @@ DIFFTEST()
     else
          echo " PASSED"
     fi
-        
+
 }
 
 # Call h5repack
@@ -227,7 +225,7 @@ DIFFTEST()
 
 
 # call TOOLTEST_MAIN and delete $output file
-TOOLTEST() 
+TOOLTEST()
 {
     echo $@
     infile=$2
@@ -253,7 +251,7 @@ TOOLTEST()
 }
 
 #------------------------------------------
-# Verifying layouts of a dataset 
+# Verifying layouts of a dataset
 VERIFY_LAYOUT_DSET()
 {
     layoutfile=layout-$1.$2
@@ -265,9 +263,9 @@ VERIFY_LAYOUT_DSET()
     shift
     shift
     shift
-   
+
     TESTING  $H5REPACK $@
-    ( 
+    (
         cd $TESTDIR
         $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     )
@@ -279,7 +277,7 @@ VERIFY_LAYOUT_DSET()
         echo " PASSED"
         DIFFTEST $infile $outfile
     fi
-    
+
     #---------------------------------
     # check the layout from a dataset
     VERIFY  "a dataset layout"
@@ -311,9 +309,9 @@ VERIFY_LAYOUT_ALL()
     shift
     shift
     shift
-    
+
     TESTING  $H5REPACK $@
-    ( 
+    (
         cd $TESTDIR
         $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     )
@@ -325,8 +323,8 @@ VERIFY_LAYOUT_ALL()
         echo " PASSED"
         DIFFTEST $infile $outfile
     fi
-    
-    
+
+
     #---------------------------------
     # check the layout from a dataset
     # check if the other layouts still exsit
@@ -353,7 +351,7 @@ VERIFY_LAYOUT_ALL()
                     echo " PASSED"
                 fi
             fi
-        else    
+        else
             # if COMPACT
             if [ $expectlayout = "COMPACT" ]; then
                 TESTING $H5DUMP_BIN -pH $outfile
@@ -405,7 +403,7 @@ VERIFY_LAYOUT_ALL()
 
 # same as TOOLTEST, but it uses the old syntax -i input_file -o output_file
 #
-TOOLTEST0() 
+TOOLTEST0()
 {
     infile=$2
     outfile=out-$1.$2
@@ -433,7 +431,7 @@ TOOLTEST0()
 # same as TOOLTEST, but it uses without -i -o options
 # used to test the family driver, where these files reside
 #
-TOOLTEST1() 
+TOOLTEST1()
 {
     infile=$2
     outfile=out-$1.$2
@@ -448,21 +446,21 @@ TOOLTEST1()
     )
     RET=$?
     if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
     else
-	echo " PASSED"
-	DIFFTEST $infile $outfile
+    echo " PASSED"
+    DIFFTEST $infile $outfile
     fi
     rm -f $outfile
 }
-          
+
 # This is same as TOOLTEST() with comparing display output
 # from -v option
 #
-TOOLTESTV() 
+TOOLTESTV()
 {
-    expect="$TESTDIR/$2.tst"
+    expect="$TESTDIR/$2-$1.tst"
     actual="$TESTDIR/`basename $2 .ddl`.out"
     actual_err="$TESTDIR/`basename $2 .ddl`.err"
 
@@ -470,7 +468,7 @@ TOOLTESTV()
     outfile=out-$1.$2
     shift
     shift
-    
+
     # Run test.
     TESTING $H5REPACK $@
     (
@@ -479,11 +477,11 @@ TOOLTESTV()
     ) >$actual 2>$actual_err
     RET=$?
     if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
     else
-	echo " PASSED"
-	DIFFTEST $infile $outfile
+    echo " PASSED"
+    DIFFTEST $infile $outfile
     fi
 
     # display output compare
@@ -499,7 +497,7 @@ TOOLTESTV()
      nerrors="`expr $nerrors + 1`"
      test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
     fi
-    
+
    rm -f $actual $actual_err
    rm -f $outfile
 }
@@ -507,7 +505,7 @@ TOOLTESTV()
 # This is same as TOOLTESTV() with comparing h5dump output
 # from -pH option
 #
-TOOLTEST_DUMP() 
+TOOLTEST_DUMP()
 {
     infile=$2
     outfile=out-$1.$2
@@ -517,7 +515,7 @@ TOOLTEST_DUMP()
 
     shift
     shift
-    
+
     # Run test.
     TESTING $H5REPACK $@
     (
@@ -533,12 +531,12 @@ TOOLTEST_DUMP()
      VERIFY h5dump output $@
      (
         cd $TESTDIR
-        $RUNSERIAL $H5DUMP_BIN -pH $outfile 
+        $RUNSERIAL $H5DUMP_BIN -pH $outfile
      ) >$actual 2>$actual_err
      cat $actual_err >> $actual
 
      RET=$?
-          
+
     fi
 
     if cmp -s $expect $actual; then
@@ -549,7 +547,7 @@ TOOLTEST_DUMP()
      nerrors="`expr $nerrors + 1`"
      test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
     fi
-    
+
    rm -f $actual $actual_err
    rm -f $outfile
 }
@@ -613,16 +611,17 @@ TOOLTEST_META()
     # verify sizes.
     MESSAGE "Verify the sizes of both output files ($size1 vs $size2)"
     if [ $size1 -lt $size2 ]; then
-    	# pass
-	echo " PASSED"
+        # pass
+    echo " PASSED"
     else
-	#fail
-	echo "*FAILED*"
+    #fail
+    echo "*FAILED*"
         nerrors="`expr $nerrors + 1`"
     fi
-    
+
     rm -f $outfile
 }
+
 # ADD_HELP_TEST
 TOOLTEST_HELP() {
 
@@ -643,6 +642,8 @@ TOOLTEST_HELP() {
     # Create the expect data file if it doesn't yet exist.
       echo " CREATED"
       cp $actual $expect-CREATED
+      echo "    Expected result (*.txt) missing"
+      nerrors="`expr $nerrors + 1`"
     elif cmp -s $expect $actual; then
       echo " PASSED"
     else
@@ -650,7 +651,7 @@ TOOLTEST_HELP() {
       echo "    Expected output (*.txt) differs from actual output (*.out)"
       nerrors="`expr $nerrors + 1`"
     fi
-    
+
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
      rm -f $actual $actual_err
@@ -676,28 +677,28 @@ STDOUT_FILTER() {
 # Each run generates "<file>.out.h5" and the tool h5diff is used to
 # compare the input and output files
 #
-# the tests are the same as the program h5repacktst, but run from the CLI 
+# the tests are the same as the program h5repacktst, but run from the CLI
 #
 
 # See which filters are usable (and skip tests for filters we
 # don't have).  Do this by searching H5pubconf.h to see which
 # filters are defined.
 
-# detect whether the encoder is present. 
+# detect whether the encoder is present.
 USE_FILTER_SZIP_ENCODER="no";
 if test $USE_FILTER_SZIP = "yes"; then
 USE_FILTER_SZIP_ENCODER=`$RUNSERIAL $H5DETECTSZIP_BIN`
 fi
 
 ##############################################################################
-###			  T H E   T E S T S                               
+###              T H E   T E S T S
 ##############################################################################
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
 
 TOOLTEST_HELP h5repack-help.txt -h
 
-# copy files (these files have no filters) 
+# copy files (these files have no filters)
 TOOLTEST fill h5repack_fill.h5
 TOOLTEST objs h5repack_objs.h5
 TOOLTEST attr h5repack_attr.h5
@@ -721,8 +722,8 @@ if test  $USE_FILTER_DEFLATE != "yes" ; then
 else
  TOOLTEST gzip_individual $arg
 fi
-  
-# gzip for all 
+
+# gzip for all
 arg="h5repack_layout.h5 -f GZIP=1"
 if test  $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
@@ -735,7 +736,7 @@ arg="h5repack_layout.h5 -f dset2:SZIP=8,EC  -l dset2:CHUNK=20x10"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
  SKIP $arg
 else
- TOOLTEST szip_individual $arg 
+ TOOLTEST szip_individual $arg
 fi
 
 # szip for all
@@ -743,18 +744,18 @@ arg="h5repack_layout.h5 -f SZIP=8,NN"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
  SKIP $arg
 else
- TOOLTEST szip_all $arg 
+ TOOLTEST szip_all $arg
 fi
 
 # shuffle with individual object
 arg="h5repack_layout.h5 -f dset2:SHUF  -l dset2:CHUNK=20x10"
-TOOLTEST shuffle_individual $arg 
-  
+TOOLTEST shuffle_individual $arg
+
 
 # shuffle for all
 arg="h5repack_layout.h5 -f SHUF"
 TOOLTEST shuffle_all $arg
-  
+
 # fletcher32  with individual object
 arg="h5repack_layout.h5 -f dset2:FLET  -l dset2:CHUNK=20x10"
 TOOLTEST fletcher_individual $arg
@@ -779,7 +780,7 @@ else
  # compare output
  TOOLTESTV gzip_verbose_filters $arg
 fi
-  
+
 ###########################################################
 # the following tests assume the input files have filters
 ###########################################################
@@ -791,7 +792,7 @@ if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
 else
  TOOLTEST szip_copy $arg
 fi
-  
+
 # szip remove
 arg="h5repack_szip.h5 --filter=dset_szip:NONE"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
@@ -799,7 +800,7 @@ if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
 else
  TOOLTEST szip_remove $arg
 fi
-  
+
 # deflate copy
 arg="h5repack_deflate.h5"
 if test $USE_FILTER_DEFLATE != "yes" ; then
@@ -815,7 +816,7 @@ if test $USE_FILTER_DEFLATE != "yes" ; then
 else
  TOOLTEST deflate_remove $arg
 fi
-    
+
 # shuffle copy
 arg="h5repack_shuffle.h5"
 TOOLTEST shuffle_copy $arg
@@ -870,14 +871,14 @@ arg="h5repack_deflate.h5 -f dset_deflate:SZIP=8,NN"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
- TOOLTEST deflate_convert $arg 
+ TOOLTEST deflate_convert $arg
 fi
 
 arg="h5repack_szip.h5 -f dset_szip:GZIP=1"
 if test $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SZIP_ENCODER != "yes"  -o $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
- TOOLTEST szip_convert $arg 
+ TOOLTEST szip_convert $arg
 fi
 
 
@@ -892,9 +893,9 @@ fi
 #file
 arg="h5repack_layout.h5 -e h5repack.info"
 if test $USE_FILTER_DEFLATE != "yes" ; then
- SKIP $arg 
+ SKIP $arg
 else
- TOOLTEST deflate_file $arg 
+ TOOLTEST deflate_file $arg
 fi
 
 #########################################################
@@ -939,18 +940,18 @@ VERIFY_LAYOUT_DSET contig_small_compa h5repack_layout2.h5 contig_small COMPACT -
 
 VERIFY_LAYOUT_DSET contig_small_fixed_compa h5repack_layout2.h5 chunked_small_fixed COMPACT -l chunked_small_fixed:COMPA
 
-#--------------------------------------------------------------------------- 
-# Test file contains chunked datasets (need multiple dsets) with 
+#---------------------------------------------------------------------------
+# Test file contains chunked datasets (need multiple dsets) with
 # unlimited max dims.   (HDFFV-7933)
 # Use first dset to test.
 #---------------------------------------------------------------------------
 # chunk to chunk - specify chunk dim bigger than any current dim
 VERIFY_LAYOUT_DSET chunk2chunk h5repack_layout3.h5 chunk_unlimit1 CHUNK -l chunk_unlimit1:CHUNK=100x300
 
-# chunk to contiguous 
+# chunk to contiguous
 VERIFY_LAYOUT_DSET chunk2conti h5repack_layout3.h5 chunk_unlimit1 CONTI -l chunk_unlimit1:CONTI
 
-# chunk to compact - convert big dataset (should be > 64k) for this purpose, 
+# chunk to compact - convert big dataset (should be > 64k) for this purpose,
 # should remain as original layout (chunk)
 VERIFY_LAYOUT_DSET chunk2compa h5repack_layout3.h5 chunk_unlimit1 CHUNK -l chunk_unlimit1:COMPA
 
@@ -958,7 +959,7 @@ VERIFY_LAYOUT_DSET chunk2compa h5repack_layout3.h5 chunk_unlimit1 CHUNK -l chunk
 # Test -f for some specific cases. Chunked dataset with unlimited max dims.
 # (HDFFV-8012)
 #--------------------------------------------------------------------------
-# - should not fail 
+# - should not fail
 # - should not change max dims from unlimit
 
 # chunk dim is bigger than dataset dim. ( dset size < 64k )
@@ -974,14 +975,14 @@ VERIFY_LAYOUT_DSET error3 h5repack_layout3.h5 chunk_unlimit3 H5S_UNLIMITED -f ch
 TOOLTEST error4 h5repack_layout3.h5 -f NONE
 
 #--------------------------------------------------------------------------
-# Test base: Convert CHUNK to CONTI for a chunked dataset with small dataset 
+# Test base: Convert CHUNK to CONTI for a chunked dataset with small dataset
 # (dset size < 64K) and with unlimited max dims on a condition as follow.
 # (HDFFV-8214)
 #--------------------------------------------------------------------------
 
 # chunk dim is bigger than dataset dim. should succeed.
 VERIFY_LAYOUT_DSET ckdim_biger h5repack_layout3.h5 chunk_unlimit2 CONTI -l chunk_unlimit2:CONTI
-# chunk dim is smaller than dataset dim. should succeed.  
+# chunk dim is smaller than dataset dim. should succeed.
 VERIFY_LAYOUT_DSET ckdim_smaller h5repack_layout3.h5 chunk_unlimit3 CONTI -l chunk_unlimit3:CONTI
 
 
@@ -1024,7 +1025,7 @@ if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
  TOOLTEST0 old_style_layout_short_switches $arg
-fi 
+fi
 
 # add a userblock to file
 arg="h5repack_objs.h5 -u ublock.bin -b 2048"
@@ -1051,17 +1052,17 @@ TOOLTEST1 family tfamily%05d.h5
 TOOLTEST bug1814 h5repack_refs.h5
 
 # test attribute with various references (bug1797 / HDFFV-5932)
-# the references in attribute of compund or vlen datatype 
-TOOLTEST HDFFV-5932 h5repack_attr_refs.h5 
+# the references in attribute of compund or vlen datatype
+TOOLTEST HDFFV-5932 h5repack_attr_refs.h5
 
-# Add test for memory leak in attirbute. This test is verified by CTEST.   
-# 1. leak from vlen string  
+# Add test for memory leak in attirbute. This test is verified by CTEST.
+# 1. leak from vlen string
 # 2. leak from compound type without reference member
 # (HDFFV-7840, )
 # Note: this test is experimental for sharing test file among tools
 TOOLTEST HDFFV-7840 h5diff_attr1.h5
 
-# tests for metadata block size option 
+# tests for metadata block size option
 TOOLTEST_META meta_short h5repack_layout.h5 -M 8192
 TOOLTEST_META meta_long h5repack_layout.h5 --metadata_block_size=8192
 
