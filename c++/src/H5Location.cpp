@@ -65,7 +65,7 @@ H5Location::H5Location() : IdComponent() {}
 // been moved to the sub-classes.  It will be removed in 1.10 release.  If its
 // removal does not raise any problems in 1.10, it will be removed from 1.8 in
 // subsequent releases.
-// Removed in 1.10.1 - Aug 2016
+// Removed in 1.8.18 and 1.10.1 - Aug 2016
 //--------------------------------------------------------------------------
 // H5Location::H5Location(const hid_t object_id) : IdComponent() {}
 
