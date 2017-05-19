@@ -329,6 +329,8 @@ void H5Location::renameAttr(const char* oldname, const char* newname) const
 ///\brief       Deprecated - This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for the names.
+///
+///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& newname) const
@@ -396,7 +398,7 @@ bool H5Location::nameExists(const H5std_string& name, const LinkAccPropList& lap
 ///             which can be either of these values:
 ///             \li \c H5F_SCOPE_GLOBAL - Flushes the entire virtual file
 ///             \li \c H5F_SCOPE_LOCAL - Flushes only the specified file
-///\exception   H5::Exception
+///\exception   H5::LocationException
 ///\par Description
 ///             This location is used to identify the file to be flushed.
 // Programmer   Binh-Minh Ribler - 2012
@@ -436,7 +438,7 @@ H5std_string H5Location::getFileName() const
 ///\return      Object version, which can have the following values:
 ///             \li \c H5O_VERSION_1
 ///             \li \c H5O_VERSION_2
-///\exception   H5::ObjHeaderIException
+///\exception   H5::LocationException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API
 ///             - version number is not one of the valid values above
@@ -452,13 +454,13 @@ unsigned H5Location::objVersion() const
 
     // Throw exception if C API returns failure
     if (ret_value < 0)
-        throw ObjHeaderIException(inMemFunc("objVersion"), "H5Oget_info failed");
+        throw LocationException(inMemFunc("objVersion"), "H5Oget_info failed");
     // Return a valid version or throw an exception for invalid value
     else
     {
         version = objinfo.hdr.version;
         if (version != H5O_VERSION_1 && version != H5O_VERSION_2)
-            throw ObjHeaderIException(inMemFunc("objVersion"), "Invalid version for object");
+            throw LocationException(inMemFunc("objVersion"), "Invalid version for object");
     }
     return(version);
 }
@@ -487,7 +489,7 @@ void H5Location::setComment(const char* name, const char* comment) const
 {
     herr_t ret_value = H5Oset_comment_by_name(getId(), name, comment, H5P_DEFAULT);
     if(ret_value < 0)
-        throw ObjHeaderIException(inMemFunc("setComment"), "H5Oset_comment_by_name failed");
+        throw LocationException(inMemFunc("setComment"), "H5Oset_comment_by_name failed");
 }
 
 //--------------------------------------------------------------------------
@@ -514,7 +516,7 @@ void H5Location::setComment(const char* comment) const
 {
     herr_t ret_value = H5Oset_comment_by_name(getId(), ".", comment, H5P_DEFAULT);
     if(ret_value < 0)
-        throw ObjHeaderIException(inMemFunc("setComment"), "H5Oset_comment_by_name failed");
+        throw LocationException(inMemFunc("setComment"), "H5Oset_comment_by_name failed");
 }
 
 //--------------------------------------------------------------------------
@@ -544,7 +546,7 @@ void H5Location::removeComment(const char* name) const
 {
     herr_t ret_value = H5Oset_comment_by_name(getId(), name, NULL, H5P_DEFAULT);
     if(ret_value < 0)
-        throw ObjHeaderIException(inMemFunc("removeComment"), "H5Oset_comment_by_name failed");
+        throw LocationException(inMemFunc("removeComment"), "H5Oset_comment_by_name failed");
 }
 
 //--------------------------------------------------------------------------
@@ -584,7 +586,7 @@ ssize_t H5Location::getComment(const char* name, size_t buf_size, char* comment)
     // If H5Oget_comment_by_name returns a negative value, raise an exception
     if (comment_len < 0)
     {
-        throw ObjHeaderIException(inMemFunc("getComment"), "H5Oget_comment_by_name failed");
+        throw LocationException(inMemFunc("getComment"), "H5Oget_comment_by_name failed");
     }
     // If the comment is longer than the provided buffer size, the C library
     // will not null terminate it
@@ -617,7 +619,7 @@ H5std_string H5Location::getComment(const char* name, size_t buf_size) const
     // If H5Oget_comment_by_name returns a negative value, raise an exception
     if (comment_len < 0)
     {
-        throw ObjHeaderIException(inMemFunc("getComment"), "H5Oget_comment_by_name failed");
+        throw LocationException(inMemFunc("getComment"), "H5Oget_comment_by_name failed");
     }
 
     // If comment exists, calls C routine again to get it
@@ -638,7 +640,7 @@ H5std_string H5Location::getComment(const char* name, size_t buf_size) const
         if (temp_len < 0)
         {
             delete []comment_C;
-            throw ObjHeaderIException(inMemFunc("getComment"), "H5Oget_comment_by_name failed");
+            throw LocationException(inMemFunc("getComment"), "H5Oget_comment_by_name failed");
         }
 
         // Convert the C comment to return
@@ -670,7 +672,7 @@ H5std_string H5Location::getComment(const H5std_string& name, size_t buf_size) c
 ///\param       obj_name - IN: Path to the object
 ///\param       lapl     - IN: Access property list for the link pointing
 ///                            to the object
-///\exception   H5::ObjHeaderIException
+///\exception   H5::LocationException
 ///\par Description
 ///             This function opens an object at this location, using
 ///             H5Oopen.  Thus, an object can be opened without knowing
@@ -682,7 +684,7 @@ hid_t H5Location::openObjId(const char* obj_name, const LinkAccPropList& lapl) c
     hid_t ret_value = H5Oopen(getId(), obj_name, lapl.getId());
     if (ret_value < 0)
     {
-        throw ObjHeaderIException(inMemFunc("openObjId"), "H5Oopen failed");
+        throw LocationException(inMemFunc("openObjId"), "H5Oopen failed");
     }
     return(ret_value);
 }
@@ -694,7 +696,7 @@ hid_t H5Location::openObjId(const char* obj_name, const LinkAccPropList& lapl) c
 ///\param       obj_name - IN: Path to the object
 ///\param       lapl     - IN: Access property list for the link pointing to
 ///                            the object
-///\exception   H5::ObjHeaderIException
+///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - May, 2017
 //--------------------------------------------------------------------------
 hid_t H5Location::openObjId(const H5std_string& obj_name, const LinkAccPropList& lapl) const
@@ -706,7 +708,7 @@ hid_t H5Location::openObjId(const H5std_string& obj_name, const LinkAccPropList&
 // Function:    H5Location::closeObjId
 ///\brief       Closes an object, which was opened with H5Location::openObjId
 ///
-///\exception   H5::ObjHeaderIException
+///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - May, 2017
 //--------------------------------------------------------------------------
 void H5Location::closeObjId(hid_t obj_id) const
@@ -714,7 +716,7 @@ void H5Location::closeObjId(hid_t obj_id) const
     herr_t ret_value = H5Oclose(obj_id);
     if (ret_value < 0)
     {
-        throw ObjHeaderIException(inMemFunc("closeObjId"), "H5Oclose failed");
+        throw LocationException(inMemFunc("closeObjId"), "H5Oclose failed");
     }
 }
 
