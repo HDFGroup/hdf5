@@ -117,7 +117,9 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     Tools
     -----
-    - 
+    - Improved h5diff compare of strings and arrays.
+
+      (ADB, 2017/05/18, HDFFV-9055, HDFFV-10128)
 
     High-Level APIs:
     ------
