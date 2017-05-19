@@ -250,6 +250,14 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * This is specifically used for the multi/split driver.
      */
 #define H5FD_FEAT_PAGED_AGGR		0x00004000
+    /*
+     * Defining H5FD_FEAT_DEFAULT_VFD_COMPATIBLE for a VFL driver
+     * that creates a file which is compatible with the default VFD.
+     * Generally, this means that the VFD creates a single file that follows
+     * the canonical HDF5 file format.
+     */
+#define H5FD_FEAT_DEFAULT_VFD_COMPATIBLE        0x00008000
+
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;
