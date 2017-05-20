@@ -44,7 +44,7 @@ static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *fil
 int
 h5repack_verify(const char *out_fname, pack_opt_t *options)
 {
-    int          ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int          ret_value = 0;     /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     hid_t        fidout     = -1;   /* file ID for output file*/
     hid_t        did        = -1;   /* dataset ID */
     hid_t        pid        = -1;   /* dataset creation property list ID */

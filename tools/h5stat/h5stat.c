@@ -35,7 +35,6 @@
                                           to accomodate datasets whithout any filters */
 
 
-
 /* Datatype statistics for datasets */
 typedef struct dtype_info_t {
     hid_t tid;                          /* ID of datatype */

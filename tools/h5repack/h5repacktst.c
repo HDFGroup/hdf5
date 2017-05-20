@@ -95,7 +95,6 @@ const char *H5REPACK_FILENAMES[] = {
 /* Name of tool */
 #define PROGRAMNAME "h5repacktst"
 
-
 #define DIM1    40
 #define DIM2    20
 #define CDIM1   DIM1/2

@@ -1619,7 +1619,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
         if(hexdump_g)
            p_type = H5Tcopy(type);
         else
-           p_type = h5tools_get_native_type(type);
+           p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
 
         if(p_type >= 0) {
             /* VL data special information */

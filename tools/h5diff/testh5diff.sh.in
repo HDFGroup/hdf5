@@ -46,8 +46,8 @@ AWK='awk'
 
 nerrors=0
 verbose=yes
-h5haveexitcode=yes	    # default is yes
-pmode=			    # default to run h5diff tests
+h5haveexitcode=yes        # default is yes
+pmode=                # default to run h5diff tests
 mydomainname=`domainname 2>/dev/null`
 
 # source dirs
@@ -458,6 +458,8 @@ TOOLTEST() {
         # Create the expect file if it doesn't yet exist.
         echo " CREATED"
         cp $actual $expect
+        echo "    Expected result (*.ddl) missing"
+        nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
         echo " PASSED"
     elif test $h5haveexitcode = 'yes' -a -z "$pmode"; then

@@ -11,8 +11,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# HDF Utilities Test script
-# Usage: h5importtestutil.sh [machine-type]
+# Tests for the  h5import tool
 
 srcdir=@srcdir@
 

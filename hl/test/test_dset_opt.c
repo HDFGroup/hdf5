@@ -38,8 +38,8 @@
 
 /* Datasets for Direct Read tests */
 #define DATASETNAME8        "disabled_chunk_cache"
-#define DATASETNAME9        "read_w_valid_cache"
-#define DATASETNAME10       "flush_chunk_cache"
+#define DATASETNAME9        "flush_chunk_cache"
+#define DATASETNAME10       "read_w_valid_cache"
 #define DATASETNAME11       "unallocated_chunk"
 #define DATASETNAME12       "unfiltered_data"
 
@@ -345,6 +345,7 @@ error:
     if(outbuf)
         HDfree(outbuf);
 
+    H5_FAILED();
     return 1;
 }
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -451,6 +452,7 @@ error:
         H5Dclose(did);
     } H5E_END_TRY;
 
+    H5_FAILED();
     return 1;
 } /* end test_direct_chunk_overwrite_data() */
 
@@ -627,6 +629,7 @@ error:
         H5Pclose(dxpl);
     } H5E_END_TRY;
 
+    H5_FAILED();
     return 1;
 } /* test_skip_compress_write1() */
 
@@ -897,6 +900,7 @@ error:
         H5Pclose(dxpl);
     } H5E_END_TRY;
 
+    H5_FAILED();
     return 1;
 } /* test_skip_compress_write2() */
 
@@ -1125,6 +1129,7 @@ error:
         H5Tclose(dt);
     } H5E_END_TRY;
 
+    H5_FAILED();
     return 1;
 } /* test_data_conv() */
 
@@ -1336,6 +1341,7 @@ error:
         H5Pclose(dxpl);
     } H5E_END_TRY;
 
+    H5_FAILED();
     return 1;
 } /* test_invalid_parameters() */
 
@@ -1516,6 +1522,7 @@ error:
     if(outbuf)
         HDfree(outbuf);
 
+    H5_FAILED();
     return 1;
 } /* test_direct_chunk_read_no_cache() */
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -1693,6 +1700,7 @@ error:
     if(outbuf)
         HDfree(outbuf);
 
+    H5_FAILED();
     return 1;
 } /* test_direct_chunk_read_cache() */
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -1841,6 +1849,7 @@ error:
         H5Pclose(dxpl);
     } H5E_END_TRY;
 
+    H5_FAILED();
     return 1;
 } /* test_read_unfiltered_dset() */
 
@@ -1958,6 +1967,7 @@ error:
         H5Pclose(dxpl);
     } H5E_END_TRY;
 
+    H5_FAILED();
     return 1;
 } /* test_read_unallocated_chunk() */
 
@@ -2013,8 +2023,10 @@ int main( void )
     if (nerrors)
         goto error;
 
+    HDputs("All direct chunk read/write tests passed.");
     return EXIT_SUCCESS;
 
 error:
+    HDputs("*** TESTS FAILED ***");
     return EXIT_FAILURE;
 }

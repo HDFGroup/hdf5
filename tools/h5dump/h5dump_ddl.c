@@ -1662,9 +1662,8 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
     const char      *real_name = display_name ? display_name : dset;
 
     if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) {
-        if (pe) {
+        if (pe)
             handle_links(fid, dset, data, pe, display_name);
-        }
         return;
     } /* end if */
 

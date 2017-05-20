@@ -252,7 +252,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   space = H5Screate_simple(1, dims, NULL);
   dataset = H5Dcreate2(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
-       dset2_1[i] = (float)(i*0.1F+1);
+       dset2_1[i] = (float)((float)i * 0.1F + 1.0F);
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -263,7 +263,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   dataset = H5Dcreate2(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   for (i = 0; i < 3; i++)
        for (j = 0; j < 5; j++)
-            dset2_2[i][j] = (float)((i+1)*j*0.1F);
+            dset2_2[i][j] = (float)(((float)i + 1.0F) * (float)j * 0.1F);
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -279,20 +279,23 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   /* If a user block is being used, write to it here */
   if(ub_size > 0)
   {
-        HDassert(ub_size <= BUF_SIZE);
+    ssize_t nbytes;
 
-  fd = HDopen(filename, O_RDWR, 0);
-        HDassert(fd >= 0);
+    HDassert(ub_size <= BUF_SIZE);
 
-  /* fill buf with pattern */
-  HDmemset(buf, '\0', ub_size);
-  bp = buf;
-  for (u = 0; u < ub_fill; u++)
-            *bp++ = pattern[u % 10];
+    fd = HDopen(filename, O_RDWR, 0);
+    HDassert(fd >= 0);
 
-  HDwrite(fd, buf, ub_size);
+    /* fill buf with pattern */
+    HDmemset(buf, '\0', ub_size);
+    bp = buf;
+    for (u = 0; u < ub_fill; u++)
+      *bp++ = pattern[u % 10];
 
-  HDclose(fd);
+    nbytes = HDwrite(fd, buf, ub_size);
+    HDassert(nbytes >= 0);
+
+    HDclose(fd);
   }
 }
 
@@ -303,10 +306,11 @@ create_textfile(const char *name, size_t size)
     int fd;
     size_t i;
     char *bp;
+    ssize_t nbytes;
 
     fd = HDcreat(name,0777);
     HDassert(fd >= 0);
-    buf = HDcalloc(size, (size_t)1);
+    buf = (char *)HDcalloc(size, (size_t)1);
     HDassert(buf);
 
     /* fill buf with pattern */
@@ -314,7 +318,8 @@ create_textfile(const char *name, size_t size)
     for(i = 0; i < size; i++)
         *bp++ = pattern[i % 10];
 
-    HDwrite(fd, buf, size);
+    nbytes = HDwrite(fd, buf, size);
+    HDassert(nbytes >= 0);
 
     HDfree(buf);
 

@@ -1311,7 +1311,8 @@
 ./tools/testfiles/tbinregR.exp
 ./tools/testfiles/tbinregR.ddl
 ./tools/testfiles/tbitfields.h5
-./tools/testfiles/tbitnopaque.ddl
+./tools/testfiles/tbitnopaque_be.ddl
+./tools/testfiles/tbitnopaque_le.ddl
 ./tools/testfiles/tbitnopaque.h5
 ./tools/testfiles/tboot1.ddl
 ./tools/testfiles/tboot2.ddl
@@ -1702,7 +1703,8 @@
 ./tools/testfiles/tarray6.h5.xml
 ./tools/testfiles/tarray7.h5.xml
 ./tools/testfiles/tattr.h5.xml
-./tools/testfiles/tbitfields.h5.xml
+./tools/testfiles/tbitfields_be.h5.xml
+./tools/testfiles/tbitfields_le.h5.xml
 ./tools/testfiles/tcompound.h5.xml
 ./tools/testfiles/tcompound2.h5.xml
 ./tools/testfiles/tcompound_complex.h5.xml
@@ -1860,6 +1862,8 @@
 ./tools/h5diff/testfiles/h5diff_709.txt
 ./tools/h5diff/testfiles/h5diff_710.txt
 ./tools/h5diff/testfiles/h5diff_80.txt
+./tools/h5diff/testfiles/h5diff_800.txt
+./tools/h5diff/testfiles/h5diff_801.txt
 ./tools/h5diff/testfiles/h5diff_90.txt
 ./tools/h5diff/testfiles/h5diff_100.txt
 ./tools/h5diff/testfiles/h5diff_101.txt
@@ -1970,6 +1974,7 @@
 ./tools/h5diff/testfiles/h5diff_basic2.h5
 ./tools/h5diff/testfiles/h5diff_dset1.h5
 ./tools/h5diff/testfiles/h5diff_dset2.h5
+./tools/h5diff/testfiles/h5diff_dset3.h5
 ./tools/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/h5diff/testfiles/h5diff_empty.h5
 ./tools/h5diff/testfiles/h5diff_hyper1.h5

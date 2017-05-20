@@ -22,11 +22,11 @@
  * size of that temporary buffer in bytes. For efficiency's sake, choose the
  * largest value suitable for your machine (for testing use a small value).
  */
-/* Maximum size used in a call to malloc for a dataset 
+/* Maximum size used in a call to malloc for a dataset
  * NOTE: this value should stay in sync with the value defined in the tools
- *       library file: h5tools_utils.h 
+ *       library file: h5tools_utils.h
  */
-hsize_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
+size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 
 /*-------------------------------------------------------------------------
 * Program: h5diffgentest
@@ -48,6 +48,7 @@ hsize_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define FILE6    "h5diff_attr2.h5"
 #define FILE7    "h5diff_dset1.h5"
 #define FILE8    "h5diff_dset2.h5"
+#define FILE8A   "h5diff_dset3.h5"
 #define FILE9    "h5diff_hyper1.h5"
 #define FILE10   "h5diff_hyper2.h5"
 #define FILE11   "h5diff_empty.h5"
@@ -194,6 +195,7 @@ int main(void)
     /* generate 2 files, the second call creates a similar file with differences */
     test_datasets(FILE7,0);
     test_datasets(FILE8,1);
+    test_datasets(FILE8A,2);
 
     /* generate 2 files, the second call creates a similar file with differences */
     test_hyperslab(FILE9,0);
@@ -234,7 +236,7 @@ int main(void)
     test_enums(ENUM_INVALID_VALUES);
 
     /* -------------------------------------------------
-     * Create test files with dataset and attribute with container types 
+     * Create test files with dataset and attribute with container types
      * (array, vlen) with multiple nested compound types.
      */
     /* file1 */
@@ -249,8 +251,8 @@ int main(void)
     test_comps_vlen_arry(COMPS_COMPLEX2,"dset4", "attr4", 5, 0);
 
     /*-------------------------------------------------
-     * Create test files with non-comparable dataset and attributes with 
-     * comparable datasets and attributes.  All the comparables should display 
+     * Create test files with non-comparable dataset and attributes with
+     * comparable datasets and attributes.  All the comparables should display
      * differences.
      */
     test_data_nocomparables(NON_COMPARBLES1,0);
@@ -1019,14 +1021,14 @@ int test_attributes(const char *file,
 static int test_attributes_verbose_level(const char *fname1, const char *fname2)
 {
     herr_t  status = SUCCEED;
-    hid_t   fid1, fid2;
-    hid_t   f1_gid, f2_gid;
-    hid_t   f1_gid2, f2_gid2;
-    hid_t   f1_gid3, f2_gid3;
-    hid_t   f1_gid4, f2_gid4;
-    hid_t   f1_did, f2_did;
-    hid_t   f1_sid, f2_sid;
-    hid_t   f1_tid, f2_tid;
+    hid_t   fid1    = -1,   fid2 = -1;
+    hid_t   f1_gid  = -1,   f2_gid = -1;
+    hid_t   f1_gid2 = -1,   f2_gid2 = -1;
+    hid_t   f1_gid3 = -1,   f2_gid3 = -1;
+    hid_t   f1_gid4 = -1,   f2_gid4 = -1;
+    hid_t   f1_did  = -1,   f2_did = -1;
+    hid_t   f1_sid  = -1,   f2_sid = -1;
+    hid_t   f1_tid  = -1,   f2_tid = -1;
     /* dset */
     hsize_t dset_dims[1]={3};
     int dset_data[3] = {0,1,2};
@@ -1257,9 +1259,9 @@ out:
     /*-----------------------------------------------------------------------
     * Close
     *-----------------------------------------------------------------------*/
-    if(fid1)
+    if(fid1 > 0)
         H5Fclose(fid1);
-    if(fid2)
+    if(fid2 > 0)
         H5Fclose(fid2);
     if(f1_gid > 0)
         H5Gclose(f1_gid);
@@ -1281,13 +1283,13 @@ out:
         H5Dclose(f1_did);
     if(f2_did > 0)
         H5Dclose(f2_did);
-    if(f1_sid >0)
+    if(f1_sid > 0)
         H5Sclose(f1_sid);
-    if(f2_sid >0)
+    if(f2_sid > 0)
         H5Sclose(f2_sid);
-    if(f1_tid >0)
+    if(f1_tid > 0)
         H5Tclose(f1_tid);
-    if(f2_tid >0)
+    if(f2_tid > 0)
         H5Tclose(f2_tid);
 
     return status;
@@ -1316,7 +1318,7 @@ int test_datasets(const char *file,
     herr_t  status;
     int     buf[2]={1,2};
 
-    if(make_diffs)
+    if(make_diffs > 0)
         memset(buf, 0, sizeof buf);
 
     /* Create a file  */
@@ -1387,9 +1389,8 @@ int test_special_datasets(const char *file,
 
     /* Create a dataset with zero dimension size in one file but the other one
      * has a dataset with a non-zero dimension size */
-    if(make_diffs) {
+    if(make_diffs)
         dims[1] = SPACE1_DIM2 + 4;
-    }
 
     sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
     did  = H5Dcreate2(fid, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -2802,15 +2803,18 @@ out:
 #define GRP_R_DSETNAME2 "dset2"
 static int test_group_recurse2(void)
 {
-    hid_t       fileid1;
-    hid_t       grp1=0, grp2;
-    hid_t       grp3=0;
-    hid_t       grp4=0;
-    hid_t       dset1, dset2;
-    hid_t       datatype, dataspace;   /* handles */
-    hid_t       fileid2;
-    hid_t       fileid3;
-    hid_t       fileid4;
+    hid_t       fileid1     = -1;
+    hid_t       grp1        = -1;
+    hid_t       grp2        = -1;
+    hid_t       grp3        = -1;
+    hid_t       grp4        = -1;
+    hid_t       dset1       = -1;
+    hid_t       dset2       = -1;
+    hid_t       datatype    = -1;
+    hid_t       dataspace   = -1;
+    hid_t       fileid2     = -1;
+    hid_t       fileid3     = -1;
+    hid_t       fileid4     = -1;
     hsize_t     dimsf[2];              /* dataset dimensions */
     herr_t      status=0;
     int data1[4][2] = {{0,0},{1,1},{2,2},{3,3}};
@@ -3103,12 +3107,18 @@ out:
     /*
      * Close/release resources.
      */
-    H5Sclose(dataspace);
-    H5Tclose(datatype);
-    H5Fclose(fileid1);
-    H5Fclose(fileid2);
-    H5Fclose(fileid3);
-    H5Fclose(fileid4);
+    if(dataspace > 0)
+        H5Sclose(dataspace);
+    if(datatype > 0)
+        H5Tclose(datatype);
+    if(fileid1 > 0)
+        H5Fclose(fileid1);
+    if(fileid2 > 0)
+        H5Fclose(fileid2);
+    if(fileid3 > 0)
+        H5Fclose(fileid3);
+    if(fileid4 > 0)
+        H5Fclose(fileid4);
 
     return status;
 }
@@ -3511,8 +3521,8 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
 {
     int i;
 
-    hid_t    fid1;      /* file id */
-    hid_t    gid;
+    hid_t    fid1   = -1;      /* file id */
+    hid_t    gid    = -1;
 
     /* compound1 datatype */
     typedef struct comp1_t
@@ -3640,7 +3650,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     /* vlen string */
     hid_t    sid_vlen_str=0;      /* dataspace ID */
     hid_t    tid_vlen_str=0;      /* datatype ID */
-    const char vlen_str_buf[]= {
+    char vlen_str_buf[]= {
         "Variable length string"
         };
     hsize_t dims_vlen_str[]  = {VLEN_STR_DIM};
@@ -3657,7 +3667,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     hid_t    sid_vlen_str_array=0;      /* dataspace ID */
     hid_t    tid_vlen_str_array_pre=0;      /* datatype ID */
     hid_t    tid_vlen_str_array=0; /* datatype ID */
-    const char *vlen_str_array_buf[VLEN_STR_ARRY_DIM]= {
+    char *vlen_str_array_buf[VLEN_STR_ARRY_DIM]= {
         "1 - Variable length string Array",
         "2 - Testing variable length string array in compound type",
         "3 - Four score and seven\n years ago our forefathers brought forth on this continent a new nation,"
@@ -4158,60 +4168,60 @@ out:
    /*-----------------------------------------------------------------------
     * Close
     *-----------------------------------------------------------------------*/
-    if(fid1)
+    if(fid1 > 0)
         H5Fclose(fid1);
-    if(gid)
+    if(gid > 0)
         H5Gclose(gid);
     /* vlen string */
-    if(tid_vlen_str)
+    if(tid_vlen_str > 0)
         H5Tclose(tid_vlen_str);
-    if(sid_vlen_str)
+    if(sid_vlen_str > 0)
         H5Sclose(sid_vlen_str);
     /* fixed len string */
-    if(tid_fixlen_str)
+    if(tid_fixlen_str > 0)
         H5Tclose(tid_fixlen_str);
-    if(sid_fixlen_str)
+    if(sid_fixlen_str > 0)
         H5Sclose(sid_fixlen_str);
     /* vlen string array */
-    if(tid_vlen_str_array_pre)
+    if(tid_vlen_str_array_pre > 0)
         H5Tclose(tid_vlen_str_array_pre);
-    if(tid_vlen_str_array)
+    if(tid_vlen_str_array > 0)
         H5Tclose(tid_vlen_str_array);
-    if(sid_vlen_str_array)
+    if(sid_vlen_str_array > 0)
         H5Sclose(sid_vlen_str_array);
     /* fixed len string array */
-    if(tid_fixlen_str_array_pre)
+    if(tid_fixlen_str_array_pre > 0)
         H5Tclose(tid_fixlen_str_array_pre);
-    if(tid_fixlen_str_array)
+    if(tid_fixlen_str_array > 0)
         H5Tclose(tid_fixlen_str_array);
-    if(sid_fixlen_str_array)
+    if(sid_fixlen_str_array > 0)
         H5Sclose(sid_fixlen_str_array);
     /* compound */
-    if(tid1_comp)
+    if(tid1_comp > 0)
         H5Tclose(tid1_comp);
-    if(tid2_comp)
+    if(tid2_comp > 0)
         H5Tclose(tid2_comp);
-    if(tid3_comp)
+    if(tid3_comp > 0)
         H5Tclose(tid3_comp);
-    if(tid4_comp)
+    if(tid4_comp > 0)
         H5Tclose(tid4_comp);
-    if(tid5_comp)
+    if(tid5_comp > 0)
         H5Tclose(tid5_comp);
-    if(tid6_comp)
+    if(tid6_comp > 0)
         H5Tclose(tid6_comp);
-    if(tid7_comp)
+    if(tid7_comp > 0)
         H5Tclose(tid7_comp);
-    if(tid8_comp)
+    if(tid8_comp > 0)
         H5Tclose(tid8_comp);
-    if(tid9_comp)
+    if(tid9_comp > 0)
         H5Tclose(tid9_comp);
-    if(did_comp)
+    if(did_comp > 0)
         H5Dclose(did_comp);
-    if(sid_comp)
+    if(sid_comp > 0)
         H5Sclose(sid_comp);
 
     return status;
-}
+} /* end test_comp_vlen_strings() */
 
 
 /*-------------------------------------------------------------------------
@@ -4317,8 +4327,8 @@ out:
 
 /*-------------------------------------------------------------------------
 *
-* Purpose: 
-*   Create test files with dataset and attribute with container types 
+* Purpose:
+*   Create test files with dataset and attribute with container types
 *   (array, vlen) with multiple nested compound types.
 *
 * Function: test_comps_array()
@@ -4342,7 +4352,7 @@ out:
 static void test_comps_array (const char *fname, const char *dset, const char *attr,int diff, int is_file_new)
 {
     /* sub compound 2 */
-    typedef struct {        
+    typedef struct {
         int i2;
         float f2;
     } cmpd2_t;
@@ -4364,17 +4374,17 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
     hid_t  tid_attr;
     hsize_t  sdims_dset[] = {SDIM_DSET};
     hsize_t  sdims_cmpd_arry[] = {SDIM_CMPD_ARRAY};
-    int     i,j;       
+    int     i,j;
     herr_t  ret;  /* Generic return value  */
 
     /* Initialize array data to write */
     for(i=0; i < SDIM_DSET; i++)
     {
         wdata[i].i1 = i;
-        for(j=0; j < SDIM_CMPD_ARRAY; j++) 
+        for(j=0; j < SDIM_CMPD_ARRAY; j++)
         {
-            wdata[i].cmpd2[j].i2 = i*10 + diff;
-            wdata[i].cmpd2[j].f2 = (float)(i*10.5F) + diff;
+            wdata[i].cmpd2[j].i2 = i * 10 + diff;
+            wdata[i].cmpd2[j].f2 = (float)i * 10.5F + (float)diff;
         } /* end for */
     }
 
@@ -4415,7 +4425,7 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
 
 
     /* -------------------
-     * Create a dataset 
+     * Create a dataset
      */
     /* Create dataspace for datasets */
     sid_dset = H5Screate_simple(1, sdims_dset, NULL);
@@ -4457,18 +4467,18 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
 static void test_comps_vlen (const char * fname, const char *dset, const char *attr, int diff, int is_file_new)
 {
     /* sub compound 2 */
-    typedef struct {       
+    typedef struct {
         int i2;
         float f2;
     } cmpd2_t;
 
     /* top compound 1 */
-    typedef struct { 
+    typedef struct {
         int i1;
         hvl_t vl;   /* VL information for compound2 */
     } cmpd1_t;
 
-    cmpd1_t wdata[SDIM_DSET];   /* Dataset for compound1 */ 
+    cmpd1_t wdata[SDIM_DSET];   /* Dataset for compound1 */
 
     hid_t  fid;  /* HDF5 File ID */
     hid_t  did_dset; /* dataset ID   */
@@ -4483,15 +4493,13 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     herr_t  ret;  /* Generic return value  */
 
     /* Allocate and initialize VL data to write */
-    for(i=0; i<SDIM_DSET; i++)
-    {
-        wdata[i].i1 = i;
-        wdata[i].vl.p = HDmalloc((i+1)*sizeof(cmpd2_t));
-        wdata[i].vl.len = i+1;
-        for(j=0; j<(i+1); j++)
-        {
-            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = i*10 + diff;
-            ((cmpd2_t *)wdata[i].vl.p)[j].f2 = (float)(i*10.5F) + diff;
+    for(i = 0; i < SDIM_DSET; i++) {
+        wdata[i].i1 = (int)i;
+        wdata[i].vl.p = HDmalloc((i + 1) * sizeof(cmpd2_t));
+        wdata[i].vl.len = i + 1;
+        for(j = 0; j < (i + 1); j++) {
+            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = (int)(i * 10 + (unsigned)diff);
+            ((cmpd2_t *)wdata[i].vl.p)[j].f2 = (float)i * 10.5F + (float)diff;
         } /* end for */
     } /* end for */
 
@@ -4526,7 +4534,7 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     assert(ret >= 0);
 
     /* -------------------------------
-     * Create dataset with compound1 
+     * Create dataset with compound1
      */
     /* Create dataspace for dataset */
     sid_dset = H5Screate_simple(1, sdims_dset, NULL);
@@ -4571,11 +4579,11 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
 
 static void test_comps_array_vlen (const char * fname, const char *dset,const char *attr, int diff, int is_file_new)
 {
-    typedef struct {       
+    typedef struct {
         int i3;
         float f3;
     } cmpd3_t;
- 
+
     typedef struct {        /* Typedef for compound datatype */
         int i2;
         hvl_t vl;   /* VL information to write */
@@ -4598,26 +4606,24 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
     hid_t  tid_cmpd3;       /* Compound3 Datatype ID   */
     hsize_t  sdims_dset[] = {SDIM_DSET};
     hsize_t  sdims_arry[] = {SDIM_CMPD_ARRAY};
-    int        i,j,k;        /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    unsigned i, j, k;   /* counting variables */
+    herr_t  ret;        /* Generic return value  */
 
 
 
     /* Initialize array data to write in compound1 */
-    for(i=0; i < SDIM_DSET; i++)
-    {
-        wdata[i].i1 = i;
+    for(i = 0; i < SDIM_DSET; i++) {
+        wdata[i].i1 = (int)i;
+
         /* Allocate and initialize VL data to write in compound2 */
-        for(j=0; j < SDIM_CMPD_ARRAY; j++) 
-        {
-            wdata[i].cmpd2[j].i2 = j*10;
-            wdata[i].cmpd2[j].vl.p = HDmalloc((j+1)*sizeof(cmpd3_t));
-            wdata[i].cmpd2[j].vl.len = j+1;
-            for(k=0; k<(j+1); k++) 
-            {
+        for(j = 0; j < SDIM_CMPD_ARRAY; j++) {
+            wdata[i].cmpd2[j].i2 = (int)(j * 10);
+            wdata[i].cmpd2[j].vl.p = HDmalloc((j + 1) * sizeof(cmpd3_t));
+            wdata[i].cmpd2[j].vl.len = j + 1;
+            for(k = 0; k < (j + 1); k++) {
                 /* Initialize data of compound3 */
-                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].i3 = j*10 + diff;
-                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].f3 = (float)(j*10.5F) + diff;
+                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].i3 = (int)j * 10 + diff;
+                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].f3 = (float)j * 10.5F + (float)diff;
             } /* end for */
         } /* end for */
     }
@@ -4716,19 +4722,19 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
 static void test_comps_vlen_arry (const char * fname, const char *dset, const char *attr, int diff, int is_file_new)
 {
     /* sub compound 3 */
-    typedef struct {       
+    typedef struct {
         int i3;
         float f3;
     } cmpd3_t;
 
     /* sub compound 2 */
-    typedef struct {       
+    typedef struct {
         int i2;
         cmpd3_t cmpd3[SDIM_CMPD_ARRAY];
     } cmpd2_t;
 
     /* top compound 1 */
-    typedef struct { 
+    typedef struct {
         int i1;
         hvl_t vl;   /* VL information for compound2 */
     } cmpd1_t;
@@ -4751,22 +4757,19 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     herr_t  ret;  /* Generic return value  */
 
     /* Allocate and initialize VL data to write */
-    for(i=0; i<SDIM_DSET; i++)
-    {
+    for(i = 0; i < SDIM_DSET; i++) {
         /* compound 1 data */
-        wdata[i].i1 = i;
-        wdata[i].vl.p = HDmalloc((i+1)*sizeof(cmpd2_t));
-        wdata[i].vl.len = i+1;
-        for(j=0; j<(i+1); j++)
-        {
+        wdata[i].i1 = (int)i;
+        wdata[i].vl.p = HDmalloc((i + 1) * sizeof(cmpd2_t));
+        wdata[i].vl.len = i + 1;
+        for(j = 0; j < (i + 1); j++) {
             /* compound2 data */
-            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = i*10 + diff;
-            for (k=0; k < SDIM_CMPD_ARRAY; k++)
-            {
+            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = (int)i * 10 + diff;
+            for(k = 0; k < SDIM_CMPD_ARRAY; k++) {
                 /* compound 3 data */
-                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].i3 = k*10.5F + diff;
-                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].f3 = (float)(k*10.5F) + diff;
-            }
+                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].i3 = (int)((float)k * 10.5F) + diff;
+                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].f3 = (float)k * 10.5F + (float)diff;
+            } /* end for */
         } /* end for */
     } /* end for */
 
@@ -4812,7 +4815,7 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     assert(ret >= 0);
 
     /* -------------------------------
-     * Create dataset with compound1 
+     * Create dataset with compound1
      */
     /* Create dataspace for dataset */
     sid_dset = H5Screate_simple(1, sdims_dset, NULL);
@@ -4862,9 +4865,9 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
 /*-------------------------------------------------------------------------
 * Function: test_data_nocomparables
 *
-* Purpose: 
-*   Create test files with non-comparable dataset and attributes with 
-*   comparable datasets and attributes.  All the comparables should display 
+* Purpose:
+*   Create test files with non-comparable dataset and attributes with
+*   comparable datasets and attributes.  All the comparables should display
 *   differences.
 *
 *-------------------------------------------------------------------------*/
@@ -4922,8 +4925,8 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
         dset_data_ptr2=(int*)&data2;
         attr_data_ptr1=(int*)&data2;
 
-        /* ----------- 
-         * group2 
+        /* -----------
+         * group2
          */
         dset_data_ptr3=(int*)&data2;
         /* dset1/attr1 */
@@ -5045,10 +5048,10 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
         goto out;
     }
 
-    
+
 
 out:
-    
+
     /*-----------------------------------------------------------------------
     * Close IDs
     *-----------------------------------------------------------------------*/
@@ -5073,9 +5076,9 @@ out:
 /*-------------------------------------------------------------------------
 * Function: test_objs_nocomparables
 *
-* Purpose: 
+* Purpose:
 *   Create test files with common objects (same name) but different object
-*   types. 
+*   types.
 *   h5diff should show non-comparable output from these common objects.
 *-------------------------------------------------------------------------*/
 static void test_objs_nocomparables(const char *fname1, const char *fname2)
@@ -5357,6 +5360,34 @@ static void test_objs_strings(const char *fname1, const char *fname2)
     H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4A);
     H5Dclose(dataset);
     dataset = H5Dcreate2(fid2, "/string4", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* string 5 : early term long string */
+    string4A[0][10] = 0;
+    string4A[0][11] = 0;
+    string4B[0][10] = 0;
+
+    string4A[1][10] = 0;
+    string4A[1][11] = 'Z';
+    string4B[1][10] = 0;
+    string4B[1][11] = 'x';
+
+    string4A[2][10] = 0;
+    string4B[2][10] = 0;
+    string4B[2][11] = 'a';
+    string4B[2][12] = 'B';
+    string4B[2][13] = 'c';
+    space = H5Screate_simple(1, dims4, NULL);
+    f_type = mkstr(168, H5T_STR_NULLTERM);
+    m_type = mkstr(21, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string5", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string5", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4B);
     H5Tclose(m_type);
     H5Tclose(f_type);
@@ -5906,13 +5937,15 @@ void write_attr_in(hid_t loc_id,
 
     /* Allocate and initialize VL dataset to write */
     n=0;
-    for (i = 0; i < 3; i++) {
-        for (j = 0; j < 2; j++) {
-            buf52[i][j].p = HDmalloc((i + 1) * sizeof(int));
-            buf52[i][j].len = i + 1;
-            for (l = 0; l < i + 1; l++)
-                if (make_diffs)((int *)buf52[i][j].p)[l] = 0;
-                else ((int *)buf52[i][j].p)[l] = n++;
+    for(i = 0; i < 3; i++) {
+        for(j = 0; j < 2; j++) {
+            buf52[i][j].p = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].len = (size_t)(i + 1);
+            for(l = 0; l < i + 1; l++)
+                if(make_diffs)
+                    ((int *)buf52[i][j].p)[l] = 0;
+                else
+                    ((int *)buf52[i][j].p)[l] = n++;
         }
     }
 
@@ -6123,8 +6156,10 @@ void write_attr_in(hid_t loc_id,
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             for (k = 0; k < 2; k++) {
-                if (make_diffs) buf23[i][j][k]=0;
-                else buf23[i][j][k]=n++;
+                if(make_diffs)
+                    buf23[i][j][k] = 0;
+                else
+                    buf23[i][j][k] = (char)n++;
             }
         }
     }
@@ -6181,12 +6216,12 @@ void write_attr_in(hid_t loc_id,
         for (j = 0; j < 3; j++) {
             for (k = 0; k < 2; k++) {
                 if (make_diffs) {
-                    buf33[i][j][k].a=0;
-                    buf33[i][j][k].b=0.0F;
+                    buf33[i][j][k].a = 0;
+                    buf33[i][j][k].b = 0.0F;
                 }
                 else {
-                    buf33[i][j][k].a=n++;
-                    buf33[i][j][k].b=n++;
+                    buf33[i][j][k].a = (char)n++;
+                    buf33[i][j][k].b = n++;
                 }
             }
         }
@@ -6324,11 +6359,13 @@ void write_attr_in(hid_t loc_id,
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p = HDmalloc((i + 1) * sizeof(int));
-                buf53[i][j][k].len = i + 1;
+                buf53[i][j][k].p = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++)
-                    if (make_diffs)((int *)buf53[i][j][k].p)[l] = 0;
-                    else ((int *)buf53[i][j][k].p)[l] = n++;
+                    if(make_diffs)
+                        ((int *)buf53[i][j][k].p)[l] = 0;
+                    else
+                        ((int *)buf53[i][j][k].p)[l] = n++;
             }
         }
     }
@@ -6504,6 +6541,9 @@ void write_dset_in(hid_t loc_id,
     int        buf73[4][3][2];    /* integer */
     float      buf83[4][3][2];    /* float */
 
+    if(make_diffs == 2) {
+        dimarray[0] = 4;
+    }
 
     /*-------------------------------------------------------------------------
     * H5S_SCALAR
@@ -6512,11 +6552,8 @@ void write_dset_in(hid_t loc_id,
 
 
 
-    if ( make_diffs )
-    {
-
+    if(make_diffs)
         scalar_data = 1;
-    }
 
     /* create a space  */
     sid = H5Screate(H5S_SCALAR);
@@ -6698,22 +6735,21 @@ void write_dset_in(hid_t loc_id,
     status = H5Tclose(tid);
 
     {
-
         double  *dbuf;                           /* information to write */
-        hid_t   did;                             /* dataset ID   */
-        hid_t   sid;                             /* dataspace ID   */
-        hid_t   tid;                             /* datatype ID   */
+        hid_t   ldid;                            /* dataset ID   */
+        hid_t   lsid;                            /* dataspace ID   */
+        hid_t   ltid;                            /* datatype ID   */
         size_t  size;
         hsize_t sdims[] = {1};
         hsize_t tdims[] = {H5TOOLS_MALLOCSIZE / sizeof(double) + 1};
-        int     j;
+        size_t  jj;
 
         /* allocate and initialize array data to write */
         size = ( H5TOOLS_MALLOCSIZE / sizeof(double) + 1 ) * sizeof(double);
-        dbuf = HDmalloc( size );
+        dbuf = (double *)HDmalloc(size);
 
-        for( j = 0; j < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; j++)
-            dbuf[j] = j;
+        for(jj = 0; jj < (H5TOOLS_MALLOCSIZE / sizeof(double) + 1); jj++)
+            dbuf[jj] = (double)jj;
 
         if (make_diffs)
         {
@@ -6722,19 +6758,19 @@ void write_dset_in(hid_t loc_id,
         }
 
         /* create a type larger than H5TOOLS_MALLOCSIZE */
-        tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims);
-        size = H5Tget_size(tid);
-        sid = H5Screate_simple(1, sdims, NULL);
-        did = H5Dcreate2(loc_id, "arrayd", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        ltid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims);
+        size = H5Tget_size(ltid);
+        lsid = H5Screate_simple(1, sdims, NULL);
+        ldid = H5Dcreate2(loc_id, "arrayd", ltid, lsid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 #if defined(WRITE_ARRAY)
-        H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+        H5Dwrite(ldid, ltid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
 #endif
 
         /* close */
-        H5Dclose(did);
-        H5Tclose(tid);
-        H5Sclose(sid);
-        HDfree( dbuf );
+        H5Dclose(ldid);
+        H5Tclose(ltid);
+        H5Sclose(lsid);
+        HDfree(dbuf);
     }
 
     /*-------------------------------------------------------------------------
@@ -6864,15 +6900,12 @@ void write_dset_in(hid_t loc_id,
 
     /* Allocate and initialize VL dataset to write */
     n = 0;
-    for(i = 0; i < 3; i++)
-    {
-        for(j = 0; j < 2; j++)
-        {
-            buf52[i][j].p = HDmalloc((i + 1) * sizeof(int));
-            buf52[i][j].len = i + 1;
-            for(l = 0; l < i + 1; l++)
-            {
-                if (make_diffs)
+    for(i = 0; i < 3; i++) {
+        for(j = 0; j < 2; j++) {
+            buf52[i][j].p = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].len = (size_t)(i + 1);
+            for(l = 0; l < i + 1; l++) {
+                if(make_diffs)
                     ((int *)buf52[i][j].p)[l] = 0;
                 else
                     ((int *)buf52[i][j].p)[l] = n++;
@@ -6982,15 +7015,13 @@ void write_dset_in(hid_t loc_id,
 
 
     n=1;
-    for (i = 0; i < 4; i++)
-    {
-        for (j = 0; j < 3; j++)
-        {
-            for (k = 0; k < 2; k++)
-            {
-                if (make_diffs)
-                    buf23[i][j][k]=0;
-                else buf23[i][j][k]=n++;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            for (k = 0; k < 2; k++) {
+                if(make_diffs)
+                    buf23[i][j][k] = 0;
+                else
+                    buf23[i][j][k] = (char)n++;
             }
         }
     }
@@ -7015,20 +7046,16 @@ void write_dset_in(hid_t loc_id,
     */
 
     n=1;
-    for (i = 0; i < 4; i++)
-    {
-        for (j = 0; j < 3; j++)
-        {
-            for (k = 0; k < 2; k++)
-            {
-                if (make_diffs)
-                {
-                    buf33[i][j][k].a=0;
-                    buf33[i][j][k].b=0.0F;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            for (k = 0; k < 2; k++) {
+                if (make_diffs) {
+                    buf33[i][j][k].a = 0;
+                    buf33[i][j][k].b = 0.0F;
                 }
                 else {
-                    buf33[i][j][k].a=n++;
-                    buf33[i][j][k].b=n++;
+                    buf33[i][j][k].a = (char)n++;
+                    buf33[i][j][k].b = n++;
                 }
             }
         }
@@ -7075,16 +7102,12 @@ void write_dset_in(hid_t loc_id,
 
     /* Allocate and initialize VL dataset to write */
     n=0;
-    for(i = 0; i < 4; i++)
-    {
-        for(j = 0; j < 3; j++)
-        {
-            for(k = 0; k < 2; k++)
-            {
-                buf53[i][j][k].p = HDmalloc((i + 1) * sizeof(int));
-                buf53[i][j][k].len = i + 1;
-                for(l = 0; l < i + 1; l++)
-                {
+    for(i = 0; i < 4; i++) {
+        for(j = 0; j < 3; j++) {
+            for(k = 0; k < 2; k++) {
+                buf53[i][j][k].p = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].len = (size_t)(i + 1);
+                for(l = 0; l < i + 1; l++) {
                     if(make_diffs)
                         ((int *)buf53[i][j][k].p)[l] = 0;
                     else
@@ -7113,7 +7136,7 @@ void write_dset_in(hid_t loc_id,
 
     n=1;
     for (i = 0; i < 24; i++) {
-        for (j = 0; j < (int)dimarray[0]; j++) {
+        for (j = 0; j < 3; j++) {
             if (make_diffs) buf63[i][j]=0;
             else buf63[i][j]=n++;
         }
@@ -7177,10 +7200,10 @@ void gen_datareg(hid_t fid,
     int             i;
 
     /* allocate the buffer for write the references */
-    rbuf = HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
+    rbuf = (hdset_reg_ref_t *)HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
 
     /* allocate the buffer for write the data dataset */
-    buf = HDmalloc(10 * 10 * sizeof(int));
+    buf = (int *)HDmalloc(10 * 10 * sizeof(int));
 
     for(i = 0; i < 10 * 10; i++)
         buf[i] = i;
@@ -7314,7 +7337,7 @@ int test_hyperslab(const char *fname,
         if(make_diffs && i == 512 * 512)
             HDmemset(buf, 0, nelmts);
 
-        hs_start[0] = i * GBLL/(1024*1024);
+        hs_start[0] = (unsigned long long)i * GBLL / (1024 * 1024);
         if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL) < 0)
             goto out;
 
