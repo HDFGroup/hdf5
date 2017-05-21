@@ -20,7 +20,7 @@ hbool_t verbose_g = 1;
 int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
     char *pool_grp = NULL;
-    hid_t file = -1, dset = -1, dset_a = -1, dset_b = -1, dset_c = -1, dset2 = -1, attr = -1, attr_a = -1, attr_b = -1 , attr_c = -1, space = -1, space2 = -1, space2_contig, fapl = -1;
+    hid_t file = -1, dset = -1, dset_a = -1, dset_b = -1, dset_c = -1, dset2 = -1, attr = -1, attr_a = -1, attr_b = -1 , attr_c = -1, space = -1, space2 = -1, space2_contig = -1, fapl = -1;
     hid_t file_type = -1, file_type_a = -1, file_type_b = -1, file_type_c = -1;
     hid_t mem_type = -1, mem_type_conv = -1, mem_type_a = -1, mem_type_b = -1, mem_type_c = -1;
     hsize_t dims[2] = {4, 2};

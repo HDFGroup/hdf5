@@ -552,6 +552,14 @@ if test $? -ne 0; then
     exit 1
 fi
 
+# --------------- Variable Length types --------------- #
+echo h5dsm_tvlen
+orterun -np 1 $EXEC_ARGS ./h5dsm_tvlen $POOL_UUID -q
+if test $? -ne 0; then
+    echo FAILED
+    exit 1
+fi
+
 # --------------- Output Comparison --------------- #
 sed -i -e 's/#.*//' -e 's/[ ^I]*$//' -e '/^$/ d' h5dsm_test.out
 echo cmp h5dsm_test.out h5dsm_test.out.exp

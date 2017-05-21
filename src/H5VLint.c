@@ -378,8 +378,9 @@ H5VL_object(hid_t id)
     /* Get the symbol table entry */
     switch(H5I_get_type(id)) {
         case H5I_GROUP:
+        case H5I_MAP:
         case H5I_DATASET:
-        case H5I_FILE:            
+        case H5I_FILE:
         case H5I_ATTR:
             /* get the object */
             if(NULL == (obj = (H5VL_object_t *)H5I_object(id)))
@@ -447,8 +448,9 @@ H5VL_object_verify(hid_t id, H5I_type_t obj_type)
     /* Get the symbol table entry */
     switch(obj_type) {
         case H5I_GROUP:
+        case H5I_MAP:
         case H5I_DATASET:
-        case H5I_FILE:            
+        case H5I_FILE:
         case H5I_ATTR:
             /* get the object */
             if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(id, obj_type)))

@@ -42,9 +42,16 @@ EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
            h5_vds h5_vds-exc \
            h5_vds-exclim h5_vds-eiger h5_vds-simpleIO h5_vds-percival \
            h5_vds-percival-unlim h5_vds-percival-unlim-maxmin \
-           h5dsm_file_create h5dsm_file_open h5dsm_dset_create h5dsm_dset_open \
-           h5dsm_dset_write h5dsm_dset_read h5dsm_map
-TEST_SCRIPT=testh5cc.sh 
+           h5dsm_file_create h5dsm_file_open h5dsm_group_create \
+           h5dsm_group_open h5dsm_dset_create h5dsm_dset_open \
+           h5dsm_dset_write h5dsm_dset_read
+           h5dsm_dset_wpartial h5dsm_dset_rpartial h5dsm_dset_w1m \
+           h5dsm_dset_r1m h5dsm_link_exists h5dsm_link_iter \
+           h5dsm_attr_create h5dsm_attr_open h5dsm_attr_write \
+           h5dsm_attr_read h5dsm_attr_iter h5dsm_slink_create \
+           h5dsm_obj_open h5dsm_obj_open_addr h5dsm_obj_info h5dsm_map \
+           h5dsm_ttconv h5dsm_tvlen
+TEST_SCRIPT=testh5cc.sh h5dsm_test.sh
 TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
 # Install files
@@ -59,8 +66,15 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_vds.c h5_vds-exc.c \
           h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c h5_vds-percival.c \
           h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c \
-          h5dsm_file_create.c h5dsm_file_open.c h5dsm_dset_create.c \
-          h5dsm_dset_open.c h5dsm_dset_write.c h5dsm_dset_read.c
+          h5dsm_file_create.c h5dsm_file_open.c h5dsm_group_create.c \
+          h5dsm_group_open.c h5dsm_dset_create.c \
+          h5dsm_dset_open.c h5dsm_dset_write.c h5dsm_dset_read.c \
+          h5dsm_dset_wpartial.c h5dsm_dset_rpartial.c h5dsm_dset_w1m.c \
+          h5dsm_dset_r1m.c h5dsm_link_exists.c h5dsm_link_iter.c \
+          h5dsm_attr_create.c h5dsm_attr_open.c h5dsm_attr_write.c \
+          h5dsm_attr_read.c h5dsm_attr_iter.c h5dsm_slink_create.c \
+          h5dsm_obj_open.c h5dsm_obj_open_addr.c h5dsm_obj_info.c h5dsm_map.c \
+          h5dsm_ttconv.c h5dsm_tvlen.c
 
 
 
@@ -140,10 +154,30 @@ h5_vds-percival-unlim: $(srcdir)/h5_vds-percival-unlim.c
 h5_vds-percival-unlim-maxmin: $(srcdir)/h5_vds-percival-unlim-maxmin.c
 h5dsm_file_create: $(srcdir)/h5dsm_file_create.c
 h5dsm_file_open: $(srcdir)/h5dsm_file_open.c
+h5dsm_group_create: $(srcdir)/h5dsm_group_create.c
+h5dsm_group_open: $(srcdir)/h5dsm_group_open.c
 h5dsm_dset_create: $(srcdir)/h5dsm_dset_create.c
 h5dsm_dset_open: $(srcdir)/h5dsm_dset_open.c
 h5dsm_dset_write: $(srcdir)/h5dsm_dset_write.c
 h5dsm_dset_read: $(srcdir)/h5dsm_dset_read.c
+h5dsm_dset_wpartial: $(srcdir)/h5dsm_dset_wpartial.c
+h5dsm_dset_rpartial: $(srcdir)/h5dsm_dset_rpartial.c
+h5dsm_dset_w1m: $(srcdir)/h5dsm_dset_w1m.c
+h5dsm_dset_r1m: $(srcdir)/h5dsm_dset_r1m.c
+h5dsm_link_exists: $(srcdir)/h5dsm_link_exists.c
+h5dsm_link_iter: $(srcdir)/h5dsm_link_iter.c
+h5dsm_attr_create: $(srcdir)/h5dsm_attr_create.c
+h5dsm_attr_open: $(srcdir)/h5dsm_attr_open.c
+h5dsm_attr_write: $(srcdir)/h5dsm_attr_write.c
+h5dsm_attr_read: $(srcdir)/h5dsm_attr_read.c
+h5dsm_attr_iter: $(srcdir)/h5dsm_attr_iter.c
+h5dsm_slink_create: $(srcdir)/h5dsm_slink_create.c
+h5dsm_obj_open: $(srcdir)/h5dsm_obj_open.c
+h5dsm_obj_open_addr: $(srcdir)/h5dsm_obj_open_addr.c
+h5dsm_obj_info: $(srcdir)/h5dsm_obj_info.c
+h5dsm_map: $(srcdir)/h5dsm_map.c
+h5dsm_ttconv: $(srcdir)/h5dsm_ttconv.c
+h5dsm_tvlen: $(srcdir)/h5dsm_tvlen.c
 
 if BUILD_SHARED_SZIP_CONDITIONAL
 LD_LIBRARY_PATH=$(LL_PATH)
