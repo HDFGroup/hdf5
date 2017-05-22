@@ -568,6 +568,10 @@ H5TOOLS_DLLVAR int     oid_output;          /* oid output */
 H5TOOLS_DLLVAR int     data_output;         /* data output */
 H5TOOLS_DLLVAR int     attr_data_output;    /* attribute data output */
 
+/* sort parameters */
+H5TOOLS_DLLVAR H5_index_t   sort_by;        /*sort_by [creation_order | name]  */
+H5TOOLS_DLLVAR H5_iter_order_t sort_order;  /*sort_order [ascending | descending]   */
+
 /* things to display or which are set via command line parameters */
 H5TOOLS_DLLVAR int     enable_error_stack; /* re-enable error stack */
 

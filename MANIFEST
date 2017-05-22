@@ -2430,6 +2430,7 @@
 ./tools/test/h5repack/testfiles/h5repack_soffset.h5
 ./tools/test/h5repack/testfiles/h5repack_szip.h5
 ./tools/test/h5repack/testfiles/ublock.bin
+./tools/test/h5repack/testfiles/crtorder.tordergr.h5.ddl
 ./tools/test/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/test/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/test/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
