@@ -77,10 +77,6 @@ extern int          include_attrs; /* Display attributes */
 extern int          display_vds_first; /* vds display to first missing */
 extern int          vds_gap_size; /* vds skip missing files */
 
-/* sort parameters */
-extern H5_index_t   sort_by; /*sort_by [creation_order | name]  */
-extern H5_iter_order_t sort_order; /*sort_order [ascending | descending]   */
-
 #define PACKED_BITS_MAX         8  /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX    8*sizeof(long long)  /* Maximum bits size of integer types of packed-bits */
 /* mask list for packed bits */
