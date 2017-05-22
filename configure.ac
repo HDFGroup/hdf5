@@ -3482,10 +3482,11 @@ chmod 755 tools/src/misc/h5cc
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
-  ## tell libtool to pass the correct argument linker, needed only for intel compiler.
+  ## tell libtool to pass the correct argument linker, needed only for intel compiler. This script 
+  ## replaces the 3rd occurance, which is for Fortran, of wl="" with wl="-Wl,"
   case "`uname`" in
     Darwin*)
-      cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv libtool.tmp libtool && chmod 755 libtool
+      cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       ;;
   esac
 fi
