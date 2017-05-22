@@ -56,6 +56,7 @@ const char *FILENAME[] = {
     "swmr1",        /* 1 */
     "swmr2",        /* 2 */
     "swmr3",        /* 3 */
+    "swmr4",        /* 3 */
     NULL
 };
 
@@ -107,6 +108,8 @@ static int test_multiple_same(hid_t in_fapl, hbool_t new_format);
 /* Tests for SWMR delta t */
 static int test_swmr_deltat_getset(hid_t fapl);
 static int test_swmr_deltat_file_create(hid_t fapl);
+static int test_swmr_deltat_file_create_without_swmr_write(hid_t fapl);
+static int test_swmr_deltat_read_concur(hid_t in_fapl);
 
 /*
  * Tests for H5Pget/set_metadata_read_attemps(), H5Fget_metadata_read_retry_info()
@@ -6044,7 +6047,7 @@ error:
 static int
 test_swmr_deltat_getset(hid_t in_fapl)
 {
-    hid_t fapl;         /* File access property list */
+    hid_t fapl = -1;         /* File access property list */
     unsigned deltat;    /* Delta t value retrieved */
     herr_t status;      /* Status from API routine */
 
@@ -6100,14 +6103,14 @@ error:
 static int
 test_swmr_deltat_file_create(hid_t in_fapl)
 {
-    hid_t fid;                  /* File identifier */
-    hid_t fapl;                 /* File access property list */
+    hid_t fid = -1;                  /* File identifier */
+    hid_t fapl = -1;                 /* File access property list */
+    hid_t fapl_created = -1;                 /* File access property list */
     unsigned deltat = 17;       /* Delta t value */
     char filename[NAME_BUF_SIZE];       /* File name */
-    herr_t status;              /* Status from API routine */
 
     /* Output message about test being performed */
-    TESTING("File create w/SWMR delta t");
+    TESTING("File create w/SWMR delta t w/SWMR write flag");
 
     /* Get a copy of the parameter in_fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
@@ -6123,6 +6126,17 @@ test_swmr_deltat_file_create(hid_t in_fapl)
     /* Create a file. */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
+
+    fapl_created = H5Fget_access_plist(fid);
+
+    /*
+     * Get value and verify it is set to 17
+     */
+    deltat = 0;
+    if(H5Pget_swmr_deltat(fapl_created, &deltat) < 0)
+        FAIL_STACK_ERROR
+    if(deltat != 17)
+        TEST_ERROR
 
     /* Closing */
     if(H5Fclose(fid) < 0)
@@ -6140,6 +6154,371 @@ error:
 
     return -1;
 } /* end test_swmr_deltat_file_create() */
+
+
+/****************************************************************
+**
+**  test_swmr_deltat_with_start_swmr_write():
+**    Test for SWMR delta T with H5Fstart_swmr_write.
+**
+*****************************************************************/
+static int
+test_swmr_deltat_with_start_swmr_write(hid_t in_fapl)
+{
+    hid_t fid = -1;                  /* File identifier */
+    hid_t fapl = -1;                 /* File access property list */
+    hid_t fapl_created = -1;                 /* File access property list */
+    herr_t ret = -1;
+    unsigned deltat = 17;       /* Delta t value */
+    char filename[NAME_BUF_SIZE];       /* File name */
+
+    /* Output message about test being performed */
+    TESTING("SWMR delta t with H5Fstart_swmr_write.");
+
+    /* Get a copy of the parameter in_fapl */
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a file without SWMR_WRITE flag */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file*/
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set delta t value */
+    deltat = 17;
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Re-open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Start SWMR write, delta t should be set */
+    H5E_BEGIN_TRY {
+        ret = H5Fstart_swmr_write(fid);
+    } H5E_END_TRY;
+    if (ret < 0) 
+        FAIL_STACK_ERROR
+
+    /* Get SWMR delta t value and verify it is the previous set value 17 */
+    fapl_created = H5Fget_access_plist(fid);
+    deltat = 0;
+    if(H5Pget_swmr_deltat(fapl_created, &deltat) < 0)
+        FAIL_STACK_ERROR
+    if(deltat != 17)
+        TEST_ERROR
+
+    /* Close the file*/
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Re-open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Delta t should be deleted after file close
+     * Get SWMR delta t value and verify it is the default 0
+     */
+    fapl_created = H5Fget_access_plist(fid);
+    deltat = 0;
+    if(H5Pget_swmr_deltat(fapl_created, &deltat) < 0)
+        FAIL_STACK_ERROR
+    if(deltat != 0)
+        TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fapl_created);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_deltat_with_start_swmr_write() */
+
+
+/****************************************************************
+**
+**  test_swmr_deltat_delete_on_file_close():
+**    Test for SWMR delta T removed after file close.
+**
+*****************************************************************/
+static int
+test_swmr_deltat_delete_on_file_close(hid_t in_fapl)
+{
+    hid_t fid = -1;                  /* File identifier */
+    hid_t fapl = -1;                 /* File access property list */
+    hid_t fapl_created = -1;                 /* File access property list */
+    unsigned deltat = 17;       /* Delta t value */
+    char filename[NAME_BUF_SIZE];       /* File name */
+
+    /* Output message about test being performed */
+    TESTING("Delete SWMR delta on file close");
+
+    /* Get a copy of the parameter in_fapl */
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[3], fapl, filename, sizeof(filename));
+
+    /* Set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a file with delta t set to 17 */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file*/
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Re-open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+    FAIL_STACK_ERROR
+
+    fapl_created = H5Fget_access_plist(fid);
+    /*
+     * Get SWMR delta t value and verify it is the default 0
+     */
+    deltat = 0;
+    if(H5Pget_swmr_deltat(fapl_created, &deltat) < 0)
+        FAIL_STACK_ERROR
+    if(deltat != 0)
+        TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_deltat_file_create() */
+
+/****************************************************************
+**
+**  test_swmr_deltat_file_create_without_swmr_write():
+**    Test for setting SWMR delta without SWMR_WRITE flag.
+**
+*****************************************************************/
+static int
+test_swmr_deltat_file_create_without_swmr_write(hid_t in_fapl)
+{
+    hid_t fid = -1;                  /* File identifier */
+    hid_t fapl = -1;                 /* File access property list */
+    hid_t fapl_created = -1;                 /* File access property list */
+    unsigned deltat = 17;       /* Delta t value */
+    char filename[NAME_BUF_SIZE];       /* File name */
+
+    /* Output message about test being performed */
+    TESTING("File create w/SWMR delta t w/o setting SWMR write flag");
+
+    /* Get a copy of the parameter in_fapl */
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[4], fapl, filename, sizeof(filename));
+
+   /* Set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a file without SWMR write. */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    fapl_created = H5Fget_access_plist(fid);
+
+    /*
+     * Get value and verify it is set to default value 0
+     */
+    deltat = 0;
+    if(H5Pget_swmr_deltat(fapl_created, &deltat) < 0)
+        FAIL_STACK_ERROR
+    if(deltat != 0)
+        TEST_ERROR
+
+
+    /* Closing */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_deltat_file_create() */
+
+
+/****************************************************************
+**
+**  test_swmr_deltat_read_concur():
+**    Test for setting and getting the SWMR delta T value.
+**
+*****************************************************************/
+static int
+test_swmr_deltat_read_concur(hid_t in_fapl)
+{
+    hid_t fid = -1;             /* File ID */
+    hid_t fapl = -1;                    /* File access property list */
+    char filename[NAME_BUF_SIZE];       /* File name */
+    pid_t childpid=0;           /* Child process ID */
+    int child_status;           /* Status passed to waitpid */
+    int child_wait_option=0;        /* Options passed to waitpid */
+    int out_pdf[2];
+    int notify = 0;
+    unsigned deltat = 17;
+
+    /* Output message about test being performed */
+    TESTING("SWMR delta t value with concurrent read access");
+
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+
+    /* Set delta t value */
+    /* if(H5Pset_swmr_deltat(fapl, deltat) < 0) */
+    /*     FAIL_STACK_ERROR */
+
+    /* Create a file. */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    if(HDpipe(out_pdf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+    FAIL_STACK_ERROR
+
+    /* Parent process open with SWMR_WRITE, child process open with SWMR_READ */
+    /* Verify child process gets the same delta t value set by parent process */ 
+
+    if(childpid == 0) {         /* Child process */
+        hid_t child_fid;        /* File ID */
+        hid_t fapl_child = -1;  /* File access property list */
+        int child_notify = 0;
+
+        /* Close unused write end for out_pdf */
+        if(HDclose(out_pdf[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Wait for notification from parent process */
+        while(child_notify != 1) {
+            if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        /* Open the test file */
+        H5E_BEGIN_TRY {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+        } H5E_END_TRY;
+
+        /* Should succeed */
+        if(child_fid >= 0) {
+
+            fapl_child = H5Fget_access_plist(child_fid);
+            if (H5Pget_swmr_deltat(fapl_child, &deltat))
+                FAIL_STACK_ERROR
+
+            if(deltat != 17)
+                FAIL_STACK_ERROR
+
+            if(H5Fclose(child_fid) < 0)
+                FAIL_STACK_ERROR
+            HDexit(EXIT_SUCCESS);
+        }
+
+        /* Close the pipe */
+        if(HDclose(out_pdf[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_FAILURE);
+    }
+
+    /* close unused read end for out_pdf */
+    if(HDclose(out_pdf[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* set delta t value */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Notify child process */
+    notify = 1;
+    if(HDwrite(out_pdf[1], &notify, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Close the pipe */
+    if(HDclose(out_pdf[1]) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_swmr_deltat_read_concur() */
+
 
 /****************************************************************
 **
@@ -7217,6 +7596,10 @@ main(void)
          */
         nerrors += test_swmr_deltat_getset(fapl);
         nerrors += test_swmr_deltat_file_create(fapl);
+        nerrors += test_swmr_deltat_file_create_without_swmr_write(fapl);
+        nerrors += test_swmr_deltat_read_concur(fapl);
+        nerrors += test_swmr_deltat_delete_on_file_close(fapl);
+        /* nerrors += test_swmr_deltat_with_start_swmr_write(fapl); */
     } /* end if */
 
     /* Tests SWMR VFD compatibility flag.

@@ -618,21 +618,19 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
 	if(H5F_super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
 
-// FULLSWMR TODO ask Quincey about the following
-/* QAK - Copy driver info for SWMR deltat */
-
+        /* FULLSWMR */
         /* Check for the extension having a 'swmr delta t' message */
         if((status = H5O_msg_exists(&ext_loc, H5O_SWMR_DELTAT_ID, meta_dxpl_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header")
         if(status) {
             /* Check for ignoring the SWMR delta t info for this file */
-            // Check with Quincey about the udata.ignore_deltat
                 /* Retrieve the 'SWMR delta t' structure */
                 if(NULL == H5O_msg_read(&ext_loc, H5O_SWMR_DELTAT_ID, &swmr_deltat, meta_dxpl_id))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
+                /* FULLSWMR TODO: is this needed? */ 
+                f->shared->swmr_deltat = swmr_deltat;
 
-                printf("SWMR delta t value = %u\n", swmr_deltat);
-                // store in the shared file struct
+/* printf("SWMR delta t value = %u\n", swmr_deltat); */
         } /* end if */
 
 

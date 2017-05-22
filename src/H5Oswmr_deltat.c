@@ -80,10 +80,6 @@ static void *
 H5O_swmr_deltat_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
-// SWMRTANG
-/* QAK: Define H5O_swmr_deltat_t typedef like H5O_refcount_t, instead of like */
-/*     H5O_btreek_t.  (Look in H5Orefcount.c for encode / decode example code, */
-/*     otherwise btreek routines are OK) */
 
     H5O_swmr_deltat_t	*swmr_deltat;          /* Native message */
     void		*ret_value = NULL;      /* Return value */

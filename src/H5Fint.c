@@ -197,7 +197,6 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial metadata cache resize config.")
 
-//FULLSWMR DONE
     /* QAK - Add H5P_set for SWMR deltat value from internal file struct */
     if(H5P_set(new_plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set SWMR deltat.")
@@ -712,10 +711,10 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
 
-// FULLSWMR DONE
 /* QAK - Get SWMR delta t property */
-        if(H5P_get(plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SWMR delta t value")
+        if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+            if(H5P_get(plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SWMR delta t value")
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -868,6 +867,13 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
     HDassert(f->shared);
 
     if(1 == f->shared->nrefs) {
+
+        /* FULLSWMR */
+        if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+            if(f->shared->swmr_deltat != 0 && H5F_addr_defined(f->shared->sblock->ext_addr) )
+                if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_SWMR_DELTAT_ID) < 0)
+                    HDONE_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove SWMR delta t value")
+ 
         int actype;                         /* metadata cache type (enum value) */
         H5F_io_info2_t fio_info;            /* I/O info for operation */
 
@@ -1473,22 +1479,27 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) {
                 file->shared->sblock->status_flags |= H5F_SUPER_SWMR_WRITE_ACCESS;
 
-                // FULLSWMR  
                 /* Check for non-default SWMR delta t, and if so, write out the SWMR delta t message */
                 if(file->shared->swmr_deltat != 0)
                     if(H5F_super_ext_write_msg(file, meta_dxpl_id, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "error in writing deltat message to superblock extension")
 
-                // FULLSWMR TODO
-                /* NOTE - Need to delete message when file closed */
-                /* NOTE2 - Need to write message when H5Fstart_swmr_write() called */
+                /* FULLSWMR TODO */
+                /* NOTE2 - Need to write message when H5Fstart_swmr_write() called, b4 set flag */
+                /* if(file->shared->swmr_deltat != 0) */
+                /*     if(H5F_super_ext_write_msg(file, meta_dxpl_id, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0) */
+                /*         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "error in writing deltat message to superblock extension") */
+            /* if(H5F_flush_tagged_metadata(file, file->shared->sblock->ext_addr, meta_dxpl_id) < 0) */
+            /*     HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock extension") */
             } /* end if */
 
-            /* Flush the superblock */
+            /* Flush the superblock & superblock extension */
             if(H5F_super_dirty(file) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, NULL, "unable to mark superblock as dirty")
             if(H5F_flush_tagged_metadata(file, H5AC__SUPERBLOCK_TAG, meta_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock")
+            if(H5F_flush_tagged_metadata(file, file->shared->sblock->ext_addr, meta_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock extension")
 
             /* Remove the file lock for SWMR_WRITE */
             if(use_file_locking && (H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)) { 
@@ -1706,6 +1717,7 @@ H5F_close(H5F_t *f)
     HDassert(f);
     HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
 
+
     /* Perform checks for "semi" file close degree here, since closing the
      * file is not allowed if there are objects still open */
     if(f->shared->fc_degree == H5F_CLOSE_SEMI) {
@@ -1723,13 +1735,14 @@ H5F_close(H5F_t *f)
         if(nopen_files == 1 && nopen_objs > 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
     } /* end if */
-
+   
     /* Reset the file ID for this file */
     f->file_id = -1;
 
     /* Attempt to close the file/mount hierarchy */
     if(H5F_try_close(f, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

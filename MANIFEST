@@ -474,6 +474,7 @@
 ./src/H5Apublic.h
 ./src/H5AC.c
 ./src/H5ACdbg.c
+./src/H5ACfreedspace.c
 ./src/H5AClog.c
 ./src/H5ACmodule.h
 ./src/H5ACmpio.c
