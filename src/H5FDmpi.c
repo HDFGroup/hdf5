@@ -278,6 +278,11 @@ H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info, MPI_Comm *comm_new, MPI_Inf
 	info_dup = info;
     }
 
+    /* Set MPI_ERRORS_RETURN on comm_dup so that MPI failures are not fatal, 
+       and return codes can be checked and handled. May 23, 2017 FTW */
+    if (MPI_SUCCESS != (mpi_code = MPI_Errhandler_set(comm_dup, MPI_ERRORS_RETURN)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Errhandler_set failed", mpi_code)
+ 
     /* copy them to the return arguments */
     *comm_new = comm_dup;
     *info_new = info_dup;
