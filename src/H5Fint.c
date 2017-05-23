@@ -712,7 +712,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
 
 /* QAK - Get SWMR delta t property */
-        if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+//        if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
             if(H5P_get(plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SWMR delta t value")
 
@@ -868,7 +868,7 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
 
     if(1 == f->shared->nrefs) {
 
-        /* FULLSWMR */
+        /* FULLSWMR, delete delta t value at file close time */
         if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
             if(f->shared->swmr_deltat != 0 && H5F_addr_defined(f->shared->sblock->ext_addr) )
                 if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_SWMR_DELTAT_ID) < 0)
@@ -1475,22 +1475,19 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write/SWMR write (may use <h5clear file> to clear file consistency flags)")
             } /* version 3 superblock */
 
+            /* FULLSWMR TODO check with Quincey*/
+            H5Pget_swmr_deltat(fapl_id, &file->shared->swmr_deltat);
+
             file->shared->sblock->status_flags |= H5F_SUPER_WRITE_ACCESS;
             if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) {
                 file->shared->sblock->status_flags |= H5F_SUPER_SWMR_WRITE_ACCESS;
 
+                /* FULLSWMR */
                 /* Check for non-default SWMR delta t, and if so, write out the SWMR delta t message */
                 if(file->shared->swmr_deltat != 0)
                     if(H5F_super_ext_write_msg(file, meta_dxpl_id, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "error in writing deltat message to superblock extension")
 
-                /* FULLSWMR TODO */
-                /* NOTE2 - Need to write message when H5Fstart_swmr_write() called, b4 set flag */
-                /* if(file->shared->swmr_deltat != 0) */
-                /*     if(H5F_super_ext_write_msg(file, meta_dxpl_id, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0) */
-                /*         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "error in writing deltat message to superblock extension") */
-            /* if(H5F_flush_tagged_metadata(file, file->shared->sblock->ext_addr, meta_dxpl_id) < 0) */
-            /*     HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock extension") */
             } /* end if */
 
             /* Flush the superblock & superblock extension */

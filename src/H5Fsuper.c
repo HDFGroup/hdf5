@@ -1122,7 +1122,7 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
      */
 
     /* Files with SWMR delta t set need the superblock extension */
-    if(f->shared->swmr_deltat > 0) {
+    if(f->shared->swmr_deltat > 0 && (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)) {
         HDassert(super_vers >= HDF5_SUPERBLOCK_VERSION_3);
         need_ext = TRUE;
     } /* end if */

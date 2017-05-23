@@ -6198,7 +6198,7 @@ test_swmr_deltat_with_start_swmr_write(hid_t in_fapl)
     if(H5Pset_swmr_deltat(fapl, deltat) < 0)
         FAIL_STACK_ERROR
 
-    /* Re-open the test file */
+    /* Re-open the test file without SWMR_WRITE flag */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         FAIL_STACK_ERROR
 
@@ -6209,11 +6209,12 @@ test_swmr_deltat_with_start_swmr_write(hid_t in_fapl)
     if (ret < 0) 
         FAIL_STACK_ERROR
 
-    /* Get SWMR delta t value and verify it is the previous set value 17 */
+    /* Get SWMR delta t value and verify it is the previously set value of 17 */
     fapl_created = H5Fget_access_plist(fid);
     deltat = 0;
     if(H5Pget_swmr_deltat(fapl_created, &deltat) < 0)
         FAIL_STACK_ERROR
+
     if(deltat != 17)
         TEST_ERROR
 
@@ -6222,7 +6223,7 @@ test_swmr_deltat_with_start_swmr_write(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Re-open the test file */
-    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, in_fapl)) < 0)
         FAIL_STACK_ERROR
 
     /* 
@@ -6289,7 +6290,7 @@ test_swmr_deltat_delete_on_file_close(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Re-open the test file */
-    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, in_fapl)) < 0)
     FAIL_STACK_ERROR
 
     fapl_created = H5Fget_access_plist(fid);
@@ -6351,12 +6352,12 @@ test_swmr_deltat_file_create_without_swmr_write(hid_t in_fapl)
     fapl_created = H5Fget_access_plist(fid);
 
     /*
-     * Get value and verify it is set to default value 0
+     * Get value and verify it is set to non-default value
      */
     deltat = 0;
     if(H5Pget_swmr_deltat(fapl_created, &deltat) < 0)
         FAIL_STACK_ERROR
-    if(deltat != 0)
+    if(deltat != 17)
         TEST_ERROR
 
 
@@ -7599,7 +7600,7 @@ main(void)
         nerrors += test_swmr_deltat_file_create_without_swmr_write(fapl);
         nerrors += test_swmr_deltat_read_concur(fapl);
         nerrors += test_swmr_deltat_delete_on_file_close(fapl);
-        /* nerrors += test_swmr_deltat_with_start_swmr_write(fapl); */
+        nerrors += test_swmr_deltat_with_start_swmr_write(fapl);
     } /* end if */
 
     /* Tests SWMR VFD compatibility flag.
