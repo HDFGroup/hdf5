@@ -44,7 +44,7 @@ EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
            h5_vds-percival-unlim h5_vds-percival-unlim-maxmin \
            h5dsm_file_create h5dsm_file_open h5dsm_group_create \
            h5dsm_group_open h5dsm_dset_create h5dsm_dset_open \
-           h5dsm_dset_write h5dsm_dset_read
+           h5dsm_dset_write h5dsm_dset_read \
            h5dsm_dset_wpartial h5dsm_dset_rpartial h5dsm_dset_w1m \
            h5dsm_dset_r1m h5dsm_link_exists h5dsm_link_iter \
            h5dsm_attr_create h5dsm_attr_open h5dsm_attr_write \
