@@ -80,18 +80,50 @@ error:
     return -1;
 } /* end check_vls() */
 
+#define UPDATE_FBUF_VLA(FBUF, UBUF) \
+do { \
+    if((FBUF).p) \
+        free((FBUF).p); \
+    if((UBUF).len > 0) { \
+        if(NULL == ((FBUF).p = malloc((UBUF).len * sizeof(int)))) \
+            ERROR; \
+        memcpy((FBUF).p, (UBUF).p, (UBUF).len * sizeof(int)); \
+    } /* end if */ \
+    else \
+        (FBUF).p = NULL; \
+    (FBUF).len = (UBUF).len; \
+} while(0)
+
+#define UPDATE_FBUF_VLS(FBUF, UBUF) \
+do { \
+    if(FBUF) \
+        free(FBUF); \
+    if(UBUF) { \
+        if(NULL == ((FBUF) = strdup(UBUF))) \
+            ERROR; \
+    } /* end if */ \
+    else \
+        (FBUF) = NULL; \
+} while(0)
+
 int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
     char *pool_grp = NULL;
     hid_t file = -1, dset_vla = -1, dset_vls = -1, attr_vla = -1, attr_vls = -1, space = -1, fapl = -1;
     hid_t type_vla = -1, type_vls = -1;
+    hid_t space_contig = -1, space_ncontig = -1;
     hsize_t dims[2] = {4, 2};
+    hsize_t start[2], count[2];
     int static_buf_vla[4][2][8];
     char static_buf_vls[4][2][8];
     hvl_t rbuf_vla[4][2];
     char *rbuf_vls[4][2];
     hvl_t wbuf_vla[4][2];
     char *wbuf_vls[4][2];
+    hvl_t ebuf_vla[4][2];
+    char *ebuf_vls[4][2];
+    hvl_t fbuf_vla[4][2];
+    char *fbuf_vls[4][2];
     int bogus_int = -1;
     char bogus_str[3] = {'-', '1', '\0'};
     const hvl_t rbuf_vla_init[4][2] = {{{1, &bogus_int}, {1, &bogus_int}},
@@ -111,6 +143,9 @@ int main(int argc, char *argv[]) {
             {&static_buf_vls[2][0][0], &static_buf_vls[2][1][0]},
             {&static_buf_vls[3][0][0], &static_buf_vls[3][1][0]}};
     int i, j, k, l;
+
+    memset(fbuf_vla[0], 0, sizeof(fbuf_vla));
+    memset(fbuf_vls[0], 0, sizeof(fbuf_vls));
 
     (void)MPI_Init(&argc, &argv);
 
@@ -145,6 +180,26 @@ int main(int argc, char *argv[]) {
 
     /* Set up dataspace */
     if((space = H5Screate_simple(2, dims, NULL)) < 0)
+        ERROR;
+
+    /* Set up contiguous dataspace selection */
+    if((space_contig = H5Screate_simple(2, dims, NULL)) < 0)
+        ERROR;
+    start[0] = 1;
+    start[1] = 0;
+    count[0] = 2;
+    count[1] = 2;
+    if(H5Sselect_hyperslab(space_contig, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        ERROR;
+
+    /* Set up con-contiguous dataspace selection */
+    if((space_ncontig = H5Screate_simple(2, dims, NULL)) < 0)
+        ERROR;
+    start[0] = 0;
+    start[1] = 1;
+    count[0] = 4;
+    count[1] = 1;
+    if(H5Sselect_hyperslab(space_ncontig, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
         ERROR;
 
     /*
@@ -294,6 +349,368 @@ int main(int argc, char *argv[]) {
 
         if(verbose_g)
             printf("\n");
+
+        /*
+         * Variable length array dataset test
+         */
+        /* Fill write data buffer */
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++)
+                for(l = 0; l < (sizeof(static_buf_vla[0][0]) / sizeof(static_buf_vla[0][0][0])); l++)
+                    static_buf_vla[j][k][l] = rand() % 100;
+
+        /* Fill write buffer */
+        memcpy(wbuf_vla, wbuf_vla_init, sizeof(wbuf_vla));
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++) {
+                /* 10% chance of having a NULL sequence */
+                if(rand() % 10)
+                    wbuf_vla[j][k].len = rand() % 9;
+                else {
+                    wbuf_vla[j][k].len = 0;
+                    wbuf_vla[j][k].p = NULL;
+                } /* end if */
+            } /* end for */
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Writing dataset with variable length arrays.  buf =\n");
+            print_vla(wbuf_vla[0]);
+        } /* end if */
+
+        /* Write data */
+        if(H5Dwrite(dset_vla, type_vla, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf_vla) < 0)
+            ERROR;
+
+        /* Read data */
+        memcpy(rbuf_vla, rbuf_vla_init, sizeof(rbuf_vla));
+        if(H5Dread(dset_vla, type_vla, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_vla) < 0)
+            ERROR;
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Read dataset with variable length arrays.  buf =\n");
+            print_vla(rbuf_vla[0]);
+        } /* end if */
+
+        /* Check buffer */
+        if(check_vla(wbuf_vla[0], rbuf_vla[0]) < 0) {
+            (void)H5Dvlen_reclaim(type_vla, space, H5P_DEFAULT, rbuf_vla);
+            ERROR;
+        } /* end if */
+
+        /* Reclaim read buffer */
+        if(H5Dvlen_reclaim(type_vla, space, H5P_DEFAULT, rbuf_vla) < 0)
+            ERROR;
+
+        if(verbose_g)
+            printf("\n");
+
+        /*
+         * Variable length string dataset test
+         */
+        /* Fill write data buffer */
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++)
+                for(l = 0; l < (sizeof(static_buf_vls[0][0]) / sizeof(static_buf_vls[0][0][0])); l++)
+                    static_buf_vls[j][k][l] = 'a' + rand() % 26;
+
+        /* Fill write buffer */
+        memcpy(wbuf_vls, wbuf_vls_init, sizeof(wbuf_vls));
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++) {
+                /* 10% chance of having a NULL sequence */
+                if(rand() % 10)
+                    static_buf_vls[j][k][rand() % 8] = '\0';
+                else
+                    wbuf_vls[j][k] = NULL;
+            } /* end for */
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Writing dataset with variable length strings.  buf =\n");
+            print_vls(wbuf_vls[0]);
+        } /* end if */
+
+        /* Write data */
+        if(H5Dwrite(dset_vls, type_vls, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf_vls) < 0)
+            ERROR;
+
+        /* Read data */
+        memcpy(rbuf_vls, rbuf_vls_init, sizeof(rbuf_vls));
+        if(H5Dread(dset_vls, type_vls, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_vls) < 0)
+            ERROR;
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Read dataset with variable length strings.  buf =\n");
+            print_vls(rbuf_vls[0]);
+        } /* end if */
+
+        /* Check buffer */
+        if(check_vls(wbuf_vls[0], rbuf_vls[0]) < 0) {
+            (void)H5Dvlen_reclaim(type_vls, space, H5P_DEFAULT, rbuf_vls);
+            ERROR;
+        } /* end if */
+
+        /* Reclaim read buffer */
+        if(H5Dvlen_reclaim(type_vls, space, H5P_DEFAULT, rbuf_vls) < 0)
+            ERROR;
+
+        if(verbose_g)
+            printf("\n");
+
+        /*
+         * Variable length array dataset test with selections
+         */
+        /* Fill write data buffer */
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++)
+                for(l = 0; l < (sizeof(static_buf_vla[0][0]) / sizeof(static_buf_vla[0][0][0])); l++)
+                    static_buf_vla[j][k][l] = rand() % 100;
+
+        /* Fill write buffer */
+        memcpy(wbuf_vla, wbuf_vla_init, sizeof(wbuf_vla));
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++) {
+                /* 10% chance of having a NULL sequence */
+                if(rand() % 10)
+                    wbuf_vla[j][k].len = rand() % 9;
+                else {
+                    wbuf_vla[j][k].len = 0;
+                    wbuf_vla[j][k].p = NULL;
+                } /* end if */
+            } /* end for */
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Writing dataset with variable length arrays.  buf =\n");
+            print_vla(wbuf_vla[0]);
+        } /* end if */
+
+        /* Write data to whole dataset */
+        if(H5Dwrite(dset_vla, type_vla, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf_vla) < 0)
+            ERROR;
+
+        /* Update fbuf */
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++)
+                UPDATE_FBUF_VLA(fbuf_vla[j][k], wbuf_vla[j][k]);
+
+        /* Read data from non-contiguous to contiguous */
+        memcpy(rbuf_vla, rbuf_vla_init, sizeof(rbuf_vla));
+        memcpy(ebuf_vla, rbuf_vla_init, sizeof(rbuf_vla));
+        if(H5Dread(dset_vla, type_vla, space_contig, space_ncontig, H5P_DEFAULT, rbuf_vla) < 0)
+            ERROR;
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Read dataset with variable length arrays with selection.  buf =\n");
+            print_vla(rbuf_vla[0]);
+        } /* end if */
+
+        /* Update ebuf */
+        ebuf_vla[1][0] = fbuf_vla[0][1];
+        ebuf_vla[1][1] = fbuf_vla[1][1];
+        ebuf_vla[2][0] = fbuf_vla[2][1];
+        ebuf_vla[2][1] = fbuf_vla[3][1];
+
+        /* Check buffer */
+        if(check_vla(ebuf_vla[0], rbuf_vla[0]) < 0) {
+            (void)H5Dvlen_reclaim(type_vla, space_contig, H5P_DEFAULT, rbuf_vla);
+            ERROR;
+        } /* end if */
+
+        /* Reclaim read buffer */
+        if(H5Dvlen_reclaim(type_vla, space_contig, H5P_DEFAULT, rbuf_vla) < 0)
+            ERROR;
+
+        if(verbose_g)
+            printf("\n");
+
+        /* Fill write data buffer */
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++)
+                for(l = 0; l < (sizeof(static_buf_vla[0][0]) / sizeof(static_buf_vla[0][0][0])); l++)
+                    static_buf_vla[j][k][l] = rand() % 100;
+
+        /* Fill write buffer */
+        memcpy(wbuf_vla, wbuf_vla_init, sizeof(wbuf_vla));
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++) {
+                /* 10% chance of having a NULL sequence */
+                if(rand() % 10)
+                    wbuf_vla[j][k].len = rand() % 9;
+                else {
+                    wbuf_vla[j][k].len = 0;
+                    wbuf_vla[j][k].p = NULL;
+                } /* end if */
+            } /* end for */
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Writing dataset with variable length arrays with selection.  buf =\n");
+            print_vla(wbuf_vla[0]);
+        } /* end if */
+
+        /* Write data to dataset from non-contiguous to contiguous */
+        if(H5Dwrite(dset_vla, type_vla, space_ncontig, space_contig, H5P_DEFAULT, wbuf_vla) < 0)
+            ERROR;
+
+        /* Update fbuf */
+        UPDATE_FBUF_VLA(fbuf_vla[1][0], wbuf_vla[0][1]);
+        UPDATE_FBUF_VLA(fbuf_vla[1][1], wbuf_vla[1][1]);
+        UPDATE_FBUF_VLA(fbuf_vla[2][0], wbuf_vla[2][1]);
+        UPDATE_FBUF_VLA(fbuf_vla[2][1], wbuf_vla[3][1]);
+
+        /* Read entire dataset */
+        memcpy(rbuf_vla, rbuf_vla_init, sizeof(rbuf_vla));
+        memcpy(ebuf_vla, rbuf_vla_init, sizeof(rbuf_vla));
+        if(H5Dread(dset_vla, type_vla, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_vla) < 0)
+            ERROR;
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Read dataset with variable length arrays.  buf =\n");
+            print_vla(rbuf_vla[0]);
+        } /* end if */
+
+        /* Check buffer */
+        if(check_vla(fbuf_vla[0], rbuf_vla[0]) < 0) {
+            (void)H5Dvlen_reclaim(type_vla, space, H5P_DEFAULT, rbuf_vla);
+            ERROR;
+        } /* end if */
+
+        /* Reclaim read buffer */
+        if(H5Dvlen_reclaim(type_vla, space, H5P_DEFAULT, rbuf_vla) < 0)
+            ERROR;
+
+        if(verbose_g)
+            printf("\n");
+
+        /*
+         * Variable length string dataset test with selections
+         */
+        /* Fill write data buffer */
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++)
+                for(l = 0; l < (sizeof(static_buf_vls[0][0]) / sizeof(static_buf_vls[0][0][0])); l++)
+                    static_buf_vls[j][k][l] = 'a' + rand() % 26;
+
+        /* Fill write buffer */
+        memcpy(wbuf_vls, wbuf_vls_init, sizeof(wbuf_vls));
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++) {
+                /* 10% chance of having a NULL sequence */
+                if(rand() % 10)
+                    static_buf_vls[j][k][rand() % 8] = '\0';
+                else
+                    wbuf_vls[j][k] = NULL;
+            } /* end for */
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Writing dataset with variable length strings.  buf =\n");
+            print_vls(wbuf_vls[0]);
+        } /* end if */
+
+        /* Write data to whole dataset */
+        if(H5Dwrite(dset_vls, type_vls, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf_vls) < 0)
+            ERROR;
+
+        /* Update fbuf */
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++)
+                UPDATE_FBUF_VLS(fbuf_vls[j][k], wbuf_vls[j][k]);
+
+        /* Read data from contiguous to non-contiguous */
+        memcpy(rbuf_vls, rbuf_vls_init, sizeof(rbuf_vls));
+        memcpy(ebuf_vls, rbuf_vls_init, sizeof(rbuf_vls));
+        if(H5Dread(dset_vls, type_vls, space_ncontig, space_contig, H5P_DEFAULT, rbuf_vls) < 0)
+            ERROR;
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Read dataset with variable length strings with selection.  buf =\n");
+            print_vls(rbuf_vls[0]);
+        } /* end if */
+
+        /* Update ebuf */
+        ebuf_vls[0][1] = fbuf_vls[1][0];
+        ebuf_vls[1][1] = fbuf_vls[1][1];
+        ebuf_vls[2][1] = fbuf_vls[2][0];
+        ebuf_vls[3][1] = fbuf_vls[2][1];
+
+        /* Check buffer */
+        if(check_vls(ebuf_vls[0], rbuf_vls[0]) < 0) {
+            (void)H5Dvlen_reclaim(type_vls, space_ncontig, H5P_DEFAULT, rbuf_vls);
+            ERROR;
+        } /* end if */
+
+        /* Reclaim read buffer */
+        if(H5Dvlen_reclaim(type_vls, space_ncontig, H5P_DEFAULT, rbuf_vls) < 0)
+            ERROR;
+
+        if(verbose_g)
+            printf("\n");
+
+        /* Fill write data buffer */
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++)
+                for(l = 0; l < (sizeof(static_buf_vls[0][0]) / sizeof(static_buf_vls[0][0][0])); l++)
+                    static_buf_vls[j][k][l] = 'a' + rand() % 26;
+
+        /* Fill write buffer */
+        memcpy(wbuf_vls, wbuf_vls_init, sizeof(wbuf_vls));
+        for(j = 0; j < dims[0]; j++)
+            for(k = 0; k < dims[1]; k++) {
+                /* 10% chance of having a NULL sequence */
+                if(rand() % 10)
+                    static_buf_vls[j][k][rand() % 8] = '\0';
+                else
+                    wbuf_vls[j][k] = NULL;
+            } /* end for */
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Writing dataset with variable length strings with selection.  buf =\n");
+            print_vls(wbuf_vls[0]);
+        } /* end if */
+
+        /* Write data to dataset from non-contiguous to contiguous */
+        if(H5Dwrite(dset_vls, type_vls, space_contig, space_ncontig, H5P_DEFAULT, wbuf_vls) < 0)
+            ERROR;
+
+        /* Update fbuf */
+        UPDATE_FBUF_VLS(fbuf_vls[0][1], wbuf_vls[1][0]);
+        UPDATE_FBUF_VLS(fbuf_vls[1][1], wbuf_vls[1][1]);
+        UPDATE_FBUF_VLS(fbuf_vls[2][1], wbuf_vls[2][0]);
+        UPDATE_FBUF_VLS(fbuf_vls[3][1], wbuf_vls[2][1]);
+
+        /* Read entire dataset */
+        memcpy(rbuf_vls, rbuf_vls_init, sizeof(rbuf_vls));
+        memcpy(ebuf_vls, rbuf_vls_init, sizeof(rbuf_vls));
+        if(H5Dread(dset_vls, type_vls, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_vls) < 0)
+            ERROR;
+
+        /* Print message */
+        if(verbose_g) {
+            printf("Read dataset with variable length strings.  buf =\n");
+            print_vls(rbuf_vls[0]);
+        } /* end if */
+
+        /* Check buffer */
+        if(check_vls(fbuf_vls[0], rbuf_vls[0]) < 0) {
+            (void)H5Dvlen_reclaim(type_vls, space, H5P_DEFAULT, rbuf_vls);
+            ERROR;
+        } /* end if */
+
+        /* Reclaim read buffer */
+        if(H5Dvlen_reclaim(type_vls, space, H5P_DEFAULT, rbuf_vls) < 0)
+            ERROR;
+
+        if(verbose_g)
+            printf("\n");
     } /* end for */
 
     /*
@@ -315,8 +732,20 @@ int main(int argc, char *argv[]) {
         ERROR;
     if(H5Sclose(space) < 0)
         ERROR;
+    if(H5Sclose(space_contig) < 0)
+        ERROR;
+    if(H5Sclose(space_ncontig) < 0)
+        ERROR;
     if(H5Pclose(fapl) < 0)
         ERROR;
+
+    for(i = 0; i < dims[0]; i++)
+        for(j = 0; j < dims[1]; j++) {
+            if(fbuf_vla[i][j].p)
+                free(fbuf_vla[i][j].p);
+            if(fbuf_vls[i][j])
+                free(fbuf_vls[i][j]);
+        } /* end for */
 
     printf("Success\n");
 
@@ -333,8 +762,18 @@ error:
         H5Tclose(type_vla);
         H5Tclose(type_vls);
         H5Sclose(space);
+        H5Sclose(space_contig);
+        H5Sclose(space_ncontig);
         H5Pclose(fapl);
     } H5E_END_TRY;
+
+    for(i = 0; i < dims[0]; i++)
+        for(j = 0; j < dims[1]; j++) {
+            if(fbuf_vla[i][j].p)
+                free(fbuf_vla[i][j].p);
+            if(fbuf_vls[i][j])
+                free(fbuf_vls[i][j]);
+        } /* end for */
 
     (void)MPI_Finalize();
     return 1;
