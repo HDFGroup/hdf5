@@ -1444,6 +1444,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         /* Set up sgl */
         daos_iov_set(&sg_iov, &file->max_oid, (daos_size_t)8);
         sgl.sg_nr.num = 1;
+        sgl.sg_nr.num_out = 0;
         sgl.sg_iovs = &sg_iov;
 
         /* Read max OID from gmd obj */
@@ -1854,6 +1855,7 @@ H5VL_daosm_write_max_oid(H5VL_daosm_file_t *file)
     /* Set up sgl */
     daos_iov_set(&sg_iov, &file->max_oid, (daos_size_t)8);
     sgl.sg_nr.num = 1;
+    sgl.sg_nr.num_out = 0;
     sgl.sg_iovs = &sg_iov;
 
     /* Write max OID to gmd obj */
@@ -1915,6 +1917,7 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
     /* Set up sgl */
     daos_iov_set(&sg_iov, val_buf, (daos_size_t)H5VL_DAOSM_LINK_VAL_BUF_SIZE);
     sgl.sg_nr.num = 1;
+    sgl.sg_nr.num_out = 0;
     sgl.sg_iovs = &sg_iov;
 
     /* Read link */
@@ -2050,6 +2053,7 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
             /* Set up type specific sgl */
             daos_iov_set(&sg_iov[0], iov_buf, (daos_size_t)sizeof(iov_buf));
             sgl.sg_nr.num = 1;
+            sgl.sg_nr.num_out = 0;
 
             break;
 
@@ -2062,6 +2066,7 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
             daos_iov_set(&sg_iov[0], iov_buf, (daos_size_t)1);
             daos_iov_set(&sg_iov[1], val->target.soft, (daos_size_t)(iod.iod_size - (uint64_t)1));
             sgl.sg_nr.num = 2;
+            sgl.sg_nr.num_out = 0;
 
             break;
 
@@ -2300,6 +2305,7 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
                  * always have room for a null terminator. */
                 daos_iov_set(&sg_iov, dkey_buf, (daos_size_t)(dkey_buf_len - 1));
                 sgl.sg_nr.num = 1;
+                sgl.sg_nr.num_out = 0;
                 sgl.sg_iovs = &sg_iov;
 
                 /* Loop to retrieve keys and make callbacks */
@@ -2667,6 +2673,7 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
         /* Set up sgl */
         daos_iov_set(&sg_iov, gcpl_buf, (daos_size_t)gcpl_size);
         sgl.sg_nr.num = 1;
+        sgl.sg_nr.num_out = 0;
         sgl.sg_iovs = &sg_iov;
 
         /* Write internal metadata to group */
@@ -2862,6 +2869,7 @@ H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file, daos_obj_id_t oid,
     /* Set up sgl */
     daos_iov_set(&sg_iov, gcpl_buf, (daos_size_t)gcpl_len);
     sgl.sg_nr.num = 1;
+    sgl.sg_nr.num_out = 0;
     sgl.sg_iovs = &sg_iov;
 
     /* Read internal metadata from group */
@@ -3617,12 +3625,15 @@ H5VL_daosm_dataset_create(void *_item,
         /* Set up sgl */
         daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)type_size);
         sgl[0].sg_nr.num = 1;
+        sgl[0].sg_nr.num_out = 0;
         sgl[0].sg_iovs = &sg_iov[0];
         daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)space_size);
         sgl[1].sg_nr.num = 1;
+        sgl[1].sg_nr.num_out = 0;
         sgl[1].sg_iovs = &sg_iov[1];
         daos_iov_set(&sg_iov[2], dcpl_buf, (daos_size_t)dcpl_size);
         sgl[2].sg_nr.num = 1;
+        sgl[2].sg_nr.num_out = 0;
         sgl[2].sg_iovs = &sg_iov[2];
 
         /* Write internal metadata to dataset */
@@ -3827,14 +3838,17 @@ H5VL_daosm_dataset_open(void *_item,
         p = dinfo_buf + (6 * sizeof(uint64_t));
         daos_iov_set(&sg_iov[0], p, (daos_size_t)type_len);
         sgl[0].sg_nr.num = 1;
+        sgl[0].sg_nr.num_out = 0;
         sgl[0].sg_iovs = &sg_iov[0];
         p += type_len;
         daos_iov_set(&sg_iov[1], p, (daos_size_t)space_len);
         sgl[1].sg_nr.num = 1;
+        sgl[1].sg_nr.num_out = 0;
         sgl[1].sg_iovs = &sg_iov[1];
         p += space_len;
         daos_iov_set(&sg_iov[2], p, (daos_size_t)dcpl_len);
         sgl[2].sg_nr.num = 1;
+        sgl[2].sg_nr.num_out = 0;
         sgl[2].sg_iovs = &sg_iov[2];
 
         /* Read internal metadata from dataset */
@@ -4117,6 +4131,7 @@ H5VL_daosm_dataset_mem_vl_rd_cb(void *_elem, hid_t H5_ATTR_UNUSED type_id,
 
     /* Set up constant sgl info */
     udata->sgls[udata->idx].sg_nr.num = 1;
+    udata->sgls[udata->idx].sg_nr.num_out = 0;
     udata->sgls[udata->idx].sg_iovs = &udata->sg_iovs[udata->idx];
 
     /* Check for empty element */
@@ -4388,7 +4403,7 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         /* Read data from dataset */
         /* Note cast to unsigned reduces width to 32 bits.  Should eventually
          * check for overflow and iterate over 2^32 size blocks */
-        if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, dset->obj.item.file->epoch, &dkey, (unsigned)(num_elem - mem_ud.offset), iods, sgls, NULL /*maps*/, NULL /*event*/)))
+        if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, dset->obj.item.file->epoch, &dkey, (unsigned)((uint64_t)num_elem - mem_ud.offset), iods, sgls, NULL /*maps*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %d", ret)
     } /* end if */
     else {
@@ -4427,6 +4442,7 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
                 iod.iod_nr = (unsigned)tot_nseq;
                 sgl.sg_nr.num = (uint32_t)tot_nseq;
+                sgl.sg_nr.num_out = 0;
             } /* end if */
             else {
                 /* Calculate recxs from file space */
@@ -4442,6 +4458,7 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                 if(H5VL_daosm_sel_to_recx_iov(space, file_type_size, buf, NULL, &sg_iovs, &tot_nseq) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
                 sgl.sg_nr.num = (uint32_t)tot_nseq;
+                sgl.sg_nr.num_out = 0;
             } /* end else */
 
             /* Point iod and sgl to lists generated above */
@@ -4474,6 +4491,7 @@ H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
             /* Set up constant sgl info */
             sgl.sg_nr.num = 1;
+            sgl.sg_nr.num_out = 0;
             sgl.sg_iovs = &sg_iov;
 
             /* Check for contiguous memory buffer */
@@ -4591,6 +4609,7 @@ H5VL_daosm_dataset_mem_vl_wr_cb(void *_elem, hid_t H5_ATTR_UNUSED type_id,
 
     /* Set up constant sgl info */
     udata->sgls[udata->idx].sg_nr.num = 1;
+    udata->sgls[udata->idx].sg_nr.num_out = 0;
     udata->sgls[udata->idx].sg_iovs = &udata->sg_iovs[udata->idx];
 
     /* Check for vlen string */
@@ -4826,6 +4845,7 @@ H5VL_daosm_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
             /* Set up constant sgl info */
             sgl.sg_nr.num = 1;
+            sgl.sg_nr.num_out = 0;
             sgl.sg_iovs = &sg_iov;
 
             /* Check if we need to fill background buffer */
@@ -4863,6 +4883,7 @@ H5VL_daosm_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
                 iod.iod_nr = (unsigned)tot_nseq;
                 sgl.sg_nr.num = (uint32_t)tot_nseq;
+                sgl.sg_nr.num_out = 0;
             } /* end if */
             else {
                 /* Calculate recxs from file space */
@@ -4878,6 +4899,7 @@ H5VL_daosm_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                 if(H5VL_daosm_sel_to_recx_iov(space, file_type_size, (void *)buf, NULL, &sg_iovs, &tot_nseq) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't generate sequence lists for DAOS I/O")
                 sgl.sg_nr.num = (uint32_t)tot_nseq;
+                sgl.sg_nr.num_out = 0;
             } /* end else */
 
             /* Point iod and sgl to lists generated above */
@@ -5548,9 +5570,11 @@ H5VL_daosm_attribute_create(void *_item, H5VL_loc_params_t loc_params,
     /* Set up sgl */
     daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)type_size);
     sgl[0].sg_nr.num = 1;
+    sgl[0].sg_nr.num_out = 0;
     sgl[0].sg_iovs = &sg_iov[0];
     daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)space_size);
     sgl[1].sg_nr.num = 1;
+    sgl[1].sg_nr.num_out = 0;
     sgl[1].sg_iovs = &sg_iov[1];
 
     /* Write attribute metadata to parent object */
@@ -5695,9 +5719,11 @@ H5VL_daosm_attribute_open(void *_item, H5VL_loc_params_t loc_params,
     /* Set up sgl */
     daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)iod[0].iod_size);
     sgl[0].sg_nr.num = 1;
+    sgl[0].sg_nr.num_out = 0;
     sgl[0].sg_iovs = &sg_iov[0];
     daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)iod[1].iod_size);
     sgl[1].sg_nr.num = 1;
+    sgl[1].sg_nr.num_out = 0;
     sgl[1].sg_iovs = &sg_iov[1];
 
     /* Read attribute metadata from parent object */
@@ -5867,6 +5893,7 @@ H5VL_daosm_attribute_read(void *_attr, hid_t mem_type_id, void *buf,
         for(i = 0; i < attr_size; i++) {
             /* Set up constant sgl info */
             sgls[i].sg_nr.num = 1;
+            sgls[i].sg_nr.num_out = 0;
             sgls[i].sg_iovs = &sg_iovs[i];
 
             /* Check for empty element */
@@ -5974,6 +6001,7 @@ H5VL_daosm_attribute_read(void *_attr, hid_t mem_type_id, void *buf,
         /* Set up sgl */
         daos_iov_set(&sg_iov, tconv_buf ? tconv_buf : buf, (daos_size_t)(attr_size * (uint64_t)file_type_size));
         sgl.sg_nr.num = 1;
+        sgl.sg_nr.num_out = 0;
         sgl.sg_iovs = &sg_iov;
 
         /* Read data from attribute */
@@ -6142,6 +6170,7 @@ H5VL_daosm_attribute_write(void *_attr, hid_t mem_type_id, const void *buf,
 
             /* Set up constant sgl info */
             sgls[i].sg_nr.num = 1;
+            sgls[i].sg_nr.num_out = 0;
             sgls[i].sg_iovs = &sg_iovs[i];
 
             /* Check for vlen string */
@@ -6226,6 +6255,7 @@ H5VL_daosm_attribute_write(void *_attr, hid_t mem_type_id, const void *buf,
 
         /* Set up constant sgl info */
         sgl.sg_nr.num = 1;
+        sgl.sg_nr.num_out = 0;
         sgl.sg_iovs = &sg_iov;
 
         /* Check for type conversion */
@@ -6492,6 +6522,7 @@ H5VL_daosm_attribute_specific(void *_item, H5VL_loc_params_t loc_params,
                  * always have room for a null terminator. */
                 daos_iov_set(&sg_iov, akey_buf, (daos_size_t)(akey_buf_len - 1));
                 sgl.sg_nr.num = 1;
+                sgl.sg_nr.num_out = 0;
                 sgl.sg_iovs = &sg_iov;
 
                 /* Loop to retrieve keys and make callbacks */
@@ -6772,9 +6803,11 @@ H5VL_daosm_map_create(void *_item, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
         /* Set up sgl */
         daos_iov_set(&sg_iov[0], ktype_buf, (daos_size_t)ktype_size);
         sgl[0].sg_nr.num = 1;
+        sgl[0].sg_nr.num_out = 0;
         sgl[0].sg_iovs = &sg_iov[0];
         daos_iov_set(&sg_iov[1], vtype_buf, (daos_size_t)vtype_size);
         sgl[1].sg_nr.num = 1;
+        sgl[1].sg_nr.num_out = 0;
         sgl[1].sg_iovs = &sg_iov[1];
 
         /* Write internal metadata to map */
@@ -6948,10 +6981,12 @@ H5VL_daosm_map_open(void *_item, H5VL_loc_params_t loc_params, const char *name,
         p = minfo_buf + (5 * sizeof(uint64_t));
         daos_iov_set(&sg_iov[0], p, (daos_size_t)ktype_len);
         sgl[0].sg_nr.num = 1;
+        sgl[0].sg_nr.num_out = 0;
         sgl[0].sg_iovs = &sg_iov[0];
         p += ktype_len;
         daos_iov_set(&sg_iov[1], p, (daos_size_t)vtype_len);
         sgl[1].sg_nr.num = 1;
+        sgl[1].sg_nr.num_out = 0;
         sgl[1].sg_iovs = &sg_iov[1];
 
         /* Read internal metadata from map */
@@ -7265,6 +7300,7 @@ H5VL_daosm_map_set(void *_map, hid_t key_mem_type_id, const void *key,
     }
 
     sgl.sg_nr.num = 1;
+    sgl.sg_nr.num_out = 0;
     sgl.sg_iovs = &sg_iov;
 
         if(0 != (ret_value = daos_obj_update(map->obj.obj_oh,
@@ -7319,6 +7355,7 @@ H5VL_daosm_map_get(void *_map, hid_t key_mem_type_id, const void *key,
         /* Set up sgl */
         daos_iov_set(&sg_iov, value, (daos_size_t)val_size);
         sgl.sg_nr.num = 1;
+        sgl.sg_nr.num_out = 0;
         sgl.sg_iovs = &sg_iov;
 
         if(0 != (ret_value = daos_obj_fetch(map->obj.obj_oh, 
@@ -7353,6 +7390,7 @@ H5VL_daosm_map_get(void *_map, hid_t key_mem_type_id, const void *key,
         }
 
         sgl.sg_nr.num = 1;
+        sgl.sg_nr.num_out = 0;
         sgl.sg_iovs = &sg_iov;
 
         if(0 != (ret_value = daos_obj_fetch(map->obj.obj_oh, 
@@ -7409,6 +7447,7 @@ H5VL_daosm_map_get_count(void *_map, hsize_t *count, void H5_ATTR_UNUSED **req)
 
     daos_iov_set(&sg_iov, buf, ENUM_DESC_BUF);
     sgl.sg_nr.num = 1;
+    sgl.sg_nr.num_out = 0;
     sgl.sg_iovs = &sg_iov;
 
     for (number = ENUM_DESC_NR, key_nr = 0; !daos_hash_is_eof(&anchor);
