@@ -918,12 +918,13 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-
-  ## tell libtool to do the right thing with COMMON symbols
+  ## tell libtool to do the right thing with COMMON symbols, this fixes 
+  ## corrupt values with COMMON and EQUIVALENCE when building shared 
+  ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
   case "`uname`" in
     Darwin*)
     H5_LDFLAGS="$H5_LDFLAGS -Wl,-commons,use_dylibs"
-      ;;
+    ;;
   esac
 
   ## Report results of check(s)
@@ -3482,8 +3483,9 @@ chmod 755 tools/src/misc/h5cc
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
-  ## tell libtool to pass the correct argument linker, needed only for intel compiler. This script 
-  ## replaces the 3rd occurance, which is for Fortran, of wl="" with wl="-Wl,"
+  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
+  ## on OS X, which is needed when building shared libraries on OS X.  This script 
+  ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
   case "`uname`" in
     Darwin*)
       cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
