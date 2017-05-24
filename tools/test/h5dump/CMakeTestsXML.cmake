@@ -81,7 +81,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tarray6.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tarray7.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tattr.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tbitfields.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tbitfields_be.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tbitfields_le.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tcompound2.h5.xml
@@ -221,8 +222,10 @@
           tarray7.h5.out.err
           tattr.h5.out
           tattr.h5.out.err
-          tbitfields.h5.out
-          tbitfields.h5.out.err
+          tbitfields_be.h5.out
+          tbitfields_be.h5.out.err
+          tbitfields_le.h5.out
+          tbitfields_le.h5.out.err
           tcompound.h5.out
           tcompound.h5.out.err
           tcompound2.h5.out
@@ -344,7 +347,11 @@
   ########## test XML
   ADD_XML_H5_TEST (tall.h5 0 tall.h5)
   ADD_XML_H5_TEST (tattr.h5 0 tattr.h5)
-  ADD_XML_H5_TEST (tbitfields.h5 0 tbitfields.h5)
+  if (H5_WORDS_BIGENDIAN)
+    ADD_XML_H5_TEST (tbitfields_be.h5 0 tbitfields.h5)
+  else ()
+    ADD_XML_H5_TEST (tbitfields_le.h5 0 tbitfields.h5)
+  endif ()
   ADD_XML_H5_TEST (tcompound.h5 0 tcompound.h5)
   ADD_XML_H5_TEST (tcompound2.h5 0 tcompound2.h5)
   ADD_XML_H5_TEST (tdatareg.h5 0 tdatareg.h5)

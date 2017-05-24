@@ -2893,7 +2893,8 @@ public class H5 implements java.io.Serializable {
      * @param file_id
      *            IN: Identifier of the target file.
      *
-     * @param mdc_logging_status, the status
+     * @param mdc_logging_status
+     *          the status
      *             mdc_logging_status[0] = is_enabled, whether logging is enabled
      *             mdc_logging_status[1] = is_currently_logging, whether events are currently being logged
      *
@@ -5811,7 +5812,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param fapl_id
      *            IN: File access property list identifier
-     * @param mdc_log_options, the options
+     * @param mdc_log_options
+     *         the options
      *             mdc_logging_options[0] = is_enabled, whether logging is enabled
      *             mdc_logging_options[1] = start_on_access, whether the logging begins as soon as the file is opened or created
      *
