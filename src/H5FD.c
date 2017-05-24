@@ -62,7 +62,6 @@
 /********************/
 static herr_t H5FD_free_cls(H5FD_class_t *cls);
 static int H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/);
-static int H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/);
 
 /*********************/
 /* Package Variables */
@@ -1082,42 +1081,6 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_query() */
-
-
-/*-------------------------------------------------------------------------
-* Function:    H5FD_driver_query
-*
-* Purpose: Similar to H5FD_query(), but intended for cases when we don't
-*          have a file available (e.g. before one is opened). Since we
-*          can't use the file to get the driver, the driver is passed in
-*          as a parameter.
-*
-* Return:  Success:    non-negative
-*          Failure:    negative
-*
-* Programmer:  Jacob Gruber
-*              Wednesday, August 17, 2011
-*
-*-------------------------------------------------------------------------
-*/
-static int
-H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
-{
-    int ret_value = 0;          /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(driver);
-    HDassert(flags);
-
-    /* Check for the driver to query and then query it */
-    if(driver->query)
-        ret_value = (driver->query)(NULL, flags);
-    else 
-        *flags = 0;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_driver_query() */
 
 
 /*-------------------------------------------------------------------------
