@@ -120,7 +120,6 @@ test_metadata_read_attempts(hid_t in_fapl)
     hid_t file_fapl = -1;                   /* The file's access property list      */
     hid_t fid = -1, fid1 = -1, fid2 = -1;   /* File IDs                             */
     hid_t driver_id = -1;                   /* ID for this VFD                      */
-    H5FD_class_t *driver = NULL;            /* Pointer to VFD class struct          */
     unsigned long driver_flags = 0;         /* VFD feature flags                    */
     hbool_t compat_w_default_vfd;           /* current VFD compat w/ H5P_DEFAULT?   */
     unsigned attempts;                      /* The # of read attempts               */
@@ -138,9 +137,7 @@ test_metadata_read_attempts(hid_t in_fapl)
      */
     if ((driver_id = H5Pget_driver(in_fapl)) < 0)
         FAIL_STACK_ERROR
-    if (NULL == (driver = (H5FD_class_t *)H5I_object_verify(driver_id, H5I_VFL)))
-        FAIL_STACK_ERROR
-    if (H5FD_driver_query(driver, &driver_flags) < 0)
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
         FAIL_STACK_ERROR
     compat_w_default_vfd = (driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE) ? TRUE : FALSE;
 

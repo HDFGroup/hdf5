@@ -442,18 +442,17 @@ done:
 *          can't use the file to get the driver, the driver is passed in
 *          as a parameter.
 *
-* Return:  Success:    non-negative
-*          Failure:    negative
+* Return:  SUCCEED/FAIL
 *
 * Programmer:  Jacob Gruber
 *              Wednesday, August 17, 2011
 *
 *-------------------------------------------------------------------------
 */
-int
+herr_t
 H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
 {
-    int ret_value = 0;          /* Return value */
+    herr_t ret_value = SUCCEED;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -468,5 +467,4 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_driver_query() */
-
 

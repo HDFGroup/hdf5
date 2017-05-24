@@ -384,6 +384,9 @@ H5_DLL herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FDlock(H5FD_t *file, hbool_t rw);
 H5_DLL herr_t H5FDunlock(H5FD_t *file);
 
+/* Allows querying a VFD ID for features before the file is opened */
+H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags/*out*/);
+
 #ifdef __cplusplus
 }
 #endif
