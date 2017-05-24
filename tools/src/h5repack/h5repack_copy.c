@@ -103,6 +103,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
     hbool_t       in_persist;             /* Persist free-space status from input file */
     hsize_t       in_threshold;           /* Free-space section threshold from input file */
     hsize_t       in_pagesize;            /* File space page size from input file */
+    unsigned      crt_order_flags;        /* group creation order flag */
 
     /*-------------------------------------------------------------------------
      * open input file
@@ -116,6 +117,8 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
     /* get user block size and file space strategy/persist/threshold */
     {
         hid_t fcpl_in; /* file creation property list ID for input file */
+        hid_t grp_in = -1;   /* group ID */
+        hid_t gcpl_in = -1;  /* group creation property list */
 
         if ((fcpl_in = H5Fget_create_plist(fidin)) < 0) {
             error_msg("failed to retrieve file creation property list\n");
@@ -127,17 +130,28 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
         }
 
-    /* If the -S option is not set, get "strategy" from the input file */
-    if(H5Pget_file_space_strategy(fcpl_in, &in_strategy, &in_persist, &in_threshold) < 0) {
-        error_msg("failed to retrieve file space strategy\n");
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
-    }
+        /* If the -S option is not set, get "strategy" from the input file */
+        if(H5Pget_file_space_strategy(fcpl_in, &in_strategy, &in_persist, &in_threshold) < 0) {
+            error_msg("failed to retrieve file space strategy\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+        }
 
-    /* If the -G option is not set, get "pagesize" from the input file */
-    if(H5Pget_file_space_page_size(fcpl_in, &in_pagesize) < 0) {
-        error_msg("failed to retrieve file space threshold\n");
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
-    }
+        /* If the -G option is not set, get "pagesize" from the input file */
+        if(H5Pget_file_space_page_size(fcpl_in, &in_pagesize) < 0) {
+            error_msg("failed to retrieve file space threshold\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+        }
+        /* open root group */
+        if ((grp_in = H5Gopen2(fidin, "/", H5P_DEFAULT)) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gopen2 failed");
+
+        /* get root group creation property list */
+        if ((gcpl_in = H5Gget_create_plist(grp_in)) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gget_create_plist failed");
+
+        /* query and set the group creation properties */
+        if (H5Pget_link_creation_order(gcpl_in, &crt_order_flags) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_link_creation_order failed");
 
         if (H5Pclose(fcpl_in) < 0) {
             error_msg("failed to close property list\n");
@@ -309,6 +323,9 @@ print_user_block(fnamein, fidin);
         }
     }
 
+    if(H5Pset_link_creation_order(fcpl, crt_order_flags ) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_link_creation_order failed");
+
     /* Set file space info to those from input file */
     set_strategy = in_strategy;
     set_persist = in_persist;
@@ -375,6 +392,8 @@ print_user_block(fnamein, fidin);
      *-------------------------------------------------------------------------
      */
 
+    /* Initialize indexing options */
+    h5trav_set_index(sort_by, sort_order);
     /* init table */
     trav_table_init(&travt);
 
