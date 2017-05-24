@@ -29,7 +29,6 @@
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -84,7 +83,6 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Interlace Mode Dimensions in the Dataspace
 * INTERLACE_PIXEL [height][width][pixel components]
@@ -238,7 +236,6 @@ herr_t H5IM_find_palette( hid_t loc_id )
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -416,7 +413,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -467,7 +463,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -524,7 +519,6 @@ herr_t H5IMmake_palette( hid_t loc_id,
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 *  An image (dataset) within an HDF5 file may optionally specify an array of
 *  palettes to be viewed with. The dataset will have an attribute
@@ -702,7 +696,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -895,7 +888,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -1012,7 +1004,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -1120,7 +1111,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -1225,7 +1215,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *

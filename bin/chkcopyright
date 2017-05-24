@@ -20,6 +20,7 @@
 # Created Data: 2003/07/22
 # Modification:
 #	Rewrote most of it. Albert Cheng, 2005/10/10.
+#       Changed source file headers for website changes.  Larry Knox, 2017/5/24.
 
 # Setup
 #
@@ -28,7 +29,7 @@ DIFF="diff"
 INITFILE=.h5chkright.ini
 EXCEPTIONS=/tmp/h5chkright.except.$$
 tmpfile=/tmp/h5chkright_tmp.$$
-EXCEPTIONDIRS="-name git"	# at least skip .git directories.
+EXCEPTIONDIRS="-name .git"	# at least skip .git directories.
 EXTRACTEDFILE=/tmp/h5chkright.extracted.$$
 VERBOSE=		# default no
 FIXIT=			# default no
@@ -116,12 +117,10 @@ BUILDCOPYRIGHT()
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
 EOF
 
     # Fortran9X source Copyright notice
@@ -132,12 +131,10 @@ EOF
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!   of the source code distribution tree; Copyright.html can be found at the  *
-!   root level of an installed copy of the electronic HDF5 document set and   *
-!   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-!   access to either file, you may request a copy from help@hdfgroup.org.     *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
 EOF
 
     # HTML file Copyright notice
@@ -148,12 +145,10 @@ EOF
   *                                                                           *
   * This file is part of HDF5.  The full HDF5 copyright notice, including     *
   * terms governing use, modification, and redistribution, is contained in    *
-  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
-  * of the source code distribution tree; Copyright.html can be found at the  *
-  * root level of an installed copy of the electronic HDF5 document set and   *
-  * is linked from the top-level documents page.  It can also be found at     *
-  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-  * access to either file, you may request a copy from help@hdfgroup.org.     *
+  * the COPYING file, which can be found at the root of the source code       *
+  * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+  * If you do not have access to either file, you may request a copy from     *
+  * help@hdfgroup.org.                                                        *
 EOF
 
     # Shell style Copyright notice
@@ -164,12 +159,10 @@ EOF
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 EOF
 
     # Shell style Copyright notice (2nd type)
@@ -180,12 +173,10 @@ EOF
 ##
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
 ## terms governing use, modification, and redistribution, is contained in
-## the files COPYING and Copyright.html.  COPYING can be found at the root
-## of the source code distribution tree; Copyright.html can be found at the
-## root level of an installed copy of the electronic HDF5 document set and
-## is linked from the top-level documents page.  It can also be found at
-## http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from help@hdfgroup.org.
+## the COPYING file, which can be found at the root of the source code
+## distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+## If you do not have access to either file, you may request a copy from
+## help@hdfgroup.org.
 EOF
 
     # Windows Batch file Copyright notice
@@ -196,12 +187,10 @@ EOF
 @REM
 @REM This file is part of HDF5.  The full HDF5 copyright notice, including
 @REM terms governing use, modification, and redistribution, is contained in
-@REM the files COPYING and Copyright.html.  COPYING can be found at the root
-@REM of the source code distribution tree; Copyright.html can be found at the
-@REM root level of an installed copy of the electronic HDF5 document set and
-@REM is linked from the top-level documents page.  It can also be found at
-@REM http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-@REM access to either file, you may request a copy from help@hdfgroup.org.
+@REM the COPYING file, which can be found at the root of the source code
+@REM distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+@REM If you do not have access to either file, you may request a copy from
+@REM help@hdfgroup.org.
 EOF
 
     # configure.ac file Copyright notice
@@ -212,12 +201,10 @@ dnl All rights reserved.
 dnl
 dnl This file is part of HDF5.  The full HDF5 copyright notice, including
 dnl terms governing use, modification, and redistribution, is contained in
-dnl the files COPYING and Copyright.html.  COPYING can be found at the root
-dnl of the source code distribution tree; Copyright.html can be found at the
-dnl root level of an installed copy of the electronic HDF5 document set and
-dnl is linked from the top-level documents page.  It can also be found at
-dnl http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-dnl access to either file, you may request a copy from help@hdfgroup.org.
+dnl the COPYING file, which can be found at the root of the source code
+dnl distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+dnl If you do not have access to either file, you may request a copy from
+dnl help@hdfgroup.org.
 EOF
 
 }
