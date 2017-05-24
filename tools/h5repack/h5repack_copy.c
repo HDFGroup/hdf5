@@ -95,6 +95,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
     hsize_t       ub_size = 0;            /* size of user block */
     hid_t         fcpl = H5P_DEFAULT;     /* file creation property list ID */
     hid_t         fapl = H5P_DEFAULT;     /* file access property list ID */
+    unsigned      crt_order_flags;        /* group creation order flag */
 
     /*-------------------------------------------------------------------------
      * open input file
