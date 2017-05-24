@@ -86,6 +86,8 @@ test_sec2(void)
     hid_t       fid = -1;                   /* file ID                      */
     hid_t       fapl_id = -1;               /* file access property list ID */
     hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char        filename[1024];             /* filename                     */
     void        *os_file_handle = NULL;     /* OS file handle               */
     hsize_t     file_size;                  /* file size                    */
@@ -101,6 +103,28 @@ test_sec2(void)
 
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))  TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_POSIX_COMPAT_HANDLE
+                        | H5FD_FEAT_SUPPORTS_SWMR_IO
+                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
+        TEST_ERROR
 
     /* Retrieve the access property list... */
     if((fapl_id_out = H5Fget_access_plist(fid)) < 0)
@@ -174,6 +198,8 @@ test_core(void)
     hid_t       fid = -1;                   /* file ID                      */
     hid_t       fapl_id = -1;               /* file access property list ID */
     hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     hid_t       did = -1;                   /* dataset ID                   */
     hid_t       sid = -1;                   /* dataspace ID                 */
     char        filename[1024];             /* filename                     */
@@ -219,6 +245,28 @@ test_core(void)
     if(HDaccess(filename, F_OK) != -1)
         FAIL_PUTS_ERROR("file created when backing store set to FALSE");
 
+    /* Check that the VFD feature flags are correct.
+     * Note that the H5FDdriver_query() API call does not require a file
+     * so backing-store related flags will not be returned here.
+     */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))             TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))                      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))             TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ALLOW_FILE_IMAGE))                TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))    TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_ALLOW_FILE_IMAGE 
+                        | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
+        TEST_ERROR
 
     /************************************************************************
      * Check basic core VFD operation and properties. This is done with the
