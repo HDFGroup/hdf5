@@ -85,7 +85,7 @@ H5Z_can_apply_szip(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UN
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get datatype */
-    if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Get datatype's size, for checking the "bits-per-pixel" */
@@ -156,7 +156,7 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get datatype */
-    if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Get the filter's current parameters */
