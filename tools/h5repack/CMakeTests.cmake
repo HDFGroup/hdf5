@@ -88,6 +88,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00008.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00009.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00010.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr.h5
   )
 
   set (LIST_OTHER_TEST_FILES
@@ -106,6 +107,7 @@
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_version_test.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/plugin_version_test.h5repack_layout.h5.tst
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_zero.tst
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/crtorder.tordergr.h5.ddl
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
@@ -247,7 +249,7 @@
             NAME H5REPACK_DMP-h5dump-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-                -D "TEST_ARGS:STRING=-pH;out-${testname}.${resultfile}"
+                -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
@@ -835,6 +837,11 @@
     set (TESTTYPE "SKIP")
   endif ()
   ADD_H5_TEST (deflate_file ${TESTTYPE} ${arg})
+
+#crtorder
+  set (arg tordergr.h5 -L)
+  set (TESTTYPE "TEST")
+  ADD_H5_DMP_TEST (crtorder ${TESTTYPE} 0 ${arg})
 
 #########################################################
 # layout options (these files have no filters)
