@@ -125,12 +125,12 @@ static int test_swmr_deltat_read_concur(hid_t in_fapl);
 static int
 test_metadata_read_attempts(hid_t in_fapl)
 {
-    hid_t fapl;             /* File access property list */
-    hid_t file_fapl;            /* The file's access property list */
-    hid_t fid, fid1, fid2;          /* File IDs */
-    unsigned attempts;          /* The # of read attempts */
-    char filename[NAME_BUF_SIZE];       /* File name */
-    herr_t ret;                 /* Generic return value */
+    hid_t fapl = -1;                        /* File access property list        */
+    hid_t file_fapl = -1;                   /* The file's access property list  */
+    hid_t fid = -1, fid1 = -1, fid2 = -1;   /* File IDs                         */
+    unsigned attempts;                      /* The # of read attempts           */
+    char filename[NAME_BUF_SIZE];           /* File name                        */
+    herr_t ret;                             /* Generic return value             */
 
     /* Output message about test being performed */
     TESTING("H5Pget/set_metadata_read_attempts()");
