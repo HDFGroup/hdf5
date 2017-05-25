@@ -38,24 +38,24 @@ static herr_t extend_dset_one(const char *file, char *dname, int action);
 
 /* Data structures for datasets with compound data type */
 typedef struct sub22_t {
-    unsigned int a;
-    unsigned int b;
-    unsigned int c;
+    int a;
+    int b;
+    int c;
 } sub22_t;
 
 typedef struct sub2_t {
-    unsigned int a;
+    int a;
     sub22_t b;
-    unsigned int c;
+    int c;
 } sub2_t;
 
 typedef struct sub4_t {
-    unsigned int a;
-    unsigned int b;
+    int a;
+    int b;
 } sub4_t;
 
 typedef struct set_t {
-    unsigned int field1;
+    int field1;
     sub2_t field2;
     double field3;
     sub4_t field4;
@@ -225,7 +225,7 @@ extend_dset_one(const char *file, char *dname, int action)
     hid_t dtid = -1;        /* dataset's datatype id                            */
     hid_t sid = -1;         /* dataspace id                                     */
     hid_t mid = -1;         /* memory space id                                  */
-    unsigned i;             /* local index variable                             */
+    int i;                  /* local index variable                             */
     hsize_t cur_dims[1];    /* current dimension sizes                          */
     hsize_t ext_dims[1];    /* new dimension sizes after extension              */
     hsize_t offset[1];      /* starting offsets of appended data                */
@@ -304,7 +304,7 @@ extend_dset_one(const char *file, char *dname, int action)
         if(!HDstrcmp(dname, DSET_CMPD) || !HDstrcmp(dname, DSET_CMPD_ESC)) {
 
             HDmemset(cbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
-            for(i = 0; i < (unsigned)action; i++) {
+            for(i = 0; i < action; i++) {
                 cbuf[i].field1 = i + 1;
                 cbuf[i].field2.a = i + 2;
                 cbuf[i].field2.b.a = i + 2;
@@ -324,7 +324,7 @@ extend_dset_one(const char *file, char *dname, int action)
         } else { /* Integer type */
 
             HDmemset(ibuf, 0, TEST_BUF_SIZE * sizeof(int));
-            for(i = 0; i < (unsigned)action; i++)
+            for(i = 0; i < action; i++)
                 ibuf[i] = (int)i;
 
             /* Write to the extended region of the dataset */
