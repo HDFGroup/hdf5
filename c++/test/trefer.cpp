@@ -383,6 +383,7 @@ static void test_reference_obj(void)
 #define GROUPNAME3      "group3"
 #define DSETNAME        "/dset"
 #define DSETNAME2       "dset2"
+#define ATTRNAME        "some attribute"
 #define NAME_SIZE       16
 
 static void
@@ -434,7 +435,6 @@ test_reference_group(void)
 
         // Close resources
         dset2.close();
-        sid1.close();
         file1->close();
 
         /*
@@ -450,8 +450,14 @@ test_reference_group(void)
         // Read in the reference
         dset1.read(&rref, PredType::STD_REF_OBJ);
 
-        // Dereference to get the group
+        // Create an attribute for the dataset
+        Attribute ds_attr1 = dset1.createAttribute(ATTRNAME, PredType::NATIVE_INT, sid1);
+
+        // Dereference to get the group using constructor, with dataset as loc
         Group refgroup(dset1, &rref);
+
+        // Dereference to get the group using constructor, with attribute as loc
+        Group attrrefgroup(ds_attr1, &rref);
 
         // Dereference group object the other way
         group.dereference(dset1, &rref);
@@ -464,14 +470,22 @@ test_reference_group(void)
         hsize_t nobjs = refgroup.getNumObjs();
         verify_val(nobjs, (hsize_t)3, "H5Group::getNumObjs",__LINE__,__FILE__);
 
-        // Check number of objects in the group dereferenced by ::reference
-        nobjs = group.getNumObjs();
-        verify_val(nobjs, (hsize_t)3, "H5Group::getNumObjs",__LINE__,__FILE__);
-
         // Check getting file name given the group dereferenced via constructor
         H5std_string fname = refgroup.getFileName();
         verify_val(fname, FILE1, "H5Group::getFileName",__LINE__,__FILE__);
     
+        // Check number of objects in the group dereferenced by constructor
+        nobjs = attrrefgroup.getNumObjs();
+        verify_val(nobjs, (hsize_t)3, "H5Group::getNumObjs",__LINE__,__FILE__);
+
+        // Check getting file name given the group dereferenced via constructor
+        fname = attrrefgroup.getFileName();
+        verify_val(fname, FILE1, "H5Group::getFileName",__LINE__,__FILE__);
+    
+        // Check number of objects in the group dereferenced by ::reference
+        nobjs = group.getNumObjs();
+        verify_val(nobjs, (hsize_t)3, "H5Group::getNumObjs",__LINE__,__FILE__);
+
         // Check getting file name given the group dereferenced by ::reference
         fname = group.getFileName();
         verify_val(fname, FILE1, "H5Group::getFileName",__LINE__,__FILE__);
@@ -484,7 +498,9 @@ test_reference_group(void)
         // Close resources
         group.close();
         refgroup.close();
+        attrrefgroup.close();
         dset1.close();
+        sid1.close();
         file1->close();
 
         PASSED();

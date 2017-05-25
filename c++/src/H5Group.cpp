@@ -105,11 +105,16 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type) : H5Ob
 ///\param       ref_type - IN: Reference type - default to H5R_OBJECT
 ///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
+// Modification
+//      May, 2017
+//              Removed in 1.8.19 because H5Location is Attribute's baseclass
+//              now. -BMR
 //--------------------------------------------------------------------------
-Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object(), id(H5I_INVALID_HID)
+/*Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, "constructor - by dereference");
 }
+*/
 
 //--------------------------------------------------------------------------
 // Function:    Group::getId

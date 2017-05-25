@@ -54,6 +54,9 @@ class H5_DLLCPP H5File : public Group {
         // Gets the creation property list of this file.
         FileCreatPropList getCreatePlist() const;
 
+        // Gets general information about this file.
+        void getFileInfo(H5F_info_t& file_info) const;
+
         // Retrieves the file size of an opened file.
         hsize_t getFileSize() const;
 
