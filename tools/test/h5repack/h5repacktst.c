@@ -266,7 +266,7 @@ int main (void)
     fname = H5REPACK_FSPACE_FNAMES[j];
     if(h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
-    pack_options.fs_strategy = -1; 	    /* "FSM_AGGR" specified via -S FSM_AGGR */
+    pack_options.fs_strategy = (H5F_fspace_strategy_t)-1; 	    /* "FSM_AGGR" specified via -S FSM_AGGR */
     pack_options.fs_threshold = -1; 	/* "0" specified via -T 0 */
     if(h5repack(fname, FSPACE_OUT, &pack_options) < 0)
         GOERROR;
