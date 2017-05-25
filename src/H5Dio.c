@@ -181,7 +181,6 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     if(direct_read) {
         unsigned u;
-        hsize_t  dims[H5O_LAYOUT_NDIMS];
         hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
 
         if(H5D_CHUNKED != dset->shared->layout.type)

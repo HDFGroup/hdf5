@@ -140,7 +140,7 @@ typedef struct mcomp_t
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t region2_id, diff_opt_t *options);
 static hbool_t all_zero(const void *_mem, size_t size);
 static int     ull2float(unsigned long long ull_value, float *f_value);
-static hsize_t character_compare(char *mem1,char *mem2,hsize_t i,unsigned u,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
+static hsize_t character_compare(char *mem1,char *mem2,hsize_t i,size_t u,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hbool_t equal_float(float value, float expected, diff_opt_t *options);
 static hbool_t equal_double(double value, double expected, diff_opt_t *options);
@@ -149,7 +149,7 @@ static hbool_t equal_ldouble(long double value, long double expected, diff_opt_t
 #endif
 static int print_data(diff_opt_t *options);
 static void print_pos(int *ph,int pp,hsize_t curr_pos,hsize_t *acc,hsize_t *pos,int rank,hsize_t *dims,const char *obj1,const char *obj2 );
-static void print_char_pos(int *ph,int pp,hsize_t curr_pos,unsigned u,hsize_t *acc,hsize_t *pos,int rank,hsize_t *dims,const char *obj1,const char *obj2 );
+static void print_char_pos(int *ph,int pp,hsize_t curr_pos,size_t u,hsize_t *acc,hsize_t *pos,int rank,hsize_t *dims,const char *obj1,const char *obj2 );
 static void h5diff_print_char(char ch);
 static hsize_t diff_datum(void       *_mem1,
                    void       *_mem2,
@@ -575,7 +575,7 @@ static hsize_t diff_datum(void       *_mem1,
 {
     unsigned char *mem1 = (unsigned char*)_mem1;
     unsigned char *mem2 = (unsigned char*)_mem2;
-    unsigned      u;
+    size_t        u;
     hid_t         memb_type;
     size_t        type_size;
     H5T_sign_t    type_sign;
@@ -2813,7 +2813,7 @@ static
 hsize_t character_compare(char *mem1,
                   char *mem2,
                   hsize_t       i,
-                  unsigned      u,
+                  size_t        u,
                   int           rank,
                   hsize_t       *dims,
                   hsize_t       *acc,
@@ -5906,7 +5906,7 @@ static
 void print_char_pos( int        *ph,       /* print header */
                      int        pp,        /* print percentage */
                      hsize_t    curr_pos,
-                     unsigned   u,
+                     size_t     u,
                      hsize_t    *acc,
                      hsize_t    *pos,
                      int        rank,
@@ -5944,7 +5944,7 @@ void print_char_pos( int        *ph,       /* print header */
     }
     else
     {
-        parallel_print("%u", (unsigned)u);
+        parallel_print("%zu", u);
     }
     parallel_print("]" );
 }
