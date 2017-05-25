@@ -68,7 +68,7 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5PLappend
   (JNIEnv *env, jclass clss, jobjectArray plugin_path)
 {
-    char *aName;
+    const char *aName;
     herr_t retVal = -1;
 
     PIN_JAVA_STRING(plugin_path, aName);
@@ -90,7 +90,7 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5PLprepend
   (JNIEnv *env, jclass clss, jobjectArray plugin_path)
 {
-    char *aName;
+    const char *aName;
     herr_t retVal = -1;
 
     PIN_JAVA_STRING(plugin_path, aName);
@@ -113,7 +113,7 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5PLreplace
   (JNIEnv *env, jclass clss, jobjectArray plugin_path, jint index)
 {
-    char *aName;
+    const char *aName;
     herr_t retVal = -1;
 
     PIN_JAVA_STRING(plugin_path, aName);
@@ -136,7 +136,7 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5PLinsert
   (JNIEnv *env, jclass clss, jobjectArray plugin_path, jint index)
 {
-    char *aName;
+    const char *aName;
     herr_t retVal = -1;
 
     PIN_JAVA_STRING(plugin_path, aName);
