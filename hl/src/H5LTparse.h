@@ -109,15 +109,15 @@ extern int H5LTyydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 {
-/* Line 2058 of yacc.c  */
-#line 68 "H5LTparse.y"
+/* Line 2065 of yacc.c  */
+#line 66 "H5LTparse.y"
 
     int     ival;         /*for integer token*/
     char    *sval;        /*for name string*/
     hid_t   hid;          /*for hid_t token*/
 
 
-/* Line 2058 of yacc.c  */
+/* Line 2065 of yacc.c  */
 #line 122 "H5LTparse.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
