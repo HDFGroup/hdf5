@@ -3479,7 +3479,7 @@ static void gent_array8(void)
     unsigned int i;
 
     /* Allocate data buffer */
-    wdata = HDmalloc(F64_DIM1 * sizeof(int));
+    wdata = (int *)HDmalloc(F64_DIM1 * sizeof(int));
     HDassert(wdata);
 
     /*
