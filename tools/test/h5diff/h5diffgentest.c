@@ -48,6 +48,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define FILE6    "h5diff_attr2.h5"
 #define FILE7    "h5diff_dset1.h5"
 #define FILE8    "h5diff_dset2.h5"
+#define FILE8A   "h5diff_dset3.h5"
 #define FILE9    "h5diff_hyper1.h5"
 #define FILE10   "h5diff_hyper2.h5"
 #define FILE11   "h5diff_empty.h5"
@@ -197,6 +198,7 @@ int main(void)
     /* generate 2 files, the second call creates a similar file with differences */
     test_datasets(FILE7,0);
     test_datasets(FILE8,1);
+    test_datasets(FILE8A,2);
 
     /* generate 2 files, the second call creates a similar file with differences */
     test_hyperslab(FILE9,0);
@@ -1328,7 +1330,7 @@ int test_datasets(const char *file,
     herr_t  status;
     int     buf[2]={1,2};
 
-    if(make_diffs)
+    if(make_diffs > 0)
         memset(buf, 0, sizeof buf);
 
     /* Create a file  */
@@ -1399,9 +1401,8 @@ int test_special_datasets(const char *file,
 
     /* Create a dataset with zero dimension size in one file but the other one
      * has a dataset with a non-zero dimension size */
-    if(make_diffs) {
+    if(make_diffs)
         dims[1] = SPACE1_DIM2 + 4;
-    }
 
     sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
     did  = H5Dcreate2(fid, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -5466,6 +5467,34 @@ static void test_objs_strings(const char *fname1, const char *fname2)
     H5Sclose(space);
     H5Dclose(dataset);
 
+    /* string 5 : early term long string */
+    string4A[0][10] = 0;
+    string4A[0][11] = 0;
+    string4B[0][10] = 0;
+
+    string4A[1][10] = 0;
+    string4A[1][11] = 'Z';
+    string4B[1][10] = 0;
+    string4B[1][11] = 'x';
+
+    string4A[2][10] = 0;
+    string4B[2][10] = 0;
+    string4B[2][11] = 'a';
+    string4B[2][12] = 'B';
+    string4B[2][13] = 'c';
+    space = H5Screate_simple(1, dims4, NULL);
+    f_type = mkstr(168, H5T_STR_NULLTERM);
+    m_type = mkstr(21, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string5", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string5", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
 out:
     /*-----------------------------------------------------------------------
     * Close IDs
@@ -6613,6 +6642,9 @@ void write_dset_in(hid_t loc_id,
     int        buf73[4][3][2];    /* integer */
     float      buf83[4][3][2];    /* float */
 
+    if(make_diffs == 2) {
+        dimarray[0] = 4;
+    }
 
     /*-------------------------------------------------------------------------
     * H5S_SCALAR
@@ -6621,11 +6653,8 @@ void write_dset_in(hid_t loc_id,
 
 
 
-    if ( make_diffs )
-    {
-
+    if(make_diffs)
         scalar_data = 1;
-    }
 
     /* create a space  */
     sid = H5Screate(H5S_SCALAR);
@@ -7208,7 +7237,7 @@ void write_dset_in(hid_t loc_id,
 
     n=1;
     for (i = 0; i < 24; i++) {
-        for (j = 0; j < (int)dimarray[0]; j++) {
+        for (j = 0; j < 3; j++) {
             if (make_diffs) buf63[i][j]=0;
             else buf63[i][j]=n++;
         }

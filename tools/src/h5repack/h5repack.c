@@ -784,6 +784,8 @@ static int check_objects(const char* fname, pack_opt_t *options) {
     *-------------------------------------------------------------------------
     */
 
+    /* Initialize indexing options */
+    h5trav_set_index(sort_by, sort_order);
     /* init table */
     trav_table_init(&travt);
 

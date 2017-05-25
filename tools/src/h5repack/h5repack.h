@@ -29,10 +29,10 @@
 #define MAX_COMPACT_DSIZE  64512  /* max data size for compact layout. -1k for header size */
 
 /* File space default information */
-#define FS_PAGESIZE_DEF		4096
-#define FS_STRATEGY_DEF        	H5F_FSPACE_STRATEGY_FSM_AGGR
-#define FS_PERSIST_DEF         	FALSE
-#define FS_THRESHOLD_DEF       	1
+#define FS_PAGESIZE_DEF        4096
+#define FS_STRATEGY_DEF            H5F_FSPACE_STRATEGY_FSM_AGGR
+#define FS_PERSIST_DEF             FALSE
+#define FS_THRESHOLD_DEF           1
 
 
 /*-------------------------------------------------------------------------
@@ -120,10 +120,10 @@ typedef struct {
  hsize_t         meta_block_size;  /* metadata aggregation block size (for H5Pset_meta_block_size) */
  hsize_t         threshold;        /* alignment threshold for H5Pset_alignment */
  hsize_t         alignment;        /* alignment for H5Pset_alignment */
- H5F_fspace_strategy_t fs_strategy;	/* File space handling strategy */
- int		fs_persist; 		/* Free space section threshold */
- long		fs_threshold; 		/* Free space section threshold */
- long long 	fs_pagesize;   		/* File space page size */
+ H5F_fspace_strategy_t fs_strategy;    /* File space handling strategy */
+ int        fs_persist;         /* Free space section threshold */
+ long        fs_threshold;         /* Free space section threshold */
+ long long     fs_pagesize;           /* File space page size */
 } pack_opt_t;
 
 
@@ -150,10 +150,10 @@ int h5repack_end(pack_opt_t *options);
 int h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options);
 int h5repack_cmp_pl(const char *fname1, const char *fname2);
 
-/* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr() 
- * and struct named_dt_t were located in h5repack_copy.c as static prior to 
- * bugfix1726. 
- * Made shared functions as copy_attr() was needed in h5repack_refs.c. 
+/* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr()
+ * and struct named_dt_t were located in h5repack_copy.c as static prior to
+ * bugfix1726.
+ * Made shared functions as copy_attr() was needed in h5repack_refs.c.
  * However copy_attr() may be obsoleted when H5Acopy is available and put back
  * others to static in h5repack_copy.c.
  */

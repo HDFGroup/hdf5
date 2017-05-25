@@ -2240,6 +2240,8 @@
 ./tools/test/h5diff/testfiles/h5diff_709.txt
 ./tools/test/h5diff/testfiles/h5diff_710.txt
 ./tools/test/h5diff/testfiles/h5diff_80.txt
+./tools/test/h5diff/testfiles/h5diff_800.txt
+./tools/test/h5diff/testfiles/h5diff_801.txt
 ./tools/test/h5diff/testfiles/h5diff_90.txt
 ./tools/test/h5diff/testfiles/h5diff_100.txt
 ./tools/test/h5diff/testfiles/h5diff_101.txt
@@ -2350,6 +2352,7 @@
 ./tools/test/h5diff/testfiles/h5diff_basic2.h5
 ./tools/test/h5diff/testfiles/h5diff_dset1.h5
 ./tools/test/h5diff/testfiles/h5diff_dset2.h5
+./tools/test/h5diff/testfiles/h5diff_dset3.h5
 ./tools/test/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/test/h5diff/testfiles/h5diff_empty.h5
 ./tools/test/h5diff/testfiles/h5diff_hyper1.h5
@@ -2429,6 +2432,7 @@
 ./tools/test/h5repack/testfiles/h5repack_soffset.h5
 ./tools/test/h5repack/testfiles/h5repack_szip.h5
 ./tools/test/h5repack/testfiles/ublock.bin
+./tools/test/h5repack/testfiles/crtorder.tordergr.h5.ddl
 ./tools/test/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/test/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/test/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst

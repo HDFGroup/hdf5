@@ -51,6 +51,10 @@ unsigned    packed_data_length; /* length of packed bits to display */
 unsigned long long packed_data_mask;  /* mask in which packed bits to display */
 int          enable_error_stack= FALSE; /* re-enable error stack */
 
+/* sort parameters */
+H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
+H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
+
 /* module-scoped variables */
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */
 

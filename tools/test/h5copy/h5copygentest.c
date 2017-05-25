@@ -33,12 +33,12 @@
 #define DATASET_COMPRESSED      "compressed"
 #define DATASET_NAMED_VL        "named_vl"
 #define DATASET_NESTED_VL       "nested_vl"
-#define DATASET_ATTR		"dset_attr"
-#define ATTR			"attr"
+#define DATASET_ATTR            "dset_attr"
+#define ATTR                    "attr"
 #define GROUP_EMPTY             "grp_empty"
 #define GROUP_DATASETS          "grp_dsets"
 #define GROUP_NESTED            "grp_nested"
-#define GROUP_ATTR		"grp_attr"
+#define GROUP_ATTR              "grp_attr"
 
 /* Obj reference */
 #define OBJ_REF_DS "Dset1"
@@ -327,8 +327,8 @@ static void gent_nested_vl(hid_t loc_id)
  * Function:    gent_att_compound_vlstr
  *
  * Purpose:     Generate a dataset and a group.
- *		Both has an attribute with a compound datatype consisting 
- *		of a variable length string
+ *              Both has an attribute with a compound datatype consisting 
+ *              of a variable length string
  *
  *-------------------------------------------------------------------------
  */
@@ -347,7 +347,7 @@ static void gent_att_compound_vlstr(hid_t loc_id)
     hid_t vl_str_tid = -1;	/* Variable length datatype ID */
     hid_t cmpd_tid = -1;	/* Compound datatype ID */
     hid_t null_sid = -1;	/* Null dataspace ID */
-    s1 buf;			/* Buffer */
+    s1 buf;                 /* Buffer */
 
     buf.i = 9;
     buf.v = "ThisIsAString";
