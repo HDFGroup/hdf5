@@ -249,7 +249,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * the same as the input file's strategy.
      */
     if(options->fs_strategy) {
-        if(out_strategy != (options->fs_strategy == (-1) ? 0 : options->fs_strategy)) {
+        if(out_strategy != (options->fs_strategy == (H5F_fspace_strategy_t)-1 ? 0 : options->fs_strategy)) {
             error_msg("file space strategy not set as unexpected\n");
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
         }
