@@ -198,7 +198,7 @@ H5PL__init_package(void)
      * to tell the library to load plugin libraries without search.
      */
     if(NULL != (preload_path = HDgetenv("HDF5_PLUGIN_PRELOAD")))
-        /* Special symbal "::" means no plugin during data reading. */
+        /* Special symbol "::" means no plugin during data reading. */
         if(!HDstrcmp(preload_path, H5PL_NO_PLUGIN))
             H5PL_plugin_g = 0;
 

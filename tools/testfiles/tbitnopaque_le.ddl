@@ -15,24 +15,24 @@ GROUP "/" {
          DATATYPE  H5T_STD_B16LE
          DATASPACE  SIMPLE { ( 32 ) / ( 32 ) }
          DATA {
-         (0): ff:ff, 00:00, ef:ff, 00:00, df:ff, 00:00, cf:ff, 00:00, bf:ff,
-         (9): 00:00, af:ff, 00:00, 9f:ff, 00:00, 8f:ff, 00:00, 7f:ff, 00:00,
-         (18): 6f:ff, 00:00, 5f:ff, 00:00, 4f:ff, 00:00, 3f:ff, 00:00, 2f:ff,
-         (27): 00:00, 1f:ff, 00:00, 0f:ff, 00:00
+         (0): ff:ff, ef:ff, df:ff, cf:ff, bf:ff, af:ff, 9f:ff, 8f:ff, 7f:ff,
+         (9): 6f:ff, 5f:ff, 4f:ff, 3f:ff, 2f:ff, 1f:ff, 0f:ff, ff:fe, ef:fe,
+         (18): df:fe, cf:fe, bf:fe, af:fe, 9f:fe, 8f:fe, 7f:fe, 6f:fe, 5f:fe,
+         (27): 4f:fe, 3f:fe, 2f:fe, 1f:fe, 0f:fe
          }
       }
       DATASET "bitfield_3" {
          DATATYPE  H5T_STD_B32LE
          DATASPACE  SIMPLE { ( 32 ) / ( 32 ) }
          DATA {
-         (0): ff:ff:ff:ff, 00:00:00:00, df:ff:ff:ff, 00:00:00:00,
-         (4): bf:ff:ff:ff, 00:00:00:00, 9f:ff:ff:ff, 00:00:00:00,
-         (8): 7f:ff:ff:ff, 00:00:00:00, 5f:ff:ff:ff, 00:00:00:00,
-         (12): 3f:ff:ff:ff, 00:00:00:00, 1f:ff:ff:ff, 00:00:00:00,
-         (16): ff:fe:ff:ff, 00:00:00:00, df:fe:ff:ff, 00:00:00:00,
-         (20): bf:fe:ff:ff, 00:00:00:00, 9f:fe:ff:ff, 00:00:00:00,
-         (24): 7f:fe:ff:ff, 00:00:00:00, 5f:fe:ff:ff, 00:00:00:00,
-         (28): 3f:fe:ff:ff, 00:00:00:00, 1f:fe:ff:ff, 00:00:00:00
+         (0): ff:ff:ff:ff, df:ff:ff:ff, bf:ff:ff:ff, 9f:ff:ff:ff,
+         (4): 7f:ff:ff:ff, 5f:ff:ff:ff, 3f:ff:ff:ff, 1f:ff:ff:ff,
+         (8): ff:fe:ff:ff, df:fe:ff:ff, bf:fe:ff:ff, 9f:fe:ff:ff,
+         (12): 7f:fe:ff:ff, 5f:fe:ff:ff, 3f:fe:ff:ff, 1f:fe:ff:ff,
+         (16): ff:fd:ff:ff, df:fd:ff:ff, bf:fd:ff:ff, 9f:fd:ff:ff,
+         (20): 7f:fd:ff:ff, 5f:fd:ff:ff, 3f:fd:ff:ff, 1f:fd:ff:ff,
+         (24): ff:fc:ff:ff, df:fc:ff:ff, bf:fc:ff:ff, 9f:fc:ff:ff,
+         (28): 7f:fc:ff:ff, 5f:fc:ff:ff, 3f:fc:ff:ff, 1f:fc:ff:ff
          }
       }
       DATASET "bitfield_4" {
@@ -282,10 +282,10 @@ GROUP "/" {
          }
          DATASPACE  SIMPLE { ( 32 ) / ( 32 ) }
          DATA {
-         (0): ff:ff, 00:00, ef:ff, 00:00, df:ff, 00:00, cf:ff, 00:00, bf:ff,
-         (9): 00:00, af:ff, 00:00, 9f:ff, 00:00, 8f:ff, 00:00, 7f:ff, 00:00,
-         (18): 6f:ff, 00:00, 5f:ff, 00:00, 4f:ff, 00:00, 3f:ff, 00:00, 2f:ff,
-         (27): 00:00, 1f:ff, 00:00, 0f:ff, 00:00
+         (0): ff:ff, ef:ff, df:ff, cf:ff, bf:ff, af:ff, 9f:ff, 8f:ff, 7f:ff,
+         (9): 6f:ff, 5f:ff, 4f:ff, 3f:ff, 2f:ff, 1f:ff, 0f:ff, ff:fe, ef:fe,
+         (18): df:fe, cf:fe, bf:fe, af:fe, 9f:fe, 8f:fe, 7f:fe, 6f:fe, 5f:fe,
+         (27): 4f:fe, 3f:fe, 2f:fe, 1f:fe, 0f:fe
          }
       }
    }

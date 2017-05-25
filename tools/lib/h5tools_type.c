@@ -15,39 +15,6 @@
 #include "h5tools.h"
 
 /*-------------------------------------------------------------------------
- * Function: h5tools_get_native_type
- *
- * Purpose: Wrapper around H5Tget_native_type() to work around
- *  Problems with bitfields.
- *
- * Return: Success:    datatype ID
- *
- *  Failure:    FAIL
- *
- * Programmer: Quincey Koziol
- *              Tuesday, October  5, 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-h5tools_get_native_type(hid_t type)
-{
-    hid_t p_type;
-    H5T_class_t type_class;
-
-    type_class = H5Tget_class(type);
-    if(type_class==H5T_BITFIELD)
-        p_type=H5Tcopy(type);
-    else
-        p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
-
-    return(p_type);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function: h5tools_get_little_endian_type
  *
  * Purpose: Get a little endian type from a file type
@@ -101,8 +68,18 @@ h5tools_get_little_endian_type(hid_t tid)
                 p_type=H5Tcopy(H5T_IEEE_F64LE);
             break;
 
-        case H5T_TIME:
         case H5T_BITFIELD:
+            if ( size == 1)
+                p_type=H5Tcopy(H5T_STD_B8LE);
+            else if ( size == 2)
+                p_type=H5Tcopy(H5T_STD_B16LE);
+            else if ( size == 4)
+                p_type=H5Tcopy(H5T_STD_B32LE);
+            else if ( size == 8)
+                p_type=H5Tcopy(H5T_STD_B64LE);
+            break;
+
+        case H5T_TIME:
         case H5T_OPAQUE:
         case H5T_STRING:
         case H5T_COMPOUND:
@@ -178,8 +155,18 @@ h5tools_get_big_endian_type(hid_t tid)
                 p_type=H5Tcopy(H5T_IEEE_F64BE);
             break;
 
-        case H5T_TIME:
         case H5T_BITFIELD:
+            if ( size == 1)
+                p_type=H5Tcopy(H5T_STD_B8BE);
+            else if ( size == 2)
+                p_type=H5Tcopy(H5T_STD_B16BE);
+            else if ( size == 4)
+                p_type=H5Tcopy(H5T_STD_B32BE);
+            else if ( size == 8)
+                p_type=H5Tcopy(H5T_STD_B64BE);
+            break;
+
+        case H5T_TIME:
         case H5T_OPAQUE:
         case H5T_STRING:
         case H5T_COMPOUND:

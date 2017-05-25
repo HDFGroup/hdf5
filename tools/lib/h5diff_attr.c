@@ -91,7 +91,7 @@ static void table_attrs_free( table_attrs_t *table )
 /*-------------------------------------------------------------------------
  * Function: table_attr_mark_exist
  *
- * Purpose: mark given attribute name to table as sign of exsit
+ * Purpose: mark given attribute name to table as sign of exist
  *
  * Parameter:
  *  - exist [IN]
@@ -322,8 +322,8 @@ hsize_t diff_attr(hid_t loc1_id,
     hid_t      space2_id=-1;    /* space ID */
     hid_t      ftype1_id=-1;    /* file data type ID */
     hid_t      ftype2_id=-1;    /* file data type ID */
-    int	       vstrtype1=0;     /* ftype1 is a variable string */
-    int	       vstrtype2=0;     /* ftype2 is a variable string */
+    int        vstrtype1=0;     /* ftype1 is a variable string */
+    int        vstrtype2=0;     /* ftype2 is a variable string */
     hid_t      mtype1_id=-1;    /* memory data type ID */
     hid_t      mtype2_id=-1;    /* memory data type ID */
     size_t     msize1;          /* memory size of memory type */
@@ -346,7 +346,7 @@ hsize_t diff_attr(hid_t loc1_id,
     hsize_t    nfound_total = 0;
     int       j;
 
-    table_attrs_t * match_list_attrs = NULL;
+    table_attrs_t *match_list_attrs = NULL;
     if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, options) < 0)
         goto error;
 
@@ -395,9 +395,9 @@ hsize_t diff_attr(hid_t loc1_id,
                 continue;
             }
 
-            if((mtype1_id = h5tools_get_native_type(ftype1_id)) < 0)
+            if((mtype1_id = H5Tget_native_type(ftype1_id, H5T_DIR_DEFAULT)) < 0)
                 goto error;
-            if((mtype2_id = h5tools_get_native_type(ftype2_id)) < 0)
+            if((mtype2_id = H5Tget_native_type(ftype2_id, H5T_DIR_DEFAULT)) < 0)
                 goto error;
             if((msize1 = H5Tget_size(mtype1_id)) == 0)
                 goto error;
