@@ -45,8 +45,10 @@
 #define TBLOCK_SIZE4    4
 #define TBLOCK_SIZE5    5
 #define TBLOCK_SIZE6    6
+#ifdef PB_OUT
 #define TBLOCK_SIZE7    7
 #define TBLOCK_SIZE8    8
+#endif /* PB_OUT */
 #define TBLOCK_SIZE10   10
 #define TBLOCK_SIZE11   11
 #define TBLOCK_SIZE20   20
