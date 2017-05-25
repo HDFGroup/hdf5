@@ -111,6 +111,9 @@ class H5_DLLCPP DataType : public H5Object {
         // Checks whether this datatype is a variable-length string.
         bool isVariableStr() const;
 
+        // Returns a copy of the creation property list of a datatype.
+        PropList getCreatePlist() const;
+
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DataType"); }
 
