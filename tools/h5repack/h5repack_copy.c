@@ -304,6 +304,9 @@ print_user_block(fnamein, fidin);
         }
     }
 
+    if(H5Pset_link_creation_order(fcpl, crt_order_flags ) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_link_creation_order failed");
+
     /*-------------------------------------------------------------------------
      * create the output file
      *-------------------------------------------------------------------------
