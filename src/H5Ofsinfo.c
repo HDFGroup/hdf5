@@ -85,7 +85,7 @@ H5FL_DEFINE_STATIC(H5O_fsinfo_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fsinfo_decode(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+H5O_fsinfo_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_fsinfo_t    *fsinfo = NULL;     /* File space info message */
