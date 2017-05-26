@@ -3479,7 +3479,7 @@ static void gent_array8(void)
     unsigned int i;
 
     /* Allocate data buffer */
-    wdata = HDmalloc(F64_DIM1 * sizeof(int));
+    wdata = (int *)HDmalloc(F64_DIM1 * sizeof(int));
     HDassert(wdata);
 
     /*
@@ -10318,7 +10318,6 @@ static void gent_udfilter(void)
     hid_t    dcpl; /* dataset creation property list */
     hid_t    dsid;  /* dataset ID */
     hid_t    sid;  /* dataspace ID */
-    hid_t    tid;  /* datatype ID */
 
     hsize_t  dims1[RANK]      = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};

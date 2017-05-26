@@ -336,7 +336,7 @@ static void gent_att_compound_vlstr(hid_t loc_id)
 {
     typedef struct { /* Compound structure for the attribute */
         int i;
-        char *v;
+        const char *v;
     } s1;
     hsize_t dim[1] = {1};	/* Dimension size */
     hid_t sid = -1; 		/* Dataspace ID */

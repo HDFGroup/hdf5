@@ -17,6 +17,8 @@
  *
  * Purpose:	Tests the dataset interface (H5D)
  */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#define H5D_TESTING
 #define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
 #define H5FD_TESTING
 
@@ -24,6 +26,7 @@
 
 #include "h5test.h"
 #include "H5srcdir.h"
+#include "H5Dpkg.h"
 #include "H5FDpkg.h"
 #include "H5VMprivate.h"
 #include "H5Zpkg.h"

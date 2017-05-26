@@ -928,64 +928,60 @@ error: /* An error has occurred.  Clean up and exit. */
  * 2016/01/27 -BMR
  *-------------------------------------------------------------------------
  */
-static herr_t verify_accessors(hid_t fid, const char *table_name, herr_t expected_value)
+static herr_t verify_accessors(hid_t fid, const char *table_name, hbool_t uses_vlen_type)
 {
-    hid_t ptable=H5I_INVALID_HID;	/* Packet table identifier */
-    hid_t dset_id=H5I_INVALID_HID;	/* Dataset associated with the pt */
-    hid_t dtype_id=H5I_INVALID_HID;	/* Dataset identifier */
+    hid_t ptable = H5I_INVALID_HID;     /* Packet table identifier */
+    hid_t dset_id = H5I_INVALID_HID;    /* Dataset associated with the pt */
+    hid_t dtype_id = H5I_INVALID_HID;   /* Dataset identifier */
     char buf[NAME_BUF_SIZE];
     ssize_t name_size;
-    herr_t  is_varlen = 0;
-    herr_t ret = FAIL;		/* Returned status from a callee */
+    htri_t vlen_check_result = -1;
 
     /* Open the named packet table. */
-    ptable = H5PTopen(fid, table_name);
-    if (ptable < 0)
-	goto error;
+    if((ptable = H5PTopen(fid, table_name)) < 0)
+        goto error;
 
     /* Get the associated dataset ID. */
-    dset_id = H5PTget_dataset(ptable);
-    if (dset_id < 0)
-	goto error;
+    if((dset_id = H5PTget_dataset(ptable)) < 0)
+        goto error;
 
     /* Check if the packet table's name matches its associated dataset's. */
     *buf = '\0';
-    name_size = H5Iget_name(dset_id, (char*)buf, NAME_BUF_SIZE);
-    if (name_size < 0)
-	goto error;
+    if((name_size = H5Iget_name(dset_id, (char*)buf, NAME_BUF_SIZE)) < 0)
+        goto error;
     VERIFY(HDstrcmp(buf, table_name), "Names of dataset and packet table don't match");
 
     /* Get the packet table's datatype ID */
-    dtype_id = H5PTget_type(ptable);
-    if (dtype_id < 0)
-	goto error;
+    if((dtype_id = H5PTget_type(ptable)) < 0)
+        goto error;
 
     /* Check if the type class matches that of the packet table. */
-    is_varlen = H5Tdetect_class(dtype_id, H5T_VLEN);
-    if (is_varlen == FAIL) /* failure occurred */
-	goto error;
-    else if (is_varlen == expected_value) /* length types match */
-	ret = SUCCEED;
-    else /* length types don't match */
-    {
-	/* Give lengthtype "fixed-length" or "variable-length" depending on the
-	   expected_value passed in, then print the error message. */
-	char lenthtype[20];
-	HDstrcpy(lenthtype, "fixed-length");
-	if (expected_value == 1)
-	    HDstrcpy(lenthtype, "variable-length");
-	fprintf(stderr, "\nThe dataset '%s' should be %s but is not\n", table_name, lenthtype);
-	ret = FAIL;
+    if((vlen_check_result = H5Tdetect_class(dtype_id, H5T_VLEN)) < 0)
+        goto error;
+
+    /* Check if length types match */
+    if (vlen_check_result != (htri_t)uses_vlen_type) {
+        /* Give lengthtype "fixed-length" or "variable-length" depending on the
+         * expected_value passed in, then print the error message.
+         */
+        char lenthtype[20];
+        if (uses_vlen_type == TRUE)
+            HDstrcpy(lenthtype, "variable-length");
+        else
+            HDstrcpy(lenthtype, "fixed-length");
+        HDfprintf(stderr, "\nThe dataset '%s' should be %s but is not\n", table_name, lenthtype);
+        goto error;
     }
 
     /* Close the packet table */
     if (H5PTclose(ptable) < 0)
-	goto error;
+        goto error;
 
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
-    if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
+    if (H5PTis_valid(ptable) > 0)
+        H5PTclose(ptable);
     H5_FAILED();
     return FAIL;
 } /* verify_accessors */
@@ -1010,25 +1006,26 @@ static int test_accessors(void)
     /* Open the file */
     fid = H5Fopen(TEST_FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
     if (fid < 0)
-	goto error;
+        goto error;
 
     ret = verify_accessors(fid, PT_VLEN_ATOMIC, TRUE);
     if (ret < 0)
-	goto error;
+        goto error;
 
     ret = verify_accessors(fid, PT_FIXED_LEN, FALSE);
     if (ret < 0)
-	goto error;
+        goto error;
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-	goto error;
+        goto error;
 
     PASSED();
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
-    if (fid > 0) H5Fclose(fid);
+    if (fid > 0)
+        H5Fclose(fid);
     H5_FAILED();
     return FAIL;
 } /* test_accessors */
