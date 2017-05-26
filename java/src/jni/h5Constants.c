@@ -24,6 +24,7 @@ extern "C" {
 #include <jni.h>
 #include "hdf5.h"
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 JNIEXPORT jlong JNICALL
