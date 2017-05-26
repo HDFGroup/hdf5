@@ -76,10 +76,6 @@ int          disable_compact_subset= FALSE; /* disable compact form of subset no
 int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
 int          include_attrs     = TRUE; /* Display attributes */
 
-/* sort parameters */
-H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
-H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
-
 #define PACKED_BITS_MAX         8  /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX    (8*sizeof(long long))  /* Maximum bits size of integer types of packed-bits */
 /* mask list for packed bits */

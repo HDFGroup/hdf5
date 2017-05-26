@@ -95,6 +95,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
     hsize_t       ub_size = 0;            /* size of user block */
     hid_t         fcpl = H5P_DEFAULT;     /* file creation property list ID */
     hid_t         fapl = H5P_DEFAULT;     /* file access property list ID */
+    unsigned      crt_order_flags;        /* group creation order flag */
 
     /*-------------------------------------------------------------------------
      * open input file
@@ -108,6 +109,8 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
     /* get user block size and file space strategy/threshold */
     {
         hid_t fcpl_in; /* file creation property list ID for input file */
+        hid_t grp_in = -1;   /* group ID */
+        hid_t gcpl_in = -1;  /* group creation property list */
 
         if ((fcpl_in = H5Fget_create_plist(fidin)) < 0) {
             error_msg("failed to retrieve file creation property list\n");
@@ -118,6 +121,18 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
             error_msg("failed to retrieve userblock size\n");
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
         }
+
+        /* open root group */
+        if ((grp_in = H5Gopen2(fidin, "/", H5P_DEFAULT)) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gopen2 failed");
+
+        /* get root group creation property list */
+        if ((gcpl_in = H5Gget_create_plist(grp_in)) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gget_create_plist failed");
+
+        /* query and set the group creation properties */
+        if (H5Pget_link_creation_order(gcpl_in, &crt_order_flags) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_link_creation_order failed");
 
         if (H5Pclose(fcpl_in) < 0) {
             error_msg("failed to close property list\n");
@@ -289,6 +304,9 @@ print_user_block(fnamein, fidin);
         }
     }
 
+    if(H5Pset_link_creation_order(fcpl, crt_order_flags ) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_link_creation_order failed");
+
     /*-------------------------------------------------------------------------
      * create the output file
      *-------------------------------------------------------------------------
@@ -317,6 +335,8 @@ print_user_block(fnamein, fidin);
      *-------------------------------------------------------------------------
      */
 
+    /* Initialize indexing options */
+    h5trav_set_index(sort_by, sort_order);
     /* init table */
     trav_table_init(&travt);
 

@@ -91,7 +91,7 @@ static void table_attrs_free( table_attrs_t *table )
 /*-------------------------------------------------------------------------
  * Function: table_attr_mark_exist
  *
- * Purpose: mark given attribute name to table as sign of exsit
+ * Purpose: mark given attribute name to table as sign of exist
  *
  * Parameter:
  *  - exist [IN]

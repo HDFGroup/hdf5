@@ -115,6 +115,8 @@ h5repack_verify(const char *out_fname, pack_opt_t *options)
     if(options->all_filter == 1 || options->all_layout == 1)
     {
 
+        /* Initialize indexing options */
+        h5trav_set_index(sort_by, sort_order);
         /* init table */
         trav_table_init(&travt);
 
@@ -329,6 +331,9 @@ int h5repack_cmp_pl(const char *fname1,
     * get file table list of objects
     *-------------------------------------------------------------------------
     */
+    /* Initialize indexing options */
+    h5trav_set_index(sort_by, sort_order);
+    /* init table */
     trav_table_init(&trav);
     if(h5trav_gettable(fid1, trav) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5trav_gettable failed");
@@ -517,7 +522,7 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
         {
 
             case H5Z_FILTER_NONE:
-        	break;
+            break;
 
             case H5Z_FILTER_SHUFFLE:
                 /* 1 private client value is returned by DCPL */
