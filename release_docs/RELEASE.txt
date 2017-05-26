@@ -139,6 +139,11 @@ Bug Fixes since HDF5-1.8.18
 
     Tools
     -----
+    - Improved h5repack by retaining creation order and adding
+      arguments to set the order and index direction.
+
+      (ADB, 2017/05/26, HDFFV-8611)
+
     - Improved h5diff compare of strings and arrays.
 
       (ADB, 2017/05/18, HDFFV-9055, HDFFV-10128)
