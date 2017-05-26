@@ -5127,8 +5127,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options
         else {
             /* get the length of the filename */
             H5Pget_mdc_log_options((hid_t)fapl_id, &is_enabled, NULL, &location_size, &start_on_access);
-            if (location_size < 0) {
-                h5badArgument(env, "H5Pget_mdc_log_options:  location_size < 0");
+            if (location_size == 0) {
+                h5badArgument(env, "H5Pget_mdc_log_options:  location_size is 0");
             }/* end if */
             else if (location_size > 0) {
                 location_size++; /* add extra space for the null terminator */
