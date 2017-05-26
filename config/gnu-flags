@@ -106,7 +106,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs"
     H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith"
     H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-default -Wswitch-enum"
-    H5_CFLAGS="$H5_CFLAGS -Wundef -Wunused-macros-Wunsafe -loop-optimizations -Wwrite-strings"
+    H5_CFLAGS="$H5_CFLAGS -Wundef -Wunused-macros -Wunsafe-loop-optimizations -Wwrite-strings"
 
     # Production
     # NDEBUG is handled explicitly by the configure script
