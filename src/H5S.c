@@ -1544,7 +1544,7 @@ H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
     H5TRACE3("e", "i*x*z", obj_id, buf, nalloc);
 
     /* Check argument and retrieve object */
-    if (NULL==(dspace=(H5S_t *)H5I_object_verify(obj_id, H5I_DATASPACE)))
+    if (NULL == (dspace = (H5S_t *)H5I_object_verify(obj_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     if(H5S_encode(dspace, (unsigned char **)&buf, nalloc)<0)
