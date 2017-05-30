@@ -139,10 +139,29 @@ Bug Fixes since HDF5-1.8.18
 
     Tools
     -----
-    - Improved h5diff compare of strings and arrays.
+    - h5repack
 
-      (ADB, 2017/05/18, HDFFV-9055, HDFFV-10128)
+      h5repack did not maintain the creation order flag of the root
+      group.
 
+      Improved h5repack by reading the creation order and applying the
+      flag to the new root group. Also added arguments to set the
+      order and index direction, which applys to the traversing of the
+      original file, on the command line.
+
+      (ADB - 2017/05/26, HDFFV-8611)
+
+    - h5diff
+
+      h5diff failed to account for strpad type and null terminators
+      of char strings. Also, h5diff failed to account for string length
+      differences and would give a different result depending on file
+      order in the command line.
+
+      Improved h5diff compare of strings and arrays by adding a check for
+      string lengths and if the strpad was null filled.
+
+      (ADB - 2017/05/18, HDFFV-9055, HDFFV-10128)
 
     Fortran API
     -----------
