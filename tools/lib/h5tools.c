@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -52,6 +50,10 @@ unsigned    packed_data_offset; /* offset of packed bits to display */
 unsigned    packed_data_length; /* length of packed bits to display */
 unsigned long long packed_data_mask;  /* mask in which packed bits to display */
 int          enable_error_stack= FALSE; /* re-enable error stack */
+
+/* sort parameters */
+H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
+H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
 
 /* module-scoped variables */
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */
@@ -279,16 +281,16 @@ h5tools_set_attr_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-			if ((f = HDfopen(fname, "wb")) != NULL) {
-				rawattrstream = f;
-				retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "wb")) != NULL) {
+                rawattrstream = f;
+                retvalue = SUCCEED;
+            }
         }
         else {
-			if ((f = HDfopen(fname, "w")) != NULL) {
-				rawattrstream = f;
-				retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "w")) != NULL) {
+                rawattrstream = f;
+                retvalue = SUCCEED;
+            }
         }
     }
     else {
@@ -321,26 +323,26 @@ h5tools_set_input_file(const char *fname, int is_bin)
         if (HDfclose(rawinstream))
             HDperror("closing rawinstream");
         else
-        	rawinstream = NULL;
+            rawinstream = NULL;
     }
     /* First check if filename is string "NULL" */
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-			if ((f = HDfopen(fname, "rb")) != NULL) {
-				rawinstream = f;
-				retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "rb")) != NULL) {
+                rawinstream = f;
+                retvalue = SUCCEED;
+            }
         }
         else {
-			if ((f = HDfopen(fname, "r")) != NULL) {
-				rawinstream = f;
-				retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "r")) != NULL) {
+                rawinstream = f;
+                retvalue = SUCCEED;
+            }
         }
     }
     else {
-    	rawinstream = NULL;
+        rawinstream = NULL;
         retvalue = SUCCEED;
     }
 
@@ -375,16 +377,16 @@ h5tools_set_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-			if ((f = HDfopen(fname, "wb")) != NULL) {
-					rawoutstream = f;
-					retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "wb")) != NULL) {
+                rawoutstream = f;
+                retvalue = SUCCEED;
+            }
         }
         else {
-			if ((f = HDfopen(fname, "w")) != NULL) {
-					rawoutstream = f;
-					retvalue = SUCCEED;
-			}
+            if ((f = HDfopen(fname, "w")) != NULL) {
+                rawoutstream = f;
+                retvalue = SUCCEED;
+            }
         }
     }
     else {
@@ -423,21 +425,21 @@ h5tools_set_error_file(const char *fname, int is_bin)
     /* First check if filename is string "NULL" */
     if (fname != NULL) {
     /* binary output */
-		if (is_bin) {
-			if ((f = HDfopen(fname, "wb")) != NULL) {
-				rawerrorstream = f;
-				retvalue = SUCCEED;
-			}
+        if (is_bin) {
+            if ((f = HDfopen(fname, "wb")) != NULL) {
+                rawerrorstream = f;
+                retvalue = SUCCEED;
+            }
         }
         else {
-			if ((f = HDfopen(fname, "w")) != NULL) {
-				rawerrorstream = f;
-				retvalue = SUCCEED;
-			}
-		}
+            if ((f = HDfopen(fname, "w")) != NULL) {
+                rawerrorstream = f;
+                retvalue = SUCCEED;
+            }
+        }
     }
     else {
-    	rawerrorstream = NULL;
+        rawerrorstream = NULL;
         retvalue = SUCCEED;
     }
 
@@ -1324,6 +1326,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
         case H5T_INTEGER:
         case H5T_FLOAT:
         case H5T_ENUM:
+        case H5T_BITFIELD:
             block_index = block_nelmts * size;
             while(block_index > 0) {
                 size_t bytes_in        = 0;    /* # of bytes to write  */
@@ -1490,7 +1493,6 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             break;
 
         case H5T_TIME:
-        case H5T_BITFIELD:
         case H5T_OPAQUE:
             for (block_index = 0; block_index < block_nelmts; block_index++) {
                 mem = ((unsigned char*)_mem) + block_index * size;

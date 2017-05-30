@@ -5,12 +5,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 #------------------------------------------------------------------------------
 # This is the list of files that are part of HDF5 source distribution.
@@ -1313,7 +1311,8 @@
 ./tools/testfiles/tbinregR.exp
 ./tools/testfiles/tbinregR.ddl
 ./tools/testfiles/tbitfields.h5
-./tools/testfiles/tbitnopaque.ddl
+./tools/testfiles/tbitnopaque_be.ddl
+./tools/testfiles/tbitnopaque_le.ddl
 ./tools/testfiles/tbitnopaque.h5
 ./tools/testfiles/tboot1.ddl
 ./tools/testfiles/tboot2.ddl
@@ -1704,7 +1703,8 @@
 ./tools/testfiles/tarray6.h5.xml
 ./tools/testfiles/tarray7.h5.xml
 ./tools/testfiles/tattr.h5.xml
-./tools/testfiles/tbitfields.h5.xml
+./tools/testfiles/tbitfields_be.h5.xml
+./tools/testfiles/tbitfields_le.h5.xml
 ./tools/testfiles/tcompound.h5.xml
 ./tools/testfiles/tcompound2.h5.xml
 ./tools/testfiles/tcompound_complex.h5.xml
@@ -1862,6 +1862,8 @@
 ./tools/h5diff/testfiles/h5diff_709.txt
 ./tools/h5diff/testfiles/h5diff_710.txt
 ./tools/h5diff/testfiles/h5diff_80.txt
+./tools/h5diff/testfiles/h5diff_800.txt
+./tools/h5diff/testfiles/h5diff_801.txt
 ./tools/h5diff/testfiles/h5diff_90.txt
 ./tools/h5diff/testfiles/h5diff_100.txt
 ./tools/h5diff/testfiles/h5diff_101.txt
@@ -1972,6 +1974,7 @@
 ./tools/h5diff/testfiles/h5diff_basic2.h5
 ./tools/h5diff/testfiles/h5diff_dset1.h5
 ./tools/h5diff/testfiles/h5diff_dset2.h5
+./tools/h5diff/testfiles/h5diff_dset3.h5
 ./tools/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/h5diff/testfiles/h5diff_empty.h5
 ./tools/h5diff/testfiles/h5diff_hyper1.h5
@@ -2047,6 +2050,7 @@
 ./tools/h5repack/testfiles/h5repack_soffset.h5
 ./tools/h5repack/testfiles/h5repack_szip.h5
 ./tools/h5repack/testfiles/ublock.bin
+./tools/h5repack/testfiles/crtorder.tordergr.h5.ddl
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst

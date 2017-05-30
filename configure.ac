@@ -6,12 +6,10 @@
 ##
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
 ## terms governing use, modification, and redistribution, is contained in
-## the files COPYING and Copyright.html.  COPYING can be found at the root
-## of the source code distribution tree; Copyright.html can be found at the
-## root level of an installed copy of the electronic HDF5 document set and
-## is linked from the top-level documents page.  It can also be found at
-## http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from help@hdfgroup.org.
+## the COPYING file, which can be found at the root of the source code
+## distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+## If you do not have access to either file, you may request a copy from
+## help@hdfgroup.org.
 
 ## ----------------------------------------------------------------------
 ## Initialize configure.
@@ -644,14 +642,13 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-
-  ## Disable fortran shared libraries on Mac. (MAM - 03/30/11)
-  
+  ## tell libtool to do the right thing with COMMON symbols, this fixes 
+  ## corrupt values with COMMON and EQUIVALENCE when building shared 
+  ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
   case "`uname`" in
     Darwin*)
-    H5_FORTRAN_SHARED="no"
-    CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
-      ;;
+    H5_LDFLAGS="$H5_LDFLAGS -Wl,-commons,use_dylibs"
+    ;;
   esac
 
   ## Report results of check(s)
@@ -3003,6 +3000,14 @@ chmod 755 tools/misc/h5cc
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
+  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
+  ## on OS X, which is needed when building shared libraries on OS X.  This script 
+  ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
+  case "`uname`" in
+    Darwin*)
+      cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      ;;
+  esac
 fi
 
 if test "X$HDF_CXX" = "Xyes"; then

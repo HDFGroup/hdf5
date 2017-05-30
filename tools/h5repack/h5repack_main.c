@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5tools.h"
@@ -33,7 +31,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:E";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:q:z:E";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -54,6 +52,8 @@ static struct long_options l_opts[] = {
     { "alignment", require_arg, 'a' },
     { "infile", require_arg, 'i' }, /* -i for backward compability */
     { "outfile", require_arg, 'o' }, /* -o for backward compability */
+    { "sort_by", require_arg, 'q' },
+    { "sort_order", require_arg, 'z' },
     { "enable-error-stack", no_arg, 'E' },
     { NULL, 0, '\0' }
 };
@@ -88,6 +88,8 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
     PRINTVALSTREAM(rawoutstream, "   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
     PRINTVALSTREAM(rawoutstream, "   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
+    PRINTVALSTREAM(rawoutstream, "   -q Q, --sort_by=Q       Sort groups and attributes by index Q\n");
+    PRINTVALSTREAM(rawoutstream, "   -z Z, --sort_order=Z    Sort groups and attributes by order Z\n");
     PRINTVALSTREAM(rawoutstream, "   -f FILT, --filter=FILT  Filter type\n");
     PRINTVALSTREAM(rawoutstream, "   -l LAYT, --layout=LAYT  Layout type\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -97,6 +99,8 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "    U - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "    T - is an integer\n");
     PRINTVALSTREAM(rawoutstream, "    A - is an integer greater than zero\n");
+    PRINTVALSTREAM(rawoutstream, "    Q - is the sort index type for the input file. It can be \"name\" or \"creation_order\" (default)\n");
+    PRINTVALSTREAM(rawoutstream, "    Z - is the sort order type for the input file. It can be \"descending\" or \"ascending\" (default)\n");
     PRINTVALSTREAM(rawoutstream, "    B - is the user block size, any value that is 512 or greater and is\n");
     PRINTVALSTREAM(rawoutstream, "        a power of 2 (1024 default)\n");
     PRINTVALSTREAM(rawoutstream, "    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
@@ -342,6 +346,52 @@ done:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    set_sort_by
+ *
+ * Purpose: set the "by" form of sorting by translating from a string input
+ *          parameter to a H5_index_t return value
+ *          current sort values are [creation_order | name]
+ *
+ * Return: H5_index_t form of sort or H5_INDEX_UNKNOWN if none found
+ *-------------------------------------------------------------------------
+ */
+static H5_index_t
+set_sort_by(const char *form)
+{
+    H5_index_t idx_type = H5_INDEX_UNKNOWN;
+
+    if (HDstrcmp(form,"name")==0) /* H5_INDEX_NAME */
+        idx_type = H5_INDEX_NAME;
+    else if (HDstrcmp(form,"creation_order")==0) /* H5_INDEX_CRT_ORDER */
+        idx_type = H5_INDEX_CRT_ORDER;
+
+    return idx_type;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    set_sort_order
+ *
+ * Purpose: set the order of sorting by translating from a string input
+ *          parameter to a H5_iter_order_t return value
+ *          current order values are [ascending | descending ]
+ *
+ * Return: H5_iter_order_t form of order or H5_ITER_UNKNOWN if none found
+ *-------------------------------------------------------------------------
+ */
+static H5_iter_order_t
+set_sort_order(const char *form)
+{
+    H5_iter_order_t iter_order = H5_ITER_UNKNOWN;
+
+    if (HDstrcmp(form,"ascending")==0) /* H5_ITER_INC */
+        iter_order = H5_ITER_INC;
+    else if (HDstrcmp(form,"descending")==0) /* H5_ITER_DEC */
+        iter_order = H5_ITER_DEC;
+
+    return iter_order;
+}
+
+/*-------------------------------------------------------------------------
  * Function: parse_command_line
  *
  * Purpose: parse command line input
@@ -499,9 +549,27 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 }
                 break;
 
-	    case 'E':
-		enable_error_stack = TRUE;
-		break;
+            case 'q':
+                if((sort_by = set_sort_by(opt_arg)) < 0) {
+                    error_msg(" failed to set sort by form <%s>\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
+
+            case 'z':
+                if((sort_order = set_sort_order(opt_arg)) < 0) {
+                    error_msg(" failed to set sort order form <%s>\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
+
+            case 'E':
+            enable_error_stack = TRUE;
+            break;
 
             default:
                 break;
@@ -569,6 +637,9 @@ int main(int argc, const char **argv)
 
     /* initialize options  */
     h5repack_init(&options, 0);
+
+    /* Initialize default indexing options */
+    sort_by = H5_INDEX_CRT_ORDER;
 
     if (parse_command_line(argc, argv, &options) < 0)
         goto done;

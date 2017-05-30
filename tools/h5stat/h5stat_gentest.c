@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -43,18 +41,17 @@
 /*
  * Generate HDF5 file with latest format with
  * NUM_GRPS groups and NUM_ATTRS attributes for the dataset
- *
  */
 static void 
 gen_newgrat_file(const char *fname)
 {
-    hid_t fapl; 	/* File access property */
-    hid_t fid;		/* File id */
-    hid_t gid;		/* Group id */
-    hid_t tid;		/* Datatype id */
-    hid_t sid; 		/* Dataspace id */
-    hid_t attr_id; 	/* Attribute id */
-    hid_t did;		/* Dataset id */
+    hid_t fapl          = -1;   /* File access property */
+    hid_t fid           = -1;   /* File id */
+    hid_t gid           = -1;   /* Group id */
+    hid_t tid           = -1;   /* Datatype id */
+    hid_t sid           = -1;   /* Dataspace id */
+    hid_t attr_id       = -1;   /* Attribute id */
+    hid_t did           = -1;   /* Dataset id */
     char name[30];	/* Group name */
     char attrname[30];	/* Attribute name */
     int  i;		/* Local index variable */
@@ -120,7 +117,6 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     } H5E_END_TRY;
-
 } /* gen_newgrat_file() */
 
 /*
