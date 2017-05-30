@@ -1813,7 +1813,7 @@ test_windows(void)
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
 
     /* Check that the VFD feature flags are correct */
-    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
         TEST_ERROR
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
         TEST_ERROR
