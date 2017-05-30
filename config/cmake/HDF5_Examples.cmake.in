@@ -17,6 +17,9 @@ cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
 ###############################################################################################################
 
 set (CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
+if ()
+  set (CMAKE_GENERATOR_TOOLSET "@GENERATOR_TOOLSET@"
+endif ()
 set (CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 
 # handle input parameters to script.
