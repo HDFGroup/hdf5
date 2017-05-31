@@ -522,7 +522,7 @@ typedef struct h5tools_context_t {
     hsize_t acc[H5S_MAX_RANK];        /* accumulator position */
     hsize_t pos[H5S_MAX_RANK];        /* matrix position */
     hsize_t sm_pos;                   /* current stripmine element position */
-    struct H5LD_memb_t **cmpd_listv;  /* h5watch: vector containing info about the list of compound fields to be printed */
+    const struct H5LD_memb_t * const *cmpd_listv;  /* h5watch: vector containing info about the list of compound fields to be printed */
 } h5tools_context_t;
 
 typedef struct subset_d {

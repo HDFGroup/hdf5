@@ -574,7 +574,9 @@ test_noread_with_filters(hid_t file)
 
     /* disable filter plugin */
     if(H5PLget_loading_state(&plugin_state) < 0) TEST_ERROR
-    plugin_state = plugin_state & ~H5PL_FILTER_PLUGIN;
+
+    plugin_state = plugin_state & (unsigned)(~H5PL_FILTER_PLUGIN);
+
     if(H5PLset_loading_state(plugin_state) < 0) TEST_ERROR
 
     if((dset = H5Dopen2(file, DSET_DYNLIB1_NAME, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -672,8 +674,8 @@ static herr_t
 test_groups_with_filters(hid_t file)
 {
     herr_t      ret_value = -1;
-    hid_t       gid;
-    hid_t       group;
+    hid_t       gid = -1;
+    hid_t       group = -1;
     int         i;
     char        gname[256];
 

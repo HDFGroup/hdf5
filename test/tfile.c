@@ -4929,9 +4929,9 @@ test_libver_bounds(void)
 static void
 test_libver_macros(void)
 {
-    unsigned	major = H5_VERS_MAJOR;
-    unsigned	minor = H5_VERS_MINOR;
-    unsigned	release = H5_VERS_RELEASE;
+    int     major = H5_VERS_MAJOR;
+    int     minor = H5_VERS_MINOR;
+    int     release = H5_VERS_RELEASE;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing macros for library version comparison\n"));
