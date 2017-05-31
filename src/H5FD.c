@@ -62,7 +62,6 @@
 /********************/
 static herr_t H5FD_free_cls(H5FD_class_t *cls);
 static int H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/);
-static int H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/);
 
 /*********************/
 /* Package Variables */
@@ -790,7 +789,8 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method")
 
     /* Query driver flag */
-    H5FD_driver_query(driver, &driver_flags);
+    if(H5FD_driver_query(driver, &driver_flags) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't query VFD flags")
 
     /* Get initial file image info */
     if(H5P_peek(plist, H5F_ACS_FILE_IMAGE_INFO_NAME, &file_image_info) < 0)
@@ -1082,42 +1082,6 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_query() */
-
-
-/*-------------------------------------------------------------------------
-* Function:    H5FD_driver_query
-*
-* Purpose: Similar to H5FD_query(), but intended for cases when we don't
-*          have a file available (e.g. before one is opened). Since we
-*          can't use the file to get the driver, the driver is passed in
-*          as a parameter.
-*
-* Return:  Success:    non-negative
-*          Failure:    negative
-*
-* Programmer:  Jacob Gruber
-*              Wednesday, August 17, 2011
-*
-*-------------------------------------------------------------------------
-*/
-static int
-H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
-{
-    int ret_value = 0;          /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(driver);
-    HDassert(flags);
-
-    /* Check for the driver to query and then query it */
-    if(driver->query)
-        ret_value = (driver->query)(NULL, flags);
-    else 
-        *flags = 0;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_driver_query() */
 
 
 /*-------------------------------------------------------------------------
@@ -2076,3 +2040,42 @@ H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_set_paged_aggr() */
+
+
+/*-------------------------------------------------------------------------
+* Function: H5FDdriver_query
+*
+* Purpose:  Similar to H5FD_query(), but intended for cases when we don't
+*           have a file available (e.g. before one is opened). Since we
+*           can't use the file to get the driver, the driver ID is passed
+*           in as a parameter.
+*
+* Return:   SUCCEED/FAIL
+*
+* Programmer:  Jacob Gruber
+*              Wednesday, August 17, 2011
+*
+*-------------------------------------------------------------------------
+*/
+herr_t
+H5FDdriver_query(hid_t driver_id, unsigned long *flags/*out*/)
+{
+    H5FD_class_t *driver = NULL;            /* Pointer to VFD class struct  */
+    herr_t ret_value = SUCCEED;             /* Return value                 */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", driver_id, flags);
+
+    if(NULL == flags)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "flags parameter cannot be NULL")
+
+    /* Check for the driver to query and then query it */
+    if (NULL == (driver = (H5FD_class_t *)H5I_object_verify(driver_id, H5I_VFL)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a VFL ID")
+    if (H5FD_driver_query(driver, flags) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "driver flag query failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDdriver_query() */
+

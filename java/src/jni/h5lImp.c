@@ -457,7 +457,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx
         } /* end if */
         else {
             buf_size = infobuf.u.val_size;
-            if(buf_size < 0) {
+            if(buf_size == 0) {
                 h5libraryError(env);
             } /* end if */
             else {

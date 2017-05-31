@@ -187,7 +187,7 @@ TOOLTEST() {
     # any unexpected output from that stream too.
     TESTING $H5LS $@
     (
-  cd $TESTDIR
+        cd $TESTDIR
         $RUNSERIAL $H5LS_BIN "$@"
     ) >$actual 2>$actual_err
 
@@ -199,37 +199,39 @@ TOOLTEST() {
     STDERR_FILTER $actual_err
     cat $actual_err >> $actual
     if [ $h5haveexitcode = 'yes' -a $exitcode -ne $retvalexpect ]; then
-  echo "*FAILED*"
-  nerrors="`expr $nerrors + 1`"
-  if [ yes = "$verbose" ]; then
-      echo "test returned with exit code $exitcode"
-      echo "test output: (up to $NLINES lines)"
-      head -$NLINES $actual
-      echo "***end of test output***"
-      echo ""
-  fi
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+        if [ yes = "$verbose" ]; then
+            echo "test returned with exit code $exitcode"
+            echo "test output: (up to $NLINES lines)"
+            head -$NLINES $actual
+            echo "***end of test output***"
+            echo ""
+        fi
     elif [ ! -f $expect ]; then
-  # Create the expect file if it doesn't yet exist.
+        # Create the expect file if it doesn't yet exist.
         echo " CREATED"
         cp $actual $expect
+        echo "    Expected result (*.ls) missing"
+        nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
         echo " PASSED"
     else
         echo "*FAILED*"
-  echo "    Expected result differs from actual result"
-  nerrors="`expr $nerrors + 1`"
-  test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "    Expected result differs from actual result"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-  rm -f $actual $actual_err $actual_sav $actual_err_sav
+        rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 }
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###              T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 # prepare for test

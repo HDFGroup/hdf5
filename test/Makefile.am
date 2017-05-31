@@ -126,8 +126,8 @@ libdynlib3.la: $(libdynlib3_la_OBJECTS) $(libdynlib3_la_DEPENDENCIES) $(EXTRA_li
 libdynlib4.la: $(libdynlib4_la_OBJECTS) $(libdynlib4_la_DEPENDENCIES) $(EXTRA_libdynlib4_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libdynlib4_la_LINK) $(am_libdynlib4_la_rpath) $(libdynlib4_la_OBJECTS) $(libdynlib4_la_LIBADD) 
 
-install-exec-hook:
-	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
+#install-exec-hook:
+#	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
 endif
 
 libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c

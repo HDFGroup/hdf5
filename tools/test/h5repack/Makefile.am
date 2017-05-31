@@ -56,8 +56,8 @@ libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EX
 libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) 
 
-install-exec-hook:
-	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
+#install-exec-hook:
+#	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
 endif
 
 

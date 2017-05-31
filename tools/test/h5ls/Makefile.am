@@ -43,8 +43,8 @@ if HAVE_SHARED_CONDITIONAL
 libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD)
 
-install-exec-hook:
-	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
+#install-exec-hook:
+#	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
 endif
 
 

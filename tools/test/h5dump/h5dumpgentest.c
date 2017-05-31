@@ -3479,7 +3479,7 @@ static void gent_array8(void)
     unsigned int i;
 
     /* Allocate data buffer */
-    wdata = HDmalloc(F64_DIM1 * sizeof(int));
+    wdata = (int *)HDmalloc(F64_DIM1 * sizeof(int));
     HDassert(wdata);
 
     /*
@@ -9717,18 +9717,19 @@ static void gent_bitnopaquefields(void)
     /* Compound datatype */
     typedef struct s_t
     {
-        unsigned char   a;
-        unsigned int    b;
-        unsigned long    c;
-        unsigned long long    d;
+        uint8_t     a;
+        uint16_t    b;
+        uint32_t    c;
+        uint64_t    d;
     } s_t;
+    
     hid_t  file, grp=-1, type=-1, space=-1, dset=-1;
     size_t  i;
     hsize_t  nelmts = F80_DIM32;
-    unsigned char buf[F80_DIM32];    /* bitfield, opaque */
-    unsigned int buf2[F80_DIM32];    /* bitfield, opaque */
-    unsigned long buf3[F80_DIM32];    /* bitfield, opaque */
-    unsigned long long buf4[F80_DIM32];    /* bitfield, opaque */
+    uint8_t buf[F80_DIM32];    /* bitfield, opaque */
+    uint16_t buf2[F80_DIM32];    /* bitfield, opaque */
+    uint32_t buf3[F80_DIM32];    /* bitfield, opaque */
+    uint64_t buf4[F80_DIM32];    /* bitfield, opaque */
     s_t      buf5[F80_DIM32];        /* compound */
 
     file = H5Fcreate(FILE80, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -9739,7 +9740,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                        buf[i] = (uint8_t)0xff ^ (uint8_t)i;
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                     H5Dclose(dset);
@@ -9754,7 +9755,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                        buf2[i] = (uint16_t)0xffff ^ (uint16_t)(i * 16);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                     H5Dclose(dset);
@@ -9769,7 +9770,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_3", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf3[i] = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                        buf3[i] = (uint32_t)0xffffffff ^ (uint32_t)(i * 32);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf3);
                     H5Dclose(dset);
@@ -9784,7 +9785,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_4", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf4[i] = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                        buf4[i] = (uint64_t)0xffffffffffffffff ^ (uint64_t)(i * 64);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf4);
                     H5Dclose(dset);
@@ -9804,7 +9805,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                            buf[i] = (uint8_t)0xff ^ (uint8_t)i;
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                         H5Dclose(dset);
                     }
@@ -9820,7 +9821,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                            buf2[i] = (uint16_t)0xffff ^ (uint16_t)(i * 16);
 
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                         H5Dclose(dset);
@@ -9843,10 +9844,10 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for(i = 0; i < nelmts; i++) {
-                        buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
-                        buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
-                        buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
-                        buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                        buf5[i].a = (uint8_t)0xff ^ (uint8_t)i;
+                        buf5[i].b = (uint16_t)0xffff ^ (uint16_t)(i * 16);
+                        buf5[i].c = (uint32_t)0xffffffff ^ (uint32_t)(i * 32);
+                        buf5[i].d = (uint64_t)0xffffffffffffffff ^ (uint64_t)(i * 64);
                     }
 
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
@@ -10317,7 +10318,6 @@ static void gent_udfilter(void)
     hid_t    dcpl; /* dataset creation property list */
     hid_t    dsid;  /* dataset ID */
     hid_t    sid;  /* dataspace ID */
-    hid_t    tid;  /* datatype ID */
 
     hsize_t  dims1[RANK]      = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};

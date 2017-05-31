@@ -187,7 +187,7 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
             symbol->nrecords = 0;
         else
             symbol->nrecords -= remove_size;
-            dim[1] = symbol->nrecords;
+        dim[1] = symbol->nrecords;
         if(H5Dset_extent(symbol->dsid, dim) < 0)
             return -1;
 

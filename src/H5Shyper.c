@@ -7571,7 +7571,7 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
     H5TRACE6("e", "iSs*h*h*h*h", space_id, op, start, stride, count, block);
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
     if (H5S_SCALAR==H5S_GET_EXTENT_TYPE(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space")
@@ -7640,7 +7640,7 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
     H5TRACE6("i", "iSs*h*h*h*h", space_id, op, start, stride, count, block);
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
     if(start==NULL || count==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified")
@@ -7768,9 +7768,9 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     H5TRACE3("i", "iSsi", space1_id, op, space2_id);
 
     /* Check args */
-    if (NULL == (space1=H5I_object_verify(space1_id, H5I_DATASPACE)))
+    if (NULL == (space1 = (H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-    if (NULL == (space2=H5I_object_verify(space2_id, H5I_DATASPACE)))
+    if (NULL == (space2 = (H5S_t *)H5I_object_verify(space2_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation")
@@ -7896,9 +7896,9 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     H5TRACE3("e", "iSsi", space1_id, op, space2_id);
 
     /* Check args */
-    if (NULL == (space1=H5I_object_verify(space1_id, H5I_DATASPACE)))
+    if (NULL == (space1 = (H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-    if (NULL == (space2=H5I_object_verify(space2_id, H5I_DATASPACE)))
+    if (NULL == (space2 = (H5S_t *)H5I_object_verify(space2_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation")

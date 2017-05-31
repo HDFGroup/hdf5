@@ -55,11 +55,11 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
     trav_table_t *travt = NULL;
     int          ok = 1;
     hid_t       fcpl_in     = -1;   /* file creation property for input file */
-    hid_t   	fcpl_out    = -1;   /* file creation property for output file */
-    H5F_fspace_strategy_t in_strategy, out_strategy;	/* file space handling strategy for in/output file */
-    hbool_t 	in_persist, out_persist;		/* free-space persist status for in/output file */
-    hsize_t	in_threshold, out_threshold;		/* free-space section threshold for in/output file */
-    hsize_t	in_pagesize, out_pagesize;		/* file space page size for input/output file */
+    hid_t       fcpl_out    = -1;   /* file creation property for output file */
+    H5F_fspace_strategy_t in_strategy, out_strategy;    /* file space handling strategy for in/output file */
+    hbool_t     in_persist, out_persist;        /* free-space persist status for in/output file */
+    hsize_t    in_threshold, out_threshold;        /* free-space section threshold for in/output file */
+    hsize_t    in_pagesize, out_pagesize;        /* file space page size for input/output file */
 
     /* open the output file */
     if((fidout = H5Fopen(out_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
@@ -122,6 +122,8 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
     if(options->all_filter == 1 || options->all_layout == 1)
     {
 
+        /* Initialize indexing options */
+        h5trav_set_index(sort_by, sort_order);
         /* init table */
         trav_table_init(&travt);
 
@@ -247,7 +249,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * the same as the input file's strategy.
      */
     if(options->fs_strategy) {
-        if(out_strategy != (options->fs_strategy == (-1) ? 0 : options->fs_strategy)) {
+        if(out_strategy != (options->fs_strategy == (H5F_fspace_strategy_t)-1 ? 0 : options->fs_strategy)) {
             error_msg("file space strategy not set as unexpected\n");
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
         }
@@ -455,6 +457,9 @@ int h5repack_cmp_pl(const char *fname1,
     * get file table list of objects
     *-------------------------------------------------------------------------
     */
+    /* Initialize indexing options */
+    h5trav_set_index(sort_by, sort_order);
+    /* init table */
     trav_table_init(&trav);
     if(h5trav_gettable(fid1, trav) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5trav_gettable failed");
@@ -643,7 +648,7 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
         {
 
             case H5Z_FILTER_NONE:
-        	break;
+            break;
 
             case H5Z_FILTER_SHUFFLE:
                 /* 1 private client value is returned by DCPL */

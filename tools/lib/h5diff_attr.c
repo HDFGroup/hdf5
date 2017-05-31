@@ -91,7 +91,7 @@ static void table_attrs_free( table_attrs_t *table )
 /*-------------------------------------------------------------------------
  * Function: table_attr_mark_exist
  *
- * Purpose: mark given attribute name to table as sign of exsit
+ * Purpose: mark given attribute name to table as sign of exist
  *
  * Parameter:
  *  - exist [IN]
@@ -155,6 +155,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
     unsigned i;
     table_attrs_t *table_lp = NULL;
 
+    h5difftrace("build_match_list_attrs start\n");
     if(H5Oget_info(loc1_id, &oinfo1) < 0)
         goto error;
     if(H5Oget_info(loc2_id, &oinfo2) < 0)
@@ -162,6 +163,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
     table_attrs_init( &table_lp );
 
+    h5diffdebug3("build_match_list_attrs: %ld - %ld\n", curr1 < oinfo1.num_attrs, curr2 < oinfo2.num_attrs);
 
     /*--------------------------------------------------
      * build the list
@@ -226,6 +228,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         /* get name */
         if(H5Aget_name(attr1_id, (size_t)ATTR_NAME_MAX, name1) < 0)
             goto error;
+        h5diffdebug2("build_match_list_attrs #1 name - %s\n", name1);
 
         table_attr_mark_exist(infile, name1, table_lp);
         table_lp->nattrs_only1++;
@@ -247,6 +250,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         /* get name */
         if(H5Aget_name(attr2_id, (size_t)ATTR_NAME_MAX, name2) < 0)
             goto error;
+        h5diffdebug2("build_match_list_attrs #2 name - %s\n", name2);
 
         table_attr_mark_exist(infile, name2, table_lp);
         table_lp->nattrs_only2++;
@@ -278,6 +282,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
     *table_out = table_lp;
 
+    h5difftrace("build_match_list_attrs end\n");
     return 0;
 
 error:
@@ -286,6 +291,7 @@ error:
     if (0 < attr2_id)
         H5Aclose(attr2_id);
 
+    h5difftrace("build_match_list_attrs end with error\n");
     return -1;
 }
 
@@ -322,8 +328,8 @@ hsize_t diff_attr(hid_t loc1_id,
     hid_t      space2_id=-1;    /* space ID */
     hid_t      ftype1_id=-1;    /* file data type ID */
     hid_t      ftype2_id=-1;    /* file data type ID */
-    int	       vstrtype1=0;     /* ftype1 is a variable string */
-    int	       vstrtype2=0;     /* ftype2 is a variable string */
+    int           vstrtype1=0;     /* ftype1 is a variable string */
+    int           vstrtype2=0;     /* ftype2 is a variable string */
     hid_t      mtype1_id=-1;    /* memory data type ID */
     hid_t      mtype2_id=-1;    /* memory data type ID */
     size_t     msize1;          /* memory size of memory type */
@@ -346,12 +352,15 @@ hsize_t diff_attr(hid_t loc1_id,
     hsize_t    nfound_total = 0;
     int       j;
 
-    table_attrs_t * match_list_attrs = NULL;
+    table_attrs_t *match_list_attrs = NULL;
+    h5difftrace("diff_attr start\n");
+
     if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, options) < 0)
         goto error;
 
     /* if detect any unique extra attr */
     if(match_list_attrs->nattrs_only1 || match_list_attrs->nattrs_only2) {
+        h5difftrace("diff_attr attributes only in one file\n");
         /* exit will be 1 */
         options->contents = 0;
     }
@@ -359,6 +368,7 @@ hsize_t diff_attr(hid_t loc1_id,
     for(u = 0; u < (unsigned)match_list_attrs->nattrs; u++) {
         if((match_list_attrs->attrs[u].exist[0]) && (match_list_attrs->attrs[u].exist[1])) {
             name1 = name2 = match_list_attrs->attrs[u].name;
+            h5diffdebug2("diff_attr name - %s\n", name1);
 
             /*--------------
             * attribute 1 */
@@ -370,6 +380,7 @@ hsize_t diff_attr(hid_t loc1_id,
             if((attr2_id = H5Aopen(loc2_id, name2, H5P_DEFAULT)) < 0)
                 goto error;
 
+            h5difftrace("diff_attr got attributes\n");
             /* get the datatypes  */
             if((ftype1_id = H5Aget_type(attr1_id)) < 0)
                 goto error;
@@ -395,9 +406,9 @@ hsize_t diff_attr(hid_t loc1_id,
                 continue;
             }
 
-            if((mtype1_id = h5tools_get_native_type(ftype1_id)) < 0)
+            if((mtype1_id = H5Tget_native_type(ftype1_id, H5T_DIR_DEFAULT)) < 0)
                 goto error;
-            if((mtype2_id = h5tools_get_native_type(ftype2_id)) < 0)
+            if((mtype2_id = H5Tget_native_type(ftype2_id, H5T_DIR_DEFAULT)) < 0)
                 goto error;
             if((msize1 = H5Tget_size(mtype1_id)) == 0)
                 goto error;
@@ -556,6 +567,7 @@ hsize_t diff_attr(hid_t loc1_id,
 
     table_attrs_free(match_list_attrs);
 
+    h5difftrace("diff_attr end\n");
     return nfound_total;
 
 error:
@@ -584,6 +596,7 @@ error:
     } H5E_END_TRY;
 
     options->err_stat = 1;
+    h5difftrace("diff_attr end with error\n");
     return nfound_total;
 }
 
