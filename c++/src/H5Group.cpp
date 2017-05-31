@@ -97,11 +97,11 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type) : H5Ob
 
 //--------------------------------------------------------------------------
 // Function:    Group overload constructor - dereference
-///\brief       Given a reference, ref, to an hdf5 group, creates a Group object
-///\param       attr - IN: Specifying location where the referenced object is in
-///\param       ref - IN: Reference pointer
-///\param       ref_type - IN: Reference type - default to H5R_OBJECT
-///\exception   H5::ReferenceException
+// Purpose      Given a reference, ref, to an hdf5 group, creates a Group object
+// \param       attr - IN: Specifying location where the referenced object is in
+// \param       ref - IN: Reference pointer
+// \param       ref_type - IN: Reference type - default to H5R_OBJECT
+// \exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
 // Modification
 //      May, 2017
