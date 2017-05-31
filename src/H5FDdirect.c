@@ -487,7 +487,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     o_flags |= O_DIRECT;
 
     /* Open the file */
-    if ((fd=HDopen(name, o_flags, 0666))<0)
+    if ((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW))<0)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
 
     if (HDfstat(fd, &sb)<0)

@@ -1596,9 +1596,9 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
         goto error;
 
     /* Copy old file into temporary file */
-    if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0)
+    if((fd_old = HDopen(filename, O_RDONLY)) < 0)
         goto error;
-    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
         goto error;
 
     /* Copy data */
