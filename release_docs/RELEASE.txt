@@ -58,7 +58,7 @@ New Features
     Configuration
     -------------
     - CMake minimum is now 3.2.2. (ADB 2016/01/10)
-    
+
 
 
     Library
@@ -141,8 +141,29 @@ Bug Fixes since HDF5-1.8.18
 
     Tools
     -----
-    - None
+    - h5repack
 
+      h5repack did not maintain the creation order flag of the root
+      group.
+
+      Improved h5repack by reading the creation order and applying the
+      flag to the new root group. Also added arguments to set the
+      order and index direction, which applys to the traversing of the
+      original file, on the command line.
+
+      (ADB - 2017/05/26, HDFFV-8611)
+
+    - h5diff
+
+      h5diff failed to account for strpad type and null terminators
+      of char strings. Also, h5diff failed to account for string length
+      differences and would give a different result depending on file
+      order in the command line.
+
+      Improved h5diff compare of strings and arrays by adding a check for
+      string lengths and if the strpad was null filled.
+
+      (ADB - 2017/05/18, HDFFV-9055, HDFFV-10128)
 
     Fortran API
     -----------
@@ -221,7 +242,7 @@ They are built with the configure process unless specified otherwise.
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-   
+
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)

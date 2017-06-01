@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __H5Location_H
@@ -95,6 +93,9 @@ class H5_DLLCPP H5Location : public IdComponent {
         virtual void removeAttr(const char* name) const;
         virtual void removeAttr(const H5std_string& name) const;
 
+        // Returns the object header version of an object
+        unsigned objVersion() const;
+
         // Sets the comment for an HDF5 object specified by its name.
         void setComment(const char* name, const char* comment) const;
         void setComment(const H5std_string& name, const H5std_string& comment) const;
@@ -128,6 +129,13 @@ class H5_DLLCPP H5Location : public IdComponent {
 
         // Retrieves a dataspace with the region pointed to selected.
         DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+        // Opens an object at this location, without knowing the object type.
+        hid_t openObjId(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        hid_t openObjId(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Closes an object opened by openObjId().
+        void closeObjId(hid_t obj_id) const;
 
         ///\brief Returns an identifier. (pure virtual)
         virtual hid_t getId() const = 0;

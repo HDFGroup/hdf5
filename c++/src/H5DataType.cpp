@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef OLD_HEADER_FILENAME
@@ -678,6 +676,31 @@ bool DataType::isVariableStr() const
         throw DataTypeIException(inMemFunc("isVariableStr"),
                                 "H5Tis_variable_str returns negative value");
     }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType::getCreatePlist
+///\brief       Returns a copy of the property list, which is for datatype
+///             creation.
+///\return      A property list object
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - May, 2017
+// Description
+//              Currently, there is no datatype creation property list class
+//              in the C++ API because there is no associated functionality.
+//--------------------------------------------------------------------------
+PropList DataType::getCreatePlist() const
+{
+    hid_t create_plist_id = H5Tget_create_plist(id);
+    if (create_plist_id < 0)
+    {
+        throw DataTypeIException(inMemFunc("getCreatePlist"),
+            "H5Tget_create_plist returns negative value");
+    }
+    // create and return the DSetCreatPropList object
+    PropList create_plist;
+    f_PropList_setId(&create_plist, create_plist_id);
+    return(create_plist);
 }
 
 //--------------------------------------------------------------------------

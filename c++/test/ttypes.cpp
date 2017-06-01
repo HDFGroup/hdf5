@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -248,12 +246,28 @@ static void test_query()
         index = tid2.getMemberIndex("ORANGE");
         verify_val(index, 3, "EnumType::getMemberIndex()", __LINE__, __FILE__);
 
-        // Commit compound datatype and close it
+        // Commit compound datatype, and test getting the datatype creation
+        // prop list, then close it
         tid1.commit(file, CompT_NAME);
+        PropList tcpl = tid1.getCreatePlist();
+        if (!IdComponent::isValid(tcpl.getId()))
+        {
+            // Throw an invalid action exception
+            throw InvalidActionException("IdComponent::isValid", "Datatype creation property list is not valid");
+        }
+        tcpl.close();
         tid1.close();
 
-        // Commit enumeration datatype and close it
+        // Commit enumeration datatype, and test getting the datatype creation
+        // prop list, then close it
         tid2.commit(file, EnumT_NAME);
+        tcpl = tid2.getCreatePlist();
+        if (!IdComponent::isValid(tcpl.getId()))
+        {
+            // Throw an invalid action exception
+            throw InvalidActionException("IdComponent::isValid", "Datatype creation property list is not valid");
+        }
+        tcpl.close();
         tid2.close();
 
         // Open the datatypes for query

@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -441,7 +439,55 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
         issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    test_num_links
+ *
+ * Purpose      Test setting and getting limit of number of links
+ *
+ * Return       Success: 0
+ *
+ *              Failure: -1
+ *
+ * Programmer   Binh-Minh Ribler
+ *              Mar, 2017
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_num_links(hid_t fapl_id, hbool_t new_format)
+{
+    char filename[NAME_BUF_SIZE];
 
+    if(new_format)
+        SUBTEST("Setting number of links (w/new group format)")
+    else
+        SUBTEST("Setting number of links")
+
+    try
+    {
+        // Use the file access template id to create a file access prop. list.
+        FileAccPropList fapl(fapl_id);
+
+        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
+
+        LinkAccPropList lapl;
+        size_t nlinks = 5;
+        lapl.setNumLinks(nlinks);
+
+         // Read it back and verify
+        size_t read_nlinks = lapl.getNumLinks();
+        verify_val(read_nlinks, nlinks, "LinkAccPropList::setNumLinks", __LINE__, __FILE__);
+
+        PASSED();
+    } // end of try block
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+} // test_num_links
 
 /*-------------------------------------------------------------------------
  * Function:    test_links
@@ -494,6 +540,7 @@ void test_links()
             /* General tests... (on both old & new format groups */
             // FileAccPropList may be passed in instead of fapl id
             test_basic_links(my_fapl_id, new_format);
+            test_num_links(my_fapl_id, new_format);
 #if 0
 // these tests are from the C test links.c and left here for future
 // implementation of H5L API

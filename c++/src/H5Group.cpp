@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef OLD_HEADER_FILENAME
@@ -105,11 +103,16 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type) : H5Ob
 ///\param       ref_type - IN: Reference type - default to H5R_OBJECT
 ///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
+// Modification
+//      May, 2017
+//              Removed in 1.8.19 because H5Location is Attribute's baseclass
+//              now. -BMR
 //--------------------------------------------------------------------------
-Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object(), id(H5I_INVALID_HID)
+/*Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, "constructor - by dereference");
 }
+*/
 
 //--------------------------------------------------------------------------
 // Function:    Group::getId

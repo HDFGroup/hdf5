@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -37,6 +35,7 @@ using namespace H5;
 #include "h5cpputil.h"  // C++ utilility header file
 
 const H5std_string      FILE_OBJECTS("tobjects.h5");
+const H5std_string      FILE_OBJHDR("tobject_header.h5");
 const H5std_string      GROUP1("Top Group");
 const H5std_string      GROUP1_PATH("/Top Group");
 const H5std_string      GROUP1_1("Sub-Group 1.1");
@@ -267,25 +266,25 @@ static void test_get_objtype()
         // Get and verify object type with
         // H5O_type_t childObjType(const H5std_string& objname)
         H5O_type_t objtype = file.childObjType(DSET_IN_FILE);
-        verify_val(objtype, H5O_TYPE_DATASET, "DataSet::childObjType", __LINE__, __FILE__);
+        verify_val(objtype, H5O_TYPE_DATASET, "H5File::childObjType", __LINE__, __FILE__);
 
         // Get and verify object type with
         // H5O_type_t childObjType(const char* objname)
         objtype = grp1.childObjType(GROUP1_1.c_str());
-        verify_val(objtype, H5O_TYPE_GROUP, "DataSet::childObjType", __LINE__, __FILE__);
+        verify_val(objtype, H5O_TYPE_GROUP, "Group::childObjType", __LINE__, __FILE__);
 
         // Get and verify object type with
         // H5O_type_t childObjType(hsize_t index, H5_index_t index_type,
         // H5_iter_order_t order, const char* objname=".")
         objtype = grp1.childObjType((hsize_t)1, H5_INDEX_NAME, H5_ITER_INC);
-        verify_val(objtype, H5O_TYPE_NAMED_DATATYPE, "DataSet::childObjType", __LINE__, __FILE__);
+        verify_val(objtype, H5O_TYPE_NAMED_DATATYPE, "Group::childObjType", __LINE__, __FILE__);
 
         // Get and verify object type with
         // H5O_type_t childObjType(hsize_t index,
         // H5_index_t index_type=H5_INDEX_NAME,
         // H5_iter_order_t order=H5_ITER_INC, const char* objname=".")
         objtype = grp1.childObjType((hsize_t)2);
-        verify_val(objtype, H5O_TYPE_GROUP, "DataSet::childObjType", __LINE__, __FILE__);
+        verify_val(objtype, H5O_TYPE_GROUP, "Group::childObjType", __LINE__, __FILE__);
 
         // Everything will be closed as they go out of scope
 
@@ -298,6 +297,180 @@ static void test_get_objtype()
         issue_fail_msg("test_get_objtype", __LINE__, __FILE__);
     }
 }   // test_get_objtype
+
+/*-------------------------------------------------------------------------
+ * Function:    test_open_object_header
+ *
+ * Purpose      Test H5Location::openObjId function.
+ *
+ * Return       None
+ *
+ * Programmer   Binh-Minh Ribler (use C version)
+ *              May 15, 2017
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5std_string GROUPNAME("group");
+const H5std_string DTYPENAME("group/datatype");
+const H5std_string DTYPENAME_INGRP("datatype");
+const H5std_string DSETNAME("dataset");
+#define RANK 2
+#define DIM0 5
+#define DIM1 10
+static void test_open_object_header()
+{
+    hsize_t     dims[2];
+    H5G_info_t  ginfo;                      /* Group info struct */
+
+    // Output message about test being performed
+    SUBTEST("H5Location::openObjId and H5Location::closeObjId");
+
+    try {
+        // Create file FILE1
+        H5File file1(FILE_OBJHDR, H5F_ACC_TRUNC);
+        /* Create a group, dataset, and committed datatype within the file */
+
+        // Create a group in the root group
+        Group grp(file1.createGroup(GROUPNAME));
+        grp.close();
+
+        // Commit the type inside the file
+        IntType dtype(PredType::NATIVE_INT);
+        dtype.commit(file1, DTYPENAME);
+        dtype.close();
+
+        // Create a new dataset
+        dims[0] = DIM0;
+        dims[1] = DIM1;
+        DataSpace dspace(RANK, dims);
+        DataSet dset(file1.createDataSet(DSETNAME, PredType::NATIVE_INT, dspace));
+
+        // Close dataset and dataspace
+        dset.close();
+        dspace.close();
+
+        // Now make sure that openObjId can open all three types of objects
+        hid_t obj_grp = file1.openObjId(GROUPNAME);
+        hid_t obj_dtype = file1.openObjId(DTYPENAME);
+        hid_t obj_dset = file1.openObjId(DSETNAME);
+
+        // Make sure that each is the right kind of ID
+        H5I_type_t id_type = IdComponent::getHDFObjType(obj_grp);
+        verify_val(id_type, H5I_GROUP, "H5Iget_type for group ID", __LINE__, __FILE__);
+        id_type = IdComponent::getHDFObjType(obj_dtype);
+        verify_val(id_type, H5I_DATATYPE, "H5Iget_type for datatype ID", __LINE__, __FILE__);
+        id_type = IdComponent::getHDFObjType(obj_dset);
+        verify_val(id_type, H5I_DATASET, "H5Iget_type for dataset ID", __LINE__, __FILE__);
+
+        /* Do something more complex with each of the IDs to make sure */
+
+        Group grp2(obj_grp);
+        hsize_t num_objs = grp2.getNumObjs();
+        verify_val(num_objs, 1, "H5Gget_info", __LINE__, __FILE__);
+        // There should be one object, the datatype
+
+        // Close datatype object opened from the file
+        file1.closeObjId(obj_dtype);
+
+        dset.setId(obj_dset);
+        dspace = dset.getSpace();
+        bool is_simple = dspace.isSimple();
+        dspace.close();
+
+        // Open datatype object from the group
+        obj_dtype = grp2.openObjId(DTYPENAME_INGRP);
+
+        dtype.setId(obj_dtype);
+        H5T_class_t type_class = dtype.getClass();
+        verify_val(type_class, H5T_INTEGER, "H5Tget_class", __LINE__, __FILE__);
+        dtype.close();
+
+        // Close datatype object
+        grp2.closeObjId(obj_dtype);
+
+        // Close the group object
+        file1.closeObjId(obj_grp);
+
+        // Try doing something with group, the ID should still work
+        num_objs = grp2.getNumObjs();
+        verify_val(num_objs, 1, "H5Gget_info", __LINE__, __FILE__);
+
+        // Close the cloned group
+        grp2.close();
+
+        PASSED();
+    }   // end of try block
+    // catch invalid action exception
+    catch (InvalidActionException& E)
+    {
+        cerr << " in InvalidActionException" << endl;
+        cerr << " *FAILED*" << endl;
+        cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
+    }
+    // catch all other exceptions
+    catch (Exception& E)
+    {
+        cerr << " in Exception" << endl;
+        issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+} /* test_open_object_header() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_is_valid
+ *
+ * Purpose:     Tests validating IDs.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              May 15, 2017
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_is_valid()
+{
+    SUBTEST("IdComponent::isValid");
+
+    try {
+        // Create a datatype
+        IntType int1(PredType::NATIVE_INT);
+
+        // Check that the ID is valid
+        hid_t int1_id = int1.getId();
+        bool is_valid = IdComponent::isValid(int1_id);
+        verify_val(is_valid, true, "IdComponent::isValid", __LINE__, __FILE__);
+
+        // Create another datatype
+        FloatType float1(PredType::NATIVE_FLOAT);
+
+        // Check that the ID is valid
+        is_valid = IdComponent::isValid(float1.getId());
+        verify_val(is_valid, true, "IdComponent::isValid", __LINE__, __FILE__);
+
+        // Close the integer type, then check the id, it should no longer be valid
+        int1.close();
+        is_valid = IdComponent::isValid(int1_id);
+        verify_val(is_valid, false, "IdComponent::isValid", __LINE__, __FILE__);
+
+        // Check that an id of -1 is invalid
+        is_valid = IdComponent::isValid((hid_t)-1);
+        verify_val(is_valid, false, "IdComponent::isValid", __LINE__, __FILE__);
+
+        PASSED();
+    }   // try block
+
+    // catch all other exceptions
+    catch (Exception& E)
+    {
+  cerr << " in catch " << endl;
+        issue_fail_msg("test_get_objtype", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   // test_is_valid
 
 /*-------------------------------------------------------------------------
  * Function:    test_objects
@@ -323,6 +496,8 @@ void test_object()
     test_get_objname();    // Test get object name from groups/datasets
     test_get_objname_ontypes(); // Test get object name from types
     test_get_objtype();    // Test get object type
+    test_is_valid();       // Test validating IDs
+    test_open_object_header();    // Test object header functions (H5O)
 
 }   // test_objects
 

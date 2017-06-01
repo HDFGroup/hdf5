@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
@@ -65,7 +63,7 @@ H5Location::H5Location() : IdComponent() {}
 // been moved to the sub-classes.  It will be removed in 1.10 release.  If its
 // removal does not raise any problems in 1.10, it will be removed from 1.8 in
 // subsequent releases.
-// Removed in 1.10.1 - Aug 2016
+// Removed in 1.8.18 and 1.10.1 - Aug 2016
 //--------------------------------------------------------------------------
 // H5Location::H5Location(const hid_t object_id) : IdComponent() {}
 
@@ -251,23 +249,6 @@ int H5Location::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_d
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5Location::getNumAttrs
-///\brief       Deprecated - Returns the number of attributes attached to this HDF5 object.
-///\return      Number of attributes
-///\exception   H5::AttributeIException
-// Programmer   Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-int H5Location::getNumAttrs() const
-{
-   H5O_info_t oinfo;    /* Object info */
-
-    if(H5Oget_info(getId(), &oinfo) < 0)
-        throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
-    else
-        return(static_cast<int>(oinfo.num_attrs));
-}
-
-//--------------------------------------------------------------------------
 // Function:    H5Location::attrExists
 ///\brief       Deprecated - Checks whether the named attribute exists at this location.
 ///\param       name - IN: Name of the attribute to be queried
@@ -346,11 +327,30 @@ void H5Location::renameAttr(const char* oldname, const char* newname) const
 ///\brief       Deprecated - This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for the names.
+///
+///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& newname) const
 {
    renameAttr (oldname.c_str(), newname.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getNumAttrs
+///\brief       Returns the number of attributes attached to this HDF5 object.
+///\return      Number of attributes
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+int H5Location::getNumAttrs() const
+{
+   H5O_info_t oinfo;    /* Object info */
+
+    if(H5Oget_info(getId(), &oinfo) < 0)
+        throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
+    else
+        return(static_cast<int>(oinfo.num_attrs));
 }
 
 //--------------------------------------------------------------------------
@@ -396,7 +396,7 @@ bool H5Location::nameExists(const H5std_string& name, const LinkAccPropList& lap
 ///             which can be either of these values:
 ///             \li \c H5F_SCOPE_GLOBAL - Flushes the entire virtual file
 ///             \li \c H5F_SCOPE_LOCAL - Flushes only the specified file
-///\exception   H5::Exception
+///\exception   H5::LocationException
 ///\par Description
 ///             This location is used to identify the file to be flushed.
 // Programmer   Binh-Minh Ribler - 2012
@@ -428,6 +428,39 @@ H5std_string H5Location::getFileName() const
     catch (LocationException& E) {
         throw FileIException(inMemFunc("getFileName"), E.getDetailMsg());
     }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::objVersion
+///\brief       Returns the header version of this HDF5 object.
+///\return      Object version, which can have the following values:
+///             \li \c H5O_VERSION_1
+///             \li \c H5O_VERSION_2
+///\exception   H5::LocationException
+///             Exception will be thrown when:
+///             - an error returned by the C API
+///             - version number is not one of the valid values above
+// Programmer   Binh-Minh Ribler - May, 2017
+//--------------------------------------------------------------------------
+unsigned H5Location::objVersion() const
+{
+    H5O_info_t objinfo;
+    unsigned version = 0;
+
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info(getId(), &objinfo);
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throw LocationException(inMemFunc("objVersion"), "H5Oget_info failed");
+    // Return a valid version or throw an exception for invalid value
+    else
+    {
+        version = objinfo.hdr.version;
+        if (version != H5O_VERSION_1 && version != H5O_VERSION_2)
+            throw LocationException(inMemFunc("objVersion"), "Invalid version for object");
+    }
+    return(version);
 }
 
 //--------------------------------------------------------------------------
@@ -551,7 +584,7 @@ ssize_t H5Location::getComment(const char* name, size_t buf_size, char* comment)
     // If H5Oget_comment_by_name returns a negative value, raise an exception
     if (comment_len < 0)
     {
-        throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
+        throw LocationException(inMemFunc("getComment"), "H5Oget_comment_by_name failed");
     }
     // If the comment is longer than the provided buffer size, the C library
     // will not null terminate it
@@ -584,7 +617,7 @@ H5std_string H5Location::getComment(const char* name, size_t buf_size) const
     // If H5Oget_comment_by_name returns a negative value, raise an exception
     if (comment_len < 0)
     {
-        throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
+        throw LocationException(inMemFunc("getComment"), "H5Oget_comment_by_name failed");
     }
 
     // If comment exists, calls C routine again to get it
@@ -605,7 +638,7 @@ H5std_string H5Location::getComment(const char* name, size_t buf_size) const
         if (temp_len < 0)
         {
             delete []comment_C;
-            throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
+            throw LocationException(inMemFunc("getComment"), "H5Oget_comment_by_name failed");
         }
 
         // Convert the C comment to return
@@ -630,6 +663,61 @@ H5std_string H5Location::getComment(const H5std_string& name, size_t buf_size) c
 {
     return(getComment(name.c_str(), buf_size));
 }
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::openObjId
+///\brief       Opens an object without knowing the object type.
+///\param       obj_name - IN: Path to the object
+///\param       lapl     - IN: Access property list for the link pointing
+///                            to the object
+///\exception   H5::LocationException
+///\par Description
+///             This function opens an object at this location, using
+///             H5Oopen.  Thus, an object can be opened without knowing
+///             the object's type.
+// Programmer   Binh-Minh Ribler - May, 2017
+//--------------------------------------------------------------------------
+hid_t H5Location::openObjId(const char* obj_name, const LinkAccPropList& lapl) const
+{
+    hid_t ret_value = H5Oopen(getId(), obj_name, lapl.getId());
+    if (ret_value < 0)
+    {
+        throw LocationException(inMemFunc("openObjId"), "H5Oopen failed");
+    }
+    return(ret_value);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::openObjId
+///\brief       This is an overloaded member function, provided for convenience.
+///             It takes a reference to a \c H5std_string for the object's path.
+///\param       obj_name - IN: Path to the object
+///\param       lapl     - IN: Access property list for the link pointing to
+///                            the object
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - May, 2017
+//--------------------------------------------------------------------------
+hid_t H5Location::openObjId(const H5std_string& obj_name, const LinkAccPropList& lapl) const
+{
+    return(openObjId(obj_name.c_str(), lapl));
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::closeObjId
+///\brief       Closes an object, which was opened with H5Location::openObjId
+///
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - May, 2017
+//--------------------------------------------------------------------------
+void H5Location::closeObjId(hid_t obj_id) const
+{
+    herr_t ret_value = H5Oclose(obj_id);
+    if (ret_value < 0)
+    {
+        throw LocationException(inMemFunc("closeObjId"), "H5Oclose failed");
+    }
+}
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -957,7 +1045,6 @@ DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
         throw ReferenceException(inMemFunc("getRegion"), E.getDetailMsg());
     }
 }
-
 
 //--------------------------------------------------------------------------
 // Function:    H5Location destructor
