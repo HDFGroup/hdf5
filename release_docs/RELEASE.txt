@@ -119,7 +119,7 @@ Bug Fixes since HDF5-1.8.18
     -------------
     - Support for Fortran shared libraries on OS X with autotools now
       works. Cmake builds still disables Fortran shared libraries on OS X.  
-      (HDFFV-2772, MSB, 4/30/2017)
+      (MSB - 2017/04/30, HDFFV-2772)
 
 
     Library
