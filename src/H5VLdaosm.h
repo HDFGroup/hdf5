@@ -97,6 +97,16 @@ typedef struct H5VL_daosm_dset_t {
     hid_t dapl_id;
 } H5VL_daosm_dset_t;
 
+/* The datatype struct */
+/* Note we could speed things up a bit by caching the serialized datatype.  We
+ * may also not need to keep the type_id around.  -NAF */
+typedef struct H5VL_daosm_dtype_t {
+    H5VL_daosm_obj_t obj; /* Must be first */
+    hid_t type_id;
+    hid_t tcpl_id;
+    hid_t tapl_id;
+} H5VL_daosm_dtype_t;
+
 /* The map struct */
 typedef struct H5VL_daosm_map_t {
     H5VL_daosm_obj_t obj; /* Must be first */
