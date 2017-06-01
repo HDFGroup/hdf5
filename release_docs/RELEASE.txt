@@ -57,16 +57,40 @@ New Features
 
     Configuration
     -------------
-    - CMake minimum is now 3.2.2. (ADB 2016/01/10)
+    -
 
+    - CMake in the Tools
+
+      User-defined filters on Windows require that tools be built
+      with shared libraries.
+
+      CMake commands added to builds tools with
+      shared libraries as well as with static libraries.
+
+      (ADB - 2017/02/07, HDFFV-10123)
 
 
     Library
     -------
 
-    - Filter plugin API added to access the table of paths to search for a
-      library.
-      (HDFFV-10143 ADB 2017/04/04)
+    - H5PL package
+
+      Users would like to be able to set the plugin path programmatically
+      instead of through the environment variable.
+
+      H5PL package obtained new APIs for manipulating the entries of
+      the plugin path table. The new APIs are;
+        H5PLappend  - Insert a plugin path at the end of the list.
+        H5PLprepend - Insert a plugin path at the beginning of the list.
+        H5PLreplace - Replace the path at the specified index.
+        H5PLinsert  - Insert a plugin path at the specified index, moving
+                      other paths after the index.
+        H5PLremove  - Remove the plugin path at the specifed index and
+                      compacting the list.
+        H5PLget     - Query the plugin path at the specified index.
+        H5PLsize    - Query the size of the current list of plugin paths.
+
+      (ADB - 2017/04/04, HDFFV-10143)
 
 
     Parallel Library
@@ -124,6 +148,15 @@ Bug Fixes since HDF5-1.8.18
 
     Library
     -------
+    - bitfield datatypes
+
+      bitfield datatypes did not fully support endianess of the data.
+
+      Improved the endianess of bitfield datatypes by adding missing functional
+      code. This code used integer types as a template.
+
+      (ADB - 2017/05/12, HDFFV-10186)
+
     - Missing #ifdef __cplusplus macros were added to the generated H5Epubgen.h file.
 
     (HDFFV-9638, DER, 4/25/2017)
@@ -164,6 +197,15 @@ Bug Fixes since HDF5-1.8.18
       string lengths and if the strpad was null filled.
 
       (ADB - 2017/05/18, HDFFV-9055, HDFFV-10128)
+
+    - h5diff
+
+      h5diff did not report user-defined filters differences correctly..
+
+      Improved h5diff compare of user-defined filters by reporting an
+      error if the user-defined filter plugin cannot be found..
+
+      (ADB - 2017/01/18, HDFFV-9994)
 
     Fortran API
     -----------
