@@ -16,9 +16,9 @@
 # See libtool versioning documentation online.
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
-LT_VERS_INTERFACE = 12
-LT_VERS_REVISION = 1
-LT_VERS_AGE = 2
+LT_VERS_INTERFACE = 13
+LT_VERS_REVISION = 0
+LT_VERS_AGE = 3
 
 ## If the API changes *at all*, increment LT_VERS_INTERFACE and
 ## reset LT_VERS_REVISION to 0.
@@ -39,7 +39,7 @@ LT_VERS_AGE = 2
 ## the effects of the H5_V1_x_COMPAT flag.
 
 ## Version numbers for wrapper shared library files.
-LT_CXX_VERS_INTERFACE = 13
+LT_CXX_VERS_INTERFACE = 14
 LT_CXX_VERS_REVISION = 0
 LT_CXX_VERS_AGE = 0
 
@@ -60,6 +60,6 @@ LT_HL_F_VERS_REVISION = 3
 LT_HL_F_VERS_AGE = 0
 
 LT_TOOLS_VERS_INTERFACE = 10
-LT_TOOLS_VERS_REVISION = 4
+LT_TOOLS_VERS_REVISION = 5
 LT_TOOLS_VERS_AGE = 0
 
