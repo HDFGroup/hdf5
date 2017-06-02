@@ -157,6 +157,23 @@ Bug Fixes since HDF5-1.8.18
 
       (ADB - 2017/05/12, HDFFV-10186)
 
+    - Compact layout "dirty" flag is not reset properly
+
+      Reset the layout "dirty" flag for a compact dataset before flushing
+      the message.
+
+      (VC - 2017/05/11, HDFFV-10051)
+
+    - Incorporate additional code changes for the H5DOread_chunk patch from GE
+      Healthcare.
+
+      Incorporate the code changes that were missing from the original patch:
+      (1) Additional tests in hl/test/test_dset_opt.c
+      (2) Fix in src/H5Dchunk.c for direct access when an entry is in chunk cache but
+          not dirty
+
+      (VC - 2017/05/02, HDFFV-9934)
+
     - Missing #ifdef __cplusplus macros were added to the generated H5Epubgen.h file.
 
     (HDFFV-9638, DER, 4/25/2017)
