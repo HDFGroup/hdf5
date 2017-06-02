@@ -62,7 +62,7 @@ class H5_DLLCPP IdComponent {
         // removal does not raise any problems in two 1.10 releases.
 
         // Creates an object to hold an HDF5 identifier.
-        IdComponent(const hid_t h5_id);
+        // IdComponent(const hid_t h5_id); - removed in 1.8.19
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
