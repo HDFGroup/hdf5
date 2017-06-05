@@ -561,14 +561,14 @@ if test $? -ne 0; then
 fi
 
 # --------------- Committed Datatypes --------------- #
-echo h5dsm_tvlen
+echo h5dsm_tcommit
 orterun -np 1 $EXEC_ARGS ./h5dsm_tcommit $POOL_UUID -q
 if test $? -ne 0; then
     echo FAILED
     exit 1
 fi
 
-echo h5dsm_tvlen \(2 processes\)
+echo h5dsm_tcommit \(2 processes\)
 orterun -np 2 $EXEC_ARGS ./h5dsm_tcommit $POOL_UUID -q
 if test $? -ne 0; then
     echo FAILED
