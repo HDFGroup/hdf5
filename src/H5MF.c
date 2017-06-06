@@ -1094,6 +1094,210 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_alloc_tmp() */
 
+/* FULLSWMR TODO */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_xfree_real
+ *
+ * Purpose:     Frees part of a file, making that part of the file
+ *              available for reuse.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MF_xfree_real(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
+    hsize_t size)
+{
+    H5F_io_info2_t fio_info;            /* I/O info for operation */
+    H5F_mem_page_t  fs_type;            /* Free space type (mapped from allocation type) */
+    H5MF_free_section_t *node = NULL;   /* Free space section pointer */
+    unsigned ctype;			/* section class type */
+    H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
+    H5AC_ring_t orig_ring = H5AC_RING_INV;  /* Original ring value */
+    H5AC_ring_t fsm_ring = H5AC_RING_INV;   /* Ring of fsm */
+    hbool_t reset_ring = FALSE;         /* Whether the ring was set */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
+#ifdef H5MF_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
+#endif /* H5MF_ALLOC_DEBUG */
+
+    /* check arguments */
+    HDassert(f);
+    if(!H5F_addr_defined(addr) || 0 == size)
+        HGOTO_DONE(SUCCEED)
+    HDassert(addr != 0);        /* Can't deallocate the superblock :-) */
+
+    if(f->shared->first_alloc_dealloc) {
+        HDassert(!H5AC_cache_image_pending(f));
+        if(H5MF_tidy_self_referential_fsm_hack(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "tidy of self referential fsm hack failed")
+    } /* end if */
+
+    H5MF_alloc_to_fs_type(f, alloc_type, size, &fs_type);
+
+    /* Set the ring type in the DXPL */
+    if(H5MF__fsm_type_is_self_referential(f, fs_type))
+        fsm_ring = H5AC_RING_MDFSM;
+    else
+        fsm_ring = H5AC_RING_RDFSM;
+    if(H5AC_set_ring(dxpl_id, fsm_ring, &dxpl, &orig_ring) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set ring value")
+    reset_ring = TRUE;
+
+    /* we are about to change the contents of the free space manager --
+     * notify metadata cache that the associated fsm ring is
+     * unsettled
+     */
+    /* Only do so for strategies that use free-space managers */
+    if(H5F_HAVE_FREE_SPACE_MANAGER(f))
+        if(H5AC_unsettle_ring(f, fsm_ring) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, "attempt to notify cache that ring is unsettled failed")
+
+    /* Check for attempting to free space that's a 'temporary' file address */
+    if(H5F_addr_le(f->shared->tmp_addr, addr))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free temporary file space")
+
+    /* Set up I/O info for operation */
+    fio_info.f = f;
+    if(H5FD_MEM_DRAW == alloc_type) {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
+
+    /* Check if the space to free intersects with the file's metadata accumulator */
+    if(H5F__accum_free(&fio_info, alloc_type, addr, size) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't check free space intersection w/metadata accumulator")
+
+    /* Check if the free space manager for the file has been initialized */
+    if(!f->shared->fs_man[fs_type]) {
+        /* If there's no free space manager for objects of this type,
+         *  see if we can avoid creating one by checking if the freed
+         *  space is at the end of the file
+         */
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: fs_addr = %a\n", FUNC, f->shared->fs_addr[fs_type]);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+        if(!H5F_addr_defined(f->shared->fs_addr[fs_type])) {
+            htri_t status;          /* "can absorb" status for section into */
+
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+            /* Try to shrink the file or absorb the block into a block aggregator */
+            if((status = H5MF_try_shrink(f, alloc_type, dxpl_id, addr, size)) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check for absorbing block")
+            else if(status > 0)
+                /* Indicate success */
+                HGOTO_DONE(SUCCEED)
+	    else if(size < f->shared->fs_threshold) {
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+		HGOTO_DONE(SUCCEED)
+	    } /* end else-if */
+        } /* end if */
+
+        /* If we are deleting the free space manager, leave now, to avoid
+         *  [re-]starting it.
+         * or if file space strategy type is not using a free space manager
+         *  (H5F_FSPACE_STRATEGY_AGGR or H5F_FSPACE_STRATEGY_NONE), drop free space
+         *   section on the floor.
+         *
+         * Note: this drops the space to free on the floor...
+         *
+         */
+        if(f->shared->fs_state[fs_type] == H5F_FS_STATE_DELETING ||
+	        !H5F_HAVE_FREE_SPACE_MANAGER(f)) {
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+            HGOTO_DONE(SUCCEED)
+        } /* end if */
+
+        /* There's either already a free space manager, or the freed
+         *  space isn't at the end of the file, so start up (or create)
+         *  the file space manager
+         */
+        if(H5MF_start_fstype(f, dxpl_id, fs_type) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
+    } /* end if */
+
+    /* Create the free-space section for the freed section */
+    ctype = H5MF_SECT_CLASS_TYPE(f, size);
+    if(NULL == (node = H5MF_sect_new(ctype, addr, size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
+
+    /* If size of the freed section is larger than threshold, add it to the free space manager */
+    if(size >= f->shared->fs_threshold) {
+	HDassert(f->shared->fs_man[fs_type]);
+
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: Before H5FS_sect_add()\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+
+        /* Add to the free space for the file */
+        if(H5MF_add_sect(f, alloc_type, dxpl_id, f->shared->fs_man[fs_type], node) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't add section to file free space")
+        node = NULL;
+
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: After H5FS_sect_add()\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+    } /* end if */
+    else {
+        htri_t merged;          /* Whether node was merged */
+        H5MF_sect_ud_t udata; 	/* User data for callback */
+
+        /* Construct user data for callbacks */
+        udata.f = f;
+        udata.dxpl_id = dxpl_id;
+        udata.alloc_type = alloc_type;
+        udata.allow_sect_absorb = TRUE;
+        udata.allow_eoa_shrink_only = FALSE;
+
+        /* Try to merge the section that is smaller than threshold */
+	if((merged = H5FS_sect_try_merge(f, dxpl_id, f->shared->fs_man[fs_type], (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, &udata)) < 0)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't merge section to file free space")
+	else if(merged == TRUE) /* successfully merged */
+	    /* Indicate that the node was used */
+            node = NULL;
+    } /* end else */
+
+done:
+    /* Reset the ring in the DXPL */
+    if(reset_ring)
+        if(H5AC_reset_ring(dxpl, orig_ring) < 0)
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set property value")
+
+    /* Release section node, if allocated and not added to section list or merged */
+    if(node)
+        if(H5MF_sect_free((H5FS_section_info_t *)node) < 0)
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
+
+#ifdef H5MF_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
+#endif /* H5MF_ALLOC_DEBUG */
+#ifdef H5MF_ALLOC_DEBUG_DUMP
+H5MF_sects_dump(f, dxpl_id, stderr);
+#endif /* H5MF_ALLOC_DEBUG_DUMP */
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+} /* end H5MF_xfree() */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5MF_xfree

@@ -3334,3 +3334,38 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_mdc_image_info() */
 
+/* FULLSWMR TODO */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_iterate
+ *
+ * Purpose:     Iterate over cache entries for full SWMR implementation, 
+ *              making a callback for matches
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Houjun Tang
+ *              May 25, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_iterate(H5F_t *f, H5AC_cache_iter_cb_t cb, void *cb_ctx)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+     
+    /* Call cache-level function to re-tag entries with the COPIED tag */
+    if(H5C_iterate(f->shared->cache, cb, cb_ctx) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTOPERATE, FAIL, "Can't iterate cache entries")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_iterate() */
+

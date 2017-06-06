@@ -8950,3 +8950,47 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__remove_entry() */
 
+/* FULLSWMR TODO */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_iterate
+ *
+ * Purpose:     Iterate over cache entries for full SWMR implementation, 
+ *              making a callback for matches
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Houjun Tang
+ *              May 25, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_iterate(H5C_t *cache_ptr, H5AC_cache_iter_cb_t cb, void *cb_ctx)
+{
+    H5C_cache_entry_t  *entry_ptr = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    /* Function enter macro */
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    entry_ptr = cache_ptr->il_head;
+    while(entry_ptr != NULL) {
+        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+
+        /* Make callback for entry */
+        if((cb)(entry_ptr, cb_ctx) != H5_ITER_CONT)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "SWMR cache entry iteration callback failed")
+
+        entry_ptr = entry_ptr->il_next; 
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_iterate() */
+

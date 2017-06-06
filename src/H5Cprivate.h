@@ -2351,5 +2351,11 @@ H5_DLL herr_t H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr,
 H5_DLL herr_t H5C_validate_index_list(H5C_t *cache_ptr);
 #endif /* NDEBUG */
 
+/* FULLSWMR TODO typedef for cache entry iteration callback */
+typedef int (*H5AC_cache_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
+
+/* FULLSWMR: cache iteration */
+H5_DLL herr_t H5C_iterate(H5C_t *cache_ptr, H5AC_cache_iter_cb_t cb, void *cb_ctx);
+
 #endif /* !_H5Cprivate_H */
 

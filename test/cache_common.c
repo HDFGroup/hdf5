@@ -3854,6 +3854,75 @@ insert_entry(H5F_t * file_ptr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	mark_entry_clean()
+ *
+ * Purpose:	Mark the specified entry as dirty.
+ *
+ *		Do nothing if pass is FALSE on entry.
+ *
+ * Return:	void
+ *
+ * Programmer:	Houjun Tang
+ *              June 5, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+mark_entry_clean(int32_t type,
+                 int32_t idx)
+{
+    herr_t result;
+    test_entry_t * base_addr;
+    test_entry_t * entry_ptr;
+    hbool_t was_dirty;
+
+    if ( pass ) {
+
+        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+        HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
+
+        base_addr = entries[type];
+        entry_ptr = &(base_addr[idx]);
+
+        HDassert( entry_ptr->index == idx );
+        HDassert( entry_ptr->type == type );
+        HDassert( entry_ptr == entry_ptr->self );
+        HDassert( entry_ptr->header.is_protected ||
+		  entry_ptr->header.is_pinned );
+
+        was_dirty = entry_ptr->is_dirty;
+	entry_ptr->is_dirty = false;
+
+        if(entry_ptr->flush_dep_npar > 0 && !was_dirty)
+            mark_flush_dep_dirty(entry_ptr);
+
+        result = H5C_mark_entry_clean((void *)entry_ptr);
+
+        if ( ( result < 0 ) ||
+             ( !entry_ptr->header.is_protected && !entry_ptr->header.is_pinned ) ||
+             ( entry_ptr->header.is_protected && !entry_ptr->header.dirtied ) ||
+             ( !entry_ptr->header.is_protected && !entry_ptr->header.is_dirty ) ||
+             ( entry_ptr->header.type != types[type] ) ||
+             ( entry_ptr->size != entry_ptr->header.size ) ||
+             ( entry_ptr->addr != entry_ptr->header.addr ) ) {
+
+            pass = FALSE;
+            failure_mssg = "error in H5C_mark_entry_dirty().";
+
+        }
+
+        HDassert( ((entry_ptr->header).type)->id == type );
+
+    }
+
+    return;
+
+} /* mark_entry_clean() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	mark_entry_dirty()
  *
  * Purpose:	Mark the specified entry as dirty.

@@ -599,6 +599,9 @@ H5TEST_DLL void insert_entry(H5F_t * file_ptr,
 H5TEST_DLL void mark_entry_dirty(int32_t type,
             int32_t idx);
 
+H5TEST_DLL void mark_entry_clean(int32_t type,
+            int32_t idx);
+
 H5TEST_DLL void move_entry(H5C_t * cache_ptr,
                 int32_t type,
                 int32_t idx,

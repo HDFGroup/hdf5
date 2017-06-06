@@ -1475,9 +1475,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write/SWMR write (may use <h5clear file> to clear file consistency flags)")
             } /* version 3 superblock */
 
-            /* FULLSWMR TODO check with Quincey*/
-            H5Pget_swmr_deltat(fapl_id, &file->shared->swmr_deltat);
-
             file->shared->sblock->status_flags |= H5F_SUPER_WRITE_ACCESS;
             if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) {
                 file->shared->sblock->status_flags |= H5F_SUPER_SWMR_WRITE_ACCESS;

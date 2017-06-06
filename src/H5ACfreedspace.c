@@ -61,7 +61,7 @@
 static herr_t H5AC__proxy_entry_image_len(const void *thing, size_t *image_len);
 static herr_t H5AC__proxy_entry_serialize(const H5F_t *f, void *image_ptr,
     size_t len, void *thing);
-static herr_t H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *thing,...);
 static herr_t H5AC__proxy_entry_free_icr(void *thing);
 
 /*********************/
@@ -99,6 +99,8 @@ const H5AC_class_t H5AC_PROXY_ENTRY[1] = {{
 /* Declare a free list to manage H5AC_proxy_entry_t objects */
 H5FL_DEFINE_STATIC(H5AC_proxy_entry_t);
 
+/* FULLSWMR TODO */
+/* change proxy_entry -> freedspace */
 
 
 /*-------------------------------------------------------------------------
@@ -116,6 +118,7 @@ H5FL_DEFINE_STATIC(H5AC_proxy_entry_t);
  */
 H5AC_proxy_entry_t *
 H5AC_proxy_entry_create(void)
+/* H5AC_proxy_entry_create(addr, type, size) */
 {
     H5AC_proxy_entry_t *pentry = NULL;  /* Pointer to new proxy entry */
     H5AC_proxy_entry_t *ret_value = NULL;       /* Return value */
@@ -521,8 +524,9 @@ H5AC__proxy_entry_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
+H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, const char *fmt,...)
 {
+    va_list ap;
     H5AC_freed_space_entry_t *pentry = (H5AC_freed_space_entry_t *)_thing;
     herr_t ret_value = SUCCEED;         	/* Return value */
 
@@ -530,6 +534,8 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
 
     /* Sanity check */
     HDassert(pentry);
+
+    va_start (ap, fmt);         /* Initialize the argument list. */
 
     switch(action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
@@ -586,15 +592,18 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
 
             /* FULLSWMR TODO */
-/* <remove flush dependency on cleaned child> */
-/* if(H5AC_get_ndirty_children(pentry, &ndirty_children) < 0) */
-/*     <error> */
-/* if(ndirty_children == 0) */
-/*     <assert nchildren == 0>  (makes certain all flush dependencies removed) */
-/*     <free space (calling "H5MF_xfree_real") for this entry (use entries address & size)> */
-/*     <delete freed space entry> */
+            /* <remove flush dependency on cleaned child> */
+            int ndirty_children;
+            /* if(H5AC_get_ndirty_children(pentry, &ndirty_children) < 0) */
+            /*         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get number of dirty children") */
 
-
+            /*     <assert nchildren == 0>  (makes certain all flush dependencies removed) */
+            if(ndirty_children == 0) {
+                HDassert(nchildren == 0);
+            /*     <free space (calling "H5MF_xfree_real") for this entry (use entries address & size)> */
+                /* H5MF_xfree_real(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size); */
+            /*     <delete freed space entry> */
+            }
 
             /* Sanity check */
             HDassert(pentry->ndirty_children > 0);
@@ -640,6 +649,8 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
     } /* end switch */
 
 done:
+    if(va_started)
+        va_end(ap);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC__proxy_entry_notify() */
 
