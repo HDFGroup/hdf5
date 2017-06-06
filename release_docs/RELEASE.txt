@@ -233,19 +233,6 @@ Bug Fixes since HDF5-1.8.18
       (BMR - 2017/05/15, HDFFV-10156)
 
 
-Test Fixes and Improvements
-============
-
-    HDFFV-10120     Added checks for compression library requirements
-                    before tests that require compression.
-
-    HDFFV-10118     Filter test restricted to byte values to avoid issue
-                    with data endianness.
-
-    HDFFV-10112     Replaced C++ comments with C style comments in h5dumpgentest.
-
-
-
 
 Supported Platforms
 ===================
