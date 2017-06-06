@@ -627,10 +627,6 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
                 /* Retrieve the 'SWMR delta t' structure */
                 if(NULL == H5O_msg_read(&ext_loc, H5O_SWMR_DELTAT_ID, &swmr_deltat, meta_dxpl_id))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
-                /* FULLSWMR TODO: is this needed? */ 
-                f->shared->swmr_deltat = swmr_deltat;
-
-/* printf("SWMR delta t value = %u\n", swmr_deltat); */
         } /* end if */
 
 

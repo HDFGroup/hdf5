@@ -8950,7 +8950,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__remove_entry() */
 
-/* FULLSWMR TODO */
 
 /*-------------------------------------------------------------------------
  *

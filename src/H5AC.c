@@ -3334,7 +3334,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_mdc_image_info() */
 
-/* FULLSWMR TODO */
 
 /*-------------------------------------------------------------------------
  *
