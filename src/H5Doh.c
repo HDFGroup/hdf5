@@ -27,6 +27,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
 
@@ -359,12 +360,12 @@ done:
 static herr_t
 H5O__dset_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 {
-    H5O_layout_t        layout;         	/* Data storage layout message */
-    H5O_efl_t           efl;			/* External File List message */
+    H5O_layout_t        *layout = NULL;         /* Data storage layout message */
+    H5O_efl_t           efl;                    /* External File List message */
     hbool_t             layout_read = FALSE;    /* Whether the layout message was read */
     hbool_t             efl_read = FALSE;       /* Whether the external file list message was read */
-    htri_t		exists;                 /* Flag if header message of interest exists */
-    herr_t      	ret_value = SUCCEED;    /* Return value */
+    htri_t              exists;                 /* Flag if header message of interest exists */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -376,22 +377,24 @@ H5O__dset_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *
     HDassert(bh_info);
 
     /* Get the layout message from the object header */
-    if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_LAYOUT_ID, &layout))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message")
+    if(NULL == (layout = (H5O_layout_t *)H5MM_calloc(sizeof(H5O_layout_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_LAYOUT_ID, layout))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message")
     layout_read = TRUE;
 
     /* Check for chunked dataset storage */
-    if(layout.type == H5D_CHUNKED && H5D__chunk_is_space_alloc(&layout.storage)) {
+    if(layout->type == H5D_CHUNKED && H5D__chunk_is_space_alloc(&(layout->storage))) {
         /* Get size of chunk index */
-        if(H5D__chunk_bh_info(loc, dxpl_id, oh, &layout, &(bh_info->index_size)) < 0)
+        if(H5D__chunk_bh_info(loc, dxpl_id, oh, layout, &(bh_info->index_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
     } /* end if */
-    else if(layout.type == H5D_VIRTUAL
-            && (layout.storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF)) {
+    else if(layout->type == H5D_VIRTUAL
+            && (layout->storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF)) {
         size_t virtual_heap_size;
 
         /* Get size of global heap object for virtual dataset */
-        if(H5HG_get_obj_size(loc->file, dxpl_id, &(layout.storage.u.virt.serial_list_hobjid), &virtual_heap_size) < 0)
+        if(H5HG_get_obj_size(loc->file, dxpl_id, &(layout->storage.u.virt.serial_list_hobjid), &virtual_heap_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get global heap size for virtual dataset mapping")
 
         /* Return heap size */
@@ -400,28 +403,31 @@ H5O__dset_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *
 
     /* Check for External File List message in the object header */
     if((exists = H5O_msg_exists_oh(oh, H5O_EFL_ID)) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for EFL message")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for EFL message")
 
-    if(exists && H5D__efl_is_space_alloc(&layout.storage)) {
+    if(exists && H5D__efl_is_space_alloc(&(layout->storage))) {
         /* Start with clean EFL info */
         HDmemset(&efl, 0, sizeof(efl));
 
-	/* Get External File List message from the object header */
-	if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_EFL_ID, &efl))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find EFL message")
+        /* Get External File List message from the object header */
+        if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_EFL_ID, &efl))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find EFL message")
         efl_read = TRUE;
 
-	/* Get size of local heap for EFL message's file list */
-	if(H5D__efl_bh_info(loc->file, dxpl_id, &efl, &(bh_info->heap_size)) < 0)
+        /* Get size of local heap for EFL message's file list */
+        if(H5D__efl_bh_info(loc->file, dxpl_id, &efl, &(bh_info->heap_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine EFL heap info")
     } /* end if */
 
 done:
     /* Free messages, if they've been read in */
-    if(layout_read && H5O_msg_reset(H5O_LAYOUT_ID, &layout) < 0)
+    if(layout_read && H5O_msg_reset(H5O_LAYOUT_ID, layout) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset data storage layout message")
     if(efl_read && H5O_msg_reset(H5O_EFL_ID, &efl) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset external file list message")
+
+    if(layout)
+        layout = (H5O_layout_t *)H5MM_xfree(layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dset_bh_info() */
