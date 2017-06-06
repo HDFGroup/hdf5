@@ -3302,7 +3302,7 @@ H5D_get_create_plist(H5D_t *dset)
 {
     H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
     H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
-    H5O_layout_t        copied_layout;          /* Layout to tweak */
+    H5O_layout_t        *copied_layout = NULL;  /* Layout to tweak */
     H5O_fill_t          copied_fill;            /* Fill value to tweak */
     H5O_efl_t           copied_efl;             /* External file list to tweak */
     hid_t		new_dcpl_id = FAIL;
@@ -3325,39 +3325,41 @@ H5D_get_create_plist(H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object creation info")
 
     /* Get the layout property */
-    if(H5P_peek(new_plist, H5D_CRT_LAYOUT_NAME, &copied_layout) < 0)
+    if(NULL == (copied_layout = (H5O_layout_t *)H5MM_calloc(sizeof(H5O_layout_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(H5P_peek(new_plist, H5D_CRT_LAYOUT_NAME, copied_layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get layout")
 
     /* Reset layout values set when dataset is created */
-    copied_layout.ops = NULL;
-    switch(copied_layout.type) {
+    copied_layout->ops = NULL;
+    switch(copied_layout->type) {
         case H5D_COMPACT:
-            copied_layout.storage.u.compact.buf = H5MM_xfree(copied_layout.storage.u.compact.buf);
-            HDmemset(&copied_layout.storage.u.compact, 0, sizeof(copied_layout.storage.u.compact));
+            copied_layout->storage.u.compact.buf = H5MM_xfree(copied_layout->storage.u.compact.buf);
+            HDmemset(&copied_layout->storage.u.compact, 0, sizeof(copied_layout->storage.u.compact));
             break;
 
         case H5D_CONTIGUOUS:
-            copied_layout.storage.u.contig.addr = HADDR_UNDEF;
-            copied_layout.storage.u.contig.size = 0;
+            copied_layout->storage.u.contig.addr = HADDR_UNDEF;
+            copied_layout->storage.u.contig.size = 0;
             break;
 
         case H5D_CHUNKED:
             /* Reset chunk size */
-            copied_layout.u.chunk.size = 0;
+            copied_layout->u.chunk.size = 0;
 
             /* Reset index info, if the chunk ops are set */
-            if(copied_layout.storage.u.chunk.ops)
-		/* Reset address and pointer of the array struct for the chunked storage index */
-                if(H5D_chunk_idx_reset(&copied_layout.storage.u.chunk, TRUE) < 0)
+            if(copied_layout->storage.u.chunk.ops)
+                /* Reset address and pointer of the array struct for the chunked storage index */
+                if(H5D_chunk_idx_reset(&copied_layout->storage.u.chunk, TRUE) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to reset chunked storage index in dest")
 
             /* Reset chunk index ops */
-            copied_layout.storage.u.chunk.ops = NULL;
+            copied_layout->storage.u.chunk.ops = NULL;
             break;
 
         case H5D_VIRTUAL:
-            copied_layout.storage.u.virt.serial_list_hobjid.addr = HADDR_UNDEF;
-            copied_layout.storage.u.virt.serial_list_hobjid.idx = 0;
+            copied_layout->storage.u.virt.serial_list_hobjid.addr = HADDR_UNDEF;
+            copied_layout->storage.u.virt.serial_list_hobjid.idx = 0;
             break;
 
         case H5D_LAYOUT_ERROR:
@@ -3367,7 +3369,7 @@ H5D_get_create_plist(H5D_t *dset)
     } /* end switch */
 
     /* Set back the (possibly modified) layout property to property list */
-    if(H5P_poke(new_plist, H5D_CRT_LAYOUT_NAME, &copied_layout) < 0)
+    if(H5P_poke(new_plist, H5D_CRT_LAYOUT_NAME, copied_layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set layout")
 
     /* Get the fill value property */
@@ -3458,6 +3460,9 @@ done:
         if(new_dcpl_id > 0)
             if(H5I_dec_app_ref(new_dcpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object")
+
+    if(copied_layout)
+        copied_layout = (H5O_layout_t *)H5MM_xfree(copied_layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_create_plist() */
