@@ -125,7 +125,20 @@ New Features
       (BMR, 2017/05/13, HDFFV-10004, HDFFV-10156)
 
     - New class LinkAccPropList is added for link access proprety list
+
       (BMR, 2017/05/13, HDFFV-10156)
+
+
+    High-Level APIs
+    ---------------
+    - H5DOread_chunk
+    
+      New API function, H5DOread_chunk, corresponding to existing function 
+      H5DOwrite_chunk.  H5DOread_chunk reads a raw data chunk directly from a 
+      chunked dataset in the file into the application buffer, bypassing the 
+      library’s internal data transfer pipeline, including filters.
+
+      (VC - 2017/05/02, HDFFV-9934)
 
 
 Support for New Platforms, Languages, and Compilers
@@ -155,22 +168,13 @@ Bug Fixes since HDF5-1.8.18
 
       (ADB - 2017/05/12, HDFFV-10186)
 
-    - Compact layout "dirty" flag is not reset properly
+    - Newly created datasets with H5D_COMPACT layout failed to open after 
+      several H5Dopen/H5Dclose cycles.
 
-      Reset the layout "dirty" flag for a compact dataset before flushing
-      the message.
+      The layout "dirty" flag for a compact dataset is now properly reset 
+      before flushing the message.
 
       (VC - 2017/05/11, HDFFV-10051)
-
-    - Incorporate additional code changes for the H5DOread_chunk patch from GE
-      Healthcare.
-
-      Incorporate the code changes that were missing from the original patch:
-      (1) Additional tests in hl/test/test_dset_opt.c
-      (2) Fix in src/H5Dchunk.c for direct access when an entry is in chunk cache but
-          not dirty
-
-      (VC - 2017/05/02, HDFFV-9934)
 
     - Missing #ifdef __cplusplus macros were added to the generated H5Epubgen.h file.
 
