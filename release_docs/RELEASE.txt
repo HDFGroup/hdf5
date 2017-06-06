@@ -143,7 +143,7 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    
+
     - Added OpenMPI 2.0.1 compiled with GCC 4.9.3
 
 
@@ -209,10 +209,19 @@ Bug Fixes since HDF5-1.8.18
 
     - h5diff
 
-      h5diff did not report user-defined filter data differences correctly..
+      h5diff help text about epsilon comparison was confusing.
+
+      Changed h5diff help text to indicate that the 'a' refers to the
+      datapoint in file1 and 'b' refers to the datapoint value in file2.
+
+      (ADB - 2017/05/16, HDFFV-9995)
+
+    - h5diff
+
+      h5diff did not report user-defined filter data differences correctly.
 
       Improved h5diff compare of user-defined filter data by reporting an
-      error if the user-defined filter plugin cannot be found..
+      error if the user-defined filter plugin cannot be found.
 
       (ADB - 2017/01/18, HDFFV-9994)
 
