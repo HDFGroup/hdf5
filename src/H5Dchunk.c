@@ -368,6 +368,9 @@ H5FL_BLK_DEFINE_STATIC(chunk);
 /* Declare extern free list to manage the H5S_sel_iter_t struct */
 H5FL_EXTERN(H5S_sel_iter_t);
 
+/* Declare a free list to manage the H5O_layout_t struct */
+H5FL_DEFINE_STATIC(H5O_layout_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__chunk_direct_write
@@ -5474,7 +5477,7 @@ H5D__chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_storage_t *storage)
     if((exists = H5O_msg_exists_oh(oh, H5O_LAYOUT_ID)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to check for object header message")
     else if(exists) {
-        if(NULL == (layout = (H5O_layout_t *)H5MM_calloc(sizeof(H5O_layout_t))))
+        if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
         if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_LAYOUT_ID, layout))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get layout message")
@@ -5504,7 +5507,7 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset layout message")
 
     if(layout)
-        layout = (H5O_layout_t *)H5MM_xfree(layout);
+        layout = H5FL_FREE(H5O_layout_t, layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_delete() */

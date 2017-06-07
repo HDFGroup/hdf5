@@ -27,7 +27,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
 
@@ -87,6 +86,9 @@ const H5O_obj_class_t H5O_OBJ_DATASET[1] = {{
 
 /* Declare a free list to manage the H5D_copy_file_ud_t struct */
 H5FL_DEFINE(H5D_copy_file_ud_t);
+
+/* Declare a free list to manage the H5O_layout_t struct */
+H5FL_DEFINE_STATIC(H5O_layout_t);
 
 
 /*-------------------------------------------------------------------------
@@ -377,7 +379,7 @@ H5O__dset_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *
     HDassert(bh_info);
 
     /* Get the layout message from the object header */
-    if(NULL == (layout = (H5O_layout_t *)H5MM_calloc(sizeof(H5O_layout_t))))
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
     if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_LAYOUT_ID, layout))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message")
@@ -427,7 +429,7 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset external file list message")
 
     if(layout)
-        layout = (H5O_layout_t *)H5MM_xfree(layout);
+        layout = H5FL_FREE(H5O_layout_t, layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dset_bh_info() */

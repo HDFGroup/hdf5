@@ -104,6 +104,9 @@ H5FL_EXTERN(H5D_chunk_info_t);
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
 
+/* Declare a free list to manage the H5O_layout_t struct */
+H5FL_DEFINE_STATIC(H5O_layout_t);
+
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
 
@@ -3325,7 +3328,7 @@ H5D_get_create_plist(H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object creation info")
 
     /* Get the layout property */
-    if(NULL == (copied_layout = (H5O_layout_t *)H5MM_calloc(sizeof(H5O_layout_t))))
+    if(NULL == (copied_layout = H5FL_CALLOC(H5O_layout_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
     if(H5P_peek(new_plist, H5D_CRT_LAYOUT_NAME, copied_layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get layout")
@@ -3462,7 +3465,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object")
 
     if(copied_layout)
-        copied_layout = (H5O_layout_t *)H5MM_xfree(copied_layout);
+        copied_layout = H5FL_FREE(H5O_layout_t, copied_layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_create_plist() */

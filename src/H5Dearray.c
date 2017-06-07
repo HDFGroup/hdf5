@@ -37,7 +37,6 @@
 #include "H5EAprivate.h"	/* Extensible arrays		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"	/* File space management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"        /* Vector functions			*/
 
 
@@ -215,10 +214,13 @@ const H5EA_class_t H5EA_CLS_FILT_CHUNK[1]={{
 /*******************/
 
 /* Declare a free list to manage the H5D_earray_ctx_t struct */
-/* Declare a free list to manage the H5D_earray_ctx_ud_t struct */
 H5FL_DEFINE_STATIC(H5D_earray_ctx_t);
+
+/* Declare a free list to manage the H5D_earray_ctx_ud_t struct */
 H5FL_DEFINE_STATIC(H5D_earray_ctx_ud_t);
 
+/* Declare a free list to manage the H5O_layout_t struct */
+H5FL_DEFINE_STATIC(H5O_layout_t);
 
 
 /*-------------------------------------------------------------------------
@@ -654,7 +656,7 @@ H5D__earray_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr)
     obj_opened = TRUE;
 
     /* Read the layout message */
-    if(NULL == (layout = (H5O_layout_t *)H5MM_calloc(sizeof(H5O_layout_t))))
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't get memory for layout")
     if(NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, layout, dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get layout info")
@@ -685,7 +687,7 @@ done:
     } /* end if */
 
     if(layout)
-        layout = (H5O_layout_t *)H5MM_xfree(layout);
+        layout = H5FL_FREE(H5O_layout_t, layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__earray_crt_dbg_context() */
