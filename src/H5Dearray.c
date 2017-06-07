@@ -220,7 +220,7 @@ H5FL_DEFINE_STATIC(H5D_earray_ctx_t);
 H5FL_DEFINE_STATIC(H5D_earray_ctx_ud_t);
 
 /* Declare a free list to manage the H5O_layout_t struct */
-H5FL_DEFINE_STATIC(H5O_layout_t);
+H5FL_EXTERN(H5O_layout_t);
 
 
 /*-------------------------------------------------------------------------

@@ -105,7 +105,7 @@ H5FL_EXTERN(H5D_chunk_info_t);
 H5FL_BLK_EXTERN(type_conv);
 
 /* Declare a free list to manage the H5O_layout_t struct */
-H5FL_DEFINE_STATIC(H5O_layout_t);
+H5FL_EXTERN(H5O_layout_t);
 
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;

@@ -88,7 +88,7 @@ const H5O_obj_class_t H5O_OBJ_DATASET[1] = {{
 H5FL_DEFINE(H5D_copy_file_ud_t);
 
 /* Declare a free list to manage the H5O_layout_t struct */
-H5FL_DEFINE_STATIC(H5O_layout_t);
+H5FL_EXTERN(H5O_layout_t);
 
 
 /*-------------------------------------------------------------------------

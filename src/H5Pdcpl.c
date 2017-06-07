@@ -200,6 +200,8 @@ const H5P_libclass_t H5P_CLS_DCRT[1] = {{
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
 
+/* Declare a free list to manage the H5O_layout_t struct */
+H5FL_EXTERN(H5O_layout_t);
 
 /***************************/
 /* Local Private Variables */
@@ -292,7 +294,7 @@ H5P__dcrt_layout_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *na
     size_t H5_ATTR_UNUSED size, void *value)
 {
     H5O_layout_t    *layout = (H5O_layout_t *)value; /* Create local aliases for values */
-    H5O_layout_t    new_layout;
+    H5O_layout_t    *new_layout = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -301,13 +303,18 @@ H5P__dcrt_layout_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *na
     HDassert(value);
 
     /* Make copy of layout */
-    if(NULL == H5O_msg_copy(H5O_LAYOUT_ID, layout, &new_layout))
+    if(NULL == (new_layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(NULL == H5O_msg_copy(H5O_LAYOUT_ID, layout, new_layout))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy layout")
 
     /* Copy new layout message over old one */
-    *layout = new_layout;
+    *layout = *new_layout;
 
 done:
+    if(new_layout)
+        new_layout = H5FL_FREE(H5O_layout_t, new_layout);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dcrt_layout_set() */
 
@@ -330,7 +337,7 @@ H5P__dcrt_layout_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *na
     size_t H5_ATTR_UNUSED size, void *value)
 {
     H5O_layout_t    *layout = (H5O_layout_t *)value; /* Create local aliases for values */
-    H5O_layout_t    new_layout;
+    H5O_layout_t    *new_layout = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -339,13 +346,18 @@ H5P__dcrt_layout_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *na
     HDassert(value);
 
     /* Make copy of layout */
-    if(NULL == H5O_msg_copy(H5O_LAYOUT_ID, layout, &new_layout))
+    if(NULL == (new_layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(NULL == H5O_msg_copy(H5O_LAYOUT_ID, layout, new_layout))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy layout")
 
     /* Copy new layout message over old one */
-    *layout = new_layout;
+    *layout = *new_layout;
 
 done:
+    if(new_layout)
+        new_layout = H5FL_FREE(H5O_layout_t, new_layout);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dcrt_layout_get() */
 
@@ -504,7 +516,7 @@ static herr_t
 H5P__dcrt_layout_dec(const void **_pp, void *value)
 {
     const H5O_layout_t *layout;         /* Storage layout */
-    H5O_layout_t tmp_layout;            /* Temporary local layout structure */
+    H5O_layout_t *tmp_layout = NULL;    /* Temporary local layout structure */
     H5D_layout_t type;                  /* Layout type */
     const uint8_t **pp = (const uint8_t **)_pp;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -543,16 +555,20 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                 else { /* chunk layout structure is encoded*/
                     unsigned u;             /* Local index variable */
 
+                    /* Allocate temporary layout */
+                    if(NULL == (tmp_layout = H5FL_CALLOC(H5O_layout_t)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for temp layout")
+
                     /* Initialize to default values */
-                    tmp_layout = H5D_def_layout_chunk_g;
+                    *tmp_layout = H5D_def_layout_chunk_g;
 
                     /* Set rank & dimensions */
-                    tmp_layout.u.chunk.ndims = (unsigned)ndims;
+                    tmp_layout->u.chunk.ndims = (unsigned)ndims;
                     for(u = 0; u < ndims; u++)
-                        UINT32DECODE(*pp, tmp_layout.u.chunk.dim[u])
+                        UINT32DECODE(*pp, tmp_layout->u.chunk.dim[u])
 
                     /* Point at the newly set up struct */
-                    layout = &tmp_layout;
+                    layout = tmp_layout;
                 } /* end else */
             }
             break;
@@ -571,82 +587,86 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                     size_t tmp_size;
                     size_t u;           /* Local index variable */
 
+                    /* Allocate temporary layout */
+                    if(NULL == (tmp_layout = H5FL_CALLOC(H5O_layout_t)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for temp layout")
+
                     /* Initialize to default values */
-                    tmp_layout = H5D_def_layout_virtual_g;
+                    *tmp_layout = H5D_def_layout_virtual_g;
 
                     /* Allocate entry list */
-                    if(NULL == (tmp_layout.storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc((size_t)nentries * sizeof(H5O_storage_virtual_ent_t))))
+                    if(NULL == (tmp_layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc((size_t)nentries * sizeof(H5O_storage_virtual_ent_t))))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate heap block")
-                    tmp_layout.storage.u.virt.list_nalloc = (size_t)nentries;
-                    tmp_layout.storage.u.virt.list_nused = (size_t)nentries;
+                    tmp_layout->storage.u.virt.list_nalloc = (size_t)nentries;
+                    tmp_layout->storage.u.virt.list_nused = (size_t)nentries;
 
                     /* Decode each entry */
                     for(u = 0; u < (size_t)nentries; u++) {
                         /* Source file name */
                         tmp_size = HDstrlen((const char *)*pp) + 1;
-                        if(NULL == (tmp_layout.storage.u.virt.list[u].source_file_name = (char *)H5MM_malloc(tmp_size)))
+                        if(NULL == (tmp_layout->storage.u.virt.list[u].source_file_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name")
-                        (void)HDmemcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
+                        (void)HDmemcpy(tmp_layout->storage.u.virt.list[u].source_file_name, *pp, tmp_size);
                         *pp += tmp_size;
 
                         /* Source dataset name */
                         tmp_size = HDstrlen((const char *)*pp) + 1;
-                        if(NULL == (tmp_layout.storage.u.virt.list[u].source_dset_name = (char *)H5MM_malloc(tmp_size)))
+                        if(NULL == (tmp_layout->storage.u.virt.list[u].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory for source dataset name")
-                        (void)HDmemcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
+                        (void)HDmemcpy(tmp_layout->storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
                         *pp += tmp_size;
 
                         /* Source selection */
-                        if(NULL == (tmp_layout.storage.u.virt.list[u].source_select = H5S_decode(pp)))
+                        if(NULL == (tmp_layout->storage.u.virt.list[u].source_select = H5S_decode(pp)))
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode source space selection")
-                        tmp_layout.storage.u.virt.list[u].source_space_status = H5O_VIRTUAL_STATUS_USER;
+                        tmp_layout->storage.u.virt.list[u].source_space_status = H5O_VIRTUAL_STATUS_USER;
 
                         /* Virtual selection */
-                        if(NULL == (tmp_layout.storage.u.virt.list[u].source_dset.virtual_select = H5S_decode(pp)))
+                        if(NULL == (tmp_layout->storage.u.virt.list[u].source_dset.virtual_select = H5S_decode(pp)))
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode virtual space selection")
-                        tmp_layout.storage.u.virt.list[u].virtual_space_status = H5O_VIRTUAL_STATUS_USER;
+                        tmp_layout->storage.u.virt.list[u].virtual_space_status = H5O_VIRTUAL_STATUS_USER;
 
                         /* Parse source file and dataset names for "printf"
                          * style format specifiers */
-                        if(H5D_virtual_parse_source_name(tmp_layout.storage.u.virt.list[u].source_file_name, &tmp_layout.storage.u.virt.list[u].parsed_source_file_name, &tmp_layout.storage.u.virt.list[u].psfn_static_strlen, &tmp_layout.storage.u.virt.list[u].psfn_nsubs) < 0)
+                        if(H5D_virtual_parse_source_name(tmp_layout->storage.u.virt.list[u].source_file_name, &tmp_layout->storage.u.virt.list[u].parsed_source_file_name, &tmp_layout->storage.u.virt.list[u].psfn_static_strlen, &tmp_layout->storage.u.virt.list[u].psfn_nsubs) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't parse source file name")
-                        if(H5D_virtual_parse_source_name(tmp_layout.storage.u.virt.list[u].source_dset_name, &tmp_layout.storage.u.virt.list[u].parsed_source_dset_name, &tmp_layout.storage.u.virt.list[u].psdn_static_strlen, &tmp_layout.storage.u.virt.list[u].psdn_nsubs) < 0)
+                        if(H5D_virtual_parse_source_name(tmp_layout->storage.u.virt.list[u].source_dset_name, &tmp_layout->storage.u.virt.list[u].parsed_source_dset_name, &tmp_layout->storage.u.virt.list[u].psdn_static_strlen, &tmp_layout->storage.u.virt.list[u].psdn_nsubs) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't parse source dataset name")
 
                         /* Set source names in source_dset struct */
-                        if((tmp_layout.storage.u.virt.list[u].psfn_nsubs == 0)
-                                && (tmp_layout.storage.u.virt.list[u].psdn_nsubs == 0)) {
-                            if(tmp_layout.storage.u.virt.list[u].parsed_source_file_name)
-                                tmp_layout.storage.u.virt.list[u].source_dset.file_name = tmp_layout.storage.u.virt.list[u].parsed_source_file_name->name_segment;
+                        if((tmp_layout->storage.u.virt.list[u].psfn_nsubs == 0)
+                                && (tmp_layout->storage.u.virt.list[u].psdn_nsubs == 0)) {
+                            if(tmp_layout->storage.u.virt.list[u].parsed_source_file_name)
+                                tmp_layout->storage.u.virt.list[u].source_dset.file_name = tmp_layout->storage.u.virt.list[u].parsed_source_file_name->name_segment;
                             else
-                                tmp_layout.storage.u.virt.list[u].source_dset.file_name = tmp_layout.storage.u.virt.list[u].source_file_name;
-                            if(tmp_layout.storage.u.virt.list[u].parsed_source_dset_name)
-                                tmp_layout.storage.u.virt.list[u].source_dset.dset_name = tmp_layout.storage.u.virt.list[u].parsed_source_dset_name->name_segment;
+                                tmp_layout->storage.u.virt.list[u].source_dset.file_name = tmp_layout->storage.u.virt.list[u].source_file_name;
+                            if(tmp_layout->storage.u.virt.list[u].parsed_source_dset_name)
+                                tmp_layout->storage.u.virt.list[u].source_dset.dset_name = tmp_layout->storage.u.virt.list[u].parsed_source_dset_name->name_segment;
                             else
-                                tmp_layout.storage.u.virt.list[u].source_dset.dset_name = tmp_layout.storage.u.virt.list[u].source_dset_name;
+                                tmp_layout->storage.u.virt.list[u].source_dset.dset_name = tmp_layout->storage.u.virt.list[u].source_dset_name;
                         } /* end if */
 
                         /* unlim_dim fields */
-                        tmp_layout.storage.u.virt.list[u].unlim_dim_source = H5S_get_select_unlim_dim(tmp_layout.storage.u.virt.list[u].source_select);
-                        tmp_layout.storage.u.virt.list[u].unlim_dim_virtual = H5S_get_select_unlim_dim(tmp_layout.storage.u.virt.list[u].source_dset.virtual_select);
-                        tmp_layout.storage.u.virt.list[u].unlim_extent_source = HSIZE_UNDEF;
-                        tmp_layout.storage.u.virt.list[u].unlim_extent_virtual = HSIZE_UNDEF;
-                        tmp_layout.storage.u.virt.list[u].clip_size_source = HSIZE_UNDEF;
-                        tmp_layout.storage.u.virt.list[u].clip_size_virtual = HSIZE_UNDEF;
+                        tmp_layout->storage.u.virt.list[u].unlim_dim_source = H5S_get_select_unlim_dim(tmp_layout->storage.u.virt.list[u].source_select);
+                        tmp_layout->storage.u.virt.list[u].unlim_dim_virtual = H5S_get_select_unlim_dim(tmp_layout->storage.u.virt.list[u].source_dset.virtual_select);
+                        tmp_layout->storage.u.virt.list[u].unlim_extent_source = HSIZE_UNDEF;
+                        tmp_layout->storage.u.virt.list[u].unlim_extent_virtual = HSIZE_UNDEF;
+                        tmp_layout->storage.u.virt.list[u].clip_size_source = HSIZE_UNDEF;
+                        tmp_layout->storage.u.virt.list[u].clip_size_virtual = HSIZE_UNDEF;
 
                         /* Clipped selections */
-                        if(tmp_layout.storage.u.virt.list[u].unlim_dim_virtual < 0) {
-                            tmp_layout.storage.u.virt.list[u].source_dset.clipped_source_select = tmp_layout.storage.u.virt.list[u].source_select;
-                            tmp_layout.storage.u.virt.list[u].source_dset.clipped_virtual_select = tmp_layout.storage.u.virt.list[u].source_dset.virtual_select;
+                        if(tmp_layout->storage.u.virt.list[u].unlim_dim_virtual < 0) {
+                            tmp_layout->storage.u.virt.list[u].source_dset.clipped_source_select = tmp_layout->storage.u.virt.list[u].source_select;
+                            tmp_layout->storage.u.virt.list[u].source_dset.clipped_virtual_select = tmp_layout->storage.u.virt.list[u].source_dset.virtual_select;
                         } /* end if */
 
                         /* Update min_dims */
-                        if(H5D_virtual_update_min_dims(&tmp_layout, u) < 0)
+                        if(H5D_virtual_update_min_dims(tmp_layout, u) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to update virtual dataset minimum dimensions")
                     } /* end for */
 
                     /* Point at the newly set up struct */
-                    layout = &tmp_layout;
+                    layout = tmp_layout;
                 } /* end else */
             } /* end block */
             break;
@@ -661,6 +681,9 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
     HDmemcpy(value, layout, sizeof(H5O_layout_t));
 
 done:
+    if(tmp_layout)
+        tmp_layout = H5FL_FREE(H5O_layout_t, tmp_layout);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dcrt_layout_dec() */
 
@@ -716,7 +739,7 @@ H5P__dcrt_layout_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED siz
     void *value)
 {
     H5O_layout_t    *layout = (H5O_layout_t *)value; /* Create local aliases for values */
-    H5O_layout_t    new_layout;
+    H5O_layout_t    *new_layout = NULL;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -724,13 +747,18 @@ H5P__dcrt_layout_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED siz
     HDassert(layout);
 
     /* Make copy of layout */
-    if(NULL == H5O_msg_copy(H5O_LAYOUT_ID, layout, &new_layout))
+    if(NULL == (new_layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(NULL == H5O_msg_copy(H5O_LAYOUT_ID, layout, new_layout))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy layout")
 
     /* Set new layout message directly into property list */
-    *layout = new_layout;
+    *layout = *new_layout;
 
 done:
+    if(new_layout)
+        new_layout = H5FL_FREE(H5O_layout_t, new_layout);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dcrt_layout_copy() */
 
@@ -1917,21 +1945,14 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
 H5Pget_layout(hid_t plist_id)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5O_layout_t layout;        /* Layout property */
-    H5D_layout_t ret_value;     /* Return value */
+    H5P_genplist_t *plist;          /* Property list pointer */
+    H5O_layout_t *layout = NULL;    /* Layout property */
+    H5D_layout_t ret_value;         /* Return value */
 
     FUNC_ENTER_API(H5D_LAYOUT_ERROR)
     H5TRACE1("Dl", "i", plist_id);
@@ -1941,13 +1962,18 @@ H5Pget_layout(hid_t plist_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_LAYOUT_ERROR, "can't find object for ID")
 
     /* Peek at layout property */
-    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5D_LAYOUT_ERROR, "can't get memory for layout")
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_LAYOUT_ERROR, "can't get layout")
 
     /* Set return value */
-    ret_value = layout.type;
+    ret_value = layout->type;
 
 done:
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
+
     FUNC_LEAVE_API(ret_value)
 } /* ed H5Pget_layout() */
 
@@ -1979,11 +2005,11 @@ done:
 herr_t
 H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5O_layout_t chunk_layout;  /* Layout information for setting chunk info */
-    uint64_t chunk_nelmts;      /* Number of elements in chunk */
-    unsigned u;                 /* Local index variable */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    H5O_layout_t *chunk_layout = NULL;  /* Layout information for setting chunk info */
+    uint64_t chunk_nelmts;              /* Number of elements in chunk */
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iIs*[a1]h", plist_id, ndims, dim);
@@ -2006,8 +2032,10 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
     /* Verify & initialize property's chunk dims */
-    HDmemcpy(&chunk_layout, &H5D_def_layout_chunk_g, sizeof(H5D_def_layout_chunk_g));
-    HDmemset(&chunk_layout.u.chunk.dim, 0, sizeof(chunk_layout.u.chunk.dim));
+    if(NULL == (chunk_layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    HDmemcpy(chunk_layout, &H5D_def_layout_chunk_g, sizeof(H5D_def_layout_chunk_g));
+    HDmemset(chunk_layout->u.chunk.dim, 0, sizeof(chunk_layout->u.chunk.dim));
     chunk_nelmts = 1;
     for(u = 0; u < (unsigned)ndims; u++) {
         if(dim[u] == 0)
@@ -2017,7 +2045,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         chunk_nelmts *= dim[u];
         if(chunk_nelmts > (uint64_t)0xffffffff)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of elements in chunk must be < 4GB")
-        chunk_layout.u.chunk.dim[u] = (uint32_t)dim[u]; /* Store user's chunk dimensions */
+        chunk_layout->u.chunk.dim[u] = (uint32_t)dim[u]; /* Store user's chunk dimensions */
     } /* end for */
 
     /* Get the plist structure */
@@ -2025,11 +2053,14 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set chunk information in property list */
-    chunk_layout.u.chunk.ndims = (unsigned)ndims;
-    if(H5P__set_layout(plist, &chunk_layout) < 0)
+    chunk_layout->u.chunk.ndims = (unsigned)ndims;
+    if(H5P__set_layout(plist, chunk_layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
 
 done:
+    if(chunk_layout)
+        chunk_layout = H5FL_FREE(H5O_layout_t, chunk_layout);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_chunk() */
 
@@ -2061,9 +2092,9 @@ done:
 int
 H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5O_layout_t layout;        /* Layout information */
-    int ret_value;              /* Return value */
+    H5P_genplist_t *plist;          /* Property list pointer */
+    H5O_layout_t *layout = NULL;    /* Layout information */
+    int ret_value;                  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Is", "iIsx", plist_id, max_ndims, dim);
@@ -2073,23 +2104,28 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Peek at the layout property */
-    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
-    if(H5D_CHUNKED != layout.type)
+    if(H5D_CHUNKED != layout->type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout")
 
     if(dim) {
         unsigned	u;      /* Local index variable */
 
         /* Get the dimension sizes */
-        for(u = 0; u < layout.u.chunk.ndims && u < (unsigned)max_ndims; u++)
-            dim[u] = layout.u.chunk.dim[u];
+        for(u = 0; u < layout->u.chunk.ndims && u < (unsigned)max_ndims; u++)
+            dim[u] = layout->u.chunk.dim[u];
     } /* end if */
 
     /* Set the return value */
-    ret_value = (int)layout.u.chunk.ndims;
+    ret_value = (int)layout->u.chunk.ndims;
 
 done:
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_chunk() */
 
@@ -2118,15 +2154,15 @@ herr_t
 H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     const char *src_dset_name, hid_t src_space_id)
 {
-    H5P_genplist_t *plist;          /* Property list pointer */
-    H5O_layout_t virtual_layout;    /* Layout information for setting virtual info */
-    H5S_t *vspace;                  /* Virtual dataset space selection */
-    H5S_t *src_space;               /* Source dataset space selection */
+    H5P_genplist_t *plist;                  /* Property list pointer */
+    H5O_layout_t *virtual_layout = NULL;    /* Layout information for setting virtual info */
+    H5S_t *vspace;                          /* Virtual dataset space selection */
+    H5S_t *src_space;                       /* Source dataset space selection */
     H5O_storage_virtual_ent_t *old_list = NULL; /* List pointer previously on property list */
-    H5O_storage_virtual_ent_t *ent = NULL; /* Convenience pointer to new VDS entry */
-    hbool_t retrieved_layout = FALSE;   /* Whether the layout has been retrieved */
-    hbool_t free_list = FALSE;      /* Whether to free the list of virtual entries */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    H5O_storage_virtual_ent_t *ent = NULL;  /* Convenience pointer to new VDS entry */
+    hbool_t retrieved_layout = FALSE;       /* Whether the layout has been retrieved */
+    hbool_t free_list = FALSE;              /* Whether to free the list of virtual entries */
+    herr_t ret_value = SUCCEED;             /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*s*si", dcpl_id, vspace_id, src_file_name, src_dset_name,
@@ -2160,41 +2196,43 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the current layout */
-    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &virtual_layout) < 0)
+    if(NULL == (virtual_layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for virtual layout")
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, virtual_layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get layout")
     retrieved_layout = TRUE;
 
     /* If the layout was not already virtual, Start with default virtual layout.
      * Otherwise, add the mapping to the current list. */
-    if(virtual_layout.type == H5D_VIRTUAL)
+    if(virtual_layout->type == H5D_VIRTUAL)
         /* Save old list pointer for error recovery */
-        old_list = virtual_layout.storage.u.virt.list;
+        old_list = virtual_layout->storage.u.virt.list;
     else {
         /* Reset the old layout */
-        if(H5O_msg_reset(H5O_LAYOUT_ID, &virtual_layout) < 0)
+        if(H5O_msg_reset(H5O_LAYOUT_ID, virtual_layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release layout message")
 
         /* Copy the default virtual layout */
-        HDmemcpy(&virtual_layout, &H5D_def_layout_virtual_g, sizeof(H5D_def_layout_virtual_g));
+        HDmemcpy(virtual_layout, &H5D_def_layout_virtual_g, sizeof(H5D_def_layout_virtual_g));
 
         /* Sanity check */
-        HDassert(virtual_layout.storage.u.virt.list_nalloc == 0);
+        HDassert(virtual_layout->storage.u.virt.list_nalloc == 0);
     } /* end else */
 
     /* Expand list if necessary */
-    if(virtual_layout.storage.u.virt.list_nused == virtual_layout.storage.u.virt.list_nalloc) {
+    if(virtual_layout->storage.u.virt.list_nused == virtual_layout->storage.u.virt.list_nalloc) {
         H5O_storage_virtual_ent_t *x;           /* Pointer to the new list */
-        size_t new_alloc = MAX(H5D_VIRTUAL_DEF_LIST_SIZE, virtual_layout.storage.u.virt.list_nalloc * 2);
+        size_t new_alloc = MAX(H5D_VIRTUAL_DEF_LIST_SIZE, virtual_layout->storage.u.virt.list_nalloc * 2);
 
         /* Expand size of entry list */
-        if(NULL == (x = (H5O_storage_virtual_ent_t *)H5MM_realloc(virtual_layout.storage.u.virt.list, new_alloc * sizeof(H5O_storage_virtual_ent_t))))
+        if(NULL == (x = (H5O_storage_virtual_ent_t *)H5MM_realloc(virtual_layout->storage.u.virt.list, new_alloc * sizeof(H5O_storage_virtual_ent_t))))
             HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't reallocate virtual dataset mapping list")
-        virtual_layout.storage.u.virt.list = x;
-        virtual_layout.storage.u.virt.list_nalloc = new_alloc;
+        virtual_layout->storage.u.virt.list = x;
+        virtual_layout->storage.u.virt.list_nalloc = new_alloc;
     } /* end if */
 
     /* Add virtual dataset mapping entry */
-    ent = &virtual_layout.storage.u.virt.list[virtual_layout.storage.u.virt.list_nused];
+    ent = &virtual_layout->storage.u.virt.list[virtual_layout->storage.u.virt.list_nused];
     HDmemset(ent, 0, sizeof(H5O_storage_virtual_ent_t));        /* Clear before starting to set up */
     if(NULL == (ent->source_dset.virtual_select = H5S_copy(vspace, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
@@ -2236,19 +2274,19 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid mapping entry")
 
     /* Update min_dims */
-    if(H5D_virtual_update_min_dims(&virtual_layout, virtual_layout.storage.u.virt.list_nused) < 0)
+    if(H5D_virtual_update_min_dims(virtual_layout, virtual_layout->storage.u.virt.list_nused) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to update virtual dataset minimum dimensions")
 
     /* Finish adding entry */
-    virtual_layout.storage.u.virt.list_nused++;
+    virtual_layout->storage.u.virt.list_nused++;
 
 done:
     /* Set VDS layout information in property list */
     /* (Even on faliure, so there's not a mangled layout struct in the list) */
     if(retrieved_layout) {
-        if(H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &virtual_layout) < 0) {
+        if(H5P_poke(plist, H5D_CRT_LAYOUT_NAME, virtual_layout) < 0) {
             HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
-            if(old_list != virtual_layout.storage.u.virt.list)
+            if(old_list != virtual_layout->storage.u.virt.list)
                 free_list = TRUE;
         } /* end if */
     } /* end if */
@@ -2274,8 +2312,11 @@ done:
 
         /* Free list if necessary */
         if(free_list)
-            virtual_layout.storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_xfree(virtual_layout.storage.u.virt.list);
+            virtual_layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_xfree(virtual_layout->storage.u.virt.list);
     } /* end if */
+
+    if(virtual_layout)
+        virtual_layout = H5FL_FREE(H5O_layout_t, virtual_layout);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_virtual() */
@@ -2298,9 +2339,9 @@ done:
 herr_t
 H5Pget_virtual_count(hid_t dcpl_id, size_t *count/*out*/)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5O_layout_t layout;        /* Layout information */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;          /* Property list pointer */
+    H5O_layout_t *layout = NULL;    /* Layout information */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", dcpl_id, count);
@@ -2311,16 +2352,21 @@ H5Pget_virtual_count(hid_t dcpl_id, size_t *count/*out*/)
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
         /* Retrieve the layout property */
-        if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+        if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
-        if(H5D_VIRTUAL != layout.type)
+        if(H5D_VIRTUAL != layout->type)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
         /* Return the number of mappings  */
-        *count = layout.storage.u.virt.list_nused;
+        *count = layout->storage.u.virt.list_nused;
     } /* end if */
 
 done:
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_count() */
 
@@ -2344,10 +2390,10 @@ done:
 hid_t
 H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5O_layout_t layout;        /* Layout information */
-    H5S_t *space = NULL;        /* Dataspace pointer */
-    hid_t ret_value;            /* Return value */
+    H5P_genplist_t *plist;          /* Property list pointer */
+    H5O_layout_t *layout = NULL;    /* Layout information */
+    H5S_t *space = NULL;            /* Dataspace pointer */
+    hid_t ret_value;                /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "iz", dcpl_id, index);
@@ -2357,16 +2403,18 @@ H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Retrieve the layout property */
-    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
-    if(H5D_VIRTUAL != layout.type)
+    if(H5D_VIRTUAL != layout->type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
     /* Get the virtual space */
-    if(index >= layout.storage.u.virt.list_nused)
+    if(index >= layout->storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
-    HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].source_dset.virtual_select, FALSE, TRUE)))
+    HDassert(layout->storage.u.virt.list_nused <= layout->storage.u.virt.list_nalloc);
+    if(NULL == (space = H5S_copy(layout->storage.u.virt.list[index].source_dset.virtual_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
 
     /* Register ID */
@@ -2378,6 +2426,9 @@ done:
     if((ret_value < 0) && space)
         if(H5S_close(space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_vspace() */
@@ -2402,10 +2453,10 @@ done:
 hid_t
 H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5O_layout_t layout;        /* Layout information */
-    H5S_t *space = NULL;        /* Dataspace pointer */
-    hid_t ret_value = FAIL;     /* Return value */
+    H5P_genplist_t *plist;          /* Property list pointer */
+    H5O_layout_t *layout = NULL;    /* Layout information */
+    H5S_t *space = NULL;            /* Dataspace pointer */
+    hid_t ret_value = FAIL;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "iz", dcpl_id, index);
@@ -2415,33 +2466,35 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Retrieve the layout property */
-    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
-    if(H5D_VIRTUAL != layout.type)
+    if(H5D_VIRTUAL != layout->type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
     /* Check index */
-    if(index >= layout.storage.u.virt.list_nused)
+    if(index >= layout->storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
-    HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
+    HDassert(layout->storage.u.virt.list_nused <= layout->storage.u.virt.list_nalloc);
 
     /* Attempt to open source dataset and patch extent if extent status is not
      * H5O_VIRTUAL_STATUS_CORRECT?  -NAF */
     /* If source space status is H5O_VIRTUAL_STATUS_INVALID, patch with bounds
      * of selection */
-    if((H5O_VIRTUAL_STATUS_INVALID == layout.storage.u.virt.list[index].source_space_status)
-            && (layout.storage.u.virt.list[index].unlim_dim_source < 0)) {
+    if((H5O_VIRTUAL_STATUS_INVALID == layout->storage.u.virt.list[index].source_space_status)
+            && (layout->storage.u.virt.list[index].unlim_dim_source < 0)) {
         hsize_t bounds_start[H5S_MAX_RANK];
         hsize_t bounds_end[H5S_MAX_RANK];
         int rank;
         int i;
 
         /* Get rank of source space */
-        if((rank = H5S_GET_EXTENT_NDIMS(layout.storage.u.virt.list[index].source_select)) < 0)
+        if((rank = H5S_GET_EXTENT_NDIMS(layout->storage.u.virt.list[index].source_select)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get source space rank")
 
         /* Get bounds of selection */
-        if(H5S_SELECT_BOUNDS(layout.storage.u.virt.list[index].source_select, bounds_start, bounds_end) < 0)
+        if(H5S_SELECT_BOUNDS(layout->storage.u.virt.list[index].source_select, bounds_start, bounds_end) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get selection bounds")
 
         /* Adjust bounds to extent */
@@ -2449,15 +2502,15 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
             bounds_end[i]++;
 
         /* Set extent */
-        if(H5S_set_extent_simple(layout.storage.u.virt.list[index].source_select, (unsigned)rank, bounds_end, NULL) < 0)
+        if(H5S_set_extent_simple(layout->storage.u.virt.list[index].source_select, (unsigned)rank, bounds_end, NULL) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set source space extent")
 
         /* Update source space status */
-        layout.storage.u.virt.list[index].source_space_status = H5O_VIRTUAL_STATUS_SEL_BOUNDS;
+        layout->storage.u.virt.list[index].source_space_status = H5O_VIRTUAL_STATUS_SEL_BOUNDS;
     } /* end if */
 
     /* Get the source space */
-    if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].source_select, FALSE, TRUE)))
+    if(NULL == (space = H5S_copy(layout->storage.u.virt.list[index].source_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
 
     /* Register ID */
@@ -2469,6 +2522,9 @@ done:
     if((ret_value < 0) && space)
         if(H5S_close(space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_srcspace() */
@@ -2508,7 +2564,7 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name/*out*/,
     size_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    H5O_layout_t layout;        /* Layout information */
+    H5O_layout_t *layout = NULL;        /* Layout information */
     ssize_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2519,21 +2575,26 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name/*out*/,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Retrieve the layout property */
-    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
-    if(H5D_VIRTUAL != layout.type)
+    if(H5D_VIRTUAL != layout->type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
     /* Get the virtual filename */
-    if(index >= layout.storage.u.virt.list_nused)
+    if(index >= layout->storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
-    HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    HDassert(layout.storage.u.virt.list[index].source_file_name);
+    HDassert(layout->storage.u.virt.list_nused <= layout->storage.u.virt.list_nalloc);
+    HDassert(layout->storage.u.virt.list[index].source_file_name);
     if(name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_file_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_file_name);
+        (void)HDstrncpy(name, layout->storage.u.virt.list[index].source_file_name, size);
+    ret_value = (ssize_t)HDstrlen(layout->storage.u.virt.list[index].source_file_name);
 
 done:
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_filename() */
 
@@ -2571,7 +2632,7 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name/*out*/,
     size_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    H5O_layout_t layout;        /* Layout information */
+    H5O_layout_t *layout = NULL;        /* Layout information */
     ssize_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2582,21 +2643,26 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name/*out*/,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Retrieve the layout property */
-    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
-    if(H5D_VIRTUAL != layout.type)
+    if(H5D_VIRTUAL != layout->type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
     /* Get the virtual filename */
-    if(index >= layout.storage.u.virt.list_nused)
+    if(index >= layout->storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
-    HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    HDassert(layout.storage.u.virt.list[index].source_dset_name);
+    HDassert(layout->storage.u.virt.list_nused <= layout->storage.u.virt.list_nalloc);
+    HDassert(layout->storage.u.virt.list[index].source_dset_name);
     if(name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_dset_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_dset_name);
+        (void)HDstrncpy(name, layout->storage.u.virt.list[index].source_dset_name, size);
+    ret_value = (ssize_t)HDstrlen(layout->storage.u.virt.list[index].source_dset_name);
 
 done:
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_virtual_dsetname() */
 
@@ -2618,7 +2684,7 @@ herr_t
 H5Pset_chunk_opts(hid_t plist_id, unsigned options)
 {
     H5P_genplist_t      *plist;         /* Property list pointer */
-    H5O_layout_t        layout;         /* Layout information for setting chunk info */
+    H5O_layout_t        *layout = NULL;      /* Layout information for setting chunk info */
     uint8_t             layout_flags = 0; /* "options" translated into layout message flags format */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -2643,9 +2709,11 @@ H5Pset_chunk_opts(hid_t plist_id, unsigned options)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Retrieve the layout property */
-    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
-    if(H5D_CHUNKED != layout.type)
+    if(H5D_CHUNKED != layout->type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout")
 
     /* Translate options into flags that can be used with the layout message */
@@ -2655,15 +2723,18 @@ H5Pset_chunk_opts(hid_t plist_id, unsigned options)
     /* Update the layout message, including the version (if necessary) */
     /* This probably isn't the right way to do this, and should be changed once
      * this branch gets the "real" way to set the layout version */
-    layout.u.chunk.flags = layout_flags;
-    if(layout.version < H5O_LAYOUT_VERSION_4)
-        layout.version = H5O_LAYOUT_VERSION_4;
+    layout->u.chunk.flags = layout_flags;
+    if(layout->version < H5O_LAYOUT_VERSION_4)
+        layout->version = H5O_LAYOUT_VERSION_4;
 
     /* Set layout value */
-    if(H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(H5P_poke(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout")
 
 done:
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_chunk_opts() */
 
@@ -2683,8 +2754,8 @@ done:
 herr_t
 H5Pget_chunk_opts(hid_t plist_id, unsigned *options)
 {
-    H5P_genplist_t      *plist;         /* Property list pointer */
-    H5O_layout_t        layout;         /* Layout information for setting chunk info */
+    H5P_genplist_t      *plist = NULL;       /* Property list pointer */
+    H5O_layout_t        *layout = NULL;      /* Layout information for getting chunk info */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2704,20 +2775,25 @@ H5Pget_chunk_opts(hid_t plist_id, unsigned *options)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Retrieve the layout property */
-    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
-    if(H5D_CHUNKED != layout.type)
+    if(H5D_CHUNKED != layout->type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout")
 
     if(options) {
         /* Translate options from flags that can be used with the layout message
          * to those known to the public */
         *options = 0;
-        if(layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
+        if(layout->u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
             *options |= H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS;
     } /* end if */
 
 done:
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_chunk_opts() */
 
@@ -3526,6 +3602,7 @@ H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
 {
     H5P_genplist_t *plist; 	/* Property list pointer */
     H5O_fill_t fill;            /* Fill value property to modify */
+    H5O_layout_t *layout = NULL;            /* Type of storage layout */
     unsigned alloc_time_state;  /* State of allocation time property */
     herr_t ret_value = SUCCEED; /* return value 	 */
 
@@ -3538,18 +3615,19 @@ H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
 
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Check for resetting to default for layout type */
     if(alloc_time == H5D_ALLOC_TIME_DEFAULT) {
-        H5O_layout_t layout;            /* Type of storage layout */
 
         /* Peek at the storage layout */
-        if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+        if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get layout")
 
         /* Set the default based on layout */
-        switch(layout.type) {
+        switch(layout->type) {
             case H5D_COMPACT:
                 alloc_time = H5D_ALLOC_TIME_EARLY;
                 break;
@@ -3593,6 +3671,9 @@ H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time")
 
 done:
+    if(layout)
+        layout = H5FL_FREE(H5O_layout_t, layout);
+
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_alloc_time() */
 
