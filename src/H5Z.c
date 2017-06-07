@@ -105,7 +105,7 @@ static H5Z_stats_t	*H5Z_stat_table_g = NULL;
 #endif /* H5Z_DEBUG */
 
 /* Declare a free list to manage the H5O_layout_t struct */
-H5FL_DEFINE_STATIC(H5O_layout_t);
+H5FL_EXTERN(H5O_layout_t);
 
 
 

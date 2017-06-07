@@ -369,7 +369,7 @@ H5FL_BLK_DEFINE_STATIC(chunk);
 H5FL_EXTERN(H5S_sel_iter_t);
 
 /* Declare a free list to manage the H5O_layout_t struct */
-H5FL_DEFINE_STATIC(H5O_layout_t);
+H5FL_EXTERN(H5O_layout_t);
 
 
 /*-------------------------------------------------------------------------
