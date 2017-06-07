@@ -89,6 +89,17 @@ New Features
 
       (ADB - 2017/04/04, HDFFV-10143)
 
+    - H5Dget_chunk_storage_size
+
+      The storage size of a chunk in the file is needed to determine the size
+      of the buffer to be allocated for reading a chunk directly from a file.
+
+      New API function gets the size in bytes currently allocated within a
+      file for a raw data chunk in a dataset.  This function was added to get
+      the chunk size in support of the implementation of H5DOread_chunks, but
+      may also be useful for other purposes.
+
+      (VC - 2017/05/02, HDFFV-9934)
 
     C++ API
     -------
@@ -132,11 +143,15 @@ New Features
     High-Level APIs
     ---------------
     - H5DOread_chunk
+
+      Users wanted to read compressed data directly from a file without any
+      processing by the HDF5 data transfer pipeline, just as they were able
+      to write it directly to a file with H5DOwrite_chunk.
     
-      New API function, H5DOread_chunk, corresponding to existing function 
-      H5DOwrite_chunk.  H5DOread_chunk reads a raw data chunk directly from a 
-      chunked dataset in the file into the application buffer, bypassing the 
-      library’s internal data transfer pipeline, including filters.
+      New API function, corresponding to existing function H5DOwrite_chunk.
+      H5DOread_chunk reads a raw data chunk directly from a chunked dataset
+      in the file into the application buffer, bypassing the library’s internal
+      data transfer pipeline, including filters.
 
       (VC - 2017/05/02, HDFFV-9934)
 
