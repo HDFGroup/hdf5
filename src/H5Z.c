@@ -11,13 +11,21 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File		  			*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
@@ -30,7 +38,16 @@
 #   include "szlib.h"
 #endif
 
-/* Local typedefs */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
 #ifdef H5Z_DEBUG
 typedef struct H5Z_stats_t {
     struct {
@@ -55,19 +72,41 @@ typedef enum {
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
-/* Local variables */
-static size_t		H5Z_table_alloc_g = 0;
-static size_t		H5Z_table_used_g = 0;
-static H5Z_class2_t	*H5Z_table_g = NULL;
-#ifdef H5Z_DEBUG
-static H5Z_stats_t	*H5Z_stat_table_g = NULL;
-#endif /* H5Z_DEBUG */
 
-/* Local functions */
+/********************/
+/* Local Prototypes */
+/********************/
 static int H5Z_find_idx(H5Z_filter_t id);
 static int H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
 static int H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
 static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+static size_t		H5Z_table_alloc_g = 0;
+static size_t		H5Z_table_used_g = 0;
+static H5Z_class2_t	*H5Z_table_g = NULL;
+
+#ifdef H5Z_DEBUG
+static H5Z_stats_t	*H5Z_stat_table_g = NULL;
+#endif /* H5Z_DEBUG */
+
+/* Declare a free list to manage the H5O_layout_t struct */
+H5FL_DEFINE_STATIC(H5O_layout_t);
+
 
 
 /*-------------------------------------------------------------------------
@@ -824,7 +863,7 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
     if(dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
         H5P_genplist_t 	*dc_plist;      /* Dataset creation property list object */
 
-        if(NULL == (dcpl_layout = (H5O_layout_t *)H5MM_calloc(sizeof(H5O_layout_t))))
+        if(NULL == (dcpl_layout = H5FL_CALLOC(H5O_layout_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
 
         /* Get dataset creation property list object */
@@ -872,7 +911,7 @@ done:
     if(space_id > 0 && H5I_dec_ref(space_id) < 0)
         HDONE_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace")
     if(dcpl_layout)
-        dcpl_layout = (H5O_layout_t *)H5MM_xfree(dcpl_layout);
+        dcpl_layout = H5FL_FREE(H5O_layout_t, dcpl_layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_prepare_prelude_callback_dcpl() */
