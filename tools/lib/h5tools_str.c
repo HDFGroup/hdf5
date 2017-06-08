@@ -1000,10 +1000,11 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
             case H5T_COMPOUND:
                 if(ctx->cmpd_listv) { /* there is <list_of_fields> */
-                    int    save_indent_level;      /* The indentation level */
+                    unsigned    save_indent_level;      /* The indentation level */
                     size_t curr_field;             /* Current field to display */
-                    int    i = 0, x = 0;           /* Local index variable */
-                    H5LD_memb_t **listv;           /* Vector of information for <list_of_fields> */
+                    int    i = 0;                  /* Local index variable */
+                    unsigned x = 0;                /* Local index variable */
+                    const H5LD_memb_t * const *listv;           /* Vector of information for <list_of_fields> */
 
                     listv = ctx->cmpd_listv;
                     ctx->cmpd_listv = NULL;

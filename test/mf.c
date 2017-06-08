@@ -45,8 +45,10 @@
 #define TBLOCK_SIZE4    4
 #define TBLOCK_SIZE5    5
 #define TBLOCK_SIZE6    6
+#ifdef PB_OUT
 #define TBLOCK_SIZE7    7
 #define TBLOCK_SIZE8    8
+#endif /* PB_OUT */
 #define TBLOCK_SIZE10   10
 #define TBLOCK_SIZE11   11
 #define TBLOCK_SIZE20   20
@@ -138,8 +140,10 @@ static unsigned test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new
 static unsigned test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format);
 static unsigned test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format);
 static unsigned test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format);
+#ifdef PB_OUT
 static unsigned test_mf_fs_persist_split(void);
 static unsigned test_mf_fs_persist_multi(void);
+#endif
 static unsigned test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl);
 static unsigned test_page_small(const char *env_h5_drvr, hid_t fapl);
 static unsigned test_page_large(const char *env_h5_drvr, hid_t fapl);
@@ -6091,6 +6095,7 @@ error:
  * Verify that the file's free-space manager(s) are persistent for a split-file
  *-------------------------------------------------------------------------
  */
+#ifdef PB_OUT
 static unsigned
 test_mf_fs_persist_split(void)
 {
@@ -6716,6 +6721,7 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_mf_fs_persist_multi() */
+#endif /* PB_OUT */
 
 /*
  *-------------------------------------------------------------------------

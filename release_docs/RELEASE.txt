@@ -54,11 +54,53 @@ New Features
 
     Configuration:
     -------------
+    - Removed version-specific gcc/gfortran flags for version 4.0 (inclusive)
+      and earlier
+
+      The config/gnu-flags file, which is sourced as a part of the configure
+      process, adds version-specific flags for use when building HDF5. Most of
+      these flags control warnings and do not affect the final product.
+
+      Flags for older versions of the compiler were consolidated into the
+      common flags section. Moving these flags simplifies maintenance of
+      the file. 
+      
+      The upshot of this is that building with ancient versions of gcc
+      (<= 4.0) will possibly no longer work without hand-hacking the file
+      to remove the flags not understood by that version of the compiler.
+      Nothing should change when building with gcc >= 4.1.
+
+      Also, as a part of this work, the string 'gfortran40' was changed to
+      'gfortran' in the config/gnu-fflags file.
+
+      (HDFFV-9937, DER, 2017/05/31)
+
     -
 
     Library:
     --------
-    -
+    - H5FDdriver_query() API call added to the C library.
+
+      This new library call allows the user to query a virtual file driver
+      (VFD) for the feature flags it supports (listed in H5FDpublic.h).
+      This can be useful to determine if a VFD supports SWMR, for example.
+
+      Note that some VFDs have feature flags that may only be present
+      after a file has been created or opened (e.g.: the core VFD will
+      have the H5FD_FEAT_POSIX_COMPAT_HANDLE flag set if the backing
+      store is switched on). Since the new API call queries a generic VFD
+      unassociated with a file, these flags will never be returned.
+
+      (HDFFV-10215, DER, 2017/05/31)
+
+
+    - H5FD_FEAT_DEFAULT_VFD_COMPATIBLE VFD feature flag added to the C library.
+
+      This new feature flag indicates that the VFD is compatible with the
+      default VFD. VFDs that set this flag create single files that follow
+      the canonical HDF5 file format.
+
+      (HDFFV-10214, DER, 2017/05/31)
 
     Parallel Library:
     -----------------

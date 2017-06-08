@@ -360,7 +360,7 @@ H5MF_sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
 static H5FS_section_info_t *
 H5MF_sect_split(H5FS_section_info_t *sect, hsize_t frag_size)
 {
-    H5MF_free_section_t *ret_value;     /* Return value */
+    H5MF_free_section_t *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
