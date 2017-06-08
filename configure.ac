@@ -784,7 +784,7 @@ AC_ARG_ENABLE([production],
                               [Determines how to run the compiler.])])
 
 case "X-$enable_production" in
-  X-|X-yes)
+  X-yes)
     enable_production="yes"
     AC_MSG_RESULT([production])
     CONFIG_MODE=production
@@ -793,7 +793,7 @@ case "X-$enable_production" in
     H5_CXXFLAGS="$H5_CXXFLAGS $PROD_CXXFLAGS"
     H5_FCFLAGS="$H5_FCFLAGS $PROD_FCFLAGS"
     ;;
-  X-no)
+  X-|X-no)
     enable_production="no"
     AC_MSG_RESULT([development])
     CONFIG_MODE=development

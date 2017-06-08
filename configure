@@ -22391,7 +22391,7 @@ fi
 
 
 case "X-$enable_production" in
-  X-|X-yes)
+  X-yes)
     enable_production="yes"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: production" >&5
 $as_echo "production" >&6; }
@@ -22401,7 +22401,7 @@ $as_echo "production" >&6; }
     H5_CXXFLAGS="$H5_CXXFLAGS $PROD_CXXFLAGS"
     H5_FCFLAGS="$H5_FCFLAGS $PROD_FCFLAGS"
     ;;
-  X-no)
+  X-|X-no)
     enable_production="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: development" >&5
 $as_echo "development" >&6; }
