@@ -11,21 +11,13 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/****************/
-/* Module Setup */
-/****************/
-
 #include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 
-/***********/
-/* Headers */
-/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File		  			*/
-#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
@@ -38,16 +30,7 @@
 #   include "szlib.h"
 #endif
 
-
-/****************/
-/* Local Macros */
-/****************/
-
-
-/******************/
-/* Local Typedefs */
-/******************/
-
+/* Local typedefs */
 #ifdef H5Z_DEBUG
 typedef struct H5Z_stats_t {
     struct {
@@ -72,41 +55,19 @@ typedef enum {
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
-
-/********************/
-/* Local Prototypes */
-/********************/
-static int H5Z_find_idx(H5Z_filter_t id);
-static int H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
-static int H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
-static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
-
-
-/*********************/
-/* Package Variables */
-/*********************/
-
-
-/*****************************/
-/* Library Private Variables */
-/*****************************/
-
-
-/*******************/
-/* Local Variables */
-/*******************/
-
+/* Local variables */
 static size_t		H5Z_table_alloc_g = 0;
 static size_t		H5Z_table_used_g = 0;
 static H5Z_class2_t	*H5Z_table_g = NULL;
-
 #ifdef H5Z_DEBUG
 static H5Z_stats_t	*H5Z_stat_table_g = NULL;
 #endif /* H5Z_DEBUG */
 
-/* Declare a free list to manage the H5O_layout_t struct */
-H5FL_EXTERN(H5O_layout_t);
-
+/* Local functions */
+static int H5Z_find_idx(H5Z_filter_t id);
+static int H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 
 /*-------------------------------------------------------------------------
@@ -850,9 +811,8 @@ done:
 static herr_t
 H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
 {
-    hid_t space_id = -1;                /* ID for dataspace describing chunk    */
-    H5O_layout_t *dcpl_layout = NULL;   /* Dataset's layout information         */
-    herr_t ret_value = SUCCEED;         /* Return value                         */
+    hid_t space_id = -1;            /* ID for dataspace describing chunk */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -862,20 +822,18 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
     /* Check if the property list is non-default */
     if(dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
         H5P_genplist_t 	*dc_plist;      /* Dataset creation property list object */
-
-        if(NULL == (dcpl_layout = H5FL_CALLOC(H5O_layout_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't get memory for layout")
+        H5O_layout_t    dcpl_layout;    /* Dataset's layout information */
 
         /* Get dataset creation property list object */
         if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
 
         /* Peek at the layout information */
-        if(H5P_peek(dc_plist, H5D_CRT_LAYOUT_NAME, dcpl_layout) < 0)
+        if(H5P_peek(dc_plist, H5D_CRT_LAYOUT_NAME, &dcpl_layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve layout")
 
         /* Check if the dataset is chunked */
-        if(H5D_CHUNKED == dcpl_layout->type) {
+        if(H5D_CHUNKED == dcpl_layout.type) {
             H5O_pline_t     dcpl_pline;     /* Object's I/O pipeline information */
 
             /* Get I/O pipeline information */
@@ -889,9 +847,9 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
                 size_t u;               /* Local index variable */
 
                 /* Create a data space for a chunk & set the extent */
-                for(u = 0; u < dcpl_layout->u.chunk.ndims; u++)
-                    chunk_dims[u] = dcpl_layout->u.chunk.dim[u];
-                if(NULL == (space = H5S_create_simple(dcpl_layout->u.chunk.ndims, chunk_dims, NULL)))
+                for(u = 0; u < dcpl_layout.u.chunk.ndims; u++)
+                    chunk_dims[u] = dcpl_layout.u.chunk.dim[u];
+                if(NULL == (space = H5S_create_simple(dcpl_layout.u.chunk.ndims, chunk_dims, NULL)))
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
                 /* Get ID for dataspace to pass to filter routines */
@@ -910,8 +868,6 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
 done:
     if(space_id > 0 && H5I_dec_ref(space_id) < 0)
         HDONE_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace")
-    if(dcpl_layout)
-        dcpl_layout = H5FL_FREE(H5O_layout_t, dcpl_layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_prepare_prelude_callback_dcpl() */
