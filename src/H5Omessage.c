@@ -732,12 +732,12 @@ H5O_msg_free_real(const H5O_msg_class_t *type, void *msg_native)
 /*-------------------------------------------------------------------------
  * Function:	H5O_msg_copy
  *
- * Purpose:     Copies a message.  If MESG is is the null pointer then a null
- *              pointer is returned with no error.
+ * Purpose:	Copies a message.  If MESG is is the null pointer then a null
+ *		pointer is returned with no error.
  *
- * Return:      Success:    Ptr to the new message
+ * Return:	Success:	Ptr to the new message
  *
- *              Failure:    NULL
+ *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
@@ -748,7 +748,7 @@ void *
 H5O_msg_copy(unsigned type_id, const void *mesg, void *dst)
 {
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    void *ret_value = NULL;                 /* Return value */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

@@ -217,9 +217,6 @@ H5FL_DEFINE_STATIC(H5D_farray_ctx_t);
 /* Declare a free list to manage the H5D_farray_ctx_ud_t struct */
 H5FL_DEFINE_STATIC(H5D_farray_ctx_ud_t);
 
-/* Declare a free list to manage the H5O_layout_t struct */
-H5FL_EXTERN(H5O_layout_t);
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__farray_crt_context
@@ -472,7 +469,7 @@ H5D__farray_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr)
     H5D_farray_ctx_ud_t	*dbg_ctx = NULL;   /* Context for fixed array callback */
     H5O_loc_t obj_loc;          /* Pointer to an object's location */
     hbool_t obj_opened = FALSE; /* Flag to indicate that the object header was opened */
-    H5O_layout_t *layout = NULL;        /* Layout message */
+    H5O_layout_t layout;        /* Layout message */
     void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_STATIC
@@ -496,9 +493,7 @@ H5D__farray_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr)
     obj_opened = TRUE;
 
     /* Read the layout message */
-    if(NULL == (layout = H5FL_CALLOC(H5O_layout_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't get memory for layout")
-    if(NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, layout, dxpl_id))
+    if(NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, &layout, dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get layout info")
 
     /* close the object header */
@@ -507,7 +502,7 @@ H5D__farray_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr)
 
     /* Create user data */
     dbg_ctx->f = f;
-    dbg_ctx->chunk_size = layout->u.chunk.size;
+    dbg_ctx->chunk_size = layout.u.chunk.size;
 
     /* Set return value */
     ret_value = dbg_ctx;
@@ -525,9 +520,6 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
         } /* end if */
     } /* end if */
-
-    if(layout)
-        layout = H5FL_FREE(H5O_layout_t, layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__farray_crt_dbg_context() */
