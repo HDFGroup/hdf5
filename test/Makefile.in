@@ -125,35 +125,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh H5srcdir_str.h \
 	testlibinfo.sh testlinks_env.sh test_plugin.sh
 CONFIG_CLEAN_VPATH_FILES =
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-am__installdirs = "$(DESTDIR)$(dyndir)"
-LTLIBRARIES = $(dyn_LTLIBRARIES) $(noinst_LTLIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdynlib1_la_LIBADD =
 am__libdynlib1_la_SOURCES_DIST = dynlib1.c
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib1_la_OBJECTS = dynlib1.lo
@@ -165,8 +137,7 @@ am__v_lt_1 =
 libdynlib1_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libdynlib1_la_LDFLAGS) $(LDFLAGS) -o $@
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib1_la_rpath = -rpath \
-@HAVE_SHARED_CONDITIONAL_TRUE@	$(dyndir)
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib1_la_rpath =
 libdynlib2_la_LIBADD =
 am__libdynlib2_la_SOURCES_DIST = dynlib2.c
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib2_la_OBJECTS = dynlib2.lo
@@ -174,8 +145,7 @@ libdynlib2_la_OBJECTS = $(am_libdynlib2_la_OBJECTS)
 libdynlib2_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libdynlib2_la_LDFLAGS) $(LDFLAGS) -o $@
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib2_la_rpath = -rpath \
-@HAVE_SHARED_CONDITIONAL_TRUE@	$(dyndir)
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib2_la_rpath =
 libdynlib3_la_LIBADD =
 am__libdynlib3_la_SOURCES_DIST = dynlib3.c
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib3_la_OBJECTS = dynlib3.lo
@@ -183,8 +153,7 @@ libdynlib3_la_OBJECTS = $(am_libdynlib3_la_OBJECTS)
 libdynlib3_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libdynlib3_la_LDFLAGS) $(LDFLAGS) -o $@
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib3_la_rpath = -rpath \
-@HAVE_SHARED_CONDITIONAL_TRUE@	$(dyndir)
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib3_la_rpath =
 libdynlib4_la_LIBADD =
 am__libdynlib4_la_SOURCES_DIST = dynlib4.c
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib4_la_OBJECTS = dynlib4.lo
@@ -192,11 +161,12 @@ libdynlib4_la_OBJECTS = $(am_libdynlib4_la_OBJECTS)
 libdynlib4_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libdynlib4_la_LDFLAGS) $(LDFLAGS) -o $@
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib4_la_rpath = -rpath \
-@HAVE_SHARED_CONDITIONAL_TRUE@	$(dyndir)
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib4_la_rpath =
 libh5test_la_LIBADD =
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
+@HAVE_SHARED_CONDITIONAL_FALSE@am_libh5test_la_rpath =
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libh5test_la_rpath =
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
 	pool$(EXEEXT) accum$(EXEEXT) hyperslab$(EXEEXT) \
@@ -622,6 +592,33 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
 am__recheck_rx = ^[ 	]*:recheck:[ 	]*
 am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
 am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
@@ -1119,21 +1116,16 @@ BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_i
     gen_noencoder gen_nullspace gen_udlinks space_overflow gen_sizes_lheap \
     gen_file_image
 
-
-# The libh5test library provides common support code for the tests.
-noinst_LTLIBRARIES = libh5test.la
-@HAVE_SHARED_CONDITIONAL_TRUE@dyn_LTLIBRARIES = libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
+@HAVE_SHARED_CONDITIONAL_FALSE@noinst_LTLIBRARIES = libh5test.la
+@HAVE_SHARED_CONDITIONAL_TRUE@noinst_LTLIBRARIES = libh5test.la libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib1_la_SOURCES = dynlib1.c
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib2_la_SOURCES = dynlib2.c
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib3_la_SOURCES = dynlib3.c
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib4_la_SOURCES = dynlib4.c
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib1_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib2_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib3_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib4_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
-
-#install-exec-hook:
-#	$(RM) $(DESTDIR)$(libdir)/*dynlib*
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib1_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib2_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib3_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib4_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
 libh5test_la_SOURCES = h5test.c testframe.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
@@ -1164,12 +1156,10 @@ DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
-DYN = $(dyn_LTLIBRARIES)
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
 chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
-dyndir = $(libdir)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
@@ -1224,41 +1214,6 @@ testlinks_env.sh: $(top_builddir)/config.status $(srcdir)/testlinks_env.sh.in
 test_plugin.sh: $(top_builddir)/config.status $(srcdir)/test_plugin.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-install-dynLTLIBRARIES: $(dyn_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	@list='$(dyn_LTLIBRARIES)'; test -n "$(dyndir)" || list=; \
-	list2=; for p in $$list; do \
-	  if test -f $$p; then \
-	    list2="$$list2 $$p"; \
-	  else :; fi; \
-	done; \
-	test -z "$$list2" || { \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(dyndir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(dyndir)" || exit 1; \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(dyndir)'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(dyndir)"; \
-	}
-
-uninstall-dynLTLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dyn_LTLIBRARIES)'; test -n "$(dyndir)" || list=; \
-	for p in $$list; do \
-	  $(am__strip_dir) \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(dyndir)/$$f'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(dyndir)/$$f"; \
-	done
-
-clean-dynLTLIBRARIES:
-	-test -z "$(dyn_LTLIBRARIES)" || rm -f $(dyn_LTLIBRARIES)
-	@list='$(dyn_LTLIBRARIES)'; \
-	locs=`for p in $$list; do echo $$p; done | \
-	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
-	      sort -u`; \
-	test -z "$$locs" || { \
-	  echo rm -f $${locs}; \
-	  rm -f $${locs}; \
-	}
-
 clean-noinstLTLIBRARIES:
 	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
 	@list='$(noinst_LTLIBRARIES)'; \
@@ -1283,7 +1238,7 @@ clean-noinstLTLIBRARIES:
 @HAVE_SHARED_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlib4_la_LINK) $(am_libdynlib4_la_rpath) $(libdynlib4_la_OBJECTS) $(libdynlib4_la_LIBADD) $(LIBS)
 
 libh5test.la: $(libh5test_la_OBJECTS) $(libh5test_la_DEPENDENCIES) $(EXTRA_libh5test_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK)  $(libh5test_la_OBJECTS) $(libh5test_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(am_libh5test_la_rpath) $(libh5test_la_OBJECTS) $(libh5test_la_LIBADD) $(LIBS)
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -2272,9 +2227,6 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
 installdirs:
-	for dir in "$(DESTDIR)$(dyndir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -2311,9 +2263,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-checkPROGRAMS clean-dynLTLIBRARIES clean-generic \
-	clean-libtool clean-noinstLTLIBRARIES clean-noinstPROGRAMS \
-	mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -2333,7 +2284,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dynLTLIBRARIES
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -2379,26 +2330,24 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dynLTLIBRARIES
+uninstall-am:
 
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
-	check-am clean clean-checkPROGRAMS clean-dynLTLIBRARIES \
-	clean-generic clean-libtool clean-noinstLTLIBRARIES \
-	clean-noinstPROGRAMS cscopelist-am ctags ctags-am distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-dynLTLIBRARIES install-exec \
+	check-am clean clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS cscopelist-am \
+	ctags ctags-am distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
 	install-info-am install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
-	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am \
-	uninstall-dynLTLIBRARIES
+	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am
 
 .PRECIOUS: Makefile
 
@@ -2428,6 +2377,7 @@ help:
 
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib4.la: $(libdynlib4_la_OBJECTS) $(libdynlib4_la_DEPENDENCIES) $(EXTRA_libdynlib4_la_DEPENDENCIES)
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(AM_V_CCLD)$(libdynlib4_la_LINK) $(am_libdynlib4_la_rpath) $(libdynlib4_la_OBJECTS) $(libdynlib4_la_LIBADD)
+@HAVE_SHARED_CONDITIONAL_FALSE@  # The libh5test library provides common support code for the tests.
 
 # Additional target for running timing test
 timings _timings: testmeta
@@ -2443,7 +2393,6 @@ flush2.chkexe_: flush1.chkexe_
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
-build-dyn: $(DYN)
 build-lib: $(LIB)
 build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(chk_TESTS)
@@ -2451,7 +2400,7 @@ build-tests: $(LIB) $(PROGS) $(chk_TESTS)
 # General rule for recursive building targets.
 # BUILT_SOURCES contain targets that need to be built before anything else
 # in the directory (e.g., for Fortran type detection)
-lib dyn progs tests check-s check-p :: $(BUILT_SOURCES)
+lib progs tests check-s check-p :: $(BUILT_SOURCES)
 	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
 	@for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X && test $$d != .; then                           \

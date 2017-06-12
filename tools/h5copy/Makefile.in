@@ -698,12 +698,10 @@ LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
-DYN = $(dyn_LTLIBRARIES)
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
 chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
-dyndir = $(libdir)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
@@ -1231,7 +1229,6 @@ help:
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
-build-dyn: $(DYN)
 build-lib: $(LIB)
 build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(chk_TESTS)
@@ -1239,7 +1236,7 @@ build-tests: $(LIB) $(PROGS) $(chk_TESTS)
 # General rule for recursive building targets.
 # BUILT_SOURCES contain targets that need to be built before anything else
 # in the directory (e.g., for Fortran type detection)
-lib dyn progs tests check-s check-p :: $(BUILT_SOURCES)
+lib progs tests check-s check-p :: $(BUILT_SOURCES)
 	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
 	@for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X && test $$d != .; then                           \
