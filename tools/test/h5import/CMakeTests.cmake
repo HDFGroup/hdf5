@@ -464,6 +464,22 @@
             dtxtstr.h5.dmp.err
             dtxtstr.h5.dff
             dtxtstr.h5.dff.err
+            tall_fp32.dmp
+            tall_fp32.dmp.err
+            tall_fp32.bin
+            tall_fp32.imp
+            tall_fp32.imp.err
+            d-tall_fp32.dmp
+            d-tall_fp32.dmp.err
+            d-tall_fp32.h5
+            tall_i32.dmp
+            tall_i32.dmp.err
+            tall_i32.bin
+            tall_i32.imp
+            tall_i32.imp.err
+            d-tall_i32.dmp
+            d-tall_i32.dmp.err
+            d-tall_i32.h5
     )
     set (last_test "H5IMPORT-clear-objects")
   endif ()
