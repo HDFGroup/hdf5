@@ -17,6 +17,7 @@
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 #include "h5import.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
@@ -66,6 +67,12 @@ static int  allocateUIntegerStorage(struct Input *in);
 static int  validateConfigurationParameters(struct Input *in);
 static int  processStrData(FILE *strm, struct Input *in, hid_t file_id);
 static int  processStrHDFData(FILE *strm, struct Input *in, hid_t file_id);
+uint16_t    swap_uint16(uint16_t val);
+int16_t     swap_int16(int16_t val);
+uint32_t    swap_uint32(uint32_t val);
+int32_t     swap_int32(int32_t val);
+int64_t     swap_int64(int64_t val);
+uint64_t    swap_uint64(uint64_t val);
 
 int main(int argc, char *argv[])
 {
@@ -226,7 +233,7 @@ int main(int argc, char *argv[])
 
     if (process(&opt) == -1)
         goto err;
-    
+
     for (i = 0; i < opt.fcount; i++) {
         in = &(opt.infiles[i].in);
         if (in->sizeOfDimension)
@@ -242,7 +249,7 @@ int main(int argc, char *argv[])
     }
 
     return (EXIT_SUCCESS);
-err: 
+err:
     (void) HDfprintf(stderr, "%s", err4);
     for (i = 0; i < opt.fcount; i++) {
         in = &(opt.infiles[i].in);
@@ -450,10 +457,12 @@ static int readIntegerData(FILE *strm, struct Input *in)
 {
     H5DT_INT8  *in08;
     H5DT_INT16 *in16;
-    H5DT_INT16  temp;
+    H5DT_INT16  temp16;
     H5DT_INT32 *in32;
+    H5DT_INT32  temp32;
 #ifdef H5_SIZEOF_LONG_LONG
     H5DT_INT64 *in64;
+    H5DT_INT64  temp64;
     char        buffer[256];
 #endif
     hsize_t     len = 1;
@@ -473,11 +482,11 @@ static int readIntegerData(FILE *strm, struct Input *in)
         case 0: /* TEXTIN */
             in08 = (H5DT_INT8 *) in->data;
             for (i = 0; i < len; i++, in08++) {
-                if (fscanf(strm, "%hd", &temp) != 1) {
+                if (fscanf(strm, "%hd", &temp16) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                (*in08) = (H5DT_INT8) temp;
+                (*in08) = (H5DT_INT8) temp16;
             }
             break;
 
@@ -488,6 +497,9 @@ static int readIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+#ifdef H5DEBUGIMPORT2
+                printf("readIntegerData %d (0x%.8X)\n", *in08, *in08);
+#endif
             }
             break;
 
@@ -512,10 +524,17 @@ static int readIntegerData(FILE *strm, struct Input *in)
 
         case 4: /* IN */
             for (i = 0; i < len; i++, in16++) {
-                if (HDfread((char *) in16, sizeof(H5DT_INT16), 1, strm) != 1) {
+                if (HDfread((char *)&temp16, sizeof(H5DT_INT16), 1, strm) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+                if (in->outputByteOrder)
+                    *in16 = temp16;
+                else
+                    *in16 = swap_int16(temp16);
+#ifdef H5DEBUGIMPORT2
+                printf("readIntegerData %d (0x%.8X)\n", *in16, temp16);
+#endif
             }
             break;
 
@@ -539,10 +558,17 @@ static int readIntegerData(FILE *strm, struct Input *in)
 
         case 4: /* IN */
             for (i = 0; i < len; i++, in32++) {
-                if (HDfread((char *) in32, sizeof(H5DT_INT32), 1, strm) != 1) {
+                if (HDfread((char *)&temp32, sizeof(H5DT_INT32), 1, strm) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+                if (in->outputByteOrder)
+                    *in32 = temp32;
+                else
+                    *in32 = swap_int32(temp32);
+#ifdef H5DEBUGIMPORT
+                printf("readIntegerData %d (0x%.8X = 0x%.8X)\n", *in32, *in32, temp32);
+#endif
             }
             break;
 
@@ -568,10 +594,17 @@ static int readIntegerData(FILE *strm, struct Input *in)
 
         case 4: /* IN */
             for (i = 0; i < len; i++, in64++) {
-                if (HDfread((char *) in64, sizeof(H5DT_INT64), 1, strm) != 1) {
+                if (HDfread((char *)&temp64, sizeof(H5DT_INT64), 1, strm) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+                if (in->outputByteOrder)
+                    *in64 = temp64;
+                else
+                    *in64 = swap_int64(temp64);
+#ifdef H5DEBUGIMPORT2
+                printf("readIntegerData %d (0x%.8X)\n", *in64, temp64);
+#endif
             }
             break;
 
@@ -593,10 +626,12 @@ static int readUIntegerData(FILE *strm, struct Input *in)
 {
     H5DT_UINT8  *in08;
     H5DT_UINT16 *in16;
-    H5DT_UINT16  temp;
+    H5DT_UINT16  temp16;
     H5DT_UINT32 *in32;
+    H5DT_UINT32  temp32;
 #ifdef H5_SIZEOF_LONG_LONG
     H5DT_UINT64 *in64;
+    H5DT_UINT64  temp64;
     char        buffer[256];
 #endif
     hsize_t     len = 1;
@@ -615,11 +650,11 @@ static int readUIntegerData(FILE *strm, struct Input *in)
         case 6: /* TEXTUIN */
             in08 = (H5DT_UINT8 *) in->data;
             for (i = 0; i < len; i++, in08++) {
-                if (fscanf(strm, "%hu", &temp) != 1) {
+                if (fscanf(strm, "%hu", &temp16) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                (*in08) = (H5DT_UINT8) temp;
+                (*in08) = (H5DT_UINT8) temp16;
             }
             break;
 
@@ -653,10 +688,14 @@ static int readUIntegerData(FILE *strm, struct Input *in)
 
         case 7: /* UIN */
             for (i = 0; i < len; i++, in16++) {
-                if (HDfread((char *) in16, sizeof(H5DT_UINT16), 1, strm) != 1) {
+                if (HDfread((char *)&temp16, sizeof(H5DT_UINT16), 1, strm) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+                if (in->outputByteOrder)
+                    *in16 = temp16;
+                else
+                    *in16 = swap_uint16(temp16);
             }
             break;
 
@@ -680,10 +719,14 @@ static int readUIntegerData(FILE *strm, struct Input *in)
 
         case 7: /* UIN */
             for (i = 0; i < len; i++, in32++) {
-                if (HDfread((char *) in32, sizeof(H5DT_UINT32), 1, strm) != 1) {
+                if (HDfread((char *)&temp32, sizeof(H5DT_UINT32), 1, strm) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+                if (in->outputByteOrder)
+                    *in32 = temp32;
+                else
+                    *in32 = swap_uint32(temp32);
             }
             break;
 
@@ -709,10 +752,14 @@ static int readUIntegerData(FILE *strm, struct Input *in)
 
         case 7: /* UIN */
             for (i = 0; i < len; i++, in64++) {
-                if (HDfread((char *) in64, sizeof(H5DT_UINT64), 1, strm) != 1) {
+                if (HDfread((char *)&temp64, sizeof(H5DT_UINT64), 1, strm) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+                if (in->outputByteOrder)
+                    *in64 = temp64;
+                else
+                    *in64 = swap_uint64(temp64);
             }
             break;
 
@@ -733,12 +780,16 @@ static int readUIntegerData(FILE *strm, struct Input *in)
 static int readFloatData(FILE *strm, struct Input *in)
 {
     H5DT_FLOAT32 *fp32;
+    uint32_t  *bfp32;
+    uint32_t  temp32;
     H5DT_FLOAT64 *fp64;
+    uint64_t  *bfp64;
+    uint64_t  temp64;
 
     hsize_t     len = 1;
     hsize_t     i;
     int         j;
-    const char *err1 = "Unable to get integer value from file.\n";
+    const char *err1 = "Unable to get float value from file.\n";
     const char *err2 = "Unrecognized input class type.\n";
     const char *err3 = "Invalid input size type.\n";
 
@@ -774,11 +825,19 @@ static int readFloatData(FILE *strm, struct Input *in)
             break;
 
         case 3: /* FP */
-            for (i = 0; i < len; i++, fp32++) {
-                if (HDfread((char *) fp32, sizeof(H5DT_FLOAT32), 1, strm) != 1) {
+            bfp32 = (uint32_t *) in->data;
+            for (i = 0; i < len; i++, bfp32++) {
+                if (HDfread((char *)&temp32, sizeof(uint32_t), 1, strm) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+                if (in->outputByteOrder)
+                    *bfp32 = temp32;
+                else
+                    *bfp32 = swap_uint32(temp32);
+#ifdef H5DEBUGIMPORT
+                printf("readFloatData %f (0x%.8X = 0x%.8X)\n", *bfp32, *bfp32, temp32);
+#endif
             }
             break;
 
@@ -816,11 +875,19 @@ static int readFloatData(FILE *strm, struct Input *in)
             break;
 
         case 3: /* FP */
-            for (i = 0; i < len; i++, fp64++) {
-                if (HDfread((char *) fp64, sizeof(H5DT_FLOAT64), 1, strm) != 1) {
+            bfp64 = (uint64_t *) in->data;
+            for (i = 0; i < len; i++, bfp64++) {
+                if (HDfread((char *)&temp64, sizeof(uint64_t), 1, strm) != 1) {
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+                if (in->outputByteOrder)
+                    *bfp64 = temp64;
+                else
+                    *bfp64 = swap_uint64(temp64);
+#ifdef H5DEBUGIMPORT2
+                printf("readFloatData %lf (0x%.8X)\n", fp64, temp64);
+#endif
             }
             break;
 
@@ -897,7 +964,7 @@ static int processStrData(FILE *strm, struct Input *in, hid_t file_id)
         goto out;
 
     /* disable error reporting */
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         /* create parent groups */
         if (in->path.count > 1) {
@@ -1321,6 +1388,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
     const char *err17 = "Configuration parameters are invalid in %s.\n";
     const char *err18 = "Unable to get string value.\n";
     const char *err19 = "Unable to get integer value.\n";
+    const char *err20 = "Unable to get subset values.\n";
 
     /* create vector to map which keywords have been found
      check vector after each keyword to check for violation
@@ -1852,6 +1920,151 @@ static int processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump FILTERS %s found\n", temp);
 #endif
             }
+            else if(!HDstrcmp("SUBSET", key)) { /* reduce dimensions */
+                hsize_t     temp_dims[MAX_NUM_DIMENSION];
+                int get_next_prop = 1;
+#ifdef H5DEBUGIMPORT
+                printf("h5dump SUBSET key\n");
+#endif
+                if (fscanf(strm, "%s", temp) != 1) { /* start bracket */
+                    (void) HDfprintf(stderr, err6b, infile);
+                    goto error;
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump SUBSET %s found\n", temp);
+#endif
+                if (fscanf(strm, "%s", temp) != 1) { /* SUBSET keyword */
+                    (void) HDfprintf(stderr, "%s", err18);
+                    goto error;
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump SUBSET %s found\n", temp);
+#endif
+                while (get_next_prop) {
+                    if(!HDstrcmp("COUNT", temp)) { /* COUNT */
+                        int icount = 0;
+                        if (fscanf(strm, "%s", temp) != 1) { /* start paren */
+                            (void) HDfprintf(stderr, err6b, infile);
+                            goto error;
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump SUBSET %s found\n", temp);
+#endif
+                        if(!HDstrcmp("(", temp)) { /* start paren */
+                            int get_next_dim = 1;
+                            int i = 0;
+
+                            if (fscanf(strm, "%s", temp) != 1) { /* Dimension with optional comma */
+                                (void) HDfprintf(stderr, err16c, infile);
+                                goto error;
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump SUBSET COUNT [%s] found\n", temp);
+#endif
+                            while (get_next_dim) {
+                                char *more = temp;
+                                temp_dims[icount] = HDstrtoull(more, &more, 10);
+                                if (fscanf(strm, "%s", temp) != 1) { /* Dimension or end paren */
+                                    (void) HDfprintf(stderr, err6b, infile);
+                                    goto error;
+                                }
+#ifdef H5DEBUGIMPORT
+                                printf("h5dump SUBSET COUNT %s found\n", temp);
+#endif
+                                if(!HDstrcmp(");", temp)) { /* end paren */
+                                    in->rank = ++icount;
+                                    in->configOptionVector[RANK] = 1;
+                                    get_next_dim = 0;
+                                }
+                                else { /* Dimension */
+                                    icount++;
+                                    if (icount > MAX_NUM_DIMENSION) {
+                                        (void) HDfprintf(stderr, "Invalid value for rank.\n");
+                                        goto error;
+                                    }
+                                }
+                            } /* while (get_next_dim) */
+                            for (i = 0; i < in->rank; i++) {
+                                in->sizeOfDimension[i] = temp_dims[i];
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump SUBSET COUNT dims: [%d]", in->rank);
+                            for (pndx = 0; pndx < in->rank; pndx++) {
+                                printf(" %d", in->sizeOfDimension[pndx]);
+                            }
+                            printf("\n");
+#endif
+                            in->configOptionVector[DIM] = 1;
+                        } /* if(!HDstrcmp("(", key))  start paren */
+                    } /* if(!HDstrcmp("COUNT", temp))  COUNT */
+                    if(!HDstrcmp("BLOCK", temp)) { /* BLOCK */
+                        int icount = 0;
+                        if (fscanf(strm, "%s", temp) != 1) { /* start paren */
+                            (void) HDfprintf(stderr, err6b, infile);
+                            goto error;
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump SUBSET %s found\n", temp);
+#endif
+                        if(!HDstrcmp("(", temp)) { /* start paren */
+                            int get_next_dim = 1;
+                            int i = 0;
+
+                            if (fscanf(strm, "%s", temp) != 1) { /* Dimension with optional comma */
+                                (void) HDfprintf(stderr, err16c, infile);
+                                goto error;
+                            }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump SUBSET BLOCK [%s] found\n", temp);
+#endif
+                            while (get_next_dim) {
+                                char *more = temp;
+                                temp_dims[icount] = HDstrtoull(more, &more, 10);
+                                if (fscanf(strm, "%s", temp) != 1) { /* Dimension or end paren */
+                                    (void) HDfprintf(stderr, err6b, infile);
+                                    goto error;
+                                }
+#ifdef H5DEBUGIMPORT
+                                printf("h5dump SUBSET BLOCK %s found\n", temp);
+#endif
+                                if(!HDstrcmp(");", temp)) { /* end paren */
+                                    in->rank = ++icount;
+                                    in->configOptionVector[RANK] = 1;
+                                    get_next_dim = 0;
+                                }
+                                else { /* Dimension */
+                                    icount++;
+                                    if (icount > MAX_NUM_DIMENSION) {
+                                        (void) HDfprintf(stderr, "Invalid value for rank.\n");
+                                        goto error;
+                                    }
+                                }
+                            } /* while (get_next_dim) */
+                            for (i = 0; i < in->rank; i++) {
+                                in->sizeOfDimension[i] = in->sizeOfDimension[i] * temp_dims[i];
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump SUBSET BLOCK dims: [%d]", in->rank);
+                            for (pndx = 0; pndx < in->rank; pndx++) {
+                                printf(" %d", in->sizeOfDimension[pndx]);
+                            }
+                            printf("\n");
+#endif
+                            in->configOptionVector[DIM] = 1;
+                        } /* if(!HDstrcmp("(", key))  start paren */
+                    } /* if(!HDstrcmp("BLOCK", temp))  BLOCK */
+                    if (fscanf(strm, "%s", temp) != 1) {
+                        (void) HDfprintf(stderr, "%s", err18);
+                        goto error;
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump SUBSET %s found\n", temp);
+#endif
+                    if(!HDstrcmp("}", temp)) { /* end bracket */
+                        get_next_prop = 0;
+                    }
+                } /* while (get_next_prop) */
+            } /* else if(!HDstrcmp("SUBSET", key)) */
             else if(!HDstrcmp("DATA", key)) { /* FINSHED */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATA key\n");
@@ -1877,13 +2090,16 @@ static int processConfigurationFile(char *infile, struct Input *in)
         printf("h5dump compressionType=%d\n", in->compressionType);
         printf("h5dump compressionParam=%d\n", in->compressionParam);
         printf("h5dump externFilename=%s\n", in->externFilename);
-        printf("h5dump configOptionVector:\n");
-        for (pndx = 0; pndx < NUM_KEYS; pndx++) {
-            printf("    %s=%d\n", keytable[pndx], in->configOptionVector[pndx]);
+        printf("h5dump sizeOfDimensions:\n");
+        for (pndx = 0; pndx < in->rank; pndx++) {
+            printf("  %d\n", in->sizeOfDimension[pndx]);
         }
 #endif
     }
     else {
+#ifdef H5DEBUGIMPORT
+        printf("original option keyword parsing\n");
+#endif
         while (scanret == 1) {
             if ((kindex = mapKeywordToIndex(key)) == -1) {
                 (void) HDfprintf(stderr, err2, infile);
@@ -2126,16 +2342,16 @@ static int processConfigurationFile(char *infile, struct Input *in)
             }
             scanret = fscanf(strm, "%s", key);
         }
-    }
 
-    /*
-         check if keywords obtained are valid
-         if yes, return 0 else error
-     */
+        /*
+            check if keywords obtained are valid
+            if yes, return 0 else error
+        */
 
-    if (validateConfigurationParameters(in) == -1) {
-        (void) HDfprintf(stderr, err17, infile);
-        goto error;
+        if (validateConfigurationParameters(in) == -1) {
+            (void) HDfprintf(stderr, err17, infile);
+            goto error;
+        }
     }
 
     /* Set success return value */
@@ -3062,8 +3278,9 @@ static int getInputClassType(struct Input *in, char * buffer)
     if (in->configOptionVector[OUTPUT_SIZE] == 0)
         in->outputSize = in->inputSize;
 #ifdef H5DEBUGIMPORT
-    printf("h5dump DATATYPE STRING %d inputSize\n", in->inputSize);
-    printf("h5dump DATATYPE STRING %d outputSize\n", in->outputSize);
+    printf("h5dump DATATYPE InClass %d inputSize\n", in->inputSize);
+    printf("h5dump DATATYPE InClass %d outputSize\n", in->outputSize);
+    printf("h5dump DATATYPE InClass %d outputArchitecture\n", in->outputArchitecture);
 #endif
 
     in->inputClass = kindex;
@@ -3382,7 +3599,7 @@ hid_t createOutputDataType(struct Input *in)
     const char *err1 = "Invalid value for output class.\n";
     const char *err2 = "Invalid value for output size.\n";
     const char *err3 = "Invalid value for output byte order.\n";
-	const char *err4 = "Invalid value for output architecture.\n";
+    const char *err4 = "Invalid value for output architecture.\n";
     const char *err5 = "STD not supported for float.\n";
     const char *err6 = "IEEE not supported for INT.\n";
 
@@ -3504,9 +3721,9 @@ hid_t createOutputDataType(struct Input *in)
             }
             break;
 
-		default:
-			(void) HDfprintf(stderr, "%s", err4);
-			return (-1);
+        default:
+            (void) HDfprintf(stderr, "%s", err4);
+            return (-1);
         }
         break;
 
@@ -3589,9 +3806,9 @@ hid_t createOutputDataType(struct Input *in)
             }
             break;
 
-		default:
-			(void) HDfprintf(stderr, "%s", err4);
-			return (-1);
+        default:
+            (void) HDfprintf(stderr, "%s", err4);
+            return (-1);
         }
         break;
 
@@ -3969,6 +4186,42 @@ static int process(struct Options *opt)
 
     H5Fclose(file_id);
     return (0);
+}
+
+uint16_t swap_uint16( uint16_t val)
+{
+    return (val << 8) | (val >> 8);
+}
+
+int16_t swap_int16(int16_t val)
+{
+    return (val << 8) | ((val >> 8) & 0xFF);
+}
+
+uint32_t swap_uint32(uint32_t val)
+{
+    val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
+    return (val << 16) | (val >> 16);
+}
+
+int32_t swap_int32(int32_t val)
+{
+    val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
+    return (val << 16) | ((val >> 16) & 0xFFFF);
+}
+
+int64_t swap_int64(int64_t val)
+{
+    val = ((val << 8) & 0xFF00FF00FF00FF00ULL) | ((val >> 8) & 0x00FF00FF00FF00FFULL);
+    val = ((val << 16) & 0xFFFF0000FFFF0000ULL) | ((val >> 16) & 0x0000FFFF0000FFFFULL);
+    return (val << 32) | ((val >> 32) & 0xFFFFFFFFULL);
+}
+
+uint64_t swap_uint64(uint64_t val)
+{
+    val = ((val << 8) & 0xFF00FF00FF00FF00ULL) | ((val >> 8) & 0x00FF00FF00FF00FFULL);
+    val = ((val << 16) & 0xFFFF0000FFFF0000ULL) | ((val >> 16) & 0x0000FFFF0000FFFFULL);
+    return (val << 32) | (val >> 32);
 }
 
 /*
