@@ -117,6 +117,15 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5import
+
+      h5import crashed trying to import data from a subset of a dataset.
+
+      Improved h5import by adding the SUBSET keyword. h5import understands
+      to use the Count times the Block as the size of the dimensions.
+
+      (ADB - 2017/06/12, HDFFV-102191)
+
     - h5repack
 
       h5repack did not maintain the creation order flag of the root

@@ -1291,6 +1291,8 @@
 ./tools/test/h5import/testfiles/binuin16.h5
 ./tools/test/h5import/testfiles/binuin32.conf
 ./tools/test/h5import/testfiles/binuin32.h5
+./tools/test/h5import/testfiles/tall_fp32.ddl
+./tools/test/h5import/testfiles/tall_i32.ddl
 ./tools/test/h5import/testfiles/textpfe.conf
 ./tools/test/h5import/testfiles/textpfe.h5
 ./tools/test/h5import/testfiles/textpfe64.txt
