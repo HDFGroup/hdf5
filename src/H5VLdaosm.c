@@ -749,7 +749,7 @@ herr_t
 H5Pset_daosm_snap_open(hid_t fapl_id, H5VL_daosm_snap_id_t snap_id)
 {
     H5P_genplist_t  *plist;      /* Property list pointer */
-    herr_t          ret_value;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
@@ -2127,7 +2127,7 @@ H5VL_daosm_link_create(H5VL_link_create_type_t create_type, void *_item,
     H5VL_daosm_group_t *link_grp = NULL;
     const char *link_name = NULL;
     H5VL_daosm_link_val_t link_val;
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
