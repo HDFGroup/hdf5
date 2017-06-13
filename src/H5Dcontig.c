@@ -31,17 +31,18 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* Files				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5VMprivate.h"		/* Vector and array functions		*/
+#include "H5private.h"      /* Generic Functions            */
+#include "H5Dpkg.h"         /* Dataset functions            */
+#include "H5Eprivate.h"     /* Error handling               */
+#include "H5Fprivate.h"     /* Files                        */
+#include "H5FDprivate.h"    /* File drivers                 */
+#include "H5FLprivate.h"    /* Free Lists                   */
+#include "H5Iprivate.h"     /* IDs                          */
+#include "H5MFprivate.h"    /* File memory management       */
+#include "H5FOprivate.h"    /* File objects                 */
+#include "H5Oprivate.h"     /* Object headers               */
+#include "H5Pprivate.h"     /* Property lists               */
+#include "H5VMprivate.h"    /* Vector and array functions   */
 
 
 /****************/
@@ -1362,6 +1363,10 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
     hsize_t     buf_dim[1] = {0};       /* Dimension for buffer */
     hbool_t     is_vlen = FALSE;        /* Flag to indicate that VL type conversion should occur */
     hbool_t     fix_ref = FALSE;        /* Flag to indicate that ref values should be fixed */
+    H5D_shared_t    *shared_fo = cpy_info->shared_fo;  /* Pointer to the shared struct for dataset object */
+    hbool_t     try_sieve = FALSE;      /* Try to get data from the sieve buffer */
+    haddr_t     sieve_start = HADDR_UNDEF; /* Start location of sieve buffer */
+    haddr_t     sieve_end = HADDR_UNDEF;    /* End locations of sieve buffer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1485,6 +1490,16 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
     /* Loop over copying data */
     addr_src = storage_src->addr;
     addr_dst = storage_dst->addr;
+
+    /* If data sieving is enabled and the dataset is open in the file,
+       set up to copy data out of the sieve buffer if deemed possible later */
+    if(H5F_HAS_FEATURE(f_src, H5FD_FEAT_DATA_SIEVE) &&
+       shared_fo && shared_fo->cache.contig.sieve_buf) {
+        try_sieve = TRUE;
+        sieve_start = shared_fo->cache.contig.sieve_loc;
+        sieve_end = sieve_start + shared_fo->cache.contig.sieve_size;
+    }
+
     while(total_src_nbytes > 0) {
         /* Check if we should reduce the number of bytes to transfer */
         if(total_src_nbytes < src_nbytes) {
@@ -1510,14 +1525,20 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
                 dst_nbytes = mem_nbytes = src_nbytes;
         } /* end if */
 
-        /* Read raw data from source file - use raw dxpl because passed in one is metadata */
-        if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, src_nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data")
+        /* If the entire copy is within the sieve buffer, copy data from the sieve buffer */
+        if(try_sieve && (addr_src >= sieve_start) && ((addr_src + src_nbytes -1) < sieve_end)) {
+            unsigned char *base_sieve_buf = shared_fo->cache.contig.sieve_buf + (addr_src - sieve_start);
+
+            HDmemcpy(buf, base_sieve_buf, src_nbytes);
+        } else
+            /* Read raw data from source file - use raw dxpl because passed in one is metadata */
+            if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, src_nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data")
 
         /* Perform datatype conversion, if necessary */
         if(is_vlen) {
             /* Convert from source file to memory */
-	    if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
+            if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
             /* Copy into another buffer, to reclaim memory later */
@@ -1527,13 +1548,13 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
             HDmemset(bkg, 0, buf_size);
 
             /* Convert from memory to destination file */
-	    if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
+            if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
             /* Reclaim space from variable length data */
             if(H5D_vlen_reclaim(tid_mem, buf_space, dxpl_id, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
-	} /* end if */
+        } /* end if */
         else if(fix_ref) {
             /* Check for expanding references */
             if(cpy_info->expand_ref) {
