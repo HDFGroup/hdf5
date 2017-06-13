@@ -142,7 +142,7 @@ case "$cc_vendor-$cc_version" in
 
     # Symbols
     NO_SYMBOLS_CFLAGS="-s"
-    SYMBOLS_CFLAGS="-g"
+    SYMBOLS_CFLAGS="-g -fno-omit-frame-pointer"
 
     # Profile
     PROFILE_CFLAGS="-pg"
