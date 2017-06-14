@@ -121,8 +121,7 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdynlibls_la_LIBADD =
 am__libdynlibls_la_SOURCES_DIST = dynlib_ls.c
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibls_la_OBJECTS =  \
-@HAVE_SHARED_CONDITIONAL_TRUE@	dynlib_ls.lo
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibls_la_OBJECTS = dynlib_ls.lo
 libdynlibls_la_OBJECTS = $(am_libdynlibls_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -132,7 +131,7 @@ libdynlibls_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(libdynlibls_la_LDFLAGS) $(LDFLAGS) -o \
 	$@
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibls_la_rpath =
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibls_la_rpath =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 h5ls_SOURCES = h5ls.c
@@ -560,6 +559,7 @@ THREADSAFE = @THREADSAFE@
 TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
+UNAME_CYGWIN = @UNAME_CYGWIN@
 UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
@@ -688,9 +688,9 @@ h5ls_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # All programs depend on the hdf5 and h5tools libraries
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
-@HAVE_SHARED_CONDITIONAL_TRUE@noinst_LTLIBRARIES = libdynlibls.la
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibls_la_SOURCES = dynlib_ls.c
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibls_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@noinst_LTLIBRARIES = libdynlibls.la
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibls_la_SOURCES = dynlib_ls.c
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibls_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere -no-undefined
 DISTCLEANFILES = h5ls_plugin.sh
 
 # Automake needs to be taught how to build lib, dyn, progs, and tests targets.
@@ -762,8 +762,8 @@ clean-noinstLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-@HAVE_SHARED_CONDITIONAL_FALSE@libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES) 
-@HAVE_SHARED_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD) $(LIBS)
+libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -1227,10 +1227,7 @@ uninstall-am: uninstall-binPROGRAMS
 help:
 	@$(top_srcdir)/bin/makehelp
 
-@HAVE_SHARED_CONDITIONAL_TRUE@  # Build it as shared library if configure is enabled for shared library.
-
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES)
-@HAVE_SHARED_CONDITIONAL_TRUE@	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD)
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@  # Build it as shared library if configure is enabled for shared library.
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

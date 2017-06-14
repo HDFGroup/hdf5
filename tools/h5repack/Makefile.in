@@ -123,8 +123,7 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdynlibadd_la_LIBADD =
 am__libdynlibadd_la_SOURCES_DIST = dynlib_rpk.c
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibadd_la_OBJECTS =  \
-@HAVE_SHARED_CONDITIONAL_TRUE@	dynlib_rpk.lo
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibadd_la_OBJECTS = dynlib_rpk.lo
 libdynlibadd_la_OBJECTS = $(am_libdynlibadd_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -134,17 +133,16 @@ libdynlibadd_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(libdynlibadd_la_LDFLAGS) $(LDFLAGS) \
 	-o $@
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibadd_la_rpath =
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibadd_la_rpath =
 libdynlibvers_la_LIBADD =
 am__libdynlibvers_la_SOURCES_DIST = dynlib_vrpk.c
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibvers_la_OBJECTS =  \
-@HAVE_SHARED_CONDITIONAL_TRUE@	dynlib_vrpk.lo
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibvers_la_OBJECTS = dynlib_vrpk.lo
 libdynlibvers_la_OBJECTS = $(am_libdynlibvers_la_OBJECTS)
 libdynlibvers_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(libdynlibvers_la_LDFLAGS) $(LDFLAGS) \
 	-o $@
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibvers_la_rpath =
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibvers_la_rpath =
 am__installdirs = "$(DESTDIR)$(bindir)"
 am__EXEEXT_1 = h5repacktst$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -594,6 +592,7 @@ THREADSAFE = @THREADSAFE@
 TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
+UNAME_CYGWIN = @UNAME_CYGWIN@
 UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
@@ -736,11 +735,11 @@ COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
 h5repack_SOURCES = $(COMMON_SOURCES) h5repack_main.c
 h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c 
 testh5repack_detect_szip_SOURCES = testh5repack_detect_szip.c
-@HAVE_SHARED_CONDITIONAL_TRUE@noinst_LTLIBRARIES = libdynlibadd.la libdynlibvers.la
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd_la_SOURCES = dynlib_rpk.c
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibvers_la_SOURCES = dynlib_vrpk.c
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@noinst_LTLIBRARIES = libdynlibadd.la libdynlibvers.la
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibadd_la_SOURCES = dynlib_rpk.c
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibvers_la_SOURCES = dynlib_vrpk.c
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
 DISTCLEANFILES = h5repack.sh h5repack_plugin.sh
 
 # Automake needs to be taught how to build lib, dyn, progs, and tests targets.
@@ -812,11 +811,11 @@ clean-noinstLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-@HAVE_SHARED_CONDITIONAL_FALSE@libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES) 
-@HAVE_SHARED_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) $(LIBS)
+libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) $(LIBS)
 
-@HAVE_SHARED_CONDITIONAL_FALSE@libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES) 
-@HAVE_SHARED_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) $(LIBS)
+libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -1328,12 +1327,7 @@ help:
 # The h5repack.sh script needs h5repacktst to run first.
 h5repack.sh.chkexe_: h5repacktst.chkexe_
 
-@HAVE_SHARED_CONDITIONAL_TRUE@  # Build it as shared library if configure is enabled for shared library.
-
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES)
-@HAVE_SHARED_CONDITIONAL_TRUE@	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD)
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES)
-@HAVE_SHARED_CONDITIONAL_TRUE@	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD)
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@  # Build it as shared library if configure is enabled for shared library.
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
