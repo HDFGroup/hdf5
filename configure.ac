@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.8.19-pre2], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.8.19], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
 
@@ -846,10 +846,16 @@ case $host_os in
   ;;
 esac
 
+## -----------
+## if `uname` is not CYGWIN, save that information to pass to Makefiles
+## to disable building and testing plugins.
+AC_SUBST([UNAME_CYGWIN]) UNAME_CYGWIN="no"
+
 ## Windows
 case "`uname`" in
   CYGWIN*)
     AC_CHECK_HEADERS([io.h sys/timeb.h])
+    UNAME_CYGWIN="yes"
     ;;
   MINGW*)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
@@ -859,6 +865,7 @@ case "`uname`" in
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
     ;;
 esac
+AM_CONDITIONAL([NOT_UNAME_CYGWIN], [test "X$UNAME_CYGWIN" = "Xno"])
 
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library

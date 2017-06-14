@@ -1,4 +1,4 @@
-HDF5 version 1.8.19-pre2 released on 2017-06-12
+HDF5 version 1.8.19 currently under development
 ================================================================================
 
 INTRODUCTION
@@ -417,6 +417,12 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+
+    The dynamically loaded plugin test libraries require undefined references 
+    to HDF5 functions to be resolved at runtime in order to function properly.
+    With autotools on CYGWIN this results in build errors, and we have not 
+    found a solution that satisfies both.  Therefore the dynamically loaded 
+    plugin tests have been disabled on CYGWIN.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
