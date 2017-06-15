@@ -86,6 +86,18 @@ if HAVE_SHARED_CONDITIONAL
   libdynlib2_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libdynlib3_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libdynlib4_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+
+libdynlib1.la: $(libdynlib1_la_OBJECTS) $(libdynlib1_la_DEPENDENCIES) $(EXTRA_libdynlib1_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib1_la_LINK) $(am_libdynlib1_la_rpath) $(libdynlib1_la_OBJECTS) $(libdynlib1_la_LIBADD)
+
+libdynlib2.la: $(libdynlib2_la_OBJECTS) $(libdynlib2_la_DEPENDENCIES) $(EXTRA_libdynlib2_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib2_la_LINK) $(am_libdynlib2_la_rpath) $(libdynlib2_la_OBJECTS) $(libdynlib2_la_LIBADD)
+
+libdynlib3.la: $(libdynlib3_la_OBJECTS) $(libdynlib3_la_DEPENDENCIES) $(EXTRA_libdynlib3_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib3_la_LINK) $(am_libdynlib3_la_rpath) $(libdynlib3_la_OBJECTS) $(libdynlib3_la_LIBADD)
+
+libdynlib4.la: $(libdynlib4_la_OBJECTS) $(libdynlib4_la_DEPENDENCIES) $(EXTRA_libdynlib4_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib4_la_LINK) $(am_libdynlib4_la_rpath) $(libdynlib4_la_OBJECTS) $(libdynlib4_la_LIBADD)
 else
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la

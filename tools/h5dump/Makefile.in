@@ -714,7 +714,7 @@ LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 h5dump_SOURCES = h5dump.c h5dump_ddl.c h5dump_xml.c
 @HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@noinst_LTLIBRARIES = libdynlibdump.la
 @HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibdump_la_SOURCES = dynlib_dump.c
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibdump_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere -noundefined
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibdump_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
 DISTCLEANFILES = testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 
 # Automake needs to be taught how to build lib, dyn, progs, and tests targets.
@@ -790,8 +790,11 @@ clean-noinstLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-libdynlibdump.la: $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_DEPENDENCIES) $(EXTRA_libdynlibdump_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libdynlibdump_la_LINK) $(am_libdynlibdump_la_rpath) $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_LIBADD) $(LIBS)
+@HAVE_SHARED_CONDITIONAL_FALSE@libdynlibdump.la: $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_DEPENDENCIES) $(EXTRA_libdynlibdump_la_DEPENDENCIES) 
+@HAVE_SHARED_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibdump_la_LINK) $(am_libdynlibdump_la_rpath) $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_LIBADD) $(LIBS)
+
+@NOT_UNAME_CYGWIN_FALSE@libdynlibdump.la: $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_DEPENDENCIES) $(EXTRA_libdynlibdump_la_DEPENDENCIES) 
+@NOT_UNAME_CYGWIN_FALSE@	$(AM_V_CCLD)$(libdynlibdump_la_LINK) $(am_libdynlibdump_la_rpath) $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -1284,6 +1287,9 @@ help:
 	@$(top_srcdir)/bin/makehelp
 
 @HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@  # Build it as shared library if configure is enabled for shared library.
+
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibdump.la: $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_DEPENDENCIES) $(EXTRA_libdynlibdump_la_DEPENDENCIES)
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@	$(AM_V_CCLD)$(libdynlibdump_la_LINK) $(am_libdynlibdump_la_rpath) $(libdynlibdump_la_OBJECTS) $(libdynlibdump_la_LIBADD)
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

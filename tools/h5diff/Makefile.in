@@ -721,7 +721,7 @@ h5diffgentest_SOURCES = h5diffgentest.c
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 @HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@noinst_LTLIBRARIES = libdynlibdiff.la
 @HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibdiff_la_SOURCES = dynlib_diff.c
-@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibdiff_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere -noundefined
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibdiff_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
 DISTCLEANFILES = h5diff_plugin.sh
 
 # Automake needs to be taught how to build lib, dyn, progs, and tests targets.
@@ -795,8 +795,11 @@ clean-noinstLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-libdynlibdiff.la: $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_DEPENDENCIES) $(EXTRA_libdynlibdiff_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libdynlibdiff_la_LINK) $(am_libdynlibdiff_la_rpath) $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_LIBADD) $(LIBS)
+@HAVE_SHARED_CONDITIONAL_FALSE@libdynlibdiff.la: $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_DEPENDENCIES) $(EXTRA_libdynlibdiff_la_DEPENDENCIES) 
+@HAVE_SHARED_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibdiff_la_LINK) $(am_libdynlibdiff_la_rpath) $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_LIBADD) $(LIBS)
+
+@NOT_UNAME_CYGWIN_FALSE@libdynlibdiff.la: $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_DEPENDENCIES) $(EXTRA_libdynlibdiff_la_DEPENDENCIES) 
+@NOT_UNAME_CYGWIN_FALSE@	$(AM_V_CCLD)$(libdynlibdiff_la_LINK) $(am_libdynlibdiff_la_rpath) $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -1288,6 +1291,9 @@ help:
 	@$(top_srcdir)/bin/makehelp
 
 @HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@  # Build it as shared library if configure is enabled for shared library.
+
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibdiff.la: $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_DEPENDENCIES) $(EXTRA_libdynlibdiff_la_DEPENDENCIES)
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@	$(AM_V_CCLD)$(libdynlibdiff_la_LINK) $(am_libdynlibdiff_la_rpath) $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_LIBADD)
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

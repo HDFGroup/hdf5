@@ -61,7 +61,10 @@ if HAVE_SHARED_CONDITIONAL
   # Build it as shared library if configure is enabled for shared library.
   noinst_LTLIBRARIES=libdynlibdiff.la
   libdynlibdiff_la_SOURCES=dynlib_diff.c
-  libdynlibdiff_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere -noundefined
+  libdynlibdiff_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+
+libdynlibdiff.la: $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_DEPENDENCIES) $(EXTRA_libdynlibdiff_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlibdiff_la_LINK) $(am_libdynlibdiff_la_rpath) $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_LIBADD)
 endif
 endif
 
