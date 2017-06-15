@@ -123,8 +123,11 @@ Bug Fixes since HDF5-1.10.1 release
 
       Improved h5import by adding the SUBSET keyword. h5import understands
       to use the Count times the Block as the size of the dimensions.
+      Added INPUT_B_ORDER keyword to old-style configuration files.
+      The import from h5dump function expects the binary files to use native
+      types (FILE '-b' option) in the binary file.
 
-      (ADB - 2017/06/12, HDFFV-102191)
+      (ADB - 2017/06/15, HDFFV-102191)
 
     - h5repack
 
