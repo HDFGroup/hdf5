@@ -37,7 +37,7 @@
 
 #define MAX_GROUPS_IN_PATH  20
 #define MAX_PATH_NAME_LENGTH 255
-#define NUM_KEYS 14
+#define NUM_KEYS 15
 #define MIN_NUM_DIMENSION  1
 #define MAX_NUM_DIMENSION  32
 #define BASE_10 10
@@ -56,6 +56,7 @@
 #define COMPRESS_PARAM   11
 #define EXTERNALSTORE    12
 #define EXTEND           13
+#define INPUT_B_ORDER    14
 
 /* data types */
 #define H5DT_INT8      signed char
@@ -82,6 +83,7 @@ struct Input
     struct path_info path;
     int inputClass;
     int inputSize;
+    int inputByteOrder;
     int rank;
     hsize_t* sizeOfDimension;
     int outputClass;
@@ -126,7 +128,8 @@ char keytable[NUM_KEYS][30] = {
         "COMPRESSION-TYPE",
         "COMPRESSION-PARAM",
         "EXTERNAL-STORAGE",
-        "MAXIMUM-DIMENSIONS"
+        "MAXIMUM-DIMENSIONS",
+        "INPUT-BYTE-ORDER"
 };
 
 static int  state_table[15][8] =

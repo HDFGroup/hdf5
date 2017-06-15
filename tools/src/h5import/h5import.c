@@ -41,6 +41,7 @@ static int  parseDimensions(struct Input *in, char *strm);
 static int  getInputSize(struct Input *in, int ival);
 static int  getInputClass(struct Input *in, char * strm);
 static int  getInputClassType(struct Input *in, char * strm);
+static int  getInputByteOrder(struct Input *in, FILE *strm);
 static int  InputClassStrToInt(char *temp);
 static int  getRank(struct Input *in, FILE *strm);
 static int  getDimensionSizes(struct Input *in, FILE *strm);
@@ -497,7 +498,7 @@ static int readIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-#ifdef H5DEBUGIMPORT2
+#ifdef H5DEBUGIMPORT
                 printf("readIntegerData %d (0x%.8X)\n", *in08, *in08);
 #endif
             }
@@ -528,11 +529,11 @@ static int readIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                if (in->outputByteOrder)
-                    *in16 = temp16;
-                else
+                if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in16 = swap_int16(temp16);
-#ifdef H5DEBUGIMPORT2
+                else
+                    *in16 = temp16;
+#ifdef H5DEBUGIMPORT
                 printf("readIntegerData %d (0x%.8X)\n", *in16, temp16);
 #endif
             }
@@ -562,10 +563,10 @@ static int readIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                if (in->outputByteOrder)
-                    *in32 = temp32;
-                else
+                if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in32 = swap_int32(temp32);
+                else
+                    *in32 = temp32;
 #ifdef H5DEBUGIMPORT
                 printf("readIntegerData %d (0x%.8X = 0x%.8X)\n", *in32, *in32, temp32);
 #endif
@@ -598,11 +599,11 @@ static int readIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                if (in->outputByteOrder)
-                    *in64 = temp64;
-                else
+                if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in64 = swap_int64(temp64);
-#ifdef H5DEBUGIMPORT2
+                else
+                    *in64 = temp64;
+#ifdef H5DEBUGIMPORT
                 printf("readIntegerData %d (0x%.8X)\n", *in64, temp64);
 #endif
             }
@@ -692,10 +693,13 @@ static int readUIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                if (in->outputByteOrder)
-                    *in16 = temp16;
-                else
+                if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in16 = swap_uint16(temp16);
+                else
+                    *in16 = temp16;
+#ifdef H5DEBUGIMPORT
+                printf("readUIntegerData %d (0x%.4X = 0x%.4X)\n", *in16, *in16, temp16);
+#endif
             }
             break;
 
@@ -723,10 +727,13 @@ static int readUIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                if (in->outputByteOrder)
-                    *in32 = temp32;
-                else
+                if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in32 = swap_uint32(temp32);
+                else
+                    *in32 = temp32;
+#ifdef H5DEBUGIMPORT
+                printf("readUIntegerData %d (0x%.8X = 0x%.8X)\n", *in32, *in32, temp32);
+#endif
             }
             break;
 
@@ -756,10 +763,13 @@ static int readUIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                if (in->outputByteOrder)
-                    *in64 = temp64;
-                else
+                if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in64 = swap_uint64(temp64);
+                else
+                    *in64 = temp64;
+#ifdef H5DEBUGIMPORT
+                printf("readUIntegerData %ld (0x%.8X = 0x%.8X)\n", *in64, *in64, temp64);
+#endif
             }
             break;
 
@@ -831,12 +841,12 @@ static int readFloatData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                if (in->outputByteOrder)
-                    *bfp32 = temp32;
-                else
+                if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *bfp32 = swap_uint32(temp32);
+                else
+                    *bfp32 = temp32;
 #ifdef H5DEBUGIMPORT
-                printf("readFloatData %f (0x%.8X = 0x%.8X)\n", *bfp32, *bfp32, temp32);
+                printf("readFloatData %ld (0x%.8X = 0x%.8X)\n", *bfp32, *bfp32, temp32);
 #endif
             }
             break;
@@ -881,12 +891,12 @@ static int readFloatData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
-                if (in->outputByteOrder)
-                    *bfp64 = temp64;
-                else
+                if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *bfp64 = swap_uint64(temp64);
-#ifdef H5DEBUGIMPORT2
-                printf("readFloatData %lf (0x%.8X)\n", fp64, temp64);
+                else
+                    *bfp64 = temp64;
+#ifdef H5DEBUGIMPORT
+                printf("readFloatData %ld (0x%.16lX)\n", *bfp64, temp64);
 #endif
             }
             break;
@@ -1353,7 +1363,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
     int         retval = -1;
 
     const char *err1 = "Unable to open the configuration file:  %s for reading.\n";
-    const char *err2 = "Unknown keyword in configuration file: %s\n";
+    const char *err2 = "Unknown keyword: %s in configuration file: %s\n";
     const char *err3a = "PATH keyword appears twice in %s.\n";
     const char *err3b = "Error in parsing the path information from %s.\n";
     const char *err4a = "INPUT-CLASS keyword appears twice in %s.\n";
@@ -1373,6 +1383,9 @@ static int processConfigurationFile(char *infile, struct Input *in)
     const char *err10b = "Error in retrieving the output architecture from %s.\n";
     const char *err11a = "OUTPUT-BYTE-ORDER keyword appears twice in %s.\n";
     const char *err11b = "Error in retrieving the output byte order from %s.\n";
+    const char *err11c = "INPUT-BYTE-ORDER keyword appears twice in %s.\n";
+    const char *err11d = "Error in retrieving the input byte order from %s.\n";
+    const char *err11e = "Invalid value for output byte-order.\n";
     const char *err12a = "CHUNKED-DIMENSION-SIZES keyword appears twice in %s.\n";
     const char *err12b = "CHUNKED-DIMENSION-SIZES cannot appear before DIMENSION-SIZES are provided.\n";
     const char *err12c = "Error in retrieving the chunked dimension sizes from %s.\n";
@@ -1395,6 +1408,26 @@ static int processConfigurationFile(char *infile, struct Input *in)
      at the end check vector to see if required fields have been provided
      process the output file according to the options
      */
+
+    /* Initialize machine endian */
+    volatile uint32_t ibyte=0x01234567;
+    /* 0 for big endian, 1 for little endian. */
+    if ((*((uint8_t*)(&ibyte))) == 0x67) {
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err11e);
+            return (-1);
+        }
+    }
+    else {
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err11e);
+            return (-1);
+        }
+    }
+    in->inputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+    printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
 
     if ((strm = HDfopen(infile, "r")) == NULL) {
         (void) HDfprintf(stderr, err1, infile);
@@ -1631,15 +1664,15 @@ static int processConfigurationFile(char *infile, struct Input *in)
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
-                        printf("h5dump DATASPACE SIMPLE %d rank\n", in->rank);
+                        printf("h5dump DATASPACE SIMPLE %ld rank\n", in->rank);
 #endif
                         for (i = 0; i < in->rank; i++) {
                             in->sizeOfDimension[i] = temp_dims[i];
                         }
 #ifdef H5DEBUGIMPORT
-                        printf("h5dump DATASPACE SIMPLE dims:", in->rank);
+                        printf("h5dump DATASPACE SIMPLE dims[%ld]:", in->rank);
                         for (pndx = 0; pndx < in->rank; pndx++) {
-                            printf(" %d", in->sizeOfDimension[pndx]);
+                            printf(" %ld", in->sizeOfDimension[pndx]);
                         }
                         printf("\n");
 #endif
@@ -1712,9 +1745,9 @@ static int processConfigurationFile(char *infile, struct Input *in)
                                 }
                             } /* while (get_next_dim) */
 #ifdef H5DEBUGIMPORT
-                            printf("h5dump DATASPACE SIMPLE maxdims:", in->rank);
+                            printf("h5dump DATASPACE SIMPLE maxdims[%ld]:", in->rank);
                             for (pndx = 0; pndx < in->rank; pndx++) {
-                                printf(" %d", in->maxsizeOfDimension[pndx]);
+                                printf(" %ld", in->maxsizeOfDimension[pndx]);
                             }
                             printf("\n");
                             printf("h5dump DATASPACE SIMPLE get max dim finished\n");
@@ -1799,9 +1832,9 @@ static int processConfigurationFile(char *infile, struct Input *in)
                             }
                         } /* while (get_next_dim) */
 #ifdef H5DEBUGIMPORT
-                        printf("h5dump STORAGE_LAYOUT CHUNKED dims:", in->rank);
+                        printf("h5dump STORAGE_LAYOUT CHUNKED dims [%ld]:", in->rank);
                         for (pndx = 0; pndx < in->rank; pndx++) {
-                            printf(" %d", in->sizeOfChunk[pndx]);
+                            printf(" %ld", in->sizeOfChunk[pndx]);
                         }
                         printf("\n");
 #endif
@@ -1927,7 +1960,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump SUBSET key\n");
 #endif
                 if (fscanf(strm, "%s", temp) != 1) { /* start bracket */
-                    (void) HDfprintf(stderr, err6b, infile);
+                    (void) HDfprintf(stderr, err20, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
@@ -1990,7 +2023,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                             printf("h5dump SUBSET COUNT dims: [%d]", in->rank);
                             for (pndx = 0; pndx < in->rank; pndx++) {
-                                printf(" %d", in->sizeOfDimension[pndx]);
+                                printf(" %ld", in->sizeOfDimension[pndx]);
                             }
                             printf("\n");
 #endif
@@ -2046,7 +2079,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                             printf("h5dump SUBSET BLOCK dims: [%d]", in->rank);
                             for (pndx = 0; pndx < in->rank; pndx++) {
-                                printf(" %d", in->sizeOfDimension[pndx]);
+                                printf(" %ld", in->sizeOfDimension[pndx]);
                             }
                             printf("\n");
 #endif
@@ -2082,6 +2115,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
         printf("\n");
         printf("h5dump inputClass=%d\n", in->inputClass);
         printf("h5dump inputSize=%d\n", in->inputSize);
+        printf("h5dump inputByteOrder=%d\n", in->inputByteOrder);
         printf("h5dump rank=%d\n", in->rank);
         printf("h5dump outputClass=%d\n", in->outputClass);
         printf("h5dump outputSize=%d\n", in->outputSize);
@@ -2092,7 +2126,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
         printf("h5dump externFilename=%s\n", in->externFilename);
         printf("h5dump sizeOfDimensions:\n");
         for (pndx = 0; pndx < in->rank; pndx++) {
-            printf("  %d\n", in->sizeOfDimension[pndx]);
+            printf("  %ld\n", in->sizeOfDimension[pndx]);
         }
 #endif
     }
@@ -2102,7 +2136,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
 #endif
         while (scanret == 1) {
             if ((kindex = mapKeywordToIndex(key)) == -1) {
-                (void) HDfprintf(stderr, err2, infile);
+                (void) HDfprintf(stderr, err2, key, infile);
                 goto error;
             }
             switch (kindex) {
@@ -2335,6 +2369,19 @@ static int processConfigurationFile(char *infile, struct Input *in)
                     goto error;
                 }
                 in->configOptionVector[EXTEND] = 1;
+                break;
+
+            case 14: /* INPUT-BYTE-ORDER */
+                if (in->configOptionVector[INPUT_B_ORDER] == 1) {
+                    (void) HDfprintf(stderr, err11c, infile);
+                    goto error;
+                }
+
+                if (getInputByteOrder(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err11d, infile);
+                    goto error;
+                }
+                in->configOptionVector[INPUT_B_ORDER] = 1;
                 break;
 
             default:
@@ -2577,7 +2624,7 @@ static int getInputClassType(struct Input *in, char * buffer)
     int         kindex = -1;
     const char *err1 = "Invalid value for input class.\n";
     const char *err2 = "Invalid value for output architecture.\n";
-    const char *err3 = "Invalid value for output byte-order.\n";
+    const char *err3 = "Invalid value for input byte-order.\n";
 
     if (!HDstrcmp(buffer, "H5T_STD_I8BE")) {
         in->inputSize = 8;
@@ -2594,6 +2641,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 4;
     }
@@ -2612,6 +2663,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 4;
     }
@@ -2630,6 +2685,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 4;
     }
@@ -2648,6 +2707,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 4;
     }
@@ -2666,6 +2729,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 4;
     }
@@ -2684,6 +2751,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 4;
     }
@@ -2702,6 +2773,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 4;
     }
@@ -2720,6 +2795,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 4;
     }
@@ -2738,6 +2817,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 7;
     }
@@ -2756,6 +2839,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 7;
     }
@@ -2774,6 +2861,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 7;
     }
@@ -2792,6 +2883,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 7;
     }
@@ -2810,6 +2905,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 7;
     }
@@ -2828,6 +2927,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 7;
     }
@@ -2846,6 +2949,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 7;
     }
@@ -2864,6 +2971,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 7;
     }
@@ -3002,6 +3113,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 3;
     }
@@ -3020,6 +3135,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 3;
     }
@@ -3038,6 +3157,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 3;
     }
@@ -3056,6 +3179,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = 3;
     }
@@ -3129,6 +3256,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = -1;
     }
@@ -3145,6 +3276,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = -1;
     }
@@ -3161,6 +3296,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = -1;
     }
@@ -3177,6 +3316,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = -1;
     }
@@ -3193,6 +3336,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = -1;
     }
@@ -3209,6 +3356,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = -1;
     }
@@ -3225,6 +3376,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = -1;
     }
@@ -3241,6 +3396,10 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
+//        in->inputByteOrder = kindex;
+    #ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+    #endif
 
         kindex = -1;
     }
@@ -3311,6 +3470,27 @@ static int getInputSize(struct Input *in, int ival)
         }
     (void) HDfprintf(stderr, "%s", err1);
     return (-1);
+}
+
+static int getInputByteOrder(struct Input *in, FILE *strm)
+{
+    char        temp[255];
+    int         kindex;
+    const char *err1 = "Unable to get 'string' value.\n";
+    const char *err2 = "Invalid value for input byte-order.\n";
+
+    if (fscanf(strm, "%s", temp) != 1) {
+        (void) HDfprintf(stderr, "%s", err1);
+        return (-1);
+    }
+
+    if ((kindex = OutputByteOrderStrToInt(temp)) == -1) {
+        (void) HDfprintf(stderr, "%s", err2);
+        return (-1);
+    }
+
+    in->inputByteOrder = kindex;
+    return (0);
 }
 
 static int getRank(struct Input *in, FILE *strm)
@@ -3578,6 +3758,7 @@ void setDefaultValues(struct Input *in, int count)
     in->inputSize = 32;
     in->outputClass = 1; /* FP */
     in->outputSize = 32;
+    in->inputByteOrder = -1; /* use default    */
     in->rank = 0;
     in->path.count = 1;
 
@@ -3950,85 +4131,433 @@ hid_t createInputDataType(struct Input *in)
 {
     hid_t       new_type = (-1);
     const char *err1 = "Invalid value for input class.\n";
-    const char *err2 = "Invalid value for output size.\n";
+    const char *err2 = "Invalid value for input size.\n";
+    const char *err3 = "Invalid value for input byte order.\n";
+    const char *err4 = "Invalid value for output architecture.\n";
+    const char *err5 = "STD not supported for float.\n";
+    const char *err6 = "IEEE not supported for INT.\n";
 
-    switch (in->inputClass) {
-    case 0:
-    case 4:
-        switch (in->inputSize) {
-        case 8:
-            new_type = H5Tcopy(H5T_NATIVE_CHAR);
+    if (in->h5dumpInput) {
+        switch (in->inputClass) {
+        case 4:
+            switch (in->outputArchitecture) {
+            case 0: /* NATIVE */
+                switch (in->inputSize) {
+                case 8:
+                    new_type = H5Tcopy(H5T_NATIVE_CHAR);
+                    break;
+
+                case 16:
+                    new_type = H5Tcopy(H5T_NATIVE_SHORT);
+                    break;
+
+                case 32:
+                    new_type = H5Tcopy(H5T_NATIVE_INT);
+                    break;
+
+                case 64:
+                    new_type = H5Tcopy(H5T_NATIVE_LLONG);
+                    break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err2);
+                    return (-1);
+                }
+                switch (in->inputByteOrder) {
+                case -1: /* default */
+                    break;
+                case 0:
+                    H5Tset_order(new_type, H5T_ORDER_BE);
+                    break;
+
+                case 1:
+                    H5Tset_order(new_type, H5T_ORDER_LE);
+                    break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
+                }
+                break;
+
+            case 1: /* STD */
+                switch (in->inputSize) {
+                case 8:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_STD_I8BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_STD_I8LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                case 16:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_STD_I16BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_STD_I16LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                case 32:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_STD_I32BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_STD_I32LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                case 64:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_STD_I64BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_STD_I64LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err2);
+                    return (-1);
+                }
+                break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err4);
+                return (-1);
+            }
             break;
 
-        case 16:
-            new_type = H5Tcopy(H5T_NATIVE_SHORT);
+        case 3:
+            switch (in->outputArchitecture) {
+            case 0:
+                switch (in->inputSize) {
+                case 32:
+                    new_type = H5Tcopy(H5T_NATIVE_FLOAT);
+                    break;
+
+                case 64:
+                    new_type = H5Tcopy(H5T_NATIVE_DOUBLE);
+                    break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err2);
+                    return (-1);
+                }
+                switch (in->inputByteOrder) {
+                case -1: /* DEFAULT */
+                    break;
+                case 0:
+                    H5Tset_order(new_type, H5T_ORDER_BE);
+                    break;
+
+                case 1:
+                    H5Tset_order(new_type, H5T_ORDER_LE);
+                    break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
+                }
+                break;
+
+            case 1:
+                (void) HDfprintf(stderr, "%s", err5);
+                return (-1);
+
+            case 2:
+                switch (in->inputSize) {
+                case 32:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_IEEE_F32BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_IEEE_F32LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                case 64:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_IEEE_F64BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_IEEE_F64LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err2);
+                    return (-1);
+                }
+                break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err4);
+                return (-1);
+            }
             break;
 
-        case 32:
-            new_type = H5Tcopy(H5T_NATIVE_INT);
-            break;
+        case 7:
+            switch (in->outputArchitecture) {
+            case 0:
+                switch (in->inputSize) {
+                case 8:
+                    new_type = H5Tcopy(H5T_NATIVE_UCHAR);
+                    break;
 
-        case 64:
-            new_type = H5Tcopy(H5T_NATIVE_LLONG);
+                case 16:
+                    new_type = H5Tcopy(H5T_NATIVE_USHORT);
+                    break;
+
+                case 32:
+                    new_type = H5Tcopy(H5T_NATIVE_UINT);
+                    break;
+
+                case 64:
+                    new_type = H5Tcopy(H5T_NATIVE_ULLONG);
+                    break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err2);
+                    return (-1);
+                }
+                switch (in->inputByteOrder) {
+                case -1: /* Default */
+                    break;
+                case 0:
+                    H5Tset_order(new_type, H5T_ORDER_BE);
+                    break;
+
+                case 1:
+                    H5Tset_order(new_type, H5T_ORDER_LE);
+                    break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err3);
+                    return (-1);
+                }
+                break;
+
+            case 1:
+                switch (in->inputSize) {
+                case 8:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_STD_U8BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_STD_U8LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                case 16:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_STD_U16BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_STD_U16LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                case 32:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_STD_U32BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_STD_U32LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                case 64:
+                    switch (in->inputByteOrder) {
+                    case -1:
+                    case 0:
+                        new_type = H5Tcopy(H5T_STD_U64BE);
+                        break;
+
+                    case 1:
+                        new_type = H5Tcopy(H5T_STD_U64LE);
+                        break;
+
+                    default:
+                        (void) HDfprintf(stderr, "%s", err3);
+                        return (-1);
+                    }
+                    break;
+
+                default:
+                    (void) HDfprintf(stderr, "%s", err2);
+                    return (-1);
+                }
+                break;
+
+            case 2:
+                (void) HDfprintf(stderr, "%s", err6);
+                return (-1);
+
+            default:
+                (void) HDfprintf(stderr, "%s", err4);
+                return (-1);
+            }
             break;
 
         default:
-            (void) HDfprintf(stderr, "%s", err2);
+            (void) HDfprintf(stderr, "%s", err1);
             return (-1);
         }
-        break;
+    }
+    else {
+        switch (in->inputClass) {
+        case 0:
+        case 4:
+            switch (in->inputSize) {
+            case 8:
+                new_type = H5Tcopy(H5T_NATIVE_CHAR);
+                break;
 
-    case 1:
-    case 2:
-    case 3:
-        switch (in->inputSize) {
-        case 32:
-            new_type = H5Tcopy(H5T_NATIVE_FLOAT);
+            case 16:
+                new_type = H5Tcopy(H5T_NATIVE_SHORT);
+                break;
+
+            case 32:
+                new_type = H5Tcopy(H5T_NATIVE_INT);
+                break;
+
+            case 64:
+                new_type = H5Tcopy(H5T_NATIVE_LLONG);
+                break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err2);
+                return (-1);
+            }
             break;
 
-        case 64:
-            new_type = H5Tcopy(H5T_NATIVE_DOUBLE);
+        case 1:
+        case 2:
+        case 3:
+            switch (in->inputSize) {
+            case 32:
+                new_type = H5Tcopy(H5T_NATIVE_FLOAT);
+                break;
+
+            case 64:
+                new_type = H5Tcopy(H5T_NATIVE_DOUBLE);
+                break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err2);
+                return (-1);
+            }
+            break;
+
+        case 5:
+            (void) HDfprintf(stderr, "%s", err1);
+            return (-1);
+            break;
+
+        case 6:
+        case 7:
+            switch (in->inputSize) {
+            case 8:
+                new_type = H5Tcopy(H5T_NATIVE_UCHAR);
+                break;
+
+            case 16:
+                new_type = H5Tcopy(H5T_NATIVE_USHORT);
+                break;
+
+            case 32:
+                new_type = H5Tcopy(H5T_NATIVE_UINT);
+                break;
+
+            case 64:
+                new_type = H5Tcopy(H5T_NATIVE_ULLONG);
+                break;
+
+            default:
+                (void) HDfprintf(stderr, "%s", err2);
+                return (-1);
+            }
             break;
 
         default:
-            (void) HDfprintf(stderr, "%s", err2);
+            (void) HDfprintf(stderr, "%s", err1);
             return (-1);
         }
-        break;
-
-    case 5:
-        (void) HDfprintf(stderr, "%s", err1);
-        return (-1);
-        break;
-
-    case 6:
-    case 7:
-        switch (in->inputSize) {
-        case 8:
-            new_type = H5Tcopy(H5T_NATIVE_UCHAR);
-            break;
-
-        case 16:
-            new_type = H5Tcopy(H5T_NATIVE_USHORT);
-            break;
-
-        case 32:
-            new_type = H5Tcopy(H5T_NATIVE_UINT);
-            break;
-
-        case 64:
-            new_type = H5Tcopy(H5T_NATIVE_ULLONG);
-            break;
-
-        default:
-            (void) HDfprintf(stderr, "%s", err2);
-            return (-1);
-        }
-        break;
-
-    default:
-        (void) HDfprintf(stderr, "%s", err1);
-        return (-1);
     }
     return new_type;
 }
@@ -4117,7 +4646,7 @@ static int process(struct Options *opt)
             intype = createInputDataType(in);
             outtype = createOutputDataType(in);
 #ifdef H5DEBUGIMPORT
-            printf("process intype %d outtype %d\n", intype, outtype);
+            printf("process intype %ld outtype %ld\n", intype, outtype);
 #endif
 
             /* create property list */
@@ -4416,6 +4945,7 @@ void help(char *name)
     (void) HDfprintf(stdout, "\t    PATH\n");
     (void) HDfprintf(stdout, "\t    INPUT-CLASS\n");
     (void) HDfprintf(stdout, "\t    INPUT-SIZE\n");
+    (void) HDfprintf(stdout, "\t    INPUT-BYTE-ORDER\n");
     (void) HDfprintf(stdout, "\t    RANK\n");
     (void) HDfprintf(stdout, "\t    DIMENSION-SIZES\n");
     (void) HDfprintf(stdout, "\t    OUTPUT-CLASS\n");
