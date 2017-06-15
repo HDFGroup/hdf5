@@ -83,6 +83,8 @@ $SRC_H5IMPORT_TESTFILES/txtuin16.h5
 $SRC_H5IMPORT_TESTFILES/txtuin32.h5
 $SRC_H5IMPORT_TESTFILES/txtstr.h5
 $SRC_H5IMPORT_TESTFILES/textpfe.h5
+$SRC_TOOLS_TESTFILES/tall.h5
+$SRC_TOOLS_TESTFILES/tintsattrs.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -112,6 +114,9 @@ $SRC_H5IMPORT_TESTFILES/dbinin32.h5.txt
 $SRC_H5IMPORT_TESTFILES/dbinuin16.h5.txt
 $SRC_H5IMPORT_TESTFILES/dbinuin32.h5.txt
 $SRC_H5IMPORT_TESTFILES/dtxtstr.h5.txt
+$SRC_H5IMPORT_TESTFILES/tall_fp32.ddl
+$SRC_H5IMPORT_TESTFILES/tall_i32.ddl
+$SRC_H5IMPORT_TESTFILES/tintsattrs_u32.ddl
 "
 
 #
@@ -263,10 +268,10 @@ fi
 TOOLTEST5()
 {
 err=0
-$RUNSERIAL $DUMPER_BIN -p -d $1 -o d$2.bin -b FILE tmp_testfiles/$2 > d$2.dmp
-$RUNSERIAL $H5IMPORT_BIN d$2.bin -c d$2.dmp -o d$2 > d$2.imp
-$RUNSERIAL $DUMPER_BIN -p d$2 tmp_testfiles/$2 $1 $1 > log2
-$CP -f $SRC_H5IMPORT_TESTFILES/d$2.txt log1
+$RUNSERIAL $DUMPER_BIN -p -d $3 $4 -o d$1.bin -b FILE tmp_testfiles/$2 > d$1.dmp
+$RUNSERIAL $H5IMPORT_BIN d$1.bin -c d$1.dmp -o d$1.h5 > d$1.imp
+$RUNSERIAL $DUMPER_BIN -p d$1 d$1.h5 $1 $1 > log2
+$CP -f $SRC_H5IMPORT_TESTFILES/$1.ddl log1
 
 cmp -s log1 log2 || err=1
 rm -f log1 log2
@@ -377,6 +382,11 @@ TOOLTEST2 "/dataset0" binin8w.h5
 
 TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE "
 TOOLTEST $TESTDIR/textpfe64.txt -c $TESTDIR/textpfe.conf -o textpfe.h5
+
+TESTING "Binary Subset "
+TOOLTEST5 tall_fp32 tall.h5 "/g2/dset2.2" "--start=1,1 --stride=2,3 --count=1,2 --block=1,1"
+TOOLTEST5 tall_i32 tall.h5 "/g1/g1.1/dset1.1.1" "--start=1,1 --stride=2,3 --count=3,2 --block=1,1"
+TOOLTEST5 tintsattrs_u32 tintsattrs.h5 "/DU32BITS" "--start=1,1 --stride=2,3 --count=3,2 --block=1,1"
 
 
 rm -f  txtin32.txt txtin16.txt txtin8.txt txtuin32.txt txtuin16.txt *.bin *.dmp *.conf *.imp *.h5
