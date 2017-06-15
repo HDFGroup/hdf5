@@ -329,7 +329,7 @@ TOOLTEST $TESTDIR/txtfp64.txt -c $TESTDIR/txtfp64.conf -o txtfp64.h5
 
 
 TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed "
-TOOLTEST binfp64.bin -c $TESTDIR/binfp64.conf -o binfp64.h5
+TOOLTEST binfp64.bin -c binfp64.conf -o binfp64.h5
 TESTING "H5DUMP-BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed "
 if test $USE_FILTER_DEFLATE != "yes"; then
  SKIP "/fp/bin/64-bit" binfp64.h5
@@ -339,7 +339,7 @@ fi
 
 
 TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed "
-TOOLTEST binin8.bin -c $TESTDIR/binin8.conf -o binin8.h5
+TOOLTEST binin8.bin -c binin8.conf -o binin8.h5
 TESTING "H5DUMP-BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed "
 if test $USE_FILTER_DEFLATE != "yes"; then
  SKIP "/int/bin/8-bit" binin8.h5
@@ -348,23 +348,23 @@ else
 fi
 
 TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended "
-TOOLTEST binin16.bin -c $TESTDIR/binin16.conf -o binin16.h5
+TOOLTEST binin16.bin -c binin16.conf -o binin16.h5
 TESTING "H5DUMP-BINARY I16 - rank 3 - Output order LE + CHUNKED + extended "
 TOOLTEST2 "/int/bin/16-bit" binin16.h5
 
 TESTING "BINARY I32 - rank 3 - Output BE + CHUNKED "
-TOOLTEST binin32.bin -c $TESTDIR/binin32.conf -o binin32.h5
+TOOLTEST binin32.bin -c binin32.conf -o binin32.h5
 TESTING "H5DUMP-BINARY I32 - rank 3 - Output BE + CHUNKED "
 TOOLTEST2 "/int/bin/32-bit" binin32.h5
 
 
 TESTING "BINARY UI16 - rank 3 - Output byte BE + CHUNKED "
-TOOLTEST binuin16.bin -c $TESTDIR/binuin16.conf -o binuin16.h5
+TOOLTEST binuin16.bin -c binuin16.conf -o binuin16.h5
 TESTING "H5DUMP-BINARY UI16 - rank 3 - Output byte BE + CHUNKED "
 TOOLTEST2 "/int/buin/16-bit" binuin16.h5
 
 TESTING "BINARY UI32 - rank 3 - Output LE + CHUNKED "
-TOOLTEST binuin32.bin -c $TESTDIR/binuin32.conf -o binuin32.h5
+TOOLTEST binuin32.bin -c binuin32.conf -o binuin32.h5
 TESTING "H5DUMP-BINARY UI32 - rank 3 - Output LE + CHUNKED "
 TOOLTEST2 "/int/buin/32-bit" binuin32.h5
 
@@ -376,7 +376,7 @@ TOOLTEST4 "/mytext/data" txtstr.h5
 
 
 TESTING "BINARY I8 CR LF EOF"
-TOOLTEST binin8w.bin -c $TESTDIR/binin8w.conf -o binin8w.h5
+TOOLTEST binin8w.bin -c binin8w.conf -o binin8w.h5
 TESTING "H5DUMP-BINARY I8 CR LF EOF"
 TOOLTEST2 "/dataset0" binin8w.h5
 
