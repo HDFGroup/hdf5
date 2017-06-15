@@ -648,6 +648,7 @@ set (H5TEST_TESTS
     cache_logging
     cork
     swmr
+    vol
 )
 
 foreach (test ${H5TEST_TESTS})
