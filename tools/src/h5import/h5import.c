@@ -2641,7 +2641,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2663,7 +2662,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2685,7 +2683,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2707,7 +2704,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2729,7 +2725,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2751,7 +2746,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2773,7 +2767,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2795,7 +2788,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2817,7 +2809,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2839,7 +2830,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2861,7 +2851,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2883,7 +2872,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2905,7 +2893,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2927,7 +2914,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2949,7 +2935,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -2971,7 +2956,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3113,7 +3097,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3135,7 +3118,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3157,7 +3139,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3179,7 +3160,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3256,7 +3236,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3276,7 +3255,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3296,7 +3274,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3316,7 +3293,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3336,7 +3312,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3356,7 +3331,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3376,7 +3350,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
@@ -3396,7 +3369,6 @@ static int getInputClassType(struct Input *in, char * buffer)
             return (-1);
         }
         in->outputByteOrder = kindex;
-//        in->inputByteOrder = kindex;
     #ifdef H5DEBUGIMPORT
         printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
     #endif
