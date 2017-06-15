@@ -383,9 +383,11 @@ TOOLTEST2 "/dataset0" binin8w.h5
 TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE "
 TOOLTEST $TESTDIR/textpfe64.txt -c $TESTDIR/textpfe.conf -o textpfe.h5
 
-TESTING "Binary Subset "
+TESTING "Binary Subset FP"
 TOOLTEST5 tall_fp32 tall.h5 "/g2/dset2.2" "--start=1,1 --stride=2,3 --count=1,2 --block=1,1"
+TESTING "Binary Subset INT"
 TOOLTEST5 tall_i32 tall.h5 "/g1/g1.1/dset1.1.1" "--start=1,1 --stride=2,3 --count=3,2 --block=1,1"
+TESTING "Binary Subset UINT"
 TOOLTEST5 tintsattrs_u32 tintsattrs.h5 "/DU32BITS" "--start=1,1 --stride=2,3 --count=3,2 --block=1,1"
 
 
