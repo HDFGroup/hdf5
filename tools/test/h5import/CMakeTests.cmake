@@ -47,6 +47,7 @@
       dtxtstr.h5.txt
       tall_fp32.ddl
       tall_i32.ddl
+      tintsattrs_u32.ddl
   )
   set (HDF5_REFERENCE_TEST_FILES
       binfp64.h5
