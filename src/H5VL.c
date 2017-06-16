@@ -29,9 +29,22 @@
 /* Headers */
 /***********/
 
-#include "H5private.h"          /* Generic Functions                                */
-#include "H5VLpkg.h"            /* Virtual Object Layer                             */
+#include "H5private.h"          /* Generic Functions                    */
+#include "H5Aprivate.h"         /* Attributes                           */
+#include "H5Eprivate.h"         /* Error handling                       */
+#include "H5Iprivate.h"         /* IDs                                  */
+#include "H5MMprivate.h"        /* Memory management                    */
+#include "H5PLprivate.h"        /* Plugins                              */
+#include "H5VLpkg.h"            /* Virtual Object Layer                 */
 
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /********************/
 /* Local Prototypes */
@@ -40,6 +53,10 @@
 /*********************/
 /* Package Variables */
 /*********************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
 
 /*******************/
 /* Local Variables */
