@@ -1395,6 +1395,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
                     case H5I_ATTR:
                     case H5I_REFERENCE:
                     case H5I_VFL:
+                    case H5I_VOL:
                     case H5I_GENPROP_CLS:
                     case H5I_GENPROP_LST:
                     case H5I_ERROR_CLASS:

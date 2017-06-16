@@ -1083,6 +1083,7 @@ H5Oclose(hid_t object_id)
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -2630,6 +2631,7 @@ H5O_get_loc(hid_t object_id)
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -2637,7 +2639,7 @@ H5O_get_loc(hid_t object_id)
         case H5I_ERROR_STACK:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, NULL, "invalid object type")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, NULL, "not a valid file object ID (dataset, group, or datatype)")
     } /* end switch */
 
 done:
