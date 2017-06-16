@@ -13,11 +13,6 @@
 
 #include "hdf5.h"
 #include "H5private.h"
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdint.h>
 #include "h5import.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
