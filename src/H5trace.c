@@ -36,6 +36,7 @@
 #include "H5FDprivate.h"    /* File drivers                             */
 #include "H5Ipkg.h"         /* IDs                                      */
 #include "H5MMprivate.h"    /* Memory management                        */
+#include "H5VLprivate.h"    /* Virtual Object Layer                     */
 
 #ifdef H5_HAVE_PARALLEL
 /* datatypes of predefined drivers needed by H5_trace() */
@@ -226,9 +227,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
          * name is the null pointer then don't print the argument or the
          * following `='.  This is used for return values.
          */
-        argname = va_arg(ap, char *); /*lint !e64 Type mismatch not really occuring */
+        argname = va_arg(ap, char *);
         if(argname) {
-            unsigned n = (unsigned)MAX (0, (int)HDstrlen(argname) - 3); /*lint !e666 Allow expression with side effects */
+            unsigned n = (unsigned)MAX (0, (int)HDstrlen(argname) - 3);
 
             if(!HDstrcmp(argname + n, "_id")) {
                 HDstrncpy(buf, argname, (size_t)MIN((int)sizeof(buf) - 1, n));
@@ -242,7 +243,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
         /* The value */
         if(ptr)
-            vp = va_arg(ap, void *); /*lint !e64 Type mismatch not really occuring */
+            vp = va_arg(ap, void *);
         switch(type[0]) {
             case 'a':
                 if(ptr) {
@@ -252,7 +253,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    haddr_t addr = va_arg(ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
+                    haddr_t addr = va_arg(ap, haddr_t);
 
                     HDfprintf(out, "%a", addr);
                 } /* end else */
@@ -811,9 +812,40 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5E_error2_t *error = va_arg(ap, H5E_error2_t *); /*lint !e64 Type mismatch not really occuring */
+                            H5E_error2_t *error = va_arg(ap, H5E_error2_t *);
 
                             fprintf(out, "0x%lx", (unsigned long)error);
+                        } /* end else */
+                        break;
+
+                    case 's':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5ES_status_t status = (H5ES_status_t)va_arg(ap, int);
+
+                            switch(status) {
+                                case H5ES_STATUS_IN_PROGRESS:
+                                    fprintf(out, "H5ES_STATUS_IN_PROGRESS");
+                                    break;
+                                case H5ES_STATUS_SUCCEED:
+                                    fprintf(out, "H5ES_STATUS_SUCCEED");
+                                    break;
+                                case H5ES_STATUS_FAIL:
+                                    fprintf(out, "H5ES_STATUS_FAIL");
+                                    break;
+                                case H5ES_STATUS_CANCEL:
+                                    fprintf(out, "H5ES_STATUS_CANCEL");
+                                    break;
+
+                                default:
+                                    fprintf(out, "%ld", (long)status);
+                                    break;
+                            } /* end switch */
                         } /* end else */
                         break;
 
@@ -1097,7 +1129,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5G_stat_t *statbuf = va_arg(ap, H5G_stat_t*); /*lint !e64 Type mismatch not really occuring */
+                            H5G_stat_t *statbuf = va_arg(ap, H5G_stat_t*);
 
                             fprintf(out, "0x%lx", (unsigned long)statbuf);
                         }
@@ -1131,7 +1163,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    hsize_t hsize = va_arg(ap, hsize_t); /*lint !e732 Loss of sign not really occuring */
+                    hsize_t hsize = va_arg(ap, hsize_t);
 
                     if(H5S_UNLIMITED == hsize)
                         HDfprintf(out, "H5S_UNLIMITED");
@@ -1565,7 +1597,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            unsigned iu = va_arg(ap, unsigned); /*lint !e732 Loss of sign not really occuring */
+                            unsigned iu = va_arg(ap, unsigned);
 
                             fprintf(out, "%u", iu);
                             asize[argno] = iu;
@@ -1809,7 +1841,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    hobj_ref_t ref = va_arg(ap, hobj_ref_t); /*lint !e732 Loss of sign not really occuring */
+                    hobj_ref_t ref = va_arg(ap, hobj_ref_t);
 
                     HDfprintf(out, "Reference Object=%a", ref);
                 } /* end else */
@@ -2007,7 +2039,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    const char *str = va_arg(ap, const char *); /*lint !e64 Type mismatch not really occuring */
+                    const char *str = va_arg(ap, const char *);
 
                     fprintf(out, "\"%s\"", str);
                 } /* end else */
@@ -2434,7 +2466,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            unsigned long iul = va_arg(ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
+                            unsigned long iul = va_arg(ap, unsigned long);
 
                             fprintf(out, "%lu", iul);
                             asize[argno] = (hssize_t)iul;
@@ -2458,7 +2490,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            unsigned long long iull = va_arg(ap, unsigned long long); /*lint !e732 Loss of sign not really occuring */
+                            unsigned long long iull = va_arg(ap, unsigned long long);
 
                             fprintf(out, "%llu", iull);
                             asize[argno] = (hssize_t)iull;
@@ -2467,6 +2499,418 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                     default:
                         fprintf (out, "BADTYPE(U%c)", type[1]);
+                        goto error;
+                } /* end switch */
+                break;
+
+            case 'V':
+                switch(type[1]) {
+                    case 'a':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_attr_get_t get = (H5VL_attr_get_t)va_arg(ap, int);
+
+                            switch(get) {
+                                case H5VL_ATTR_GET_SPACE:
+                                    fprintf(out, "H5VL_ATTR_GET_SPACE");
+                                    break;
+                                case H5VL_ATTR_GET_TYPE:
+                                    fprintf(out, "H5VL_ATTR_GET_TYPE");
+                                    break;
+                                case H5VL_ATTR_GET_ACPL:
+                                    fprintf(out, "H5VL_ATTR_GET_ACPL");
+                                    break;
+                                case H5VL_ATTR_GET_NAME:
+                                    fprintf(out, "H5VL_ATTR_GET_NAME");
+                                    break;
+                                case H5VL_ATTR_GET_STORAGE_SIZE:
+                                    fprintf(out, "H5VL_ATTR_GET_STORAGE_SIZE");
+                                    break;
+                                case H5VL_ATTR_GET_INFO:
+                                    fprintf(out, "H5VL_ATTR_GET_INFO");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)get);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'b':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_attr_specific_t specific = (H5VL_attr_specific_t)va_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_ATTR_DELETE:
+                                    fprintf(out, "H5VL_ATTR_DELETE");
+                                    break;
+                                case H5VL_ATTR_EXISTS:
+                                    fprintf(out, "H5VL_ATTR_EXISTS");
+                                    break;
+                                case H5VL_ATTR_ITER:
+                                    fprintf(out, "H5VL_ATTR_ITER");
+                                    break;
+                                case H5VL_ATTR_RENAME:
+                                    fprintf(out, "H5VL_ATTR_RENAME");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'c':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_dataset_get_t get = (H5VL_dataset_get_t)va_arg(ap, int);
+
+                            switch(get) {
+                                case H5VL_DATASET_GET_SPACE:
+                                    fprintf(out, "H5VL_DATASET_GET_SPACE");
+                                    break;
+                                case H5VL_DATASET_GET_SPACE_STATUS:
+                                    fprintf(out, "H5VL_DATASET_GET_SPACE_STATUS");
+                                    break;
+                                case H5VL_DATASET_GET_TYPE:
+                                    fprintf(out, "H5VL_DATASET_GET_TYPE");
+                                    break;
+                                case H5VL_DATASET_GET_DCPL:
+                                    fprintf(out, "H5VL_DATASET_GET_DCPL");
+                                    break;
+                                case H5VL_DATASET_GET_DAPL:
+                                    fprintf(out, "H5VL_DATASET_GET_DAPL");
+                                    break;
+                                case H5VL_DATASET_GET_STORAGE_SIZE:
+                                    fprintf(out, "H5VL_DATASET_GET_STORAGE_SIZE");
+                                    break;
+                                case H5VL_DATASET_GET_OFFSET:
+                                    fprintf(out, "H5VL_DATASET_GET_OFFSET");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)get);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'd':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_dataset_specific_t specific = (H5VL_dataset_specific_t)va_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_DATASET_SET_EXTENT:
+                                    fprintf(out, "H5VL_DATASET_SPECIFIC_SPACE");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'e':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_datatype_get_t get = (H5VL_datatype_get_t)va_arg(ap, int);
+
+                            switch(get) {
+                                case H5VL_DATATYPE_GET_BINARY:
+                                    fprintf(out, "H5VL_DATATYPE_GET_BINARY");
+                                    break;
+                                case H5VL_DATATYPE_GET_TCPL:
+                                    fprintf(out, "H5VL_DATATYPE_GET_TCPL");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)get);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'f':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_datatype_specific_t specific = (H5VL_datatype_specific_t)va_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_DATATYPE_SPECIFIC_INVALID:
+                                default:
+                                    fprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'g':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_file_get_t get = (H5VL_file_get_t)va_arg(ap, int);
+
+                            switch(get) {
+                                case H5VL_FILE_GET_FAPL:
+                                    fprintf(out, "H5VL_FILE_GET_FAPL");
+                                    break;
+                                case H5VL_FILE_GET_FCPL:
+                                    fprintf(out, "H5VL_FILE_GET_FCPL");
+                                    break;
+                                case H5VL_FILE_GET_INTENT:
+                                    fprintf(out, "H5VL_FILE_GET_INTENT");
+                                    break;
+                                case H5VL_FILE_GET_NAME:
+                                    fprintf(out, "H5VL_FILE_GET_NAME");
+                                    break;
+                                case H5VL_FILE_GET_OBJ_COUNT:
+                                    fprintf(out, "H5VL_FILE_GET_OBJ_COUNT");
+                                    break;
+                                case H5VL_FILE_GET_OBJ_IDS:
+                                    fprintf(out, "H5VL_FILE_GET_OBJ_IDS");
+                                    break;
+                                case H5VL_OBJECT_GET_FILE:
+                                    fprintf(out, "H5VL_OBJECT_GET_FILE");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)get);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'h':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_file_specific_t specific = (H5VL_file_specific_t)va_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_FILE_FLUSH:
+                                    fprintf(out, "H5VL_FILE_FLUSH");
+                                    break;
+                                case H5VL_FILE_MOUNT:
+                                    fprintf(out, "H5VL_FILE_MOUNT");
+                                    break;
+                                case H5VL_FILE_UNMOUNT:
+                                    fprintf(out, "H5VL_FILE_UNMOUNT");
+                                    break;
+                                case H5VL_FILE_IS_ACCESSIBLE:
+                                    fprintf(out, "H5VL_FILE_IS_ACCESSIBLE");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'i':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_group_get_t get = (H5VL_group_get_t)va_arg(ap, int);
+
+                            switch(get) {
+                                case H5VL_GROUP_GET_GCPL:
+                                    fprintf(out, "H5VL_GROUP_GET_GCPL");
+                                    break;
+                                case H5VL_GROUP_GET_INFO:
+                                    fprintf(out, "H5VL_GROUP_GET_INFO");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)get);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'j':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_group_specific_t specific = (H5VL_group_specific_t)va_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_GROUP_SPECIFIC_INVALID:
+                                default:
+                                    fprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'k':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_link_create_type_t create = (H5VL_link_create_type_t)va_arg(ap, int);
+
+                            switch(create) {
+                                case H5VL_LINK_CREATE_HARD:
+                                    fprintf(out, "H5VL_LINK_CREATE_HARD");
+                                    break;
+                                case H5VL_LINK_CREATE_SOFT:
+                                    fprintf(out, "H5VL_LINK_CREATE_SOFT");
+                                    break;
+                                case H5VL_LINK_CREATE_UD:
+                                    fprintf(out, "H5VL_LINK_CREATE_UD");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)create);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'l':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_link_get_t get = (H5VL_link_get_t)va_arg(ap, int);
+
+                            switch(get) {
+                                case H5VL_LINK_GET_INFO:
+                                    fprintf(out, "H5VL_LINK_GET_INFO");
+                                    break;
+                                case H5VL_LINK_GET_NAME:
+                                    fprintf(out, "H5VL_LINK_GET_NAME");
+                                    break;
+                                case H5VL_LINK_GET_VAL:
+                                    fprintf(out, "H5VL_LINK_GET_VAL");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)get);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'm':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_link_specific_t specific = (H5VL_link_specific_t)va_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_LINK_DELETE:
+                                    fprintf(out, "H5VL_LINK_DELETE");
+                                    break;
+                                case H5VL_LINK_EXISTS:
+                                    fprintf(out, "H5VL_LINK_EXISTS");
+                                    break;
+                                case H5VL_LINK_ITER:
+                                    fprintf(out, "H5VL_LINK_ITER");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'n':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_object_get_t get = (H5VL_object_get_t)va_arg(ap, int);
+
+                            switch(get) {
+                                case H5VL_REF_GET_REGION:
+                                    fprintf(out, "H5VL_REF_GET_REGION");
+                                    break;
+                                case H5VL_REF_GET_TYPE:
+                                    fprintf(out, "H5VL_REF_GET_TYPE");
+                                    break;
+                                case H5VL_REF_GET_NAME:
+                                    fprintf(out, "H5VL_REF_GET_NAME");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)get);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    case 'o':
+                        if(ptr) {
+                            if(vp)
+                                fprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_object_specific_t specific = (H5VL_object_specific_t)va_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_OBJECT_CHANGE_REF_COUNT:
+                                    fprintf(out, "H5VL_OBJECT_CHANGE_REF_COUNT");
+                                    break;
+                                case H5VL_OBJECT_EXISTS:
+                                    fprintf(out, "H5VL_OBJECT_EXISTS");
+                                    break;
+                                case H5VL_OBJECT_VISIT:
+                                    fprintf(out, "H5VL_OBJECT_VISIT");
+                                    break;
+                                case H5VL_REF_CREATE:
+                                    fprintf(out, "H5VL_REF_CREATE");
+                                    break;
+                                default:
+                                    fprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+                    default:
+                        fprintf(out, "BADTYPE(Z%c)", type[1]);
                         goto error;
                 } /* end switch */
                 break;
@@ -2492,7 +2936,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    vp = va_arg (ap, void *); /*lint !e64 Type mismatch not really occuring */
+                    vp = va_arg (ap, void *);
 
                     if(vp)
                         fprintf(out, "0x%lx", (unsigned long)vp);
@@ -2518,7 +2962,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    size_t size = va_arg(ap, size_t); /*lint !e732 Loss of sign not really occuring */
+                    size_t size = va_arg(ap, size_t);
 
                     HDfprintf(out, "%Zu", size);
                     asize[argno] = (hssize_t)size;
@@ -2565,7 +3009,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5Z_class2_t *filter = va_arg(ap, H5Z_class2_t*); /*lint !e64 Type mismatch not really occuring */
+                            H5Z_class2_t *filter = va_arg(ap, H5Z_class2_t*);
 
                             fprintf(out, "0x%lx", (unsigned long)filter);
                         } /* end else */

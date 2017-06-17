@@ -82,13 +82,11 @@ static const H5I_class_t H5I_VOL_CLS[1] = {{
 /*-------------------------------------------------------------------------
  * Function:    H5VL_init
  *
- * Purpose:     Initialize the interface from some other package.
+ * Purpose:     Initialize the interface from some other package
  *
- * Return:      Success:    non-negative
- *              Failure:    negative
+ * Return:      Success:    Non-negative
  *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -112,10 +110,8 @@ done:
  * Purpose:     Initialize interface-specific information
  *
  * Return:      Success:    Non-negative
- *              Failure:    Negative
  *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -141,10 +137,8 @@ done:
  * Purpose:     Terminate various H5VL objects
  *
  * Return:      Success:    Non-negative
- *              Failure:    Negative
  *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -176,18 +170,16 @@ H5VL_term_package(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_free_cls
+ * Function:    H5VL_free_cls
  *
- * Purpose:	Frees a file vol class struct and returns an indication of
- *		success. This function is used as the free callback for the
- *		virtual object layer object identifiers (cf H5VL_init_interface).
+ * Purpose:     Frees a file VOL class struct and returns an indication of
+ *              success. This function is used as the free callback for the
+ *              virtual object layer object identifiers
+ *              (c.f.: H5VL_init_interface).
  *
- * Return:	Success:	Non-negative
+ * Return:      Success:    Non-negative
  *
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *              January, 2012
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
