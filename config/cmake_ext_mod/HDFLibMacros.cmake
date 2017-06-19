@@ -8,7 +8,7 @@
 # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
-
+#
 #-------------------------------------------------------------------------------
 macro (EXTERNAL_JPEG_LIBRARY compress_type jpeg_pic)
   # May need to build JPEG with PIC on x64 machines with gcc

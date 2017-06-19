@@ -8,7 +8,7 @@
 # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
-
+#
 #
 # Check if the type exists and determine size of type.  if the type
 # exists, the size will be stored to the variable.

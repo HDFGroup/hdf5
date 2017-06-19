@@ -9,7 +9,6 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #ifdef H5_LDOUBLE_TO_LONG_SPECIAL_TEST
 
 #include <string.h>
