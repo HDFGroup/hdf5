@@ -46,6 +46,11 @@
 /* Local Typedefs */
 /******************/
 
+typedef struct {
+    const char *name;
+    hid_t ret_id;
+} H5VL_get_plugin_ud_t;
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -61,6 +66,36 @@
 /*******************/
 /* Local Variables */
 /*******************/
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__get_plugin_cb
+ *
+ * Purpose:     Callback routine to search through registered VOLs
+ *
+ * Return:      Success:    H5_ITER_STOP if the class and op_data name
+ *                          members match. H5_ITER_CONT otherwise.
+ *
+ *              Failure:    Can't fail
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
+{
+    H5VL_get_plugin_ud_t *op_data = (H5VL_get_plugin_ud_t *)_op_data; /* User data for callback */
+    H5VL_class_t *cls = (H5VL_class_t *)obj;
+    int ret_value = H5_ITER_CONT;     /* Callback return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    if(0 == HDstrcmp(cls->name, op_data->name)) {
+        op_data->ret_id = id;
+        ret_value = H5_ITER_STOP;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__get_plugin_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -80,12 +115,35 @@
 hid_t
 H5VLregister(const H5VL_class_t *cls)
 {
+    H5VL_get_plugin_ud_t op_data;
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "*x", cls);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    /* Check arguments */
+    if(!cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "null class pointer is disallowed")
+
+    if(cls->value < H5_VOL_MAX_LIB_VALUE)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "registered class value must not be smaller than %d", H5_VOL_MAX_LIB_VALUE)
+
+    if(!cls->name)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "invalid VOL class name");
+
+    op_data.ret_id = FAIL;
+    op_data.name = cls->name;
+
+    /* check if plugin is already registered */
+    if(H5I_iterate(H5I_VOL, H5VL__get_plugin_cb, &op_data, TRUE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER,FAIL, "can't iterate over VOL ids")
+
+    if(op_data.ret_id != FAIL)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "VOL plugin with the same name is already registered.")
+
+    /* Create the new class ID */
+    if((ret_value = H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register vol plugin ID")
 
 done:
     FUNC_LEAVE_API(ret_value)

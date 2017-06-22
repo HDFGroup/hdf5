@@ -36,6 +36,7 @@
 /******************************/
 
 H5_DLL herr_t H5VL_init(void);
+H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
 
 #endif /* _H5VLprivate_H */
 

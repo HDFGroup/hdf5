@@ -205,3 +205,46 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_free_cls() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_register
+ *
+ * Purpose:     Registers a new vol plugin as a member of the virtual object
+ *              layer class.
+ *
+ * Return:      Success:    A vol plugin ID which is good until the
+ *                          library is closed or the driver is unregistered.
+ *
+ *              Failure:    A negative value.
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VL_register(const void *_cls, size_t size, hbool_t app_ref)
+{
+    const H5VL_class_t	*cls = (const H5VL_class_t *)_cls;
+    H5VL_class_t	*saved = NULL;
+    hid_t		ret_value = -1;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments */
+    HDassert(cls);
+
+    /* Copy the class structure so the caller can reuse or free it */
+    if(NULL == (saved = (H5VL_class_t *)H5MM_calloc(size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for vol plugin class struct")
+    HDmemcpy(saved, cls, size);
+
+    /* Create the new class ID */
+    if((ret_value = H5I_register(H5I_VOL, saved, app_ref)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register vol plugin ID")
+
+done:
+    if(ret_value < 0)
+        if(saved)
+            H5MM_xfree(saved);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_register() */
+
