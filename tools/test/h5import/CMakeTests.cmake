@@ -171,7 +171,7 @@
             NAME H5IMPORT-DUMP-${testname}-H5DMP
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-                -D "TEST_ARGS:STRING=-p;-d;${datasetname};-o;d${testfile}.bin;-b;FILE;testfiles/${testfile}"
+                -D "TEST_ARGS:STRING=-p;-d;${datasetname};-o;d${testfile}.bin;-b;NATIVE;testfiles/${testfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=d${testfile}.dmp"
                 -D "TEST_EXPECT=0"
@@ -244,7 +244,7 @@
           NAME H5IMPORT_SUB-DUMP-${testname}-H5DMP
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=-p;-d;${datasetname};${ARGN};-o;${testname}.bin;-b;FILE;testfiles/${testfile}"
+              -D "TEST_ARGS:STRING=-p;-d;${datasetname};${ARGN};-o;${testname}.bin;-b;NATIVE;testfiles/${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${testname}.dmp"
               -D "TEST_EXPECT=0"

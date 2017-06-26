@@ -83,6 +83,7 @@ struct Input
     struct path_info path;
     int inputClass;
     int inputSize;
+    int inputArchitecture;
     int inputByteOrder;
     int rank;
     hsize_t* sizeOfDimension;

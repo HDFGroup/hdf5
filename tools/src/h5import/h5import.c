@@ -524,9 +524,11 @@ static int readIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+/*
                 if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in16 = swap_int16(temp16);
                 else
+*/
                     *in16 = temp16;
 #ifdef H5DEBUGIMPORT
                 printf("readIntegerData %d (0x%.8X)\n", *in16, temp16);
@@ -558,9 +560,11 @@ static int readIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+/*
                 if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in32 = swap_int32(temp32);
                 else
+*/
                     *in32 = temp32;
 #ifdef H5DEBUGIMPORT
                 printf("readIntegerData %d (0x%.8X = 0x%.8X)\n", *in32, *in32, temp32);
@@ -594,9 +598,11 @@ static int readIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+/*
                 if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in64 = swap_int64(temp64);
                 else
+*/
                     *in64 = temp64;
 #ifdef H5DEBUGIMPORT
                 printf("readIntegerData %d (0x%.8X)\n", *in64, temp64);
@@ -688,9 +694,11 @@ static int readUIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+/*
                 if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in16 = swap_uint16(temp16);
                 else
+*/
                     *in16 = temp16;
 #ifdef H5DEBUGIMPORT
                 printf("readUIntegerData %d (0x%.4X = 0x%.4X)\n", *in16, *in16, temp16);
@@ -722,9 +730,11 @@ static int readUIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+/*
                 if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in32 = swap_uint32(temp32);
                 else
+*/
                     *in32 = temp32;
 #ifdef H5DEBUGIMPORT
                 printf("readUIntegerData %d (0x%.8X = 0x%.8X)\n", *in32, *in32, temp32);
@@ -758,9 +768,11 @@ static int readUIntegerData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+/*
                 if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *in64 = swap_uint64(temp64);
                 else
+*/
                     *in64 = temp64;
 #ifdef H5DEBUGIMPORT
                 printf("readUIntegerData %ld (0x%.8X = 0x%.8X)\n", *in64, *in64, temp64);
@@ -836,9 +848,11 @@ static int readFloatData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+/*
                 if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *bfp32 = swap_uint32(temp32);
                 else
+*/
                     *bfp32 = temp32;
 #ifdef H5DEBUGIMPORT
                 printf("readFloatData %ld (0x%.8X = 0x%.8X)\n", *bfp32, *bfp32, temp32);
@@ -886,9 +900,11 @@ static int readFloatData(FILE *strm, struct Input *in)
                     (void) HDfprintf(stderr, "%s", err1);
                     return (-1);
                 }
+/*
                 if (in-> h5dumpInput && (in->inputByteOrder != in->outputByteOrder))
                     *bfp64 = swap_uint64(temp64);
                 else
+*/
                     *bfp64 = temp64;
 #ifdef H5DEBUGIMPORT
                 printf("readFloatData %ld (0x%.16lX)\n", *bfp64, temp64);
@@ -1423,6 +1439,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
     printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
 #endif
+    in->inputArchitecture = 0; /* default to NATIVE */
 
     if ((strm = HDfopen(infile, "r")) == NULL) {
         (void) HDfprintf(stderr, err1, infile);
@@ -2110,6 +2127,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
         printf("\n");
         printf("h5dump inputClass=%d\n", in->inputClass);
         printf("h5dump inputSize=%d\n", in->inputSize);
+        printf("h5dump inputArchitecture=%d\n", in->inputArchitecture);
         printf("h5dump inputByteOrder=%d\n", in->inputByteOrder);
         printf("h5dump rank=%d\n", in->rank);
         printf("h5dump outputClass=%d\n", in->outputClass);
@@ -4107,8 +4125,8 @@ hid_t createInputDataType(struct Input *in)
     if (in->h5dumpInput) {
         switch (in->inputClass) {
         case 4:
-            switch (in->outputArchitecture) {
-            case 0: /* NATIVE */
+            switch (in->inputArchitecture) {
+            case 0:  /*NATIVE*/
                 switch (in->inputSize) {
                 case 8:
                     new_type = H5Tcopy(H5T_NATIVE_CHAR);
@@ -4147,7 +4165,7 @@ hid_t createInputDataType(struct Input *in)
                 }
                 break;
 
-            case 1: /* STD */
+            case 1:  /*STD*/
                 switch (in->inputSize) {
                 case 8:
                     switch (in->inputByteOrder) {
@@ -4230,7 +4248,7 @@ hid_t createInputDataType(struct Input *in)
             break;
 
         case 3:
-            switch (in->outputArchitecture) {
+            switch (in->inputArchitecture) {
             case 0:
                 switch (in->inputSize) {
                 case 32:
@@ -4315,7 +4333,7 @@ hid_t createInputDataType(struct Input *in)
             break;
 
         case 7:
-            switch (in->outputArchitecture) {
+            switch (in->inputArchitecture) {
             case 0:
                 switch (in->inputSize) {
                 case 8:
