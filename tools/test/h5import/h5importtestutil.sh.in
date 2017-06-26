@@ -204,7 +204,7 @@ fi
 TOOLTEST2()
 {
 err=0
-$RUNSERIAL $DUMPER_BIN -p -d $1 -o d$2.bin -b FILE tmp_testfiles/$2 > d$2.dmp
+$RUNSERIAL $DUMPER_BIN -p -d $1 -o d$2.bin -b NATIVE tmp_testfiles/$2 > d$2.dmp
 $RUNSERIAL $H5IMPORT_BIN d$2.bin -c d$2.dmp -o d$2 > d$2.imp
 $RUNSERIAL $H5DIFF_BIN -v d$2 tmp_testfiles/$2 $1 $1 > log2
 $CP -f $SRC_H5IMPORT_TESTFILES/d$2.txt log1
