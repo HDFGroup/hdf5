@@ -243,21 +243,23 @@
 #
 # ::
 #
-#  install_jar_exports(TARGETS jar1 [jar2 ...]
-#                      FILE export_filename
-#                      DESTINATION destination [COMPONENT component])
+#  install_jar_exports(TARGETS jars...
+#                      [NAMESPACE <namespace>]
+#                      FILE <filename>
+#                      DESTINATION <dir> [COMPONENT <component>])
 #
-# This command installs a target export file export_filename for the named jar
-# targets to the given DESTINATION. Its function is similar to that of
-# install(EXPORTS).
+# This command installs a target export file ``<filename>`` for the named jar
+# targets to the given ``DESTINATION``. Its function is similar to that of
+# :command:`install(EXPORTS ...)`.
 #
 # ::
 #
-#  export_jars(TARGETS jar1 [jar2 ...]
-#              FILE export_filename)
+#  export_jars(TARGETS jars...
+#              [NAMESPACE <namespace>]
+#              FILE <filename>)
 #
-# This command writes a target export file export_filename for the named jar
-# targets. Its function is similar to that of export().
+# This command writes a target export file ``<filename>`` for the named jar
+# targets. Its function is similar to that of :command:`export(...)`.
 #
 # ::
 #
@@ -425,10 +427,12 @@ endfunction()
 function(__java_export_jar VAR TARGET PATH)
     get_target_property(_jarpath ${TARGET} JAR_FILE)
     get_filename_component(_jarname ${_jarpath} NAME)
+    set(_target "${_jar_NAMESPACE}${TARGET}")
     __java_lcat(${VAR}
-      "# Create imported target ${TARGET}"
-      "add_custom_target(${TARGET})"
-      "set_target_properties(${TARGET} PROPERTIES"
+      "# Create imported target ${_target}"
+      "add_library(${_target} IMPORTED STATIC)"
+      "set_target_properties(${_target} PROPERTIES"
+      "  IMPORTED_LOCATION \"${PATH}/${_jarname}\""
       "  JAR_FILE \"${PATH}/${_jarname}\")"
       ""
     )
@@ -1402,7 +1406,7 @@ function(export_jars)
     # Parse and validate arguments
     cmake_parse_arguments(_export_jars
       ""
-      "FILE"
+      "FILE;NAMESPACE"
       "TARGETS"
       ${ARGN}
     )
@@ -1412,6 +1416,7 @@ function(export_jars)
     if (NOT _export_jars_TARGETS)
       message(SEND_ERROR "export_jars: TARGETS must be specified.")
     endif()
+    set(_jar_NAMESPACE "${_export_jars_NAMESPACE}")
 
     # Set content of generated exports file
     string(REPLACE ";" " " __targets__ "${_export_jars_TARGETS}")
@@ -1434,7 +1439,7 @@ function(install_jar_exports)
     # Parse and validate arguments
     cmake_parse_arguments(_install_jar_exports
       ""
-      "FILE;DESTINATION;COMPONENT"
+      "FILE;DESTINATION;COMPONENT;NAMESPACE"
       "TARGETS"
       ${ARGN}
     )
@@ -1447,6 +1452,7 @@ function(install_jar_exports)
     if (NOT _install_jar_exports_TARGETS)
       message(SEND_ERROR "install_jar_exports: TARGETS must be specified.")
     endif()
+    set(_jar_NAMESPACE "${_install_jar_exports_NAMESPACE}")
 
     if (_install_jar_exports_COMPONENT)
       set (_COMPONENT COMPONENT ${_install_jar_exports_COMPONENT})
