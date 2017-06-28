@@ -1941,26 +1941,17 @@ AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
                    [Width for printf() for type `long long' or `__int64', use `ll'])
 
 ## ----------------------------------------------------------------------
-## Deprecate old ways of determining debug/production build
-## These can probably be removed in the future (1.10.1?)
+## Remove old ways of determining debug/production build.
+## These were used in 1.8.x and earlier. We should probably keep these checks
+## around to help people migrate to 1.10.x and newer versions.
 ##
 AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug],
-               [DEPRECATED: use --enable-build-mode=debug])],
-              [DEPRECATED_DEBUG=$enableval])
-
-if test "X-$DEPRECATED_DEBUG" != "X-" ; then
-    AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])
-fi
+              [AS_HELP_STRING([--enable-debug], [DEPRECATED: use --enable-build-mode=debug])],
+              [AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])])
 
 AC_ARG_ENABLE([production],
-              [AS_HELP_STRING([--enable-production],
-               [DEPRECATED: use --enable-build-mode=production])],
-              [DEPRECATED_PRODUCTION=$enableval])
-
-if test "X-$DEPRECATED_PRODUCTION" != "X-" ; then
-    AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])
-fi
+              [AS_HELP_STRING([--enable-production], [DEPRECATED: use --enable-build-mode=production])],
+              [AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])])
 
 
 ## ----------------------------------------------------------------------
