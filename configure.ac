@@ -3352,6 +3352,14 @@ fi
 ##
 AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 
+## The H5 flags go through multiple rounds of processing, which can introduce
+## extra whitespace. Trim this for nicer output in the settings file.
+H5_LDFLAGS=$(echo "$H5_LDFLAGS" | awk '$1=$1')
+H5_CPPFLAGS=$(echo "$H5_CPPFLAGS" | awk '$1=$1')
+H5_CFLAGS=$(echo "$H5_CFLAGS" | awk '$1=$1')
+H5_FCFLAGS=$(echo "$H5_FCFLAGS" | awk '$1=$1')
+H5_CXXFLAGS=$(echo "$H5_CXXFLAGS" | awk '$1=$1')
+
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
                  src/Makefile
