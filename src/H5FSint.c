@@ -77,6 +77,32 @@
 /*******************/
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5FS_init
+ *
+ * Purpose:     Initialize the interface in case it is unable to initialize
+ *              itself soon enough.
+ *
+ * Return:      Success:    non-negative
+ *              Failure:    negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, March 4, 2000
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FS_init() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FS__create_flush_depend
