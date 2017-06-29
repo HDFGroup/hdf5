@@ -4670,7 +4670,7 @@ typedef struct H5C_tag_info_t {
  * get_entry_ptr_from_addr_counter: Counter used to track the number of
  *              times the H5C_get_entry_ptr_from_addr() function has been
  *              called successfully.  This field is only defined when
- *              NDEBUG is not #defined.
+ *              H5_DEBUG_BUILD is #defined.
  *
  ****************************************************************************/
 struct H5C_t {
@@ -4903,9 +4903,9 @@ struct H5C_t {
 
     char			prefix[H5C__PREFIX_LEN];
 
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
     int64_t                     get_entry_ptr_from_addr_counter;
-#endif /* NDEBUG */
+#endif /* H5_DEBUG_BUILD */
 };
 
 /* Define typedef for tagged cache entry iteration callbacks */

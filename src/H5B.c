@@ -991,14 +991,8 @@ H5B__insert_helper(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "internal error: likely corrupt key values")
 #endif /* H5_STRICT_FORMAT_CHECKS */
     } else if(cmp) {
-	/*
-	 * We couldn't figure out which branch to follow out of this node. THIS
-	 * IS A MAJOR PROBLEM THAT NEEDS TO BE FIXED --rpm.
-	 */
-	HDassert("INTERNAL HDF5 ERROR (contact rpm)" && 0);
-#ifdef NDEBUG
-	HDabort();
-#endif /* NDEBUG */
+        /* We couldn't determine which branch to follow out of this node. */
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "unable to find a way out of this node")
     } else if(bt->level > 0) {
 	/*
 	 * Follow a branch out of this node to another subtree.

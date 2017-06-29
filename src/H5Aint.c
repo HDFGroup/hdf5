@@ -314,7 +314,7 @@ H5A__open_common(const H5G_loc_t *loc, H5A_t *attr)
     HDassert(loc);
     HDassert(attr);
 
-#if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
+#if defined(H5_USING_MEMCHECKER) || defined(H5_DEBUG_BUILD)
     /* Clear object location */
     if(H5O_loc_reset(&(attr->oloc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
@@ -1710,10 +1710,7 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
                 break;
 
             default:
-                HDassert("unknown attribute op type" && 0);
-#ifdef NDEBUG
                 HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unsupported attribute op type")
-#endif /* NDEBUG */
         } /* end switch */
 
         /* Increment the number of entries passed through */

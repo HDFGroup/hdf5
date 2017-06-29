@@ -127,7 +127,7 @@ H5O_add_gap(H5F_t *f, H5O_t *oh, unsigned chunkno, hbool_t *chk_dirtied,
     HDassert(new_gap_loc);
     HDassert(new_gap_size);
 
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
 if(chunkno > 0) {
     unsigned chk_proxy_status = 0;         /* Object header chunk proxy entry cache status */
 
@@ -136,9 +136,10 @@ if(chunkno > 0) {
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check metadata cache status for object header chunk proxy")
 
     /* Make certain that object header is protected */
-    HDassert(chk_proxy_status & H5AC_ES__IS_PROTECTED);
+    if(!(chk_proxy_status & H5AC_ES__IS_PROTECTED))
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "chunk proxy is not protected")
 } /* end if */
-#endif /* NDEBUG */
+#endif /* H5_DEBUG_BUILD */
 
     /* Check for existing null message in chunk */
     merged_with_null = FALSE;

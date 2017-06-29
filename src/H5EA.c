@@ -877,7 +877,7 @@ H5EA_close(H5EA_t *ea, hid_t dxpl_id))
         if(pending_delete) {
             H5EA_hdr_t *hdr;            /* Another pointer to extensible array header */
 
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
 {
     unsigned hdr_status = 0;         /* Header's status in the metadata cache */
 
@@ -886,11 +886,14 @@ H5EA_close(H5EA_t *ea, hid_t dxpl_id))
         H5E_THROW(H5E_CANTGET, "unable to check metadata cache status for extensible array header")
 
     /* Sanity checks on header */
-    HDassert(hdr_status & H5AC_ES__IN_CACHE);
-    HDassert(hdr_status & H5AC_ES__IS_PINNED);
-    HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
+    if(!(hdr_status & H5AC_ES__IN_CACHE))
+        H5E_THROW(H5E_BADVALUE, "extensible array header not in cache")
+    if(!(hdr_status & H5AC_ES__IS_PINNED))
+        H5E_THROW(H5E_BADVALUE, "extensible array header not pinned")
+    if(hdr_status & H5AC_ES__IS_PROTECTED)
+        H5E_THROW(H5E_BADVALUE, "extensible array header is incorrectly protected")
 }
-#endif /* NDEBUG */
+#endif /* H5_DEBUG_BUILD */
 
             /* Lock the array header into memory */
             /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
