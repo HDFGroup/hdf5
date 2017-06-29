@@ -171,11 +171,11 @@
 #define H5O_DECODEIO_DIRTY              0x02u   /* OUT: message has been changed */
 
 /* Macro to incremend ndecode_dirtied (only if we are debugging) */
-#ifdef H5_DEBUG_BUILD
+#ifndef NDEBUG
 #define INCR_NDECODE_DIRTIED(OH) (OH)->ndecode_dirtied++;
-#else /* H5_DEBUG_BUILD */
+#else /* NDEBUG */
 #define INCR_NDECODE_DIRTIED(OH) ;
-#endif /* H5_DEBUG_BUILD */
+#endif /* NDEBUG */
 
 /* Load native information for a message, if it's not already present */
 /* (Only works for messages with decode callback) */
@@ -193,11 +193,11 @@
         if((ioflags & H5O_DECODEIO_DIRTY) && (H5F_get_intent((F)) & H5F_ACC_RDWR)) { \
             (MSG)->dirty = TRUE;                                              \
             /* Increment the count of messages dirtied by decoding, but */    \
-            /* only debugging */                                              \
+            /* only ifndef NDEBUG */                                          \
             INCR_NDECODE_DIRTIED(OH)                                          \
         }                                                                     \
                                                                               \
-        /* Set the message's "shared info", if it's shareable */	          \
+        /* Set the message's "shared info", if it's shareable */	      \
         if((MSG)->flags & H5O_MSG_FLAG_SHAREABLE) {                           \
             HDassert(msg_type->share_flags & H5O_SHARE_IS_SHARABLE);          \
             H5O_UPDATE_SHARED((H5O_shared_t *)(MSG)->native, H5O_SHARE_TYPE_HERE, (F), msg_type->id, (MSG)->crt_idx, (OH)->chunk[0].addr) \
@@ -292,9 +292,9 @@ struct H5O_t {
                                          *      versions of the library)
                                          */
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
-#ifdef H5_DEBUG_BUILD
+#ifndef NDEBUG
     size_t      ndecode_dirtied;        /* Number of messages dirtied by decoding */
-#endif /* H5_DEBUG_BUILD */
+#endif /* NDEBUG */
 
     /* Chunk management information (not stored) */
     size_t      rc;                     /* Reference count of [continuation] chunks using this structure */

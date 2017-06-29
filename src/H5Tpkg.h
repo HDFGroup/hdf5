@@ -26,6 +26,13 @@
 #ifndef _H5Tpkg_H
 #define _H5Tpkg_H
 
+/*
+ * Define this to enable debugging.
+ */
+#ifdef NDEBUG
+#  undef H5T_DEBUG
+#endif
+
 /* Get package's private header */
 #include "H5Tprivate.h"
 

@@ -207,20 +207,20 @@
 #define H5C__UPDATE_PAGE_BUFFER_FLAG            0x40000 /* Set during parallel I/O */
 
 /* Debugging/sanity checking/statistics settings */
-#ifdef H5_DEBUG_BUILD
+#ifndef NDEBUG
 #define H5C_DO_SANITY_CHECKS		1
 #define H5C_DO_SLIST_SANITY_CHECKS	0
 #define H5C_DO_TAGGING_SANITY_CHECKS	1
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
-#else /* H5_DEBUG_BUILD */
+#else /* NDEBUG */
 /* With rare execptions, the following defines should be set 
- * to 0 if not using a debug build. 
+ * to 0 if NDEBUG is defined 
  */
 #define H5C_DO_SANITY_CHECKS		0
 #define H5C_DO_SLIST_SANITY_CHECKS	0
 #define H5C_DO_TAGGING_SANITY_CHECKS	0
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
-#endif /* H5_DEBUG_BUILD */
+#endif /* NDEBUG */
 
 /* Cork actions: cork/uncork/get cork status of an object */
 #define H5C__SET_CORK                  0x1
@@ -242,11 +242,11 @@
  * debug mode, and 0 in production mode..
  */
 
-#ifdef H5_DEBUG_BUILD
+#ifndef NDEBUG
 #define H5C_COLLECT_CACHE_STATS	1
-#else /* H5_DEBUG_BUILD */
+#else /* NDEBUG */
 #define H5C_COLLECT_CACHE_STATS	0
-#endif /* H5_DEBUG_BUILD */
+#endif /* NDEBUG */
 
 /* H5C_COLLECT_CACHE_ENTRY_STATS controls collection of statistics
  * in individual cache entries.
@@ -1561,7 +1561,7 @@ typedef int H5C_ring_t;
  *		a single cache serialization.
  *
  *		This is a debugging field, and thus is maintained only if 
- *		H5_DEBUG_BUILD is defined.
+ *		NDEBUG is undefined.
  *
  * Fields supporting tagged entries:
  *
@@ -1671,9 +1671,9 @@ typedef struct H5C_cache_entry_t {
     int32_t                     age;
     hbool_t			prefetched_dirty;
 
-#ifdef H5_DEBUG_BUILD	/* debugging field */
+#ifndef NDEBUG	/* debugging field */
     int                         serialization_count;
-#endif /* H5_DEBUG_BUILD */
+#endif /* NDEBUG */
 
     /* fields supporting tag lists */
     struct H5C_cache_entry_t   *tl_next;
@@ -2337,7 +2337,7 @@ H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, unsigned ce_arr
     haddr_t *ce_array_ptr);
 #endif /* H5_HAVE_PARALLEL */
 
-#ifdef H5_DEBUG_BUILD	/* debugging functions */
+#ifndef NDEBUG	/* debugging functions */
 H5_DLL herr_t H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL herr_t H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL hbool_t H5C_get_serialization_in_progress(const H5C_t *cache_ptr);
@@ -2354,7 +2354,7 @@ H5_DLL herr_t H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr,
     const H5C_class_t *expected_type, hbool_t *in_cache_ptr,
     hbool_t *type_ok_ptr);
 H5_DLL herr_t H5C_validate_index_list(H5C_t *cache_ptr);
-#endif /* H5_DEBUG_BUILD */
+#endif /* NDEBUG */
 
 /* FULLSWMR typedef for cache entry iteration callback */
 typedef int (*H5AC_cache_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
