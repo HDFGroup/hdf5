@@ -1941,26 +1941,17 @@ AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
                    [Width for printf() for type `long long' or `__int64', use `ll'])
 
 ## ----------------------------------------------------------------------
-## Deprecate old ways of determining debug/production build
-## These can probably be removed in the future (1.10.1?)
+## Remove old ways of determining debug/production build.
+## These were used in 1.8.x and earlier. We should probably keep these checks
+## around to help people migrate to 1.10.x and newer versions.
 ##
 AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug],
-               [DEPRECATED: use --enable-build-mode=debug])],
-              [DEPRECATED_DEBUG=$enableval])
-
-if test "X-$DEPRECATED_DEBUG" != "X-" ; then
-    AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])
-fi
+              [AS_HELP_STRING([--enable-debug], [DEPRECATED: use --enable-build-mode=debug])],
+              [AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])])
 
 AC_ARG_ENABLE([production],
-              [AS_HELP_STRING([--enable-production],
-               [DEPRECATED: use --enable-build-mode=production])],
-              [DEPRECATED_PRODUCTION=$enableval])
-
-if test "X-$DEPRECATED_PRODUCTION" != "X-" ; then
-    AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])
-fi
+              [AS_HELP_STRING([--enable-production], [DEPRECATED: use --enable-build-mode=production])],
+              [AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])])
 
 
 ## ----------------------------------------------------------------------
@@ -3351,6 +3342,14 @@ fi
 ## Set a macro if shared library is enabled.
 ##
 AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
+
+## The H5 flags go through multiple rounds of processing, which can introduce
+## extra whitespace. Trim this for nicer output in the settings file.
+H5_LDFLAGS=$(echo "$H5_LDFLAGS" | awk '$1=$1')
+H5_CPPFLAGS=$(echo "$H5_CPPFLAGS" | awk '$1=$1')
+H5_CFLAGS=$(echo "$H5_CFLAGS" | awk '$1=$1')
+H5_FCFLAGS=$(echo "$H5_FCFLAGS" | awk '$1=$1')
+H5_CXXFLAGS=$(echo "$H5_CXXFLAGS" | awk '$1=$1')
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
