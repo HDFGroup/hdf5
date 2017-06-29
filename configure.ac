@@ -585,11 +585,11 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])
   fi
 
-  if  test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
+  if test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_C_SIZEOF], [1], [Define if we have Fortran intrinsic C_SIZEOF])
   fi
 
-  if  test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
+  if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
   fi
 
@@ -604,7 +604,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## Is C_LONG_DOUBLE different from C_DOUBLE
   FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
-  if test "X$FORTRAN_HAVE_C_LONG_DOUBLE"; then
+  if test "$FORTRAN_HAVE_C_LONG_DOUBLE" = "1"; then
     PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
     if test "X$C_LONG_DOUBLE_IS_UNIQUE_FORTRAN" = "Xyes"; then
       FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="1"
