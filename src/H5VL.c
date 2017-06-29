@@ -196,12 +196,22 @@ done:
 herr_t
 H5VLunregister(hid_t vol_id)
 {
+    H5VL_class_t *cls = NULL;
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", vol_id);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    /* Check arguments */
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(vol_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol plugin")
+
+    if(cls->value <= H5_VOL_MAX_LIB_VALUE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't unregister an internal plugin")
+
+    /* The H5VL_class_t struct will be freed by this function */
+    if(H5I_dec_app_ref(vol_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to unregister vol plugin")
 
 done:
     FUNC_LEAVE_API(ret_value)
