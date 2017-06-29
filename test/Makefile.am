@@ -104,7 +104,11 @@ noinst_LTLIBRARIES=libh5test.la
 if HAVE_SHARED_CONDITIONAL
   # The libdynlib1, libdynlib2, libdynlib3, and libdynlib4 library for testing plugin module plugin.c.
   # Build it as shared library if configure is enabled for shared library.
-  dyn_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
+  #
+  # null_vol is used for testing VOL plugin functionality.
+  dyn_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la null_vol.la
+
+  # Filter plugin test libraries
   libdynlib1_la_SOURCES=dynlib1.c
   libdynlib2_la_SOURCES=dynlib2.c
   libdynlib3_la_SOURCES=dynlib3.c
@@ -125,6 +129,13 @@ libdynlib3.la: $(libdynlib3_la_OBJECTS) $(libdynlib3_la_DEPENDENCIES) $(EXTRA_li
 
 libdynlib4.la: $(libdynlib4_la_OBJECTS) $(libdynlib4_la_DEPENDENCIES) $(EXTRA_libdynlib4_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libdynlib4_la_LINK) $(am_libdynlib4_la_rpath) $(libdynlib4_la_OBJECTS) $(libdynlib4_la_LIBADD) 
+
+  # VOL plugin test libraries
+  null_vol_la_SOURCES=null_vol.c
+  null_vol_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+
+null_vol.la: $(null_vol_la_OBJECTS) $(null_vol_la_DEPENDENCIES) $(EXTRA_null_vol_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(null_vol_la_LINK) $(am_null_vol_la_rpath) $(nul_vol_la_OBJECTS) $(null_vol_la_LIBADD)
 
 #install-exec-hook:
 #	$(RM) $(DESTDIR)$(dyndir)/*dynlib*

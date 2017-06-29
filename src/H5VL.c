@@ -125,8 +125,8 @@ H5VLregister(const H5VL_class_t *cls)
     if(!cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "null class pointer is disallowed")
 
-    if(cls->value < H5_VOL_MAX_LIB_VALUE)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "registered class value must not be smaller than %d", H5_VOL_MAX_LIB_VALUE)
+    if(cls->value <= UINT_MAX)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "registered class value must not be larger than %u", UINT_MAX)
 
     if(!cls->name)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "invalid VOL class name");
@@ -205,9 +205,6 @@ H5VLunregister(hid_t vol_id)
     /* Check arguments */
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(vol_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol plugin")
-
-    if(cls->value <= H5_VOL_MAX_LIB_VALUE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't unregister an internal plugin")
 
     /* The H5VL_class_t struct will be freed by this function */
     if(H5I_dec_app_ref(vol_id) < 0)
