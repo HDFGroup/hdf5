@@ -1559,20 +1559,20 @@ extern char *strdup(const char *s);
 /*
  * A macro for detecting over/under-flow when casting between types
  */
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
 #define H5_CHECK_OVERFLOW(var, vartype, casttype) \
 {                                                 \
     casttype _tmp_overflow = (casttype)(var);     \
     HDassert((var) == (vartype)_tmp_overflow);      \
 }
-#else /* NDEBUG */
+#else /* H5_DEBUG_BUILD */
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)
-#endif /* NDEBUG */
+#endif /* H5_DEBUG_BUILD */
 
 /*
  * A macro for detecting over/under-flow when assigning between types
  */
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
 #define ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)       \
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
@@ -1626,10 +1626,10 @@ extern char *strdup(const char *s);
 #define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)  \
     H5_GLUE4(ASSIGN_,srctype,_TO_,dsttype)(dst,dsttype,src,srctype)\
 
-#else /* NDEBUG */
+#else /* H5_DEBUG_BUILD */
 #define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)  \
     (dst) = (dsttype)(src);
-#endif /* NDEBUG */
+#endif /* H5_DEBUG_BUILD */
 
 #if defined(H5_HAVE_WINDOW_PATH)
 
@@ -1974,23 +1974,23 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 #define H5_PACKAGE_INIT(pkg_init, err)
 #endif /* H5_MY_PKG */
 
-
-#ifndef NDEBUG
+/* Check the function name (requires assert()) */
+#if defined(H5_DEBUG_BUILD) && !defined(NDEBUG)
 #define FUNC_ENTER_CHECK_NAME(asrt)                                           \
     {                                                                         \
         static hbool_t func_check = FALSE;                                    \
                                                                               \
         if(!func_check) {                                                     \
             /* Check function naming status */                                \
-            HDassert(asrt && "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in H5private.h (this is usually due to an incorrect number of underscores)");                                                   \
+            HDassert(asrt && "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in H5private.h (this is usually due to an incorrect number of underscores in a new or changed function name)");                                                   \
                                                                               \
             /* Don't check again */                                           \
             func_check = TRUE;                                                \
         } /* end if */                                                        \
     } /* end scope */
-#else /* NDEBUG */
+#else /* H5_DEBUG_BUILD */
 #define FUNC_ENTER_CHECK_NAME(asrt)
-#endif /* NDEBUG */
+#endif /* H5_DEBUG_BUILD */
 
 
 #define FUNC_ENTER_COMMON(asrt)                                               \

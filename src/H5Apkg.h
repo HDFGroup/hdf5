@@ -26,13 +26,6 @@
 #ifndef _H5Apkg_H
 #define _H5Apkg_H
 
-/*
- * Define this to enable debugging.
- */
-#ifdef NDEBUG
-#  undef H5A_DEBUG
-#endif
-
 /* Get package's private header */
 #include "H5Aprivate.h"
 

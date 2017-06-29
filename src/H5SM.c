@@ -527,16 +527,17 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     if(H5HF_get_heap_addr(fheap, &(header->heap_addr)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTGETSIZE, FAIL, "can't get fractal heap address")
 
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
 {
     size_t fheap_id_len;             /* Size of a fractal heap ID */
 
     /* Sanity check ID length */
     if(H5HF_get_id_len(fheap, &fheap_id_len) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTGETSIZE, FAIL, "can't get fractal heap ID length")
-    HDassert(fheap_id_len == H5O_FHEAP_ID_LEN);
+    if(fheap_id_len != H5O_FHEAP_ID_LEN)
+        HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, FAIL, "incorrect fractal heap ID length")
 }
-#endif /* NDEBUG */
+#endif /* H5_DEBUG_BUILD */
 
 done:
     /* Release resources */
@@ -1057,7 +1058,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned defer_flags,
     unsigned            cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t             index_num;
     htri_t              tri_ret;
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
     unsigned            deferred_type = -1u;
 #endif
     htri_t              ret_value = TRUE;
@@ -1069,13 +1070,13 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned defer_flags,
      * holds true; otherwise we can leave now if it wasn't shared in the DEFER
      * pass. */
     if(defer_flags & H5SM_WAS_DEFERRED)
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
         deferred_type = ((H5O_shared_t *)mesg)->type;
-#else /* NDEBUG */
+#else /* H5_DEBUG_BUILD */
         if((((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_HERE)
                 && (((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_SOHM))
             HGOTO_DONE(FALSE);
-#endif /* NDEBUG */
+#endif /* H5_DEBUG_BUILD */
 
     /* "trivial" sharing checks */
     if(mesg_flags && (*mesg_flags & H5O_MSG_FLAG_DONTSHARE))
@@ -1130,16 +1131,18 @@ done:
     HDassert((ret_value != TRUE)
             || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_HERE
             || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_SOHM);
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
     /* If we previously deferred this operation, make sure the saved message
-     * type is the same as the one we get here. */
+     * type is the same as the one we get here.
+     */
     if(defer_flags & H5SM_WAS_DEFERRED)
-        HDassert(deferred_type == ((H5O_shared_t *)mesg)->type);
-#endif /* NDEBUG */
+        if(deferred_type != ((H5O_shared_t *)mesg)->type)
+            HDONE_ERROR(H5E_SOHM, H5E_BADVALUE, FAIL, "deferred type doesn't match")
+#endif /* H5_DEBUG_BUILD */
 
     /* Release the master SOHM table */
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, H5F_SOHM_ADDR(f), table, cache_flags) < 0)
-	HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM master table")
+        HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM master table")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5SM_try_share() */

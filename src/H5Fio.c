@@ -298,7 +298,7 @@ H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id)
     if(H5AC_evict(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict all except pinned entries")
 
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
 {
     unsigned status = 0;
     uint32_t cur_num_entries;
@@ -319,7 +319,7 @@ H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id)
     if(cur_num_entries != 1)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "number of cache entries is not correct")
 }
-#endif /* NDEBUG */
+#endif /* H5_DEBUG_BUILD */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

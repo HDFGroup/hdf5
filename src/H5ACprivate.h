@@ -485,7 +485,7 @@ H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
 
 /* Debugging functions */
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
-#ifndef NDEBUG
+#ifdef H5_DEBUG_BUILD
 H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
 H5_DLL herr_t H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
     void **entry_ptr_ptr);
@@ -496,7 +496,7 @@ H5_DLL herr_t H5AC_verify_entry_type(const H5F_t *f, haddr_t addr,
     hbool_t *type_ok_ptr);
 H5_DLL hbool_t H5AC_get_serialization_in_progress(H5F_t *f);
 H5_DLL hbool_t H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring);
-#endif /* NDEBUG */ /* end debugging functions */
+#endif /* H5_DEBUG_BUILD */ /* end debugging functions */
 
 #endif /* !_H5ACprivate_H */
 

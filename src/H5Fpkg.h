@@ -43,15 +43,6 @@
 #include "H5PBprivate.h"        /* Page buffer                          */
 #include "H5UCprivate.h"	/* Reference counted object functions	*/
 
-
-/*
- * Feature: Define this constant on the compiler command-line if you want to
- *	    see some debugging messages on the debug stream.
- */
-#ifdef NDEBUG
-#  undef H5F_DEBUG
-#endif
-
 /* Superblock status flags */
 #define H5F_SUPER_WRITE_ACCESS          0x01
 #define H5F_SUPER_FILE_OK               0x02
