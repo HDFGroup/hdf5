@@ -14,7 +14,7 @@
 /*
  * Purpose:	The Virtual Object Layer as described in documentation.
  *              The pupose is to provide an abstraction on how to access the
- *              underlying HDF5 container, whether in a local file with 
+ *              underlying HDF5 container, whether in a local file with
  *              a specific file format, or remotely on other machines, etc...
  */
 
@@ -324,7 +324,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLget_plugin_name
  *
- * Purpose:     Returns the plugin name for the VOL associated with the 
+ * Purpose:     Returns the plugin name for the VOL associated with the
  *              object or file ID
  *
  * Return:      Success:        The length of the plugin name
@@ -405,8 +405,8 @@ done:
 /*---------------------------------------------------------------------------
  * Function:    H5VLget_object
  *
- * Purpose:     Retrieves the object pointer associated with the ID. This 
- *              also optionally returns the H5VL_t struct that this ID 
+ * Purpose:     Retrieves the object pointer associated with the ID. This
+ *              also optionally returns the H5VL_t struct that this ID
  *              belongs to, if the user passes a valid pointer value.
  *
  * Return:      Success:    Non-negative
@@ -520,7 +520,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
+H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL; /* Return value */
@@ -548,7 +548,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
+H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
               hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL; /* Return value */
@@ -624,7 +624,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_get(void *obj, hid_t plugin_id, H5VL_attr_get_t get_type, 
+H5VLattr_get(void *obj, hid_t plugin_id, H5VL_attr_get_t get_type,
              hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -651,7 +651,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, 
+H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
                   H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -731,7 +731,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
+H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
                     hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL; /* Return value */
@@ -759,7 +759,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
+H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
                   hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
@@ -787,7 +787,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_read(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id, 
+H5VLdataset_read(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id,
                   hid_t file_space_id, hid_t plist_id, void *buf, void **req)
 {
     herr_t ret_value = SUCCEED;
@@ -815,7 +815,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_write(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id, 
+H5VLdataset_write(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id,
                    hid_t file_space_id, hid_t plist_id, const void *buf, void **req)
 {
     herr_t ret_value = SUCCEED;
@@ -843,7 +843,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_get(void *dset, hid_t plugin_id, H5VL_dataset_get_t get_type, 
+H5VLdataset_get(void *dset, hid_t plugin_id, H5VL_dataset_get_t get_type,
                 hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -870,7 +870,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_specific(void *obj, hid_t plugin_id, H5VL_dataset_specific_t specific_type, 
+H5VLdataset_specific(void *obj, hid_t plugin_id, H5VL_dataset_specific_t specific_type,
                       hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -950,7 +950,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
+H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                 hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
@@ -1003,7 +1003,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_get(void *file, hid_t plugin_id, H5VL_file_get_t get_type, 
+H5VLfile_get(void *file, hid_t plugin_id, H5VL_file_get_t get_type,
              hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -1030,7 +1030,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_specific(void *file, hid_t plugin_id, H5VL_file_specific_t specific_type, 
+H5VLfile_specific(void *file, hid_t plugin_id, H5VL_file_specific_t specific_type,
                   hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -1109,7 +1109,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
+H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
                  hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
@@ -1137,7 +1137,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
+H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
                 hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
@@ -1165,7 +1165,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_get(void *obj, hid_t plugin_id, H5VL_group_get_t get_type, 
+H5VLgroup_get(void *obj, hid_t plugin_id, H5VL_group_get_t get_type,
               hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -1191,7 +1191,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_specific(void *obj, hid_t plugin_id, H5VL_group_specific_t specific_type, 
+H5VLgroup_specific(void *obj, hid_t plugin_id, H5VL_group_specific_t specific_type,
                       hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -1270,7 +1270,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
+H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params,
                  hid_t plugin_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
@@ -1298,8 +1298,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj, 
-              H5VL_loc_params_t loc_params2, hid_t plugin_id, 
+H5VLlink_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
+              H5VL_loc_params_t loc_params2, hid_t plugin_id,
               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
@@ -1327,8 +1327,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj, 
-              H5VL_loc_params_t loc_params2, hid_t plugin_id, 
+H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
+              H5VL_loc_params_t loc_params2, hid_t plugin_id,
               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
@@ -1356,7 +1356,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_link_get_t get_type, 
+H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_link_get_t get_type,
               hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -1384,7 +1384,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, 
+H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
                   H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -1465,8 +1465,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, hid_t plugin_id1, const char *src_name, 
-                void *dst_obj, H5VL_loc_params_t loc_params2, hid_t plugin_id2, const char *dst_name, 
+H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, hid_t plugin_id1, const char *src_name,
+                void *dst_obj, H5VL_loc_params_t loc_params2, hid_t plugin_id2, const char *dst_name,
                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
@@ -1495,7 +1495,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_object_get_t get_type, 
+H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_object_get_t get_type,
                hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -1523,7 +1523,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, 
+H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
                     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -1577,7 +1577,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
+H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
                      hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
@@ -1605,7 +1605,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name, 
+H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
                    hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
@@ -1633,7 +1633,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_specific(void *obj, hid_t plugin_id, H5VL_datatype_specific_t specific_type, 
+H5VLdatatype_specific(void *obj, hid_t plugin_id, H5VL_datatype_specific_t specific_type,
                       hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
@@ -1687,7 +1687,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_get(void *obj, hid_t plugin_id, H5VL_datatype_get_t get_type, 
+H5VLdatatype_get(void *obj, hid_t plugin_id, H5VL_datatype_get_t get_type,
                  hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;

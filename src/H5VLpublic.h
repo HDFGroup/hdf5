@@ -97,8 +97,8 @@ typedef enum H5VL_dataset_specific_t {
 
 /* types for datatype GET callback */
 typedef enum H5VL_datatype_get_t {
-    H5VL_DATATYPE_GET_BINARY,               /* get serialized form of transient type */ 
-    H5VL_DATATYPE_GET_TCPL	            /* datatype creation property list	   */
+    H5VL_DATATYPE_GET_BINARY,               /* get serialized form of transient type */
+    H5VL_DATATYPE_GET_TCPL	                /* datatype creation property list	   */
 } H5VL_datatype_get_t;
 
 /* types for datatype SPECFIC callback */
@@ -110,10 +110,10 @@ typedef enum H5VL_datatype_specific_t {
 typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_FAPL,                     /* file access property list	*/
     H5VL_FILE_GET_FCPL,	                    /* file creation property list	*/
-    H5VL_FILE_GET_INTENT,	            /* file intent           		*/
+    H5VL_FILE_GET_INTENT,	                /* file intent           		*/
     H5VL_FILE_GET_NAME,	                    /* file name             		*/
     H5VL_FILE_GET_OBJ_COUNT,	            /* object count in file	       	*/
-    H5VL_FILE_GET_OBJ_IDS,	            /* object ids in file     		*/
+    H5VL_FILE_GET_OBJ_IDS,	                /* object ids in file     		*/
     H5VL_OBJECT_GET_FILE                    /* retrieve or resurrect file of object */
 } H5VL_file_get_t;
 
@@ -219,14 +219,14 @@ typedef struct H5VL_loc_params_t {
 
 /* H5A routines */
 typedef struct H5VL_attr_class_t {
-    void *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, 
+    void *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name,
                     hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
-    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, 
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char *attr_name,
                   hid_t aapl_id, hid_t dxpl_id, void **req);
     herr_t (*read)(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
     herr_t (*write)(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_loc_params_t loc_params, H5VL_attr_specific_t specific_type, 
+    herr_t (*specific)(void *obj, H5VL_loc_params_t loc_params, H5VL_attr_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *attr, hid_t dxpl_id, void **req);
@@ -234,16 +234,16 @@ typedef struct H5VL_attr_class_t {
 
 /* H5D routines */
 typedef struct H5VL_dataset_class_t {
-    void *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+    void *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *name,
                     hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
-    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char *name,
                   hid_t dapl_id, hid_t dxpl_id, void **req);
     herr_t (*read)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                    hid_t xfer_plist_id, void * buf, void **req);
     herr_t (*write)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                     hid_t xfer_plist_id, const void * buf, void **req);
     herr_t (*get)(void *obj, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_dataset_specific_t specific_type, 
+    herr_t (*specific)(void *obj, H5VL_dataset_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *dset, hid_t dxpl_id, void **req);
@@ -251,12 +251,12 @@ typedef struct H5VL_dataset_class_t {
 
 /* H5T routines*/
 typedef struct H5VL_datatype_class_t {
-    void *(*commit)(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, 
+    void *(*commit)(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id,
                     hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
-    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char * name, 
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char * name,
                   hid_t tapl_id, hid_t dxpl_id, void **req);
     herr_t (*get)   (void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_datatype_specific_t specific_type, 
+    herr_t (*specific)(void *obj, H5VL_datatype_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *dt, hid_t dxpl_id, void **req);
@@ -264,11 +264,11 @@ typedef struct H5VL_datatype_class_t {
 
 /* H5F routines */
 typedef struct H5VL_file_class_t {
-    void *(*create)(const char *name, unsigned flags, hid_t fcpl_id, 
+    void *(*create)(const char *name, unsigned flags, hid_t fcpl_id,
                     hid_t fapl_id, hid_t dxpl_id, void **req);
     void *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_file_specific_t specific_type, 
+    herr_t (*specific)(void *obj, H5VL_file_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *file, hid_t dxpl_id, void **req);
@@ -276,12 +276,12 @@ typedef struct H5VL_file_class_t {
 
 /* H5G routines */
 typedef struct H5VL_group_class_t {
-    void *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+    void *(*create)(void *obj, H5VL_loc_params_t loc_params, const char *name,
                     hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
-    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, const char *name,
                   hid_t gapl_id, hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_group_specific_t specific_type, 
+    herr_t (*specific)(void *obj, H5VL_group_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *grp, hid_t dxpl_id, void **req);
@@ -289,31 +289,31 @@ typedef struct H5VL_group_class_t {
 
 /* H5L routines */
 typedef struct H5VL_link_class_t {
-    herr_t (*create)(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
+    herr_t (*create)(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params,
                      hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
-    herr_t (*copy)(void *src_obj, H5VL_loc_params_t loc_params1, 
+    herr_t (*copy)(void *src_obj, H5VL_loc_params_t loc_params1,
                    void *dst_obj, H5VL_loc_params_t loc_params2,
                    hid_t lcpl, hid_t lapl, hid_t dxpl_id, void **req);
-    herr_t (*move)(void *src_obj, H5VL_loc_params_t loc_params1, 
+    herr_t (*move)(void *src_obj, H5VL_loc_params_t loc_params1,
                    void *dst_obj, H5VL_loc_params_t loc_params2,
                    hid_t lcpl, hid_t lapl, hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, 
+    herr_t (*get)(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type,
                   hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_loc_params_t loc_params, H5VL_link_specific_t specific_type, 
+    herr_t (*specific)(void *obj, H5VL_loc_params_t loc_params, H5VL_link_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 } H5VL_link_class_t;
 
 /* H5O routines */
 typedef struct H5VL_object_class_t {
-    void *(*open)(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, 
+    void *(*open)(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type,
                   hid_t dxpl_id, void **req);
-    herr_t (*copy)(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
+    herr_t (*copy)(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name,
                    void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name,
                    hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
+    herr_t (*get)(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type,
                   hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, 
+    herr_t (*specific)(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 } H5VL_object_class_t;
@@ -431,8 +431,8 @@ H5_DLL herr_t H5VLlink_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void 
 
 /* Objects */
 H5_DLL void *H5VLobject_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, hid_t plugin_id1, const char *src_name, 
-                               void *dst_obj, H5VL_loc_params_t loc_params2, hid_t plugin_id2, const char *dst_name, 
+H5_DLL herr_t H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, hid_t plugin_id1, const char *src_name,
+                               void *dst_obj, H5VL_loc_params_t loc_params2, hid_t plugin_id2, const char *dst_name,
                                hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
