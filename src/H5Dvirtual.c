@@ -2510,7 +2510,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                          type_info->mem_type, fill_space, io_info->md_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "filling buf failed")
 
-#ifdef H5_DEBUG_BUILD
+#ifndef NDEBUG
             /* Make sure the total number of elements written (including fill
              * values) >= nelmts */
             {
@@ -2523,10 +2523,9 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 /* Verify number of elements is correct.  Note that since we
                  * don't check for overlap we can't assert that these are equal
                  */
-                if((tot_nelmts + (hsize_t)select_nelmts) < nelmts)
-                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "number of elements is incorrect")
+                HDassert((tot_nelmts + (hsize_t)select_nelmts) >= nelmts);
             } /* end block */
-#endif /* H5_DEBUG_BUILD */
+#endif /* NDEBUG */
         } /* end if */
     } /* end if */
 
