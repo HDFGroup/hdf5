@@ -58,7 +58,7 @@ END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS
 !---- START ----- Check to see C_LONG_DOUBLE is different from C_DOUBLE
 MODULE type_mod
   USE ISO_C_BINDING
-  INTERFACE h5t	
+  INTERFACE h5t
      MODULE PROCEDURE h5t_c_double
      MODULE PROCEDURE h5t_c_long_double
   END INTERFACE
