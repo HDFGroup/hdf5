@@ -283,12 +283,21 @@ done:
 htri_t
 H5VLis_registered(const char *name)
 {
+    H5VL_get_plugin_ud_t op_data;
     htri_t ret_value = FALSE;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "*s", name);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    op_data.ret_id = FAIL;
+    op_data.name = name;
+
+    /* Check arguments */
+    if(H5I_iterate(H5I_VOL, H5VL__get_plugin_cb, &op_data, TRUE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "can't iterate over VOL ids")
+
+    if(op_data.ret_id != FAIL)
+        ret_value = TRUE;
 
 done:
     FUNC_LEAVE_API(ret_value)

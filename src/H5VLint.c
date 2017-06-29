@@ -152,7 +152,7 @@ H5VL_term_package(void)
     if(H5_PKG_INIT_VAR) {
 
         if(H5I_nmembers(H5I_VOL) > 0) {
-            /* XXX: Need to investigate if this is okay... */
+            /* XXX: Need to investigate if this is sufficient... */
             (void)H5I_clear_type(H5I_VOL, FALSE, FALSE);
             n++;
         }
