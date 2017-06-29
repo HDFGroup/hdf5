@@ -565,6 +565,7 @@
 ./src/H5EAsblock.c
 ./src/H5EAstat.c
 ./src/H5EAtest.c
+./src/H5ESpublic.h
 ./src/H5F.c
 ./src/H5Faccum.c
 ./src/H5Fcwfs.c
@@ -869,6 +870,12 @@
 ./src/H5Tvlen.c
 ./src/H5TS.c
 ./src/H5TSprivate.h
+./src/H5VL.c
+./src/H5VLint.c
+./src/H5VLmodule.h
+./src/H5VLpkg.h
+./src/H5VLprivate.h
+./src/H5VLpublic.h
 ./src/H5VM.c
 ./src/H5VMprivate.h
 ./src/H5WB.c
@@ -1018,6 +1025,7 @@
 ./test/noencoder.h5
 ./test/none.h5
 ./test/ntypes.c
+./test/null_vol.c
 ./test/ohdr.c
 ./test/objcopy.c
 ./test/page_buffer.c
@@ -1106,6 +1114,7 @@
 ./test/use_disable_mdc_flushes.c
 ./test/use.h
 ./test/vfd.c
+./test/vol.c
 ./test/test_filters_le.h5
 ./test/test_filters_be.h5
 ./test/gen_filters.c
