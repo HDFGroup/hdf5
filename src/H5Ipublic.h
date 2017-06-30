@@ -28,7 +28,7 @@
  * fail otherwise).
  *
  * When adding types here, add a section to the 'misc19' test in test/tmisc.c
- * to verify that the H5I{inc|dec|get}_ref() routines work correctly with in.
+ * to verify that the H5I{inc|dec|get}_ref() routines work correctly with it.
  *
  */
 typedef enum H5I_type_t {

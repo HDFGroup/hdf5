@@ -12,25 +12,17 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * FILE:	H5I.c - Internal storage routines for handling "IDs"
+ * FILE:    H5I.c - Internal storage routines for handling "IDs"
  *
- * REMARKS:	ID's which allow objects (void *'s currently) to be bundled
- *		into "types" for more general storage.
+ * REMARKS: IDs which allow objects (void * currently) to be bundled
+ *          into "types" for more general storage.
  *
- * DESIGN:	The types are stored in an array of pointers to store each
- *		type in an element. Each "type" node contains a link to a
- *		hash table to manage the IDs in each type.  Allowed types are
- *		values within the range 1 to H5I_MAX_NUM_TYPES and are given out
- *		at run-time.  Types used by the library are stored in global
- *		variables defined in H5Ipublic.h.
- *
- * AUTHOR:	Quincey Koziol
- *
- * MODIFICATIONS:
- *	1/3/96	- Starting writing specs & coding prototype
- *	1/7/96	- Finished coding prototype
- *	6/10/97 - Moved into HDF5 library
- *	5/18/04 - Expanded to allow registration of new types at run-time
+ * DESIGN:  The types are stored in an array of pointers to store each
+ *          type in an element. Each "type" node contains a link to a
+ *          hash table to manage the IDs in each type.  Allowed types are
+ *          values within the range 1 to H5I_MAX_NUM_TYPES and are given out
+ *          at run-time.  Types used by the library are stored in global
+ *          variables defined in H5Ipublic.h.
  */
 
 #include "H5Imodule.h"          /* This source code file is part of the H5I module */
@@ -44,6 +36,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5SLprivate.h"	/* Skip Lists                           */
+#include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 /* Define this to compile in support for dumping ID information */
 /* #define H5I_DEBUG_OUTPUT */

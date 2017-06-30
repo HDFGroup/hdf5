@@ -124,10 +124,8 @@ H5VLregister(const H5VL_class_t *cls)
     /* Check arguments */
     if(!cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "null class pointer is disallowed")
-
-    if(cls->value <= UINT_MAX)
+    if(cls->value > UINT_MAX)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "registered class value must not be larger than %u", UINT_MAX)
-
     if(!cls->name)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "invalid VOL class name");
 
@@ -377,7 +375,12 @@ H5VLclose(hid_t vol_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", vol_id);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    /* Check args */
+    if(NULL == H5I_object_verify(vol_id, H5I_VOL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if(H5I_dec_app_ref(vol_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close VOL plugin ID")
 
 done:
     FUNC_LEAVE_API(ret_value)
