@@ -373,6 +373,7 @@ set (H5_CHECK_TESTS
     atomic_reader
     links_env
     flushrefresh
+    filenotclosed
 )
 
 foreach (test ${H5_CHECK_TESTS})
