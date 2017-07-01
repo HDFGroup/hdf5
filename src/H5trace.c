@@ -1320,10 +1320,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "%ld (attr)", (long)obj);
                                 break;
 
-                            case H5I_REFERENCE:
-                                fprintf(out, "%ld (reference)", (long)obj);
-                                break;
-
                             case H5I_VFL:
                                 fprintf(out, "%ld (file driver)", (long)obj);
                                 break;
@@ -1499,10 +1495,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                 case H5I_ATTR:
                                     fprintf(out, "H5I_ATTR");
-                                    break;
-
-                                case H5I_REFERENCE:
-                                    fprintf(out, "H5I_REFERENCE");
                                     break;
 
                                 case H5I_VFL:

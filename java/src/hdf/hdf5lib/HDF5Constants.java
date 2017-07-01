@@ -309,7 +309,6 @@ public class HDF5Constants {
     public static final int H5I_GROUP = H5I_GROUP();
     public static final int H5I_INVALID_HID = H5I_INVALID_HID();
     public static final int H5I_NTYPES = H5I_NTYPES();
-    public static final int H5I_REFERENCE = H5I_REFERENCE();
     public static final int H5I_UNINIT = H5I_UNINIT();
     public static final int H5I_VFL = H5I_VFL();
 
@@ -1195,8 +1194,6 @@ public class HDF5Constants {
     private static native final int H5I_INVALID_HID();
 
     private static native final int H5I_NTYPES();
-
-    private static native final int H5I_REFERENCE();
 
     private static native final int H5I_UNINIT();
 
