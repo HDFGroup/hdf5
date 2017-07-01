@@ -3445,6 +3445,8 @@ test_misc19(void)
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5FDunregister");
 
+    HDfree(vfd_cls);
+
 } /* end test_misc19() */
 
 /****************************************************************
