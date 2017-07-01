@@ -3445,8 +3445,6 @@ test_misc19(void)
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5FDunregister");
 
-/* Check H5I operations on references */
-
 } /* end test_misc19() */
 
 /****************************************************************

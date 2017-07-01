@@ -71,17 +71,6 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
-/* Reference ID class */
-static const H5I_class_t H5I_REFERENCE_CLS[1] = {{
-    H5I_REFERENCE,		/* ID class value */
-    0,				/* Class flags */
-    0,				/* # of reserved IDs for class */
-    NULL			/* Callback routine for closing objects of this class */
-}};
-
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5R_top_package_initialize_s = FALSE;
-
 
 
 /*--------------------------------------------------------------------------
@@ -103,56 +92,9 @@ H5R__init_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Initialize the atom group for the file IDs */
-    if(H5I_register_type(H5I_REFERENCE_CLS) < 0)
-	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
-    /* Mark "top" of interface as initialized, too */
-    H5R_top_package_initialize_s = TRUE;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__init_package() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R_top_term_package
- PURPOSE
-    Terminate various H5R objects
- USAGE
-    void H5R_top_term_package()
- RETURNS
-    void
- DESCRIPTION
-    Release IDs for the atom group, deferring full interface shutdown
-    until later (in H5R_term_package).
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-int
-H5R_top_term_package(void)
-{
-    int	n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if(H5R_top_package_initialize_s) {
-	if(H5I_nmembers(H5I_REFERENCE) > 0) {
-	    (void)H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
-            n++; /*H5I*/
-	} /* end if */
-
-        /* Mark closed */
-        if(0 == n)
-            H5R_top_package_initialize_s = FALSE;
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(n)
-} /* end H5R_top_term_package() */
 
 
 /*--------------------------------------------------------------------------
@@ -178,24 +120,12 @@ H5R_top_term_package(void)
 int
 H5R_term_package(void)
 {
-    int	n = 0;
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_PKG_INIT_VAR) {
-        /* Sanity checks */
-        HDassert(0 == H5I_nmembers(H5I_REFERENCE));
-        HDassert(FALSE == H5R_top_package_initialize_s);
+    if(H5_PKG_INIT_VAR)
+        H5_PKG_INIT_VAR = FALSE;
 
-        /* Destroy the reference id group */
-        n += (H5I_dec_type_ref(H5I_REFERENCE) > 0);
-
-        /* Mark closed */
-        if(0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(n)
+    FUNC_LEAVE_NOAPI(0)
 } /* end H5R_term_package() */
 
 
@@ -741,7 +671,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
 
     /* Atomize */
-    if((ret_value = H5I_register (H5I_DATASPACE, space, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
 done:
