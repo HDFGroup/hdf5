@@ -152,7 +152,7 @@ H5R_top_term_package(void)
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5R__init_package() */
+} /* end H5R_top_term_package() */
 
 
 /*--------------------------------------------------------------------------
