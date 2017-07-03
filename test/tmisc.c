@@ -30,6 +30,7 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 #include "H5Dpkg.h"         /* Datasets                 */
+#include "H5Iprivate.h"     /* IDs, can be removed when H5I_REFERENCE is gone */
 
 /* Definitions for misc. test #1 */
 #define MISC1_FILE  "tmisc1.h5"
@@ -3446,6 +3447,34 @@ test_misc19(void)
     VERIFY(ret, FAIL, "H5FDunregister");
 
     HDfree(vfd_cls);
+
+/* Check H5I operations on references */
+
+    /* Reference IDs are not used by the library so there's no
+     * way of testing if incr/decr, etc. work. Instead, just
+     * do a quick smoke check to ensure that a couple of basic
+     * calls return sane values.
+     *
+     * H5I_REFERENCE has been declared deprecated with a tentative
+     * removal version of HDF5 1.12.0.
+     *
+     * Delete this entire block when H5I_REFERENCE no longer exists.
+     *
+     * The H5Iprivate.h header was included to support H5I_nmembers()
+     * so that can also probably be removed as well.
+     */
+{
+    htri_t tf;                      /* Boolean generic return   */
+    int64_t num_members;            /* Number of members in type */
+
+    tf = H5Itype_exists(H5I_REFERENCE);
+    VERIFY(tf, TRUE, "H5Itype_exists");
+
+    num_members = 999;
+    num_members = H5I_nmembers(H5I_REFERENCE);
+    VERIFY(num_members, 0, "H5Inmembers");
+
+} /* end block */
 
 } /* end test_misc19() */
 
