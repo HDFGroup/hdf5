@@ -103,7 +103,7 @@ H5R__init_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-/* Initialize the atom group for the file IDs */
+    /* Initialize the atom group for the file IDs */
     if(H5I_register_type(H5I_REFERENCE_CLS) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -144,7 +144,7 @@ H5R_top_term_package(void)
         if(H5I_nmembers(H5I_REFERENCE) > 0) {
             (void)H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
             n++; /*H5I*/
-	} /* end if */
+	    } /* end if */
 
         /* Mark closed */
         if(0 == n)
@@ -193,7 +193,7 @@ H5R_term_package(void)
         /* Mark closed */
         if(0 == n)
             H5_PKG_INIT_VAR = FALSE;
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_term_package() */
