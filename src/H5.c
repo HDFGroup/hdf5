@@ -29,6 +29,7 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5SLprivate.h"        /* Skip lists                           */
 #include "H5Tprivate.h"         /* Datatypes                            */
+#include "H5FSprivate.h"        /* File free space                      */
 
 /****************/
 /* Local Macros */
@@ -204,6 +205,10 @@ H5_init_library(void)
      * property classes.
      * The link interface needs to be initialized so that link property lists
      * have their properties registered.
+     * The FS module needs to be initialized as a result of the fix for HDFFV-10160:
+     *   It might not be initialized during normal file open. 
+     *   When the application does not close the file, routines in the module might
+     *   be called via H5_term_library() when shutting down the file.
      */
     if(H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
@@ -217,6 +222,8 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface")
     if(H5L_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
+    if(H5FS_init() < 0)
+       HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize FS interface")
 
     /* Debugging? */
     H5_debug_mask("-all");

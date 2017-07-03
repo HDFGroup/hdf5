@@ -29,7 +29,8 @@
 #include "hdf5.h"
 #include "testhdf5.h"
 #include "H5srcdir.h"
-#include "H5Dpkg.h"    /* Datasets         */
+#include "H5Dpkg.h"         /* Datasets                 */
+#include "H5Iprivate.h"     /* IDs, can be removed when H5I_REFERENCE is gone */
 
 /* Definitions for misc. test #1 */
 #define MISC1_FILE  "tmisc1.h5"
@@ -2984,19 +2985,21 @@ test_misc18(void)
 static void
 test_misc19(void)
 {
-    hid_t fid;          /* File ID */
-    hid_t sid;          /* 'Space ID */
-    hid_t did;          /* Dataset ID */
-    hid_t tid;          /* 'Type ID */
-    hid_t aid;          /* Attribute ID */
-    hid_t plid;         /* Property List ID */
-    hid_t pcid;         /* Property Class ID */
-    hid_t gid;          /* Group ID */
-    hid_t ecid;         /* Error Class ID */
-    hid_t emid;         /* Error Message ID */
-    hid_t esid;         /* Error Stack ID */
-    int rc;             /* Reference count */
-    herr_t ret;         /* Generic return value */
+    hid_t fid = -1;                 /* File ID                  */
+    hid_t sid = -1;                 /* Dataspace ID             */
+    hid_t did = -1;                 /* Dataset ID               */
+    hid_t tid = -1;                 /* Datatype ID              */
+    hid_t aid = -1;                 /* Attribute ID             */
+    hid_t plid = -1;                /* Property List ID         */
+    hid_t pcid = -1;                /* Property Class ID        */
+    hid_t gid = -1;                 /* Group ID                 */
+    hid_t ecid = -1;                /* Error Class ID           */
+    hid_t emid = -1;                /* Error Message ID         */
+    hid_t esid = -1;                /* Error Stack ID           */
+    hid_t vfdid = -1;               /* Virtual File Driver ID   */
+    H5FD_class_t *vfd_cls = NULL;   /* VFD class                */
+    int rc;                         /* Reference count          */
+    herr_t ret;                     /* Generic return value     */
 
 /* Check H5I operations on files */
 
@@ -3405,6 +3408,73 @@ test_misc19(void)
         ret = H5Eclose_stack(esid);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Eclose_stack");
+
+
+/* Check H5I operations on virtual file drivers */
+
+    /* Get a VFD class to register */
+    vfd_cls = h5_get_dummy_vfd_class();
+    CHECK(vfd_cls, NULL, "h5_get_dummy_vfd_class");
+
+    /* Register a virtual file driver */
+    vfdid = H5FDregister(vfd_cls);
+    CHECK(vfdid, FAIL, "H5FDregister");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(vfdid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Increment the reference count */
+    rc = H5Iinc_ref(vfdid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Unregister the VFD normally */
+    ret = H5FDunregister(vfdid);
+    CHECK(ret, FAIL, "H5FDunregister");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(vfdid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Unregister the VFD by decrementing the reference count */
+    rc = H5Idec_ref(vfdid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try unregistering the VFD again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5FDunregister(vfdid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5FDunregister");
+
+    HDfree(vfd_cls);
+
+/* Check H5I operations on references */
+
+    /* Reference IDs are not used by the library so there's no
+     * way of testing if incr/decr, etc. work. Instead, just
+     * do a quick smoke check to ensure that a couple of basic
+     * calls return sane values.
+     *
+     * H5I_REFERENCE has been declared deprecated with a tentative
+     * removal version of HDF5 1.12.0.
+     *
+     * Delete this entire block when H5I_REFERENCE no longer exists.
+     *
+     * The H5Iprivate.h header was included to support H5I_nmembers()
+     * so that can also probably be removed as well.
+     */
+{
+    htri_t tf;                      /* Boolean generic return   */
+    int64_t num_members;            /* Number of members in type */
+
+    tf = H5Itype_exists(H5I_REFERENCE);
+    VERIFY(tf, TRUE, "H5Itype_exists");
+
+    num_members = 999;
+    num_members = H5I_nmembers(H5I_REFERENCE);
+    VERIFY(num_members, 0, "H5Inmembers");
+
+} /* end block */
 
 } /* end test_misc19() */
 

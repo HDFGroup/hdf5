@@ -30,6 +30,8 @@
  * When adding types here, add a section to the 'misc19' test in test/tmisc.c
  * to verify that the H5I{inc|dec|get}_ref() routines work correctly with it.
  *
+ * NOTE: H5I_REFERENCE is not used by the library and has been deprecated
+ *       with a tentative removal version of 1.12.0. (DER, July 2017)
  */
 typedef enum H5I_type_t {
     H5I_UNINIT      = (-2),     /* uninitialized type                           */
@@ -40,7 +42,7 @@ typedef enum H5I_type_t {
     H5I_DATASPACE,              /* type ID for Dataspace objects                */
     H5I_DATASET,                /* type ID for Dataset objects                  */
     H5I_ATTR,                   /* type ID for Attribute objects                */
-    H5I_REFERENCE,              /* type ID for Reference objects                */
+    H5I_REFERENCE,              /* *DEPRECATED* type ID for Reference objects   */
     H5I_VFL,                    /* type ID for virtual file layer               */
     H5I_VOL,                    /* type ID for virtual object layer             */
     H5I_GENPROP_CLS,            /* type ID for generic property list classes    */
