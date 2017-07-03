@@ -679,6 +679,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_DATASPACE:
+        case H5I_REFERENCE:
         case H5I_VFL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:

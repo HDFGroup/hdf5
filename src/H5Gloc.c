@@ -240,6 +240,9 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
             } /* end case */
             break;
 
+        case H5I_REFERENCE:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of reference")
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_VFL:
