@@ -138,6 +138,24 @@ PropList::PropList(const hid_t plist_id) : IdComponent()
               throw PropListIException("PropList constructor", "H5Pcopy failed");
           }
           break;
+        /* These should really be error cases, but changing that breaks
+         * the stated behavior and causes test failures.
+         * (DER, July 2017)
+         */
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_GROUP:
+        case H5I_DATATYPE:
+        case H5I_DATASPACE:
+        case H5I_DATASET:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        case H5I_UNINIT:
         default:
           id = H5P_DEFAULT;
           break;
