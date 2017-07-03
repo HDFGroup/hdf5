@@ -189,6 +189,7 @@ public class HDF5Constants {
     public static final long H5E_UNSUPPORTED = H5E_UNSUPPORTED();
     public static final long H5E_VERSION = H5E_VERSION();
     public static final long H5E_VFL = H5E_VFL();
+    public static final long H5E_VOL = H5E_VOL();
     public static final long H5E_WALK_DOWNWARD = H5E_WALK_DOWNWARD();
     public static final long H5E_WALK_UPWARD = H5E_WALK_UPWARD();
     public static final long H5E_WRITEERROR = H5E_WRITEERROR();
@@ -966,6 +967,8 @@ public class HDF5Constants {
     private static native final long H5E_VERSION();
 
     private static native final long H5E_VFL();
+
+    private static native final long H5E_VOL();
 
     private static native final long H5E_WALK_DOWNWARD();
 

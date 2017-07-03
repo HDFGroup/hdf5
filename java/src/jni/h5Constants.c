@@ -341,6 +341,8 @@ Java_hdf_hdf5lib_HDF5Constants_H5E_1VERSION(JNIEnv *env, jclass cls) { return H5
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1VFL(JNIEnv *env, jclass cls) { return H5E_VFL; }
 JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5E_1VOL(JNIEnv *env, jclass cls) { return H5E_VOL; }
+JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1WALK_1DOWNWARD(JNIEnv *env, jclass cls) { return H5E_WALK_DOWNWARD; }
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1WALK_1UPWARD(JNIEnv *env, jclass cls) { return H5E_WALK_UPWARD; }
