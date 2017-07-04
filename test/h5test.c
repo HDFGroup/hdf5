@@ -106,9 +106,10 @@ static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suf
 
 
 
-/* A non-usable VFD class and its functions.
+/* A dummy (generally non-functional) VFD class and its functions.
  *
- * Usable for testing things like ID handling where we shouldn't mess with the real VFDs.
+ * Useful for testing things like ID handling where we shouldn't mess with the
+ * real VFDs.
  */
 static H5FD_t *dummy_vfd_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static H5FD_t *dummy_vfd_open(const char H5_ATTR_UNUSED *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED maxaddr) { return NULL; }
@@ -132,7 +133,7 @@ static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, had
 static herr_t dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) { return FAIL; }
 
 static H5FD_class_t dummy_vfd_class_g = {
-    "fake",                     /* name                 */
+    "dummy",                    /* name                 */
     1,                          /* maxaddr              */
     H5F_CLOSE_WEAK,             /* fc_degree            */
     NULL,                       /* terminate            */
@@ -165,6 +166,88 @@ static H5FD_class_t dummy_vfd_class_g = {
     NULL,                       /* unlock               */
     H5FD_FLMAP_DEFAULT          /* fl_map               */
 };
+
+/* A dummy (generally non-functional) VOL class and its functions.
+ *
+ * Useful for testing things like ID handling where we shouldn't mess with the
+ * real VOL plugins.
+ */
+static const H5VL_class_t dummy_vol_class_g = {
+    0,                                              /* version      */
+    847271,                                         /* value        */
+    "dummy vol driver",                             /* name         */
+    NULL,                                           /* initialize   */
+    NULL,                                           /* terminate    */
+    (size_t)0,                                      /* fapl size    */
+    NULL,                                           /* fapl copy    */
+    NULL,                                           /* fapl free    */
+    {   /* attribute_cls */
+        NULL,                                       /* create       */
+        NULL,                                       /* open         */
+        NULL,                                       /* read         */
+        NULL,                                       /* write        */
+        NULL,                                       /* get          */
+        NULL,                                       /* specific     */
+        NULL,                                       /* optional     */
+        NULL                                        /* close        */
+    },
+    {   /* dataset_cls */
+        NULL,                                       /* create       */
+        NULL,                                       /* open         */
+        NULL,                                       /* read         */
+        NULL,                                       /* write        */
+        NULL,                                       /* get          */
+        NULL,                                       /* specific     */
+        NULL,                                       /* optional     */
+        NULL                                        /* close        */
+    },
+    {   /* datatype_cls */
+        NULL,                                       /* commit       */
+        NULL,                                       /* open         */
+        NULL,                                       /* get_size     */
+        NULL,                                       /* specific     */
+        NULL,                                       /* optional     */
+        NULL                                        /* close        */
+    },
+    {   /* file_cls */
+        NULL,                                       /* create       */
+        NULL,                                       /* open         */
+        NULL,                                       /* get          */
+        NULL,                                       /* specific     */
+        NULL,                                       /* optional     */
+        NULL                                        /* close        */
+    },
+    {   /* group_cls */
+        NULL,                                       /* create       */
+        NULL,                                       /* open         */
+        NULL,                                       /* get          */
+        NULL,                                       /* specific     */
+        NULL,                                       /* optional     */
+        NULL                                        /* close        */
+    },
+    {   /* link_cls */
+        NULL,                                       /* create       */
+        NULL,                                       /* copy         */
+        NULL,                                       /* move         */
+        NULL,                                       /* get          */
+        NULL,                                       /* specific     */
+        NULL                                        /* optional     */
+    },
+    {   /* object_cls */
+        NULL,                                       /* open         */
+        NULL,                                       /* copy         */
+        NULL,                                       /* get          */
+        NULL,                                       /* specific     */
+        NULL                                        /* optional     */
+    },
+    {   /* async_cls */
+        NULL,                                       /* cancel       */
+        NULL,                                       /* test         */
+        NULL                                        /* wait         */
+    },
+    NULL                                            /* optional     */
+};
+
 
 
 /*-------------------------------------------------------------------------
@@ -1890,6 +1973,7 @@ error:
     return FAIL;
 } /* h5_wait_message() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    h5_get_dummy_vfd_class()
  *
@@ -1927,4 +2011,43 @@ error:
         HDfree(vfd_class);
     return NULL;
 } /* h5_get_dummy_vfd_class */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_dummy_vol_class()
+ *
+ * Purpose:     Returns a disposable, generally non-functional,
+ *              VOL class struct.
+ *
+ *              In some of the test code, we need a disposable VOL driver
+ *              but we don't want to mess with the real VFDs and we also
+ *              don't have access to the internals of the real VOL drivers
+ *              (which use static globals and functions) to easily duplicate
+ *              them (e.g.: for testing VOL driver ID handling).
+ *
+ *              This API call will return a pointer to a VOL class that
+ *              can be used to construct a test VOL using H5VLregister().
+ *
+ * Return:      Success:    A pointer to a VOL class struct
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_class_t *
+h5_get_dummy_vol_class(void)
+{
+    H5VL_class_t *vol_class = NULL;
+
+    if(NULL == (vol_class = (H5VL_class_t *)HDmalloc(sizeof(H5VL_class_t))))
+        TEST_ERROR;
+
+    HDmemcpy(vol_class, &dummy_vol_class_g, sizeof(H5VL_class_t));
+
+    return vol_class;
+
+error:
+    if(vol_class)
+        HDfree(vol_class);
+    return NULL;
+} /* h5_get_dummy_vol_class */
 

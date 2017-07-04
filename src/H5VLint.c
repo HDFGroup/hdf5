@@ -150,13 +150,12 @@ H5VL_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_PKG_INIT_VAR) {
-
         if(H5I_nmembers(H5I_VOL) > 0) {
-            /* XXX: Need to investigate if this is sufficient... */
             (void)H5I_clear_type(H5I_VOL, FALSE, FALSE);
             n++;
         }
         else {
+            /* Destroy the VOL driver ID group */
             n += (H5I_dec_type_ref(H5I_VOL) > 0);
 
             /* Mark interface as closed */

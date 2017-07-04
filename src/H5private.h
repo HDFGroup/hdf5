@@ -1687,25 +1687,26 @@ extern char *strdup(const char *s);
  *    information about the package in H5_init_library().
  */
 typedef enum {
-    H5_PKG_A,        /*Attributes      */
-    H5_PKG_AC,        /*Meta data cache    */
-    H5_PKG_B,        /*B-trees      */
-    H5_PKG_D,        /*Datasets      */
-    H5_PKG_E,        /*Error handling    */
-    H5_PKG_F,        /*Files        */
-    H5_PKG_G,        /*Groups      */
-    H5_PKG_HG,        /*Global heap      */
-    H5_PKG_HL,        /*Local heap      */
-    H5_PKG_I,        /*Interface      */
-    H5_PKG_MF,        /*File memory management  */
-    H5_PKG_MM,        /*Core memory management  */
-    H5_PKG_O,        /*Object headers    */
-    H5_PKG_P,        /*Property lists    */
-    H5_PKG_S,        /*Data spaces      */
-    H5_PKG_T,        /*Data types      */
-    H5_PKG_V,        /*Vector functions    */
-    H5_PKG_Z,        /*Raw data filters    */
-    H5_NPKGS        /*Must be last      */
+    H5_PKG_A,       /* Attributes               */
+    H5_PKG_AC,      /* Metadata cache           */
+    H5_PKG_B,       /* B-trees                  */
+    H5_PKG_D,       /* Datasets                 */
+    H5_PKG_E,       /* Error handling           */
+    H5_PKG_F,       /* Files                    */
+    H5_PKG_G,       /* Groups                   */
+    H5_PKG_HG,      /* Global heaps             */
+    H5_PKG_HL,      /* Local heaps              */
+    H5_PKG_I,       /* IDs                      */
+    H5_PKG_MF,      /* File memory management   */
+    H5_PKG_MM,      /* Core memory management   */
+    H5_PKG_O,       /* Object headers           */
+    H5_PKG_P,       /* Property lists           */
+    H5_PKG_S,       /* Dataspaces               */
+    H5_PKG_T,       /* Datatypes                */
+    H5_PKG_V,       /* Vector functions         */
+    H5_PKG_VL,      /* VOL functions            */
+    H5_PKG_Z,       /* Raw data filters         */
+    H5_NPKGS        /* Must be last             */
 } H5_pkg_t;
 
 typedef struct H5_debug_open_stream_t {

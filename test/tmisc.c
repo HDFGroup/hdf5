@@ -30,7 +30,6 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 #include "H5Dpkg.h"         /* Datasets                 */
-#include "H5Iprivate.h"     /* IDs, can be removed when H5I_REFERENCE is gone */
 
 /* Definitions for misc. test #1 */
 #define MISC1_FILE  "tmisc1.h5"
@@ -2997,7 +2996,9 @@ test_misc19(void)
     hid_t emid = -1;                /* Error Message ID         */
     hid_t esid = -1;                /* Error Stack ID           */
     hid_t vfdid = -1;               /* Virtual File Driver ID   */
+    hid_t volid = -1;               /* Virtual Object Layer ID  */
     H5FD_class_t *vfd_cls = NULL;   /* VFD class                */
+    H5VL_class_t *vol_cls = NULL;   /* VOL class                */
     int rc;                         /* Reference count          */
     herr_t ret;                     /* Generic return value     */
 
@@ -3448,33 +3449,43 @@ test_misc19(void)
 
     HDfree(vfd_cls);
 
-/* Check H5I operations on references */
+/* Check H5I operations on virtual object drivers */
 
-    /* Reference IDs are not used by the library so there's no
-     * way of testing if incr/decr, etc. work. Instead, just
-     * do a quick smoke check to ensure that a couple of basic
-     * calls return sane values.
-     *
-     * H5I_REFERENCE has been declared deprecated with a tentative
-     * removal version of HDF5 1.12.0.
-     *
-     * Delete this entire block when H5I_REFERENCE no longer exists.
-     *
-     * The H5Iprivate.h header was included to support H5I_nmembers()
-     * so that can also probably be removed as well.
-     */
-{
-    htri_t tf;                      /* Boolean generic return   */
-    int64_t num_members;            /* Number of members in type */
+    /* Get a VOL class to register */
+    vol_cls = h5_get_dummy_vol_class();
+    CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
 
-    tf = H5Itype_exists(H5I_REFERENCE);
-    VERIFY(tf, TRUE, "H5Itype_exists");
+    /* Register a virtual object driver */
+    volid = H5VLregister(vol_cls);
+    CHECK(volid, FAIL, "H5VLregister");
 
-    num_members = 999;
-    num_members = H5I_nmembers(H5I_REFERENCE);
-    VERIFY(num_members, 0, "H5Inmembers");
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
 
-} /* end block */
+    /* Increment the reference count */
+    rc = H5Iinc_ref(volid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Unregister the VOL driver normally */
+    ret = H5VLunregister(volid);
+    CHECK(ret, FAIL, "H5VLunregister");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Unregister the VOL driver by decrementing the reference count */
+    rc = H5Idec_ref(volid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try unregistering the VOL driver again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5VLunregister(volid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5VLunregister");
+
+    HDfree(vol_cls);
 
 } /* end test_misc19() */
 

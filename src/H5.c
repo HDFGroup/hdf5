@@ -172,6 +172,7 @@ H5_init_library(void)
     H5_debug_g.pkg[H5_PKG_S].name = "s";
     H5_debug_g.pkg[H5_PKG_T].name = "t";
     H5_debug_g.pkg[H5_PKG_V].name = "v";
+    H5_debug_g.pkg[H5_PKG_VL].name = "vl";
     H5_debug_g.pkg[H5_PKG_Z].name = "z";
 
     /*
@@ -212,6 +213,8 @@ H5_init_library(void)
      */
     if(H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
+    if(H5VL_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
     if(H5P_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
     if(H5T_init() < 0)
@@ -242,11 +245,6 @@ done:
  *		library-specific data.
  *
  * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Friday, November 20, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -281,11 +279,11 @@ H5_term_library(void)
      */
 #define DOWN(F)								      \
     (((n = H5##F##_term_package()) && (at + 8) < sizeof loop)?	      \
-     (sprintf(loop + at, "%s%s", (at ? "," : ""), #F),			      \
+     (HDsprintf(loop + at, "%s%s", (at ? "," : ""), #F),			      \
       at += HDstrlen(loop + at),					      \
       n):                                                                     \
      ((n > 0 && (at + 5) < sizeof loop) ?				      \
-     (sprintf(loop + at, "..."),					      \
+     (HDsprintf(loop + at, "..."),					      \
       at += HDstrlen(loop + at),					      \
      n) : n))
 
@@ -345,6 +343,7 @@ H5_term_library(void)
             pending += DOWN(AC);
             pending += DOWN(Z);
             pending += DOWN(FD);
+            pending += DOWN(VL);
             pending += DOWN(PL);
             /* Don't shut down the error code until other APIs which use it are shut down */
             if(pending == 0)
@@ -364,8 +363,8 @@ H5_term_library(void)
     if(pending) {
         /* Only display the error message if the user is interested in them. */
         if(func) {
-            fprintf(stderr, "HDF5: infinite loop closing library\n");
-            fprintf(stderr, "      %s\n", loop);
+            HDfprintf(stderr, "HDF5: infinite loop closing library\n");
+            HDfprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
             HDabort();
 #endif /* NDEBUG */
@@ -440,11 +439,6 @@ done:
  *		Failure:	negative if this function is called more than
  *				once or if it is called too late.
  *
- * Programmer:	Robb Matzke
- *              Friday, November 20, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -478,11 +472,6 @@ H5dont_atexit(void)
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Saturday, March 11, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -528,13 +517,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, August 2, 2000
- *
- * Modifications:   Neil Fortner
- *                  Wednesday, April 8, 2009
- *                  Added support for factory free lists
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -577,9 +559,6 @@ done:
  *              'trace' word was shown.
  *
  * Return:      void
- *
- * Programmer:  Robb Matzke
- *              Wednesday, August 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -632,7 +611,7 @@ H5_debug_mask(const char *s)
 		            } /* end if */
                 } /* end for */
                 if (i>=(size_t)H5_NPKGS)
-                    fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
+                    HDfprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
             } /* end if-else */
 
         } else if (HDisdigit(*s)) {
@@ -672,8 +651,6 @@ H5_debug_mask(const char *s)
  *
  * Return:	MPI_SUCCESS
  *
- * Programmer:	Mohamad Chaarawi, February 2015
- *
  *-------------------------------------------------------------------------
  */
 static int H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H5_ATTR_UNUSED *attr_val, int H5_ATTR_UNUSED *flag)
@@ -697,13 +674,6 @@ static int H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED key
  *		printf("version %u.%u release %u", maj, min, rel)
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Unknown
- *
- * Modifications:
- * 	Robb Matzke, 4 Mar 1998
- *	Now use "normal" data types for the interface.  Any of the arguments
- *	may be null pointers
  *
  *-------------------------------------------------------------------------
  */
@@ -737,13 +707,6 @@ done:
  * Return:	Success:	SUCCEED
  *
  *		Failure:	abort()
- *
- * Programmer:	Robb Matzke
- *              Tuesday, April 21, 1998
- *
- * Modifications:
- *	Albert Cheng, May 12, 2001
- *	Added verification of H5_VERS_INFO.
  *
  *-------------------------------------------------------------------------
  */
@@ -869,11 +832,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -895,11 +853,6 @@ done:
  * Purpose:	Terminate the library and release all resources.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Friday, January 30, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

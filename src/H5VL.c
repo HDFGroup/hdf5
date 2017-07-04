@@ -104,8 +104,8 @@ H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
  * Purpose:     Registers a new vol plugin as a member of the virtual object
  *              layer class.
  *
- * Return:      Success:    A vol plugin ID which is good until the
- *                          library is closed or the plugin is
+ * Return:      Success:    A vol driver ID which is good until the
+ *                          library is closed or the driver is
  *                          unregistered.
  *
  *              Failure:    A negative value.
@@ -127,7 +127,7 @@ H5VLregister(const H5VL_class_t *cls)
     if(cls->value > UINT_MAX)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "registered class value must not be larger than %u", UINT_MAX)
     if(!cls->name)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "invalid VOL class name");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "VOL class name cannot be the NULL pointer");
 
     op_data.ret_id = FAIL;
     op_data.name = cls->name;
