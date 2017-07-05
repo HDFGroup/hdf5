@@ -2664,6 +2664,14 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
             local_info_array[i].io_size = (size_t) select_npoints * type_info->src_type_size;
 
+            /* XXX: Currently the full overwrite status of a chunk is only obtained on a per-process
+             * basis. This means that if the total selection in the chunk, as determined by the combination
+             * of selections of all of the processes interested in the chunk, covers the entire chunk,
+             * the performance optimization of not reading the chunk from the file is still valid, but
+             * is not applied in the current implementation. Something like an appropriately placed
+             * MPI_Allreduce or a running total of the number of chunk points selected during chunk
+             * redistribution should suffice for implementing this case - JTH.
+             */
             if ((chunk_npoints = H5S_GET_EXTENT_NPOINTS(chunk_info->fspace)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
             local_info_array[i].full_overwrite =
