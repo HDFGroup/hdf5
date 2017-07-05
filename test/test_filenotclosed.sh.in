@@ -29,7 +29,8 @@ TEST_NAME=filenotclosed     # The test name
 TEST_BIN=`pwd`/$TEST_NAME 	# The path of the test binary
 #
 # Run the test
-$RUNSERIAL $TEST_BIN >/dev/null 2>&1 
+#$RUNSERIAL $TEST_BIN >/dev/null 2>&1 
+$RUNSERIAL $TEST_BIN 2>&1 
 exitcode=$?
 if [ $exitcode -eq 0 ]; then
     echo "Test PASSED"

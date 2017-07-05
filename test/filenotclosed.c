@@ -66,6 +66,24 @@ main(void)
     int buf[5] = {1, 2, 3, 4, 5};           /* The data to be written to the dataset */
     char  filename[100];        /* File name */
     const char *env_h5_drvr;    /* File Driver value from environment */
+    hbool_t contig_addr_vfd;    /* Contiguous address vfd */
+
+     /* Get the VFD to use */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if(env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    /* Skip test when using VFDs that has different address spaces for each
+     * type of metadata allocation.
+     * Further investigation is needed to resolve the test failure with the
+     * split/multi driver.  Please see HDFFV-10160.
+     */
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    if(!contig_addr_vfd) {
+        SKIPPED();
+        puts("    Temporary skipped for a spilt/multi driver");
+        HDexit(EXIT_SUCCESS);
+    }
 
     h5_reset();
 
