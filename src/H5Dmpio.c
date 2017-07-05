@@ -172,6 +172,8 @@ static herr_t H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io
 static int H5D__cmp_chunk_addr(const void *chunk_addr_info1, const void *chunk_addr_info2);
 static int H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_info_entry1,
     const void *filtered_collective_io_info_entry2);
+static int H5D__cmp_filtered_collective_io_info_entry_owner(const void *filtered_collective_io_info_entry1,
+    const void *filtered_collective_io_info_entry2);
 
 
 /*********************/
