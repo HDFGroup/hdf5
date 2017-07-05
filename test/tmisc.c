@@ -29,7 +29,7 @@
 #include "hdf5.h"
 #include "testhdf5.h"
 #include "H5srcdir.h"
-#include "H5Dpkg.h"    /* Datasets         */
+#include "H5Dpkg.h"         /* Datasets                 */
 
 /* Definitions for misc. test #1 */
 #define MISC1_FILE  "tmisc1.h5"
@@ -2984,19 +2984,23 @@ test_misc18(void)
 static void
 test_misc19(void)
 {
-    hid_t fid;          /* File ID */
-    hid_t sid;          /* 'Space ID */
-    hid_t did;          /* Dataset ID */
-    hid_t tid;          /* 'Type ID */
-    hid_t aid;          /* Attribute ID */
-    hid_t plid;         /* Property List ID */
-    hid_t pcid;         /* Property Class ID */
-    hid_t gid;          /* Group ID */
-    hid_t ecid;         /* Error Class ID */
-    hid_t emid;         /* Error Message ID */
-    hid_t esid;         /* Error Stack ID */
-    int rc;             /* Reference count */
-    herr_t ret;         /* Generic return value */
+    hid_t fid = -1;                 /* File ID                  */
+    hid_t sid = -1;                 /* Dataspace ID             */
+    hid_t did = -1;                 /* Dataset ID               */
+    hid_t tid = -1;                 /* Datatype ID              */
+    hid_t aid = -1;                 /* Attribute ID             */
+    hid_t plid = -1;                /* Property List ID         */
+    hid_t pcid = -1;                /* Property Class ID        */
+    hid_t gid = -1;                 /* Group ID                 */
+    hid_t ecid = -1;                /* Error Class ID           */
+    hid_t emid = -1;                /* Error Message ID         */
+    hid_t esid = -1;                /* Error Stack ID           */
+    hid_t vfdid = -1;               /* Virtual File Driver ID   */
+    hid_t volid = -1;               /* Virtual Object Layer ID  */
+    H5FD_class_t *vfd_cls = NULL;   /* VFD class                */
+    H5VL_class_t *vol_cls = NULL;   /* VOL class                */
+    int rc;                         /* Reference count          */
+    herr_t ret;                     /* Generic return value     */
 
 /* Check H5I operations on files */
 
@@ -3405,6 +3409,83 @@ test_misc19(void)
         ret = H5Eclose_stack(esid);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Eclose_stack");
+
+
+/* Check H5I operations on virtual file drivers */
+
+    /* Get a VFD class to register */
+    vfd_cls = h5_get_dummy_vfd_class();
+    CHECK(vfd_cls, NULL, "h5_get_dummy_vfd_class");
+
+    /* Register a virtual file driver */
+    vfdid = H5FDregister(vfd_cls);
+    CHECK(vfdid, FAIL, "H5FDregister");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(vfdid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Increment the reference count */
+    rc = H5Iinc_ref(vfdid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Unregister the VFD normally */
+    ret = H5FDunregister(vfdid);
+    CHECK(ret, FAIL, "H5FDunregister");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(vfdid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Unregister the VFD by decrementing the reference count */
+    rc = H5Idec_ref(vfdid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try unregistering the VFD again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5FDunregister(vfdid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5FDunregister");
+
+    HDfree(vfd_cls);
+
+/* Check H5I operations on virtual object drivers */
+
+    /* Get a VOL class to register */
+    vol_cls = h5_get_dummy_vol_class();
+    CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
+
+    /* Register a virtual object driver */
+    volid = H5VLregister(vol_cls);
+    CHECK(volid, FAIL, "H5VLregister");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Increment the reference count */
+    rc = H5Iinc_ref(volid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Unregister the VOL driver normally */
+    ret = H5VLunregister(volid);
+    CHECK(ret, FAIL, "H5VLunregister");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Unregister the VOL driver by decrementing the reference count */
+    rc = H5Idec_ref(volid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try unregistering the VOL driver again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5VLunregister(volid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5VLunregister");
+
+    HDfree(vol_cls);
 
 } /* end test_misc19() */
 

@@ -214,6 +214,9 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
         case H5I_DATASPACE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of dataspace")
 
+        case H5I_VOL:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of VOL plugin")
+
         case H5I_DATASET:
             {
                 H5D_t	*dset;

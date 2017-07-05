@@ -189,6 +189,7 @@ public class HDF5Constants {
     public static final long H5E_UNSUPPORTED = H5E_UNSUPPORTED();
     public static final long H5E_VERSION = H5E_VERSION();
     public static final long H5E_VFL = H5E_VFL();
+    public static final long H5E_VOL = H5E_VOL();
     public static final long H5E_WALK_DOWNWARD = H5E_WALK_DOWNWARD();
     public static final long H5E_WALK_UPWARD = H5E_WALK_UPWARD();
     public static final long H5E_WRITEERROR = H5E_WRITEERROR();
@@ -312,6 +313,7 @@ public class HDF5Constants {
     public static final int H5I_REFERENCE = H5I_REFERENCE();
     public static final int H5I_UNINIT = H5I_UNINIT();
     public static final int H5I_VFL = H5I_VFL();
+    public static final int H5I_VOL = H5I_VOL();
 
     public static final int H5L_TYPE_ERROR = H5L_TYPE_ERROR();
     public static final int H5L_TYPE_HARD = H5L_TYPE_HARD();
@@ -966,6 +968,8 @@ public class HDF5Constants {
 
     private static native final long H5E_VFL();
 
+    private static native final long H5E_VOL();
+
     private static native final long H5E_WALK_DOWNWARD();
 
     private static native final long H5E_WALK_UPWARD();
@@ -1201,6 +1205,8 @@ public class HDF5Constants {
     private static native final int H5I_UNINIT();
 
     private static native final int H5I_VFL();
+
+    private static native final int H5I_VOL();
 
     private static native final int H5L_TYPE_ERROR();
 

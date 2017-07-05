@@ -53,7 +53,6 @@
 #   include <limits.h>
 #   include <math.h>
 #   include <signal.h>
-#   include <stdarg.h>
 #   include <stdio.h>
 #   include <stdlib.h>
 #   include <string.h>
@@ -1688,25 +1687,26 @@ extern char *strdup(const char *s);
  *    information about the package in H5_init_library().
  */
 typedef enum {
-    H5_PKG_A,        /*Attributes      */
-    H5_PKG_AC,        /*Meta data cache    */
-    H5_PKG_B,        /*B-trees      */
-    H5_PKG_D,        /*Datasets      */
-    H5_PKG_E,        /*Error handling    */
-    H5_PKG_F,        /*Files        */
-    H5_PKG_G,        /*Groups      */
-    H5_PKG_HG,        /*Global heap      */
-    H5_PKG_HL,        /*Local heap      */
-    H5_PKG_I,        /*Interface      */
-    H5_PKG_MF,        /*File memory management  */
-    H5_PKG_MM,        /*Core memory management  */
-    H5_PKG_O,        /*Object headers    */
-    H5_PKG_P,        /*Property lists    */
-    H5_PKG_S,        /*Data spaces      */
-    H5_PKG_T,        /*Data types      */
-    H5_PKG_V,        /*Vector functions    */
-    H5_PKG_Z,        /*Raw data filters    */
-    H5_NPKGS        /*Must be last      */
+    H5_PKG_A,       /* Attributes               */
+    H5_PKG_AC,      /* Metadata cache           */
+    H5_PKG_B,       /* B-trees                  */
+    H5_PKG_D,       /* Datasets                 */
+    H5_PKG_E,       /* Error handling           */
+    H5_PKG_F,       /* Files                    */
+    H5_PKG_G,       /* Groups                   */
+    H5_PKG_HG,      /* Global heaps             */
+    H5_PKG_HL,      /* Local heaps              */
+    H5_PKG_I,       /* IDs                      */
+    H5_PKG_MF,      /* File memory management   */
+    H5_PKG_MM,      /* Core memory management   */
+    H5_PKG_O,       /* Object headers           */
+    H5_PKG_P,       /* Property lists           */
+    H5_PKG_S,       /* Dataspaces               */
+    H5_PKG_T,       /* Datatypes                */
+    H5_PKG_V,       /* Vector functions         */
+    H5_PKG_VL,      /* VOL functions            */
+    H5_PKG_Z,       /* Raw data filters         */
+    H5_NPKGS        /* Must be last             */
 } H5_pkg_t;
 
 typedef struct H5_debug_open_stream_t {
@@ -1735,76 +1735,90 @@ extern H5_debug_t    H5_debug_g;
 extern char H5libhdf5_settings[]; /* embedded library information */
 
 /*-------------------------------------------------------------------------
- * Purpose:  These macros are inserted automatically just after the
- *    FUNC_ENTER() macro of API functions and are used to trace
- *    application program execution. Unless H5_DEBUG_API has been
- *    defined they are no-ops.
+ * Purpose: These macros are inserted automatically just after the
+ *          FUNC_ENTER() macro of API functions and are used to trace
+ *          application program execution. Unless H5_DEBUG_API has been
+ *          defined they are no-ops.
  *
- * Arguments:  R  - Return type encoded as a string
- *    T  - Argument types encoded as a string
- *    A0-An  - Arguments.  The number at the end of the macro name
- *        indicates the number of arguments.
+ * Arguments:   R  - Return type encoded as a string
+ *              T  - Argument types encoded as a string
+ *              A0-An  - Arguments.  The number at the end of the macro name
+ *                                   indicates the number of arguments.
  *
- * Programmer:  Robb Matzke
- *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_DEBUG_API
-#define H5TRACE_DECL         const char *RTYPE=NULL;                                      \
-                                           double CALLTIME;
-#define H5TRACE0(R,T)         RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T)
-#define H5TRACE1(R,T,A0)       RTYPE=R;                                      \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0)
-#define H5TRACE2(R,T,A0,A1)       RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1)
-#define H5TRACE3(R,T,A0,A1,A2)       RTYPE=R;                                      \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2)
-#define H5TRACE4(R,T,A0,A1,A2,A3)     RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3)
-#define H5TRACE5(R,T,A0,A1,A2,A3,A4)     RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4)
-#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)     RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5)
-#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6) RTYPE=R;                                                     \
-             CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6)
-#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7) RTYPE=R;                                                  \
-                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7)
-#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8) RTYPE=R;                                               \
-                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8)
-#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9) RTYPE=R;                                           \
-                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9)
-#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) RTYPE=R;                                       \
-                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
-                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9, \
-                                                             #A10,A10)
-#define H5TRACE_RETURN(V)       if (RTYPE) {                                                 \
-                H5_trace(&CALLTIME,FUNC,RTYPE,NULL,V);                    \
-                RTYPE=NULL;                                               \
-             }
+
+#define H5TRACE_DECL                                                                                    \
+            const char *RTYPE = NULL;                                                                   \
+            double CALLTIME;
+
+#define H5TRACE0(R,T)                                                                                   \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T)
+#define H5TRACE1(R,T,A0)                                                                                \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0)
+#define H5TRACE2(R,T,A0,A1)                                                                             \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1)
+#define H5TRACE3(R,T,A0,A1,A2)                                                                          \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2)
+#define H5TRACE4(R,T,A0,A1,A2,A3)                                                                       \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3)
+#define H5TRACE5(R,T,A0,A1,A2,A3,A4)                                                                    \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4)
+#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)                                                                 \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5)
+#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6)                                                              \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6)
+#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7)                                                           \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7)
+#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)                                                        \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,      \
+                                          #A8,A8)
+#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)                                                    \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,      \
+                                          #A8,A8,#A9,A9)
+#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)                                                \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,      \
+                                          #A8,A8,#A9,A9,#A10,A10)
+#define H5TRACE12(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)                                            \
+            RTYPE=R;                                                                                    \
+            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,#A4,A4,#A5,A5,#A6,A6,#A7,A7,      \
+                                          #A8,A8,#A9,A9,#A10,A10,#A11,A11)
+
+#define H5TRACE_RETURN(V)                                                                               \
+            if (RTYPE) {                                                                                \
+                H5_trace(&CALLTIME, FUNC, RTYPE, NULL, V);                                              \
+                RTYPE = NULL;                                                                           \
+            }
 #else
-#define H5TRACE_DECL                      /*void*/
-#define H5TRACE0(R,T)                      /*void*/
-#define H5TRACE1(R,T,A0)                    /*void*/
-#define H5TRACE2(R,T,A0,A1)                    /*void*/
-#define H5TRACE3(R,T,A0,A1,A2)                    /*void*/
-#define H5TRACE4(R,T,A0,A1,A2,A3)                  /*void*/
-#define H5TRACE5(R,T,A0,A1,A2,A3,A4)                  /*void*/
-#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)                  /*void*/
-#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6)              /*void*/
-#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7)           /*void*/
-#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)        /*void*/
-#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)    /*void*/
-#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) /*void*/
-#define H5TRACE_RETURN(V)                    /*void*/
-#endif
+#define H5TRACE_DECL                                            /*void*/
+#define H5TRACE0(R,T)                                           /*void*/
+#define H5TRACE1(R,T,A0)                                        /*void*/
+#define H5TRACE2(R,T,A0,A1)                                     /*void*/
+#define H5TRACE3(R,T,A0,A1,A2)                                  /*void*/
+#define H5TRACE4(R,T,A0,A1,A2,A3)                               /*void*/
+#define H5TRACE5(R,T,A0,A1,A2,A3,A4)                            /*void*/
+#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)                         /*void*/
+#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6)                      /*void*/
+#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7)                   /*void*/
+#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)                /*void*/
+#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)            /*void*/
+#define H5TRACE11(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)        /*void*/
+#define H5TRACE12(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)    /*void*/
+#define H5TRACE_RETURN(V)                                       /*void*/
+#endif /* H5_DEBUG_API */
 
 H5_DLL double H5_trace(const double *calltime, const char *func, const char *type, ...);
 
@@ -2599,6 +2613,7 @@ H5_DLL int H5S_top_term_package(void);
 H5_DLL int H5SL_term_package(void);
 H5_DLL int H5T_term_package(void);
 H5_DLL int H5T_top_term_package(void);
+H5_DLL int H5VL_term_package(void);
 H5_DLL int H5Z_term_package(void);
 
 /* Checksum functions */

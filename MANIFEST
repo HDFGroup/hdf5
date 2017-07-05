@@ -565,6 +565,7 @@
 ./src/H5EAsblock.c
 ./src/H5EAstat.c
 ./src/H5EAtest.c
+./src/H5ESpublic.h
 ./src/H5F.c
 ./src/H5Faccum.c
 ./src/H5Fcwfs.c
@@ -869,6 +870,12 @@
 ./src/H5Tvlen.c
 ./src/H5TS.c
 ./src/H5TSprivate.h
+./src/H5VL.c
+./src/H5VLint.c
+./src/H5VLmodule.h
+./src/H5VLpkg.h
+./src/H5VLprivate.h
+./src/H5VLpublic.h
 ./src/H5VM.c
 ./src/H5VMprivate.h
 ./src/H5WB.c
@@ -956,6 +963,7 @@
 ./test/filespace_1_8.h5
 ./test/filespace_1_6.h5
 ./test/freespace.c
+./test/filenotclosed.c
 ./test/file_image.c
 ./test/file_image_core_test.h5
 ./test/fill_old.h5
@@ -1018,6 +1026,7 @@
 ./test/noencoder.h5
 ./test/none.h5
 ./test/ntypes.c
+./test/null_vol.c
 ./test/ohdr.c
 ./test/objcopy.c
 ./test/page_buffer.c
@@ -1057,6 +1066,7 @@
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
+./test/test_filenotclosed.sh.in
 ./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
@@ -1106,6 +1116,7 @@
 ./test/use_disable_mdc_flushes.c
 ./test/use.h
 ./test/vfd.c
+./test/vol.c
 ./test/test_filters_le.h5
 ./test/test_filters_be.h5
 ./test/gen_filters.c
@@ -1275,20 +1286,16 @@
 ./tools/test/h5import/h5importtestutil.sh.in
 
 # testfiles for h5import
-./tools/test/h5import/testfiles/binfp64.conf
 ./tools/test/h5import/testfiles/binfp64.h5
-./tools/test/h5import/testfiles/binin16.conf
 ./tools/test/h5import/testfiles/binin16.h5
-./tools/test/h5import/testfiles/binin32.conf
 ./tools/test/h5import/testfiles/binin32.h5
-./tools/test/h5import/testfiles/binin8.conf
 ./tools/test/h5import/testfiles/binin8.h5
-./tools/test/h5import/testfiles/binin8w.conf
 ./tools/test/h5import/testfiles/binin8w.h5
-./tools/test/h5import/testfiles/binuin16.conf
 ./tools/test/h5import/testfiles/binuin16.h5
-./tools/test/h5import/testfiles/binuin32.conf
 ./tools/test/h5import/testfiles/binuin32.h5
+./tools/test/h5import/testfiles/tall_fp32.ddl
+./tools/test/h5import/testfiles/tall_i32.ddl
+./tools/test/h5import/testfiles/tintsattrs_u32.ddl
 ./tools/test/h5import/testfiles/textpfe.conf
 ./tools/test/h5import/testfiles/textpfe.h5
 ./tools/test/h5import/testfiles/textpfe64.txt

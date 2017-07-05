@@ -253,6 +253,7 @@ set (H5_TESTS
     cache_logging
     cork
     swmr
+    vol
 )
 
 foreach (test ${H5_TESTS})
@@ -373,6 +374,7 @@ set (H5_CHECK_TESTS
     atomic_reader
     links_env
     flushrefresh
+    filenotclosed
 )
 
 foreach (test ${H5_CHECK_TESTS})

@@ -570,6 +570,7 @@ set (test_CLEANFILES
     flushrefresh_VERIFICATION_CHECKPOINT1
     flushrefresh_VERIFICATION_CHECKPOINT2
     flushrefresh_VERIFICATION_DONE
+    filenotclosed.h5
     atomic_data
     accum_swmr_big.h5
     ohdr_swmr.h5
@@ -648,6 +649,7 @@ set (H5TEST_TESTS
     cache_logging
     cork
     swmr
+    vol
 )
 
 foreach (test ${H5TEST_TESTS})
@@ -780,6 +782,22 @@ add_test (NAME H5TEST-cache_image COMMAND $<TARGET_FILE:cache_image>)
 set_tests_properties (H5TEST-cache_image PROPERTIES
     DEPENDS H5TEST-clear-cache_image-objects
     ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=3"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+
+#-- Adding test for filenotclosed
+add_test (
+    NAME H5TEST-clear-filenotclosed-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        filenotclosed.h5
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+add_test (NAME H5TEST-filenotclosed COMMAND $<TARGET_FILE:filenotclosed>)
+set_tests_properties (H5TEST-filenotclosed PROPERTIES
+    DEPENDS H5TEST-clear-filenotclosed-objects
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 

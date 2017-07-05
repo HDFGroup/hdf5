@@ -585,11 +585,11 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])
   fi
 
-  if  test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
+  if test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_C_SIZEOF], [1], [Define if we have Fortran intrinsic C_SIZEOF])
   fi
 
-  if  test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
+  if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
   fi
 
@@ -604,7 +604,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## Is C_LONG_DOUBLE different from C_DOUBLE
   FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
-  if test "X$FORTRAN_HAVE_C_LONG_DOUBLE"; then
+  if test "$FORTRAN_HAVE_C_LONG_DOUBLE" = "1"; then
     PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
     if test "X$C_LONG_DOUBLE_IS_UNIQUE_FORTRAN" = "Xyes"; then
       FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="1"
@@ -1251,10 +1251,11 @@ AC_ARG_WITH([fnord],
   ])
 
 ## ----------------------------------------------------------------------
-## Is the dmalloc present? It has a header file `dmalloc.h' and a library
-## `-ldmalloc' and their locations might be specified with the `--with-dmalloc'
-## command-line switch. The value is an include path and/or a library path.
-## If the library path is specified then it must be preceded by a comma.
+## Is dmalloc (debug malloc library) requested? It has a header file 
+## `dmalloc.h' and a library `-ldmalloc' and their locations might be
+## specified with the `--with-dmalloc' command-line switch. The value 
+## is an include path and/or a library path. If the library path is
+## specified then it must be preceded by a comma.
 ##
 AC_SUBST([HAVE_DMALLOC])
 
@@ -1940,26 +1941,17 @@ AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
                    [Width for printf() for type `long long' or `__int64', use `ll'])
 
 ## ----------------------------------------------------------------------
-## Deprecate old ways of determining debug/production build
-## These can probably be removed in the future (1.10.1?)
+## Remove old ways of determining debug/production build.
+## These were used in 1.8.x and earlier. We should probably keep these checks
+## around to help people migrate to 1.10.x and newer versions.
 ##
 AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug],
-               [DEPRECATED: use --enable-build-mode=debug])],
-              [DEPRECATED_DEBUG=$enableval])
-
-if test "X-$DEPRECATED_DEBUG" != "X-" ; then
-    AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])
-fi
+              [AS_HELP_STRING([--enable-debug], [DEPRECATED: use --enable-build-mode=debug])],
+              [AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])])
 
 AC_ARG_ENABLE([production],
-              [AS_HELP_STRING([--enable-production],
-               [DEPRECATED: use --enable-build-mode=production])],
-              [DEPRECATED_PRODUCTION=$enableval])
-
-if test "X-$DEPRECATED_PRODUCTION" != "X-" ; then
-    AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])
-fi
+              [AS_HELP_STRING([--enable-production], [DEPRECATED: use --enable-build-mode=production])],
+              [AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])])
 
 
 ## ----------------------------------------------------------------------
@@ -3361,6 +3353,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
+                 test/test_filenotclosed.sh
                  test/testswmr.sh
                  test/test_plugin.sh
                  test/test_usecases.sh
