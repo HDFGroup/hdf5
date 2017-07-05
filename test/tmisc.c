@@ -3476,7 +3476,6 @@ test_misc19(void)
 
     HDfree(vfd_cls);
 
-<<<<<<< HEAD
 /* Check H5I operations on virtual object drivers */
 
     /* Get a VOL class to register */
