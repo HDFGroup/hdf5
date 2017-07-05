@@ -6,12 +6,10 @@
 ##
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
 ## terms governing use, modification, and redistribution, is contained in
-## the files COPYING and Copyright.html.  COPYING can be found at the root
-## of the source code distribution tree; Copyright.html can be found at the
-## root level of an installed copy of the electronic HDF5 document set and
-## is linked from the top-level documents page.  It can also be found at
-## http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from help@hdfgroup.org.
+## the COPYING file, which can be found at the root of the source code
+## distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+## If you do not have access to either file, you may request a copy from
+## help@hdfgroup.org.
 
 ## ----------------------------------------------------------------------
 ## Initialize configure.
@@ -587,11 +585,11 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])
   fi
 
-  if  test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
+  if test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_C_SIZEOF], [1], [Define if we have Fortran intrinsic C_SIZEOF])
   fi
 
-  if  test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
+  if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
   fi
 
@@ -606,7 +604,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## Is C_LONG_DOUBLE different from C_DOUBLE
   FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
-  if test "X$FORTRAN_HAVE_C_LONG_DOUBLE"; then
+  if test "$FORTRAN_HAVE_C_LONG_DOUBLE" = "1"; then
     PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
     if test "X$C_LONG_DOUBLE_IS_UNIQUE_FORTRAN" = "Xyes"; then
       FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="1"
@@ -920,14 +918,13 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-
-  ## Disable fortran shared libraries on Mac. (MAM - 03/30/11)
-
+  ## tell libtool to do the right thing with COMMON symbols, this fixes 
+  ## corrupt values with COMMON and EQUIVALENCE when building shared 
+  ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
   case "`uname`" in
     Darwin*)
-    H5_FORTRAN_SHARED="no"
-    CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
-      ;;
+    H5_LDFLAGS="$H5_LDFLAGS -Wl,-commons,use_dylibs"
+    ;;
   esac
 
   ## Report results of check(s)
@@ -1254,10 +1251,11 @@ AC_ARG_WITH([fnord],
   ])
 
 ## ----------------------------------------------------------------------
-## Is the dmalloc present? It has a header file `dmalloc.h' and a library
-## `-ldmalloc' and their locations might be specified with the `--with-dmalloc'
-## command-line switch. The value is an include path and/or a library path.
-## If the library path is specified then it must be preceded by a comma.
+## Is dmalloc (debug malloc library) requested? It has a header file 
+## `dmalloc.h' and a library `-ldmalloc' and their locations might be
+## specified with the `--with-dmalloc' command-line switch. The value 
+## is an include path and/or a library path. If the library path is
+## specified then it must be preceded by a comma.
 ##
 AC_SUBST([HAVE_DMALLOC])
 
@@ -1943,26 +1941,17 @@ AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
                    [Width for printf() for type `long long' or `__int64', use `ll'])
 
 ## ----------------------------------------------------------------------
-## Deprecate old ways of determining debug/production build
-## These can probably be removed in the future (1.10.1?)
+## Remove old ways of determining debug/production build.
+## These were used in 1.8.x and earlier. We should probably keep these checks
+## around to help people migrate to 1.10.x and newer versions.
 ##
 AC_ARG_ENABLE([debug],
-              [AS_HELP_STRING([--enable-debug],
-               [DEPRECATED: use --enable-build-mode=debug])],
-              [DEPRECATED_DEBUG=$enableval])
-
-if test "X-$DEPRECATED_DEBUG" != "X-" ; then
-    AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])
-fi
+              [AS_HELP_STRING([--enable-debug], [DEPRECATED: use --enable-build-mode=debug])],
+              [AC_MSG_ERROR([--enable-debug is deprecated, use --enable-build-mode=debug instead.])])
 
 AC_ARG_ENABLE([production],
-              [AS_HELP_STRING([--enable-production],
-               [DEPRECATED: use --enable-build-mode=production])],
-              [DEPRECATED_PRODUCTION=$enableval])
-
-if test "X-$DEPRECATED_PRODUCTION" != "X-" ; then
-    AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])
-fi
+              [AS_HELP_STRING([--enable-production], [DEPRECATED: use --enable-build-mode=production])],
+              [AC_MSG_ERROR([--enable-production is deprecated, use --enable-build-mode=production instead.])])
 
 
 ## ----------------------------------------------------------------------
@@ -3364,6 +3353,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
+                 test/test_filenotclosed.sh
                  test/testswmr.sh
                  test/test_plugin.sh
                  test/test_usecases.sh
@@ -3486,6 +3476,14 @@ chmod 755 tools/src/misc/h5cc
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
+  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
+  ## on OS X, which is needed when building shared libraries on OS X.  This script 
+  ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
+  case "`uname`" in
+    Darwin*)
+      cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      ;;
+  esac
 fi
 
 if test "X$HDF_CXX" = "Xyes"; then

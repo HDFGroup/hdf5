@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 #-----------------------------------------------------------------------------
 # HDF5 Config file for compiling against hdf5 build/install directory
 #-----------------------------------------------------------------------------
@@ -33,6 +44,7 @@ set (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_ENCODING @HDF5_ENABLE_SZIP_ENCODING@)
 set (${HDF5_PACKAGE_NAME}_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
 set (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS      @HDF5_PACKAGE_EXTLIBS@)
 set (${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES @HDF5_LIBRARIES_TO_EXPORT@)
+set (${HDF5_PACKAGE_NAME}_TOOLSET "@CMAKE_GENERATOR_TOOLSET@")
 
 #-----------------------------------------------------------------------------
 # Dependencies

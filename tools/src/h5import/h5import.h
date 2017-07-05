@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -39,7 +37,7 @@
 
 #define MAX_GROUPS_IN_PATH  20
 #define MAX_PATH_NAME_LENGTH 255
-#define NUM_KEYS 14
+#define NUM_KEYS 15
 #define MIN_NUM_DIMENSION  1
 #define MAX_NUM_DIMENSION  32
 #define BASE_10 10
@@ -58,6 +56,7 @@
 #define COMPRESS_PARAM   11
 #define EXTERNALSTORE    12
 #define EXTEND           13
+#define INPUT_B_ORDER    14
 
 /* data types */
 #define H5DT_INT8      signed char
@@ -84,6 +83,8 @@ struct Input
     struct path_info path;
     int inputClass;
     int inputSize;
+    int inputArchitecture;
+    int inputByteOrder;
     int rank;
     hsize_t* sizeOfDimension;
     int outputClass;
@@ -128,7 +129,8 @@ char keytable[NUM_KEYS][30] = {
         "COMPRESSION-TYPE",
         "COMPRESSION-PARAM",
         "EXTERNAL-STORAGE",
-        "MAXIMUM-DIMENSIONS"
+        "MAXIMUM-DIMENSIONS",
+        "INPUT-BYTE-ORDER"
 };
 
 static int  state_table[15][8] =

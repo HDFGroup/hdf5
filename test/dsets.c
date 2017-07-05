@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -19,10 +17,8 @@
  *
  * Purpose:	Tests the dataset interface (H5D)
  */
-
 #define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
 #define H5D_TESTING
-
 #define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
 #define H5FD_TESTING
 
@@ -571,7 +567,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         if(H5Fclose(file) < 0) goto error;
             file = -1;
 
-        f = HDopen(filename, O_RDONLY, 0);
+        f = HDopen(filename, O_RDONLY);
         HDlseek(f, (off_t)offset, SEEK_SET);
         if(HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2) < 0)
             goto error;
@@ -685,7 +681,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(H5Fclose(file) < 0) goto error;
         file = -1;
 
-        f = HDopen(filename, O_RDONLY, 0);
+        f = HDopen(filename, O_RDONLY);
         HDlseek(f, (off_t)offset, SEEK_SET);
         if(HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2) < 0)
             goto error;
@@ -12639,7 +12635,123 @@ error:
 
 } /* dls_01_main() */
 
+/*-------------------------------------------------------------------------
+ * Function:    test_compact_open_close_dirty
+ *
+ * Purpose:     Verify that the two issues reported in HDFFV-10051 are fixed:
+ *              (1) Repeated open/close of a compact dataset fails due to the
+ *                  increment of ndims in the dataset structure for every open.
+ *              (2) layout "dirty" flag for a compact dataset is not reset
+ *                  properly after flushing the data at dataset close.
+ *              The test for issue #1 is based on compactoc.c attached
+ *              to the jira issue HDFFV-10051
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Vailin Choi; April 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compact_open_close_dirty(hid_t fapl)
+{
+    hid_t       fid = -1;       /* File ID */
+    hid_t       did = -1;       /* Dataset ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list */
+    hsize_t     dims[1] = {10}; /* Dimension */
+    int         wbuf[10];       /* Data buffer */
+    char	    filename[FILENAME_BUF_SIZE];    /* Filename */
+    int         i;              /* Local index variable */
+    hbool_t     dirty;          /* The dirty flag */
 
+    TESTING("compact dataset repeated open/close and dirty flag");
+
+    /* Create a file */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Initialize data */
+    for(i = 0; i < 10; i++)
+        wbuf[i] = i;
+
+    /* Create dataspace */
+    if((sid = H5Screate_simple(1, dims, NULL)) < 0) 
+        TEST_ERROR
+
+    /* Set compact layout */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
+        TEST_ERROR
+    if(H5Pset_layout(dcpl, H5D_COMPACT) < 0) 
+        TEST_ERROR
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) 
+        TEST_ERROR
+
+    /* Create a compact dataset */
+    if((did = H5Dcreate2(fid, DSET_COMPACT_MAX_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Write to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0) 
+        TEST_ERROR
+
+    /* Verify the repeated open/close of the dataset will not fail */
+    for(i = 0; i < 20;i++) {
+        H5E_BEGIN_TRY {
+            did = H5Dopen2 (fid, DSET_COMPACT_MAX_NAME, H5P_DEFAULT);
+        } H5E_END_TRY;
+        if(did < 0)
+            TEST_ERROR
+        if(H5Dclose(did) < 0)
+            TEST_ERROR
+    } 
+
+    /* Open the dataset */
+    if((did = H5Dopen2(fid, DSET_COMPACT_MAX_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Retrieve the "dirty" flag from the compact dataset layout */
+    if(H5D__layout_compact_dirty_test(did, &dirty) < 0)
+        TEST_ERROR
+
+    /* Verify that the "dirty" flag is false */
+    if(dirty)
+        TEST_ERROR
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0) 
+        TEST_ERROR
+
+    /* Close the dataspace */
+    if(H5Sclose(sid) < 0) 
+        TEST_ERROR
+
+    /* Close the dataset creation property list */
+    if(H5Pclose(dcpl) < 0)
+        TEST_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR
+
+     PASSED();
+     return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Dclose(did);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_compact_open_close_dirty() */
 
 
 /*-------------------------------------------------------------------------
@@ -12761,6 +12873,7 @@ main(void)
             nerrors += (test_simple_io(envval, my_fapl) < 0		? 1 : 0);
             nerrors += (test_compact_io(my_fapl) < 0  		? 1 : 0);
             nerrors += (test_max_compact(my_fapl) < 0		? 1 : 0);
+            nerrors += (test_compact_open_close_dirty(my_fapl) < 0     ? 1 : 0);
             nerrors += (test_conv_buffer(file) < 0			? 1 : 0);
             nerrors += (test_tconv(file) < 0			? 1 : 0);
             nerrors += (test_filters(file, my_fapl) < 0		? 1 : 0);

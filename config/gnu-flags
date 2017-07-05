@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 
 
 # This file should be sourced into configure if the compiler is the
@@ -93,13 +91,27 @@ case "$cc_vendor-$cc_version" in
             ;;
     esac
 
-    # General
-    H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs"
+    # General flags
+    #
+    # Note that some of the flags listed here really should be developer
+    # flags (listed in a separate variable, below) but we put them here
+    # because they are not raised by the current code and we'd like to
+    # know if they do start showing up.
+    #
+    # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
+    # warnings that are emitted. If you need it, add it from the 
+    # environment variable at configure time.
+    H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -pedantic -Wall -Wextra -Wbad-function-cast -Wc++-compat -Wcast-align"
+    H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal"
+    H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs"
+    H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith"
+    H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-default -Wswitch-enum"
+    H5_CFLAGS="$H5_CFLAGS -Wundef -Wunused-macros -Wunsafe-loop-optimizations -Wwrite-strings"
 
     # Production
     # NDEBUG is handled explicitly by the configure script
     case "$cc_vendor-$cc_version" in
-      gcc-[34].*)
+      gcc-4.*)
         PROD_CFLAGS=
         ;;
       gcc-[56].*)
@@ -114,7 +126,7 @@ case "$cc_vendor-$cc_version" in
 
     # Debug
     # NDEBUG is handled explicitly by the configure script
-    # -g is hanled by the symbols flags
+    # -g is handled by the symbols flags
     case "$cc_vendor-$cc_version" in
       gcc-[56].*)
         DEBUG_CFLAGS="-ftrapv -fno-common"
@@ -123,22 +135,21 @@ case "$cc_vendor-$cc_version" in
         DEBUG_CFLAGS=
         ;;
     esac
-    #DEBUG_CFLAGS="-fsanitize=undefined"
 
     # Developer warnings (suggestions from gcc, not code problems)
-    DEVELOPER_WARNING_CFLAGS="-Winline -Waggregate-return"
-    NO_DEVELOPER_WARNING_CFLAGS="-Wno-inline -Wno-aggregate-return"
+    DEVELOPER_WARNING_CFLAGS="-Winline -Waggregate-return -Wmissing-format-attribute -Wmissing-noreturn"
+    NO_DEVELOPER_WARNING_CFLAGS="-Wno-inline -Wno-aggregate-return -Wno-missing-format-attribute -Wno-missing-noreturn"
 
     # Symbols
     NO_SYMBOLS_CFLAGS="-s"
-    SYMBOLS_CFLAGS="-g"
+    SYMBOLS_CFLAGS="-g -fno-omit-frame-pointer"
 
     # Profile
     PROFILE_CFLAGS="-pg"
 
     # Optimization
     case "$cc_vendor-$cc_version" in
-      gcc-[34].*)
+      gcc-4.*)
         HIGH_OPT_CFLAGS="-O3"
         DEBUG_OPT_CFLAGS=
         ;;
@@ -152,10 +163,6 @@ case "$cc_vendor-$cc_version" in
         ;;
     esac
     NO_OPT_CFLAGS="-O0"
-
-    # Try out the new "stack protector" feature introduced in gcc 4.1
-    # (We should also think about adding some of the other memory protection options)
-    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wstack-protector -fstack-protector-all"
 
     # Flags are set
     cc_flags_set=yes
@@ -172,375 +179,169 @@ case "$cc_vendor-$cc_version" in
 # include and break it out into it's own section, like the other versions
 # below. -QAK
   gcc-6*)
-    # Append warning flags
-    # Don't use the '-Wtraditional' flag, we're way past having K&R C code
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional"
-    # Don't use the '-Wtraditional-conversion' flag, there's too many warnings
-    #  from GCC's assert macro
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional-conversion"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     # (none, or incorporated in -Wall / -Wextra now)
 
-    # Append more extra warning flags that only gcc 4.3+ know about
+    # Append warning flags that only gcc 4.3+ knows about
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
     H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
 
-    # Append more extra warning flags that only gcc 4.4+ know about
+    # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
-    # Append more extra warning flags that only gcc 4.5+ know about
+    # Append warning flags that only gcc 4.5+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
-    # Append more extra warning flags that only gcc 4.6+ know about
+    # Append warning flags that only gcc 4.6+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
 
-    # Append more extra warning flags that only gcc 4.7+ know about
+    # Append warning flags that only gcc 4.7+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
 
-    # Append more extra warning flags that only gcc 4.8+ know about
+    # Append warning flags that only gcc 4.8+ knows about
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
 
-    # Append more extra warning flags that only gcc 4.9+ know about
+    # Append warning flags that only gcc 4.9+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wdate-time"
 
-    # Append more extra warning flags that only gcc 5.x+ know about
+    # Append warning flags that only gcc 5.x+ knows about
     H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
 
-    # Append more extra warning flags that only gcc 6.x+ know about
+    # Append warning flags that only gcc 6.x+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa"
     ;;
 
   gcc-5*)
-    # Append warning flags
-    # Don't use the '-Wtraditional' flag, we're way past having K&R C code
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional"
-    # Don't use the '-Wtraditional-conversion' flag, there's too many warnings
-    #  from GCC's assert macro
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional-conversion"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     # (none, or incorporated in -Wall / -Wextra now)
 
-    # Append more extra warning flags that only gcc 4.3+ know about
+    # Append warning flags that only gcc 4.3+ knows about
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
     H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
 
-    # Append more extra warning flags that only gcc 4.4+ know about
+    # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
-    # Append more extra warning flags that only gcc 4.5+ know about
+    # Append warning flags that only gcc 4.5+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
-    # Append more extra warning flags that only gcc 4.6+ know about
+    # Append warning flags that only gcc 4.6+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
 
-    # Append more extra warning flags that only gcc 4.7+ know about
+    # Append warning flags that only gcc 4.7+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
 
-    # Append more extra warning flags that only gcc 4.8+ know about
+    # Append warning flags that only gcc 4.8+ knows about
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
 
-    # Append more extra warning flags that only gcc 4.9+ know about
+    # Append warning flags that only gcc 4.9+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wdate-time"
 
-    # Append more extra warning flags that only gcc 5.x+ know about
+    # Append warning flags that only gcc 5.x+ knows about
     H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
     ;;
 
   gcc-4.9*)
-    # Append warning flags
-    # Don't use the '-Wtraditional' flag, we're way past having K&R C code
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional"
-    # Don't use the '-Wtraditional-conversion' flag, there's too many warnings
-    #  from GCC's assert macro
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional-conversion"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     # (none, or incorporated in -Wall / -Wextra now)
 
-    # Append more extra warning flags that only gcc 4.3+ know about
+    # Append warning flags that only gcc 4.3+ knows about
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
     H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
 
-    # Append more extra warning flags that only gcc 4.4+ know about
+    # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
-    # Append more extra warning flags that only gcc 4.5+ know about
+    # Append warning flags that only gcc 4.5+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
-    # Append more extra warning flags that only gcc 4.6+ know about
+    # Append warning flags that only gcc 4.6+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
 
-    # Append more extra warning flags that only gcc 4.7+ know about
+    # Append warning flags that only gcc 4.7+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
 
-    # Append more extra warning flags that only gcc 4.8+ know about
+    # Append warning flags that only gcc 4.8+ knows about
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
 
-    # Append more extra warning flags that only gcc 4.9+ know about
+    # Append warning flags that only gcc 4.9+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wdate-time"
     ;;
 
   gcc-4.8*)
-    # Append warning flags
-    # Don't use the '-Wtraditional' flag, we're way past having K&R C code
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional"
-    # Don't use the '-Wtraditional-conversion' flag, there's too many warnings
-    #  from GCC's assert macro
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional-conversion"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     # (none, or incorporated in -Wall / -Wextra now)
 
-    # Append more extra warning flags that only gcc 4.3+ know about
+    # Append warning flags that only gcc 4.3+ knows about
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
     H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
 
-    # Append more extra warning flags that only gcc 4.4+ know about
+    # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
-    # Append more extra warning flags that only gcc 4.5+ know about
+    # Append warning flags that only gcc 4.5+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init"
 
-    # Append more extra warning flags that only gcc 4.6+ know about
+    # Append warning flags that only gcc 4.6+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
 
-    # Append more extra warning flags that only gcc 4.7+ know about
+    # Append warning flags that only gcc 4.7+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
 
-    # Append more extra warning flags that only gcc 4.8+ know about
+    # Append warning flags that only gcc 4.8+ knows about
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
     ;;
 
   gcc-4.7*)
-    # Append warning flags
-    # Don't use the '-Wtraditional' flag, we're way past having K&R C code
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional"
-    # Don't use the '-Wtraditional-conversion' flag, there's too many warnings
-    #  from GCC's assert macro
-    # H5_CFLAGS="$H5_CFLAGS -Wtraditional-conversion"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning appears to be reliable now...
-    # (this warning was removed in gcc 4.5+)
-    #H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     # (none, or incorporated in -Wall / -Wextra now)
 
-    # Append more extra warning flags that only gcc 4.3+ know about
+    # Append warning flags that only gcc 4.3+ knows about
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
     H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
 
-    # Append more extra warning flags that only gcc 4.4+ know about
+    # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
-    # Append more extra warning flags that only gcc 4.5+ know about
+    # Append warning flags that only gcc 4.5+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
-    # Append more extra warning flags that only gcc 4.6+ know about
+    # Append warning flags that only gcc 4.6+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
 
-    # Append more extra warning flags that only gcc 4.7+ know about
+    # Append warning flags that only gcc 4.7+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
@@ -550,57 +351,22 @@ case "$cc_vendor-$cc_version" in
     # Disable warnings about using 'long long' type
     H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
 
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning appears to be reliable now...
-    # (this warning was removed in gcc 4.5+)
-    #H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     # (none, or incorporated in -Wall / -Wextra now)
 
-    # Append more extra warning flags that only gcc 4.3+ know about
+    # Append warning flags that only gcc 4.3+ knows about
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
     H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
 
-    # Append more extra warning flags that only gcc 4.4+ know about
+    # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
-    # Append more extra warning flags that only gcc 4.5+ know about
+    # Append warning flags that only gcc 4.5+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
-    # Append more extra warning flags that only gcc 4.6+ know about
+    # Append warning flags that only gcc 4.6+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
     NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
@@ -610,54 +376,19 @@ case "$cc_vendor-$cc_version" in
     # Disable warnings about using 'long long' type
     H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
 
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning appears to be reliable now...
-    # (this warning was removed in gcc 4.5+)
-    #H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     # (none, or incorporated in -Wall / -Wextra now)
 
-    # Append more extra warning flags that only gcc 4.3+ know about
+    # Append warning flags that only gcc 4.3+ knows about
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
     H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
 
-    # Append more extra warning flags that only gcc 4.4+ know about
+    # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
-    # Append more extra warning flags that only gcc 4.5+ know about
+    # Append warning flags that only gcc 4.5+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
     ;;
 
@@ -665,50 +396,16 @@ case "$cc_vendor-$cc_version" in
     # Disable warnings about using 'long long' type
     H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
 
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
 
-    # Append more extra warning flags that only gcc 4.3+ know about
+    # Append warning flags that only gcc 4.3+ knows about
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
     H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
 
-    # Append more extra warning flags that only gcc 4.4+ know about
+    # Append warning flags that only gcc 4.4+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
     ;;
 
@@ -716,44 +413,15 @@ case "$cc_vendor-$cc_version" in
     # Disable warnings about using 'long long' type
     H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
 
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
+    # Append warning flags that only gcc 4.1+ knows about
+    # -Wvolatile-register-var was later incorporated into -Wall and
+    # needs to be specified explicitly for gcc 4.1-4.3.
+    H5_CFLAGS="$H5_CFLAGS -Wvolatile-register-var"
 
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
 
-    # Append more extra warning flags that only gcc 4.3+ know about
+    # Append warning flags that only gcc 4.3+ knows about
     #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... -QAK
@@ -764,41 +432,12 @@ case "$cc_vendor-$cc_version" in
     # Disable warnings about using 'long long' type
     H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
 
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
+    # Append warning flags that only gcc 4.1+ knows about
+    # -Wvolatile-register-var was later incorporated into -Wall and
+    # needs to be specified explicitly for gcc 4.1-4.3.
+    H5_CFLAGS="$H5_CFLAGS -Wvolatile-register-var"
 
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
+    # Append warning flags that only gcc 4.2+ knows about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
     ;;
 
@@ -806,172 +445,12 @@ case "$cc_vendor-$cc_version" in
     # Disable warnings about using 'long long' type
     H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
 
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
+    # Append warning flags that only gcc 4.1+ knows about
+    # -Wvolatile-register-var was later incorporated into -Wall and
+    # needs to be specified explicitly for gcc 4.1-4.3.
+    H5_CFLAGS="$H5_CFLAGS -Wvolatile-register-var"
     ;;
 
-  gcc-4.0*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-    ;;
-
-  gcc-3.4*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append more extra warning flags that only gcc3.4+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-    ;;
-
-  gcc-3.3*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
-
-    # Append more extra warning flags that only gcc3.3+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-    ;;
-
-  gcc-3.2*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append more extra warning flags that only gcc3.2+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wpacked -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wmissing-noreturn"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-missing-noreturn"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
-    ;;
-
-  gcc-3*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append some extra warning flags that only gcc3+ know about
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-    ;;
 esac
 
 # Clear cc info if no flags set

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -38,6 +36,12 @@
 #include "H5Fpkg.h"
 #include "H5Gpkg.h"
 #include "H5Ipkg.h"
+
+/* Evict on close is not supported under parallel at this time.
+ * In the meantime, we just run a simple check that EoC can't be
+ * enabled in parallel HDF5.
+ */
+#ifndef H5_HAVE_PARALLEL
 
 /* Uncomment to manually inspect cache states */
 /* (Requires debug build of the library) */
@@ -991,4 +995,97 @@ error:
     return EXIT_FAILURE;
 
 } /* end main() */
+
+#else
+
+
+/*-------------------------------------------------------------------------
+ * Function:    check_evict_on_close_parallel_fail()
+ *
+ * Purpose:     Verify that the H5Pset_evict_on_close() call fails in
+ *              parallel HDF5.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+check_evict_on_close_parallel_fail(void)
+{
+    hid_t       fapl_id = -1;
+    hbool_t     evict_on_close;
+    herr_t      status;
+
+    TESTING("evict on close fails in parallel");
+
+    /* Create a fapl */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set the evict on close property (should fail)*/
+    evict_on_close = TRUE;
+    H5E_BEGIN_TRY {
+        status = H5Pset_evict_on_close(fapl_id, evict_on_close);
+    } H5E_END_TRY;
+    if(status >= 0)
+        FAIL_PUTS_ERROR("H5Pset_evict_on_close() did not fail in parallel HDF5.");
+
+    /* close fapl */
+    if(H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5_FAILED();
+    return FAIL;
+
+} /* check_evict_on_close_parallel_fail() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    main (parallel version)
+ *
+ * Return:      EXIT_FAILURE/EXIT_SUCCESS
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+main(void)
+{
+    unsigned    nerrors = 0;        /* number of test errors                */
+
+    HDprintf("Testing evict-on-close cache behavior\n");
+
+    /* Initialize */
+    h5_reset();
+
+    /* Test that EoC fails in parallel HDF5 */
+    nerrors += check_evict_on_close_parallel_fail() < 0 ? 1 : 0;
+
+    if(nerrors)
+        goto error;
+
+    HDprintf("All evict-on-close tests passed.\n");
+    HDprintf("Note that EoC is not supported under parallel so most tests are skipped.\n");
+
+    return EXIT_SUCCESS;
+
+error:
+
+    HDprintf("***** %u evict-on-close test%s FAILED! *****\n",
+        nerrors, nerrors > 1 ? "S" : "");
+
+    return EXIT_FAILURE;
+
+} /* main() - parallel */
+
+#endif /* H5_HAVE_PARALLEL */
 

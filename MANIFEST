@@ -5,12 +5,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 #------------------------------------------------------------------------------
 # This is the list of files that are part of HDF5 source distribution.
@@ -433,7 +431,9 @@
 
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
-./release_docs/HISTORY-1_9.txt
+./release_docs/HISTORY-1_8.txt
+./release_docs/HISTORY-1_10.txt
+./release_docs/HISTORY-1_8_0-1_10_0.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
@@ -956,6 +956,7 @@
 ./test/filespace_1_8.h5
 ./test/filespace_1_6.h5
 ./test/freespace.c
+./test/filenotclosed.c
 ./test/file_image.c
 ./test/file_image_core_test.h5
 ./test/fill_old.h5
@@ -1057,6 +1058,7 @@
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
+./test/test_filenotclosed.sh.in
 ./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
@@ -1275,20 +1277,16 @@
 ./tools/test/h5import/h5importtestutil.sh.in
 
 # testfiles for h5import
-./tools/test/h5import/testfiles/binfp64.conf
 ./tools/test/h5import/testfiles/binfp64.h5
-./tools/test/h5import/testfiles/binin16.conf
 ./tools/test/h5import/testfiles/binin16.h5
-./tools/test/h5import/testfiles/binin32.conf
 ./tools/test/h5import/testfiles/binin32.h5
-./tools/test/h5import/testfiles/binin8.conf
 ./tools/test/h5import/testfiles/binin8.h5
-./tools/test/h5import/testfiles/binin8w.conf
 ./tools/test/h5import/testfiles/binin8w.h5
-./tools/test/h5import/testfiles/binuin16.conf
 ./tools/test/h5import/testfiles/binuin16.h5
-./tools/test/h5import/testfiles/binuin32.conf
 ./tools/test/h5import/testfiles/binuin32.h5
+./tools/test/h5import/testfiles/tall_fp32.ddl
+./tools/test/h5import/testfiles/tall_i32.ddl
+./tools/test/h5import/testfiles/tintsattrs_u32.ddl
 ./tools/test/h5import/testfiles/textpfe.conf
 ./tools/test/h5import/testfiles/textpfe.h5
 ./tools/test/h5import/testfiles/textpfe64.txt
@@ -1471,10 +1469,14 @@
 ./tools/test/misc/testfiles/h5clear_no_mdc_image.ddl
 ./tools/test/misc/testfiles/h5clear_open_fail.ddl
 ./tools/test/misc/testfiles/h5clear_usage.ddl
+./tools/test/misc/testfiles/h5clear_log_v3.h5
+./tools/test/misc/testfiles/h5clear_mdc_image.h5
+./tools/test/misc/testfiles/h5clear_sec2_v0.h5
+./tools/test/misc/testfiles/h5clear_sec2_v2.h5
+./tools/test/misc/testfiles/h5clear_sec2_v3.h5
+./tools/test/misc/testfiles/latest_h5clear_log_v3.h5
+./tools/test/misc/testfiles/latest_h5clear_sec2_v3.h5
 ./tools/test/misc/testfiles/mod_h5clear_mdc_image.h5
-./tools/test/misc/testfiles/orig_h5clear_sec2_v0.h5
-./tools/test/misc/testfiles/orig_h5clear_sec2_v2.h5
-./tools/test/misc/testfiles/orig_h5clear_sec2_v3.h5
 ./tools/test/misc/testfiles/h5mkgrp_help.txt
 ./tools/test/misc/testfiles/h5mkgrp_version.txt.in
 ./tools/test/misc/h5perf_gentest.c
@@ -1625,7 +1627,8 @@
 ./tools/testfiles/tbinregR.exp
 ./tools/testfiles/tbinregR.ddl
 ./tools/testfiles/tbitfields.h5
-./tools/testfiles/tbitnopaque.ddl
+./tools/testfiles/tbitnopaque_be.ddl
+./tools/testfiles/tbitnopaque_le.ddl
 ./tools/testfiles/tbitnopaque.h5
 ./tools/testfiles/tboot1.ddl
 ./tools/testfiles/tboot2.ddl
@@ -2075,7 +2078,8 @@
 ./tools/testfiles/tarray6.h5.xml
 ./tools/testfiles/tarray7.h5.xml
 ./tools/testfiles/tattr.h5.xml
-./tools/testfiles/tbitfields.h5.xml
+./tools/testfiles/tbitfields_be.h5.xml
+./tools/testfiles/tbitfields_le.h5.xml
 ./tools/testfiles/tcompound.h5.xml
 ./tools/testfiles/tcompound2.h5.xml
 ./tools/testfiles/tcompound_complex.h5.xml
@@ -2234,6 +2238,8 @@
 ./tools/test/h5diff/testfiles/h5diff_709.txt
 ./tools/test/h5diff/testfiles/h5diff_710.txt
 ./tools/test/h5diff/testfiles/h5diff_80.txt
+./tools/test/h5diff/testfiles/h5diff_800.txt
+./tools/test/h5diff/testfiles/h5diff_801.txt
 ./tools/test/h5diff/testfiles/h5diff_90.txt
 ./tools/test/h5diff/testfiles/h5diff_100.txt
 ./tools/test/h5diff/testfiles/h5diff_101.txt
@@ -2344,6 +2350,7 @@
 ./tools/test/h5diff/testfiles/h5diff_basic2.h5
 ./tools/test/h5diff/testfiles/h5diff_dset1.h5
 ./tools/test/h5diff/testfiles/h5diff_dset2.h5
+./tools/test/h5diff/testfiles/h5diff_dset3.h5
 ./tools/test/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/test/h5diff/testfiles/h5diff_empty.h5
 ./tools/test/h5diff/testfiles/h5diff_hyper1.h5
@@ -2423,6 +2430,7 @@
 ./tools/test/h5repack/testfiles/h5repack_soffset.h5
 ./tools/test/h5repack/testfiles/h5repack_szip.h5
 ./tools/test/h5repack/testfiles/ublock.bin
+./tools/test/h5repack/testfiles/crtorder.tordergr.h5.ddl
 ./tools/test/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/test/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/test/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst

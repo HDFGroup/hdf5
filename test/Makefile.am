@@ -5,12 +5,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
@@ -27,14 +25,15 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       testerror.sh: err_compat, error_test
 #       testlibinfo.sh:
 #       testcheck_version.sh: tcheck_version
-#       tetlinks_env.sh: links_env
+#       testlinks_env.sh: links_env
+#       test_filenotclosed.sh: filenotclosed.c
 #       testflushrefresh.sh: flushrefresh
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh \
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filenotclosed.sh\
     testswmr.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) test_filenotclosed$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
     swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
     swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
@@ -67,6 +66,7 @@ TEST_PROG= testhdf5 \
 # accum_swmr_reader is used by accum.c.
 # atomic_writer and atomic_reader are standalone programs.
 # links_env is used by testlinks_env.sh
+# filenotclosed is used by test_filenotclosed.sh
 # flushrefresh is used by testflushrefresh.sh.
 # use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_usecases.sh
 # swmr_* files (besides swmr.c) are used by testswmr.sh.
@@ -76,7 +76,7 @@ TEST_PROG= testhdf5 \
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     testmeta accum_swmr_reader atomic_writer atomic_reader \
-    links_env flushrefresh use_append_chunk use_append_mchunks use_disable_mdc_flushes \
+    links_env filenotclosed flushrefresh use_append_chunk use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
     swmr_check_compat_vfd vds_swmr_gen vds_swmr_reader vds_swmr_writer
@@ -100,24 +100,36 @@ if BUILD_ALL_CONDITIONAL
   noinst_PROGRAMS=$(BUILD_ALL_PROGS)
 endif
 
-if HAVE_SHARED_CONDITIONAL
-  # The libh5test library provides common support code for the tests.
-  noinst_LTLIBRARIES=libh5test.la
+# The libh5test library provides common support code for the tests.
+noinst_LTLIBRARIES=libh5test.la
 
+if HAVE_SHARED_CONDITIONAL
   # The libdynlib1, libdynlib2, libdynlib3, and libdynlib4 library for testing plugin module plugin.c.
   # Build it as shared library if configure is enabled for shared library.
-  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
+  dyn_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
   libdynlib1_la_SOURCES=dynlib1.c
   libdynlib2_la_SOURCES=dynlib2.c
   libdynlib3_la_SOURCES=dynlib3.c
   libdynlib4_la_SOURCES=dynlib4.c
+  libdynlib1_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlib2_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlib3_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlib4_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
 
-install-exec-hook:
-	$(RM) $(DESTDIR)$(libdir)/*dynlib*
+libdynlib1.la: $(libdynlib1_la_OBJECTS) $(libdynlib1_la_DEPENDENCIES) $(EXTRA_libdynlib1_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib1_la_LINK) $(am_libdynlib1_la_rpath) $(libdynlib1_la_OBJECTS) $(libdynlib1_la_LIBADD)
 
-else
-  # The libh5test library provides common support code for the tests.
-  noinst_LTLIBRARIES=libh5test.la
+libdynlib2.la: $(libdynlib2_la_OBJECTS) $(libdynlib2_la_DEPENDENCIES) $(EXTRA_libdynlib2_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib2_la_LINK) $(am_libdynlib2_la_rpath) $(libdynlib2_la_OBJECTS) $(libdynlib2_la_LIBADD)
+
+libdynlib3.la: $(libdynlib3_la_OBJECTS) $(libdynlib3_la_DEPENDENCIES) $(EXTRA_libdynlib3_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib3_la_LINK) $(am_libdynlib3_la_rpath) $(libdynlib3_la_OBJECTS) $(libdynlib3_la_LIBADD)
+
+libdynlib4.la: $(libdynlib4_la_OBJECTS) $(libdynlib4_la_DEPENDENCIES) $(EXTRA_libdynlib4_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(libdynlib4_la_LINK) $(am_libdynlib4_la_rpath) $(libdynlib4_la_OBJECTS) $(libdynlib4_la_LIBADD) 
+
+#install-exec-hook:
+#	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
 endif
 
 libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c
@@ -206,6 +218,6 @@ use_disable_mdc_flushes_SOURCES=use_disable_mdc_flushes.c
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh \
-    testswmr.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh
+    testswmr.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh test_filenotclosed.sh
 
 include $(top_srcdir)/config/conclude.am

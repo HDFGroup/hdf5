@@ -5,12 +5,10 @@
 *                                                                           *
 * This file is part of HDF5.  The full HDF5 copyright notice, including     *
 * terms governing use, modification, and redistribution, is contained in    *
-* the files COPYING and Copyright.html.  COPYING can be found at the root   *
-* of the source code distribution tree; Copyright.html can be found at the  *
-* root level of an installed copy of the electronic HDF5 document set and   *
-* is linked from the top-level documents page.  It can also be found at     *
-* http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-* access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
@@ -268,7 +266,7 @@ int main (void)
     fname = H5REPACK_FSPACE_FNAMES[j];
     if(h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
-    pack_options.fs_strategy = -1; 	    /* "FSM_AGGR" specified via -S FSM_AGGR */
+    pack_options.fs_strategy = (H5F_fspace_strategy_t)-1; 	    /* "FSM_AGGR" specified via -S FSM_AGGR */
     pack_options.fs_threshold = -1; 	/* "0" specified via -T 0 */
     if(h5repack(fname, FSPACE_OUT, &pack_options) < 0)
         GOERROR;
@@ -3757,7 +3755,7 @@ make_userblock(void)
         ub[u] = (char)('a' + (char)(u % 26));
 
     /* Re-open HDF5 file, as "plain" file */
-    if((fd = HDopen(FNAME16, O_WRONLY, 0644)) < 0)
+    if((fd = HDopen(FNAME16, O_WRONLY)) < 0)
         goto out;
 
     /* Write userblock data */
@@ -3821,7 +3819,7 @@ verify_userblock( const char* filename)
 
 
     /* Re-open HDF5 file, as "plain" file */
-    if((fd = HDopen(filename, O_RDONLY, 0)) < 0)
+    if((fd = HDopen(filename, O_RDONLY)) < 0)
         goto out;
 
     /* Read userblock data */
@@ -3870,7 +3868,7 @@ make_userblock_file(void)
         ub[u] = (char)('a' + (char)(u % 26));
 
     /* open file */
-    if((fd = HDopen(FNAME_UB,O_WRONLY|O_CREAT|O_TRUNC, 0644 )) < 0)
+    if((fd = HDopen(FNAME_UB, O_WRONLY|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
         goto out;
 
     /* write userblock data */

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "hdf5.h"
 #include "H5private.h"
@@ -142,7 +140,7 @@ error:
  *		status_flags properly so users can open the files afterwards.
  *
  * Return:	Success:	0
- *		Failure:	1
+ *		    Failure:	1
  *
  * Programmer:	Vailin Choi; July 2013
  *
@@ -167,65 +165,65 @@ main(void)
 
     /* Create a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-	goto error;
+        goto error;
 
     /* Copy the file access property list */
     if((new_fapl = H5Pcopy(fapl)) < 0)
-	goto error;
+        goto error;
     /* Set to latest library format */
     if(H5Pset_libver_bounds(new_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	goto error;
+        goto error;
 
     /* Files created within this for loop will have v3 superblock and nonzero status_flags */
     for(new_format = FALSE; new_format <= TRUE; new_format++) {
-	hid_t fapl2, my_fapl;	/* File access property lists */
+        hid_t fapl2, my_fapl;	/* File access property lists */
 
-	/* Set to use the appropriate file access property list */
-	if(new_format)
-	    fapl2 = new_fapl;
-	else
-	    fapl2 = fapl;
-	/*
-	 * Create a sec2 file
-	 */
-	if((my_fapl = H5Pcopy(fapl2)) < 0)
-	    goto error;
-	/* Create the file */
-	sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[0]);
-	if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0) 
-	    goto error;
+        /* Set to use the appropriate file access property list */
+        if(new_format)
+            fapl2 = new_fapl;
+        else
+            fapl2 = fapl;
+        /*
+         * Create a sec2 file
+         */
+        if((my_fapl = H5Pcopy(fapl2)) < 0)
+            goto error;
+        /* Create the file */
+        sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[0]);
+        if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0) 
+            goto error;
 
-	/* Flush the file */
-	if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-	    goto error;
+        /* Flush the file */
+        if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+            goto error;
     
-	/* Close the property list */
-	if(H5Pclose(my_fapl) < 0)
-	    goto error;
+        /* Close the property list */
+        if(H5Pclose(my_fapl) < 0)
+            goto error;
 
-	/*
-	 * Create a log file
-	 */
-	/* Create a copy of file access property list */
-	if((my_fapl = H5Pcopy(fapl2)) < 0)
-	    goto error;
+        /*
+         * Create a log file
+         */
+        /* Create a copy of file access property list */
+        if((my_fapl = H5Pcopy(fapl2)) < 0)
+            goto  error;
 
-	/* Setup the fapl for the log driver */
-	if(H5Pset_fapl_log(my_fapl, "append.log", (unsigned long long)H5FD_LOG_ALL, (size_t)(4 * KB)) < 0)
-	    goto error;
+        /* Setup the fapl for the log driver */
+        if(H5Pset_fapl_log(my_fapl, "append.log", (unsigned long long)H5FD_LOG_ALL, (size_t)(4 * KB)) < 0)
+            goto error;
 
-	/* Create the file */
-	sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[1]);
-	if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0) 
-	    goto error;
+        /* Create the file */
+        sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[1]);
+        if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0) 
+            goto error;
 
-	/* Flush the file */
-	if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-	    goto error;
+        /* Flush the file */
+        if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+            goto error;
 
-	/* Close the property list */
-	if(H5Pclose(my_fapl) < 0)
-	    goto error;
+        /* Close the property list */
+        if(H5Pclose(my_fapl) < 0)
+            goto error;
 
     } /* end for */
 
@@ -233,38 +231,38 @@ main(void)
      * Create a sec2 file with v0 superblock but nonzero status_flags
      */
     if((fid = H5Fcreate(FILENAME[2], H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) 
-	goto error;
+        goto error;
 
     /* Flush the file */
     if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-	goto error;
+        goto error;
 
 
     /* 
      * Create a sec2 file with v2 superblock but nonzero status_flags
      */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-	goto error;
+        goto error;
     if(H5Pset_shared_mesg_nindexes(fcpl, 1) < 0)
         goto error;
     if(H5Pset_shared_mesg_index(fcpl, 0, H5O_SHMESG_DTYPE_FLAG, 50) < 0)
         goto error;
 
     if((fid = H5Fcreate(FILENAME[3], H5F_ACC_TRUNC, fcpl, fapl)) < 0) 
-	goto error;
+        goto error;
 
     /* Flush the file */
     if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-	goto error;
+        goto error;
 
     
     /* Close the property lists */
     if(H5Pclose(fapl) < 0)
-	goto error;
+        goto error;
     if(H5Pclose(new_fapl) < 0)
-	goto error;
+        goto error;
     if(H5Pclose(fcpl) < 0)
-	goto error;
+        goto error;
 
     fflush(stdout);
     fflush(stderr);

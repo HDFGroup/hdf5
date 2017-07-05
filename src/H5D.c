@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /****************/
@@ -1089,3 +1087,43 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Dget_chunk_index_type() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_chunk_storage_size
+ *
+ * Purpose:     Returns the size of an allocated chunk.
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:  Matthew Strong (GE Healthcare)
+ *              20 October 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_nbytes)
+{
+    H5D_t       *dset = NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*h*h", dset_id, offset, chunk_nbytes);
+
+    /* Check arguments */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if( NULL == offset )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
+    if( NULL == chunk_nbytes )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
+
+    if(H5D_CHUNKED != dset->shared->layout.type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+
+    /* Call private function */
+    if(H5D__get_chunk_storage_size(dset, H5P_DATASET_XFER_DEFAULT, offset, chunk_nbytes) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get storage size of chunk")
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* H5Dget_chunk_storage_size() */

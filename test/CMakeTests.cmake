@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -559,6 +570,7 @@ set (test_CLEANFILES
     flushrefresh_VERIFICATION_CHECKPOINT1
     flushrefresh_VERIFICATION_CHECKPOINT2
     flushrefresh_VERIFICATION_DONE
+    filenotclosed.h5
     atomic_data
     accum_swmr_big.h5
     ohdr_swmr.h5
@@ -769,6 +781,22 @@ add_test (NAME H5TEST-cache_image COMMAND $<TARGET_FILE:cache_image>)
 set_tests_properties (H5TEST-cache_image PROPERTIES
     DEPENDS H5TEST-clear-cache_image-objects
     ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=3"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+
+#-- Adding test for filenotclosed
+add_test (
+    NAME H5TEST-clear-filenotclosed-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        filenotclosed.h5
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+add_test (NAME H5TEST-filenotclosed COMMAND $<TARGET_FILE:filenotclosed>)
+set_tests_properties (H5TEST-filenotclosed PROPERTIES
+    DEPENDS H5TEST-clear-filenotclosed-objects
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
@@ -986,8 +1014,10 @@ endif ()
 ##############################################################################
 if (WIN32)
   set (CMAKE_SEP "\;")
+  set (BIN_REL_PATH "../../")
 else ()
   set (CMAKE_SEP ":")
+  set (BIN_REL_PATH "../")
 endif ()
 
 add_test (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:plugin>)
@@ -995,6 +1025,16 @@ set_tests_properties (H5PLUGIN-plugin PROPERTIES
     ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
 )
+
+##############################################################################
+# HDFFV-9655 relative plugin test disabled
+#
+#add_test (NAME H5PLUGIN-pluginRelative COMMAND $<TARGET_FILE:plugin>)
+#set_tests_properties (H5PLUGIN-pluginRelative PROPERTIES
+#    ENVIRONMENT "HDF5_PLUGIN_PATH=@/${BIN_REL_PATH}testdir1${CMAKE_SEP}@/${BIN_REL_PATH}testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+#    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+#)
+##############################################################################
 
 ##############################################################################
 ###    S W M R  T E S T S

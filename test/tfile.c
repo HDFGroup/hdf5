@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
@@ -1613,7 +1611,7 @@ test_file_ishdf5(void)
 
 
     /* Create non-HDF5 file and check it */
-    fd=HDopen(FILE1, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    fd = HDopen(FILE1, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW);
     CHECK(fd, FAIL, "HDopen");
 
     /* Initialize information to write */
@@ -2659,7 +2657,7 @@ cal_chksum(const char *file, uint32_t *chksum)
     herr_t ret;                                 /* Generic return value */
 
     /* Open the file */
-    fdes = HDopen(file, O_RDONLY, 0);
+    fdes = HDopen(file, O_RDONLY);
     CHECK(fdes, FAIL, "HDopen");
 
     /* Retrieve the file's size */
@@ -2722,7 +2720,7 @@ test_rw_noupdate(void)
 
     /* Calculate checksum for the file */
     ret = cal_chksum(FILE1, &chksum1);
-    CHECK(ret, FAIL, "HDopen");
+    CHECK(ret, FAIL, "cal_chksum");
 
     /* Open and close File With Read/Write Permission */
     fid = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -2734,7 +2732,7 @@ test_rw_noupdate(void)
 
     /* Calculate checksum for the file */
     ret = cal_chksum(FILE1, &chksum2);
-    CHECK(ret, FAIL, "HDopen");
+    CHECK(ret, FAIL, "cal_chksum");
 
     /* The two checksums are the same, i.e. the file is not changed */
     VERIFY(chksum1, chksum2, "Checksum");
@@ -4342,9 +4340,9 @@ test_filespace_compatible(void)
         const char *filename = H5_get_srcdir_filename(OLD_FILENAME[j]); /* Corrected test file name */
 
         /* Open and copy the test file into a temporary file */
-	fd_old = HDopen(filename, O_RDONLY, 0666);
+	fd_old = HDopen(filename, O_RDONLY);
 	CHECK(fd_old, FAIL, "HDopen");
-	fd_new = HDopen(FILE5, O_RDWR|O_CREAT|O_TRUNC, 0666);
+	fd_new = HDopen(FILE5, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW);
 	CHECK(fd_new, FAIL, "HDopen");
 
 	/* Copy data */
@@ -4931,9 +4929,9 @@ test_libver_bounds(void)
 static void
 test_libver_macros(void)
 {
-    unsigned	major = H5_VERS_MAJOR;
-    unsigned	minor = H5_VERS_MINOR;
-    unsigned	release = H5_VERS_RELEASE;
+    int     major = H5_VERS_MAJOR;
+    int     minor = H5_VERS_MINOR;
+    int     release = H5_VERS_RELEASE;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing macros for library version comparison\n"));

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -3732,7 +3730,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
         TESTING("H5Pset/get_elink_fapl() with same physical layout")
 
     if((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) || (NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE)))
-	TEST_ERROR
+        TEST_ERROR
 
     /*
      * set up name for main file:
@@ -3782,7 +3780,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
 
     /* Create external link to target file: ext_link->extlinks17:/A/Dataset */
     if(H5Lcreate_external(filename2, "/A/Dataset", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* create fapl to be a "core" file without backing store */
     if(H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, FALSE) < 0)
@@ -3795,9 +3793,9 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     /* try to open the external linked target dataset */
     did = H5Dopen2(fid, "ext_link", dapl_id);
     if(did < 0) {
-	H5_FAILED();
-	HDputs("    Should succeed in opening the target dataset");
-	goto error;
+        H5_FAILED();
+        HDputs("    Should succeed in opening the target dataset");
+        goto error;
     }
 
     /* Initialize the dataset */
@@ -3807,7 +3805,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
 
     /* Write the data to the dataset */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     if(H5Pclose(dapl_id) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR

@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -51,7 +62,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tbin4.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tbinregR.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tbigdims.ddl
-      ${HDF5_TOOLS_DIR}/testfiles/tbitnopaque.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tbitnopaque_be.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tbitnopaque_le.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tboot1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tboot2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tboot2A.ddl
@@ -799,8 +811,10 @@
           tbinregR.out.err
           tbigdims.out
           tbigdims.out.err
-          tbitnopaque.out
-          tbitnopaque.out.err
+          tbitnopaque_be.out
+          tbitnopaque_be.out.err
+          tbitnopaque_le.out
+          tbitnopaque_le.out.err
           tboot1.out
           tboot1.out.err
           tboot2.out
@@ -1161,7 +1175,11 @@
   ADD_H5_TEST (tcomp-4 0 --enable-error-stack tcompound_complex.h5)
   ADD_H5_TEST (tcompound_complex2 0 --enable-error-stack tcompound_complex2.h5)
   # tests for bitfields and opaque data types
-  ADD_H5_TEST (tbitnopaque 0 --enable-error-stack tbitnopaque.h5)
+  if (H5_WORDS_BIGENDIAN)
+    ADD_H5_TEST (tbitnopaque_be 0 --enable-error-stack tbitnopaque.h5)
+  else ()
+    ADD_H5_TEST (tbitnopaque_le 0 --enable-error-stack tbitnopaque.h5)
+  endif ()
 
   #test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
@@ -1394,14 +1412,14 @@
   ADD_H5_EXPORT_TEST (tstr2bin6 tstr2.h5 0 --enable-error-stack -d /g6/dset6 -b -o)
 
   # NATIVE default. the NATIVE test can be validated with h5import/h5diff
-  ADD_H5_TEST_IMPORT (tbin1 out1D tbinary.h5 0 --enable-error-stack -d integer -b)
+#  ADD_H5_TEST_IMPORT (tbin1 out1D tbinary.h5 0 --enable-error-stack -d integer -b)
 
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     ADD_H5_TEST (tbin2 0 --enable-error-stack -b BE -d float -o tbin2.bin tbinary.h5)
   endif ()
 
   # the NATIVE test can be validated with h5import/h5diff
-  ADD_H5_TEST_IMPORT (tbin3 out3D tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
+#  ADD_H5_TEST_IMPORT (tbin3 out3D tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
 
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     ADD_H5_TEST (tbin4 0 --enable-error-stack -d double -b FILE -o tbin4.bin tbinary.h5)

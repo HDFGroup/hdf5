@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
@@ -233,9 +231,9 @@ int create_wo_file(void)
     int	   ret_code;
 
     /* Create the data file */
-    if ((write_fd_g = HDopen(DATAFILE, O_RDWR|O_TRUNC|O_CREAT, 0664)) < 0) {
-	printf("WRITER: error from open\n");
-	return -1;
+    if ((write_fd_g = HDopen(DATAFILE, O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0) {
+        HDprintf("WRITER: error from open\n");
+        return -1;
     }
     blkaddr=0;
     /* write it to partition 0 */
@@ -299,9 +297,9 @@ int read_wo_file(void)
     char buffer[BLOCKSIZE_DFT];
 
     /* Open the data file */
-    if ((read_fd = HDopen(DATAFILE, O_RDONLY, 0)) < 0) {
-	printf("READER: error from open\n");
-	return -1;
+    if ((read_fd = HDopen(DATAFILE, O_RDONLY)) < 0) {
+        HDprintf("READER: error from open\n");
+        return -1;
     }
     /* keep reading the initial block address until it is non-zero before proceeding. */
     while (blkaddr == 0){

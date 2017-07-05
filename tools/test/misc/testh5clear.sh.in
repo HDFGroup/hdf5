@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 # Tests for the h5clear tool
 #
@@ -68,9 +66,13 @@ $SRC_H5CLEAR_TESTFILES/h5clear_usage.ddl
 $SRC_H5CLEAR_TESTFILES/h5clear_open_fail.ddl
 $SRC_H5CLEAR_TESTFILES/h5clear_missing_file.ddl
 $SRC_H5CLEAR_TESTFILES/h5clear_no_mdc_image.ddl
-$SRC_H5CLEAR_TESTFILES/orig_h5clear_sec2_v0.h5
-$SRC_H5CLEAR_TESTFILES/orig_h5clear_sec2_v2.h5
-$SRC_H5CLEAR_TESTFILES/orig_h5clear_sec2_v3.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_sec2_v0.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_sec2_v2.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_sec2_v3.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_log_v3.h5
+$SRC_H5CLEAR_TESTFILES/latest_h5clear_log_v3.h5
+$SRC_H5CLEAR_TESTFILES/latest_h5clear_sec2_v3.h5
+$SRC_H5CLEAR_TESTFILES/h5clear_mdc_image.h5
 $SRC_H5CLEAR_TESTFILES/mod_h5clear_mdc_image.h5
 "
 
@@ -161,6 +163,7 @@ TOOLTEST_OUT() {
     # Run test.
     TESTING $H5CLEAR $option1 $option2 $fname
     (
+        cd $TESTDIR
         $RUNSERIAL $H5CLEAR_BIN $option1 $option2 $fname
     ) >$actual 2>$actual_err
     cp $actual $actual_sav
@@ -181,7 +184,10 @@ TOOLTEST_OUT() {
 OPEN_CHK() {
     fname=$1
     expected=$2
-    $OPENCHK_BIN $fname 2>/dev/null
+    (
+        cd $TESTDIR
+        $OPENCHK_BIN $fname 2>/dev/null
+    )
     actual=$?
     if test $actual -ne $expected; then
         echo "Unexpected return from $OPENCHK"
@@ -201,9 +207,11 @@ TOOLTEST() {
     ret_expected=$4
     #
     TESTING $H5CLEAR $option1 $option2 $fname
-    fname=$1
     # h5clear $option1 $option2 $fname
-    $RUNSERIAL $H5CLEAR_BIN $option1 $option2 $fname 2>/dev/null 1>/dev/null
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5CLEAR_BIN $option1 $option2 $fname 2>/dev/null 1>/dev/null
+    )
     if test $? -ne $ret_expected; then
         echo "*FAILED*"
         nerrors=`expr $nerrors + 1`
@@ -219,30 +227,34 @@ TOOLTEST() {
 ##############################################################################
 # prepare for testing
 COPY_TESTFILES_TO_TESTDIR
+# For Cmake
+$CP -f $TESTDIR/h5clear_sec2_v0.h5 $TESTDIR/orig_h5clear_sec2_v0.h5
+$CP -f $TESTDIR/h5clear_sec2_v2.h5 $TESTDIR/orig_h5clear_sec2_v2.h5
+$CP -f $TESTDIR/h5clear_sec2_v3.h5 $TESTDIR/orig_h5clear_sec2_v3.h5
 #
 #
 #
 # The following are tests to verify the expected output from h5clear
 # "h5clear -h"
-# "h5clear"                             (no options, no file)
-# "h5clear junk.h5"                     (no options, nonexisting file)
-# "h5clear orig_h5clear_sec2_v3.h5"          (no options, existing file)
-# "h5clear -m"                          (valid 1 option, no file)
-# "h5clear -s junk.h5"                  (valid 1 option, nonexisting file)
-# "h5clear -m -s junk.h5"               (valid 2 options, no file)
-# "h5clear -m -s junk.h5"               (valid 2 options, nonexisting file)
-# "h5clear -m orig_h5clear_sec2_v2.h5"       (valid 1 option, existing file, no cache image)
-# "h5clear -s -m orig_h5clear_sec2_v0.h5"    (valid 2 options, existing file, no cache image)
+# "h5clear"                                 (no options, no file)
+# "h5clear junk.h5"                         (no options, nonexisting file)
+# "h5clear orig_h5clear_sec2_v3.h5"         (no options, existing file)
+# "h5clear -m"                              (valid 1 option, no file)
+# "h5clear -s junk.h5"                      (valid 1 option, nonexisting file)
+# "h5clear -m -s"                           (valid 2 options, no file)
+# "h5clear -m -s junk.h5"                   (valid 2 options, nonexisting file)
+# "h5clear -m orig_h5clear_sec2_v2.h5"      (valid 1 option, existing file, no cache image)
+# "h5clear -s -m orig_h5clear_sec2_v0.h5"   (valid 2 options, existing file, no cache image)
 TOOLTEST_OUT "" -h "" h5clear_usage.ddl
 TOOLTEST_OUT "" "" "" h5clear_usage.ddl
 TOOLTEST_OUT junk.h5 "" "" h5clear_usage.ddl
-TOOLTEST_OUT $TESTDIR/orig_h5clear_sec2_v3.h5 "" "" h5clear_usage.ddl
+TOOLTEST_OUT orig_h5clear_sec2_v3.h5 "" "" h5clear_usage.ddl
 TOOLTEST_OUT "" -m "" h5clear_missing_file.ddl
 TOOLTEST_OUT junk.h5 -s "" h5clear_open_fail.ddl
 TOOLTEST_OUT "" -m -s h5clear_missing_file.ddl
 TOOLTEST_OUT junk.h5 -m -s h5clear_open_fail.ddl
-TOOLTEST_OUT $TESTDIR/orig_h5clear_sec2_v2.h5 -m "" h5clear_no_mdc_image.ddl
-TOOLTEST_OUT $TESTDIR/orig_h5clear_sec2_v0.h5 -s -m h5clear_no_mdc_image.ddl
+TOOLTEST_OUT orig_h5clear_sec2_v2.h5 -m "" h5clear_no_mdc_image.ddl
+TOOLTEST_OUT orig_h5clear_sec2_v0.h5 -s -m h5clear_no_mdc_image.ddl
 #
 #
 #
@@ -254,9 +266,9 @@ TOOLTEST_OUT $TESTDIR/orig_h5clear_sec2_v0.h5 -s -m h5clear_no_mdc_image.ddl
 # "h5clear -l h5clear_sec2_v2.h5"       (invalid 1 option, existing file, fail exit code)
 # "h5clear -m -k"                       (valid/invalid 2 options, nofile, fail exit code)
 # "h5clear -l -m"                       (invalid/valid 2 options, nofile, fail exit code)
-# "h5clear -m -k junk.h5"               (valid/invalid 2 options, nonexisting file, fail exit code)
+# "h5clear -m -l junk.h5"               (valid/invalid 2 options, nonexisting file, fail exit code)
 # "h5clear -l -m junk.h5"               (invalid/valid 2 options, nonexisting file, fail exit code)
-# "h5clear -m -k h5clear_sec2_v0.h5"    (valid/invalid 2 options, existing file, fail exit code)
+# "h5clear -m -l h5clear_sec2_v0.h5"    (valid/invalid 2 options, existing file, fail exit code)
 # "h5clear -l -m h5clear_sec2_v0.h5"    (invalid/valid 2 options, existing file, fail exit code)
 TOOLTEST h5clear_mdc_image.h5 -m "" $SUCCEED
 TOOLTEST "" --vers "" $SUCCEED
@@ -273,8 +285,8 @@ TOOLTEST h5clear_sec2_v0.h5 -l -m $FAIL
 #
 #
 # h5clear_mdc_image.h5 already has cache image removed earlier, verify the expected warning from h5clear:
-TOOLTEST_OUT $TESTDIR/mod_h5clear_mdc_image.h5 -m "" h5clear_no_mdc_image.ddl
-TOOLTEST_OUT $TESTDIR/mod_h5clear_mdc_image.h5 -s -m h5clear_no_mdc_image.ddl
+TOOLTEST_OUT mod_h5clear_mdc_image.h5 -m "" h5clear_no_mdc_image.ddl
+TOOLTEST_OUT mod_h5clear_mdc_image.h5 -s -m h5clear_no_mdc_image.ddl
 #
 #
 #

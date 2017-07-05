@@ -5,12 +5,10 @@
 *                                                                           *
 * This file is part of HDF5.  The full HDF5 copyright notice, including     *
 * terms governing use, modification, and redistribution, is contained in    *
-* the files COPYING and Copyright.html.  COPYING can be found at the root   *
-* of the source code distribution tree; Copyright.html can be found at the  *
-* root level of an installed copy of the electronic HDF5 document set and   *
-* is linked from the top-level documents page.  It can also be found at     *
-* http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-* access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
@@ -50,6 +48,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define FILE6    "h5diff_attr2.h5"
 #define FILE7    "h5diff_dset1.h5"
 #define FILE8    "h5diff_dset2.h5"
+#define FILE8A   "h5diff_dset3.h5"
 #define FILE9    "h5diff_hyper1.h5"
 #define FILE10   "h5diff_hyper2.h5"
 #define FILE11   "h5diff_empty.h5"
@@ -199,6 +198,7 @@ int main(void)
     /* generate 2 files, the second call creates a similar file with differences */
     test_datasets(FILE7,0);
     test_datasets(FILE8,1);
+    test_datasets(FILE8A,2);
 
     /* generate 2 files, the second call creates a similar file with differences */
     test_hyperslab(FILE9,0);
@@ -1330,7 +1330,7 @@ int test_datasets(const char *file,
     herr_t  status;
     int     buf[2]={1,2};
 
-    if(make_diffs)
+    if(make_diffs > 0)
         memset(buf, 0, sizeof buf);
 
     /* Create a file  */
@@ -1401,9 +1401,8 @@ int test_special_datasets(const char *file,
 
     /* Create a dataset with zero dimension size in one file but the other one
      * has a dataset with a non-zero dimension size */
-    if(make_diffs) {
+    if(make_diffs)
         dims[1] = SPACE1_DIM2 + 4;
-    }
 
     sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
     did  = H5Dcreate2(fid, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -3633,8 +3632,8 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         char   *str_vlen_repeat;  /* vlen string */
         char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
         char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
-        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
-        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
         char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
     } comp1_t;
@@ -3646,9 +3645,9 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
         char   *str_vlen_repeat;  /* vlen string */
         char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
-        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
-        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
     } comp2_t;
 
@@ -3661,8 +3660,8 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         char   *str_vlen_repeat;  /* vlen string */
         char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
         char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
-        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
-        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
     } comp3_t;
 
     /* compound4 datatype */
@@ -3673,16 +3672,16 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
         char   *str_vlen_repeat;  /* vlen string */
         char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
-        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
-        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
     } comp4_t;
 
     /* compound5 datatype */
     typedef struct comp5_t
     {
-        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
-        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
         char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
         char   *str_vlen;  /* vlen string */
@@ -3694,9 +3693,9 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     /* compound6 datatype */
     typedef struct comp6_t
     {
-        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
-        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
         char   *str_vlen;  /* vlen string */
         char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
@@ -3709,8 +3708,8 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     {
         char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
         char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
-        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
-        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
         char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
         char   *str_vlen;  /* vlen string */
@@ -3721,9 +3720,9 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     typedef struct comp8_t
     {
         char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
-        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
-        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
         char   *str_vlen;  /* vlen string */
         char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
@@ -3735,8 +3734,8 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     {
         char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
         char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
-        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
-        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        const char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
         int    int_data1;
         hobj_ref_t objref1;                  /* reference */
@@ -3769,7 +3768,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     hid_t    sid_vlen_str_array=0;      /* dataspace ID */
     hid_t    tid_vlen_str_array_pre=0;      /* datatype ID */
     hid_t    tid_vlen_str_array=0; /* datatype ID */
-    char *vlen_str_array_buf[VLEN_STR_ARRY_DIM]= {
+    const char *vlen_str_array_buf[VLEN_STR_ARRY_DIM]= {
         "1 - Variable length string Array",
         "2 - Testing variable length string array in compound type",
         "3 - Four score and seven\n years ago our forefathers brought forth on this continent a new nation,"
@@ -5344,7 +5343,6 @@ static hid_t mkstr(int size, H5T_str_t pad) {
 *-------------------------------------------------------------------------*/
 static void test_objs_strings(const char *fname1, const char *fname2)
 {
-    herr_t  status = SUCCEED;
     hid_t   fid1=0;
     hid_t   fid2=0;
     hid_t   dataset=0;
@@ -5399,7 +5397,6 @@ static void test_objs_strings(const char *fname1, const char *fname2)
      if (fid1 < 0)
      {
          fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
-         status = FAIL;
          goto out;
      }
 
@@ -5408,7 +5405,6 @@ static void test_objs_strings(const char *fname1, const char *fname2)
      if (fid2 < 0)
      {
          fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
-         status = FAIL;
          goto out;
      }
 
@@ -5462,6 +5458,34 @@ static void test_objs_strings(const char *fname1, const char *fname2)
     H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4A);
     H5Dclose(dataset);
     dataset = H5Dcreate2(fid2, "/string4", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* string 5 : early term long string */
+    string4A[0][10] = 0;
+    string4A[0][11] = 0;
+    string4B[0][10] = 0;
+
+    string4A[1][10] = 0;
+    string4A[1][11] = 'Z';
+    string4B[1][10] = 0;
+    string4B[1][11] = 'x';
+
+    string4A[2][10] = 0;
+    string4B[2][10] = 0;
+    string4B[2][11] = 'a';
+    string4B[2][12] = 'B';
+    string4B[2][13] = 'c';
+    space = H5Screate_simple(1, dims4, NULL);
+    f_type = mkstr(168, H5T_STR_NULLTERM);
+    m_type = mkstr(21, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string5", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string5", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4B);
     H5Tclose(m_type);
     H5Tclose(f_type);
@@ -6615,6 +6639,9 @@ void write_dset_in(hid_t loc_id,
     int        buf73[4][3][2];    /* integer */
     float      buf83[4][3][2];    /* float */
 
+    if(make_diffs == 2) {
+        dimarray[0] = 4;
+    }
 
     /*-------------------------------------------------------------------------
     * H5S_SCALAR
@@ -6623,11 +6650,8 @@ void write_dset_in(hid_t loc_id,
 
 
 
-    if ( make_diffs )
-    {
-
+    if(make_diffs)
         scalar_data = 1;
-    }
 
     /* create a space  */
     sid = H5Screate(H5S_SCALAR);
@@ -7210,7 +7234,7 @@ void write_dset_in(hid_t loc_id,
 
     n=1;
     for (i = 0; i < 24; i++) {
-        for (j = 0; j < (int)dimarray[0]; j++) {
+        for (j = 0; j < 3; j++) {
             if (make_diffs) buf63[i][j]=0;
             else buf63[i][j]=n++;
         }

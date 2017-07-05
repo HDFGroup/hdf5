@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
@@ -294,7 +292,7 @@ main (int argc, const char *argv[])
     H5Pclose(plist);
     H5Fclose(ifile);
 
-    ufid = HDopen(ub_file, O_RDONLY, 0);
+    ufid = HDopen(ub_file, O_RDONLY);
     if(ufid < 0) {
         error_msg("unable to open user block file \"%s\"\n", ub_file);
         leave (EXIT_FAILURE);
@@ -309,7 +307,7 @@ main (int argc, const char *argv[])
 
     fsize = (off_t)sbuf.st_size;
 
-    h5fid = HDopen(input_file, O_RDONLY, 0);
+    h5fid = HDopen(input_file, O_RDONLY);
     if(h5fid < 0) {
         error_msg("unable to open HDF5 file for read \"%s\"\n", input_file);
         HDclose (ufid);
@@ -327,7 +325,7 @@ main (int argc, const char *argv[])
     h5fsize = (hsize_t)sbuf2.st_size;
 
     if (output_file == NULL) {
-        ofid = HDopen (input_file, O_WRONLY, 0);
+        ofid = HDopen(input_file, O_WRONLY);
 
         if (ofid < 0) {
             error_msg("unable to open output file \"%s\"\n", output_file);
@@ -337,7 +335,7 @@ main (int argc, const char *argv[])
         }
     }
     else {
-        ofid = HDopen (output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        ofid = HDopen(output_file, O_WRONLY | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
 
         if (ofid < 0) {
             error_msg("unable to create output file \"%s\"\n", output_file);

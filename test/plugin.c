@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic document set and is     *
- * linked from the top-level documents page.  It can also be found at        *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have access   *
- * to either file, you may request a copy from help@hdfgroup.org.            *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*
  * Programmer:    Raymond Lu
@@ -576,7 +574,9 @@ test_noread_with_filters(hid_t file)
 
     /* disable filter plugin */
     if(H5PLget_loading_state(&plugin_state) < 0) TEST_ERROR
-    plugin_state = plugin_state & ~H5PL_FILTER_PLUGIN;
+
+    plugin_state = plugin_state & (unsigned)(~H5PL_FILTER_PLUGIN);
+
     if(H5PLset_loading_state(plugin_state) < 0) TEST_ERROR
 
     if((dset = H5Dopen2(file, DSET_DYNLIB1_NAME, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -674,8 +674,8 @@ static herr_t
 test_groups_with_filters(hid_t file)
 {
     herr_t      ret_value = -1;
-    hid_t       gid;
-    hid_t       group;
+    hid_t       gid = -1;
+    hid_t       group = -1;
     int         i;
     char        gname[256];
 
@@ -733,7 +733,7 @@ test_filter_path_apis(void)
 
     if(H5Zfilter_avail(H5Z_FILTER_DYNLIB1) != TRUE) TEST_ERROR
 
-    ndx = H5PLsize();
+    H5PLsize(&ndx);
 
     TESTING("    remove");
     /* Remove all existing paths*/
@@ -743,7 +743,8 @@ test_filter_path_apis(void)
             TEST_ERROR
         } /* end if */
     /* Verify the table is empty */
-    if(H5PLsize() > 0) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx > 0) TEST_ERROR
     PASSED();
 
     TESTING("    remove (exceed min)");
@@ -764,7 +765,8 @@ test_filter_path_apis(void)
         }
     }
     /* Verify the table is full */
-    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
     PASSED();
 
     TESTING("    append (exceed)");
@@ -835,7 +837,8 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is not full */
-    if (H5PLsize() != H5PL_MAX_PATH_NUM - 1) TEST_ERROR
+    H5PLsize(&ndx);
+    if (ndx != H5PL_MAX_PATH_NUM - 1) TEST_ERROR
 
     TESTING("    prepend");
     /* Prepend one path*/
@@ -846,7 +849,8 @@ test_filter_path_apis(void)
     }
 
     /* Verify the table is full */
-    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were moved */
     if(H5PLget(8, pathname, 256) <= 0) TEST_ERROR
@@ -880,7 +884,8 @@ test_filter_path_apis(void)
     }
 
     /* Verify the table is full */
-    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     /* Verify that the entries were not moved */
     if(H5PLget(0, pathname, 256) <= 0) TEST_ERROR
@@ -909,7 +914,8 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is not full */
-    if(H5PLsize() != 15) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != 15) TEST_ERROR
 
     TESTING("    insert");
     /* Insert one path*/
@@ -928,7 +934,8 @@ test_filter_path_apis(void)
     PASSED();
 
     /* Verify the table is full */
-    if(H5PLsize() != H5PL_MAX_PATH_NUM) TEST_ERROR
+    H5PLsize(&ndx);
+    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
 
     TESTING("    insert (exceed)");
     /* Exceed the max path insert */

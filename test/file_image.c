@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
@@ -626,7 +624,7 @@ test_core(void)
     VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE, "Free callback came from wrong sourc in core close");
 
     /* Create file image buffer */
-    fd = HDopen(copied_filename, O_RDONLY, 0666);
+    fd = HDopen(copied_filename, O_RDONLY);
     VERIFY(fd > 0, "open failed");
     ret = HDfstat(fd, &sb);
     VERIFY(ret == 0, "fstat failed");
@@ -816,7 +814,7 @@ test_get_file_image(const char * test_banner,
             HDsnprintf(member_file_name, 1024, file_name, i);
 
             /* open the test file using standard I/O calls */
-            fd = HDopen(member_file_name, O_RDONLY, 0666);
+            fd = HDopen(member_file_name, O_RDONLY);
             VERIFY(fd >= 0, "HDopen() failed.");
 
             if(size_remaining >= FAMILY_SIZE ){
@@ -864,7 +862,7 @@ test_get_file_image(const char * test_banner,
         VERIFY(file_image_ptr != NULL, "HDmalloc(2) failed.");
 
         /* open the test file using standard I/O calls */
-        fd = HDopen(file_name, O_RDONLY, 0666);
+        fd = HDopen(file_name, O_RDONLY);
         VERIFY(fd >= 0, "HDopen() failed.");
 
 	if(user) {

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -155,6 +153,7 @@ H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
 		  haddr_t maxaddr);
 H5_DLL herr_t H5FD_close(H5FD_t *file);
 H5_DLL int H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
+H5_DLL herr_t H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/);
 H5_DLL haddr_t H5FD_alloc(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, 
     struct H5F_t *f, hsize_t size, haddr_t *frag_addr, hsize_t *frag_size);
 H5_DLL herr_t H5FD_free(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, struct H5F_t *f,

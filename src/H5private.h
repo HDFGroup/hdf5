@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Robb Matzke <matzke@llnl.gov>
@@ -495,6 +493,15 @@
 #   define h5_posix_io_t                size_t
 #   define h5_posix_io_ret_t            ssize_t
 #   define H5_POSIX_MAX_IO_BYTES        SSIZET_MAX
+#endif
+
+/* POSIX I/O mode used as the third parameter to open/_open
+ * when creating a new file (O_CREAT is set).
+ */
+#if defined(H5_HAVE_WIN32_API)
+#   define H5_POSIX_CREATE_MODE_RW      (_S_IREAD | _S_IWRITE)
+#else
+#   define H5_POSIX_CREATE_MODE_RW      0666
 #endif
 
 /*
@@ -1119,11 +1126,7 @@ typedef off_t               h5_stat_size_t;
     #define HDnanosleep(N, O)    nanosleep(N, O)
 #endif /* HDnanosleep */
 #ifndef HDopen
-    #ifdef _O_BINARY
-        #define HDopen(S,F,M)    open(S,F|_O_BINARY,M)
-    #else
-        #define HDopen(S,F,M)    open(S,F,M)
-    #endif
+    #define HDopen(F,...)    open(F,__VA_ARGS__)
 #endif /* HDopen */
 #ifndef HDopendir
     #define HDopendir(S)    opendir(S)

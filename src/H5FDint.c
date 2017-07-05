@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -434,4 +432,39 @@ H5FD_get_eof(const H5FD_t *file, H5FD_mem_t type)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_get_eof() */
+
+
+/*-------------------------------------------------------------------------
+* Function:    H5FD_driver_query
+*
+* Purpose: Similar to H5FD_query(), but intended for cases when we don't
+*          have a file available (e.g. before one is opened). Since we
+*          can't use the file to get the driver, the driver is passed in
+*          as a parameter.
+*
+* Return:  SUCCEED/FAIL
+*
+* Programmer:  Jacob Gruber
+*              Wednesday, August 17, 2011
+*
+*-------------------------------------------------------------------------
+*/
+herr_t
+H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
+{
+    herr_t ret_value = SUCCEED;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(driver);
+    HDassert(flags);
+
+    /* Check for the driver to query and then query it */
+    if(driver->query)
+        ret_value = (driver->query)(NULL, flags);
+    else 
+        *flags = 0;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_driver_query() */
 

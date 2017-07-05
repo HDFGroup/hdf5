@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 #-------------------------------------------------------------------------------
 macro (SET_GLOBAL_VARIABLE name value)
   set (${name} ${value} CACHE INTERNAL "Used to pass variables between directories" FORCE)
@@ -236,21 +247,30 @@ macro (HDF_README_PROPERTIES target_fortran)
     elseif (${CMAKE_SYSTEM_VERSION} MATCHES "6.3")
       set (BINARY_PLATFORM "${BINARY_PLATFORM} 10")
     endif ()
-    set (BINARY_PLATFORM "${BINARY_PLATFORM} ${MSVC_C_ARCHITECTURE_ID}")
-    if (${CMAKE_C_COMPILER_VERSION} MATCHES "^16.*")
-      set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2010")
-    elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^15.*")
-      set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2008")
-    elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^17.*")
-      set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2012")
-    elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^18.*")
-      set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2013")
-    elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^19.*")
-      set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2015")
-    elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^20.*")
-      set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2017")
-    else ()
-      set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO ${CMAKE_C_COMPILER_VERSION}")
+    if (CMAKE_C_COMPILER_ID MATCHES "Intel")
+      set (BINARY_PLATFORM "${BINARY_PLATFORM} Intel")
+      if (${CMAKE_C_COMPILER_VERSION} MATCHES "^17.*")
+        set (BINARY_PLATFORM "${BINARY_PLATFORM}, using Intel 17")
+      else ()
+        set (BINARY_PLATFORM "${BINARY_PLATFORM}, using Intel ${CMAKE_C_COMPILER_VERSION}")
+      endif ()
+    elseif (CMAKE_C_COMPILER_ID MATCHES "MSVC")
+      set (BINARY_PLATFORM "${BINARY_PLATFORM} ${MSVC_C_ARCHITECTURE_ID}")
+      if (${CMAKE_C_COMPILER_VERSION} MATCHES "^16.*")
+        set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2010")
+      elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^15.*")
+        set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2008")
+      elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^17.*")
+        set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2012")
+      elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^18.*")
+        set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2013")
+      elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^19.*")
+        set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2015")
+      elseif (${CMAKE_C_COMPILER_VERSION} MATCHES "^20.*")
+        set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO 2017")
+      else ()
+        set (BINARY_PLATFORM "${BINARY_PLATFORM}, using VISUAL STUDIO ${CMAKE_C_COMPILER_VERSION}")
+      endif ()
     endif ()
   elseif (APPLE)
     set (BINARY_EXAMPLE_ENDING "tar.gz")

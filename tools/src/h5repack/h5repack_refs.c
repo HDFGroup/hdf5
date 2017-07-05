@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
@@ -27,7 +25,7 @@ static const char* MapIdToName(hid_t refobj_id,trav_table_t *travt);
 static int copy_refs_attr(hid_t loc_in, hid_t loc_out, pack_opt_t *options,
                           trav_table_t *travt, hid_t fidout);
 static herr_t update_ref_value(hid_t obj_id, H5R_type_t ref_type, void *ref_in,
-		hid_t fid_out, void *ref_out, trav_table_t *travt);
+        hid_t fid_out, void *ref_out, trav_table_t *travt);
 
 /*-------------------------------------------------------------------------
  * Function: do_copy_refobjs
@@ -128,8 +126,8 @@ int do_copy_refobjs(hid_t fidin,
                 for(k = 0; k < rank; k++)
                     nelmts *= dims[k];
 
-                if((mtype_id = h5tools_get_native_type(ftype_id)) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_get_native_type failed");
+                if((mtype_id = H5Tget_native_type(ftype_id, H5T_DIR_DEFAULT)) < 0)
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
 
                 if((msize = H5Tget_size(mtype_id)) == 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
@@ -427,13 +425,13 @@ done:
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Modifier: xcao@hdfgroup.org, 9/12/2011
- * 	         Update values of references(object and region) for the following types:
+ *              Update values of references(object and region) for the following types:
  *               1) References,
  *               2) ARRAY of reference,
  *               3) VLEN of references.
  *               4) COMPOUND of references.
  *          This function does not handle references in other complicated structures,
- *		    such as references in nested compound datatypes.
+ *            such as references in nested compound datatypes.
  *
  * Date: October, 28, 2003
  *
@@ -474,7 +472,7 @@ static int copy_refs_attr(hid_t loc_in,
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info failed");
 
     for(u = 0; u < (unsigned)oinfo.num_attrs; u++) {
-    	is_ref = is_ref_vlen = is_ref_array = is_ref_comp = 0;
+        is_ref = is_ref_vlen = is_ref_array = is_ref_comp = 0;
 
         /* open attribute */
         if((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -486,8 +484,8 @@ static int copy_refs_attr(hid_t loc_in,
 
         type_class = H5Tget_class(ftype_id);
 
-        if((mtype_id = h5tools_get_native_type(ftype_id)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_get_native_type failed");
+        if((mtype_id = H5Tget_native_type(ftype_id, H5T_DIR_DEFAULT)) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
 
         if((msize = H5Tget_size(mtype_id)) == 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
@@ -530,9 +528,9 @@ static int copy_refs_attr(hid_t loc_in,
                 }
                 H5Tclose(mtid);
             }
-            
-            /* if compound don't contain reference type member, free the above 
-             * mallocs. Otherwise there can be memory leaks by the 'continue' 
+
+            /* if compound don't contain reference type member, free the above
+             * mallocs. Otherwise there can be memory leaks by the 'continue'
              * statement below. */
             if (!ref_comp_field_n) {
                 if (ref_comp_index) {
@@ -541,7 +539,7 @@ static int copy_refs_attr(hid_t loc_in,
                 }
 
                 if (ref_comp_size) {
-            	    HDfree(ref_comp_size);
+                    HDfree(ref_comp_size);
                     ref_comp_size = NULL;
                 }
             }
@@ -590,7 +588,7 @@ static int copy_refs_attr(hid_t loc_in,
             array_rank = (unsigned)H5Tget_array_ndims(mtype_id);
             H5Tget_array_dims2(mtype_id, array_dims);
             for(j = 0; j <array_rank; j++)
-            	array_size *= array_dims[j];
+                array_size *= array_dims[j];
             nelmts *= array_size;
         }
 
@@ -650,7 +648,7 @@ static int copy_refs_attr(hid_t loc_in,
                 }
             } /* H5T_STD_REF_DSETREG */
             else if (is_ref_vlen) {
-            	/* handle VLEN of references */
+                /* handle VLEN of references */
 
                 buf = (hvl_t *)HDmalloc((unsigned)(nelmts * sizeof(hvl_t)));
                 refbuf = buf; /* reuse the read buffer for write */
@@ -690,7 +688,7 @@ static int copy_refs_attr(hid_t loc_in,
                 }
             } /* else if (is_ref_vlen) */
             else if (is_ref_comp) {
-            	/* handle ref fields in a compound */
+                /* handle ref fields in a compound */
 
                 buf = HDmalloc((unsigned)(nelmts * msize));
                 refbuf = buf; /* reuse the read buffer for write */
@@ -730,7 +728,7 @@ static int copy_refs_attr(hid_t loc_in,
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Awrite failed");
 
             if (is_ref_vlen && buf)
-            	H5Dvlen_reclaim (mtype_id, space_id, H5P_DEFAULT, buf);
+                H5Dvlen_reclaim (mtype_id, space_id, H5P_DEFAULT, buf);
         } /* if (nelmts) */
 
         if (refbuf == buf)
@@ -782,10 +780,10 @@ done:
         HDfree(buf);
 
     if (ref_comp_index)
-    	HDfree(ref_comp_index);
+        HDfree(ref_comp_index);
 
     if (ref_comp_size)
-    	HDfree(ref_comp_size);
+        HDfree(ref_comp_size);
 
     H5E_BEGIN_TRY {
         H5Tclose(ftype_id);
@@ -799,9 +797,9 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	MapIdToName
+ * Function:    MapIdToName
  *
- * Purpose:	map a ID from a reference to a dataset name
+ * Purpose:    map a ID from a reference to a dataset name
  *
  *-------------------------------------------------------------------------
  */
@@ -834,16 +832,16 @@ out:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	Update_Ref_value
+ * Function:    Update_Ref_value
  *
- * Purpose:	Update a reference value
+ * Purpose:    Update a reference value
  *
  * Programmer: xcao@hdfgroup.org 9/12/2011
  *
  *-------------------------------------------------------------------------
  */
 static herr_t update_ref_value(hid_t obj_id, H5R_type_t ref_type, void *ref_in,
-		hid_t fid_out, void *ref_out, trav_table_t *travt)
+        hid_t fid_out, void *ref_out, trav_table_t *travt)
 {
     int    ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     const char* ref_obj_name;
