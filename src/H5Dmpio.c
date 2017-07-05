@@ -1898,6 +1898,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
 
                 /* Collect the new chunk info back to the local copy, since only the record in the
                  * collective array gets updated by the chunk re-allocation */
+                /* XXX: This step may no longer be necessary */
                 HDmemcpy(&chunk_list[i].chunk_states.new_chunk, &collective_chunk_list[offset].chunk_states.new_chunk, sizeof(chunk_list[i].chunk_states.new_chunk));
 
                 H5_CHECKED_ASSIGN(mpi_type_count, int, chunk_list[i].chunk_states.new_chunk.length, hsize_t);
