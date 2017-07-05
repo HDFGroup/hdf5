@@ -2684,7 +2684,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     /* Redistribute shared chunks to new owners as necessary */
     if (io_info->op_type == H5D_IO_OP_WRITE)
         if (H5D__chunk_redistribute_shared_chunks(io_info, type_info, fm, local_info_array, &num_chunks_selected) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDISTRIBUTE, FAIL, "unable to redistribute shared chunks")
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to redistribute shared chunks")
 
     *chunk_list = local_info_array;
     *num_entries = num_chunks_selected;
