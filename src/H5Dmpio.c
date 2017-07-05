@@ -113,9 +113,9 @@ typedef struct H5D_filtered_collective_io_info_t {
   } owners;
 
   struct {
-      MPI_Request    *receive_requests_array;
-      unsigned char **receive_buffer_array;
-      int             num_receive_requests;
+      MPI_Request    *receive_requests_array;   /* Array of receive requests posted to receive chunk modification data from other processes */
+      unsigned char **receive_buffer_array;     /* Array of receive buffers to store chunk modification data from other processes */
+      int             num_receive_requests;     /* Number of entries in the receive_requests_array and receive_buffer_array arrays */
   } async_info;
 } H5D_filtered_collective_io_info_t;
 
@@ -348,7 +348,10 @@ done:
  * Purpose:     Given arrays by MPI ranks, gathers them into a single array
  *              which is either gathered to the rank specified by root when
  *              allgather is false, or is distributed back to all ranks
- *              when allgather is true. If the sort_func argument is
+ *              when allgather is true. The number of processes
+ *              participating in the gather operation should be specified
+ *              for nprocs and the MPI communicator to use should be
+ *              specified for comm. If the sort_func argument is
  *              specified, the list is sorted before being returned.
  *
  *              If allgather is specified as true, root is ignored.
@@ -1266,10 +1269,10 @@ if(H5DEBUG(D))
  *              1. Construct a list of selected chunks in the collective IO
  *                 operation
  *                 A. If any chunk is being written to by more than 1
- *                    process, the process writing the most data to the
- *                    chunk will take ownership of the chunk (the first
- *                    process seen that is writing the most data becomes
- *                    the new owner in the case of ties)
+ *                    process, the process writing to the chunk which
+ *                    currently has the least amount of chunks assigned
+ *                    to it becomes the new owner (in the case of ties,
+ *                    the lowest MPI rank becomes the new owner)
  *              2. If the operation is a write operation
  *                 A. Loop through each chunk in the operation
  *                    I. If this is not a full overwrite of the chunk
@@ -1461,7 +1464,7 @@ done:
                 H5MM_free(chunk_list[i].buf);
 
         H5MM_free(chunk_list);
-    }
+    } /* end if */
 
     if (num_chunks_selected_array)
         H5MM_free(num_chunks_selected_array);
@@ -1700,10 +1703,10 @@ done:
  *              1. Construct a list of selected chunks in the collective IO
  *                 operation
  *                 A. If any chunk is being written to by more than 1
- *                    process, the process writing the most data to the
- *                    chunk will take ownership of the chunk (the first
- *                    process seen that is writing the most data becomes
- *                    the new owner in the case of ties)
+ *                    process, the process writing to the chunk which
+ *                    currently has the least amount of chunks assigned
+ *                    to it becomes the new owner (in the case of ties,
+ *                    the lowest MPI rank becomes the new owner)
  *              2. If the operation is a read operation
  *                 A. Loop through each chunk in the operation
  *                    I. Read the chunk from the file
@@ -1947,11 +1950,11 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
             if (collective_chunk_list){
                 H5MM_free(collective_chunk_list);
                 collective_chunk_list = NULL;
-            }
+            } /* end if */
             if (has_chunk_selected_array){
                 H5MM_free(has_chunk_selected_array);
                 has_chunk_selected_array = NULL;
-            }
+            } /* end if */
         } /* end for */
 
         /* Free the MPI file and memory types, if they were derived */
@@ -1973,7 +1976,7 @@ done:
                 H5MM_free(chunk_list[i].buf);
 
         H5MM_free(chunk_list);
-    }
+    } /* end if */
 
     if (collective_chunk_list)
         H5MM_free(collective_chunk_list);
@@ -2197,6 +2200,23 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
     FUNC_LEAVE_NOAPI(H5F_addr_cmp(addr1, addr2))
 } /* end H5D__cmp_filtered_collective_io_info_entry() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__cmp_filtered_collective_io_info_entry_owner
+ *
+ * Purpose:     Routine to compare filtered collective chunk io info
+ *              entries's original owner fields
+ *
+ * Description: Callback for qsort() to compare filtered collective chunk
+ *              io info entries's original owner fields
+ *
+ * Return:      -1, 0, 1
+ *
+ * Programmer:  Jordan Henderson
+ *              Monday, Apr. 10th, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 H5D__cmp_filtered_collective_io_info_entry_owner(const void *filtered_collective_io_info_entry1, const void *filtered_collective_io_info_entry2)
 {
@@ -2575,7 +2595,8 @@ done:
  * Purpose:     Constructs a list of entries which contain the necessary
  *              information for inter-process communication when performing
  *              collective io on filtered chunks. This list is used by
- *              every process in operations that must be collectively done
+ *              each process when performing I/O on locally selected chunks
+ *              and also in operations that must be collectively done
  *              on every chunk, such as chunk re-allocation, insertion of
  *              chunks into the chunk index, etc.
  *
@@ -2668,7 +2689,17 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_redistribute_shared_chunks
  *
- * Purpose:
+ * Purpose:     When performing a collective write on a Dataset with
+ *              filters applied, this function is used to redistribute any
+ *              chunks which are selected by more than one process, so as
+ *              to preserve file integrity after the write by ensuring
+ *              that any shared chunks are only modified by one process.
+ *
+ *              The current implementation simply hands the list off to
+ *              rank 0, which then scans the list and for each shared
+ *              chunk, it redistributes the chunk to the process writing
+ *              to the chunk which currently has the least amount of chunks
+ *              assigned to it.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2782,7 +2813,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
     if (shared_chunks_info_array) {
         H5MM_free(shared_chunks_info_array);
         shared_chunks_info_array = NULL;
-    }
+    } /* end if */
 
     /* Now that the chunks have been redistributed, each process must send its modification data
      * to the new owners of any of the chunks it previously possessed. Accordingly, each process
@@ -2907,7 +2938,7 @@ done:
     for (i = 0; i < num_send_requests; i++) {
         if (mod_data[i])
             H5MM_free(mod_data[i]);
-    }
+    } /* end for */
 
     if (send_requests)
         H5MM_free(send_requests);
@@ -3070,7 +3101,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
      */
     if (!chunk_entry->full_overwrite || io_info->op_type == H5D_IO_OP_READ) {
         buf_size = chunk_entry->chunk_states.chunk_current.length;
-    }
+    } /* end if */
     else {
         hssize_t extent_npoints;
 
@@ -3078,7 +3109,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
 
         buf_size = (hsize_t) extent_npoints * type_info->src_type_size;
-    }
+    } /* end else */
 
     chunk_entry->chunk_states.new_chunk.length = buf_size;
 
@@ -3189,7 +3220,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
                     dataspace = NULL;
                 }
                 H5MM_free(chunk_entry->async_info.receive_buffer_array[i]);
-            }
+            } /* end for */
 
             /* Filter the chunk */
             if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, 0, &filter_mask,
