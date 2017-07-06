@@ -1331,6 +1331,11 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
 
     FUNC_ENTER_STATIC
 
+    HDassert(io_info);
+    HDassert(type_info);
+    HDassert(fm);
+    HDassert(dx_plist);
+
     /* Obtain the current rank of the process and the number of processes */
     if ((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank")
@@ -1771,6 +1776,11 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
     herr_t                             ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
+
+    HDassert(io_info);
+    HDassert(type_info);
+    HDassert(fm);
+    HDassert(dx_plist);
 
     /* Obtain the current rank of the process and the number of processes */
     if ((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
@@ -2735,6 +2745,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
     size_t                              i, last_assigned_idx;
     int                                *send_counts = NULL;
     int                                *send_displacements = NULL;
+    int                                 scatter_recvcount_int;
     int                                 mpi_rank, mpi_size, mpi_code;
     herr_t                              ret_value = SUCCEED;
 
@@ -2742,6 +2753,8 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
 
     HDassert(io_info);
     HDassert(type_info);
+    HDassert(fm);
+    HDassert(local_chunk_array);
     HDassert(local_chunk_array_num_entries);
 
     if ((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
@@ -2816,9 +2829,9 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
     } /* end if */
 
     /* Scatter the segments of the list back to each process */
-    if (MPI_SUCCESS != (mpi_code = MPI_Scatterv(shared_chunks_info_array, send_counts,
-            send_displacements, MPI_BYTE, local_chunk_array, *local_chunk_array_num_entries * (int) sizeof(*local_chunk_array),
-            MPI_BYTE, 0, io_info->comm)))
+    H5_CHECKED_ASSIGN(scatter_recvcount_int, int, *local_chunk_array_num_entries * sizeof(*local_chunk_array), size_t);
+    if (MPI_SUCCESS != (mpi_code = MPI_Scatterv(shared_chunks_info_array, send_counts, send_displacements,
+            MPI_BYTE, local_chunk_array, scatter_recvcount_int, MPI_BYTE, 0, io_info->comm)))
         HMPI_GOTO_ERROR(FAIL, "unable to scatter shared chunks info buffer", mpi_code)
 
     if (shared_chunks_info_array) {
@@ -2898,10 +2911,10 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
                 size_t      j;
 
                 chunk_entry->async_info.num_receive_requests = (int) chunk_entry->num_writers - 1;
-                if (NULL == (chunk_entry->async_info.receive_requests_array = (MPI_Request *) H5MM_malloc(chunk_entry->async_info.num_receive_requests * sizeof(MPI_Request))))
+                if (NULL == (chunk_entry->async_info.receive_requests_array = (MPI_Request *) H5MM_malloc((size_t) chunk_entry->async_info.num_receive_requests * sizeof(MPI_Request))))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate async requests array")
 
-                if (NULL == (chunk_entry->async_info.receive_buffer_array = (unsigned char **) H5MM_malloc(chunk_entry->async_info.num_receive_requests * sizeof(unsigned char *))))
+                if (NULL == (chunk_entry->async_info.receive_buffer_array = (unsigned char **) H5MM_malloc((size_t) chunk_entry->async_info.num_receive_requests * sizeof(unsigned char *))))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate async receive buffers")
 
                 for (j = 0; j < chunk_entry->num_writers - 1; j++) {
@@ -2917,7 +2930,8 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
                     if (MPI_SUCCESS != (mpi_code = MPI_Get_count(&status, MPI_BYTE, &count)))
                         HMPI_GOTO_ERROR(FAIL, "MPI_Get_count failed", mpi_code)
 
-                    if (NULL == (chunk_entry->async_info.receive_buffer_array[j] = (unsigned char *) H5MM_malloc(count * sizeof(char *))))
+                    HDassert(count >= 0);
+                    if (NULL == (chunk_entry->async_info.receive_buffer_array[j] = (unsigned char *) H5MM_malloc((size_t) count * sizeof(char *))))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate modification data receive buffer")
 
                     if (MPI_SUCCESS != (mpi_code = MPI_Imrecv(chunk_entry->async_info.receive_buffer_array[j], count, MPI_BYTE,
@@ -3100,6 +3114,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     HDassert(chunk_entry);
     HDassert(io_info);
     HDassert(type_info);
+    HDassert(fm);
 
     /* Look up the chunk and get its file and memory dataspaces */
     if (NULL == (chunk_info = (H5D_chunk_info_t *) H5SL_search(fm->sel_chunks, &chunk_entry->index)))
