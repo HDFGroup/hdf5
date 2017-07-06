@@ -2223,7 +2223,8 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
  * Description: Callback for qsort() to compare filtered collective chunk
  *              io info entries's original owner fields
  *
- * Return:      -1, 0, 1
+ * Return:      The difference between the two
+ *              H5D_filtered_collective_io_info_t's original owner fields
  *
  * Programmer:  Jordan Henderson
  *              Monday, Apr. 10th, 2017
@@ -2754,7 +2755,6 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
     HDassert(io_info);
     HDassert(type_info);
     HDassert(fm);
-    HDassert(local_chunk_array);
     HDassert(local_chunk_array_num_entries);
 
     if ((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
@@ -3100,6 +3100,8 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     unsigned char    *mod_data = NULL; /* Chunk modification data sent by a process to a chunk's owner */
     unsigned          filter_mask = 0;
     hssize_t          iter_nelmts;     /* Number of points to iterate over for the chunk IO operation */
+    hssize_t          extent_npoints;
+    hsize_t           true_chunk_size;
     hbool_t           mem_iter_init = FALSE;
     size_t            buf_size;
     size_t            i;
@@ -3120,24 +3122,16 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     if (NULL == (chunk_info = (H5D_chunk_info_t *) H5SL_search(fm->sel_chunks, &chunk_entry->index)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, FAIL, "can't locate chunk in skip list")
 
-    /* If this is a read operation or a write operation where the chunk is not being fully
-     * overwritten, enough memory must be allocated to read the filtered chunk from the file.
-     * If this is a write operation where the chunk is being fully overwritten, enough memory
-     * must be allocated for the size of the unfiltered chunk.
+    if ((extent_npoints = H5S_GET_EXTENT_NPOINTS(chunk_info->fspace)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
+    true_chunk_size = (hsize_t) extent_npoints * type_info->src_type_size;
+
+    /* If the size of the filtered chunk is larger than the number of points in the
+     * chunk file space extent times the datatype size, allocate enough space to hold the
+     * whole filtered chunk. Otherwise, allocate a buffer equal to the size of the
+     * chunk so that the unfiltering operation doesn't have to grow the buffer.
      */
-    if (!chunk_entry->full_overwrite || io_info->op_type == H5D_IO_OP_READ) {
-        buf_size = chunk_entry->chunk_states.chunk_current.length;
-    } /* end if */
-    else {
-        hssize_t extent_npoints;
-
-        if ((extent_npoints = H5S_GET_EXTENT_NPOINTS(chunk_info->fspace)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-
-        buf_size = (hsize_t) extent_npoints * type_info->src_type_size;
-    } /* end else */
-
-    chunk_entry->chunk_states.new_chunk.length = buf_size;
+    buf_size = MAX(chunk_entry->chunk_states.chunk_current.length, true_chunk_size);
 
     if (NULL == (chunk_entry->buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer")
@@ -3146,6 +3140,8 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
      * read from the file and unfiltered.
      */
     if (!chunk_entry->full_overwrite || io_info->op_type == H5D_IO_OP_READ) {
+        chunk_entry->chunk_states.new_chunk.length = chunk_entry->chunk_states.chunk_current.length;
+
         /* XXX: Test with MPI types and collective read to improve performance */
         if (H5F_block_read(io_info->dset->oloc.file, H5FD_MEM_DRAW, chunk_entry->chunk_states.chunk_current.offset,
                 buf_size, H5AC_rawdata_dxpl_id, chunk_entry->buf) < 0)
@@ -3156,6 +3152,9 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
                 (size_t *) &chunk_entry->chunk_states.new_chunk.length, &buf_size, &chunk_entry->buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "couldn't unfilter chunk for modifying")
     } /* end if */
+    else {
+        chunk_entry->chunk_states.new_chunk.length = true_chunk_size;
+    } /* end else */
 
     /* Initialize iterator for memory selection */
     if (NULL == (mem_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(*mem_iter))))
