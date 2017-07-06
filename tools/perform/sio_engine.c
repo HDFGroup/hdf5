@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -261,7 +259,7 @@ done:
         case HDF5:
             if (fd.h5fd != -1)
                 hrc = do_fclose(iot, &fd);
-			break;
+            break;
         default:
             /* unknown request */
             HDassert(0 && "Unknown IO type");
@@ -683,7 +681,7 @@ dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
                 VRFY((hrc >= 0), "H5Dwrite");
 
                 break;
-				
+
             default:
                 /* unknown request */
                 HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -861,7 +859,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             GOTOERROR(FAIL);
         }
         break;
-		
+
         default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -984,7 +982,7 @@ static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms,
                     h5dset_space_id, h5dxpl, buffer);
                 VRFY((hrc >= 0), "H5Dread");
                 break;
-				
+
             default:
                 /* unknown request */
                 HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -1102,7 +1100,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             GOTOERROR(FAIL);
         }
         break;
-		
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)param->io_type);
@@ -1230,7 +1228,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
 
         fd->h5fd = -1;
         break;
-		
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
@@ -1302,7 +1300,7 @@ do_cleanupfile(iotype iot, char *filename)
             }
             H5Pclose(fapl);
         break;
-			
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);

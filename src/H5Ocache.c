@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -1116,10 +1114,6 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
         else
             id = *p++;
 
-        /* Check for unknown message ID getting encoded in file */
-        if(id == H5O_UNKNOWN_ID)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "'unknown' message ID encoded in file?!?")
-
         /* Message size */
         UINT16DECODE(p, mesg_size);
         HDassert(mesg_size == H5O_ALIGN_OH(oh, mesg_size));
@@ -1193,7 +1187,12 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
 
             /* Point unknown messages at 'unknown' message class */
             /* (Usually from future versions of the library) */
-            if(id >= NELMTS(H5O_msg_class_g) || NULL == H5O_msg_class_g[id]) {
+            if(id >= H5O_UNKNOWN_ID ||
+#ifdef H5O_ENABLE_BOGUS
+               id == H5O_BOGUS_VALID_ID ||
+#endif
+               NULL == H5O_msg_class_g[id]) {
+
                 H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
 
                 /* Allocate "unknown" message info */

@@ -5,12 +5,10 @@
 *                                                                           *
 * This file is part of HDF5.  The full HDF5 copyright notice, including     *
 * terms governing use, modification, and redistribution, is contained in    *
-* the files COPYING and Copyright.html.  COPYING can be found at the root   *
-* of the source code distribution tree; Copyright.html can be found at the  *
-* root level of an installed copy of the electronic HDF5 document set and   *
-* is linked from the top-level documents page.  It can also be found at     *
-* http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-* access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
@@ -96,7 +94,6 @@ const char *H5REPACK_FILENAMES[] = {
 
 /* Name of tool */
 #define PROGRAMNAME "h5repacktst"
-
 
 #define DIM1    40
 #define DIM2    20
@@ -1537,7 +1534,7 @@ int main (void)
         hid_t       fapl;
 
         fapl = h5_fileaccess();
-        h5_cleanup(H5REPACK_FILENAMES, fapl);
+        h5_clean_files(H5REPACK_FILENAMES, fapl);
 
     }
 

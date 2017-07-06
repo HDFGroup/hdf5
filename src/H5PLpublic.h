@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic document set and is     *
- * linked from the top-level documents page.  It can also be found at        *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have access   *
- * to either file, you may request a copy from help@hdfgroup.org.            *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Raymond Lu <songyulu@hdfgroup.org>
@@ -44,6 +42,13 @@ extern "C" {
 /* plugin state */
 H5_DLL herr_t H5PLset_loading_state(unsigned int plugin_type);
 H5_DLL herr_t H5PLget_loading_state(unsigned int *plugin_type/*out*/);
+H5_DLL herr_t H5PLappend(const char *plugin_path);
+H5_DLL herr_t H5PLprepend(const char *plugin_path);
+H5_DLL herr_t H5PLreplace(const char *plugin_path, unsigned int index);
+H5_DLL herr_t H5PLinsert(const char *plugin_path, unsigned int index);
+H5_DLL herr_t H5PLremove(unsigned int index);
+H5_DLL ssize_t H5PLget(unsigned int index, char *pathname/*out*/, size_t size);
+H5_DLL herr_t H5PLsize(unsigned int *listsize/*out*/);
 
 #ifdef __cplusplus
 }

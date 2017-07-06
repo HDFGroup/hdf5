@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -113,6 +111,7 @@
 #define FILE81  "tints4dims.h5"
 #define FILE82  "tcompound_complex2.h5"
 #define FILE83  "tvlenstr_array.h5"
+#define FILE84  "tudfilter.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -150,6 +149,23 @@ const H5Z_class2_t H5Z_MYFILTER[1] = {{
         NULL,                /* The "can apply" callback     */
         set_local_myfilter,  /* The "set local" callback     */
         myfilter,            /* The actual filter function */
+}};
+
+#define H5Z_FILTER_DYNLIBUD      300
+#define MULTIPLIER              3
+
+static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
+                const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
+    H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
+    H5Z_FILTER_DYNLIBUD,             /* Filter id number        */
+    1, 1,                            /* Encoding and decoding enabled   */
+    "dynlibud",                 /* Filter name for debugging    */
+    NULL,                            /* The "can apply" callback        */
+    NULL,                            /* The "set local" callback        */
+    (H5Z_func_t)H5Z_filter_dynlibud,    /* The actual filter function    */
 }};
 
 
@@ -618,7 +634,7 @@ static int gent_softlink2(void)
     fileid1 = H5Fcreate(FILE4_1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fileid1 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -629,7 +645,7 @@ static int gent_softlink2(void)
     gid1 = H5Gcreate2(fileid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -637,7 +653,7 @@ static int gent_softlink2(void)
     gid2 = H5Gcreate2(fileid1, "group_empty", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid2 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -649,7 +665,7 @@ static int gent_softlink2(void)
     status = H5Tcommit2(fileid1, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -677,7 +693,7 @@ static int gent_softlink2(void)
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset1 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -685,7 +701,7 @@ static int gent_softlink2(void)
     status = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -698,7 +714,7 @@ static int gent_softlink2(void)
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset2 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -706,7 +722,7 @@ static int gent_softlink2(void)
     status = H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -721,7 +737,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dset1", fileid1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -730,7 +746,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dtype", fileid1, "soft_dtype", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -739,7 +755,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/group1", fileid1, "soft_group1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -748,7 +764,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/group_empty", fileid1, "soft_empty_grp", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -757,7 +773,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("not_yet", fileid1, "soft_dangle", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -769,7 +785,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dset1", gid1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -778,7 +794,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dset2", gid1, "soft_dset2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -787,7 +803,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dtype", gid1, "soft_dtype", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -796,7 +812,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/group_empty", gid1, "soft_empty_grp", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -805,7 +821,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("not_yet", gid1, "soft_dangle", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -815,31 +831,31 @@ static int gent_softlink2(void)
      * Close/release resources.
      */
     if(dataspace >= 0 && H5Sclose(dataspace) < 0) {
-        fprintf(stderr, "Error: %s> H5Sclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Sclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(gid1 >= 0 && H5Gclose(gid1) < 0) {
-        fprintf(stderr, "Error: %s> H5Gclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Gclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(gid2 >= 0 && H5Gclose(gid2) < 0) {
-        fprintf(stderr, "Error: %s> H5Gclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Gclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(datatype >= 0 && H5Tclose(datatype) < 0) {
-        fprintf(stderr, "Error: %s> H5Tclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Tclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(dset1 >= 0 && H5Dclose(dset1) < 0) {
-        fprintf(stderr, "Error: %s> H5Dclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(dset2 >= 0 && H5Dclose(dset2) < 0) {
-        fprintf(stderr, "Error: %s> H5Dclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(fileid1 >= 0 && H5Fclose(fileid1) < 0) {
-        fprintf(stderr, "Error: %s> H5Fclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Fclose failed.\n", FILE4_1);
         status = FAIL;
     }
 
@@ -915,7 +931,7 @@ static void gent_udlink(void)
     /* This ud link will dangle, but that's okay */
     fid = H5Fcreate(FILE54, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     H5Lcreate_ud(fid, "udlink1", (H5L_type_t)MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
-    strcpy(buf, "foo");
+    HDstrcpy(buf, "foo");
     H5Lcreate_ud(fid, "udlink2", (H5L_type_t)MY_LINKCLASS, buf, 4, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Fclose(fid);
@@ -1820,7 +1836,7 @@ static void gent_str(void) {
                 for(l = 0; l < 10; l++)
                     comp1[i][j].a[k][l] = (l + j + k) * (l + j + k);
             for(k = 0 ; k < 12; k++)
-                strcpy(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
+                HDstrcpy(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
         }
 
     dataset = H5Dcreate2(fid, "/comp1", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -2452,7 +2468,7 @@ static void gent_nestcomp(void)
      */
     status = H5Dwrite(dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
     if(status < 0)
-        fprintf(stderr, "gent_nestcomp H5Dwrite failed\n");
+        HDfprintf(stderr, "gent_nestcomp H5Dwrite failed\n");
 
     /*
      * Release resources
@@ -3477,6 +3493,7 @@ static void gent_array8(void)
             status = H5Dwrite (dset, filetype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
             HDassert(status >= 0);
     }
+
     /*
      * Close and release resources.
      */
@@ -9551,18 +9568,19 @@ static void gent_bitnopaquefields(void)
     /* Compound datatype */
     typedef struct s_t
     {
-        unsigned char   a;
-        unsigned int    b;
-        unsigned long    c;
-        unsigned long long    d;
+        uint8_t     a;
+        uint16_t    b;
+        uint32_t    c;
+        uint64_t    d;
     } s_t;
+    
     hid_t  file, grp=-1, type=-1, space=-1, dset=-1;
     size_t  i;
     hsize_t  nelmts = F80_DIM32;
-    unsigned char buf[F80_DIM32];    /* bitfield, opaque */
-    unsigned int buf2[F80_DIM32];    /* bitfield, opaque */
-    unsigned long buf3[F80_DIM32];    /* bitfield, opaque */
-    unsigned long long buf4[F80_DIM32];    /* bitfield, opaque */
+    uint8_t buf[F80_DIM32];    /* bitfield, opaque */
+    uint16_t buf2[F80_DIM32];    /* bitfield, opaque */
+    uint32_t buf3[F80_DIM32];    /* bitfield, opaque */
+    uint64_t buf4[F80_DIM32];    /* bitfield, opaque */
     s_t      buf5[F80_DIM32];        /* compound */
 
     file = H5Fcreate(FILE80, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -9573,7 +9591,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                        buf[i] = (uint8_t)0xff ^ (uint8_t)i;
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                     H5Dclose(dset);
@@ -9588,7 +9606,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                        buf2[i] = (uint16_t)0xffff ^ (uint16_t)(i * 16);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                     H5Dclose(dset);
@@ -9603,7 +9621,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_3", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf3[i] = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                        buf3[i] = (uint32_t)0xffffffff ^ (uint32_t)(i * 32);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf3);
                     H5Dclose(dset);
@@ -9618,7 +9636,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_4", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf4[i] = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                        buf4[i] = (uint64_t)0xffffffffffffffff ^ (uint64_t)(i * 64);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf4);
                     H5Dclose(dset);
@@ -9638,7 +9656,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                            buf[i] = (uint8_t)0xff ^ (uint8_t)i;
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                         H5Dclose(dset);
                     }
@@ -9654,7 +9672,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                            buf2[i] = (uint16_t)0xffff ^ (uint16_t)(i * 16);
 
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                         H5Dclose(dset);
@@ -9677,10 +9695,10 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for(i = 0; i < nelmts; i++) {
-                        buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
-                        buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
-                        buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
-                        buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                        buf5[i].a = (uint8_t)0xff ^ (uint8_t)i;
+                        buf5[i].b = (uint16_t)0xffff ^ (uint16_t)(i * 16);
+                        buf5[i].c = (uint32_t)0xffffffff ^ (uint32_t)(i * 32);
+                        buf5[i].d = (uint64_t)0xffffffffffffffff ^ (uint64_t)(i * 64);
                     }
 
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
@@ -9977,74 +9995,80 @@ static void gent_compound_complex2(void)
         H5Sclose(space);
     }
 
-//    /* CompoundComplex2D */
-//    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
-//        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
-//        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
-//        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
-//        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
-//        if ((space = H5Screate_simple(F82_RANK2, &nelmts, NULL)) >= 0) {
-//            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-//                for(i = 0; i < nelmts; i++) {
-//                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
-//                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
-//                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
-//                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
-//                }
-//
-//                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
-//                H5Dclose(dset);
-//            }
-//            H5Sclose(space);
-//        }
-//        H5Tclose(type);
-//    }
-//
-//    /* CompoundComplex3D */
-//    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
-//        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
-//        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
-//        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
-//        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
-//        if ((space = H5Screate_simple(F82_RANK3, &nelmts, NULL)) >= 0) {
-//            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-//                for(i = 0; i < nelmts; i++) {
-//                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
-//                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
-//                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
-//                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
-//                }
-//
-//                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
-//                H5Dclose(dset);
-//            }
-//            H5Sclose(space);
-//        }
-//        H5Tclose(type);
-//    }
-//
-//    /* CompoundComplex4D */
-//    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
-//        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
-//        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
-//        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
-//        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
-//        if ((space = H5Screate_simple(F82_RANK4, &nelmts, NULL)) >= 0) {
-//            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-//                for(i = 0; i < nelmts; i++) {
-//                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
-//                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
-//                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
-//                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
-//                }
-//
-//                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
-//                H5Dclose(dset);
-//            }
-//            H5Sclose(space);
-//        }
-//        H5Tclose(type);
-//    }
+    /* CompoundComplex2D */
+/*
+    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+        if ((space = H5Screate_simple(F82_RANK2, &nelmts, NULL)) >= 0) {
+            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                for(i = 0; i < nelmts; i++) {
+                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                }
+
+                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+                H5Dclose(dset);
+            }
+            H5Sclose(space);
+        }
+        H5Tclose(type);
+    }
+
+*/
+    /* CompoundComplex3D */
+/*
+    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+        if ((space = H5Screate_simple(F82_RANK3, &nelmts, NULL)) >= 0) {
+            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                for(i = 0; i < nelmts; i++) {
+                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                }
+
+                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+                H5Dclose(dset);
+            }
+            H5Sclose(space);
+        }
+        H5Tclose(type);
+    }
+
+*/
+    /* CompoundComplex4D */
+/*
+    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+        if ((space = H5Screate_simple(F82_RANK4, &nelmts, NULL)) >= 0) {
+            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                for(i = 0; i < nelmts; i++) {
+                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                }
+
+                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+                H5Dclose(dset);
+            }
+            H5Sclose(space);
+        }
+        H5Tclose(type);
+    }
+*/
 
     H5Fclose(file);
 }
@@ -10119,7 +10143,7 @@ static void gent_vlenstr_array(void)
 
             if ((dset = H5Dcreate2(file, F83_DATASETNAME2, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                 if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                    fprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
+                    HDfprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
 
                 H5Dclose(dset);
             }
@@ -10132,6 +10156,132 @@ static void gent_vlenstr_array(void)
     H5Fclose(file);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gent_udfilter
+ *
+ * Purpose:     Generate a file to be used in testing user defined filter plugin3.
+ *-------------------------------------------------------------------------
+ */
+static void gent_udfilter(void)
+{
+    hid_t    fid;  /* file id */
+    hid_t    dcpl; /* dataset creation property list */
+    hid_t    dsid;  /* dataset ID */
+    hid_t    sid;  /* dataspace ID */
+    hid_t    tid;  /* datatype ID */
+
+    hsize_t  dims1[RANK]      = {DIM1,DIM2};
+    hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
+    int      buf1[DIM1][DIM2];
+    int      i, j, n, ret;
+
+    for(i=n=0; i<DIM1; i++){
+        for(j=0; j<DIM2; j++){
+            buf1[i][j]=n++;
+        }
+    }
+
+    /* create a file */
+    fid  = H5Fcreate(FILE84, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    HDassert(fid>=0);
+
+    /* create a space */
+    sid = H5Screate_simple(SPACE2_RANK, dims1, NULL);
+
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    HDassert(dcpl>=0);
+
+    ret = H5Pset_layout(dcpl, H5D_CHUNKED);
+    HDassert(ret >= 0);
+
+    ret = H5Pset_chunk(dcpl, SPACE2_RANK, chunk_dims);
+    HDassert(ret >= 0);
+
+    ret = H5Zregister (H5Z_DYNLIBUD);
+    HDassert(ret >= 0);
+
+    ret = H5Pset_filter (dcpl, H5Z_FILTER_DYNLIBUD, H5Z_FLAG_MANDATORY, 0, NULL);
+    HDassert(ret >= 0);
+
+    /* create the dataset */
+    dsid = H5Dcreate2(fid, "dynlibud", H5T_STD_I32LE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    HDassert(dsid >= 0);
+
+    /* write */
+    ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1);
+    HDassert(ret >= 0);
+
+    /* close */
+    ret = H5Dclose(dsid);
+    HDassert(ret >= 0);
+
+    /* remove the filters from the dcpl */
+    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    HDassert(ret >= 0);
+
+    /*-------------------------------------------------------------------------
+     * close
+     *-------------------------------------------------------------------------
+     */
+    ret = H5Sclose(sid);
+    HDassert(ret >= 0);
+
+    ret = H5Pclose(dcpl);
+    HDassert(ret >= 0);
+
+    ret = H5Fclose(fid);
+    HDassert(ret >= 0);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_filter_dynlibud
+ *
+ * Purpose:    A dynlibud filter method that multiplies the original value
+ *              during write and divide the original value during read. It
+ *              will be built as a shared library.  tools tests will load
+ *              and use this filter as a plugin library.
+ *
+ * Return:    Success:    Data chunk size
+ *
+ *        Failure:    0
+ *-------------------------------------------------------------------------
+ */
+static size_t
+H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
+      const unsigned int *cd_values, size_t nbytes,
+      size_t *buf_size, void **buf)
+{
+    char *int_ptr = (char *)*buf;          /* Pointer to the data values */
+    size_t buf_left = *buf_size;  /* Amount of data buffer left to process */
+
+    /* Check for the correct number of parameters */
+    if(cd_nelmts > 0)
+        return(0);
+
+    /* Assignment to eliminate unused parameter warning. */
+    cd_values = cd_values;
+
+    if(flags & H5Z_FLAG_REVERSE) { /*read*/
+        /* Subtract the original value with MULTIPLIER */
+        while(buf_left > 0) {
+            char temp = *int_ptr;
+            *int_ptr = temp - MULTIPLIER;
+            int_ptr++;
+            buf_left -= sizeof(*int_ptr);
+        } /* end while */
+    } /* end if */
+    else { /*write*/
+        /* Add the original value with MULTIPLIER */
+        while(buf_left > 0) {
+            char temp = *int_ptr;
+            *int_ptr = temp + MULTIPLIER;
+            int_ptr++;
+            buf_left -= sizeof(*int_ptr);
+        } /* end while */
+    } /* end else */
+
+    return nbytes;
+} /* end H5Z_filter_dynlibud() */
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -10226,6 +10376,8 @@ int main(void)
     gent_bitnopaquefields();
 
     gent_intsfourdims();
+
+    gent_udfilter();
 
     return 0;
 }

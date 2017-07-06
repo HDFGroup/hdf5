@@ -5,12 +5,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 #------------------------------------------------------------------------------
 # This is the list of files that are part of HDF5 source distribution.
@@ -392,6 +390,8 @@
 ./c++/src/H5IntType.h
 ./c++/src/H5Library.cpp
 ./c++/src/H5Library.h
+./c++/src/H5LaccProp.cpp
+./c++/src/H5LaccProp.h
 ./c++/src/H5Location.cpp
 ./c++/src/H5Location.h
 ./c++/src/H5Object.cpp
@@ -738,6 +738,7 @@
 ./src/H5Pstrcpl.c
 ./src/H5Ptest.c
 ./src/H5PL.c
+./src/H5PLpkg.h
 ./src/H5PLprivate.h
 ./src/H5PLpublic.h
 ./src/H5PLextern.h
@@ -1018,6 +1019,7 @@
 
 ./tools/h5dump/Makefile.am
 ./tools/h5dump/Makefile.in
+./tools/h5dump/dynlib_dump.c
 ./tools/h5dump/h5dump.c
 ./tools/h5dump/h5dump.h
 ./tools/h5dump/h5dump_defines.h
@@ -1027,6 +1029,7 @@
 ./tools/h5dump/h5dump_xml.c
 ./tools/h5dump/h5dump_xml.h
 ./tools/h5dump/h5dumpgentest.c
+./tools/h5dump/h5dump_plugin.sh.in
 ./tools/h5dump/testh5dump.sh.in
 ./tools/h5dump/testh5dumppbits.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
@@ -1094,11 +1097,13 @@
 # h5diff sources
 ./tools/h5diff/Makefile.am
 ./tools/h5diff/Makefile.in
+./tools/h5diff/dynlib_diff.c
 ./tools/h5diff/h5diff_common.c
 ./tools/h5diff/h5diff_common.h
 ./tools/h5diff/h5diff_main.c
 ./tools/h5diff/ph5diff_main.c
 ./tools/h5diff/h5diffgentest.c
+./tools/h5diff/h5diff_plugin.sh.in
 ./tools/h5diff/testh5diff.sh.in
 ./tools/h5diff/testph5diff.sh.in
 
@@ -1124,7 +1129,9 @@
 # h5ls sources
 ./tools/h5ls/Makefile.am
 ./tools/h5ls/Makefile.in
+./tools/h5ls/dynlib_ls.c
 ./tools/h5ls/h5ls.c
+./tools/h5ls/h5ls_plugin.sh.in
 ./tools/h5ls/testh5ls.sh.in
 
 # h5copy sources
@@ -1304,7 +1311,8 @@
 ./tools/testfiles/tbinregR.exp
 ./tools/testfiles/tbinregR.ddl
 ./tools/testfiles/tbitfields.h5
-./tools/testfiles/tbitnopaque.ddl
+./tools/testfiles/tbitnopaque_be.ddl
+./tools/testfiles/tbitnopaque_le.ddl
 ./tools/testfiles/tbitnopaque.h5
 ./tools/testfiles/tboot1.ddl
 ./tools/testfiles/tboot2.ddl
@@ -1485,6 +1493,9 @@
 ./tools/testfiles/tstring2.ddl
 ./tools/testfiles/tstringe.ddl
 ./tools/testfiles/tszip.ddl
+./tools/testfiles/tudfilter.ddl
+./tools/testfiles/tudfilter.h5
+./tools/testfiles/tudfilter.ls
 ./tools/testfiles/tudlink.h5
 ./tools/testfiles/tudlink.h5.xml
 ./tools/testfiles/tudlink-1.ddl
@@ -1692,7 +1703,8 @@
 ./tools/testfiles/tarray6.h5.xml
 ./tools/testfiles/tarray7.h5.xml
 ./tools/testfiles/tattr.h5.xml
-./tools/testfiles/tbitfields.h5.xml
+./tools/testfiles/tbitfields_be.h5.xml
+./tools/testfiles/tbitfields_le.h5.xml
 ./tools/testfiles/tcompound.h5.xml
 ./tools/testfiles/tcompound2.h5.xml
 ./tools/testfiles/tcompound_complex.h5.xml
@@ -1797,6 +1809,10 @@
 ./tools/h5diff/testfiles/h5diff_57.txt
 ./tools/h5diff/testfiles/h5diff_58.txt
 ./tools/h5diff/testfiles/h5diff_59.txt
+./tools/h5diff/testfiles/h5diff_60.txt
+./tools/h5diff/testfiles/h5diff_61.txt
+./tools/h5diff/testfiles/h5diff_62.txt
+./tools/h5diff/testfiles/h5diff_63.txt
 ./tools/h5diff/testfiles/h5diff_600.txt
 ./tools/h5diff/testfiles/h5diff_601.txt
 ./tools/h5diff/testfiles/h5diff_603.txt
@@ -1846,6 +1862,8 @@
 ./tools/h5diff/testfiles/h5diff_709.txt
 ./tools/h5diff/testfiles/h5diff_710.txt
 ./tools/h5diff/testfiles/h5diff_80.txt
+./tools/h5diff/testfiles/h5diff_800.txt
+./tools/h5diff/testfiles/h5diff_801.txt
 ./tools/h5diff/testfiles/h5diff_90.txt
 ./tools/h5diff/testfiles/h5diff_100.txt
 ./tools/h5diff/testfiles/h5diff_101.txt
@@ -1956,6 +1974,7 @@
 ./tools/h5diff/testfiles/h5diff_basic2.h5
 ./tools/h5diff/testfiles/h5diff_dset1.h5
 ./tools/h5diff/testfiles/h5diff_dset2.h5
+./tools/h5diff/testfiles/h5diff_dset3.h5
 ./tools/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/h5diff/testfiles/h5diff_empty.h5
 ./tools/h5diff/testfiles/h5diff_hyper1.h5
@@ -1996,6 +2015,12 @@
 ./tools/h5diff/testfiles/tmptest.he5
 ./tools/h5diff/testfiles/h5diff_tmp2.txt
 ./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
+./tools/h5diff/testfiles/tudfilter.h5
+./tools/h5diff/testfiles/tudfilter2.h5
+./tools/h5diff/testfiles/h5diff_ud.txt
+./tools/h5diff/testfiles/h5diff_udfail.txt
+./tools/h5diff/testfiles/diff_strings1.h5
+./tools/h5diff/testfiles/diff_strings2.h5
 
 #test files for h5repack
 ./tools/h5repack/testfiles/README
@@ -2025,6 +2050,7 @@
 ./tools/h5repack/testfiles/h5repack_soffset.h5
 ./tools/h5repack/testfiles/h5repack_szip.h5
 ./tools/h5repack/testfiles/ublock.bin
+./tools/h5repack/testfiles/crtorder.tordergr.h5.ddl
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
@@ -2301,7 +2327,6 @@
 ./config/cmake_ext_mod/HDFUseFortran.cmake
 ./config/cmake_ext_mod/NSIS.InstallOptions.ini.in
 ./config/cmake_ext_mod/NSIS.template.in
-./config/cmake_ext_mod/prunTest.cmake
 ./config/cmake_ext_mod/runTest.cmake
 ./config/cmake_ext_mod/version.plist.in
 
@@ -2387,5 +2412,8 @@
 ./tools/perform/CMakeTests.cmake
 
 # CMake-specific User Scripts
+./config/cmake/CTestScript.cmake
+./config/cmake/HDF5_Examples_options.cmake
 ./config/cmake/scripts/CTestScript.cmake
-./config/cmake/scripts/HDF518config.cmake
+./config/cmake/scripts/HDF5config.cmake
+./config/cmake/scripts/HDF5options.cmake

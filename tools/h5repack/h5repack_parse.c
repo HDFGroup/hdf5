@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
@@ -47,9 +45,9 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     int         k, l, p, q, end_obj = -1, no_param = 0;
     unsigned    j, n;
     char        sobj[MAX_NC_NAME];
-    char        scomp[10];
-    char        stype[6];
-    char        smask[3];
+    char        scomp[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    char        stype[6] = {0, 0, 0, 0, 0, 0};
+    char        smask[3] = {0, 0, 0};
     obj_list_t* obj_list = NULL;
     unsigned    pixels_per_block;
 
@@ -396,6 +394,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                 error_msg("invalid filter type in <%s>\n", str);
                 HDexit(EXIT_FAILURE);
             }
+            break;
         }
     } /*i*/
 

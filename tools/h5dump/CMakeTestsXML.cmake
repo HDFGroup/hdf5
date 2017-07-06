@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -70,7 +81,8 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray6.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray7.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitfields.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitfields_be.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitfields_le.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound2.h5.xml
@@ -130,12 +142,12 @@
   foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
     get_filename_component(fname "${tst_xml_h5_file}" NAME)
     HDFTEST_COPY_FILE("${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
-  endforeach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
+  endforeach ()
 
   foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
     get_filename_component(fname "${tst_xml_other_file}" NAME)
     HDFTEST_COPY_FILE("${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
-  endforeach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
+  endforeach ()
   add_custom_target(h5dump_xml_files ALL COMMENT "Copying files needed by h5dump_xml tests" DEPENDS ${h5dump_xml_files_list})
 
 ##############################################################################
@@ -144,20 +156,20 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
+  macro (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     if (${testtype} STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5DUMP-XML-${skipresultfile}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
         )
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else (${testtype} STREQUAL "SKIP")
+      endif ()
+    else ()
       ADD_XML_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
-    endif (${testtype} STREQUAL "SKIP")
-  ENDMACRO (ADD_XML_SKIP_H5_TEST)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_XML_H5_TEST resultfile resultcode)
+  macro (ADD_XML_H5_TEST resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
       set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
@@ -167,13 +179,7 @@
       if (NOT "${last_xml_test}" STREQUAL "")
         set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5DUMP-XML-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ${resultfile}.out ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP-XML-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
+    else ()
       add_test (
           NAME H5DUMP-XML-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -185,9 +191,8 @@
               -D "TEST_REFERENCE=${resultfile}.xml"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS "H5DUMP-XML-${resultfile}-clear-objects")
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_XML_H5_TEST file)
+    endif ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################
@@ -217,8 +222,10 @@
           tarray7.h5.out.err
           tattr.h5.out
           tattr.h5.out.err
-          tbitfields.h5.out
-          tbitfields.h5.out.err
+          tbitfields_be.h5.out
+          tbitfields_be.h5.out.err
+          tbitfields_le.h5.out
+          tbitfields_le.h5.out.err
           tcompound.h5.out
           tcompound.h5.out.err
           tcompound2.h5.out
@@ -333,14 +340,18 @@
     set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
     if (NOT "${last_xml_test}" STREQUAL "")
       set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_xml_test})
-    endif (NOT "${last_xml_test}" STREQUAL "")
+    endif ()
     set (last_test "H5DUMP-XML-clearall-objects")
-  endif (HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
   ########## test XML
   ADD_XML_H5_TEST (tall.h5 0 tall.h5)
   ADD_XML_H5_TEST (tattr.h5 0 tattr.h5)
-  ADD_XML_H5_TEST (tbitfields.h5 0 tbitfields.h5)
+  if (H5_WORDS_BIGENDIAN)
+    ADD_XML_H5_TEST (tbitfields_be.h5 0 tbitfields.h5)
+  else ()
+    ADD_XML_H5_TEST (tbitfields_le.h5 0 tbitfields.h5)
+  endif ()
   ADD_XML_H5_TEST (tcompound.h5 0 tcompound.h5)
   ADD_XML_H5_TEST (tcompound2.h5 0 tcompound2.h5)
   ADD_XML_H5_TEST (tdatareg.h5 0 tdatareg.h5)

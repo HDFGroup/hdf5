@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #ifndef H5DUMP_EXTERN_H__
 #define H5DUMP_EXTERN_H__
@@ -52,7 +50,7 @@ typedef struct h5dump_table_list_t {
 
 extern h5dump_table_list_t  table_list;
 extern table_t             *group_table, *dset_table, *type_table;
-extern int                  dump_indent;              /*how far in to indent the line         */
+extern unsigned                  dump_indent;              /*how far in to indent the line         */
 
 extern int          unamedtype;     /* shared datatype with no name */
 extern hbool_t      hit_elink;  /* whether we have traversed an external link */
@@ -73,14 +71,9 @@ extern int          display_fi; /*file index */
 extern int          display_ai;  /*array index */
 extern int          display_escape; /*escape non printable characters */
 extern int          display_region; /*print region reference data */
-extern int          enable_error_stack; /* re-enable error stack */
 extern int          disable_compact_subset; /* disable compact form of subset notation */
 extern int          display_packed_bits; /*print 1-8 byte numbers as packed bits*/
 extern int          include_attrs; /* Display attributes */
-
-/* sort parameters */
-extern H5_index_t   sort_by; /*sort_by [creation_order | name]  */
-extern H5_iter_order_t sort_order; /*sort_order [ascending | descending]   */
 
 #define PACKED_BITS_MAX         8  /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX    8*sizeof(long long)  /* Maximum bits size of integer types of packed-bits */
@@ -88,8 +81,8 @@ extern H5_iter_order_t sort_order; /*sort_order [ascending | descending]   */
 extern unsigned long long packed_mask[PACKED_BITS_MAX];  /* packed bits are restricted to 8*sizeof(llong) bytes */
 
 /* packed bits display parameters */
-extern int packed_offset[PACKED_BITS_MAX];
-extern int packed_length[PACKED_BITS_MAX];
+extern unsigned packed_offset[PACKED_BITS_MAX];
+extern unsigned packed_length[PACKED_BITS_MAX];
 
 /*
  * The global table is set to either ddl_function_table or

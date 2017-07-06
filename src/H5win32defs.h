@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Scott Wegner
@@ -23,6 +21,11 @@
  *
  */
 
+/*
+ * _MSC_VER = 1900 VS2015
+ * _MSC_VER = 1800 VS2013
+ * _MSC_VER = 1700 VS2012
+ */
 #ifdef H5_HAVE_WIN32_API
 
 typedef struct _stati64     h5_stat_t;
@@ -53,13 +56,22 @@ typedef __int64             h5_stat_size_t;
 #define HDsleep(S)          Sleep(S*1000)
 #define HDstat(S,B)         _stati64(S,B)
 #define HDstrcasecmp(A,B)   _stricmp(A,B)
-#define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
 #define HDstrdup(S)         _strdup(S)
 #define HDtzset()           _tzset()
 #define HDunlink(S)         _unlink(S)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
 
 #ifdef H5_HAVE_VISUAL_STUDIO
+
+#if (_MSC_VER < 1800)
+  #ifndef H5_HAVE_STRTOLL
+    #define HDstrtoll(S,R,N)    _strtoi64(S,R,N)
+  #endif /* H5_HAVE_STRTOLL */
+  #ifndef H5_HAVE_STRTOULL
+    #define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
+  #endif /* H5_HAVE_STRTOULL */
+#endif /* MSC_VER < 1800 */
+
 /*
  * The (void*) cast just avoids a compiler warning in H5_HAVE_VISUAL_STUDIO
  */

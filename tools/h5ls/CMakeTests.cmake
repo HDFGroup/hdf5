@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -29,6 +40,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsoftlinks.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tudfilter.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tudlink.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.h5
   )
@@ -86,6 +98,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink-1.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr-1.ls
+      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tudlink-1.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2le.ls
@@ -98,7 +111,7 @@
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${listfiles}" NAME)
     HDFTEST_COPY_FILE("${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5ls_files")
-  endforeach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  endforeach ()
   add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
 
 ##############################################################################
@@ -107,7 +120,7 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_H5_TEST resultfile resultcode)
+  macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
@@ -118,12 +131,7 @@
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5LS-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${resultfile}.out ./testfiles/${resultfile}.out.err
-      )
+    else ()
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -135,9 +143,35 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS "H5LS-${resultfile}-clear-objects")
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_TEST file)
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_UD_TEST testname resultcode resultfile)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5LS_UD-${testname}-clearall-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/${resultfile}.out
+              testfiles/${resultfile}.out.err
+      )
+      add_test (
+          NAME H5LS_UD-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ls"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5LS_UD-${testname} PROPERTIES DEPENDS H5LS_UD-${testname}-clearall-objects)
+    endif ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################
@@ -258,11 +292,25 @@
           tvldtypes2be.out
           tvldtypes2be.out.err
     )
+    set_tests_properties (H5LS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif (NOT "${last_test}" STREQUAL "")
+    endif ()
     set (last_test "H5LS-clearall-objects")
-  endif (HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
+
+# See which filters are usable (and skip tests for filters we
+# don't have).  Do this by searching H5pubconf.h to see which
+# filters are defined.
+
+# detect whether the encoder is present.
+  if (H5_HAVE_FILTER_DEFLATE)
+    set (USE_FILTER_DEFLATE "true")
+  endif ()
+
+  if (H5_HAVE_FILTER_SZIP)
+    set (USE_FILTER_SZIP "true")
+  endif ()
 
   # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)
@@ -373,9 +421,9 @@
   # ( HDFFV-7838, )
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tattrreg_be 0 -w80 -v -d tattrreg.h5)
-  else (H5_WORDS_BIGENDIAN)
+  else ()
     ADD_H5_TEST (tattrreg_le 0 -w80 -v -d tattrreg.h5)
-  endif (H5_WORDS_BIGENDIAN)
+  endif ()
 
   # test for non-existing file
   ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
@@ -383,13 +431,18 @@
   # test for variable length data types in verbose mode
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
-  else (H5_WORDS_BIGENDIAN)
+  else ()
     ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)
-  endif (H5_WORDS_BIGENDIAN)
+  endif ()
 
   # test for dataset region references data types in verbose mode
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
-  else (H5_WORDS_BIGENDIAN)
+  else ()
     ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
-  endif (H5_WORDS_BIGENDIAN)
+  endif ()
+
+##############################################################################
+###    P L U G I N  T E S T S
+##############################################################################
+ADD_H5_UD_TEST (h5ls_plugin_test 0 tudfilter -w80 -d tudfilter.h5)

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -194,27 +192,25 @@ main (int argc, char *argv[])
     int		src, dst=-1;		/*source & destination files	*/
     int		need_seek=FALSE;	/*destination needs to seek?	*/
     int		need_write;		/*data needs to be written?	*/
-    /*struct stat	sb;			temporary file stat buffer	*/
-	/*struct _stati64 sb;*/
-	h5_stat_t sb;
+    h5_stat_t sb;                       /*temporary file stat buffer	*/
 
     int		verbose=FALSE;		/*display file names?		*/
 
-    const char	*src_gen_name;		/*general source name		*/
-    char	src_name[NAMELEN];	/*source member name		*/
+    const char	*src_gen_name;  /*general source name		*/
+    char	*src_name=NULL;	    /*source member name		*/
 
     int		src_is_family;		/*is source name a family name?	*/
     int		src_membno=0;		/*source member number		*/
 
-    const char	*dst_gen_name;		/*general destination name	*/
-    char	dst_name[NAMELEN];	/*destination member name	*/
+    const char	*dst_gen_name;	/*general destination name	*/
+    char	*dst_name=NULL;	    /*destination member name	*/
     int		dst_is_family;		/*is dst name a family name?	*/
     int		dst_membno=0;		/*destination member number	*/
 
     off_t	left_overs=0;		/*amount of zeros left over	*/
     off_t	src_offset=0;		/*offset in source member	*/
     off_t	dst_offset=0;		/*offset in destination member	*/
-    off_t	src_size;		/*source logical member size	*/
+    off_t	src_size;           /*source logical member size	*/
     off_t	src_act_size;		/*source actual member size	*/
     off_t	dst_size=1 GB;		/*destination logical memb size	*/
     hid_t       fapl;                   /*file access property list     */
@@ -232,24 +228,30 @@ main (int argc, char *argv[])
      * Parse switches.
      */
     while (argno<argc && '-'==argv[argno][0]) {
-	if (!strcmp (argv[argno], "-v")) {
-	    verbose = TRUE;
-	    argno++;
-	} else if (!strcmp(argv[argno], "-V")) {
-	    printf("This is %s version %u.%u release %u\n",
-		   prog_name, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-	    exit(EXIT_SUCCESS);
+        if (!strcmp (argv[argno], "-v")) {
+            verbose = TRUE;
+            argno++;
+        } else if (!strcmp(argv[argno], "-V")) {
+            printf("This is %s version %u.%u release %u\n",
+                prog_name, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+            exit(EXIT_SUCCESS);
         } else if (!strcmp (argv[argno], "-family_to_sec2")) {
-	    family_to_sec2 = TRUE;
-	    argno++;
-	} else if ('b'==argv[argno][1]) {
-	    blk_size = get_size (prog_name, &argno, argc, argv);
-	} else if ('m'==argv[argno][1]) {
-	    dst_size = get_size (prog_name, &argno, argc, argv);
-	} else {
-	    usage (prog_name);
-	}
-    }
+            family_to_sec2 = TRUE;
+            argno++;
+        } else if ('b'==argv[argno][1]) {
+            blk_size = (size_t)get_size (prog_name, &argno, argc, argv);
+        } else if ('m'==argv[argno][1]) {
+            dst_size = get_size (prog_name, &argno, argc, argv);
+        } else {
+            usage (prog_name);
+        } /* end if */
+    } /* end while */
+
+    /* allocate names */
+    if(NULL == (src_name = (char *)HDcalloc((size_t)NAMELEN, sizeof(char))))
+        exit(EXIT_FAILURE);
+    if(NULL == (dst_name = (char *)HDcalloc((size_t)NAMELEN, sizeof(char))))
+        exit(EXIT_FAILURE);
 
     /*
      * Get the name for the source file and open the first member.  The size
@@ -261,13 +263,13 @@ main (int argc, char *argv[])
     src_is_family = strcmp (src_name, src_gen_name);
 
     if ((src=HDopen(src_name, O_RDONLY,0))<0) {
-	perror (src_name);
-	exit (EXIT_FAILURE);
+        perror (src_name);
+        exit (EXIT_FAILURE);
     }
 
     if (HDfstat(src, &sb)<0) {
-	perror ("fstat");
-	exit (EXIT_FAILURE);
+        perror ("fstat");
+        exit (EXIT_FAILURE);
     }
     src_size = src_act_size = sb.st_size;
     if (verbose) fprintf (stderr, "< %s\n", src_name);
@@ -290,7 +292,7 @@ main (int argc, char *argv[])
     if (argno<argc) usage (prog_name);
 
     /* Now the real work, split the file */
-    buf = HDmalloc (blk_size);
+    buf = (char *)HDmalloc(blk_size);
     while (src_offset<src_size) {
 
 	/* Read a block.  The amount to read is the minimum of:
@@ -302,7 +304,7 @@ main (int argc, char *argv[])
 	if (dst_is_family) n = (size_t)MIN((off_t)n, dst_size-dst_offset);
 	if (left_overs) {
 	    n = (size_t)MIN ((off_t)n, left_overs);
-	    left_overs -= n;
+	    left_overs = left_overs - (off_t)n;
 	    need_write = FALSE;
 	} else if (src_offset<src_act_size) {
 	    n = (size_t)MIN ((off_t)n, src_act_size-src_offset);
@@ -353,16 +355,16 @@ main (int argc, char *argv[])
 	 * loop.   The destination offset must be updated so we can fix
 	 * trailing holes.
 	 */
-	src_offset += n;
+	src_offset = src_offset + (off_t)n;
 	if (src_offset==src_act_size) {
 	    HDclose (src);
 	    if (!src_is_family) {
-		dst_offset += n;
+                dst_offset = dst_offset + (off_t)n;
 		break;
 	    }
 	    sprintf (src_name, src_gen_name, ++src_membno);
 	    if ((src=HDopen (src_name, O_RDONLY,0))<0 && ENOENT==errno) {
-		dst_offset += n;
+                dst_offset = dst_offset + (off_t)n;
 		break;
 	    } else if (src<0) {
 		perror (src_name);
@@ -386,7 +388,7 @@ main (int argc, char *argv[])
 	 * needed. The first member is extended to the logical member size
 	 * but other members might be smaller if they end with a hole.
 	 */
-	dst_offset += n;
+        dst_offset = dst_offset + (off_t)n;
 	if (dst_is_family && dst_offset==dst_size) {
 	    if (0==dst_membno) {
 		if (HDlseek (dst, dst_size-1, SEEK_SET)<0) {
@@ -468,7 +470,7 @@ main (int argc, char *argv[])
         }
 
         /* Set the property of the new member size as hsize_t */
-        hdsize = dst_size;
+        hdsize = (hsize_t)dst_size;
         if(H5Pset(fapl, H5F_ACS_FAMILY_NEWSIZE_NAME, &hdsize) < 0) {
             perror ("H5Pset");
             exit (EXIT_FAILURE);
@@ -485,19 +487,22 @@ main (int argc, char *argv[])
     H5E_BEGIN_TRY {
         file=H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl);
     } H5E_END_TRY;
+
     if(file>=0) {
         if(H5Fclose(file)<0) {
             perror ("H5Fclose");
             exit (EXIT_FAILURE);
-        }
-    }
+        } /* end if */
+    } /* end if */
 
     if(H5Pclose(fapl)<0) {
         perror ("H5Pclose");
         exit (EXIT_FAILURE);
-    }
+    } /* end if */
 
     /* Free resources and return */
-    HDfree (buf);
+    HDfree(src_name);
+    HDfree(dst_name);
+    HDfree(buf);
     return EXIT_SUCCESS;
-}
+} /* end main */

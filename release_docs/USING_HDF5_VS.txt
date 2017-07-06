@@ -46,7 +46,7 @@ Using Visual Studio with HDF5 Libraries
           szip.lib zlib.lib hdf5.lib hdf5_cpp.lib
 
 ========================================================================
-Helpful Pointers
+3. Helpful Pointers
 ========================================================================
 
     3.1 FAQ

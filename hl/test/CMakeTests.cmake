@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+
 
 ##############################################################################
 ##############################################################################
@@ -28,21 +39,34 @@ set (HL_REFERENCE_TEST_FILES
 # --------------------------------------------------------------------
 foreach (h5_file ${HL_REFERENCE_TEST_FILES})
   HDFTEST_COPY_FILE("${HDF5_HL_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_HL_TEST_BINARY_DIR}/${h5_file}" "hl_test_files")
-endforeach (h5_file ${HL_REFERENCE_TEST_FILES})
+endforeach ()
 add_custom_target(hl_test_files ALL COMMENT "Copying files needed by hl_test tests" DEPENDS ${hl_test_files_list})
 
 # --------------------------------------------------------------------
 #  Macro used to add a unit test
 # --------------------------------------------------------------------
-MACRO (HL_ADD_TEST hl_name)
-  add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
+macro (HL_ADD_TEST hl_name)
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
+  else ()
+    add_test (NAME HL_${hl_name} COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:hl_${hl_name}>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_EXPECT=0"
+        -D "TEST_SKIP_COMPARE=TRUE"
+        -D "TEST_OUTPUT=hl_${hl_name}.txt"
+        #-D "TEST_REFERENCE=hl_${hl_name}.out"
+        -D "TEST_FOLDER=${HDF5_HL_TEST_BINARY_DIR}"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+    )
+  endif ()
   if (NOT "${last_test}" STREQUAL "")
     set_tests_properties (HL_${hl_name} PROPERTIES DEPENDS ${last_test}
       ENVIRONMENT "srcdir=${HDF5_HL_TEST_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
     )
   endif ()
-ENDMACRO (HL_ADD_TEST)
+endmacro ()
 
 # Remove any output file left over from previous test run
 add_test (
@@ -76,7 +100,7 @@ add_test (
 )
 if (NOT "${last_test}" STREQUAL "")
   set_tests_properties (HL_test-clear-objects PROPERTIES DEPENDS ${last_test})
-endif (NOT "${last_test}" STREQUAL "")
+endif ()
 set (last_test "HL_test-clear-objects")
 
 HL_add_test (test_ds)

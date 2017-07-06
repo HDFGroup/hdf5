@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -113,8 +111,8 @@ int main (void)
        * Write the data to the hyperslab.
        */
       int       data1[3][3] = { {1, 1, 1},       /* data to write */
-				{1, 1, 1},
-				{1, 1, 1} };
+                                {1, 1, 1},
+                                {1, 1, 1} };
       dataset.write( data1, PredType::NATIVE_INT, mspace1, fspace1 );
 
       /*
@@ -187,16 +185,16 @@ int main (void)
       /*
        * Resulting dataset
        *
-       *	 1 1 1 3 3
-       *	 1 1 1 3 3
-       *	 1 1 1 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
-       *	 2 0 0 0 0
+       *         1 1 1 3 3
+       *         1 1 1 3 3
+       *         1 1 1 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
+       *         2 0 0 0 0
        */
       /*
        * Display the result.

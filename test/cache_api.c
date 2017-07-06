@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  John Mainzer
@@ -20,11 +18,9 @@
  *		with the cache implemented in H5C.c
  */
 
-#include "h5test.h"
-#include "H5Iprivate.h"
-#include "H5ACprivate.h"
 #include "cache_common.h"
 
+/* extern declarations */
 
 /* global variable declarations: */
 
@@ -50,19 +46,19 @@ static void check_file_mdc_api_errs(void);
 /**************************************************************************/
 
 /*-------------------------------------------------------------------------
- * Function:	check_fapl_mdc_api_calls()
+ * Function:    check_fapl_mdc_api_calls()
  *
- * Purpose:	Verify that the file access property list related
- *		metadata cache related API calls are functioning
- *		correctly.
+ * Purpose:     Verify that the file access property list related
+ *              metadata cache related API calls are functioning
+ *              correctly.
  *
- *		Since we have tested the H5C code elsewhere, it should
- *		be sufficient to verify that the desired configuration
- *		data is getting to the cache.
+ *              Since we have tested the H5C code elsewhere, it should
+ *              be sufficient to verify that the desired configuration
+ *              data is getting to the cache.
  *
  * Return:	void
  *
- * Programmer:	John Mainzer
+ * Programmer:  John Mainzer
  *              4/12/04
  *
  *-------------------------------------------------------------------------
@@ -131,13 +127,13 @@ check_fapl_mdc_api_calls(void)
 
     if ( pass ) {
 
-	fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
-	if ( fapl_id < 0 ) {
+        if ( fapl_id < 0 ) {
 
-	    pass = FALSE;
+            pass = FALSE;
             failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
-	}
+        }
     }
 
     if ( pass ) {
@@ -149,7 +145,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+            failure_mssg = "H5Pget_mdc_config() failed.\n";
 
         } else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)) {
 
@@ -170,7 +166,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pset_mdc_config() failed.\n";
+            failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
 
@@ -183,7 +179,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+            failure_mssg = "H5Pget_mdc_config() failed.\n";
 
         } else if ( ! CACHE_CONFIGS_EQUAL(mod_config, scratch, TRUE, TRUE) ) {
 
@@ -197,7 +193,7 @@ check_fapl_mdc_api_calls(void)
         if ( H5Pclose(fapl_id) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+            failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
@@ -239,11 +235,11 @@ check_fapl_mdc_api_calls(void)
         if ( file_ptr == NULL ) {
 
             pass = FALSE;
-	    failure_mssg = "Can't get file_ptr.\n";
+            failure_mssg = "Can't get file_ptr.\n";
 
-	} else {
+        } else {
 
-	    cache_ptr = file_ptr->shared->cache;
+            cache_ptr = file_ptr->shared->cache;
         }
     }
 
@@ -262,9 +258,8 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! resize_configs_are_equal(&default_auto_size_ctl, \
+        if ( ! resize_configs_are_equal(&default_auto_size_ctl, \
                                         &cache_ptr->resize_ctl, TRUE) ) {
-
 
             pass = FALSE;
             failure_mssg = "Unexpected value(s) in cache resize_ctl 1.\n";
@@ -295,7 +290,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+            failure_mssg = "H5Pget_mdc_config() failed.\n";
 
         } else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)) {
 
@@ -305,22 +300,22 @@ check_fapl_mdc_api_calls(void)
         } else if ( H5Pclose(fapl_id) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+            failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( H5Fclose(file_id) < 0  ) {
+        if ( H5Fclose(file_id) < 0  ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+            failure_mssg = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "HDremove() failed.\n";
         }
     }
 
@@ -335,13 +330,13 @@ check_fapl_mdc_api_calls(void)
     /* Create a FAPL */
     if ( pass ) {
 
-	fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
-	if ( fapl_id < 0 ) {
+        if ( fapl_id < 0 ) {
 
-	    pass = FALSE;
+            pass = FALSE;
             failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
-	}
+        }
     }
 
     /* Modify the initial mdc configuration in the FAPL. */
@@ -353,7 +348,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pset_mdc_config() failed.\n";
+            failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
 
@@ -388,7 +383,7 @@ check_fapl_mdc_api_calls(void)
         if ( file_ptr == NULL ) {
 
             pass = FALSE;
-	    failure_mssg = "Can't get file_ptr.\n";
+            failure_mssg = "Can't get file_ptr.\n";
 
         } else {
 
@@ -411,9 +406,8 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! resize_configs_are_equal(&mod_auto_size_ctl, \
+        if ( ! resize_configs_are_equal(&mod_auto_size_ctl, \
                                         &cache_ptr->resize_ctl, TRUE) ) {
-
 
             pass = FALSE;
             failure_mssg = "Unexpected value(s) in cache resize_ctl 2.\n";
@@ -444,7 +438,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+            failure_mssg = "H5Pget_mdc_config() failed.\n";
 
         } else if ( ! CACHE_CONFIGS_EQUAL(mod_config, scratch, TRUE, TRUE) ) {
 
@@ -454,7 +448,7 @@ check_fapl_mdc_api_calls(void)
         } else if ( H5Pclose(test_fapl_id) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+            failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
@@ -464,22 +458,22 @@ check_fapl_mdc_api_calls(void)
         if ( H5Pclose(fapl_id) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+            failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( H5Fclose(file_id) < 0  ) {
+        if ( H5Fclose(file_id) < 0  ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+            failure_mssg = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "HDremove() failed.\n";
         }
     }
 
@@ -493,25 +487,23 @@ check_fapl_mdc_api_calls(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_file_mdc_api_calls()
+ * Function:    check_file_mdc_api_calls()
  *
- * Purpose:	Verify that the file related metadata cache API calls are
- *		functioning correctly.
+ * Purpose:     Verify that the file related metadata cache API calls are
+ *              functioning correctly.
  *
- *		Since we have tested the H5C code elsewhere, it should
- *		be sufficient to verify that the desired configuration
- *		data is getting in and out of the cache.  Similarly,
- *		we need only verify that the cache monitoring calls
- *		return the data that the cache thinks they should return.
- *		We shouldn't need to verify data correctness beyond that
- *		point.
+ *              Since we have tested the H5C code elsewhere, it should
+ *              be sufficient to verify that the desired configuration
+ *              data is getting in and out of the cache.  Similarly,
+ *              we need only verify that the cache monitoring calls
+ *              return the data that the cache thinks they should return.
+ *              We shouldn't need to verify data correctness beyond that
+ *              point.
  *
  * Return:	void
  *
- * Programmer:	John Mainzer
+ * Programmer:  John Mainzer
  *              4/14/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -821,15 +813,15 @@ check_file_mdc_api_calls(void)
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( H5Fclose(file_id) < 0  ) {
+        if ( H5Fclose(file_id) < 0  ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+            failure_mssg = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "HDremove() failed.\n";
         }
     }
 
@@ -845,17 +837,16 @@ check_file_mdc_api_calls(void)
 /*-------------------------------------------------------------------------
  * Function:	mdc_api_call_smoke_check()
  *
- * Purpose:
+ * Purpose:     Initial basic functional test to see if there are problems
+ *              with the cache API calls.
  *
- * Return:	void
+ *              NOTE: This test takes some time to run and checks the 
+ *                    HDF5TestExpress environment variable.
  *
- * Programmer:	John Mainzer
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
  *              4/14/04
- *
- * Modifications:
- *
- * 		JRM -- 7/12/06
- * 		Added progress reporting code.
  *
  *-------------------------------------------------------------------------
  */
@@ -880,7 +871,7 @@ mdc_api_call_smoke_check(int express_test)
     hid_t filespace_ids[NUM_DSETS];
     hid_t memspace_id = -1;
     hid_t dataset_ids[NUM_DSETS];
-    hid_t properties;
+    hid_t properties = -1;
     char dset_name[64];
     int i, j, k, l, m, n;
     herr_t status;
@@ -1105,7 +1096,7 @@ mdc_api_call_smoke_check(int express_test)
 
                 sprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
-                                           dataspace_id, H5P_DEFAULT, properties, H5P_DEFAULT);
+				            dataspace_id, H5P_DEFAULT, properties, H5P_DEFAULT);
 
                 if ( dataset_ids[i] < 0 ) {
 
@@ -1329,8 +1320,8 @@ mdc_api_call_smoke_check(int express_test)
         }
 
         n++;
-
     }
+
 
     /* close the file spaces we are done with */
     i = 1;
@@ -1450,7 +1441,6 @@ mdc_api_call_smoke_check(int express_test)
         }
 
         n++;
-
     }
 
     /* close file space 0 */
@@ -1496,16 +1486,16 @@ mdc_api_call_smoke_check(int express_test)
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( H5Fclose(file_id) < 0  ) {
+        if ( H5Fclose(file_id) < 0  ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+            failure_mssg = "H5Fclose() failed.\n";
 
         }
         else if ( HDremove(filename) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "HDremove() failed.\n";
         }
     }
 
@@ -3000,17 +2990,15 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_fapl_mdc_api_errs()
+ * Function:    check_fapl_mdc_api_errs()
  *
- * Purpose:	Verify that the FAPL related MDC API calls reject input
- *		errors gracefully.
+ * Purpose:     Verify that the FAPL related MDC API calls reject input
+ *              errors gracefully.
  *
  * Return:	void
  *
- * Programmer:	John Mainzer
+ * Programmer:  John Mainzer
  *              4/19/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3030,7 +3018,6 @@ check_fapl_mdc_api_errs(void)
 
     pass = TRUE;
 
-
     /* first test H5Pget_mdc_config().
      */
 
@@ -3038,8 +3025,8 @@ check_fapl_mdc_api_errs(void)
     if  ( pass ) {
 
         H5E_BEGIN_TRY {
-	    result = H5Pget_mdc_config((hid_t)-1, &scratch);
-	} H5E_END_TRY;
+            result = H5Pget_mdc_config((hid_t)-1, &scratch);
+        } H5E_END_TRY;
 
         if ( result >= 0 ) {
 
@@ -3065,7 +3052,7 @@ check_fapl_mdc_api_errs(void)
 
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if ( ( pass ) &&
-         ( ( H5Pget_mdc_config(fapl_id, &scratch) < 0 ) ||
+         ( ( H5Pget_mdc_config(fapl_id, &scratch) < 0) ||
            ( !CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE) ) ) ) {
 
         pass = FALSE;
@@ -3171,17 +3158,15 @@ check_fapl_mdc_api_errs(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_file_mdc_api_errs()
+ * Function:    check_file_mdc_api_errs()
  *
- * Purpose:	Verify that the file related MDC API calls reject input
- *		errors gracefully.
+ * Purpose:     Verify that the file related MDC API calls reject input
+ *              errors gracefully.
  *
  * Return:	void
  *
- * Programmer:	John Mainzer
+ * Programmer:  John Mainzer
  *              4/19/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3215,7 +3200,7 @@ check_file_mdc_api_errs(void)
     /* setup the file name */
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: calling h5_fixname().\n", fcn_name);
 	}
@@ -3230,7 +3215,7 @@ check_file_mdc_api_errs(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: calling H5Fcreate().\n", fcn_name);
 	}
@@ -3252,7 +3237,7 @@ check_file_mdc_api_errs(void)
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if  ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 1.\n", fcn_name);
 	}
@@ -3270,7 +3255,7 @@ check_file_mdc_api_errs(void)
 
     if  ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 2.\n", fcn_name);
 	}
@@ -3289,7 +3274,7 @@ check_file_mdc_api_errs(void)
     scratch.version = -1; /* a convenient, invalid value */
     if  ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 3.\n", fcn_name);
 	}
@@ -3311,7 +3296,7 @@ check_file_mdc_api_errs(void)
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 1.\n", fcn_name);
 	}
@@ -3329,7 +3314,7 @@ check_file_mdc_api_errs(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 2.\n", fcn_name);
 	}
@@ -3348,7 +3333,7 @@ check_file_mdc_api_errs(void)
     i = 0;
     while ( ( pass ) && ( i < NUM_INVALID_CONFIGS ) )
     {
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout,
 		    "%s: testing H5Fset_mdc_config() with invalid config %d.\n",
@@ -3378,7 +3363,7 @@ check_file_mdc_api_errs(void)
     /* test H5Fget_mdc_hit_rate() */
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 1.\n",
 		      fcn_name);
@@ -3397,7 +3382,7 @@ check_file_mdc_api_errs(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 2.\n",
 		      fcn_name);
@@ -3418,7 +3403,7 @@ check_file_mdc_api_errs(void)
     /* test H5Freset_mdc_hit_rate_stats() */
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Freset_mdc_hit_rate_stats().\n",
 		      fcn_name);
@@ -3440,7 +3425,7 @@ check_file_mdc_api_errs(void)
     /* test H5Fget_mdc_size() */
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 1.\n", fcn_name);
 	}
@@ -3459,7 +3444,7 @@ check_file_mdc_api_errs(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 2.\n", fcn_name);
 	}
@@ -3481,7 +3466,7 @@ check_file_mdc_api_errs(void)
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( show_progress ) {
+        if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: cleaning up from tests.\n", fcn_name);
 	}
@@ -3508,22 +3493,17 @@ check_file_mdc_api_errs(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Run tests on the cache code contained in H5C.c
+ * Purpose:     Run tests on the cache code contained in H5C.c
  *
  * Return:	Success:
  *
- *		Failure:
- *
- * Programmer:	John Mainzer
+ * Programmer:  John Mainzer
  *              6/24/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-
 int
 main(void)
 {
@@ -3552,3 +3532,4 @@ main(void)
     return(0);
 
 } /* main() */
+

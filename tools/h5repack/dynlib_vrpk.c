@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic document set and is     *
- * linked from the top-level documents page.  It can also be found at        *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have access   *
- * to either file, you may request a copy from help@hdfgroup.org.            *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*
  * Purpose:    Tests the plugin module (H5PL)
@@ -67,19 +65,19 @@ H5Z_filter_dynlib4(unsigned int flags, size_t cd_nelmts,
     /* Check for the library version */
     if(H5get_libversion(&ver_info[0], &ver_info[1], &ver_info[2]) < 0) {
         PUSH_ERR("dynlib4", H5E_CALLBACK, "H5get_libversion");
-        return 0;
+        return(0);
     }
     /* Check for the correct number of parameters */
     if(cd_nelmts == 0)
-        return 0;
+        return(0);
 
     /* Check that permanent parameters are set correctly */
     if(cd_values[0] > 9)
-        return 0;
+        return(0);
 
     if(ver_info[0] != cd_values[1] || ver_info[1] != cd_values[2]) {
         PUSH_ERR("dynlib4", H5E_CALLBACK, "H5get_libversion does not match");
-        return 0;
+        return(0);
     }
 
     add_on = (int)cd_values[0];

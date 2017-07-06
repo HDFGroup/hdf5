@@ -6,12 +6,10 @@
 ##
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
 ## terms governing use, modification, and redistribution, is contained in
-## the files COPYING and Copyright.html.  COPYING can be found at the root
-## of the source code distribution tree; Copyright.html can be found at the
-## root level of an installed copy of the electronic HDF5 document set and
-## is linked from the top-level documents page.  It can also be found at
-## http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from help@hdfgroup.org.
+## the COPYING file, which can be found at the root of the source code
+## distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+## If you do not have access to either file, you may request a copy from
+## help@hdfgroup.org.
 
 ## ----------------------------------------------------------------------
 ## Initialize configure.
@@ -26,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.8.18], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.8.19], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
 
@@ -644,14 +642,13 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-
-  ## Disable fortran shared libraries on Mac. (MAM - 03/30/11)
-  
+  ## tell libtool to do the right thing with COMMON symbols, this fixes 
+  ## corrupt values with COMMON and EQUIVALENCE when building shared 
+  ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
   case "`uname`" in
     Darwin*)
-    H5_FORTRAN_SHARED="no"
-    CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
-      ;;
+    H5_LDFLAGS="$H5_LDFLAGS -Wl,-commons,use_dylibs"
+    ;;
   esac
 
   ## Report results of check(s)
@@ -849,10 +846,16 @@ case $host_os in
   ;;
 esac
 
+## -----------
+## if `uname` is not CYGWIN, save that information to pass to Makefiles
+## to disable building and testing plugins.
+AC_SUBST([UNAME_CYGWIN]) UNAME_CYGWIN="no"
+
 ## Windows
 case "`uname`" in
   CYGWIN*)
     AC_CHECK_HEADERS([io.h sys/timeb.h])
+    UNAME_CYGWIN="yes"
     ;;
   MINGW*)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
@@ -862,6 +865,7 @@ case "`uname`" in
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
     ;;
 esac
+AM_CONDITIONAL([NOT_UNAME_CYGWIN], [test "X$UNAME_CYGWIN" = "Xno"])
 
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
@@ -1581,6 +1585,7 @@ AC_CHECK_FUNCS([gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
+AC_CHECK_FUNCS([strtoll strtoull])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
 
 ## ----------------------------------------------------------------------
@@ -1717,7 +1722,7 @@ AC_ARG_ENABLE([debug],
                                ])],
               [DEBUG_PKG=$enableval])
 
-## Default to no if producton is enabled
+## Default to no if production is enabled
 if test "X-$DEBUG_PKG" = X- ; then
     if test "$enable_production" = yes ; then
 	DEBUG_PKG=no
@@ -2929,13 +2934,17 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  testpar/Makefile
                  tools/Makefile
                  tools/h5dump/Makefile
+                 tools/h5dump/h5dump_plugin.sh
                  tools/h5dump/testh5dump.sh
                  tools/h5dump/testh5dumppbits.sh
                  tools/h5dump/testh5dumpxml.sh
+                 tools/h5ls/Makefile
+                 tools/h5ls/h5ls_plugin.sh
                  tools/h5ls/testh5ls.sh
                  tools/h5import/Makefile
                  tools/h5import/h5importtestutil.sh
                  tools/h5diff/Makefile
+                 tools/h5diff/h5diff_plugin.sh
                  tools/h5diff/testh5diff.sh
                  tools/h5diff/testph5diff.sh
                  tools/h5jam/Makefile
@@ -2943,7 +2952,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5repack/Makefile
                  tools/h5repack/h5repack.sh
                  tools/h5repack/h5repack_plugin.sh
-                 tools/h5ls/Makefile
                  tools/h5copy/Makefile
                  tools/h5copy/testh5copy.sh
                  tools/lib/Makefile
@@ -2999,6 +3007,14 @@ chmod 755 tools/misc/h5cc
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
+  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
+  ## on OS X, which is needed when building shared libraries on OS X.  This script 
+  ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
+  case "`uname`" in
+    Darwin*)
+      cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      ;;
+  esac
 fi
 
 if test "X$HDF_CXX" = "Xyes"; then

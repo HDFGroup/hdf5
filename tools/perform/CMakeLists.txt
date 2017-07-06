@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_PERFORM )
 
 #-----------------------------------------------------------------------------
@@ -37,10 +37,10 @@ if (HDF5_BUILD_PERFORM_STANDALONE)
   TARGET_C_PROPERTIES (h5perf_serial_alone STATIC " " " ")
   target_link_libraries (h5perf_serial_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (h5perf_serial_alone PROPERTIES FOLDER perform)
-  set_property (TARGET h5perf_serial_alone 
+  set_property (TARGET h5perf_serial_alone
       APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
   )
-endif (HDF5_BUILD_PERFORM_STANDALONE)
+endif ()
 
 #-- Adding test for chunk
 set (chunk_SRCS
@@ -82,7 +82,7 @@ if (BUILD_TESTING)
   TARGET_C_PROPERTIES (perf_meta STATIC " " " ")
   target_link_libraries (perf_meta ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
   set_target_properties (perf_meta PROPERTIES FOLDER perform)
-endif (BUILD_TESTING)
+endif ()
 
 #-- Adding test for zip_perf
 set (zip_perf_SRCS
@@ -117,10 +117,10 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
     TARGET_C_PROPERTIES (h5perf_alone STATIC " " " ")
     target_link_libraries (h5perf_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     set_target_properties (h5perf_alone PROPERTIES FOLDER perform)
-    set_property (TARGET h5perf_alone 
+    set_property (TARGET h5perf_alone
         APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
     )
-  endif (HDF5_BUILD_PERFORM_STANDALONE)
-endif (H5_HAVE_PARALLEL AND BUILD_TESTING)
+  endif ()
+endif ()
 
 include (CMakeTests.cmake)

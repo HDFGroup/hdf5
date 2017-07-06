@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
@@ -58,7 +56,7 @@ static struct long_options l_opts[] = {
 static void check_options(diff_opt_t* options)
 {
     /*--------------------------------------------------------------
-     * check for mutually exclusive options 
+     * check for mutually exclusive options
      *--------------------------------------------------------------*/
 
     /* check between -d , -p, --use-system-epsilon.
@@ -129,13 +127,13 @@ void parse_command_line(int argc,
             h5diff_exit(EXIT_SUCCESS);
         case 'v':
             options->m_verbose = 1;
-            /* This for loop is for handling style like 
+            /* This for loop is for handling style like
              * -v, -v1, --verbose, --verbose=1.
              */
             for (i = 1; i < argc; i++)
-            {                
-                /* 
-                 * short opt 
+            {
+                /*
+                 * short opt
                  */
                 if (!strcmp (argv[i], "-v"))  /* no arg */
             {
@@ -147,10 +145,10 @@ void parse_command_line(int argc,
             {
                     options->m_verbose_level = atoi(&argv[i][2]);
                     break;
-            }    
+            }
 
-                /* 
-                 * long opt 
+                /*
+                 * long opt
                  */
                 if (!strcmp (argv[i], "--verbose"))  /* no arg */
             {
@@ -179,7 +177,7 @@ void parse_command_line(int argc,
             break;
         case 'E':
             options->exclude_path = 1;
-            
+
             /* create linked list of excluding objects */
             if( (exclude_node = (struct exclude_path_list*) HDmalloc(sizeof(struct exclude_path_list))) == NULL)
             {
@@ -191,8 +189,8 @@ void parse_command_line(int argc,
             exclude_node->obj_path = (char*)opt_arg;
             exclude_node->obj_type = H5TRAV_TYPE_UNKNOWN;
             exclude_prev = exclude_head;
-            
-            if (NULL == exclude_head)            
+
+            if (NULL == exclude_head)
             {
                 exclude_head = exclude_node;
                 exclude_head->next = NULL;
@@ -204,7 +202,7 @@ void parse_command_line(int argc,
 
                 exclude_node->next = NULL;
                 exclude_prev->next = exclude_node;
-            }            
+            }
             break;
         case 'd':
             options->d=1;
@@ -249,16 +247,17 @@ void parse_command_line(int argc,
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            options->count = atol( opt_arg );
-
+            options->count = HDstrtoull(opt_arg, NULL, 0);
             break;
 
         case 'N':
             options->do_nans = 0;
             break;
+
         case 'c':
             options->m_list_not_cmp = 1;
             break;
+
         case 'e':
             options->use_system_epsilon = 1;
             break;
@@ -459,7 +458,7 @@ check_d_input( const char *str )
 
 void usage(void)
 {
- printf("usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]] \n");
+ printf("usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]\n");
  printf("  file1             File name of the first HDF5 file\n");
  printf("  file2             File name of the second HDF5 file\n");
  printf("  [obj1]            Name of an HDF5 object, in absolute path\n");
@@ -520,19 +519,22 @@ void usage(void)
  printf("   -n C, --count=C\n");
  printf("         Print differences up to C. C must be a positive integer.\n");
  printf("   -d D, --delta=D\n");
- printf("         Print difference if (|a-b| > D). D must be a positive number.\n");
+ printf("         Print difference if (|a-b| > D). D must be a positive number. Where a\n");
+ printf("         is the data point value in file1 and b is the data point value in file2.\n");
  printf("         Can not use with '-p' or '--use-system-epsilon'.\n");
  printf("   -p R, --relative=R\n");
- printf("         Print difference if (|(a-b)/b| > R). R must be a positive number.\n");
+ printf("         Print difference if (|(a-b)/b| > R). R must be a positive number. Where a\n");
+ printf("         is the data point value in file1 and b is the data point value in file2.\n");
  printf("         Can not use with '-d' or '--use-system-epsilon'.\n");
  printf("   --use-system-epsilon\n");
- printf("         Print difference if (|a-b| > EPSILON), EPSILON is system defined value.\n");
+ printf("         Print difference if (|a-b| > EPSILON), EPSILON is system defined value. Where a\n");
+ printf("         is the data point value in file1 and b is the data point value in file2.\n");
  printf("         If the system epsilon is not defined,one of the following predefined\n");
  printf("         values will be used:\n");
  printf("           FLT_EPSILON = 1.19209E-07 for floating-point type\n");
  printf("           DBL_EPSILON = 2.22045E-16 for double precision type\n");
  printf("         Can not use with '-p' or '-d'.\n");
- printf("   --exclude-path \"path\" \n");
+ printf("   --exclude-path \"path\"\n");
  printf("         Exclude the specified path to an object when comparing files or groups.\n");
  printf("         If a group is excluded, all member objects will also be excluded.\n");
  printf("         The specified path is excluded wherever it occurs.\n");
@@ -571,15 +573,15 @@ void usage(void)
  printf("\n");
 
  printf(" Object comparison:\n");
- printf("  1) Groups \n");
+ printf("  1) Groups\n");
  printf("      First compares the names of member objects (relative path, from the\n");
  printf("      specified group) and generates a report of objects that appear in only\n");
  printf("      one group or in both groups. Common objects are then compared recursively.\n");
- printf("  2) Datasets \n");
+ printf("  2) Datasets\n");
  printf("      Array rank and dimensions, datatypes, and data values are compared.\n");
- printf("  3) Datatypes \n");
+ printf("  3) Datatypes\n");
  printf("      The comparison is based on the return value of H5Tequal.\n");
- printf("  4) Symbolic links \n");
+ printf("  4) Symbolic links\n");
  printf("      The paths to the target objects are compared.\n");
  printf("      (The option --follow-symlinks overrides the default behavior when\n");
  printf("       symbolic links are compared.).\n");

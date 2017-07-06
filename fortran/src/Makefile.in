@@ -21,12 +21,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 # HDF5 Fortran Library Makefile(.in)
 #
@@ -612,6 +610,7 @@ THREADSAFE = @THREADSAFE@
 TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
+UNAME_CYGWIN = @UNAME_CYGWIN@
 UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
@@ -734,18 +733,18 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 # See libtool versioning documentation online.
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
-LT_VERS_INTERFACE = 12
-LT_VERS_REVISION = 1
-LT_VERS_AGE = 2
-LT_CXX_VERS_INTERFACE = 13
+LT_VERS_INTERFACE = 13
+LT_VERS_REVISION = 0
+LT_VERS_AGE = 3
+LT_CXX_VERS_INTERFACE = 14
 LT_CXX_VERS_REVISION = 0
 LT_CXX_VERS_AGE = 0
 LT_F_VERS_INTERFACE = 10
 LT_F_VERS_REVISION = 4
 LT_F_VERS_AGE = 0
-LT_HL_VERS_INTERFACE = 11
-LT_HL_VERS_REVISION = 1
-LT_HL_VERS_AGE = 1
+LT_HL_VERS_INTERFACE = 12
+LT_HL_VERS_REVISION = 0
+LT_HL_VERS_AGE = 2
 LT_HL_CXX_VERS_INTERFACE = 12
 LT_HL_CXX_VERS_REVISION = 0
 LT_HL_CXX_VERS_AGE = 1
@@ -753,7 +752,7 @@ LT_HL_F_VERS_INTERFACE = 10
 LT_HL_F_VERS_REVISION = 3
 LT_HL_F_VERS_AGE = 0
 LT_TOOLS_VERS_INTERFACE = 10
-LT_TOOLS_VERS_REVISION = 4
+LT_TOOLS_VERS_REVISION = 5
 LT_TOOLS_VERS_AGE = 0
 AM_FCLIBS = $(LIBHDF5)
 
@@ -829,7 +828,7 @@ H5fortran_detect_SOURCES = H5fortran_detect.f90
 # Mark this directory as part of the Fortran API
 FORTRAN_API = yes
 
-# Automake needs to be taught how to build lib, progs, and tests targets.
+# Automake needs to be taught how to build lib, dyn, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
@@ -1383,19 +1382,6 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 
 help:
 	@$(top_srcdir)/bin/makehelp
-
-# Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
-# All rights reserved.
-#
-# This file is part of HDF5.  The full HDF5 copyright notice, including
-# terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules

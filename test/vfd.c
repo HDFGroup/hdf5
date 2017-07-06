@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -80,9 +78,9 @@ const char *FILENAME[] = {
 static herr_t
 test_sec2(void)
 {
-  hid_t        file            = -1;
-  hid_t        fapl            = -1;
-  hid_t        access_fapl     = -1;
+    hid_t       file = -1;                   /* file ID                      */
+    hid_t       fapl = -1;               /* file access property list ID */
+    hid_t        access_fapl     = -1;
     char         filename[1024];
     int          *fhandle        = NULL;
     hsize_t      file_size       = 0;
@@ -90,7 +88,8 @@ test_sec2(void)
     TESTING("SEC2 file driver");
 
     /* Set property list and file name for SEC2 driver. */
-    fapl = h5_fileaccess();
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if(H5Pset_fapl_sec2(fapl) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -125,11 +124,12 @@ test_sec2(void)
      */
     if(file_size < 1 * KB || file_size > 4 * KB)
         TEST_ERROR;
+    h5_delete_test_file(FILENAME[0], fapl);
 
-    if(H5Fclose(file) < 0)
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
-    h5_cleanup(FILENAME, fapl);
     PASSED();
     return 0;
 
@@ -184,7 +184,8 @@ test_direct(void)
 
     /* Set property list and file name for Direct driver.  Set memory alignment boundary
      * and file block size to 512 which is the minimum for Linux 2.6. */
-    fapl = h5_fileaccess();
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if(H5Pset_fapl_direct(fapl, MBOUNDARY, FBSIZE, CBSIZE) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
@@ -333,7 +334,12 @@ test_direct(void)
     HDassert(check);
     HDfree(check);
 
-    h5_cleanup(FILENAME, fapl);
+    h5_delete_test_file(FILENAME[1], fapl);
+
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
     PASSED();
     return 0;
 
@@ -387,7 +393,8 @@ test_core(void)
     TESTING("CORE file driver");
 
     /* Set property list and file name for CORE driver */
-    fapl = h5_fileaccess();
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
         TEST_ERROR;
     if(H5Pset_core_write_tracking(fapl, TRUE, CORE_PAGE_SIZE) < 0)
@@ -558,14 +565,19 @@ test_core(void)
         TEST_ERROR;
     if(H5Dclose(dset1) < 0)
         TEST_ERROR;
-    if(H5Fclose(file) < 0)
-        TEST_ERROR;
     HDassert(points);
     HDfree(points);
     HDassert(check);
     HDfree(check);
 
-    h5_cleanup(FILENAME, fapl);
+    /* Close and delete the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+    h5_delete_test_file(FILENAME[5], fapl);
+
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -602,7 +614,7 @@ error:
 static herr_t
 test_family_opens(char *fname, hid_t fa_pl)
 {
-    hid_t file;
+    hid_t file=-1;
     char first_name[1024];
     char wrong_name[1024];
     int i;
@@ -673,7 +685,7 @@ error:
 static herr_t
 test_family(void)
 {
-    hid_t       file=(-1), fapl, fapl2=(-1), space=(-1), dset=(-1);
+    hid_t       file=-1, fapl=-1, fapl2=-1, space=-1, dset=-1;
     hid_t       access_fapl = -1;
     char        filename[1024];
     char        dname[]="dataset";
@@ -686,11 +698,11 @@ test_family(void)
     TESTING("FAMILY file driver");
 
     /* Set property list and file name for FAMILY driver */
-    fapl = h5_fileaccess();
-
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
-    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -797,10 +809,15 @@ test_family(void)
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
+    /* Close and delete the file */
     if(H5Fclose(file) < 0)
         TEST_ERROR;
+    h5_delete_test_file(FILENAME[2], fapl);
 
-    h5_cleanup(FILENAME, fapl);
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
     PASSED();
     return 0;
 
@@ -808,7 +825,8 @@ error:
     H5E_BEGIN_TRY {
         H5Sclose(space);
         H5Dclose(dset);
-        H5Pclose (fapl2);
+        H5Pclose(fapl);
+        H5Pclose(fapl2);
         H5Fclose(file);
     } H5E_END_TRY;
     return -1;
@@ -836,8 +854,8 @@ error:
 static herr_t
 test_family_compat(void)
 {
-    hid_t       file = (-1), fapl;
-    hid_t       dset;
+    hid_t       file = -1, fapl = -1;
+    hid_t       dset = -1;
     char        dname[]="dataset";
     char        filename[1024];
     char        pathname[1024], pathname_individual[1024];
@@ -847,13 +865,13 @@ test_family_compat(void)
     TESTING("FAMILY file driver backward compatibility");
 
     /* Set property list and file name for FAMILY driver */
-    fapl = h5_fileaccess();
-
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE2, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    h5_fixname(COMPAT_BASENAME, fapl, filename, sizeof filename);
-    h5_fixname(FILENAME[3], fapl, newname, sizeof newname);
+    h5_fixname(COMPAT_BASENAME, fapl, filename, sizeof(filename));
+    h5_fixname(FILENAME[3], fapl, newname, sizeof(newname));
 
     pathname[0] = '\0';
     HDstrcat(pathname, filename);
@@ -869,7 +887,7 @@ test_family_compat(void)
         counter++;
         HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
         HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
-    }
+    } /* end while */
 
     /* Make sure we can open the file.  Use the read and write mode to flush the
      * superblock. */
@@ -895,10 +913,14 @@ test_family_compat(void)
     if(H5Dclose(dset) < 0)
         TEST_ERROR;
 
+    /* Close and delete the file */
     if(H5Fclose(file) < 0)
         TEST_ERROR;
+    h5_delete_test_file(FILENAME[3], fapl);
 
-    h5_cleanup(FILENAME, fapl);
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
 
     PASSED();
 
@@ -931,7 +953,7 @@ error:
 static herr_t
 test_multi_opens(char *fname)
 {
-    hid_t file;
+    hid_t file=-1;
     char  super_name[1024];     /*name string "%%s-s.h5"*/
     char  sf_name[1024];        /*name string "multi_file-s.h5"*/
 
@@ -963,8 +985,8 @@ test_multi_opens(char *fname)
 static herr_t
 test_multi(void)
 {
-    hid_t       file=(-1), fapl, fapl2=(-1), dset=(-1), space=(-1);
-    hid_t       root, attr, aspace, atype;
+    hid_t       file=-1, fapl=-1, fapl2=-1, dset=-1, space=-1;
+    hid_t       root=-1, attr=-1, aspace=-1, atype=-1;
     hid_t       access_fapl = -1;
     char        filename[1024];
     int         *fhandle2=NULL, *fhandle=NULL;
@@ -982,14 +1004,16 @@ test_multi(void)
     int         buf[MULTI_SIZE][MULTI_SIZE];
 
     TESTING("MULTI file driver");
-    /* Set file access property list for MULTI driver */
-    fapl = h5_fileaccess();
 
-    HDmemset(memb_map, 0,  sizeof memb_map);
-    HDmemset(memb_fapl, 0, sizeof memb_fapl);
-    HDmemset(memb_name, 0, sizeof memb_name);
-    HDmemset(memb_addr, 0, sizeof memb_addr);
-    HDmemset(sv, 0, sizeof sv);
+    /* Set file access property list for MULTI driver */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    HDmemset(memb_map, 0,  sizeof(memb_map));
+    HDmemset(memb_fapl, 0, sizeof(memb_fapl));
+    HDmemset(memb_name, 0, sizeof(memb_name));
+    HDmemset(memb_addr, 0, sizeof(memb_addr));
+    HDmemset(sv, 0, sizeof(sv));
 
     for(mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
         memb_fapl[mt] = H5P_DEFAULT;
@@ -1106,7 +1130,7 @@ test_multi(void)
 
     /* Create and write attribute for the root group. */
     if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Attribute string. */
     if((atype = H5Tcopy(H5T_C_S1)) < 0)
@@ -1136,10 +1160,15 @@ test_multi(void)
     if(H5Aclose(attr) < 0)
         TEST_ERROR;
 
+    /* Close and delete the file */
     if(H5Fclose(file) < 0)
         TEST_ERROR;
+    h5_delete_test_file(FILENAME[4], fapl);
 
-    h5_cleanup(FILENAME, fapl);
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
     PASSED();
 
     return 0;
@@ -1179,7 +1208,7 @@ error:
 static herr_t
 test_multi_compat(void)
 {
-    hid_t       file=(-1), fapl, dset=(-1), space=(-1);
+    hid_t       file=-1, fapl=-1, dset=-1, space=-1;
     char        newname[1024];
     char        filename_s[1024], newname_s[1024];
     char        filename_r[1024], newname_r[1024];
@@ -1195,7 +1224,8 @@ test_multi_compat(void)
     TESTING("MULTI file driver backward compatibility");
 
     /* Set file access property list for MULTI driver */
-    fapl = h5_fileaccess();
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
 
     HDmemset(memb_map, 0,  sizeof memb_map);
     HDmemset(memb_fapl, 0, sizeof memb_fapl);
@@ -1303,10 +1333,15 @@ test_multi_compat(void)
     if(H5Dclose(dset) < 0)
         TEST_ERROR;
 
+    /* Close and delete the file */
     if(H5Fclose(file) < 0)
         TEST_ERROR;
+    h5_delete_test_file(FILENAME[9], fapl);
 
-    h5_cleanup(FILENAME, fapl);
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
     PASSED();
 
     return 0;
@@ -1350,7 +1385,8 @@ test_log(void)
     TESTING("LOG file driver");
 
     /* Set property list and file name for log driver. */
-    fapl = h5_fileaccess();
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if(H5Pset_fapl_log(fapl, LOG_FILENAME, flags, buf_size) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
@@ -1387,10 +1423,15 @@ test_log(void)
     if(file_size < 1 * KB || file_size > 4 * KB)
         TEST_ERROR;
 
+    /* Close and delete the file */
     if(H5Fclose(file) < 0)
         TEST_ERROR;
+    h5_delete_test_file(FILENAME[6], fapl);
 
-    h5_cleanup(FILENAME, fapl);
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
     PASSED();
     return 0;
 
@@ -1429,7 +1470,8 @@ test_stdio(void)
     TESTING("STDIO file driver");
 
     /* Set property list and file name for STDIO driver. */
-    fapl = h5_fileaccess();
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if(H5Pset_fapl_stdio(fapl) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[7], fapl, filename, sizeof filename);
@@ -1465,10 +1507,15 @@ test_stdio(void)
     if(file_size < 1 * KB || file_size > 4 * KB)
         TEST_ERROR;
 
+    /* Close and delete the file */
     if(H5Fclose(file) < 0)
         TEST_ERROR;
+    h5_delete_test_file(FILENAME[7], fapl);
 
-    h5_cleanup(FILENAME, fapl);
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
     PASSED();
     return 0;
 
@@ -1519,7 +1566,8 @@ test_windows(void)
 #else /* H5_HAVE_WINDOWS */
 
     /* Set property list and file name for WINDOWS driver. */
-    fapl = h5_fileaccess();
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if(H5Pset_fapl_windows(fapl) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
@@ -1555,10 +1603,15 @@ test_windows(void)
     if(file_size < 1 * KB || file_size > 4 * KB)
         TEST_ERROR;
 
+   /* Close and delete the file */
     if(H5Fclose(file) < 0)
         TEST_ERROR;
+    h5_delete_test_file(FILENAME[8], fapl);
 
-    h5_cleanup(FILENAME, fapl);
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
     PASSED();
     return 0;
 

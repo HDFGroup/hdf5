@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -19,7 +17,7 @@
  */
 #include <string.h>
 #include <stdlib.h>
-/*#include <unistd.h>	*//* Required for unlink() */
+/*#include <unistd.h>    *//* Required for unlink() */
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -37,11 +35,11 @@ const char *setname = "align";
 
 int main(void)
 {
-    hid_t fil,spc,set;
-    hid_t cs6, cmp, fix;
-    hid_t cmp1, cmp2, cmp3;
-    hid_t plist;
-    hid_t array_dt;
+    hid_t fil=-1, spc=-1, set=-1;
+    hid_t cs6=-1, cmp=-1, fix=-1;
+    hid_t cmp1=-1, cmp2=-1, cmp3=-1;
+    hid_t plist=-1;
+    hid_t array_dt=-1;
 
     hsize_t dim[2];
     hsize_t cdim[4];
@@ -49,7 +47,7 @@ int main(void)
     char string5[5];
     float fok[2] = {1234.0f, 2341.0f};
     float fnok[2] = {5678.0f, 6785.0f};
-    float *fptr;
+    float *fptr = NULL;
 
     char *data = NULL;
 
@@ -88,8 +86,7 @@ int main(void)
     H5Tinsert(cmp, "Not Ok", sizeof(fok) + sizeof(string5), array_dt);
     H5Tclose(array_dt);
 
-    fix = h5tools_get_native_type(cmp);
-
+    fix = H5Tget_native_type(cmp, H5T_DIR_DEFAULT);
     cmp1 = H5Tcreate(H5T_COMPOUND, sizeof(fok));
 
     cdim[0] = sizeof(fok) / sizeof(float);
@@ -108,7 +105,7 @@ int main(void)
     H5Tclose(array_dt);
 
     plist = H5Pcreate(H5P_DATASET_XFER);
-    if((error = H5Pset_preserve(plist, 1)) < 0) 
+    if((error = H5Pset_preserve(plist, 1)) < 0)
         goto out;
 
     /*
@@ -137,6 +134,7 @@ int main(void)
 
     H5Dread(set, fix, spc, H5S_ALL, H5P_DEFAULT, data);
     fptr = (float *)(data + H5Tget_member_offset(fix, 1));
+    H5Dclose(set);
 
 out:
     if(error < 0) {
@@ -194,7 +192,9 @@ out:
     if(data)
         HDfree(data);
     H5Sclose(spc);
+    H5Tclose(cs6);
     H5Tclose(cmp);
+    H5Tclose(fix);
     H5Tclose(cmp1);
     H5Tclose(cmp2);
     H5Tclose(cmp3);
@@ -203,37 +203,5 @@ out:
     HDunlink(fname);
     fflush(stdout);
     return result;
-}
-
-/*-------------------------------------------------------------------------
- * Function: h5tools_get_native_type
- *
- * Purpose: Wrapper around H5Tget_native_type() to work around
- *  Problems with bitfields.
- *
- * Return: Success:    datatype ID
- *
- *  Failure:    FAIL
- *
- * Programmer: Quincey Koziol
- *              Tuesday, October  5, 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-h5tools_get_native_type(hid_t type)
-{
-    hid_t p_type;
-    H5T_class_t type_class;
-
-    type_class = H5Tget_class(type);
-    if(type_class==H5T_BITFIELD)
-        p_type=H5Tcopy(type);
-    else
-        p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
-
-    return(p_type);
 }
 

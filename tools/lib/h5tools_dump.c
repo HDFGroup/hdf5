@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -1777,7 +1775,7 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     else if (bin_form == 3)
         p_type = h5tools_get_big_endian_type(f_type);
     else
-        p_type = h5tools_get_native_type(f_type);
+        p_type = H5Tget_native_type(f_type, H5T_DIR_DEFAULT);
 
     if (p_type < 0)
         goto done;
@@ -2865,7 +2863,7 @@ h5tools_print_fill_value(h5tools_str_t *buffer/*in,out*/, const h5tool_format_t 
     hid_t             n_type;
     void             *buf = NULL;
 
-    n_type = h5tools_get_native_type(type_id);
+    n_type = H5Tget_native_type(type_id, H5T_DIR_DEFAULT);
 
     size = H5Tget_size(n_type);
     buf = HDmalloc(size);
@@ -3135,7 +3133,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
                 cd_values, sizeof(f_name), f_name, NULL);
 
-            if (filtn<0)
+            if (filtn < 0)
                 continue; /* nothing to print for invalid filter */
 
             ctx->need_prefix = TRUE;
@@ -3156,11 +3154,10 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
                     break;
                 case H5Z_FILTER_SZIP:
-                    {
                         szip_options_mask = cd_values[0];;
                         szip_pixels_per_block = cd_values[1];
 
-                        h5tools_str_append(&buffer, "%s %s",SZIP, BEGIN);
+                        h5tools_str_append(&buffer, "%s %s", SZIP, BEGIN);
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
                         ctx->indent_level++;
@@ -3219,7 +3216,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s", END);
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-                    }
                     break;
                 case H5Z_FILTER_NBIT:
                     h5tools_str_append(&buffer, "%s", NBIT);
@@ -3267,7 +3263,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                     h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer, "%s",END);
+                    h5tools_str_append(&buffer, "%s", END);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
                     break;
             }/*switch*/
@@ -3288,7 +3284,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     h5tools_str_reset(&buffer);
-    h5tools_str_append(&buffer, "%s",END);
+    h5tools_str_append(&buffer, "%s", END);
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
     /*-------------------------------------------------------------------------
@@ -3389,6 +3385,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         case H5D_ALLOC_TIME_LATE:
             h5tools_str_append(&buffer, "%s", "H5D_ALLOC_TIME_LATE");
             break;
+            case H5D_ALLOC_TIME_ERROR:
+            case H5D_ALLOC_TIME_DEFAULT:
         default:
             HDassert(0);
             break;
@@ -3584,7 +3582,7 @@ void
 h5tools_print_packed_bits(h5tools_str_t *buffer, hid_t type)
 {
     unsigned packed_bits_size = 0;
-    hid_t n_type = h5tools_get_native_type(type);
+    hid_t n_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
 
     if(H5Tget_class(n_type) == H5T_INTEGER) {
         if(H5Tequal(n_type, H5T_NATIVE_SCHAR) == TRUE)
@@ -3842,7 +3840,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
             unsigned int        vl_data = 0; /* contains VL datatypes */
 
             type = H5Aget_type(obj_id);
-            p_type = h5tools_get_native_type(type);
+            p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
 
             ndims = H5Sget_simple_extent_dims(space, size, NULL);
 

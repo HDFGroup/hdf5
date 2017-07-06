@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -32,7 +43,7 @@ set_tests_properties (PERFORM_h5perf_serial PROPERTIES TIMEOUT 1800)
 
 if (HDF5_BUILD_PERFORM_STANDALONE)
   add_test (NAME PERFORM_h5perf_serial_alone COMMAND $<TARGET_FILE:h5perf_serial_alone>)
-endif (HDF5_BUILD_PERFORM_STANDALONE)
+endif ()
 
 add_test (NAME PERFORM_chunk COMMAND $<TARGET_FILE:chunk>)
 
@@ -50,5 +61,5 @@ if (H5_HAVE_PARALLEL)
 
   if (HDF5_BUILD_PERFORM_STANDALONE)
     add_test (NAME PERFORM_h5perf_alone COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf_alone>)
-  endif (HDF5_BUILD_PERFORM_STANDALONE)
-endif (H5_HAVE_PARALLEL)
+  endif ()
+endif ()

@@ -17,6 +17,8 @@ usage: h5repack [OPTIONS] file1 file2
    -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size
    -t T, --threshold=T     Threshold value for H5Pset_alignment
    -a A, --alignment=A     Alignment value for H5Pset_alignment
+   -q Q, --sort_by=Q       Sort groups and attributes by index Q
+   -z Z, --sort_order=Z    Sort groups and attributes by order Z
    -f FILT, --filter=FILT  Filter type
    -l LAYT, --layout=LAYT  Layout type
 
@@ -26,6 +28,8 @@ usage: h5repack [OPTIONS] file1 file2
     U - is a filename.
     T - is an integer
     A - is an integer greater than zero
+    Q - is the sort index type for the input file. It can be "name" or "creation_order" (default)
+    Z - is the sort order type for the input file. It can be "descending" or "ascending" (default)
     B - is the user block size, any value that is 512 or greater and is
         a power of 2 (1024 default)
     F - is the shared object header message type, any of <dspace|dtype|fill|

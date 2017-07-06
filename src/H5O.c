@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -98,34 +96,39 @@ static const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
  */
 
 const H5O_msg_class_t *const H5O_msg_class_g[] = {
-    H5O_MSG_NULL,		/*0x0000 Null				*/
-    H5O_MSG_SDSPACE,		/*0x0001 Dataspace			*/
-    H5O_MSG_LINFO,		/*0x0002 Link information		*/
-    H5O_MSG_DTYPE,		/*0x0003 Datatype			*/
-    H5O_MSG_FILL,       	/*0x0004 Old data storage -- fill value */
-    H5O_MSG_FILL_NEW,		/*0x0005 New data storage -- fill value */
-    H5O_MSG_LINK,		/*0x0006 Link 				*/
-    H5O_MSG_EFL,		/*0x0007 Data storage -- external data files */
-    H5O_MSG_LAYOUT,		/*0x0008 Data Layout			*/
+    H5O_MSG_NULL,           /*0x0000 Null                                   */
+    H5O_MSG_SDSPACE,        /*0x0001 Dataspace                              */
+    H5O_MSG_LINFO,          /*0x0002 Link information                       */
+    H5O_MSG_DTYPE,          /*0x0003 Datatype                               */
+    H5O_MSG_FILL,           /*0x0004 Old data storage -- fill value         */
+    H5O_MSG_FILL_NEW,       /*0x0005 New data storage -- fill value         */
+    H5O_MSG_LINK,           /*0x0006 Link                                   */
+    H5O_MSG_EFL,            /*0x0007 Data storage -- external data files    */
+    H5O_MSG_LAYOUT,         /*0x0008 Data Layout                            */
 #ifdef H5O_ENABLE_BOGUS
-    H5O_MSG_BOGUS,		/*0x0009 "Bogus" (for testing)		*/
+    H5O_MSG_BOGUS_VALID,    /*0x0009 "Bogus valid" (for testing)            */
 #else /* H5O_ENABLE_BOGUS */
-    NULL,			/*0x0009 "Bogus" (for testing)		*/
+    NULL,                   /*0x0009 "Bogus valid" (for testing)            */
 #endif /* H5O_ENABLE_BOGUS */
-    H5O_MSG_GINFO,		/*0x000A Group information		*/
-    H5O_MSG_PLINE,		/*0x000B Data storage -- filter pipeline */
-    H5O_MSG_ATTR,		/*0x000C Attribute			*/
-    H5O_MSG_NAME,		/*0x000D Object name			*/
-    H5O_MSG_MTIME,		/*0x000E Object modification date and time */
-    H5O_MSG_SHMESG,		/*0x000F File-wide shared message table */
-    H5O_MSG_CONT,		/*0x0010 Object header continuation	*/
-    H5O_MSG_STAB,		/*0x0011 Symbol table			*/
-    H5O_MSG_MTIME_NEW,		/*0x0012 New Object modification date and time */
-    H5O_MSG_BTREEK,		/*0x0013 Non-default v1 B-tree 'K' values */
-    H5O_MSG_DRVINFO,		/*0x0014 Driver info settings		*/
-    H5O_MSG_AINFO,		/*0x0015 Attribute information		*/
-    H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
-    H5O_MSG_UNKNOWN		/*0x0017 Placeholder for unknown message */
+    H5O_MSG_GINFO,          /*0x000A Group information                      */
+    H5O_MSG_PLINE,          /*0x000B Data storage -- filter pipeline        */
+    H5O_MSG_ATTR,           /*0x000C Attribute                              */
+    H5O_MSG_NAME,           /*0x000D Object name                            */
+    H5O_MSG_MTIME,          /*0x000E Object modification date and time      */
+    H5O_MSG_SHMESG,         /*0x000F File-wide shared message table         */
+    H5O_MSG_CONT,           /*0x0010 Object header continuation             */
+    H5O_MSG_STAB,           /*0x0011 Symbol table                           */
+    H5O_MSG_MTIME_NEW,      /*0x0012 New Object modification date and time  */
+    H5O_MSG_BTREEK,         /*0x0013 Non-default v1 B-tree 'K' values       */
+    H5O_MSG_DRVINFO,        /*0x0014 Driver info settings                   */
+    H5O_MSG_AINFO,          /*0x0015 Attribute information                  */
+    H5O_MSG_REFCOUNT,       /*0x0016 Object's ref. count                    */
+    H5O_MSG_UNKNOWN,        /*0x0017 Placeholder for unknown message        */
+#ifdef H5O_ENABLE_BOGUS
+    H5O_MSG_BOGUS_INVALID   /*0x0018 "Bogus invalid" (for testing)          */
+#else /* H5O_ENABLE_BOGUS */
+    NULL                    /*0x0018 "Bogus invalid" (for testing)          */
+#endif /* H5O_ENABLE_BOGUS */
 };
 
 /* Declare a free list to manage the H5O_t struct */
@@ -2122,10 +2125,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
+H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned bogus_id, unsigned mesg_flags)
 {
-    size_t	idx;                /* Local index variable */
-    herr_t ret_value = SUCCEED;     /* Return value */
+    size_t idx;                 /* Local index variable */
+    H5O_msg_class_t *type;      /* Message class type */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2134,7 +2138,8 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
 
     /* Look for existing message */
     for(idx = 0; idx < oh->nmesgs; idx++)
-	if(H5O_MSG_BOGUS == oh->mesg[idx].type)
+        if(H5O_MSG_BOGUS_VALID == oh->mesg[idx].type ||
+           H5O_MSG_BOGUS_INVALID == oh->mesg[idx].type)
             break;
 
     /* Create a new message */
@@ -2142,18 +2147,25 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
         H5O_bogus_t *bogus;             /* Pointer to the bogus information */
 
         /* Allocate the native message in memory */
-	if(NULL == (bogus = H5MM_malloc(sizeof(H5O_bogus_t))))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for 'bogus' message")
+        if(NULL == (bogus = H5MM_malloc(sizeof(H5O_bogus_t))))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for 'bogus' message")
 
         /* Update the native value */
         bogus->u = H5O_BOGUS_VALUE;
 
+        if(bogus_id == H5O_BOGUS_VALID_ID)
+            type = H5O_MSG_BOGUS_VALID;
+        else if(bogus_id == H5O_BOGUS_INVALID_ID)
+            type = H5O_MSG_BOGUS_INVALID;
+        else
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID for 'bogus' message")
+
         /* Allocate space in the object header for bogus message */
-	if(H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_BOGUS, &mesg_flags, bogus, &idx) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message")
+        if(H5O_msg_alloc(f, dxpl_id, oh, type, &mesg_flags, bogus, &idx) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message")
 
         /* Point to "bogus" information (take it over) */
-	oh->mesg[idx].native = bogus;
+        oh->mesg[idx].native = bogus;
 
         /* Set the appropriate flags for the message */
         oh->mesg[idx].flags = mesg_flags;

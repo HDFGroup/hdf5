@@ -1,5 +1,3 @@
-Error: 'recursive' option not compatible with 'group info' option!
-
 usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
   OPTIONS
    -h, -?, --help  Print a usage message and exit
@@ -58,3 +56,5 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
                       Replaced by --follow-symlinks.
    -e, --errors       Show all HDF5 error reporting
                       Replaced by --enable-error-stack.
+Error: 'recursive' option not compatible with 'group info' option!
+

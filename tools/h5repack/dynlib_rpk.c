@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic document set and is     *
- * linked from the top-level documents page.  It can also be found at        *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have access   *
- * to either file, you may request a copy from help@hdfgroup.org.            *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*
  * Programmer:    Raymond Lu
@@ -38,8 +36,8 @@ const H5Z_class2_t H5Z_DYNLIB1[1] = {{
     (H5Z_func_t)H5Z_filter_dynlib1,    /* The actual filter function    */
 }};
 
-H5PL_type_t   H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
-const void    *H5PLget_plugin_info(void) {return H5Z_DYNLIB1;}
+H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
+const void *H5PLget_plugin_info(void) {return H5Z_DYNLIB1;}
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_filter_dynlib1

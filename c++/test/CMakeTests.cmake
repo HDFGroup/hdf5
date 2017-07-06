@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+
 HDFTEST_COPY_FILE("${HDF5_CPP_TEST_SOURCE_DIR}/th5s.h5" "${PROJECT_BINARY_DIR}/th5s.h5" "cpp_testhdf5_files")
 add_custom_target(cpp_testhdf5_files ALL COMMENT "Copying files needed by cpp_testhdf5 tests" DEPENDS ${cpp_testhdf5_files_list})
 
@@ -19,7 +30,20 @@ add_test (
             tfattrs.h5
 )
 
-add_test (NAME CPP_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME CPP_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
+else ()
+  add_test (NAME CPP_testhdf5 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_SKIP_COMPARE=TRUE"
+      -D "TEST_OUTPUT=cpp_testhdf5.txt"
+      #-D "TEST_REFERENCE=cpp_testhdf5.out"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
 set_tests_properties (CPP_testhdf5 PROPERTIES DEPENDS CPP_testhdf5-clear-objects)
 
 if (HDF5_TEST_VFD)
@@ -35,9 +59,9 @@ if (HDF5_TEST_VFD)
 
   if (DIRECT_VFD)
     set (VFD_LIST ${VFD_LIST} direct)
-  endif (DIRECT_VFD)
+  endif ()
 
-  MACRO (ADD_VFD_TEST vfdname resultcode)
+  macro (ADD_VFD_TEST vfdname resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdname}")
       add_test (
@@ -64,12 +88,12 @@ if (HDF5_TEST_VFD)
       )
       set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES DEPENDS CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects)
       set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES TIMEOUT 30)
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_VFD_TEST)
+    endif ()
+  endmacro ()
 
   # Run test with different Virtual File Driver
   foreach (vfd ${VFD_LIST})
     ADD_VFD_TEST (${vfd} 0)
-  endforeach (vfd ${VFD_LIST})
+  endforeach ()
 
-endif (HDF5_TEST_VFD)
+endif ()

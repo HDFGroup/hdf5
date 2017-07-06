@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 //
@@ -41,9 +39,9 @@
 
 const H5std_string FILE_NAME( "SDS.h5" );
 const H5std_string DATASET_NAME( "IntArray" );
-const int    NX_SUB = 3;	// hyperslab dimensions
+const int    NX_SUB = 3;        // hyperslab dimensions
 const int    NY_SUB = 4;
-const int    NX = 7;		// output buffer dimensions
+const int    NX = 7;            // output buffer dimensions
 const int    NY = 7;
 const int    NZ = 3;
 const int    RANK_OUT = 3;
@@ -59,8 +57,8 @@ int main (void)
    {
       for (i = 0; i < NY; i++)
       {
- 	 for (k = 0; k < NZ ; k++)
-	    data_out[j][i][k] = 0;
+         for (k = 0; k < NZ ; k++)
+            data_out[j][i][k] = 0;
       }
    }
 
@@ -91,19 +89,19 @@ int main (void)
        */
       if( type_class == H5T_INTEGER )
       {
-	 cout << "Data set has INTEGER type" << endl;
+         cout << "Data set has INTEGER type" << endl;
 
          /*
-	  * Get the integer datatype
+          * Get the integer datatype
           */
-	 IntType intype = dataset.getIntType();
+         IntType intype = dataset.getIntType();
 
          /*
           * Get order of datatype and print message if it's a little endian.
           */
-	 H5std_string order_string;
+         H5std_string order_string;
          H5T_order_t order = intype.getOrder( order_string );
-	 cout << order_string << endl;
+         cout << order_string << endl;
 
          /*
           * Get size of the data element stored in file and print it.
@@ -129,15 +127,15 @@ int main (void)
       hsize_t dims_out[2];
       int ndims = dataspace.getSimpleExtentDims( dims_out, NULL);
       cout << "rank " << rank << ", dimensions " <<
-	      (unsigned long)(dims_out[0]) << " x " <<
-	      (unsigned long)(dims_out[1]) << endl;
+              (unsigned long)(dims_out[0]) << " x " <<
+              (unsigned long)(dims_out[1]) << endl;
 
       /*
        * Define hyperslab in the dataset; implicitly giving strike and
        * block NULL.
        */
-      hsize_t      offset[2];	// hyperslab offset in the file
-      hsize_t      count[2];	// size of the hyperslab in the file
+      hsize_t      offset[2];   // hyperslab offset in the file
+      hsize_t      count[2];    // size of the hyperslab in the file
       offset[0] = 1;
       offset[1] = 2;
       count[0]  = NX_SUB;
@@ -156,8 +154,8 @@ int main (void)
       /*
        * Define memory hyperslab.
        */
-      hsize_t      offset_out[3];	// hyperslab offset in memory
-      hsize_t      count_out[3];	// size of the hyperslab in memory
+      hsize_t      offset_out[3];       // hyperslab offset in memory
+      hsize_t      count_out[3];        // size of the hyperslab in memory
       offset_out[0] = 3;
       offset_out[1] = 0;
       offset_out[2] = 0;
@@ -174,9 +172,9 @@ int main (void)
 
       for (j = 0; j < NX; j++)
       {
-	for (i = 0; i < NY; i++)
-	   cout << data_out[j][i][0] << " ";
-	cout << endl;
+        for (i = 0; i < NY; i++)
+           cout << data_out[j][i][0] << " ";
+        cout << endl;
       }
       /*
        * 0 0 0 0 0 0 0

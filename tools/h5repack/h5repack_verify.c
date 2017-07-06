@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
@@ -39,11 +37,6 @@ static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *fil
  * Programmer: Pedro Vicente, pvn@hdfgroup.org
  *
  * Date: December 19, 2003
- *  Modified: December, 19, 2007 (exactly 4 years later :-) )
- *  Separate into 3 cases
- *  1) no filter input, get all datasets and compare DCPLs. TO DO
- *  2) filter input on selected datasets, get each one trough OBJ and match
- *  3) filter input on all datasets, get all objects and match
  *
  *-------------------------------------------------------------------------
  */
@@ -51,7 +44,7 @@ static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *fil
 int
 h5repack_verify(const char *out_fname, pack_opt_t *options)
 {
-    int          ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int          ret_value = 0;     /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     hid_t        fidout     = -1;   /* file ID for output file*/
     hid_t        did        = -1;   /* dataset ID */
     hid_t        pid        = -1;   /* dataset creation property list ID */
@@ -122,6 +115,8 @@ h5repack_verify(const char *out_fname, pack_opt_t *options)
     if(options->all_filter == 1 || options->all_layout == 1)
     {
 
+        /* Initialize indexing options */
+        h5trav_set_index(sort_by, sort_order);
         /* init table */
         trav_table_init(&travt);
 
@@ -336,6 +331,9 @@ int h5repack_cmp_pl(const char *fname1,
     * get file table list of objects
     *-------------------------------------------------------------------------
     */
+    /* Initialize indexing options */
+    h5trav_set_index(sort_by, sort_order);
+    /* init table */
     trav_table_init(&trav);
     if(h5trav_gettable(fid1, trav) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5trav_gettable failed");
