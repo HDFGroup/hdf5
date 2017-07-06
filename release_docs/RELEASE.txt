@@ -55,7 +55,7 @@ New Features
     Configuration:
     -------------
     - Removed version-specific gcc/gfortran flags for version 4.0 (inclusive)
-      and earlier
+      and earlier.
 
       The config/gnu-flags file, which is sourced as a part of the configure
       process, adds version-specific flags for use when building HDF5. Most of
@@ -70,12 +70,18 @@ New Features
       to remove the flags not understood by that version of the compiler.
       Nothing should change when building with gcc >= 4.1.
 
-      Also, as a part of this work, the string 'gfortran40' was changed to
-      'gfortran' in the config/gnu-fflags file.
-
       (HDFFV-9937, DER, 2017/05/31)
 
-    -
+    - -fno-omit-frame-pointer was added when building with debugging symbols
+      enabled.
+
+      Debugging symbols can be enabled independently of the overall build
+      mode in both the autotools and CMake. This allows (limited) debugging
+      of optimized code. Since many debuggers rely on the frame pointer,
+      we've disabled this optimization when debugging symbols are requested
+      (e.g.: via building with --enable-symbols).
+
+      (HDFFV-10226, DER, 2017/05/31)
 
     Library:
     --------
@@ -102,6 +108,17 @@ New Features
 
       (HDFFV-10214, DER, 2017/05/31)
 
+    - The H5I_REFERENCE value in the H5I_type_t enum (defined in H5Ipublic.h)
+      has been marked as deprectated.
+
+      This ID type value is not used in the C library. i.e.: There are no
+      hid_t values that are of ID type H5I_REFERENCE.
+
+      This enum value will be removed in a future major version of the library.
+      The code will remain unchanged in the HDF5 1.10.x branches.
+
+      (HDFFV-10252, DER, 2017/04/05)
+
     Parallel Library:
     -----------------
     -
@@ -113,6 +130,21 @@ New Features
     C++ Library:
     ------------
     -
+
+    Java Library:
+    -------------
+
+    - The H5I_REFERENCE value in the H5I_type_t enum (defined in H5Ipublic.h)
+      has been marked as deprectated.
+
+      JNI code which refers to this value will be removed in a future
+      major version of the library. The code will remain unchanged in the
+      1.10.x branches.
+
+      See the C library section, above, for further information.
+
+      (HDFFV-10252, DER, 2017/04/05)
+
 
     Tools:
     ------
@@ -147,7 +179,32 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     Configuration
     -------------
-    -
+    - Corrected FORTRAN_HAVE_C_LONG_DOUBLE processing in the autotools.
+
+      A bug in the autotools Fortran processing code always set the
+      FORTRAN_HAVE_C_LONG_DOUBLE variable to be true regardless of
+      whether or not a C long double type was present.
+
+      This would cause compilation failures on platforms where a C
+      long double type was not available and the Fortran wrappers
+      were being built.
+
+      (HDFFV-10247, DER, 2017/07/05)
+
+    - The deprecated --enable-production and --enable-debug configure options
+      failed to emit errors when passed an empty string
+      (e.g.: --enable-debug="").
+
+      Due to the way we checked for these options being set, it was possible
+      to avoid the error message and continue configuration if an empty string
+      was passed to the option.
+
+      Any use of --enable-production or --enable-debug will now halt the
+      configuration step and emit a helpful error message
+      (use --enable-build-mode=debug|production instead).
+
+      (HDFFV-10248, DER, 2017/07/05)
+
 
     Performance
     -------------
