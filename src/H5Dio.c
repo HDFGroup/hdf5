@@ -1190,7 +1190,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
 
         /* Check if we can set direct MPI-IO read/write functions */
-        if((opt = H5D__mpio_opt_possible(io_info, file_space, mem_space, type_info, fm, dx_plist)) < 0)
+        if((opt = H5D__mpio_opt_possible(io_info, file_space, mem_space, type_info, dx_plist)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
 
         /* Check if we can use the optimized parallel I/O routines */
@@ -1227,7 +1227,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
                 if (H5P_get(dx_plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &global_no_collective_cause) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get global no collective cause value")
 
-                /* Append each of the "reason for breaking collective I/O" error messages to the
+                /* Append each of the reason for breaking collective I/O error messages to the
                  * local and global no collective cause strings */
                 for (cause = 1, index = 0; cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE; cause <<= 1, index++) {
                     size_t cause_strlen = strlen(cause_strings[index]);
