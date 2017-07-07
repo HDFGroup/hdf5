@@ -202,8 +202,7 @@ static int H5D__cmp_filtered_collective_io_info_entry_owner(const void *filtered
  */
 htri_t
 H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
-    const H5S_t *mem_space, const H5D_type_info_t *type_info,
-    const H5D_chunk_map_t H5_ATTR_UNUSED *fm, H5P_genplist_t *dx_plist)
+    const H5S_t *mem_space, const H5D_type_info_t *type_info, H5P_genplist_t *dx_plist)
 {
     int local_cause = 0;        /* Local reason(s) for breaking collective mode */
     int global_cause = 0;       /* Global reason(s) for breaking collective mode */
