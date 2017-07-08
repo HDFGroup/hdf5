@@ -335,6 +335,11 @@ typedef enum H5VL_category_t {
 /* XXX: We should consider adding a UUID/GUID field to this struct
  *      as well as a H5VLregister_by_uuid() API call for people who
  *      really care about getting a particular VOL driver.
+ * XXX: We should also consider adding enough information so that
+ *      files can be opened without specifying the VOL driver.
+ *      e.g.: If we stored a UUID and version, we could search for
+ *      a matching VOL driver so a user did not have to make any
+ *      H5VL calls.
  */
 typedef struct H5VL_class_t {
     const char *name;                               /* Plugin name (MUST be unique!)                */
@@ -380,7 +385,6 @@ extern "C" {
 /* VOL Plugin Functionality */
 H5_DLL herr_t H5VLinitialize(hid_t plugin_id, hid_t vipl_id);
 H5_DLL herr_t H5VLterminate(hid_t plugin_id, hid_t vtpl_id);
-H5_DLL hid_t H5VLget_plugin_id(const char *name);
 H5_DLL herr_t H5VLclose(hid_t plugin_id);
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
 H5_DLL hid_t H5VLregister_by_name(const char *plugin_name);

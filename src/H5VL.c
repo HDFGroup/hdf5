@@ -315,32 +315,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLget_plugin_id
- *
- * Purpose:     Retrieves the registered plugin ID for a VOL.
- *
- * Return:      Non-negative if the VOL class has been registered
- *
- *              Negative on error (if the class is not a valid class or not registered)
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5VLget_plugin_id(const char *name)
-{
-    hid_t ret_value = FAIL;     /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "*s", name);
-
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLget_plugin_id() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5VLget_plugin_name
  *
  * Purpose:     Returns the plugin name for the VOL associated with the

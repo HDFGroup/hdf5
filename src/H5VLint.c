@@ -198,6 +198,7 @@ H5VL_free_cls(H5VL_class_t *cls)
     if(cls->terminate && cls->terminate(H5P_DEFAULT) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL plugin did not terminate cleanly")
 
+    /* XXX: We'll leak memory if the name string was dynamically allocated. */
     H5MM_free(cls);
 
 done:
