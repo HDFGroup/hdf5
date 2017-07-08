@@ -332,12 +332,16 @@ typedef enum H5VL_category_t {
 } H5VL_category_t;
 
 /* Class information for each VOL driver */
+/* XXX: We should consider adding a UUID/GUID field to this struct
+ *      as well as a H5VLregister_by_uuid() API call for people who
+ *      really care about getting a particular VOL driver.
+ */
 typedef struct H5VL_class_t {
     const char *name;                               /* Plugin name (MUST be unique!)                */
     unsigned int version;                           /* VOL driver version #                         */
                                                     /* XXX: Is this supposed to be a VOL driver
                                                      *      version number or a VOL API version
-                                                     *      number?
+                                                     *      number? Maybe we need both?
                                                      */
     H5VL_category_t category;                       /* Class category                               */
     herr_t  (*initialize)(hid_t vipl_id);           /* Plugin initialization callback               */
