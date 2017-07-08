@@ -173,9 +173,9 @@ static H5FD_class_t dummy_vfd_class_g = {
  * real VOL plugins.
  */
 static const H5VL_class_t dummy_vol_class_g = {
-    0,                                              /* version      */
-    847271,                                         /* value        */
     "dummy vol driver",                             /* name         */
+    0,                                              /* version      */
+    H5VL_INTERNAL,                                  /* category     */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
     (size_t)0,                                      /* fapl size    */

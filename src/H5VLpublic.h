@@ -325,11 +325,21 @@ typedef struct H5VL_async_class_t {
     herr_t (*wait)  (void **, H5ES_status_t *);
 } H5VL_async_class_t;
 
+/* VOL category (internal, external, etc.) */
+typedef enum H5VL_category_t {
+    H5VL_INTERNAL,      /* Internal VOL driver */
+    H5VL_EXTERNAL       /* External VOL driver (plugin) */
+} H5VL_category_t;
+
 /* Class information for each VOL driver */
 typedef struct H5VL_class_t {
-    unsigned int version;                           /* Class version #                              */
-    unsigned int value;                             /* value to identify plugin                     */
-    const char *name;                               /* Plugin name                                  */
+    const char *name;                               /* Plugin name (MUST be unique!)                */
+    unsigned int version;                           /* VOL driver version #                         */
+                                                    /* XXX: Is this supposed to be a VOL driver
+                                                     *      version number or a VOL API version
+                                                     *      number?
+                                                     */
+    H5VL_category_t category;                       /* Class category                               */
     herr_t  (*initialize)(hid_t vipl_id);           /* Plugin initialization callback               */
     herr_t  (*terminate)(hid_t vtpl_id);            /* Plugin termination callback                  */
     size_t  fapl_size;                              /* size of the vol info in the fapl property    */

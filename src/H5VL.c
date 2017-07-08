@@ -124,10 +124,13 @@ H5VLregister(const H5VL_class_t *cls)
     /* Check arguments */
     if(!cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "null class pointer is disallowed")
-    if(cls->value > UINT_MAX)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "registered class value must not be larger than %u", UINT_MAX)
+    if(cls->category != H5VL_INTERNAL && cls->category != H5VL_EXTERNAL)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "class category must be set correctly")
     if(!cls->name)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "VOL class name cannot be the NULL pointer");
+    /* XXX: Should probably come up with a max length so we can use strnlen()? */
+    if(0 == HDstrlen(cls->name))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "VOL class name cannot be the empty string");
 
     op_data.ret_id = FAIL;
     op_data.name = cls->name;

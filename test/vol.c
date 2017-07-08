@@ -22,15 +22,15 @@
 #include "h5test.h"
 
 
-#define FAKE_VOL_NAME   "fake_vol"
+#define FAKE_VOL_NAME   "fake"
 
 /* A VOL class struct that describes a VOL class with no
  * functionality.
  */
 static const H5VL_class_t fake_vol_g = {
-    0,                                              /* version      */
-    1234,                                           /* value        */
     FAKE_VOL_NAME,                                  /* name         */
+    0,                                              /* version      */
+    H5VL_INTERNAL,                                  /* category     */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
     (size_t)0,                                      /* fapl size    */
