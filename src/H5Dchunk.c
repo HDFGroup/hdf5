@@ -1019,11 +1019,16 @@ H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
         unsigned u;                         /* Local index value */
 
         for(u = 0; u < dset->shared->ndims; u++) {
+            hsize_t scaled_power2up;    /* Scaled value, rounded to next power of 2 */
+
             /* Initial scaled dimension sizes */
             rdcc->scaled_dims[u] = dset->shared->curr_dims[u] / dset->shared->layout.u.chunk.dim[u];
 
+            if( !(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])) )
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
+
             /* Inital 'power2up' values for scaled dimensions */
-            rdcc->scaled_power2up[u] = H5VM_power2up(rdcc->scaled_dims[u]);
+            rdcc->scaled_power2up[u] = scaled_power2up;
 
             /* Number of bits required to encode scaled dimension size */
             rdcc->scaled_encode_bits[u] = H5VM_log2_gen(rdcc->scaled_power2up[u]);

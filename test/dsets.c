@@ -51,14 +51,15 @@ const char *FILENAME[] = {
     "copy_dcpl_newfile",/* 13 */
     "partial_chunks",   /* 14 */
     "layout_extend",    /* 15 */
-    "zero_chunk",	/* 16 */
+    "zero_chunk",	    /* 16 */
     "chunk_single",     /* 17 */
     "swmr_non_latest",  /* 18 */
     "earray_hdr_fd",    /* 19 */
     "farray_hdr_fd",    /* 20 */
     "bt2_hdr_fd",       /* 21 */
-    "storage_size",	/* 22 */
+    "storage_size",	    /* 22 */
     "dls_01_strings",   /* 23 */
+    "power2up",         /* 24 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -11345,6 +11346,97 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_power2up
+ *
+ * Purpose:     Tests that the H5VM_power2up(n) function does not result in an 
+ *              infinite loop when input n exceeds 2^63. (HDFFV-10217)
+ *              H5VM_power2up() is used to calculate the next power of 2 for
+ *              a dataset's scaled dimension sizes.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Vailin Choi; June 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_power2up(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       did = -1;       /* Dataset ID */
+    hsize_t     dims[2];        /* Dataset dimension sizes */
+    hsize_t     max_dims[2];    /* Maximum dimension sizes */
+    hsize_t     chunk_dims[2];  /* Chunk dimensions */
+    hsize_t     ext_dims[2];    /* Extended dimension sizes */
+    herr_t      status;         /* Error status */
+
+    TESTING("the next power of 2");
+
+    h5_fixname(FILENAME[24], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Set dims[1] to ((2^63) -1) */
+    dims[0] = 0;
+    dims[1] = ((hsize_t)1 << ((sizeof(hsize_t) * CHAR_BIT) -1)) - 1;
+    max_dims[0] = max_dims[1] = H5S_UNLIMITED;
+    sid =  H5Screate_simple(2, dims, max_dims);
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
+       TEST_ERROR
+
+    /* Set chunk size */
+    chunk_dims[0] = chunk_dims[1] = 1;
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) 
+       TEST_ERROR
+
+    /* Create chunked dataset */
+    if((did = H5Dcreate2(fid, "dset", H5T_NATIVE_INT64, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+       TEST_ERROR
+
+    ext_dims[0] = 1;
+    ext_dims[1] = dims[1] + 5;
+
+    /* Extend to (2^63)+ */
+    H5E_BEGIN_TRY {
+        status = H5Dset_extent(did, ext_dims);
+    } H5E_END_TRY;
+    if(status >= 0)
+       TEST_ERROR
+
+    /* Closing */
+    if(H5Dclose(did) < 0) 
+       TEST_ERROR
+    if(H5Sclose(sid) < 0) 
+       TEST_ERROR
+    if(H5Pclose(dcpl) < 0) 
+       TEST_ERROR
+    if(H5Fclose(fid) < 0) 
+       TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_power2up() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_scatter
  *
  * Purpose:     Tests H5Dscatter with a variety of different selections
@@ -12928,6 +13020,7 @@ main(void)
             nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
             nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
             nerrors += (test_storage_size(my_fapl) < 0              ? 1 : 0);
+            nerrors += (test_power2up(my_fapl) < 0                  ? 1 : 0);
 
             nerrors += (test_swmr_non_latest(envval, my_fapl) < 0   ? 1 : 0);
             nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0     ? 1 : 0);
