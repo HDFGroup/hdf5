@@ -674,7 +674,7 @@ HDfprintf(stderr, "%s: Entering, section {%a, %Hu}\n", FUNC, (*sect)->sect_info.
 HDfprintf(stderr, "%s: section is dropped\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     } /* end if */
-    /* Adjust the section if it is not at page end but its size + pgend threshold is at page end */
+    /* Adjust the section if it is not at page end but its size + prem is at page end */
     else
         if(prem <= H5F_PGEND_META_THRES(udata->f)) {
             (*sect)->sect_info.size += prem;
