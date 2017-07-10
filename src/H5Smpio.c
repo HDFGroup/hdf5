@@ -232,7 +232,7 @@ H5S_mpio_create_point_datatype (size_t elmt_size, hsize_t num_points,
 
       /* Create an MPI datatype for the whole point selection */
       if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)num_points, blocks, disp, elmt_type, new_type)))
-          HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_indexed_block failed", mpi_code)
+          HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
 #endif
 
       /* Commit MPI datatype for later use */
@@ -871,7 +871,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
                                                    block_type,      /* old type */
                                                    &outer_type);    /* new type */
                 if(MPI_SUCCESS != mpi_code)
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
             }
             MPI_Type_free(&block_type);
             MPI_Type_free(&inner_type);
@@ -1424,7 +1424,7 @@ static herr_t H5S_mpio_create_large_type (hsize_t num_elements,
                                                                stride_bytes,
                                                                old_type,
                                                                &inner_type))) {
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
         }
     }
 
@@ -1444,7 +1444,7 @@ static herr_t H5S_mpio_create_large_type (hsize_t num_elements,
                                                                stride_bytes,
                                                                inner_type,
                                                                &outer_type))) {
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
         }
     }
 
@@ -1468,7 +1468,7 @@ static herr_t H5S_mpio_create_large_type (hsize_t num_elements,
                                 stride_bytes,
                                 old_type,
                                 &leftover_type))) {
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
             }
         }
 
@@ -1484,7 +1484,7 @@ static herr_t H5S_mpio_create_large_type (hsize_t num_elements,
 
         if(MPI_SUCCESS != (mpi_code =
                            MPI_Type_create_struct(2, block_len, disp, type, new_type))) {
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
         }
 
         MPI_Type_free(&outer_type);

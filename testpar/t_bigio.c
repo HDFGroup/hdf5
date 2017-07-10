@@ -2060,13 +2060,62 @@ coll_chunktest(const char* filename,
 
 
 
+/*****************************************************************************
+ *
+ * Function:	do_express_test()
+ *
+ * Purpose:	Do an MPI_Allreduce to obtain the maximum value returned
+ * 		by GetTestExpress() across all processes.  Return this
+ * 		value.
+ *
+ * 		Envirmoment variables can be different across different
+ * 		processes.  This function ensures that all processes agree
+ * 		on whether to do an express test.
+ *
+ * Return:	Success:	Maximum of the values returned by
+ * 				GetTestExpress() across	all processes.
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	JRM -- 4/25/06
+ *
+ *****************************************************************************/
+static int
+do_express_test(int world_mpi_rank)
+{
+    int express_test;
+    int max_express_test;
+    int result;
+
+    express_test = GetTestExpress();
+
+    result = MPI_Allreduce((void *)&express_test,
+                           (void *)&max_express_test,
+                           1,
+                           MPI_INT,
+                           MPI_MAX,
+                           MPI_COMM_WORLD);
+
+    if ( result != MPI_SUCCESS ) {
+        nerrors++;
+        max_express_test = -1;
+        if ( VERBOSE_MED && (world_mpi_rank == 0)) {
+            HDfprintf(stdout, "%d:%s: MPI_Allreduce() failed.\n",
+                      world_mpi_rank, FUNC );
+        }
+    }
+
+    return(max_express_test);
+
+} /* do_express_test() */
 
 
 int main(int argc, char **argv) 
 {
-
+    int ExpressMode = 0;
     hsize_t newsize = 1048576;
     hsize_t oldsize = H5S_mpio_set_bigio_count(newsize);
+
     if (newsize != oldsize) {
       bigcount = newsize * 2;
     }
@@ -2075,20 +2124,27 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
+    ExpressMode = do_express_test(mpi_rank);
+
     dataset_big_write();
     MPI_Barrier(MPI_COMM_WORLD);
 
     dataset_big_read();
     MPI_Barrier(MPI_COMM_WORLD);
 
-    oldsize = H5S_mpio_set_bigio_count(16384);
+    if (ExpressMode > 1) {
+      printf("***Express test mode on.  Several tests are skipped\n");
+    }
+    else {
+      coll_chunk1();
+      MPI_Barrier(MPI_COMM_WORLD);
+      coll_chunk2();
+      MPI_Barrier(MPI_COMM_WORLD);
+      coll_chunk3();
+    }
 
-    coll_chunk1();
-    MPI_Barrier(MPI_COMM_WORLD);
-    coll_chunk2();
-    MPI_Barrier(MPI_COMM_WORLD);
-    coll_chunk3();
-    MPI_Barrier(MPI_COMM_WORLD);
+    /* close HDF5 library */
+    H5close();
 
     MPI_Finalize();
 
