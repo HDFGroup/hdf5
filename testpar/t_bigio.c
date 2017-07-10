@@ -2132,7 +2132,7 @@ int main(int argc, char **argv)
     dataset_big_read();
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if (ExpressMode > 1) {
+    if (ExpressMode > 0) {
       printf("***Express test mode on.  Several tests are skipped\n");
     }
     else {
