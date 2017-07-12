@@ -357,24 +357,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     if((obj_class = H5O_obj_class(oloc_src, dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
-    /* Check if the object at the address is already open in the file */
-    if(H5FO_opened(oloc_src->file, oloc_src->addr) != NULL) {
-	
-	H5G_loc_t   tmp_loc; 	/* Location of object */
-	H5O_loc_t   tmp_oloc; 	/* Location of object */
-	H5G_name_t  tmp_path;	/* Object's path */
-
-	tmp_loc.oloc = &tmp_oloc;
-	tmp_loc.path = &tmp_path;
-	tmp_oloc.file = oloc_src->file;
-	tmp_oloc.addr = oloc_src->addr;
-	tmp_oloc.holding_file = oloc_src->holding_file;
-	H5G_name_reset(tmp_loc.path);
-
-	/* Flush the object of this class */
-        if(obj_class->flush && obj_class->flush(&tmp_loc, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
-    }
+    /* Set the pointer to the shared struct for the object if opened in the file */
+    cpy_info->shared_fo = H5FO_opened(oloc_src->file, oloc_src->addr);
 
     /* Get source object header */
     if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC_READ)))
