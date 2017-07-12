@@ -6664,8 +6664,7 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl, hbool_t test_open)
     addr_reset();
 
     /* open source file (read-only) */
-    //if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((fid_src = H5Fopen("../../hdf5/test/fill_old.h5", H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
