@@ -63,8 +63,8 @@ New Features
 
       Flags for older versions of the compiler were consolidated into the
       common flags section. Moving these flags simplifies maintenance of
-      the file. 
-      
+      the file.
+
       The upshot of this is that building with ancient versions of gcc
       (<= 4.0) will possibly no longer work without hand-hacking the file
       to remove the flags not understood by that version of the compiler.
@@ -205,6 +205,15 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (HDFFV-10248, DER, 2017/07/05)
 
+    - cmake
+
+      To many commands for POST_BUILD step caused command line to be
+      too big on windows.
+
+      Changed foreach of copy command to use a custom command with the
+      use of the HDFTEST_COPY_FILE macro.
+
+      (ADB - 2017/07/12, HDFFV-10254)
 
     Performance
     -------------
