@@ -62,7 +62,29 @@ New Features
 
     Parallel Library:
     -----------------
-    -
+    - Large MPI-IO transfers
+
+      Previous releases of PHDF5 would fail when attempting to
+      read or write greater than 2GB of data in a single IO operation.
+      This issue stems principally from an MPI API whose definitions
+      utilize 32 bit integers to describe the number of data elements
+      and datatype that MPI should use to effect a data transfer.
+      Historically, HDF5 has invoked MPI-IO with the number of
+      elements in a contiguous buffer represented as the length
+      of that buffer in bytes.
+
+      Resolving the issue and thus enabling larger MPI-IO transfers
+      is accomplished first, by detecting when a user IO request would
+      exceed the 2GB limit as described above.  Once a transfer request
+      is identified as requiring special handling, PHDF5 now creates a
+      derived datatype consisting of a vector of fixed sized blocks
+      which is in turn wrapped within a single MPI_Type_struct to
+      contain the vector and any remaining data.   The newly created
+      datatype is then used in place of MPI_BYTE and can be used to
+      fulfill the original user request without encountering API
+      errors.
+
+      (RAW – 2017/07/11, HDFFV-8839)
 
     Fortran Library:
     ----------------
