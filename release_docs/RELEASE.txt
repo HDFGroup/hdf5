@@ -107,7 +107,7 @@ Bug Fixes since HDF5-1.10.1 release
     -------------
     - cmake
 
-      To many commands for POST_BUILD step caused command line to be
+      Too many commands for POST_BUILD step caused command line to be
       too big on windows.
 
       Changed foreach of copy command to use a custom command with the
