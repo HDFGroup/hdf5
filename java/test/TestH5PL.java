@@ -70,26 +70,74 @@ public class TestH5PL {
     @Test
     public void TestH5PLpaths() {
         try {
-            int original_entries = H5.H5PLsize();
-            H5.H5PLappend("path_one");
-            int plugin_entries = H5.H5PLsize();
-            assertTrue("H5.H5PLsize: "+plugin_entries, (original_entries+1) == plugin_entries);
-            H5.H5PLprepend("path_two");
-            plugin_entries = H5.H5PLsize();
-            assertTrue("H5.H5PLsize: "+plugin_entries, (original_entries+2) == plugin_entries);
-            H5.H5PLinsert("path_three", original_entries);
-            plugin_entries = H5.H5PLsize();
-            assertTrue("H5.H5PLsize: "+plugin_entries, (original_entries+3) == plugin_entries);
-            String first_path = H5.H5PLget(original_entries);
-            assertTrue("First path was : "+first_path + " ",first_path.compareToIgnoreCase("path_three")==0);
-            H5.H5PLreplace("path_four", original_entries);
-            first_path = H5.H5PLget(original_entries);
-            assertTrue("First path changed to : "+first_path + " ",first_path.compareToIgnoreCase("path_four")==0);
-            H5.H5PLremove(original_entries);
-            first_path = H5.H5PLget(original_entries);
-            assertTrue("First path now : "+first_path + " ",first_path.compareToIgnoreCase("path_two")==0);
-            plugin_entries = H5.H5PLsize();
-            assertTrue("H5.H5PLsize: "+plugin_entries, (original_entries+2) == plugin_entries);
+            // Get the original number of paths
+            int nStartPaths = H5.H5PLsize();
+
+            int nPaths;                     /* # paths from H5PLSize()      */
+            int nTruePaths = nStartPaths;   /* What the # paths should be   */
+            int index;                      /* Path table index             */
+            String path;                    /* Path from H5PLget()          */
+
+            // APPEND a path and ensure it was added correctly
+            String pathAppend = "path_append";
+            H5.H5PLappend(pathAppend);
+
+            nPaths = H5.H5PLsize();
+            nTruePaths++;
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            index = nTruePaths - 1;
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathAppend + " but was " + path, path.compareToIgnoreCase(pathAppend) == 0);
+
+            // PREPEND a path and ensure it was added correctly
+            String pathPrepend = "path_prepend";
+            H5.H5PLprepend(pathPrepend);
+
+            nPaths = H5.H5PLsize();
+            nTruePaths++;
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            index = 0;
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathPrepend + " but was " + path, path.compareToIgnoreCase(pathPrepend) == 0);
+
+            // INSERT a path and ensure it was added correctly
+            // Inserting at the index == # of start paths ensures we're in the middle
+            String pathInsert = "path_insert";
+            index = nStartPaths;
+            H5.H5PLinsert(pathInsert, index);
+
+            nPaths = H5.H5PLsize();
+            nTruePaths++;
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathInsert + " but was " + path, path.compareToIgnoreCase(pathInsert) == 0);
+
+            // REPLACE the path we just added and ensure it updated correctly
+            String pathReplace = "path_replace";
+            index = nStartPaths;
+            H5.H5PLreplace(pathReplace, index);
+
+            nPaths = H5.H5PLsize();
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathReplace + " but was " + path, path.compareToIgnoreCase(pathReplace) == 0);
+
+            // REMOVE the path we just replaced and check that the table was compacted
+            // The (index+1) path should move down to fill the space when the path is removed.
+            index = nStartPaths;
+            String pathRemove = H5.H5PLget(index + 1);
+            H5.H5PLremove(index);
+
+            nPaths = H5.H5PLsize();
+            nTruePaths--;
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathRemove + " but was " + path, path.compareToIgnoreCase(pathRemove) == 0);
         }
         catch (Throwable err) {
             err.printStackTrace();
