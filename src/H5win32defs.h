@@ -119,6 +119,7 @@ extern "C" {
     H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
     H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
     H5_DLL int Wnanosleep(const struct timespec *req, struct timespec *rem);
+    H5_DLL herr_t H5_expand_windows_env_vars(char **env_var);
 
     /* Round functions only needed for VS2012 and earlier.
      * They are always built to ensure they don't go stale and
