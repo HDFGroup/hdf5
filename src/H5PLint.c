@@ -248,13 +248,16 @@ H5PL_load(H5PL_type_t type, int id)
     switch (type) {
         case H5PL_TYPE_FILTER:
             if ((H5PL_plugin_control_mask_g & H5PL_FILTER_PLUGIN) == 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin filter '%d' is not available", id)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "filter plugins disabled")
             break;
-
+        case H5PL_TYPE_VOL:
+            if((H5PL_plugin_control_mask_g & H5PL_VOL_PLUGIN) == 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Virtual Object Layer (VOL) driver plugins disabled")
+            break;
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin '%d' is not valid", id)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Invalid plugin type specified")
     }
 
     /* Set up the search parameters */

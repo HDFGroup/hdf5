@@ -209,7 +209,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5PL__add_plugin
  *
- * Purpose:     Add a plugin to the plugin cached.
+ * Purpose:     Add a plugin to the plugin cache.
  *
  * Return:      SUCCEED/FAIL
  *
