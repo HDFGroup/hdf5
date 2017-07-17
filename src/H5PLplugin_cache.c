@@ -271,7 +271,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
     for (u = 0; u < H5PL_num_plugins_g; u++) {
 
         /* If the plugin type (filter, etc.) and ID match, query the plugin for its info */
-        if ((search_params->type == (H5PL_cache_g[u]).type) && (search_params->id == (H5PL_cache_g[u]).id)) {
+        if ((search_params->type == (H5PL_cache_g[u]).type) && (search_params->key.id == (H5PL_cache_g[u]).id)) {
 
             H5PL_get_plugin_info_t      get_plugin_info_function;
             const H5Z_class2_t          *filter_info;

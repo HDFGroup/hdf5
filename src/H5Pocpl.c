@@ -748,9 +748,12 @@ H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags,
 
     /* If filter is not available, try to dynamically load it */
     if(!filter_avail) {
+        H5PL_key_t key;
         const H5Z_class2_t *filter_info;
 
-        if(NULL == (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)filter)))
+        key.id = (int)filter;
+
+        if(NULL == (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, key)))
             HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "failed to load dynamically loaded plugin")
         if(H5Z_register(filter_info) < 0)
 	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")

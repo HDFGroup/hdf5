@@ -235,11 +235,11 @@ done:
  *-------------------------------------------------------------------------
  */
 const void *
-H5PL_load(H5PL_type_t type, int id)
+H5PL_load(H5PL_type_t type, H5PL_key_t key)
 {
-    H5PL_search_params_t    search_params;
+    H5PL_search_params_t    search_params;          /* Plugin search parameters     */
     hbool_t                 found = FALSE;          /* Whether the plugin was found */
-    const void             *plugin_info = NULL;
+    const void             *plugin_info = NULL;     /* Information from the plugin  */
     const void             *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
@@ -262,7 +262,7 @@ H5PL_load(H5PL_type_t type, int id)
 
     /* Set up the search parameters */
     search_params.type = type;
-    search_params.id = id;
+    search_params.key.id = key.id;
 
     /* Search in the table of already loaded plugin libraries */
     if(H5PL__find_plugin_in_cache(&search_params, &found, &plugin_info) < 0)
