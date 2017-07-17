@@ -11,10 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
 #include "H5private.h"
 #include "h5repack.h"
 #include "h5tools.h"

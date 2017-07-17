@@ -22,9 +22,6 @@
  * This is a module of useful timing functions for performance testing.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "H5private.h"
 #include "hdf5.h"
 
