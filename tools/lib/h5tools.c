@@ -12,15 +12,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Thursday, July 23, 1998
- *
  * Purpose: A library for displaying the values of a dataset in a human
  *  readable format.
  */
-
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "h5tools.h"
 #include "h5tools_dump.h"
