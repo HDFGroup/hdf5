@@ -43,6 +43,7 @@ ENDMACRO (ADD_H5P_EXE file)
 
 set (H5P_TESTS
     t_mpi
+    t_bigio
     t_cache
     t_pflush1
     t_pflush2
