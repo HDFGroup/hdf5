@@ -56,9 +56,9 @@
 
 /* Type for the list of info for opened plugin libraries */
 typedef struct H5PL_plugin_t {
-    H5PL_type_t     type;           /* Plugin type          */
-    int             id;             /* ID for the plugin    */
-    H5PL_HANDLE     handle;         /* Plugin handle        */
+    H5PL_type_t     type;           /* Plugin type                          */
+    H5PL_key_t      key;            /* Unique key to identify the plugin    */
+    H5PL_HANDLE     handle;         /* Plugin handle                        */
 } H5PL_plugin_t;
 
 
@@ -216,7 +216,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PL__add_plugin(H5PL_type_t type, int id, H5PL_HANDLE handle)
+H5PL__add_plugin(H5PL_type_t type, H5PL_key_t key, H5PL_HANDLE handle)
 {
     herr_t      ret_value = SUCCEED;
 
@@ -229,7 +229,7 @@ H5PL__add_plugin(H5PL_type_t type, int id, H5PL_HANDLE handle)
 
     /* Store the plugin info and bump the # of plugins */
     H5PL_cache_g[H5PL_num_plugins_g].type       = type;
-    H5PL_cache_g[H5PL_num_plugins_g].id         = id;
+    H5PL_cache_g[H5PL_num_plugins_g].key        = key;
     H5PL_cache_g[H5PL_num_plugins_g].handle     = handle;
 
     H5PL_num_plugins_g++;
@@ -271,7 +271,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
     for (u = 0; u < H5PL_num_plugins_g; u++) {
 
         /* If the plugin type (filter, etc.) and ID match, query the plugin for its info */
-        if ((search_params->type == (H5PL_cache_g[u]).type) && (search_params->key.id == (H5PL_cache_g[u]).id)) {
+        if ((search_params->type == (H5PL_cache_g[u]).type) && (search_params->key.id == (H5PL_cache_g[u]).key.id)) {
 
             H5PL_get_plugin_info_t      get_plugin_info_function;
             const H5Z_class2_t          *filter_info;

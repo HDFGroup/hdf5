@@ -346,12 +346,12 @@ H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success,
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "Invalid plugin type specified")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "Invalid plugin type specified")
     }
 
     /* If we found the correct plugin, store it in the cache */
     if (*success)
-        if (H5PL__add_plugin(type, key.id, handle))
+        if (H5PL__add_plugin(type, key, handle))
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
 
 done:
