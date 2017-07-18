@@ -30,6 +30,7 @@
 #include "H5Eprivate.h"     /* Error handling               */
 #include "H5MMprivate.h"    /* Memory management            */
 #include "H5PLpkg.h"        /* Plugin                       */
+#include "H5VLprivate.h"    /* Virtual Object Layer         */
 #include "H5Zprivate.h"     /* Filter pipeline              */
 
 
@@ -345,7 +346,7 @@ H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success,
             if (NULL == (filter_info = (const H5Z_class2_t *)(*get_plugin_info)()))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
 
-            /* If the filter IDs match, set the output parameters */
+            /* If the filter IDs match, we're done. Set the output parameters. */
             if (filter_info->id == key.id) {
                 *plugin_info = (const void *)filter_info;
                 *success = TRUE;
@@ -354,6 +355,21 @@ H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success,
             break;
         }
         case H5PL_TYPE_VOL:
+        {
+            const H5VL_class_t *vol_info;
+
+            /* Get the plugin info */
+            if (NULL == (vol_info = (const H5VL_class_t *)(*get_plugin_info)()))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL driver info from plugin")
+
+            /* If the plugin names match, we're done. Set the output parameters. */
+            if (vol_info->name && !HDstrcmp(vol_info->name, key.name)) {
+                *plugin_info = (const void *)vol_info;
+                *success = TRUE;
+            }
+
+            break;
+        }
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:
