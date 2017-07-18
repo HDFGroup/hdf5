@@ -47,6 +47,7 @@
 /* Local Prototypes */
 /********************/
 
+static herr_t H5PL__get_filter_info(H5PL_get_plugin_info_t get_plugin_info, int id, hbool_t *success, const H5Z_class2_t **plugin_info);
 
 /*********************/
 /* Package Variables */
@@ -300,7 +301,7 @@ H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const v
 {
     H5PL_HANDLE             handle = NULL;
     H5PL_get_plugin_info_t  get_plugin_info = NULL;
-    htri_t                  ret_value = SUCCEED;
+    herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -321,7 +322,6 @@ H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const v
         HGOTO_DONE(SUCCEED);
     }
 
-
     /* Return a handle for the function H5PLget_plugin_info in the dynamic library.
      * The plugin library is suppose to define this function.
      *
@@ -332,27 +332,18 @@ H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const v
      */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-    if (NULL != (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_info"))) {
+    if (NULL == (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_info")))
+        HGOTO_DONE(SUCCEED);
 #pragma GCC diagnostic pop
 
-        const H5Z_class2_t *info;
+    /* Get the filter information */
+    if (H5PL__get_filter_info(get_plugin_info, id, success, (const H5Z_class2_t **)plugin_info) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
 
-        /* Get the plugin info */
-        if (NULL == (info = (const H5Z_class2_t *)(*get_plugin_info)()))
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
-
-        /* Check if the filter IDs match */
-        if (info->id == id) {
-
-            /* Store the plugin in the cache */
-            if (H5PL__add_plugin(type, id, handle))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
-
-            /* Set output parameters */
-            *success = TRUE;
-            *plugin_info = (const void *)info;
-        }
-    }
+    /* If we found the correct plugin, store it in the cache */
+    if (*success)
+        if (H5PL__add_plugin(type, id, handle))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
 
 done:
     if (!success && handle)
@@ -361,6 +352,39 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__get_filter_info
+ *
+ * Purpose:     Gets filter information from a plugin.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PL__get_filter_info(H5PL_get_plugin_info_t get_plugin_info, int id, hbool_t *success, const H5Z_class2_t **filter_info)
+{
+    herr_t                  ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Check args - Just assert on package functions */
+    HDassert(success);
+    HDassert(filter_info);
+
+    /* Get the plugin info */
+    if (NULL == (*filter_info = (const H5Z_class2_t *)(*get_plugin_info)()))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
+
+    /* Check if the filter IDs match */
+    if ((*filter_info)->id == id)
+        *success = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__get_filter_info() */
 
 
 /*-------------------------------------------------------------------------
