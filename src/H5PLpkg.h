@@ -134,7 +134,7 @@ H5_DLL herr_t H5PL__get_plugin_control_mask(unsigned int *mask /*out*/);
 H5_DLL herr_t H5PL__set_plugin_control_mask(unsigned int mask);
 
 /* Plugin search and manipulation */
-H5_DLL herr_t H5PL__open(const char *libname, H5PL_type_t type, int id, hbool_t *success /*out*/, const void **plugin_info /*out*/);
+H5_DLL herr_t H5PL__open(const char *libname, H5PL_type_t type, H5PL_key_t key, hbool_t *success /*out*/, const void **plugin_info /*out*/);
 H5_DLL herr_t H5PL__close(H5PL_HANDLE handle);
 
 /* Plugin cache calls */

@@ -297,7 +297,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const void **plugin_info)
+H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success, const void **plugin_info)
 {
     H5PL_HANDLE             handle = NULL;
     H5PL_get_plugin_info_t  get_plugin_info = NULL;
@@ -336,17 +336,26 @@ H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const v
         HGOTO_DONE(SUCCEED);
 #pragma GCC diagnostic pop
 
-    /* Get the filter information */
-    if (H5PL__get_filter_info(get_plugin_info, id, success, (const H5Z_class2_t **)plugin_info) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
+    /* Get the plugin information */
+    switch (type) {
+        case H5PL_TYPE_FILTER:
+            if (H5PL__get_filter_info(get_plugin_info, key.id, success, (const H5Z_class2_t **)plugin_info) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
+            break;
+        case H5PL_TYPE_VOL:
+        case H5PL_TYPE_ERROR:
+        case H5PL_TYPE_NONE:
+        default:
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "Invalid plugin type specified")
+    }
 
     /* If we found the correct plugin, store it in the cache */
     if (*success)
-        if (H5PL__add_plugin(type, id, handle))
+        if (H5PL__add_plugin(type, key.id, handle))
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
 
 done:
-    if (!success && handle)
+    if (!(*success) && handle)
         if (H5PL__close(handle) < 0)
             HDONE_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
 
