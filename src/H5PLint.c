@@ -47,7 +47,6 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5PL__get_filter_info(H5PL_get_plugin_info_t get_plugin_info, int id, hbool_t *success, const H5Z_class2_t **plugin_info);
 
 /*********************/
 /* Package Variables */
@@ -339,9 +338,21 @@ H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success,
     /* Get the plugin information */
     switch (type) {
         case H5PL_TYPE_FILTER:
-            if (H5PL__get_filter_info(get_plugin_info, key.id, success, (const H5Z_class2_t **)plugin_info) < 0)
+        {
+            const H5Z_class2_t *filter_info;
+
+            /* Get the plugin info */
+            if (NULL == (filter_info = (const H5Z_class2_t *)(*get_plugin_info)()))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
+
+            /* If the filter IDs match, set the output parameters */
+            if (filter_info->id == key.id) {
+                *plugin_info = (const void *)filter_info;
+                *success = TRUE;
+            }
+
             break;
+        }
         case H5PL_TYPE_VOL:
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
@@ -361,39 +372,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5PL__get_filter_info
- *
- * Purpose:     Gets filter information from a plugin.
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5PL__get_filter_info(H5PL_get_plugin_info_t get_plugin_info, int id, hbool_t *success, const H5Z_class2_t **filter_info)
-{
-    herr_t                  ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Check args - Just assert on package functions */
-    HDassert(success);
-    HDassert(filter_info);
-
-    /* Get the plugin info */
-    if (NULL == (*filter_info = (const H5Z_class2_t *)(*get_plugin_info)()))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
-
-    /* Check if the filter IDs match */
-    if ((*filter_info)->id == id)
-        *success = TRUE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__get_filter_info() */
 
 
 /*-------------------------------------------------------------------------
