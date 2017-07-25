@@ -12,16 +12,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling <wendling@ncsa.uiuc.edu>
- *              Monday, 19. February 2001
- *
  * Purpose: These are string functions for us to use and abuse.
  */
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "H5private.h"
 #include "h5tools.h"            /* for h5tool_format_t structure */
 #include "h5tools_ref.h"
