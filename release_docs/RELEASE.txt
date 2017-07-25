@@ -147,6 +147,15 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5diff
+
+      h5diff segfaulted on compare of a  NULL variable length string.
+
+      Improved h5diff compare of strings by adding a check for
+      NULL strings and setting the lengths to zero.
+
+      (ADB - 2017/07/25, HDFFV-10246)
+
     - h5import
 
       h5import crashed trying to import data from a subset of a dataset.
