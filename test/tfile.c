@@ -109,6 +109,7 @@
 #define TEST_THRESHOLD10    10                          /* Free space section threshold */
 #define FSP_SIZE_DEF        4096                        /* File space page size default */
 #define FSP_SIZE512         512                         /* File space page size */
+#define FSP_SIZE1G          1024*1024*1024              /* File space page size */
 
 /* Declaration for test_libver_macros2() */
 #define FILE6			"tfile6.h5"	/* Test file */
@@ -3581,6 +3582,9 @@ test_filespace_info(const char *env_h5_drvr)
      *  Setting value less than 512 will return an error;
      *      --setting file space page size to 0
      *      --setting file space page size to 511
+     *
+     *  File space page size has a maximum size of 1 gigabyte.
+     *  Setting value greater than 1 gigabyte will return an error.
      */
     /* Create file creation property list template */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
@@ -3598,12 +3602,25 @@ test_filespace_info(const char *env_h5_drvr)
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_file_space_page_size");
 
+    /* Setting to 1GB+1: should fail */
+    H5E_BEGIN_TRY {
+        ret = H5Pset_file_space_page_size(fcpl, FSP_SIZE1G+1);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Pset_file_space_page_size");
+
     /* Setting to 512: should succeed */
     ret = H5Pset_file_space_page_size(fcpl, FSP_SIZE512);
     CHECK(ret, FAIL, "H5Pset_file_space_page_size");
     ret = H5Pget_file_space_page_size(fcpl, &fsp_size);
     CHECK(ret, FAIL, "H5Pget_file_space_page_size");
     VERIFY(fsp_size, FSP_SIZE512, "H5Pget_file_space_page_size");
+
+    /* Setting to 1GB: should succeed */
+    ret = H5Pset_file_space_page_size(fcpl, FSP_SIZE1G);
+    CHECK(ret, FAIL, "H5Pset_file_space_page_size");
+    ret = H5Pget_file_space_page_size(fcpl, &fsp_size);
+    CHECK(ret, FAIL, "H5Pget_file_space_page_size");
+    VERIFY(fsp_size, FSP_SIZE1G, "H5Pget_file_space_page_size");
 
     /* Close property list */
     H5Pclose(fcpl);
