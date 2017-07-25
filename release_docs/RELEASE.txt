@@ -56,173 +56,91 @@ New Features
 ============
 
     Configuration
-    --------------
-    - CMake in the Tools
-
-      User-defined filters on Windows require that tools be built
-      with shared libraries.
-
-      CMake command code added to build tools with
-      shared libraries as well as with static libraries.
-
-      (ADB - 2017/02/07, HDFFV-10123)
+    -------------
+    - None
 
 
     Library
     -------
-    - H5PL package
+    - None
 
-      Users would like to be able to set the plugin path programmatically
-      instead of through the environment variable.
 
-      H5PL package obtained new APIs for manipulating the entries of
-      the plugin path table. The new APIs are;
-        H5PLappend  - Insert a plugin path at the end of the list.
-        H5PLprepend - Insert a plugin path at the beginning of the list.
-        H5PLreplace - Replace the path at the specified index.
-        H5PLinsert  - Insert a plugin path at the specified index, moving
-                      other paths after the index.
-        H5PLremove  - Remove the plugin path at the specifed index and
-                      compacting the list.
-        H5PLget     - Query the plugin path at the specified index.
-        H5PLsize    - Query the size of the current list of plugin paths.
+    Parallel Library
+    ----------------
+    - None
 
-      (ADB - 2017/04/04, HDFFV-10143)
+
+    Tools
+    -----
+    - None
+
+
+    High-Level APIs
+    ---------------
+    - None
+
+
+    Fortran API
+    -----------
+    - None
 
 
     C++ API
     -------
-    - The following C++ API wrappers have been added to the C++ Library:
-        // Determines if a name exists.
-        H5Location::nameExists() - C API H5Lexists()
-
-        // Checks if an ID is valid.
-        IdComponent::isValid() - C API H5Iis_valid()
-
-        // Sets the number of soft or user-defined links that can be
-        // traversed before a failure occurs.
-        LinkAccPropList::setNumLinks() - C API H5Pset_nlinks()
-
-        // Gets the number of soft or user-defined link traversals allowed
-        LinkAccPropList::getNumLinks() - C API H5Pget_nlinks()
-
-        // Returns a copy of the creation property list of a datatype.
-        DataType::getCreatePlist() - C API H5Tget_create_plist()
-
-        // Opens an object within a location, regarless its type.
-        H5Location::openObjId() - C API H5Oopen()
-        H5Location::openObjId() - C API H5Oopen()
-
-        // Closes an object opened by openObjId().
-        H5Location::closeObjId() - C API H5Oclose()
-
-        // Gets general information about a file.
-        H5File::getFileInfo() - C API H5Fget_info()
-
-        // Returns the header version of an HDF5 object.
-        H5Object::objVersion() - C API H5Oget_info()
-
-      (BMR, 2017/05/13, HDFFV-10004, HDFFV-10156)
-
-    - New class LinkAccPropList is added for link access proprety list
-      (BMR, 2017/05/13, HDFFV-10156)
+    - None
 
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
     
-    - Added OpenMPI 2.0.1 compiled with GCC 4.9.3
 
 
-Bug Fixes since HDF5-1.8.18
+Bug Fixes since HDF5-1.8.19
 ===========================
 
     Configuration
     -------------
-    - Support for Fortran shared libraries on OS X with autotools now
-      works. Cmake builds still disables Fortran shared libraries on OS X.
-      (MSB - 2017/04/30, HDFFV-2772)
+    - None
 
 
     Library
     -------
-    - bitfield datatypes
+    - None
 
-      bitfield datatypes did not fully support endianness of the data.
 
-      Improved the endianness of bitfield datatypes by adding missing functional
-      code. This code used integer types as a template.
+    Parallel Library
+    ----------------
+    - None
 
-      (ADB - 2017/05/12, HDFFV-10186)
 
-    - Compact layout "dirty" flag is not reset properly
-
-      Reset the layout "dirty" flag for a compact dataset before flushing
-      the message.
-
-      (VC - 2017/05/11, HDFFV-10051)
-
-    - Incorporate additional code changes for the H5DOread_chunk patch from GE
-      Healthcare.
-
-      Incorporate the code changes that were missing from the original patch:
-      (1) Additional tests in hl/test/test_dset_opt.c
-      (2) Fix in src/H5Dchunk.c for direct access when an entry is in chunk cache but
-          not dirty
-
-      (VC - 2017/05/02, HDFFV-9934)
-
-    - Missing #ifdef __cplusplus macros were added to the generated H5Epubgen.h file.
-
-      (DER - 2017/04/25, HDFFV-9638)
+    Performance
+    -------------
+    - None
 
 
     Tools
     -----
-    - h5repack
+    - None
 
-      h5repack did not maintain the creation order flag of the root
-      group.
 
-      Improved h5repack by reading the creation order and applying the
-      flag to the new root group. Also added arguments to set the
-      order and index direction, which applies to the traversing of the
-      original file, on the command line.
+    Fortran API
+    -----------
+    - None
 
-      (ADB - 2017/05/26, HDFFV-8611)
-
-    - h5diff
-
-      h5diff failed to account for strpad type and null terminators
-      of char strings. Also, h5diff failed to account for string length
-      differences and would give a different result depending on file
-      order in the command line.
-
-      Improved h5diff compare of strings and arrays by adding a check for
-      string lengths and if the strpad was null filled.
-
-      (ADB - 2017/05/18, HDFFV-9055, HDFFV-10128)
-
-    - h5diff
-
-      h5diff did not report user-defined filter data differences correctly..
-
-      Improved h5diff compare of user-defined filter data by reporting an
-      error if the user-defined filter plugin cannot be found..
-
-      (ADB - 2017/01/18, HDFFV-9994)
 
     C++ API
     -------
-    - The class hierarchy is revised to better reflect the HDF5 model.
-      Class H5File is now derived from class Group instead of H5Location.
-      Class Attribute is now derived from H5Location instead of IdComponent.
-      Wrappers of H5A APIs in H5Location are now duplicated in H5Object,
-      the original wrappers in H5Location will be deprecated in future
-      releases.
+    - None
 
-      (BMR - 2017/05/15, HDFFV-10156)
 
+    High-Level APIs:
+    ---------------
+    - None
+
+
+    Packet Table APIs:
+    ------------------
+    - None
 
 
 Supported Platforms
