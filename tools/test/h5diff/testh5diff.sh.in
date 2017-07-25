@@ -569,7 +569,7 @@ SKIP() {
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
 # second copy of tvlstr.h5
-$CP -f $SRC_TOOLS_TESTFILES/tvlstr.h5 $TESTDIR/tvlstr.h5
+$CP -f $SRC_TOOLS_TESTFILES/tvlstr.h5 $TESTDIR/tvlstr2.h5
 
 # ############################################################################
 # # Common usage
