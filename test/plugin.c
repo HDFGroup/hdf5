@@ -737,9 +737,7 @@ test_path_api_calls(void)
      */
     n_starting_paths = 42;
 
-    /****************/
-    /* H5PLremove() */
-    /****************/
+    TESTING("    initialize");
     H5PLsize(&ndx);
     if(ndx!=2) TEST_ERROR
 
