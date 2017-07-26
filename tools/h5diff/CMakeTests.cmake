@@ -253,6 +253,7 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_ud.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_udfail.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_vlstr.txt
   )
 
   set (LIST_WIN_TEST_FILES
