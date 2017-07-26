@@ -734,6 +734,8 @@ test_filter_path_apis(void)
     if(H5Zfilter_avail(H5Z_FILTER_DYNLIB1) != TRUE) TEST_ERROR
 
     H5PLsize(&ndx);
+    if(ndx!=2) TEST_ERROR
+    PASSED();
 
     TESTING("    remove");
     /* Remove all existing paths*/
