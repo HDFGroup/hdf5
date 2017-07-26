@@ -120,6 +120,7 @@ $SRC_H5DIFF_TESTFILES/non_comparables1.h5
 $SRC_H5DIFF_TESTFILES/non_comparables2.h5
 $SRC_H5DIFF_TESTFILES/diff_strings1.h5
 $SRC_H5DIFF_TESTFILES/diff_strings2.h5
+$SRC_TOOLS_TESTFILES/tvlstr.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -522,6 +523,8 @@ SKIP() {
 ##############################################################################
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
+# second copy of tvlstr.h5
+$CP -f $SRC_TOOLS_TESTFILES/tvlstr.h5 $TESTDIR/tvlstr2.h5
 
 # ############################################################################
 # # Common usage
@@ -1097,6 +1100,7 @@ TOOLTEST h5diff_487.txt -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 h5
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
 TOOLTEST h5diff_530.txt -v  h5diff_comp_vl_strs.h5 h5diff_comp_vl_strs.h5 /group /group_copy
+TOOLTEST h5diff_vlstr.txt -v  tvlstr.h5 tvlstr2.h5
 
 # ##############################################################################
 # # Test container types (array,vlen) with multiple nested compound types

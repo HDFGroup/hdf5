@@ -66,6 +66,8 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/tudfilter2.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/diff_strings1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/diff_strings2.h5
+      # tools/testfiles
+      ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5
   )
 
   set (LIST_OTHER_TEST_FILES
@@ -276,6 +278,8 @@
       HDFTEST_COPY_FILE("${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${fname}" "h5diff_files")
     endif ()
   endforeach ()
+  # copy second version of tvlstr.h5
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/testfiles/tvlstr2.h5" "h5diff_files")
 
 
   #
@@ -839,6 +843,8 @@
           h5diff_801.out.err
           h5diff_90.out
           h5diff_90.out.err
+          h5diff_vlstr.out
+          h5diff_vlstr.out.err
     )
     set_tests_properties (H5DIFF-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (NOT "${last_test}" STREQUAL "")
@@ -1403,6 +1409,7 @@ ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
 ADD_H5_TEST (h5diff_530 0 -v  ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
+ADD_H5_TEST (h5diff_vlstr 0 -v tvlstr.h5 tvlstr2.h5)
 
 # ##############################################################################
 # # Test container types (array,vlen) with multiple nested compound types
