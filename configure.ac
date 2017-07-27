@@ -3028,7 +3028,9 @@ AC_CONFIG_FILES([src/libhdf5.settings
 AC_OUTPUT
 
 chmod 755 tools/misc/h5cc
-
+if test "X$HDF_FORTRAN" = "Xyes"; then
+  chmod 755 fortran/src/h5fc
+fi
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi
