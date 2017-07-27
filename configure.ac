@@ -3339,7 +3339,6 @@ else
 fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
-  chmod 755 fortran/src/h5fc
   ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
   ## on OS X, which is needed when building shared libraries on OS X.  This script 
   ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
