@@ -130,27 +130,27 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1] = {{
 /* Class info for "small" free space sections */
 H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
     /* Class variables */
-    H5MF_FSPACE_SECT_SMALL,		/* Section type                 */
-    0,					/* Extra serialized size        */
-    H5FS_CLS_MERGE_SYM | H5FS_CLS_ADJUST_OK, /* Class flags                  */
-    NULL,				/* Class private info           */
+    H5MF_FSPACE_SECT_SMALL,     /* Section type                 */
+    0,                          /* Extra serialized size        */
+    H5FS_CLS_MERGE_SYM | H5FS_CLS_ADJUST_OK,    /* Class flags                  */
+    NULL,                       /* Class private info           */
 
     /* Class methods */
-    NULL,				/* Initialize section class     */
-    NULL,				/* Terminate section class      */
+    NULL,                       /* Initialize section class     */
+    NULL,                       /* Terminate section class      */
 
     /* Object methods */
-    H5MF_sect_small_add,		/* Add section                  */
-    NULL,				/* Serialize section            */
+    H5MF_sect_small_add,        /* Add section                  */
+    NULL,                       /* Serialize section            */
     H5MF_sect_deserialize,		/* Deserialize section          */
-    H5MF_sect_small_can_merge,		/* Can sections merge?          */
-    H5MF_sect_small_merge,		/* Merge sections               */
-    H5MF_sect_small_can_shrink,		/* Can section shrink container?*/
-    H5MF_sect_small_shrink,		/* Shrink container w/section   */
-    H5MF_sect_free,			/* Free section                 */
-    H5MF_sect_valid,			/* Check validity of section    */
-    H5MF_sect_split,			/* Split section node for alignment */
-    NULL,				/* Dump debugging for section   */
+    H5MF_sect_small_can_merge,  /* Can sections merge?          */
+    H5MF_sect_small_merge,      /* Merge sections               */
+    NULL,		                /* Can section shrink container?*/
+    NULL,		                /* Shrink container w/section   */
+    H5MF_sect_free,             /* Free section                 */
+    H5MF_sect_valid,            /* Check validity of section    */
+    H5MF_sect_split,            /* Split section node for alignment */
+    NULL,                       /* Dump debugging for section   */
 }};
 
 /* Class info for "large" free space sections */
@@ -674,7 +674,7 @@ HDfprintf(stderr, "%s: Entering, section {%a, %Hu}\n", FUNC, (*sect)->sect_info.
 HDfprintf(stderr, "%s: section is dropped\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     } /* end if */
-    /* Adjust the section if it is not at page end but its size + pgend threshold is at page end */
+    /* Adjust the section if it is not at page end but its size + prem is at page end */
     else
         if(prem <= H5F_PGEND_META_THRES(udata->f)) {
             (*sect)->sect_info.size += prem;

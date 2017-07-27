@@ -104,6 +104,68 @@ static herr_t h5_errors(hid_t estack, void *client_data);
 static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
                               char *fullname, size_t size, hbool_t nest_printf);
 
+
+
+/* A non-usable VFD class and its functions.
+ *
+ * Usable for testing things like ID handling where we shouldn't mess with the real VFDs.
+ */
+static H5FD_t *dummy_vfd_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+static H5FD_t *dummy_vfd_open(const char H5_ATTR_UNUSED *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED maxaddr) { return NULL; }
+
+static herr_t dummy_vfd_close(H5FD_t *_file);
+static herr_t dummy_vfd_close(H5FD_t H5_ATTR_UNUSED *_file) { return FAIL; }
+
+static haddr_t dummy_vfd_get_eoa(const H5FD_t *file, H5FD_mem_t type);
+static haddr_t dummy_vfd_get_eoa(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
+
+static herr_t dummy_vfd_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
+static herr_t dummy_vfd_set_eoa(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t H5_ATTR_UNUSED addr) { return FAIL; }
+
+static haddr_t dummy_vfd_get_eof(const H5FD_t *file, H5FD_mem_t type);
+static haddr_t dummy_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
+
+static herr_t dummy_vfd_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, void *buf);
+static herr_t dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, void H5_ATTR_UNUSED *buf) { return FAIL; }
+
+static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, const void *buf);
+static herr_t dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) { return FAIL; }
+
+static H5FD_class_t dummy_vfd_class_g = {
+    "fake",                     /* name                 */
+    1,                          /* maxaddr              */
+    H5F_CLOSE_WEAK,             /* fc_degree            */
+    NULL,                       /* terminate            */
+    NULL,                       /* sb_size              */
+    NULL,                       /* sb_encode            */
+    NULL,                       /* sb_decode            */
+    0,                          /* fapl_size            */
+    NULL,                       /* fapl_get             */
+    NULL,                       /* fapl_copy            */
+    NULL,                       /* fapl_free            */
+    0,                          /* dxpl_size            */
+    NULL,                       /* dxpl_copy            */
+    NULL,                       /* dxpl_free            */
+    dummy_vfd_open,             /* open                 */
+    dummy_vfd_close,            /* close                */
+    NULL,                       /* cmp                  */
+    NULL,                       /* query                */
+    NULL,                       /* get_type_map         */
+    NULL,                       /* alloc                */
+    NULL,                       /* free                 */
+    dummy_vfd_get_eoa,          /* get_eoa              */
+    dummy_vfd_set_eoa,          /* set_eoa              */
+    dummy_vfd_get_eof,          /* get_eof              */
+    NULL,                       /* get_handle           */
+    dummy_vfd_read,             /* read                 */
+    dummy_vfd_write,            /* write                */
+    NULL,                       /* flush                */
+    NULL,                       /* truncate             */
+    NULL,                       /* lock                 */
+    NULL,                       /* unlock               */
+    H5FD_FLMAP_DEFAULT          /* fl_map               */
+};
+
 
 /*-------------------------------------------------------------------------
  * Function:  h5_errors
@@ -1827,4 +1889,42 @@ h5_wait_message(const char *waitfor)
 error:
     return FAIL;
 } /* h5_wait_message() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_dummy_vfd_class()
+ *
+ * Purpose:     Returns a disposable, generally non-functional,
+ *              VFD class struct.
+ *
+ *              In some of the test code, we need a disposable VFD but
+ *              we don't want to mess with the real VFDs and we also
+ *              don't have access to the internals of the real VFDs (which
+ *              use static globals and functions) to easily duplicate
+ *              them (e.g.: for testing VFD ID handling).
+ *
+ *              This API call will return a pointer to a VFD class that
+ *              can be used to construct a test VFD using H5FDregister().
+ *
+ * Return:      Success:    A pointer to a VFD class struct
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5FD_class_t *
+h5_get_dummy_vfd_class(void)
+{
+    H5FD_class_t *vfd_class = NULL;
+
+    if(NULL == (vfd_class = (H5FD_class_t *)HDmalloc(sizeof(H5FD_class_t))))
+        TEST_ERROR;
+
+    HDmemcpy(vfd_class, &dummy_vfd_class_g, sizeof(H5FD_class_t));
+
+    return vfd_class;
+
+error:
+    if(vfd_class)
+        HDfree(vfd_class);
+    return NULL;
+} /* h5_get_dummy_vfd_class */
 

@@ -1519,7 +1519,7 @@ H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     H5AC_ring_t fsm_ring = H5AC_RING_INV;   /* Ring of fsm */
     H5F_mem_page_t fs_type;                 /* Free space type */
     hbool_t reset_ring = FALSE;             /* Whether the ring was set */
-    htri_t ret_value = FAIL;                /* Return value */
+    htri_t ret_value = FALSE;               /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG

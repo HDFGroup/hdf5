@@ -15,8 +15,6 @@
 #include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
-#include <string.h>
-#include <stdlib.h>
 
 /* Name of tool */
 #define PROGRAMNAME "h5mkgrp"

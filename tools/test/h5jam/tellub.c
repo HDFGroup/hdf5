@@ -11,12 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdio.h>
-
-#ifdef H5_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #include "hdf5.h"
 #include "H5private.h"
 #include "h5tools.h"
