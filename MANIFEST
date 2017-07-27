@@ -2021,6 +2021,7 @@
 ./tools/h5diff/testfiles/h5diff_udfail.txt
 ./tools/h5diff/testfiles/diff_strings1.h5
 ./tools/h5diff/testfiles/diff_strings2.h5
+./tools/h5diff/testfiles/h5diff_vlstr.txt
 
 #test files for h5repack
 ./tools/h5repack/testfiles/README

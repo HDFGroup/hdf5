@@ -55,6 +55,7 @@ add_test (NAME PERFORM_perf_meta COMMAND $<TARGET_FILE:perf_meta>)
 
 add_test (NAME PERFORM_zip_perf_help COMMAND $<TARGET_FILE:zip_perf> "-h")
 add_test (NAME PERFORM_zip_perf COMMAND $<TARGET_FILE:zip_perf> tfilters.h5)
+set_tests_properties (PERFORM_zip_perf PROPERTIES DEPENDS PERFORM_zip_perf_help)
 
 if (H5_HAVE_PARALLEL)
   add_test (NAME PERFORM_h5perf COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf>)
