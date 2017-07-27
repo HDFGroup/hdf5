@@ -3504,7 +3504,9 @@ AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
 AC_OUTPUT
 
 chmod 755 tools/src/misc/h5cc
-
+if test "X$HDF_FORTRAN" = "Xyes"; then
+  chmod 755 fortran/src/h5fc
+fi
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi
