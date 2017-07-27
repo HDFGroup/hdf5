@@ -316,6 +316,9 @@
   endforeach ()
   # copy second version of tvlstr.h5
   HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/testfiles/tvlstr2.h5" "h5diff_files")
+  if (H5_HAVE_PARALLEL)
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/PAR/testfiles/tvlstr2.h5" "h5diff_files")
+  endif ()
 
 
   #
