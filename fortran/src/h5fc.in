@@ -307,7 +307,7 @@ if test "x$do_link" = "xyes"; then
   link_args="$link_args -L${libdir}"
 
   case "$host_os" in
-    linux*)               flag="-Wl,-rpath -Wl," ;;
+    linux*)               flag="@fortran_linux_linker_option@-rpath -Wl," ;;
     hpux*)                flag="-Wl,+b -Wl," ;;
     freebsd*|solaris*)    flag="-R" ;;
     rs6000*|aix*)         flag="-L" ;;
