@@ -2910,14 +2910,6 @@ else
 fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
-  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
-  ## on OS X, which is needed when building shared libraries on OS X.  This script 
-  ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
-  case "`uname`" in
-    Darwin*)
-      cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
-      ;;
-  esac
 
   ### libtool does not pass the correct argument linking (-WL,-WL,,) for the NAG Fortran compiler 
   ### on Linux (other OSs have not been tested).
@@ -2927,9 +2919,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     Linux*)
 
     fortran_linux_linker_option="-Wl,"
-
+	
     if (grep -i 'NAG_Fortran' libtool > /dev/null); then
-       cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
        fortran_linux_linker_option="-Wl,-Wl,,"
     fi
 
@@ -3033,6 +3024,31 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 fi
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
+fi
+
+
+if test "X$HDF_FORTRAN" = "Xyes"; then
+  chmod 755 fortran/src/h5fc
+  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
+  ## on OS X, which is needed when building shared libraries on OS X.  This script 
+  ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
+  case "`uname`" in
+    Darwin*)
+      cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      ;;
+  esac
+
+  ### libtool does not pass the correct argument linking (-WL,-WL,,) for the NAG Fortran compiler 
+  ### on Linux (other OSs have not been tested).
+  ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
+  ### wl="-Wl,-WL,," in the libtool file. (HDFFV-10037)
+  case "`uname`" in
+    Linux*)
+      if (grep -i 'NAG_Fortran' libtool > /dev/null); then
+         cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      fi
+      ;;
+  esac
 fi
 
 ## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
