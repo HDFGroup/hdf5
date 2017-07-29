@@ -2412,6 +2412,7 @@
 
 #test files for h5repack
 ./tools/test/h5repack/testfiles/README
+./tools/test/h5repack/testfiles/h5repack_aggr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr_refs.h5
 ./tools/test/h5repack/testfiles/h5repack_deflate.h5
@@ -2421,6 +2422,8 @@
 ./tools/test/h5repack/testfiles/h5repack_fill.h5
 ./tools/test/h5repack/testfiles/h5repack_filters.h5
 ./tools/test/h5repack/testfiles/h5repack_fletcher.h5
+./tools/test/h5repack/testfiles/h5repack_fsm_aggr_nopersist.h5
+./tools/test/h5repack/testfiles/h5repack_fsm_aggr_persist.h5
 ./tools/test/h5repack/testfiles/h5repack_hlink.h5
 ./tools/test/h5repack/testfiles/h5repack.info
 ./tools/test/h5repack/testfiles/h5repack_layout.h5
@@ -2432,7 +2435,10 @@
 ./tools/test/h5repack/testfiles/h5repack_nested_8bit_enum_deflated.h5
 ./tools/test/h5repack/testfiles/h5repack_nested_8bit_enum.h5
 ./tools/test/h5repack/testfiles/h5repack_nbit.h5
+./tools/test/h5repack/testfiles/h5repack_none.h5
 ./tools/test/h5repack/testfiles/h5repack_objs.h5
+./tools/test/h5repack/testfiles/h5repack_paged_nopersist.h5
+./tools/test/h5repack/testfiles/h5repack_paged_persist.h5
 ./tools/test/h5repack/testfiles/h5repack_refs.h5
 ./tools/test/h5repack/testfiles/h5repack_shuffle.h5
 ./tools/test/h5repack/testfiles/h5repack_soffset.h5
@@ -2451,6 +2457,12 @@
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
+./tools/test/h5repack/testfiles/GS.h5repack_paged_nopersist.h5.ddl
+./tools/test/h5repack/testfiles/S.h5repack_fsm_aggr_persist.h5.ddl
+./tools/test/h5repack/testfiles/SP.h5repack_fsm_aggr_nopersist.h5.ddl
+./tools/test/h5repack/testfiles/SP.h5repack_paged_persist.h5.ddl
+./tools/test/h5repack/testfiles/SPT.h5repack_aggr.h5.ddl
+./tools/test/h5repack/testfiles/STG.h5repack_none.h5.ddl
 ./tools/test/h5repack/testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
 ./tools/test/h5repack/testfiles/2_vds.h5-vds_chunk3x6x9-v.ddl
 ./tools/test/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
