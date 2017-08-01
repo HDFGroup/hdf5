@@ -1237,3 +1237,49 @@ H5_get_time(void)
 } /* end H5_get_time() */
 
 
+#ifdef H5_HAVE_WIN32_API
+
+#define H5_WIN32_ENV_VAR_BUFFER_SIZE    32767
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_expand_windows_env_vars()
+ *
+ * Purpose:     Replaces windows environment variables of the form %foo%
+ *              with user-specific values.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_expand_windows_env_vars(char **env_var)
+{
+    long    n_chars = 0;
+    char   *temp_buf = NULL;
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Allocate buffer for expanded environment variable string */
+    if (NULL == (temp_buf = (char *)H5MM_calloc((size_t)H5_WIN32_ENV_VAR_BUFFER_SIZE)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
+
+    /* Expand the environment variable string */
+    if ((n_chars = ExpandEnvironmentStringsA(*env_var, temp_buf, H5_WIN32_ENV_VAR_BUFFER_SIZE)) > H5_WIN32_ENV_VAR_BUFFER_SIZE)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+
+    if (0 == n_chars)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+
+    *env_var = (char *)H5MM_xfree(*env_var);
+    *env_var = temp_buf;
+
+done:
+    if (FAIL == ret_value && temp_buf)
+        temp_buf = (char *)H5MM_xfree(temp_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_expand_windows_env_vars() */
+#endif /* H5_HAVE_WIN32_API */
+
