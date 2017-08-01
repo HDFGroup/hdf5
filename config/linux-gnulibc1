@@ -84,7 +84,20 @@ else
             $RM $tmpfile
             fc_version_info=`$FC -V | grep Absoft`
             ;;
-
+         # The NAG compiler
+	 nagfor*|nagftn*)
+            RM='rm -f'
+            tmpfile=/tmp/cmpver.$$
+            $FC -V >& $tmpfile
+            if test -s "$tmpfile"; then
+                if( grep -s 'NAG Fortran' $tmpfile > /dev/null) then
+                    FC_BASENAME=nagfor
+                fi
+            fi
+            fc_version_info=`grep "NAG Fortran" $tmpfile`
+            echo "compiler '$FC' is $fc_version_info"
+            $RM $tmpfile
+	    ;;
          *)
             ;;
     esac
@@ -108,10 +121,10 @@ case $FC_BASENAME in
     #
     f95)
         # Set required flag for compiling C stubs
-        H5_CFLAGS="$H5_CFLAGS" 
+        H5_CFLAGS="$H5_CFLAGS"
 
         F9XSUFFIXFLAG=""
-# We force compiler to use upper case for external names 
+# We force compiler to use upper case for external names
 # (just in case since this should be a default EIP)
         H5_FCFLAGS="$H5_FCFLAGS"
         FSEARCH_DIRS=""
@@ -133,6 +146,37 @@ case $FC_BASENAME in
         HIGH_OPT_FCFLAGS="-O"
         DEBUG_OPT_FCFLAGS=
         NO_OPT_FCFLAGS=
+
+        f9x_flags_set=yes
+        ;;
+#
+#   NAG compiler
+#
+    nagfor)
+
+        F9XSUFFIXFLAG=""
+# We force compiler to use upper case for external names
+# (just in case since this should be a default EIP)
+        H5_FCFLAGS="$H5_FCFLAGS"
+        FSEARCH_DIRS=""
+
+        # Production
+        PROD_FCFLAGS=
+
+        # Debug
+        DEBUG_FCFLAGS="-C"
+
+        # Symbols
+        SYMBOLS_FCFLAGS="-g"
+        NO_SYMBOLS_FCFLAGS="-s"
+
+        # Profiling
+        PROFILE_FCFLAGS="-pg"
+
+        # Optimization
+        HIGH_OPT_FCFLAGS="-O"
+        DEBUG_OPT_FCFLAGS="-O0"
+        NO_OPT_FCFLAGS="-O0"
 
         f9x_flags_set=yes
         ;;
@@ -230,6 +274,19 @@ case $FC in
     *pgf90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'pgf90'`
         ;;
+    *nagfor*|*nagftn*)
+        RM='rm -f'
+        tmpfile=/tmp/cmpver.$$
+        $FC -V >& $tmpfile
+        if test -s "$tmpfile"; then
+           if( grep -s 'NAG Fortran' $tmpfile > /dev/null) then
+               FC_BASENAME=nagfor
+           fi
+        fi
+        fc_version_info=`grep "NAG Fortran" $tmpfile`
+        $RM $tmpfile
+        echo "compiler '$FC' is $fc_version_info"
+	;;
 
      *)
         echo "No match to get fc_version_info for $FC"
