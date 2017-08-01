@@ -25,39 +25,9 @@
 /* See H5private.h for how to include system headers */
 #include "hdf5.h"
 #include "H5private.h"
-#ifdef H5_STDC_HEADERS
-#   include <ctype.h>
-#   include <errno.h>
-#   include <fcntl.h>
-#   include <stdio.h>
-#   include <stdlib.h>
-#   include <string.h>
-#endif
 
-#ifdef H5_HAVE_UNISTD_H
-#   include <sys/types.h>
-#   include <unistd.h>
-#endif
-
-#ifdef H5_HAVE_SYS_STAT_H
-#   include <sys/stat.h>
-#endif
-
-#ifndef FALSE
-#   define FALSE	0
-#endif
-#ifndef TRUE
-#   define TRUE 	1
-#endif
-#   define NAMELEN	4096
+#define NAMELEN	4096
 #define GB	*1024*1024*1024
-
-#ifndef MIN
-#   define MIN(X,Y)	((X)<(Y)?(X):(Y))
-#endif
-#ifndef MIN3
-#   define MIN3(X,Y,Z)	MIN(MIN(X,Y),Z)
-#endif
 
 /*Make these 2 private properties(defined in H5Fprivate.h) available to h5repart.
  *The first one updates the member file size in the superblock.  The second one

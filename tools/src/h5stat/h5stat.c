@@ -11,8 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
 #include "H5private.h"    /* Generic Functions      */
 #include "h5tools.h"
 #include "h5tools_utils.h"

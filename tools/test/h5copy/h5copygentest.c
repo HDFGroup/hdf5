@@ -14,7 +14,6 @@
 /*
  * Generate the binary hdf5 file for the h5copy tests
  */
-#include <stdlib.h>
 #include "hdf5.h"
 #include "H5private.h"
 
