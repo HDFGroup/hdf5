@@ -1266,15 +1266,11 @@ H5_expand_windows_env_vars(char **env_var)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
 
     /* Expand the environment variable string */
-    if ((n_chars = ExpandEnvironmentStringsA(*env_var, temp_buf, H5_WIN32_ENV_VAR_BUFFER_SIZE)) > H5_WIN32_ENV_VAR_BUFFER_SIZE) {
-        temp_buf = (char *)H5MM_xfree(temp_buf);
+    if ((n_chars = ExpandEnvironmentStringsA(*env_var, temp_buf, H5_WIN32_ENV_VAR_BUFFER_SIZE)) > H5_WIN32_ENV_VAR_BUFFER_SIZE)
         HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
-    }
 
-    if (n_chars == 0) {
-        temp_buf = (char *)H5MM_xfree(temp_buf);
+    if (0 == n_chars)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
-    }
 
     *env_var = (char *)H5MM_xfree(*env_var);
     *env_var = temp_buf;

@@ -16377,6 +16377,16 @@ main(void)
     unsigned	nerrors = 0;            /* Cumulative error count */
     unsigned num_pb_fs = 1;             /* The number of settings to test for page buffering and file space handling */
     int	ExpressMode;                    /* Express testing level */
+    const char *envval;                 /* Environment variable */
+    hbool_t contig_addr_vfd;            /* Whether VFD used has a contigous address space */
+
+    /* Don't run this test using certain file drivers */
+    envval = HDgetenv("HDF5_DRIVER");
+    if(envval == NULL)
+        envval = "nomatch";
+
+    /* Current VFD that does not support contigous address space */
+    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi"));
 
     /* Reset library */
     h5_reset();
@@ -16428,6 +16438,12 @@ main(void)
         shared_wobj_g[u] = (unsigned char)u;
 
     for(v = 0; v < num_pb_fs; v++) {
+        /* Skip test when:
+           a) multi/split drivers and
+           b) persisting free-space or using paged aggregation strategy 
+           because the library will fail file creation (temporary) for the above conditions */
+        if(!contig_addr_vfd && v)
+            break;
 
         if((fcpl = H5Pcopy(def_fcpl)) < 0) 
             TEST_ERROR

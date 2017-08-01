@@ -673,21 +673,33 @@ static hsize_t diff_datum(void       *_mem1,
                 h5difftrace("diff_datum H5T_STRING variable\n");
                 /* Get pointer to first string */
                 s1 = *(char**) mem1;
-                size1 = HDstrlen(s1);
+                if(s1)
+                    size1 = HDstrlen(s1);
+                else
+                    size1 = 0;
                 /* Get pointer to second string */
                 s2 = *(char**) mem2;
-                size2 = HDstrlen(s2);
+                if(s2)
+                    size2 = HDstrlen(s2);
+                else
+                    size2 = 0;
             }
             else if (H5T_STR_NULLTERM == pad) {
                 h5difftrace("diff_datum H5T_STRING null term\n");
                 /* Get pointer to first string */
                 s1 = (char*) mem1;
-                size1 = HDstrlen(s1);
+                if(s1)
+                    size1 = HDstrlen(s1);
+                else
+                    size1 = 0;
                 if (size1 > size_mtype)
                     size1 = size_mtype;
                 /* Get pointer to second string */
                 s2 = (char*) mem2;
-                size2 = HDstrlen(s2);
+                if(s2)
+                    size2 = HDstrlen(s2);
+                else
+                    size2 = 0;
                 if (size2 > size_mtype)
                     size2 = size_mtype;
             }
