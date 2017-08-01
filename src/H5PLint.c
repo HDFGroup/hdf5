@@ -30,6 +30,7 @@
 #include "H5Eprivate.h"     /* Error handling               */
 #include "H5MMprivate.h"    /* Memory management            */
 #include "H5PLpkg.h"        /* Plugin                       */
+#include "H5VLprivate.h"    /* Virtual Object Layer         */
 #include "H5Zprivate.h"     /* Filter pipeline              */
 
 
@@ -235,11 +236,11 @@ done:
  *-------------------------------------------------------------------------
  */
 const void *
-H5PL_load(H5PL_type_t type, int id)
+H5PL_load(H5PL_type_t type, H5PL_key_t key)
 {
-    H5PL_search_params_t    search_params;
+    H5PL_search_params_t    search_params;          /* Plugin search parameters     */
     hbool_t                 found = FALSE;          /* Whether the plugin was found */
-    const void             *plugin_info = NULL;
+    const void             *plugin_info = NULL;     /* Information from the plugin  */
     const void             *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
@@ -248,18 +249,21 @@ H5PL_load(H5PL_type_t type, int id)
     switch (type) {
         case H5PL_TYPE_FILTER:
             if ((H5PL_plugin_control_mask_g & H5PL_FILTER_PLUGIN) == 0)
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin filter '%d' is not available", id)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "filter plugins disabled")
             break;
-
+        case H5PL_TYPE_VOL:
+            if((H5PL_plugin_control_mask_g & H5PL_VOL_PLUGIN) == 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Virtual Object Layer (VOL) driver plugins disabled")
+            break;
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin '%d' is not valid", id)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "Invalid plugin type specified")
     }
 
     /* Set up the search parameters */
     search_params.type = type;
-    search_params.id = id;
+    search_params.key.id = key.id;
 
     /* Search in the table of already loaded plugin libraries */
     if(H5PL__find_plugin_in_cache(&search_params, &found, &plugin_info) < 0)
@@ -293,11 +297,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const void **plugin_info)
+H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success, const void **plugin_info)
 {
     H5PL_HANDLE             handle = NULL;
     H5PL_get_plugin_info_t  get_plugin_info = NULL;
-    htri_t                  ret_value = SUCCEED;
+    herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -318,7 +322,6 @@ H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const v
         HGOTO_DONE(SUCCEED);
     }
 
-
     /* Return a handle for the function H5PLget_plugin_info in the dynamic library.
      * The plugin library is suppose to define this function.
      *
@@ -329,30 +332,57 @@ H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const v
      */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-    if (NULL != (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_info"))) {
+    if (NULL == (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_info")))
+        HGOTO_DONE(SUCCEED);
 #pragma GCC diagnostic pop
 
-        const H5Z_class2_t *info;
+    /* Get the plugin information */
+    switch (type) {
+        case H5PL_TYPE_FILTER:
+        {
+            const H5Z_class2_t *filter_info;
 
-        /* Get the plugin info */
-        if (NULL == (info = (const H5Z_class2_t *)(*get_plugin_info)()))
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
+            /* Get the plugin info */
+            if (NULL == (filter_info = (const H5Z_class2_t *)(*get_plugin_info)()))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
 
-        /* Check if the filter IDs match */
-        if (info->id == id) {
+            /* If the filter IDs match, we're done. Set the output parameters. */
+            if (filter_info->id == key.id) {
+                *plugin_info = (const void *)filter_info;
+                *success = TRUE;
+            }
 
-            /* Store the plugin in the cache */
-            if (H5PL__add_plugin(type, id, handle))
-                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
-
-            /* Set output parameters */
-            *success = TRUE;
-            *plugin_info = (const void *)info;
+            break;
         }
+        case H5PL_TYPE_VOL:
+        {
+            const H5VL_class_t *vol_info;
+
+            /* Get the plugin info */
+            if (NULL == (vol_info = (const H5VL_class_t *)(*get_plugin_info)()))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL driver info from plugin")
+
+            /* If the plugin names match, we're done. Set the output parameters. */
+            if (vol_info->name && !HDstrcmp(vol_info->name, key.name)) {
+                *plugin_info = (const void *)vol_info;
+                *success = TRUE;
+            }
+
+            break;
+        }
+        case H5PL_TYPE_ERROR:
+        case H5PL_TYPE_NONE:
+        default:
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "Invalid plugin type specified")
     }
 
+    /* If we found the correct plugin, store it in the cache */
+    if (*success)
+        if (H5PL__add_plugin(type, key, handle))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
+
 done:
-    if (!success && handle)
+    if (!(*success) && handle)
         if (H5PL__close(handle) < 0)
             HDONE_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
 

@@ -662,11 +662,13 @@ H5Zfilter_avail(H5Z_filter_t id)
     if((ret_value = H5Z_filter_avail(id)) < 0)
     	HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
     else if(ret_value == FALSE) {
+        H5PL_key_t key;
         const H5Z_class2_t *filter_info;
 
-        if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)id)))
+        key.id = (int)id;
+        if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, key)))
         	ret_value = TRUE;
-    } /* end if */
+    } /* end else if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1326,10 +1328,12 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
              */
 	    if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
                 hbool_t issue_error = FALSE;
+                H5PL_key_t key;
 				const H5Z_class2_t    *filter_info;
 
 				/* Try loading the filter */
-				if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)(pline->filter[idx].id)))) {
+                key.id = (int)(pline->filter[idx].id);
+				if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, key))) {
 					/* Register the filter we loaded */
 					if(H5Z_register(filter_info) < 0)
 						HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
