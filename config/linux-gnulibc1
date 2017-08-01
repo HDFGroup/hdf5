@@ -153,8 +153,6 @@ case $FC_BASENAME in
 #   NAG compiler
 #
     nagfor)
-        # Set required flag for compiling C stubs
-        H5_CFLAGS="$H5_CFLAGS"
 
         F9XSUFFIXFLAG=""
 # We force compiler to use upper case for external names
@@ -166,19 +164,19 @@ case $FC_BASENAME in
         PROD_FCFLAGS=
 
         # Debug
-        DEBUG_FCFLAGS=
+        DEBUG_FCFLAGS="-C"
 
         # Symbols
         SYMBOLS_FCFLAGS="-g"
-        NO_SYMBOLS_FCFLAGS=""
+        NO_SYMBOLS_FCFLAGS="-s"
 
         # Profiling
-        PROFILE_FCFLAGS=""
+        PROFILE_FCFLAGS="-pg"
 
         # Optimization
         HIGH_OPT_FCFLAGS="-O"
-        DEBUG_OPT_FCFLAGS=
-        NO_OPT_FCFLAGS=
+        DEBUG_OPT_FCFLAGS="-O0"
+        NO_OPT_FCFLAGS="-O0"
 
         f9x_flags_set=yes
         ;;
