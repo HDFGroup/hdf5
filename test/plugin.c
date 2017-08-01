@@ -723,7 +723,6 @@ test_path_api_calls(void)
     ssize_t      path_len = -1;
     char         path[256];
     char         temp_name[256];
-    herr_t       ret_value = -1;
 
     HDputs("Testing access to the filter path table");
 
@@ -1098,37 +1097,44 @@ main(void)
 
     /* Testing setup */
     h5_reset();
-    fapl = h5_fileaccess();
+
+    if ((fapl = h5_fileaccess()) < 0)
+        TEST_ERROR
 
     /* Turn off the chunk cache, so all the chunks are immediately written to disk */
-    if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0) TEST_ERROR
+    if (H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
+        TEST_ERROR
     rdcc_nbytes = 0;
-    if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0) TEST_ERROR
+    if (H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
+        TEST_ERROR
 
     /* Copy the file access property list */
-    if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
+    if ((fapl2 = H5Pcopy(fapl)) < 0)
+        TEST_ERROR
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
-    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
+    if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR
 
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Test with old & new format groups */
-    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = FALSE; new_format <= TRUE; new_format++) {
         hid_t my_fapl;
 
         /* Set the FAPL for the type of format */
-        if(new_format) {
+        if (new_format) {
             HDputs("\nTesting with new file format:");
             my_fapl = fapl2;
-        } /* end if */
+        }
         else {
             HDputs("Testing with old file format:");
             my_fapl = fapl;
-        } /* end else */
+        }
 
         /* Create the file for this test */
-        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) TEST_ERROR
+        if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
+            TEST_ERROR
 
         /* Test dynamically loaded filters for chunked dataset */
         nerrors += (test_filters_for_datasets(file) < 0    ? 1 : 0);
@@ -1136,12 +1142,15 @@ main(void)
         /* Test dynamically loaded filters for groups */
         nerrors += (test_filters_for_groups(file) < 0 ? 1 : 0);
 
-        if(H5Fclose(file) < 0) TEST_ERROR
+        if (H5Fclose(file) < 0)
+            TEST_ERROR
     } /* end for */
 
     /* Close FAPL */
-    if(H5Pclose(fapl2) < 0) TEST_ERROR
-    if(H5Pclose(fapl) < 0) TEST_ERROR
+    if (H5Pclose(fapl2) < 0)
+        TEST_ERROR
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -1150,10 +1159,12 @@ main(void)
 
     /* Close the library so that all loaded plugin libraries are unloaded */
     h5_reset();
-    fapl = h5_fileaccess();
+    if ((fapl = h5_fileaccess()) < 0)
+        TEST_ERROR
 
     /* Reopen the file for testing data reading */
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR
 
     /* Read the data with filters */
     nerrors += (test_read_with_filters(file) < 0 ? 1 : 0);
@@ -1166,20 +1177,23 @@ main(void)
 
     /* Close the library so that all loaded plugin libraries are unloaded */
     h5_reset();
-    fapl = h5_fileaccess();
+    if ((fapl = h5_fileaccess()) < 0)
+        TEST_ERROR
 
     /* Reopen the file for testing data reading */
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR
 
     /* Read the data with disabled filters */
     nerrors += (test_noread_with_filters(file) < 0  ? 1 : 0);
 
-    if(H5Fclose(file) < 0) TEST_ERROR
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
 
     /* Test the APIs for access to the filter plugin path table */
     nerrors += (test_path_api_calls() < 0  ? 1 : 0);
 
-    if(nerrors)
+    if (nerrors)
         TEST_ERROR
 
     HDprintf("All plugin tests passed.\n");
