@@ -292,6 +292,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* NOTE: We turn off -Wpedantic in gcc to quiet a warning about converting
+ *       object pointers to function pointers, which is undefined in ANSI C.
+ *       This is basically unavoidable due to the nature of dlsym() and *is*
+ *       defined in POSIX, so it's fine.
+ *
+ *       This pragma only needs to surround the assignment of the
+ *       get_plugin_info function pointer, but early (4.4.7, at least) gcc
+ *       only allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 herr_t
 H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const void **plugin_info)
 {
@@ -318,19 +329,10 @@ H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const v
         HGOTO_DONE(SUCCEED);
     }
 
-
     /* Return a handle for the function H5PLget_plugin_info in the dynamic library.
      * The plugin library is suppose to define this function.
-     *
-     * NOTE: We turn off -Wpedantic in gcc to quiet a warning about converting
-     *       object pointers to function pointers, which is undefined in ANSI C.
-     *       This is basically unavoidable due to the nature of dlsym() and *is*
-     *       defined in POSIX, so it's fine.
      */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
     if (NULL != (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_info"))) {
-#pragma GCC diagnostic pop
 
         const H5Z_class2_t *info;
 
@@ -358,6 +360,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
