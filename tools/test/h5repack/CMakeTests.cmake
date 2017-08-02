@@ -76,6 +76,12 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_shuffle.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_soffset.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_szip.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_aggr.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_fsm_aggr_nopersist.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_fsm_aggr_persist.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_none.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_paged_nopersist.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_paged_persist.h5
       # h5diff/testfile
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr1.h5
       # tools/testfiles
@@ -139,6 +145,12 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_conti-v.ddl
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_zero.tst
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/crtorder.tordergr.h5.ddl
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/SP.h5repack_fsm_aggr_nopersist.h5.ddl
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/S.h5repack_fsm_aggr_persist.h5.ddl
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/STG.h5repack_none.h5.ddl
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/GS.h5repack_paged_nopersist.h5.ddl
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/SP.h5repack_paged_persist.h5.ddl
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/SPT.h5repack_aggr.h5.ddl
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
@@ -238,7 +250,8 @@
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_CMP-${testname}
-            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile})
+            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+        )
       else ()
         add_test (
             NAME H5REPACK_CMP-${testname}
@@ -272,7 +285,8 @@
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_MASK-${testname}
-            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile})
+            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+        )
       else (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_MASK-${testname}
@@ -305,7 +319,8 @@
       # If using memchecker add tests without using scripts
       add_test (
           NAME H5REPACK_DMP-${testname}
-          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile})
+          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+      )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
@@ -322,6 +337,40 @@
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
         set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_DMP-${testname}")
+      endif ()
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_STAT_TEST testname testtype resultcode statarg resultfile)
+    if ("${testtype}" STREQUAL "SKIP")
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_STAT-${testname}-SKIPPED
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}"
+        )
+      endif ()
+    else ()
+      # If using memchecker add tests without using scripts
+      add_test (
+          NAME H5REPACK_STAT-${testname}
+          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5REPACK_STAT-${testname} PROPERTIES DEPENDS ${last_test})
+      endif ()
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_STAT-h5stat-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+                -D "TEST_ARGS:STRING=-S;-s;out-${statarg}.${resultfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}-${testname}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${statarg}.${resultfile}.ddl"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+        set_tests_properties (H5REPACK_STAT-h5stat-${testname} PROPERTIES DEPENDS "H5REPACK_STAT-${testname}")
       endif ()
     endif ()
   endmacro ()
@@ -971,6 +1020,48 @@
   set (arg tordergr.h5 -L)
   set (TESTTYPE "TEST")
   ADD_H5_DMP_TEST (crtorder ${TESTTYPE} 0 ${arg})
+
+###################################################################################################
+# Testing paged aggregation related options:
+#   -G pagesize
+#   -P 1 or 0
+#   -S strategy
+#   -T threshold
+#
+# The testfiles used are generated by test/gen_filespace.c and the file names are prepended with "h5repack_":
+#   (1) "fsm_aggr_nopersist.h5"  /* H5F_FSPACE_STRATEGY_FSM_AGGR + not persisting free-space */
+#   (2) "fsm_aggr_persist.h5"    /* H5F_FSPACE_STRATEGY_FSM_AGGR + persisting free-space */
+#   (3) "paged_nopersist.h5"     /* H5F_FSPACE_STRATEGY_PAGE + not persisting free-space */
+#   (4) "paged_persist.h5"       /* H5F_FSPACE_STRATEGY_PAGE + persisting free-space */
+#   (5) "aggr.h5"                /* H5F_FSPACE_STRATEGY_AGGR */
+#   (6) "none.h5"                /* H5F_FSPACE_STRATEGY_NONE */
+#
+#####################################################################################################
+#
+  set (arg h5repack_fsm_aggr_nopersist.h5 -S PAGE -P 1)
+  set (TESTTYPE "TEST")
+  ADD_H5_STAT_TEST (SP_PAGE ${TESTTYPE} 0 SP ${arg})
+
+  set (arg h5repack_fsm_aggr_persist.h5 -S AGGR)
+  set (TESTTYPE "TEST")
+  ADD_H5_STAT_TEST (S_AGGR ${TESTTYPE} 0 S ${arg})
+
+  set (arg h5repack_none.h5 -S PAGE -T 10 -G 2048)
+  set (TESTTYPE "TEST")
+  ADD_H5_STAT_TEST (STG_PAGE ${TESTTYPE} 0 STG ${arg})
+
+  set (arg h5repack_paged_nopersist.h5 -G 512 -S AGGR)
+  set (TESTTYPE "TEST")
+  ADD_H5_STAT_TEST (GS_AGGR ${TESTTYPE} 0 GS ${arg})
+
+  set (arg h5repack_paged_persist.h5 -S NONE -P 1)
+  set (TESTTYPE "TEST")
+  ADD_H5_STAT_TEST (SP_NONE ${TESTTYPE} 0 SP ${arg})
+
+  set (arg h5repack_aggr.h5 -S FSM_AGGR -P 1 -T 5)
+  set (TESTTYPE "TEST")
+  ADD_H5_STAT_TEST (SPT_FSM_AGGR ${TESTTYPE} 0 SPT ${arg})
+
 
 #########################################################
 # layout options (these files have no filters)
