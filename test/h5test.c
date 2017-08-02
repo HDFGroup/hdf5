@@ -104,151 +104,6 @@ static herr_t h5_errors(hid_t estack, void *client_data);
 static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
                               char *fullname, size_t size, hbool_t nest_printf);
 
-
-
-/* A dummy (generally non-functional) VFD class and its functions.
- *
- * Useful for testing things like ID handling where we shouldn't mess with the
- * real VFDs.
- */
-static H5FD_t *dummy_vfd_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
-static H5FD_t *dummy_vfd_open(const char H5_ATTR_UNUSED *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED maxaddr) { return NULL; }
-
-static herr_t dummy_vfd_close(H5FD_t *_file);
-static herr_t dummy_vfd_close(H5FD_t H5_ATTR_UNUSED *_file) { return FAIL; }
-
-static haddr_t dummy_vfd_get_eoa(const H5FD_t *file, H5FD_mem_t type);
-static haddr_t dummy_vfd_get_eoa(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
-
-static herr_t dummy_vfd_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static herr_t dummy_vfd_set_eoa(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t H5_ATTR_UNUSED addr) { return FAIL; }
-
-static haddr_t dummy_vfd_get_eof(const H5FD_t *file, H5FD_mem_t type);
-static haddr_t dummy_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
-
-static herr_t dummy_vfd_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, void *buf);
-static herr_t dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, void H5_ATTR_UNUSED *buf) { return FAIL; }
-
-static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, const void *buf);
-static herr_t dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) { return FAIL; }
-
-static H5FD_class_t dummy_vfd_class_g = {
-    "dummy",                    /* name                 */
-    1,                          /* maxaddr              */
-    H5F_CLOSE_WEAK,             /* fc_degree            */
-    NULL,                       /* terminate            */
-    NULL,                       /* sb_size              */
-    NULL,                       /* sb_encode            */
-    NULL,                       /* sb_decode            */
-    0,                          /* fapl_size            */
-    NULL,                       /* fapl_get             */
-    NULL,                       /* fapl_copy            */
-    NULL,                       /* fapl_free            */
-    0,                          /* dxpl_size            */
-    NULL,                       /* dxpl_copy            */
-    NULL,                       /* dxpl_free            */
-    dummy_vfd_open,             /* open                 */
-    dummy_vfd_close,            /* close                */
-    NULL,                       /* cmp                  */
-    NULL,                       /* query                */
-    NULL,                       /* get_type_map         */
-    NULL,                       /* alloc                */
-    NULL,                       /* free                 */
-    dummy_vfd_get_eoa,          /* get_eoa              */
-    dummy_vfd_set_eoa,          /* set_eoa              */
-    dummy_vfd_get_eof,          /* get_eof              */
-    NULL,                       /* get_handle           */
-    dummy_vfd_read,             /* read                 */
-    dummy_vfd_write,            /* write                */
-    NULL,                       /* flush                */
-    NULL,                       /* truncate             */
-    NULL,                       /* lock                 */
-    NULL,                       /* unlock               */
-    H5FD_FLMAP_DEFAULT          /* fl_map               */
-};
-
-/* A dummy (generally non-functional) VOL class and its functions.
- *
- * Useful for testing things like ID handling where we shouldn't mess with the
- * real VOL plugins.
- */
-static const H5VL_class_t dummy_vol_class_g = {
-    0,                                              /* version      */
-    847271,                                         /* value        */
-    "dummy vol driver",                             /* name         */
-    NULL,                                           /* initialize   */
-    NULL,                                           /* terminate    */
-    (size_t)0,                                      /* fapl size    */
-    NULL,                                           /* fapl copy    */
-    NULL,                                           /* fapl free    */
-    {   /* attribute_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* read         */
-        NULL,                                       /* write        */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
-    },
-    {   /* dataset_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* read         */
-        NULL,                                       /* write        */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
-    },
-    {   /* datatype_cls */
-        NULL,                                       /* commit       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get_size     */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
-    },
-    {   /* file_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
-    },
-    {   /* group_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
-    },
-    {   /* link_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* copy         */
-        NULL,                                       /* move         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL                                        /* optional     */
-    },
-    {   /* object_cls */
-        NULL,                                       /* open         */
-        NULL,                                       /* copy         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL                                        /* optional     */
-    },
-    {   /* async_cls */
-        NULL,                                       /* cancel       */
-        NULL,                                       /* test         */
-        NULL                                        /* wait         */
-    },
-    NULL                                            /* optional     */
-};
-
-
 
 /*-------------------------------------------------------------------------
  * Function:  h5_errors
@@ -1973,6 +1828,32 @@ error:
     return FAIL;
 } /* h5_wait_message() */
 
+/* Functions for the dummy VFD class (see below).
+ *
+ * Useful for testing things like ID handling where we shouldn't mess with the
+ * real VFDs.
+ */
+static H5FD_t *dummy_vfd_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+static H5FD_t *dummy_vfd_open(const char H5_ATTR_UNUSED *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED maxaddr) { return NULL; }
+
+static herr_t dummy_vfd_close(H5FD_t *_file);
+static herr_t dummy_vfd_close(H5FD_t H5_ATTR_UNUSED *_file) { return FAIL; }
+
+static haddr_t dummy_vfd_get_eoa(const H5FD_t *file, H5FD_mem_t type);
+static haddr_t dummy_vfd_get_eoa(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
+
+static herr_t dummy_vfd_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
+static herr_t dummy_vfd_set_eoa(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t H5_ATTR_UNUSED addr) { return FAIL; }
+
+static haddr_t dummy_vfd_get_eof(const H5FD_t *file, H5FD_mem_t type);
+static haddr_t dummy_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
+
+static herr_t dummy_vfd_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, void *buf);
+static herr_t dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, void H5_ATTR_UNUSED *buf) { return FAIL; }
+
+static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, const void *buf);
+static herr_t dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) { return FAIL; }
+
 
 /*-------------------------------------------------------------------------
  * Function:    h5_get_dummy_vfd_class()
@@ -1997,12 +1878,24 @@ error:
 H5FD_class_t *
 h5_get_dummy_vfd_class(void)
 {
-    H5FD_class_t *vfd_class = NULL;
+    H5FD_class_t *vfd_class = NULL;     /* Dummy VFD that will be returned */
 
-    if(NULL == (vfd_class = (H5FD_class_t *)HDmalloc(sizeof(H5FD_class_t))))
+    /* Create the class and initialize everything to zero/NULL */
+    if(NULL == (vfd_class = (H5FD_class_t *)HDcalloc((size_t)1, sizeof(H5FD_class_t))))
         TEST_ERROR;
 
-    HDmemcpy(vfd_class, &dummy_vfd_class_g, sizeof(H5FD_class_t));
+    /* Fill in the minimum parameters to make a VFD that
+     * can be registered.
+     */
+    vfd_class->name = "dummy";
+    vfd_class->maxaddr = 1;
+    vfd_class->open = dummy_vfd_open;
+    vfd_class->close = dummy_vfd_close;
+    vfd_class->get_eoa = dummy_vfd_get_eoa;
+    vfd_class->set_eoa = dummy_vfd_set_eoa;
+    vfd_class->get_eof = dummy_vfd_get_eof;
+    vfd_class->read = dummy_vfd_read;
+    vfd_class->write = dummy_vfd_write;
 
     return vfd_class;
 
@@ -2036,12 +1929,17 @@ error:
 H5VL_class_t *
 h5_get_dummy_vol_class(void)
 {
-    H5VL_class_t *vol_class = NULL;
+    H5VL_class_t *vol_class = NULL;     /* Dummy VOL class that will be returned */
 
-    if(NULL == (vol_class = (H5VL_class_t *)HDmalloc(sizeof(H5VL_class_t))))
+    /* Create the class and initialize everything to zero/NULL */
+    if(NULL == (vol_class = (H5VL_class_t *)HDcalloc((size_t)1, sizeof(H5VL_class_t))))
         TEST_ERROR;
 
-    HDmemcpy(vol_class, &dummy_vol_class_g, sizeof(H5VL_class_t));
+    /* Fill in the minimum parameters to make a VOL driver class that
+     * can be registered.
+     */
+    vol_class->name = "dummy";
+    vol_class->category = H5VL_INTERNAL;
 
     return vol_class;
 

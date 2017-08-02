@@ -325,11 +325,30 @@ typedef struct H5VL_async_class_t {
     herr_t (*wait)  (void **, H5ES_status_t *);
 } H5VL_async_class_t;
 
+/* VOL category (internal, external, etc.) */
+typedef enum H5VL_category_t {
+    H5VL_INTERNAL,      /* Internal VOL driver */
+    H5VL_EXTERNAL       /* External VOL driver (plugin) */
+} H5VL_category_t;
+
 /* Class information for each VOL driver */
+/* XXX: We should consider adding a UUID/GUID field to this struct
+ *      as well as a H5VLregister_by_uuid() API call for people who
+ *      really care about getting a particular VOL driver.
+ * XXX: We should also consider adding enough information so that
+ *      files can be opened without specifying the VOL driver.
+ *      e.g.: If we stored a UUID and version, we could search for
+ *      a matching VOL driver so a user did not have to make any
+ *      H5VL calls.
+ */
 typedef struct H5VL_class_t {
-    unsigned int version;                           /* Class version #                              */
-    unsigned int value;                             /* value to identify plugin                     */
-    const char *name;                               /* Plugin name                                  */
+    const char *name;                               /* Plugin name (MUST be unique!)                */
+    unsigned int version;                           /* VOL driver version #                         */
+                                                    /* XXX: Is this supposed to be a VOL driver
+                                                     *      version number or a VOL API version
+                                                     *      number? Maybe we need both?
+                                                     */
+    H5VL_category_t category;                       /* Class category                               */
     herr_t  (*initialize)(hid_t vipl_id);           /* Plugin initialization callback               */
     herr_t  (*terminate)(hid_t vtpl_id);            /* Plugin termination callback                  */
     size_t  fapl_size;                              /* size of the vol info in the fapl property    */
@@ -366,7 +385,6 @@ extern "C" {
 /* VOL Plugin Functionality */
 H5_DLL herr_t H5VLinitialize(hid_t plugin_id, hid_t vipl_id);
 H5_DLL herr_t H5VLterminate(hid_t plugin_id, hid_t vtpl_id);
-H5_DLL hid_t H5VLget_plugin_id(const char *name);
 H5_DLL herr_t H5VLclose(hid_t plugin_id);
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
 H5_DLL hid_t H5VLregister_by_name(const char *plugin_name);

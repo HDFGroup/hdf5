@@ -80,6 +80,7 @@ $SRC_H5DUMP_TESTFILES/tdset.h5
 $SRC_H5DUMP_TESTFILES/tdset2.h5
 $SRC_H5DUMP_TESTFILES/tempty.h5
 $SRC_H5DUMP_TESTFILES/tenum.h5
+$SRC_H5DUMP_TESTFILES/test35.nc
 $SRC_H5DUMP_TESTFILES/textlink.h5
 $SRC_H5DUMP_TESTFILES/tfpformat.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
@@ -144,6 +145,7 @@ $SRC_H5DUMP_TESTFILES/tempty-nons-uri.h5.xml
 $SRC_H5DUMP_TESTFILES/tempty-ns.h5.xml
 $SRC_H5DUMP_TESTFILES/tempty-ns-2.h5.xml
 $SRC_H5DUMP_TESTFILES/tenum.h5.xml
+$SRC_H5DUMP_TESTFILES/test35.nc.xml
 $SRC_H5DUMP_TESTFILES/textlink.h5.xml
 $SRC_H5DUMP_TESTFILES/tfpformat.h5.xml
 $SRC_H5DUMP_TESTFILES/tgroup.h5.xml
@@ -382,6 +384,9 @@ TOOLTEST torderattr4.h5.xml --xml -H --sort_by=creation_order --sort_order=desce
 
 # tests for floating point user defined printf format
 TOOLTEST tfpformat.h5.xml -u -m %.7f tfpformat.h5
+
+# test for HDFFV-10256 issue
+TOOLTEST test35.nc --xml test35.nc
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

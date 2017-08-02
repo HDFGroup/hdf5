@@ -56,18 +56,11 @@ set (H5WATCH_TEST_FILES
 
 # make test dir
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-add_custom_target(h5watch-files ALL COMMENT "Copying files needed by h5watch tests")
 
 foreach (h5watch_file ${H5WATCH_TEST_FILES})
-  set (dest "${PROJECT_BINARY_DIR}/testfiles/${h5watch_file}")
-  #message (STATUS " Copying ${h5watch_file}")
-  add_custom_command (
-      TARGET     h5watch-files
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${HDF5_HL_TOOLS_DIR}/testfiles/${h5watch_file} ${dest}
-  )
+  HDFTEST_COPY_FILE("${HDF5_HL_TOOLS_DIR}/testfiles/${h5watch_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5watch_file}" "H5WATCH_files")
 endforeach ()
+add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tests" DEPENDS ${H5WATCH_files_list})
 
 ##############################################################################
 ##############################################################################

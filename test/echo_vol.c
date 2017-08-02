@@ -12,21 +12,19 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:     A 'null' virtual object layer (VOL) plugin that has zero
- *              functionality aside from being able to be registered.
+ * Purpose:     A simple virtual object layer (VOL) plugin that just echoes
+ *              the name of the API call.
  */
 
 #include "h5test.h"
 #include "H5PLextern.h"
 
 /* The VOL class struct.
- *
- * All the callbacks are NULL pointers since this is the 'null' VOL plugin...
  */
-static const H5VL_class_t null_vol_g = {
+static const H5VL_class_t echo_vol_g = {
+    "echo_vol",                                     /* name         */
     0,                                              /* version      */
-    501,                                            /* value        */
-    "null_vol",                                     /* name         */
+    H5VL_EXTERNAL,                                  /* category     */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
     (size_t)0,                                      /* fapl size    */
@@ -115,6 +113,6 @@ H5PLget_plugin_type(void)
 const void*
 H5PLget_plugin_info(void)
 {
-    return &null_vol_g;
+    return &echo_vol_g;
 }
 
