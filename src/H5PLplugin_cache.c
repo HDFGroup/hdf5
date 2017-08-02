@@ -250,6 +250,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* See the other use of H5PL_GET_LIB_FUNC() for an explanation
+ * for why we disable -Wpedantic here.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 herr_t
 H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *found, const void **plugin_info)
 {
@@ -276,16 +281,9 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
             H5PL_get_plugin_info_t      get_plugin_info_function;
             const H5Z_class2_t          *filter_info;
 
-            /* Get the "get plugin info" function from the plugin.
-             *
-             * See the other use of H5PL_GET_LIB_FUNC() for an explanation
-             * for why we disable -Wpedantic here.
-             */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
+            /* Get the "get plugin info" function from the plugin. */
             if (NULL == (get_plugin_info_function = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC((H5PL_cache_g[u]).handle, "H5PLget_plugin_info")))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
-#pragma GCC diagnostic pop
 
             /* Call the "get plugin info" function */
             if (NULL == (filter_info = (const H5Z_class2_t *)(*get_plugin_info_function)()))
@@ -305,4 +303,5 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__find_plugin_in_cache() */
+#pragma GCC diagnostic pop
 
