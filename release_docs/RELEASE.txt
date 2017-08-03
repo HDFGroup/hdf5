@@ -175,7 +175,41 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     Library
     -------
-    -
+    - Fixes for paged aggregation
+
+      Skip test in test/fheap.c when:
+      (1) multi/split drivers and
+      (2) persisting free-space or using paged aggregation strategy
+
+      (VC, 2017/07/10)
+
+    - Fixes for paged aggregation
+
+      Changes made based on RFC review comments:
+      (1) Add maximum value for file space page size
+      (2) Drop check for page end metadata threshold
+      (3) Remove "can_shrink" and "shrink" callbacks for small section class
+
+      (VC, 2017/06/09)
+
+    - Fix for infinite loop in H5VM_power2up().
+
+      The function H5VM_power2up() returns the next power of 2
+      for n. When n exceeds 2^63, it overflows and becomes 0 causing
+      the infinite looping. 
+
+      The fix ensures that the function checks for n >= 2^63
+      and returns 0.
+
+      (HDFFV-10217, VC, 2017/07/10)
+
+    - Fix for H5Ocopy doesn't work with open identifiers
+
+      Changes made so that raw data for dataset objects are copied from
+      cached info when possible instead of flushing objects to file and
+      read them back in again.
+
+      (HDFFV-7853, VC, 2017/07/05)
 
     Configuration
     -------------
@@ -225,6 +259,13 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     Tools
     -----
+    - h5repack
+
+      Add tests to h5repack.sh.in to verify options added for paged 
+      aggregation work as expected.
+
+      (VC, 2017/08/03)
+
     - h5diff
 
       h5diff segfaulted on compare of a  NULL variable length string.
