@@ -23,6 +23,13 @@
 
 #include "t_filters_parallel.h"
 
+const char *FILENAME[] = {
+        "t_filters_parallel"
+};
+char filenames[1][256];
+
+int nerrors = 0;
+
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
 static int test_one_chunk_filtered_dataset(void);
@@ -82,7 +89,7 @@ static int (*tests[])(void) = {
  *             02/01/2017
  */
 static int
-test_one_chunk_filtered_dataset()
+test_one_chunk_filtered_dataset(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     dataset_dims[ONE_CHUNK_FILTERED_DATASET_DIMS];
@@ -95,22 +102,23 @@ test_one_chunk_filtered_dataset()
     size_t      i, data_size;
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
-    int         ret_value = 0;
 
-    if (mpi_rank == 0) TESTING("one-chunk filtered dataset");
+    if (MAINPROCESS) TESTING("one-chunk filtered dataset");
 
-    if ((plist_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        TEST_ERROR
-    if (H5Pset_fapl_mpio(plist_id, comm, info) < 0)
-        goto error;
-    if (H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        goto exit;
+    /* Set up file access property list with parallel I/O access */
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((plist_id >= 0), "FAPL creation succeeded");
 
-    if ((file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, plist_id)) < 0)
-        goto error;
-    if (H5Pclose(plist_id) < 0)
-        goto error;
+    VRFY((H5Pset_fapl_mpio(plist_id, comm, info) >= 0), "Set FAPL MPIO succeeded");
 
+    VRFY((H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0), "Set libver bounds succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, plist_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
+
+    /* Create the dataspace for the dataset */
     dataset_dims[0] = ONE_CHUNK_FILTERED_DATASET_NROWS;
     dataset_dims[1] = ONE_CHUNK_FILTERED_DATASET_NCOLS;
     chunk_dims[0] = ONE_CHUNK_FILTERED_DATASET_CH_NROWS;
@@ -118,92 +126,77 @@ test_one_chunk_filtered_dataset()
     sel_dims[0] = ONE_CHUNK_FILTERED_DATASET_NROWS / NUM_MPI_RANKS;
     sel_dims[1] = ONE_CHUNK_FILTERED_DATASET_NCOLS;
 
-    if ((filespace = H5Screate_simple(ONE_CHUNK_FILTERED_DATASET_DIMS, dataset_dims, NULL)) < 0)
-        goto error;
-    if ((memspace = H5Screate_simple(ONE_CHUNK_FILTERED_DATASET_DIMS, sel_dims, NULL)) < 0)
-        goto error;
+    filespace = H5Screate_simple(ONE_CHUNK_FILTERED_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    if ((plist_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto error;
+    memspace = H5Screate_simple(ONE_CHUNK_FILTERED_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
-    if (H5Pset_chunk(plist_id, ONE_CHUNK_FILTERED_DATASET_DIMS, chunk_dims) < 0)
-        goto error;
+    /* Create chunked dataset */
+    plist_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((plist_id >= 0), "DCPL creation succeeded");
 
-    if (SET_FILTER(plist_id) < 0)
-        goto error;
+    VRFY((H5Pset_chunk(plist_id, ONE_CHUNK_FILTERED_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
 
-    if ((dset_id = H5Dcreate(file_id, ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-            H5P_DEFAULT, plist_id, H5P_DEFAULT)) < 0)
-        goto error;
-    if (H5Pclose(plist_id) < 0)
-        goto error;
-    if (H5Sclose(filespace) < 0)
-        goto error;
+    /* Add test filter to the pipeline */
+    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
+    dset_id = H5Dcreate(file_id, ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+            H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset creation succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+
+    /* Each process defines the dataset selection in memory and writes
+     * it to the hyperslab in the file
+     */
     count[0] = 1;
     count[1] = 1;
     stride[0] = ONE_CHUNK_FILTERED_DATASET_CH_NROWS;
     stride[1] = ONE_CHUNK_FILTERED_DATASET_CH_NCOLS;
     block[0] = sel_dims[0];
     block[1] = sel_dims[1];
-    offset[0] = (mpi_rank * sel_dims[0]);
+    offset[0] = ((hsize_t) mpi_rank * sel_dims[0]);
     offset[1] = 0;
 
-    printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], offset[ %llu, %llu ], block size[ %llu, %llu ]\n",
+    if (VERBOSE_MED)
+        printf("Process %d: count[ %llu, %llu ], stride[ %llu, %llu ], offset[ %llu, %llu ], block size[ %llu, %llu ]\n",
             mpi_rank, count[0], count[1], stride[0], stride[1], offset[0], offset[1], block[0], block[1]);
 
-    if ((filespace = H5Dget_space(dset_id)) < 0)
-        goto error;
-    if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, stride, count, block) < 0)
-        goto error;
+    /* Select hyperslab in the file */
+    filespace = H5Dget_space(dset_id);
+    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
+    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, stride, count, block) >= 0),
+            "Hyperslab selection succeeded");
+
+    /* Fill data buffer */
     data_size = ONE_CHUNK_FILTERED_DATASET_CH_NROWS * ONE_CHUNK_FILTERED_DATASET_NCOLS * sizeof(*data);
 
-    if (NULL == (data = malloc(data_size))) {
-        fprintf(stderr, "Couldn't allocate memory.\n");
-        goto error;
-    }
+    data = (C_DATATYPE *) malloc(data_size);
+    VRFY((NULL != data), "malloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = GEN_DATA(i);
 
-    if ((plist_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        goto error;
-    if (H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) < 0)
-        goto error;
+    /* Create property list for collective dataset write */
+    plist_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((plist_id >= 0), "DXPL creation succeeded");
 
-    if (H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) < 0)
-        goto error;
+    VRFY((H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) >= 0), "Set DXPL MPIO succeeded");
 
-    goto exit;
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) >= 0), "Dataset write succeeded");
 
-error:
-    H5E_BEGIN_TRY {
-        free(data);
-        H5Dclose(dset_id);
-        H5Sclose(filespace);
-        H5Sclose(memspace);
-        H5Pclose(plist_id);
-        H5Fclose(file_id);
-    } H5E_END_TRY;
+    if (data) free(data);
 
-    return 1;
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
-exit:
-    if (data)
-        free(data);
-    if (H5Dclose(dset_id) < 0)
-        fprintf(stderr, "Unable to close dataset\n");
-    if (H5Sclose(filespace) < 0)
-        fprintf(stderr, "Unable to close filespace\n");
-    if (H5Sclose(memspace) < 0)
-        fprintf(stderr, "Unable to close memspace\n");
-    if (H5Pclose(plist_id) < 0)
-        fprintf(stderr, "Unable to close plist\n");
-    if (H5Fclose(file_id) < 0)
-        fprintf(stderr, "Unable to close file\n");
-
-    return ret_value;
+    return 0;
 }
 
 /*
@@ -216,7 +209,7 @@ exit:
  *             02/01/2017
  */
 static int
-test_filtered_dataset_no_overlap()
+test_filtered_dataset_no_overlap(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     dataset_dims[UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -227,24 +220,24 @@ test_filtered_dataset_no_overlap()
     hsize_t     block[UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     offset[UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     size_t      i, data_size;
-    hid_t       file_id, dset_id, plist_id;
-    hid_t       filespace, memspace;
+    hid_t       file_id = -1, dset_id = -1, plist_id = -1;
+    hid_t       filespace = -1, memspace = -1;
     int         ret_value = 0;
 
-    if (mpi_rank == 0) puts("Testing write to unshared filtered chunks");
+    if (MAINPROCESS) TESTING("write to unshared filtered chunks");
 
     /* Set up file access property list with parallel I/O access */
-    if ((plist_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        goto error;
-    if (H5Pset_fapl_mpio(plist_id, comm, info) < 0)
-        goto error;
-    if (H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        goto exit;
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((plist_id >= 0), "FAPL creation succeeded");
 
-    if ((file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, plist_id)) < 0)
-        goto error;
-    if (H5Pclose(plist_id) < 0)
-        goto error;
+    VRFY((H5Pset_fapl_mpio(plist_id, comm, info) >= 0), "Set FAPL MPIO succeeded");
+
+    VRFY((H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0), "Set libver bounds succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, plist_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
 
     /* Create the dataspace for the dataset */
     dataset_dims[0] = UNSHARED_FILTERED_CHUNKS_NROWS;
@@ -254,28 +247,27 @@ test_filtered_dataset_no_overlap()
     sel_dims[0] = UNSHARED_FILTERED_CHUNKS_CH_NROWS;
     sel_dims[1] = UNSHARED_FILTERED_CHUNKS_NCOLS;
 
-    if ((filespace = H5Screate_simple(UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL)) < 0)
-        goto error;
-    if ((memspace = H5Screate_simple(UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL)) < 0)
-        goto error;
+    filespace = H5Screate_simple(UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation suceeded");
+
+    memspace = H5Screate_simple(UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     /* Create chunked dataset */
-    if ((plist_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto error;
-    if (H5Pset_chunk(plist_id, UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) < 0)
-        goto error;
+    plist_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((plist_id >= 0), "DCPL creation succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
 
     /* Add test filter to the pipeline */
-    if (SET_FILTER(plist_id) < 0)
-        goto error;
+    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    if ((dset_id = H5Dcreate(file_id, UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-            H5P_DEFAULT, plist_id, H5P_DEFAULT)) < 0)
-        goto error;
-    if (H5Pclose(plist_id) < 0)
-        goto error;
-    if (H5Sclose(filespace) < 0)
-        goto error;
+    dset_id = H5Dcreate(file_id, UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+            H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset creation succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
     /* Each process defines the dataset selection in memory and writes
      * it to the hyperslab in the file
@@ -286,60 +278,46 @@ test_filtered_dataset_no_overlap()
     stride[1] = UNSHARED_FILTERED_CHUNKS_CH_NCOLS;
     block[0] = UNSHARED_FILTERED_CHUNKS_CH_NROWS;
     block[1] = UNSHARED_FILTERED_CHUNKS_CH_NCOLS;
-    offset[0] = (mpi_rank * UNSHARED_FILTERED_CHUNKS_CH_NROWS * count[0]);
+    offset[0] = ((hsize_t) mpi_rank * UNSHARED_FILTERED_CHUNKS_CH_NROWS * count[0]);
     offset[1] = 0;
 
-    printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], offset[ %llu, %llu ], block size[ %llu, %llu ]\n",
+    if (VERBOSE_MED)
+        printf("Process %d: count[ %llu, %llu ], stride[ %llu, %llu ], offset[ %llu, %llu ], block size[ %llu, %llu ]\n",
             mpi_rank, count[0], count[1], stride[0], stride[1], offset[0], offset[1], block[0], block[1]);
 
     /* Select hyperslab in the file */
-    if ((filespace = H5Dget_space(dset_id)) < 0)
-        goto error;
-    if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, stride, count, block) < 0)
-        goto error;
+    filespace = H5Dget_space(dset_id);
+    VRFY((dset_id >= 0), "File dataspace retrieval succeeded");
+
+    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, stride, count, block) >= 0),
+            "Hyperslab selection succeeded");
 
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-    if (NULL == (data = malloc(data_size))) {
-        fprintf(stderr, "Couldn't allocate memory.\n");
-        goto error;
-    }
+    data = (C_DATATYPE *) malloc(data_size);
+    VRFY((NULL != data), "malloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = GEN_DATA(i);
 
     /* Create property list for collective dataset write */
-    if ((plist_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        goto error;
-    if (H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) < 0)
-        goto error;
+    plist_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((plist_id >= 0), "DXPL creation succeeded");
 
-    if (H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) < 0)
-        goto error;
+    VRFY((H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) >= 0), "Set DXPL MPIO succeeded");
 
-    goto exit;
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) >= 0), "Dataset write succeeded");
 
-error:
-    if (mpi_rank == 0) puts("*** UNSHARED FILTERED CHUNKS WRITE TEST FAILED ***");
+    if (data) free(data);
 
-    ret_value = 1;
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
-exit:
-    if (data)
-        free(data);
-    if (H5Dclose(dset_id) < 0)
-        fprintf(stderr, "Unable to close dataset\n");
-    if (H5Sclose(filespace) < 0)
-        fprintf(stderr, "Unable to close filespace\n");
-    if (H5Sclose(memspace) < 0)
-        fprintf(stderr, "Unable to close memspace\n");
-    if (H5Pclose(plist_id) < 0)
-        fprintf(stderr, "Unable to close plist\n");
-    if (H5Fclose(file_id) < 0)
-        fprintf(stderr, "Unable to close file\n");
-
-    return ret_value;
+    return 0;
 }
 
 /*
@@ -353,7 +331,7 @@ exit:
  *             02/01/2017
  */
 static int
-test_filtered_dataset_overlap()
+test_filtered_dataset_overlap(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     dataset_dims[SHARED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -492,7 +470,7 @@ exit:
  *             02/01/2017
  */
 static int
-test_filtered_dataset_single_no_selection()
+test_filtered_dataset_single_no_selection(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     dataset_dims[SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
@@ -642,7 +620,7 @@ exit:
  *             02/02/2017
  */
 static int
-test_filtered_dataset_all_no_selection()
+test_filtered_dataset_all_no_selection(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     dataset_dims[ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
@@ -755,7 +733,7 @@ exit:
  *             02/02/2017
  */
 static int
-test_filtered_dataset_point_selection()
+test_filtered_dataset_point_selection(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     coords[2 * POINT_SELECTION_FILTERED_CHUNKS_NUM_CHUNKS][POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
@@ -885,7 +863,7 @@ exit:
  *             02/02/2017
  */
 static int
-test_filtered_dataset_interleaved_write()
+test_filtered_dataset_interleaved_write(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     dataset_dims[INTERLEAVED_WRITE_FILTERED_DATASET_DIMS];
@@ -1020,7 +998,7 @@ exit:
  *             02/06/2017
  */
 static int
-test_3d_filtered_dataset_no_overlap_separate_pages()
+test_3d_filtered_dataset_no_overlap_separate_pages(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     dataset_dims[UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
@@ -1163,7 +1141,7 @@ exit:
  *             02/06/2017
  */
 static int
-test_3d_filtered_dataset_no_overlap_same_pages()
+test_3d_filtered_dataset_no_overlap_same_pages(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     dataset_dims[UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
@@ -1306,7 +1284,7 @@ exit:
  *             02/06/2017
  */
 static int
-test_3d_filtered_dataset_overlap()
+test_3d_filtered_dataset_overlap(void)
 {
     C_DATATYPE *data = NULL;
     hsize_t     dataset_dims[SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
@@ -1466,7 +1444,7 @@ test_32d_filtered_dataset_overlap(void)
  *             02/10/2017
  */
 static int
-test_cmpd_filtered_dataset_no_conversion_unshared()
+test_cmpd_filtered_dataset_no_conversion_unshared(void)
 {
     cmpd_filtered_t data[COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC];
     hsize_t         dataset_dims[COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
@@ -1607,7 +1585,7 @@ exit:
  *             02/10/2017
  */
 static int
-test_cmpd_filtered_dataset_no_conversion_shared()
+test_cmpd_filtered_dataset_no_conversion_shared(void)
 {
     cmpd_filtered_t data[COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC];
     hsize_t         dataset_dims[COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
@@ -1753,7 +1731,7 @@ exit:
  *             02/07/2017
  */
 static int
-test_cmpd_filtered_dataset_type_conversion_unshared()
+test_cmpd_filtered_dataset_type_conversion_unshared(void)
 {
     cmpd_filtered_t data[COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC];
     hsize_t         dataset_dims[COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
@@ -1913,7 +1891,7 @@ exit:
  *             02/10/2017
  */
 static int
-test_cmpd_filtered_dataset_type_conversion_shared()
+test_cmpd_filtered_dataset_type_conversion_shared(void)
 {
     cmpd_filtered_t data[COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC];
     hsize_t         dataset_dims[COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
@@ -2196,9 +2174,8 @@ int
 main(int argc, char** argv)
 {
     size_t i;
-    hid_t  file_id, fapl;
+    hid_t  file_id = -1, fapl = -1;
     int    mpi_code;
-    int    nerrors = 0;
 
     /* Initialize MPI */
     MPI_Init(&argc, &argv);
@@ -2206,29 +2183,50 @@ main(int argc, char** argv)
     MPI_Comm_rank(comm, &mpi_rank);
 
     if (mpi_size != NUM_MPI_RANKS) {
-        printf("These tests are set up to use %d ranks.\n", NUM_MPI_RANKS);
-        printf("Quitting...\n");
-        return 0;
+        if (MAINPROCESS) {
+            printf("These tests are set up to use %d ranks.\n", NUM_MPI_RANKS);
+            printf("Quitting...\n");
+        }
+
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
-    /* Create test file */
-    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        goto exit;
-    if (H5Pset_fapl_mpio(fapl, comm, info) < 0)
-        goto exit;
-    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        goto exit;
+    if (H5dont_atexit() < 0) {
+        printf("Failed to turn off atexit processing. Continue.\n");
+    }
 
-    if ((file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        goto exit;
-    if (H5Fclose(file_id) < 0)
-        goto exit;
+    H5open();
+
+    if (MAINPROCESS) {
+        printf("==========================\n");
+        printf("Parallel Filters tests\n");
+        printf("==========================\n\n");
+    }
+
+    if (VERBOSE_MED) h5_show_hostname();
+
+    ALARM_ON;
+
+    /* Create test file */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl >= 0), "FAPL creation succeeded");
+
+    VRFY((H5Pset_fapl_mpio(fapl, comm, info) >= 0), "Set FAPL MPIO succeeded");
+
+    VRFY((H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0), "Set libver bounds succeeded");
+
+    VRFY((h5_fixname(FILENAME[0], fapl, filenames[0], sizeof(filenames[0])) != NULL), "Test file name created");
+
+    file_id = H5Fcreate(filenames[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    VRFY((file_id >= 0), "Test file creation succeeded");
+
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     for (i = 0; i < ARRAY_SIZE(tests); i++) {
         if (MPI_SUCCESS == (mpi_code = MPI_Barrier(comm))) {
-            nerrors += (*tests[i])();
+            (*tests[i])();
         } else {
-            if (mpi_rank == 0) fprintf(stderr, "MPI_Barrier failed");
+            if (MAINPROCESS) MESG("MPI_Barrier failed");
             nerrors++;
         }
     }
@@ -2238,13 +2236,19 @@ main(int argc, char** argv)
     puts("All Parallel Filters tests passed\n");
 
 exit:
-    if (H5Pclose(fapl) < 0)
-        fprintf(stderr, "Couldn't close fapl.\n");
-
     if (nerrors)
-        if (mpi_rank == 0) printf("*** %d TEST%s FAILED ***\n", nerrors, nerrors > 1 ? "S" : "");
+        if (MAINPROCESS) printf("*** %d TEST ERROR%s OCCURRED ***\n", nerrors, nerrors > 1 ? "S" : "");
+
+    ALARM_OFF;
+
+    h5_clean_files(FILENAME, fapl);
+
+    if (H5Pclose(fapl) < 0)
+        MESG("Couldn't close FAPL.\n");
+
+    H5close();
 
     MPI_Finalize();
 
-    exit(EXIT_SUCCESS);
+    exit((nerrors ? EXIT_FAILURE : EXIT_SUCCESS));
 }
