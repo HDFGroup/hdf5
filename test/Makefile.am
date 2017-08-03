@@ -79,7 +79,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     links_env filenotclosed flushrefresh use_append_chunk use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    swmr_check_compat_vfd vds_swmr_gen vds_swmr_reader vds_swmr_writer tfilters_parallel
+    swmr_check_compat_vfd vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= plugin
 endif
@@ -203,7 +203,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
-    tbogus.h5.copy cache_image_test.h5 tfilters_parallel.h5
+    tbogus.h5.copy cache_image_test.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

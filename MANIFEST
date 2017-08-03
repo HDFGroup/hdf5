@@ -1076,8 +1076,6 @@
 ./test/testswmr.sh.in
 ./test/testvdsswmr.sh.in
 ./test/tfile.c
-./test/tfilters_parallel.c
-./test/tfilters_parallel.h
 ./test/tgenprop.c
 ./test/th5o.c
 ./test/th5s.c
@@ -1239,6 +1237,8 @@
 ./testpar/t_file.c
 ./testpar/t_file_image.c
 ./testpar/t_filter_read.c
+./testpar/tfilters_parallel.c
+./testpar/tfilters_parallel.h
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c

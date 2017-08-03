@@ -21,7 +21,7 @@
  * datasets in parallel with filters applied to the data.
  */
 
-#include "tfilters_parallel.h"
+#include "t_filters_parallel.h"
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
@@ -93,14 +93,14 @@ test_one_chunk_filtered_dataset()
     hsize_t     block[ONE_CHUNK_FILTERED_DATASET_DIMS];
     hsize_t     offset[ONE_CHUNK_FILTERED_DATASET_DIMS];
     size_t      i, data_size;
-    hid_t       file_id, dset_id, plist_id;
-    hid_t       filespace, memspace;
+    hid_t       file_id = -1, dset_id = -1, plist_id = -1;
+    hid_t       filespace = -1, memspace = -1;
     int         ret_value = 0;
 
-    if (mpi_rank == 0) puts("Testing one-chunk filtered dataset");
+    if (mpi_rank == 0) TESTING("one-chunk filtered dataset");
 
     if ((plist_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        goto error;
+        TEST_ERROR
     if (H5Pset_fapl_mpio(plist_id, comm, info) < 0)
         goto error;
     if (H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
@@ -178,9 +178,16 @@ test_one_chunk_filtered_dataset()
     goto exit;
 
 error:
-    if (mpi_rank == 0) puts("*** ONE-CHUNK FILTERED DATASET TEST FAILED ***");
+    H5E_BEGIN_TRY {
+        free(data);
+        H5Dclose(dset_id);
+        H5Sclose(filespace);
+        H5Sclose(memspace);
+        H5Pclose(plist_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
 
-    ret_value = 1;
+    return 1;
 
 exit:
     if (data)
