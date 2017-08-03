@@ -28,7 +28,7 @@
 #include <string.h>
 
 #include "stdlib.h"
-#include "h5test.h"
+#include "testpar.h"
 
 /* Used to load other filters than GZIP */
 /* #define DYNAMIC_FILTER */ /* Uncomment and define the fields below to use a dynamically loaded filter */
