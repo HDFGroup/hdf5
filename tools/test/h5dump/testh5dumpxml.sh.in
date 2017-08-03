@@ -386,7 +386,7 @@ TOOLTEST torderattr4.h5.xml --xml -H --sort_by=creation_order --sort_order=desce
 TOOLTEST tfpformat.h5.xml -u -m %.7f tfpformat.h5
 
 # test for HDFFV-10256 issue
-TOOLTEST test35.nc --xml test35.nc
+TOOLTEST test35.nc.xml --xml test35.nc
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

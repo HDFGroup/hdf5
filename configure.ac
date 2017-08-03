@@ -3340,10 +3340,10 @@ fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
-  ### libtool does not pass the correct argument linking (-WL,-WL,,) for the NAG Fortran compiler 
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler 
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
-  ### wl="-Wl,-WL,," in the libtool file. (HDFFV-10037)
+  ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
 
@@ -3510,13 +3510,13 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 
-  ### libtool does not pass the correct argument linking (-WL,-WL,,) for the NAG Fortran compiler 
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler 
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
-  ### wl="-Wl,-WL,," in the libtool file. (HDFFV-10037)
+  ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
-      if (grep -i 'NAG_Fortran' libtool > /dev/null); then
+      if test "X$FC_BASENAME" = "Xnagfor"; then
          cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
