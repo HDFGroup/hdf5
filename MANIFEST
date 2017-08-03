@@ -1713,6 +1713,8 @@
 ./tools/testfiles/tdset2.h5.xml
 ./tools/testfiles/tempty.h5.xml
 ./tools/testfiles/tenum.h5.xml
+./tools/testfiles/test35.nc
+./tools/testfiles/test35.nc.xml
 ./tools/testfiles/tfpformat.h5.xml
 ./tools/testfiles/tgroup.h5.xml
 ./tools/testfiles/thlink.h5.xml
