@@ -1227,7 +1227,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
                 if (H5P_get(dx_plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &global_no_collective_cause) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get global no collective cause value")
 
-                /* Append each of the reason for breaking collective I/O error messages to the
+                /* Append each of the "reason for breaking collective I/O" error messages to the
                  * local and global no collective cause strings */
                 for (cause = 1, index = 0; cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE; cause <<= 1, index++) {
                     size_t cause_strlen = strlen(cause_strings[index]);

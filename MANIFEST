@@ -1070,6 +1070,8 @@
 ./test/testswmr.sh.in
 ./test/testvdsswmr.sh.in
 ./test/tfile.c
+./test/tfilters_parallel.c
+./test/tfilters_parallel.h
 ./test/tgenprop.c
 ./test/th5o.c
 ./test/th5s.c
