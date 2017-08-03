@@ -3516,7 +3516,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ### wl="-Wl,-WL,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
-      if (grep -i 'NAG_Fortran' libtool > /dev/null); then
+      if test "X$FC_BASENAME" = "Xnagfor"; then
          cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
