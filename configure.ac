@@ -2909,6 +2909,27 @@ else
   STATIC_SHARED="none"
 fi
 
+if test "X$HDF_FORTRAN" = "Xyes"; then
+
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler 
+  ### on Linux (other OSs have not been tested).
+  ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
+  ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
+  case "`uname`" in
+    Linux*)
+
+    fortran_linux_linker_option="-Wl,"
+    if test "X$FC_BASENAME" = "Xnagfor"; then
+       fortran_linux_linker_option="-Wl,-Wl,,"
+    fi
+
+    ## Set the correct linker option for use in h5fc.in markup
+    AC_SUBST([fortran_linux_linker_option])
+    ;;
+  esac
+
+fi
+
 ## ----------------------------------------------------------------------
 ## Set a macro if shared library is enabled.
 ##
@@ -2997,6 +3018,10 @@ AC_CONFIG_FILES([src/libhdf5.settings
 AC_OUTPUT
 
 chmod 755 tools/misc/h5cc
+if test "X$HDF_CXX" = "Xyes"; then
+  chmod 755 c++/src/h5c++
+fi
+
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
@@ -3008,10 +3033,18 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       ;;
   esac
-fi
 
-if test "X$HDF_CXX" = "Xyes"; then
-  chmod 755 c++/src/h5c++
+  ### libtool does not pass the correct argument linking (-WL,-Wl,,) for the NAG Fortran compiler 
+  ### on Linux (other OSs have not been tested).
+  ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
+  ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
+  case "`uname`" in
+    Linux*)
+      if test "X$FC_BASENAME" = "Xnagfor"; then
+         cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      fi
+      ;;
+  esac
 fi
 
 ## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
