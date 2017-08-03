@@ -42,7 +42,6 @@ size_t             cd_nelmts = FILTER_NUM_CDVALUES;
 #define STRINGIFY(type) #type
 
 /* Common defines for all tests */
-#define FILENAME             "tfilters_parallel.h5"
 #define NUM_MPI_RANKS        4
 #define C_DATATYPE           long
 #define C_DATATYPE_STR(type) STRINGIFY(type)
