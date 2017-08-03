@@ -2919,8 +2919,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     Linux*)
 
     fortran_linux_linker_option="-Wl,"
-	
-    if (grep -i 'NAG_Fortran' libtool > /dev/null); then
+    if test "X$FC_BASENAME" = "Xnagfor"; then
        fortran_linux_linker_option="-Wl,-Wl,,"
     fi
 
