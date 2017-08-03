@@ -3018,9 +3018,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
 AC_OUTPUT
 
 chmod 755 tools/misc/h5cc
-if test "X$HDF_FORTRAN" = "Xyes"; then
-  chmod 755 fortran/src/h5fc
-fi
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi
@@ -3043,7 +3040,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ### wl="-Wl,-WL,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
-      if (grep -i 'NAG_Fortran' libtool > /dev/null); then
+      if test "X$FC_BASENAME" = "Xnagfor"; then
          cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
