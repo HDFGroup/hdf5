@@ -537,6 +537,7 @@ dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
 exec_prefix = @exec_prefix@
+fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -1053,9 +1054,9 @@ h5_crtatt.chkexe_: h5_rdwt.chkexe_
 # Tell automake how to build examples using h5fc
 # Additional dependencies for the examples are listed below
 @BUILD_PARALLEL_CONDITIONAL_TRUE@$(EXTRA_PROG): $(H5FC_PP)
-@BUILD_PARALLEL_CONDITIONAL_TRUE@	$(H5FC_PP) $(H5CCFLAGS) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
+@BUILD_PARALLEL_CONDITIONAL_TRUE@	$(H5FC_PP) $(H5CCFLAGS) -o $@ $(srcdir)/$@.f90;
 @BUILD_PARALLEL_CONDITIONAL_FALSE@$(EXTRA_PROG): $(H5FC)
-@BUILD_PARALLEL_CONDITIONAL_FALSE@	$(H5FC) $(H5CCFLAGS) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
+@BUILD_PARALLEL_CONDITIONAL_FALSE@	$(H5FC) $(H5CCFLAGS) -o $@ $(srcdir)/$@.f90;
 
 # List dependencies for each example.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
