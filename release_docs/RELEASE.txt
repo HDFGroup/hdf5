@@ -266,6 +266,16 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (VC, 2017/08/03)
 
+    - h5dump
+
+      h5dump segfaulted on output of XML file.
+
+      Function that escape'd strings used the full buffer length
+      instead of just the length of the replacement string in a
+      strncpy call. Using the correct length fixed the issue.
+
+      (ADB - 2017/08/01, HDFFV-10256)
+
     - h5diff
 
       h5diff segfaulted on compare of a  NULL variable length string.
@@ -275,6 +285,18 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       (ADB - 2017/07/25, HDFFV-10246)
 
+    - h5import
+
+      h5import crashed trying to import data from a subset of a dataset.
+
+      Improved h5import by adding the SUBSET keyword. h5import understands
+      to use the Count times the Block as the size of the dimensions.
+      Added INPUT_B_ORDER keyword to old-style configuration files.
+      The import from h5dump function expects the binary files to use native
+      types (FILE '-b' option) in the binary file.
+
+      (ADB - 2017/06/15, HDFFV-10219)
+
     - h5repack
 
       h5repack did not maintain the creation order flag of the root
@@ -282,7 +304,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       Improved h5repack by reading the creation order and applying the
       flag to the new root group. Also added arguments to set the
-      order and index direction, which applys to the traversing of the
+      order and index direction, which applies to the traversing of the
       original file, on the command line.
 
       (ADB - 2017/05/26, HDFFV-8611)
