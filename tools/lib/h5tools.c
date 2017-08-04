@@ -34,7 +34,7 @@ FILE       *rawinstream = NULL;        /* should initialize to stdin but gcc moa
 FILE       *rawoutstream = NULL;       /* should initialize to stdout but gcc moans about it */
 FILE       *rawerrorstream = NULL;     /* should initialize to stderr but gcc moans about it */
 int         bin_output;         /* binary output */
-int         bin_form;           /* binary form */
+int         bin_form = 0;       /* binary form, default NATIVE */
 int         region_output;      /* region output */
 int         oid_output;         /* oid output */
 int         data_output;        /* data output */
