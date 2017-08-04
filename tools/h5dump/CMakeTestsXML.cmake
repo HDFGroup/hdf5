@@ -50,6 +50,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-quot.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-sp.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnamed_dtype_attr.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/test35.nc
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcomp.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnodata.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tobjref.h5
@@ -99,6 +100,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-ns.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-ns-2.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tenum.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/test35.nc.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/textlink.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tfpformat.h5.xml
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup.h5.xml
@@ -258,6 +260,8 @@
           tempty.h5.out.err
           tenum.h5.out
           tenum.h5.out.err
+          test35.nc.out
+          test35.nc.out.err
           textlink.h5.out
           textlink.h5.out.err
           tfpformat.h5.out
@@ -429,4 +433,7 @@
 
   # tests for floating point user defined printf format
   ADD_XML_H5_TEST (tfpformat.h5 0 -u -m %.7f tfpformat.h5)
+
+  # test for HDFFV-10256 issue
+  ADD_XML_H5_TEST (test35.nc 0 test35.nc)
 
