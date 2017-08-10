@@ -48,7 +48,7 @@ size_t             cd_nelmts = FILTER_NUM_CDVALUES;
 #define HDF5_DATATYPE_NAME   H5T_NATIVE_LONG
 
 #define GEN_DATA(i)          INCREMENTAL_DATA(i)
-#define INCREMENTAL_DATA(i)  (mpi_rank + i)      /* Generates incremental test data */
+#define INCREMENTAL_DATA(i)  ((size_t) mpi_rank + i)      /* Generates incremental test data */
 
 /* XXX: For experimental purposes only, will causes tests to fail data verification phase */
 /* #define GEN_DATA(i)          RANK_DATA(i) */  /* Given an index value i, generates test data based upon selected mode */
