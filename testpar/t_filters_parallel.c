@@ -45,9 +45,6 @@ static void test_filtered_dataset_interleaved_write(void);
 static void test_3d_filtered_dataset_no_overlap_separate_pages(void);
 static void test_3d_filtered_dataset_no_overlap_same_pages(void);
 static void test_3d_filtered_dataset_overlap(void);
-static void test_32d_filtered_dataset_no_overlap_separate_pages(void);
-static void test_32d_filtered_dataset_no_overlap_same_pages(void);
-static void test_32d_filtered_dataset_overlap(void);
 static void test_cmpd_filtered_dataset_no_conversion_unshared(void);
 static void test_cmpd_filtered_dataset_no_conversion_shared(void);
 static void test_cmpd_filtered_dataset_type_conversion_unshared(void);
@@ -71,9 +68,6 @@ static void (*tests[])(void) = {
         test_3d_filtered_dataset_no_overlap_separate_pages,
         test_3d_filtered_dataset_no_overlap_same_pages,
         test_3d_filtered_dataset_overlap,
-        test_32d_filtered_dataset_no_overlap_separate_pages,
-        test_32d_filtered_dataset_no_overlap_same_pages,
-        test_32d_filtered_dataset_overlap,
         test_cmpd_filtered_dataset_no_conversion_unshared,
         test_cmpd_filtered_dataset_no_conversion_shared,
         test_cmpd_filtered_dataset_type_conversion_unshared,
@@ -236,10 +230,13 @@ test_one_chunk_filtered_dataset(void)
  * Programmer: Jordan Henderson
  *             02/01/2017
  */
+/* XXX: Done */
 static void
 test_filtered_dataset_no_overlap(void)
 {
     C_DATATYPE *data = NULL;
+    C_DATATYPE *read_buf = NULL;
+    C_DATATYPE *correct_buf = NULL;
     hsize_t     dataset_dims[UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -247,7 +244,7 @@ test_filtered_dataset_no_overlap(void)
     hsize_t     stride[UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     offset[UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size;
+    size_t      i, data_size, correct_buf_size;
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
@@ -320,12 +317,19 @@ test_filtered_dataset_no_overlap(void)
 
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
     data = (C_DATATYPE *) malloc(data_size);
     VRFY((NULL != data), "malloc succeeded");
 
+    correct_buf = (C_DATATYPE *) malloc(correct_buf_size);
+    VRFY((NULL != correct_buf), "malloc succeeded");
+
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = GEN_DATA(i);
+
+    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
+        correct_buf[i] = (C_DATATYPE) ((i % (NUM_MPI_RANKS * dataset_dims[1])) + (i / (NUM_MPI_RANKS * dataset_dims[1])));
 
     /* Create property list for collective dataset write */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -336,6 +340,22 @@ test_filtered_dataset_no_overlap(void)
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) >= 0), "Dataset write succeeded");
 
     if (data) free(data);
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+
+    /* Verify the correct data was written */
+    read_buf = (C_DATATYPE *) malloc(correct_buf_size);
+    VRFY((NULL != read_buf), "malloc succeeded");
+
+    dset_id = H5Dopen(file_id, "/" UNSHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset open succeeded");
+
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
+
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+
+    if (correct_buf) free(correct_buf);
+    if (read_buf) free(read_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -356,10 +376,13 @@ test_filtered_dataset_no_overlap(void)
  * Programmer: Jordan Henderson
  *             02/01/2017
  */
+/* XXX: Done */
 static void
 test_filtered_dataset_overlap(void)
 {
     C_DATATYPE *data = NULL;
+    C_DATATYPE *read_buf = NULL;
+    C_DATATYPE *correct_buf = NULL;
     hsize_t     dataset_dims[SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[SHARED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -367,7 +390,7 @@ test_filtered_dataset_overlap(void)
     hsize_t     stride[SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     offset[SHARED_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size;
+    size_t      i, data_size, correct_buf_size;
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
@@ -440,12 +463,19 @@ test_filtered_dataset_overlap(void)
 
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
     data = (C_DATATYPE *) malloc(data_size);
     VRFY((NULL != data), "malloc succeeded");
 
+    correct_buf = (C_DATATYPE *) malloc(correct_buf_size);
+    VRFY((NULL != correct_buf), "malloc succeeded");
+
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = GEN_DATA(i);
+
+    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
+        correct_buf[i] = (dataset_dims[1] * (i / (NUM_MPI_RANKS * dataset_dims[1]))) + (i % dataset_dims[1]) + (((i % (NUM_MPI_RANKS * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]);
 
     /* Create property list for collective dataset write */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -456,6 +486,22 @@ test_filtered_dataset_overlap(void)
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) >= 0), "Dataset write succeeded");
 
     if (data) free(data);
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+
+    /* Verify correct data was written */
+    read_buf = (C_DATATYPE *) malloc(correct_buf_size);
+    VRFY((NULL != read_buf), "malloc succeeded");
+
+    dset_id = H5Dopen(file_id, "/" SHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset open succeeded");
+
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
+
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+
+    if (correct_buf) free(correct_buf);
+    if (read_buf) free(read_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -478,10 +524,13 @@ test_filtered_dataset_overlap(void)
  * Programmer: Jordan Henderson
  *             02/01/2017
  */
+/* XXX: Done */
 static void
 test_filtered_dataset_single_no_selection(void)
 {
     C_DATATYPE *data = NULL;
+    C_DATATYPE *read_buf = NULL;
+    C_DATATYPE *correct_buf = NULL;
     hsize_t     dataset_dims[SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
@@ -489,7 +538,7 @@ test_filtered_dataset_single_no_selection(void)
     hsize_t     stride[SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     offset[SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size;
+    size_t      i, data_size, correct_buf_size;
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
@@ -568,12 +617,19 @@ test_filtered_dataset_single_no_selection(void)
 
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
     data = (C_DATATYPE *) malloc(data_size);
     VRFY((NULL != data), "malloc succeeded");
 
+    correct_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "malloc succeeded");
+
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = GEN_DATA(i);
+
+    for (i = 0; i < (correct_buf_size / sizeof(*correct_buf)) - (NUM_MPI_RANKS * dataset_dims[1]); i++)
+        correct_buf[i] = (i % (NUM_MPI_RANKS * dataset_dims[1])) + (i / (NUM_MPI_RANKS * dataset_dims[1]));
 
     /* Create property list for collective dataset write */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -584,6 +640,22 @@ test_filtered_dataset_single_no_selection(void)
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) >= 0), "Dataset write succeeded");
 
     if (data) free(data);
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+
+    /* Verify the correct data was written */
+    read_buf = (C_DATATYPE *) malloc(correct_buf_size);
+    VRFY((NULL != read_buf), "malloc succeeded");
+
+    dset_id = H5Dopen(file_id, "/" SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset open succeeded");
+
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
+
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+
+    if (correct_buf) free(correct_buf);
+    if (read_buf) free(read_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -607,14 +679,17 @@ test_filtered_dataset_single_no_selection(void)
  * Programmer: Jordan Henderson
  *             02/02/2017
  */
+/* XXX: Done */
 static void
 test_filtered_dataset_all_no_selection(void)
 {
     C_DATATYPE *data = NULL;
+    C_DATATYPE *read_buf = NULL;
+    C_DATATYPE *correct_buf = NULL;
     hsize_t     dataset_dims[ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size;
+    size_t      i, data_size, correct_buf_size;
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
@@ -669,8 +744,12 @@ test_filtered_dataset_all_no_selection(void)
 
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
     data = (C_DATATYPE *) malloc(data_size);
+    VRFY((NULL != data), "malloc succeeded");
+
+    correct_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != data), "malloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
@@ -685,6 +764,22 @@ test_filtered_dataset_all_no_selection(void)
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) >= 0), "Dataset write succeeded");
 
     if (data) free(data);
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+
+    /* Verify the correct data was written */
+    read_buf = (C_DATATYPE *) malloc(correct_buf_size);
+    VRFY((NULL != read_buf), "malloc succeeded");
+
+    dset_id = H5Dopen(file_id, "/" ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset open succeeded");
+
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
+
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+
+    if (correct_buf) free(correct_buf);
+    if (read_buf) free(read_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -1323,24 +1418,6 @@ test_3d_filtered_dataset_overlap(void)
     VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
-    return;
-}
-
-static void
-test_32d_filtered_dataset_no_overlap_separate_pages(void)
-{
-    return;
-}
-
-static void
-test_32d_filtered_dataset_no_overlap_same_pages(void)
-{
-    return;
-}
-
-static void
-test_32d_filtered_dataset_overlap(void)
-{
     return;
 }
 
