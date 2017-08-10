@@ -3143,7 +3143,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
 
         /* XXX: Test with MPI types and collective read to improve performance */
         if (H5F_block_read(io_info->dset->oloc.file, H5FD_MEM_DRAW, chunk_entry->chunk_states.chunk_current.offset,
-                buf_size, H5AC_rawdata_dxpl_id, chunk_entry->buf) < 0)
+                chunk_entry->chunk_states.new_chunk.length, H5AC_rawdata_dxpl_id, chunk_entry->buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
 
         if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE, &filter_mask,
