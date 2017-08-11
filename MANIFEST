@@ -1237,8 +1237,8 @@
 ./testpar/t_file.c
 ./testpar/t_file_image.c
 ./testpar/t_filter_read.c
-./testpar/tfilters_parallel.c
-./testpar/tfilters_parallel.h
+./testpar/t_filters_parallel.c
+./testpar/t_filters_parallel.h
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
