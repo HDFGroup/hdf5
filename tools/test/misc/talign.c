@@ -15,9 +15,6 @@
  * Small program to illustrate the "misalignment" of members within a compound
  * datatype, in a datatype fixed by H5Tget_native_type().
  */
-#include <string.h>
-#include <stdlib.h>
-/*#include <unistd.h>    *//* Required for unlink() */
 
 #include "hdf5.h"
 #include "H5private.h"

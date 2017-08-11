@@ -12,19 +12,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling <wendling@ncsa.uiuc.edu>
- *              Tuesday, 6. March 2001
- */
-
-/*
  * Portions of this work are derived from _Obfuscated C and Other Mysteries_,
  * by Don Libes, copyright (c) 1993 by John Wiley & Sons, Inc.
  */
-
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "h5tools.h"
 #include "h5tools_utils.h"

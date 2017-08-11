@@ -42,9 +42,5 @@ struct diffs_found
     int      not_cmp;
 };
 
-#ifdef H5_HAVE_PARALLEL
-#include <mpi.h>
-#endif
-
 #endif  /* _PH5DIFF_H__ */
 

@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*
- * Programmer:    Raymond Lu
- *        13 February 2013
- *
  * Purpose:    Tests the plugin module (H5PL)
  */
 
@@ -660,13 +657,10 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_groups_with_filters
  *
- * Purpose:    Tests opening group with dynamically loaded filters
+ * Purpose:     Tests opening group with dynamically loaded filters
  *
- * Return:    Success:    0
- *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *              1 April 2013
+ * Return:      Success:    0
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
@@ -710,261 +704,388 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:  test_filter_path_apis
+ * Function:  test_path_api_calls
  *
- * Purpose:   Tests accessing the path table for dynamically loaded filters
+ * Purpose:   Tests the H5PL API calls that manipulate the plugin search
+ *            paths.
  *
- * Return:    Success:    0
- *            Failure:    -1
+ * Return:    SUCCEED/FAIL
+ * 
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filter_path_apis(void)
+test_path_api_calls(void)
 {
-    herr_t       ret_value = -1;
-    unsigned int i;
-    unsigned int ndx;
+    unsigned int n_starting_paths;
+    unsigned int u;                 
+    unsigned int n_paths;
     herr_t       ret;
-    ssize_t      pathlen = -1;
-    char         pathname[256];
-    char         tempname[256];
+    ssize_t      path_len = -1;
+    char         path[256];
+    char         temp_name[256];
 
     HDputs("Testing access to the filter path table");
 
-    if(H5Zfilter_avail(H5Z_FILTER_DYNLIB1) != TRUE) TEST_ERROR
+    if(H5Zfilter_avail(H5Z_FILTER_DYNLIB1) != TRUE)
+        TEST_ERROR
 
-    H5PLsize(&ndx);
+    /* Set the number of paths to create for this test.
+     *
+     * This should be set high enough to ensure that at least one array
+     * expansion will take place. See H5PLpath.c for details.
+     */
+    n_starting_paths = 42;
 
-    TESTING("    remove");
-    /* Remove all existing paths*/
-    for(i=ndx; i > 0; i--)
-        if(H5PLremove(i-1) < 0) {
-            HDfprintf(stderr,"    at %d: %s\n", i, pathname);
-            TEST_ERROR
-        } /* end if */
-    /* Verify the table is empty */
-    H5PLsize(&ndx);
-    if(ndx > 0) TEST_ERROR
+    /* Check that initialization is correct */
+    TESTING("    initialize");
+
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+    if(n_paths != 2)
+        TEST_ERROR
+
     PASSED();
 
-    TESTING("    remove (exceed min)");
-    /* Exceed the min path removal */
+    /****************/
+    /* H5PLremove() */
+    /****************/
+
+    /* Remove all the current paths */
+    TESTING("    remove");
+
+    /* Get the current size */
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+
+    /* Remove all existing paths */
+    for(u = n_paths; u > 0; u--)
+        if(H5PLremove(u-1) < 0) {
+            HDfprintf(stderr,"    at %u: %s\n", u, path);
+            TEST_ERROR
+        }
+
+    /* Verify the table is empty */
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+    if(n_paths > 0)
+        TEST_ERROR
+
+    PASSED();
+
+
+    TESTING("    remove (index 0 in empty table)");
+
+    /* Try to remove index zero in an empty list (SHOULD FAIL) */
     H5E_BEGIN_TRY {
         ret = H5PLremove(0);
     } H5E_END_TRY
-    if(ret >= 0) TEST_ERROR
+    if(ret >= 0)
+        TEST_ERROR
+
     PASSED();
 
+
+    /****************/
+    /* H5PLappend() */
+    /****************/
+
     TESTING("    append");
-    /* Create multiple paths to fill table */
-    for(i=0; i < H5PL_MAX_PATH_NUM; i++) {
-        HDsprintf(pathname, "a_path_%d", i);
-        if(H5PLappend(pathname) < 0) {
-            HDfprintf(stderr,"    at %d: %s\n", i, pathname);
+
+    /* Add a bunch of paths to the path table */
+    for(u = 0; u < n_starting_paths; u++) {
+        HDsprintf(path, "a_path_%u", u);
+        if(H5PLappend(path) < 0) {
+            HDfprintf(stderr,"    at %u: %s\n", u, path);
             TEST_ERROR
         }
     }
-    /* Verify the table is full */
-    H5PLsize(&ndx);
-    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
+
     PASSED();
 
-    TESTING("    append (exceed)");
-    /* Exceed the max path append */
+
+    /**********************/
+    /* H5PLremove() again */
+    /**********************/
+
+    TESTING("    remove (index too high)");
+
+    /* Try to remove a path where the index is beyond the table capacity (SHOULD FAIL) */
     H5E_BEGIN_TRY {
-        HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM);
-        ret = H5PLappend(pathname);
+        ret = H5PLremove(n_starting_paths);
     } H5E_END_TRY
-    if(ret >= 0) TEST_ERROR
+
+    if(ret >= 0)
+        TEST_ERROR
+
     PASSED();
 
-    TESTING("    remove (exceed max)");
-    /* Exceed the max path removal */
-    H5E_BEGIN_TRY {
-        ret = H5PLremove(H5PL_MAX_PATH_NUM);
-    } H5E_END_TRY
-    if(ret >= 0) TEST_ERROR
-    PASSED();
+
+    /*************/
+    /* H5PLget() */
+    /*************/
 
     TESTING("    get (path name)");
-    if((pathlen = H5PLget(0, NULL, 0)) <= 0) {
+
+    /* Get the path length by passing in NULL */
+    if((path_len = H5PLget(0, NULL, 0)) <= 0) {
         HDfprintf(stderr,"    get path 0 length failed\n");
         TEST_ERROR
     }
-    if(pathlen != 8) TEST_ERROR
+    if(path_len != 8)
+        TEST_ERROR
 
-    if((pathlen = H5PLget(0, pathname, 256)) <= 0) {
-        HDfprintf(stderr,"    get 0 len: %d : %s\n", pathlen, pathname);
+    /* Get the path */
+    if((path_len = H5PLget(0, path, 256)) <= 0) {
+        HDfprintf(stderr,"    get 0 len: %u : %s\n", path_len, path);
         TEST_ERROR
     }
-    if(HDstrcmp(pathname, "a_path_0") != 0) {
-        HDfprintf(stderr,"    get 0: %s\n", pathname);
+    if(HDstrcmp(path, "a_path_0") != 0) {
+        HDfprintf(stderr,"    get 0: %s\n", path);
         TEST_ERROR
     }
+
     PASSED();
 
-    TESTING("    get (bounds)");
-    if((pathlen = H5PLget(1, pathname, 256)) <= 0) TEST_ERROR
-    if(HDstrcmp(pathname, "a_path_1") != 0) {
-        HDfprintf(stderr,"    get 1: %s\n", pathname);
+
+    TESTING("    get (high and low indices)");
+
+    /* Get path at index 1 */
+    if((path_len = H5PLget(1, path, 256)) <= 0)
+        TEST_ERROR
+    if(HDstrcmp(path, "a_path_1") != 0) {
+        HDfprintf(stderr,"    get 1: %s\n", path);
         TEST_ERROR
     }
-    if((pathlen = H5PLget(H5PL_MAX_PATH_NUM - 1, pathname, 256)) <= 0) TEST_ERROR
-    HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM - 1);
-    if(HDstrcmp(pathname, tempname) != 0) {
-        HDfprintf(stderr,"    get %d: %s\n", H5PL_MAX_PATH_NUM - 1, pathname);
+
+    /* Get path at the last index */
+    if((path_len = H5PLget(n_starting_paths - 1, path, 256)) <= 0)
+        TEST_ERROR
+    HDsprintf(temp_name, "a_path_%u", n_starting_paths - 1);
+    if(HDstrcmp(path, temp_name) != 0) {
+        HDfprintf(stderr,"    get %u: %s\n", n_starting_paths - 1, path);
         TEST_ERROR
     }
+
     PASSED();
 
-    TESTING("    get (bounds exceed)");
+
+    TESTING("    get (index too high)");
+
+    /* Get path at the last + 1 index (SHOULD FAIL) */
     H5E_BEGIN_TRY {
-        pathlen = H5PLget(H5PL_MAX_PATH_NUM, NULL, 0);
+        path_len = H5PLget(n_starting_paths, NULL, 0);
     } H5E_END_TRY
-    if(pathlen > 0) TEST_ERROR
+    if(path_len > 0)
+        TEST_ERROR
+
     PASSED();
 
-    TESTING("    remove (verify for prepend)");
-    /* Remove one path*/
-    if(H5PLremove(8) < 0) TEST_ERROR
+
+    /*****************/
+    /* H5PLprepend() */
+    /*****************/
+
+    /* We'll remove a path at an arbitrary index and then
+     * prepend a new path.
+     */
+
+    TESTING("    remove (arbitrary index 1)");
+
+    /* Remove one path */
+    if(H5PLremove(8) < 0)
+        TEST_ERROR
 
     /* Verify that the entries were moved */
-    if((pathlen = H5PLget(8, pathname, 256)) <= 0) TEST_ERROR
-    if(HDstrcmp(pathname, "a_path_9") != 0) {
-        HDfprintf(stderr,"    get 8: %s\n", pathname);
+    if((path_len = H5PLget(8, path, 256)) <= 0)
+        TEST_ERROR
+    if(HDstrcmp(path, "a_path_9") != 0) {
+        HDfprintf(stderr,"    get 8: %s\n", path);
         TEST_ERROR
     }
+
+    /* Verify the table shrank */
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+    if(n_paths != n_starting_paths - 1)
+        TEST_ERROR
+
     PASSED();
 
-    /* Verify the table is not full */
-    H5PLsize(&ndx);
-    if (ndx != H5PL_MAX_PATH_NUM - 1) TEST_ERROR
 
     TESTING("    prepend");
-    /* Prepend one path*/
-    HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if(H5PLprepend(pathname) < 0) {
-        HDfprintf(stderr,"    prepend %d: %s\n", H5PL_MAX_PATH_NUM + 1, pathname);
+
+    /* Prepend one path */
+    HDsprintf(path, "a_path_%d", n_starting_paths + 1);
+    if(H5PLprepend(path) < 0) {
+        HDfprintf(stderr,"    prepend %u: %s\n", n_starting_paths + 1, path);
         TEST_ERROR
     }
 
-    /* Verify the table is full */
-    H5PLsize(&ndx);
-    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
+    /* Verify the table increased */
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+    if(n_paths != n_starting_paths)
+        TEST_ERROR
 
     /* Verify that the entries were moved */
-    if(H5PLget(8, pathname, 256) <= 0) TEST_ERROR
-    if(HDstrcmp(pathname, "a_path_7") != 0) {
-        HDfprintf(stderr,"    get 8: %s\n", pathname);
+    if(H5PLget(8, path, 256) <= 0)
+        TEST_ERROR
+    if(HDstrcmp(path, "a_path_7") != 0) {
+        HDfprintf(stderr,"    get 8: %s\n", path);
         TEST_ERROR
     }
-    if(H5PLget(0, pathname, 256) <= 0) TEST_ERROR
-    HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if(HDstrcmp(pathname, tempname) != 0) {
-        HDfprintf(stderr,"    get 0: %s\n", pathname);
+
+    /* Verify that the path was inserted at index zero */
+    if(H5PLget(0, path, 256) <= 0)
+        TEST_ERROR
+    HDsprintf(temp_name, "a_path_%d", n_starting_paths + 1);
+    if(HDstrcmp(path, temp_name) != 0) {
+        HDfprintf(stderr,"    get 0: %s\n", path);
         TEST_ERROR
     }
+
     PASSED();
 
-    TESTING("    prepend (exceed)");
-    /* Exceed the max path prepend */
-    H5E_BEGIN_TRY {
-        HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 2);
-        ret = H5PLprepend(pathname);
-    } H5E_END_TRY
-    if(ret >= 0) TEST_ERROR
-    PASSED();
+
+    /*****************/
+    /* H5PLreplace() */
+    /*****************/
 
     TESTING("    replace");
-    /* Replace one path*/
-    HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 4);
-    if(H5PLreplace(pathname, 1) < 0) {
-        HDfprintf(stderr,"    replace 1: %s\n", pathname);
+
+    /* Replace one path at index 1 */
+    HDsprintf(path, "a_path_%u", n_starting_paths + 4);
+    if(H5PLreplace(path, 1) < 0) {
+        HDfprintf(stderr,"    replace 1: %s\n", path);
         TEST_ERROR
     }
 
-    /* Verify the table is full */
-    H5PLsize(&ndx);
-    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
+    /* Verify the table size remained the same */
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+    if(n_paths != n_starting_paths)
+        TEST_ERROR
 
-    /* Verify that the entries were not moved */
-    if(H5PLget(0, pathname, 256) <= 0) TEST_ERROR
-    HDsprintf(tempname, "a_path_%d", H5PL_MAX_PATH_NUM + 1);
-    if(HDstrcmp(pathname, tempname) != 0) {
-        HDfprintf(stderr,"    get 0: %s\n", pathname);
+    /* Verify that the entries were not moved by
+     * inspecting the paths at indices +/- 1.
+     */
+
+    /* Check path at index 0 */
+    if(H5PLget(0, path, 256) <= 0)
+        TEST_ERROR
+    HDsprintf(temp_name, "a_path_%u", n_starting_paths + 1);
+    if(HDstrcmp(path, temp_name) != 0) {
+        HDfprintf(stderr,"    get 0: %s\n", path);
         TEST_ERROR
     }
-    if(H5PLget(2, pathname, 256) <= 0) TEST_ERROR
-    if(HDstrcmp(pathname, "a_path_1") != 0) {
-        HDfprintf(stderr,"    get 2: %s\n", pathname);
+
+    /* Check path at index 2 */
+    if(H5PLget(2, path, 256) <= 0)
+        TEST_ERROR
+    if(HDstrcmp(path, "a_path_1") != 0) {
+        HDfprintf(stderr,"    get 2: %s\n", path);
         TEST_ERROR
     }
+
     PASSED();
 
-    TESTING("    remove (verify for insert)");
-    /* Remove one path*/
-    if(H5PLremove(4) < 0) TEST_ERROR
+
+    /****************/
+    /* H5PLinsert() */
+    /****************/
+
+    /* We'll remove a path at an arbitrary index and then
+     * insert a new path.
+     */
+
+    TESTING("    remove (arbitrary index 2)");
+
+    /* Remove one path */
+    if(H5PLremove(4) < 0)
+        TEST_ERROR
 
     /* Verify that the entries were moved */
-    if(H5PLget(4, pathname, 256) <= 0) TEST_ERROR
-    if(HDstrcmp(pathname, "a_path_4") != 0) {
-        HDfprintf(stderr,"    get 4: %s\n", pathname);
+    if(H5PLget(4, path, 256) <= 0)
+        TEST_ERROR
+    if(HDstrcmp(path, "a_path_4") != 0) {
+        HDfprintf(stderr,"    get 4: %s\n", path);
         TEST_ERROR
     }
+
+    /* Verify the table size */
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+    if(n_paths != n_starting_paths - 1)
+        TEST_ERROR
     PASSED();
 
-    /* Verify the table is not full */
-    H5PLsize(&ndx);
-    if(ndx != 15) TEST_ERROR
 
     TESTING("    insert");
-    /* Insert one path*/
-    HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 5);
-    if(H5PLinsert(pathname, 3) < 0) {
-        HDfprintf(stderr,"    insert 3: %s\n", pathname);
+
+    /* Insert one path at index 3*/
+    HDsprintf(path, "a_path_%d", n_starting_paths + 5);
+    if(H5PLinsert(path, 3) < 0) {
+        HDfprintf(stderr,"    insert 3: %s\n", path);
         TEST_ERROR
     }
 
     /* Verify that the entries were moved */
-    if(H5PLget(4, pathname, 256) <= 0) TEST_ERROR
-    if(HDstrcmp(pathname, "a_path_2") != 0) {
-        HDfprintf(stderr,"    get 4: %s\n", pathname);
+    if(H5PLget(4, path, 256) <= 0)
+        TEST_ERROR
+    if(HDstrcmp(path, "a_path_2") != 0) {
+        HDfprintf(stderr,"    get 4: %s\n", path);
         TEST_ERROR
     }
-    PASSED();
 
-    /* Verify the table is full */
-    H5PLsize(&ndx);
-    if(ndx != H5PL_MAX_PATH_NUM) TEST_ERROR
-
-    TESTING("    insert (exceed)");
-    /* Exceed the max path insert */
-    H5E_BEGIN_TRY {
-        HDsprintf(pathname, "a_path_%d", H5PL_MAX_PATH_NUM + 6);
-        ret = H5PLinsert(pathname, 12);
-    } H5E_END_TRY
-    if(ret >= 0) TEST_ERROR
+    /* Verify the table size increased */
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+    if(n_paths != n_starting_paths)
+        TEST_ERROR
 
     PASSED();
 
-    ret_value = 0;
+
+    /****************/
+    /* H5PLremove() */
+    /****************/
+
+    /* Remove all the current paths */
+    TESTING("    remove (all)");
+
+    /* Get the current size */
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+
+    /* Remove all existing paths */
+    for(u = n_paths; u > 0; u--)
+        if(H5PLremove(u-1) < 0) {
+            HDfprintf(stderr,"    at %u: %s\n", u, path);
+            TEST_ERROR
+        }
+
+    /* Verify the table is empty */
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+    if(n_paths > 0)
+        TEST_ERROR
+
+    PASSED();
+
+
+    return SUCCEED;
 
 error:
-    return ret_value;
-}
+    return FAIL;
+} /* end test_path_api_calls() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:    Tests the plugin module (H5PL)
+ * Purpose:     Tests the plugin module (H5PL)
  *
- * Return:    Success:    exit(EXIT_SUCCESS)
- *
- *        Failure:    exit(EXIT_FAILURE)
- *
- * Programmer:    Raymond Lu
- *        14 March 2013
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  *-------------------------------------------------------------------------
  */
@@ -984,37 +1105,44 @@ main(void)
 
     /* Testing setup */
     h5_reset();
-    fapl = h5_fileaccess();
+
+    if ((fapl = h5_fileaccess()) < 0)
+        TEST_ERROR
 
     /* Turn off the chunk cache, so all the chunks are immediately written to disk */
-    if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0) TEST_ERROR
+    if (H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
+        TEST_ERROR
     rdcc_nbytes = 0;
-    if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0) TEST_ERROR
+    if (H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
+        TEST_ERROR
 
     /* Copy the file access property list */
-    if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
+    if ((fapl2 = H5Pcopy(fapl)) < 0)
+        TEST_ERROR
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
-    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
+    if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR
 
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Test with old & new format groups */
-    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = FALSE; new_format <= TRUE; new_format++) {
         hid_t my_fapl;
 
         /* Set the FAPL for the type of format */
-        if(new_format) {
+        if (new_format) {
             HDputs("\nTesting with new file format:");
             my_fapl = fapl2;
-        } /* end if */
+        }
         else {
             HDputs("Testing with old file format:");
             my_fapl = fapl;
-        } /* end else */
+        }
 
         /* Create the file for this test */
-        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) TEST_ERROR
+        if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
+            TEST_ERROR
 
         /* Test dynamically loaded filters for chunked dataset */
         nerrors += (test_filters_for_datasets(file) < 0    ? 1 : 0);
@@ -1022,12 +1150,15 @@ main(void)
         /* Test dynamically loaded filters for groups */
         nerrors += (test_filters_for_groups(file) < 0 ? 1 : 0);
 
-        if(H5Fclose(file) < 0) TEST_ERROR
+        if (H5Fclose(file) < 0)
+            TEST_ERROR
     } /* end for */
 
     /* Close FAPL */
-    if(H5Pclose(fapl2) < 0) TEST_ERROR
-    if(H5Pclose(fapl) < 0) TEST_ERROR
+    if (H5Pclose(fapl2) < 0)
+        TEST_ERROR
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -1036,10 +1167,12 @@ main(void)
 
     /* Close the library so that all loaded plugin libraries are unloaded */
     h5_reset();
-    fapl = h5_fileaccess();
+    if ((fapl = h5_fileaccess()) < 0)
+        TEST_ERROR
 
     /* Reopen the file for testing data reading */
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR
 
     /* Read the data with filters */
     nerrors += (test_read_with_filters(file) < 0 ? 1 : 0);
@@ -1052,29 +1185,33 @@ main(void)
 
     /* Close the library so that all loaded plugin libraries are unloaded */
     h5_reset();
-    fapl = h5_fileaccess();
+    if ((fapl = h5_fileaccess()) < 0)
+        TEST_ERROR
 
     /* Reopen the file for testing data reading */
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR
 
     /* Read the data with disabled filters */
     nerrors += (test_noread_with_filters(file) < 0  ? 1 : 0);
 
-    if(H5Fclose(file) < 0) TEST_ERROR
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
 
     /* Test the APIs for access to the filter plugin path table */
-    nerrors += (test_filter_path_apis() < 0  ? 1 : 0);
+    nerrors += (test_path_api_calls() < 0  ? 1 : 0);
 
-    if(nerrors) TEST_ERROR
+    if (nerrors)
+        TEST_ERROR
 
     HDprintf("All plugin tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
     nerrors = MAX(1, nerrors);
     HDprintf("***** %d PLUGIN TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-    return 1;
-}
+    HDexit(EXIT_FAILURE);
+} /* end main() */
 

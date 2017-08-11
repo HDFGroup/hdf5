@@ -10,8 +10,6 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "H5private.h"
 #include "h5tools.h"
@@ -782,20 +780,20 @@ xml_escape_the_string(const char *str, int slen)
             esc_len = 1;
         }
         else if (*cp == '\'') {
-            HDstrncpy(ncp, apos, ncp_len);
             esc_len = HDstrlen(apos);
+            HDstrncpy(ncp, apos, esc_len);
         }
         else if (*cp == '<') {
-            HDstrncpy(ncp, lt, ncp_len);
             esc_len = HDstrlen(lt);
+            HDstrncpy(ncp, lt, esc_len);
         }
         else if (*cp == '>') {
-            HDstrncpy(ncp, gt, ncp_len);
             esc_len = HDstrlen(gt);
+            HDstrncpy(ncp, gt, esc_len);
         }
         else if (*cp == '&') {
-            HDstrncpy(ncp, amp, ncp_len);
             esc_len = HDstrlen(amp);
+            HDstrncpy(ncp, amp, esc_len);
         }
         else {
             *ncp = *cp;
