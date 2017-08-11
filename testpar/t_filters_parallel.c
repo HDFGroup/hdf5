@@ -2218,9 +2218,150 @@ test_write_serial_read_parallel(void)
 static void
 test_write_parallel_read_serial(void)
 {
+    C_DATATYPE *data = NULL;
+    C_DATATYPE *read_buf = NULL;
+    C_DATATYPE *correct_buf = NULL;
+    hsize_t     dataset_dims[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
+    hsize_t     chunk_dims[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
+    hsize_t     sel_dims[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
+    hsize_t     count[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
+    hsize_t     stride[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
+    hsize_t     block[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
+    hsize_t     offset[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
+    size_t      i, data_size, correct_buf_size;
+    hid_t       file_id = -1, dset_id = -1, plist_id = -1;
+    hid_t       filespace = -1, memspace = -1;
+
+    if (MAINPROCESS) puts("Testing write file in parallel; read serially");
+
+    /* Set up file access property list with parallel I/O access */
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((plist_id >= 0), "FAPL creation succeeded");
+
+    VRFY((H5Pset_fapl_mpio(plist_id, comm, info) >= 0), "Set FAPL MPIO succeeded");
+
+    VRFY((H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0), "Set libver bounds succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, plist_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
+
+    /* Create the dataspace for the dataset */
+    dataset_dims[0] = WRITE_PARALLEL_READ_SERIAL_NROWS;
+    dataset_dims[1] = WRITE_PARALLEL_READ_SERIAL_NCOLS;
+    dataset_dims[2] = WRITE_PARALLEL_READ_SERIAL_DEPTH;
+    chunk_dims[0]   = WRITE_PARALLEL_READ_SERIAL_CH_NROWS;
+    chunk_dims[1]   = WRITE_PARALLEL_READ_SERIAL_CH_NCOLS;
+    chunk_dims[2]   = 1;
+    sel_dims[0]     = WRITE_PARALLEL_READ_SERIAL_CH_NROWS;
+    sel_dims[1]     = WRITE_PARALLEL_READ_SERIAL_NCOLS;
+    sel_dims[2]     = WRITE_PARALLEL_READ_SERIAL_DEPTH;
+
+    filespace = H5Screate_simple(WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    memspace = H5Screate_simple(WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    plist_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((plist_id >= 0), "DCPL creation succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
+
+    dset_id = H5Dcreate(file_id, WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+            H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset creation succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+
+    /* Each process defines the dataset selection in memory and writes
+     * it to the hyperslab in the file
+     */
+    count[0]  = 1;
+    count[1]  = WRITE_PARALLEL_READ_SERIAL_NCOLS / WRITE_PARALLEL_READ_SERIAL_CH_NCOLS;
+    count[2]  = NUM_MPI_RANKS;
+    stride[0] = WRITE_PARALLEL_READ_SERIAL_CH_NROWS;
+    stride[1] = WRITE_PARALLEL_READ_SERIAL_CH_NCOLS;
+    stride[2] = 1;
+    block[0]  = WRITE_PARALLEL_READ_SERIAL_CH_NROWS;
+    block[1]  = WRITE_PARALLEL_READ_SERIAL_CH_NCOLS;
+    block[2]  = 1;
+    offset[0] = ((hsize_t) mpi_rank * WRITE_PARALLEL_READ_SERIAL_CH_NROWS * count[0]);
+    offset[1] = 0;
+    offset[2] = 0;
+
+    if (VERBOSE_MED)
+        printf("Process %d is writing with count[ %llu, %llu, %llu ], stride[ %llu, %llu, %llu ], offset[ %llu, %llu, %llu ], block size[ %llu, %llu, %llu ]\n",
+            mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], offset[0], offset[1], offset[2], block[0], block[1], block[2]);
+
+    /* Select hyperslab in the file */
+    filespace = H5Dget_space(dset_id);
+    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
+
+    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, stride, count, block) >= 0), "Hyperslab selection succeeded");
+
+    /* Fill data buffer */
+    data_size = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(*data);
+
+    data = (C_DATATYPE *) malloc(data_size);
+    VRFY((NULL != data), "malloc succeeded");
+
+    for (i = 0; i < data_size / sizeof(*data); i++)
+        data[i] = (C_DATATYPE) GEN_DATA(i);
+
+    /* Create property list for collective dataset write */
+    plist_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((plist_id >= 0), "DXPL creation succeeded");
+
+    VRFY((H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) >= 0), "Set DXPL MPIO succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) >= 0), "Dataset write succeeded");
+
+    if (data) free(data);
+
+    VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     if (MAINPROCESS) {
+        plist_id = H5Pcreate(H5P_FILE_ACCESS);
+        VRFY((plist_id >= 0), "FAPL creation succeeded");
 
+        VRFY((H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0), "Set libver bounds succeeded");
+
+        file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, plist_id);
+        VRFY((file_id >= 0), "Test file open succeeded");
+
+        VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
+
+        dset_id = H5Dopen(file_id, "/" WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, H5P_DEFAULT);
+        VRFY((dset_id >= 0), "Dataset open succeeded");
+
+        correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
+
+        correct_buf = (C_DATATYPE *) malloc(correct_buf_size);
+        VRFY((NULL != correct_buf), "malloc succeeded");
+
+        read_buf = (C_DATATYPE *) malloc(correct_buf_size);
+        VRFY((NULL != read_buf), "malloc succeeded");
+
+        for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
+            correct_buf[i] = (C_DATATYPE) ((i % (dataset_dims[0] * dataset_dims[1])) + (i / (dataset_dims[0] * dataset_dims[1])));;
+
+        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) >= 0), "Dataset read succeeded");
+
+        VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+
+        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
 
     return;
@@ -2297,8 +2438,7 @@ exit:
 
     ALARM_OFF;
 
-    /* XXX: Commented for testing */
-    /* h5_clean_files(FILENAME, fapl); */
+    h5_clean_files(FILENAME, fapl);
 
     H5close();
 
