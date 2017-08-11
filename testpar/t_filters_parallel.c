@@ -81,7 +81,6 @@ static void (*tests[])(void) = {
  * Programmer: Jordan Henderson
  *             02/01/2017
  */
-/* XXX: DONE */
 static void
 test_one_chunk_filtered_dataset(void)
 {
@@ -228,7 +227,6 @@ test_one_chunk_filtered_dataset(void)
  * Programmer: Jordan Henderson
  *             02/01/2017
  */
-/* XXX: Done */
 static void
 test_filtered_dataset_no_overlap(void)
 {
@@ -374,7 +372,6 @@ test_filtered_dataset_no_overlap(void)
  * Programmer: Jordan Henderson
  *             02/01/2017
  */
-/* XXX: Done */
 static void
 test_filtered_dataset_overlap(void)
 {
@@ -524,7 +521,6 @@ test_filtered_dataset_overlap(void)
  * Programmer: Jordan Henderson
  *             02/01/2017
  */
-/* XXX: Done */
 static void
 test_filtered_dataset_single_no_selection(void)
 {
@@ -679,7 +675,6 @@ test_filtered_dataset_single_no_selection(void)
  * Programmer: Jordan Henderson
  *             02/02/2017
  */
-/* XXX: Done */
 static void
 test_filtered_dataset_all_no_selection(void)
 {
@@ -797,7 +792,6 @@ test_filtered_dataset_all_no_selection(void)
  * Programmer: Jordan Henderson
  *             02/02/2017
  */
-/* XXX: DONE */
 static void
 test_filtered_dataset_point_selection(void)
 {
@@ -936,7 +930,6 @@ test_filtered_dataset_point_selection(void)
  * Programmer: Jordan Henderson
  *             02/02/2017
  */
-/* XXX: Done */
 static void
 test_filtered_dataset_interleaved_write(void)
 {
@@ -1082,7 +1075,6 @@ test_filtered_dataset_interleaved_write(void)
  * Programmer: Jordan Henderson
  *             02/06/2017
  */
-/* XXX: Done */
 static void
 test_3d_filtered_dataset_no_overlap_separate_pages(void)
 {
@@ -1234,7 +1226,6 @@ test_3d_filtered_dataset_no_overlap_separate_pages(void)
  * Programmer: Jordan Henderson
  *             02/06/2017
  */
-/* XXX: Done */
 static void
 test_3d_filtered_dataset_no_overlap_same_pages(void)
 {
@@ -1386,7 +1377,6 @@ test_3d_filtered_dataset_no_overlap_same_pages(void)
  * Programmer: Jordan Henderson
  *             02/06/2017
  */
-/* XXX: Done */
 static void
 test_3d_filtered_dataset_overlap(void)
 {
@@ -2112,6 +2102,10 @@ test_write_serial_read_parallel(void)
 
     if (MAINPROCESS) puts("Testing write file serially; read file in parallel");
 
+    dataset_dims[0] = WRITE_SERIAL_READ_PARALLEL_NROWS;
+    dataset_dims[1] = WRITE_SERIAL_READ_PARALLEL_NCOLS;
+    dataset_dims[2] = WRITE_SERIAL_READ_PARALLEL_DEPTH;
+
     /* Write the file on the MAINPROCESS rank */
     if (MAINPROCESS) {
         /* Set up file access property list */
@@ -2126,9 +2120,6 @@ test_write_serial_read_parallel(void)
         VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
 
         /* Create the dataspace for the dataset */
-        dataset_dims[0] = WRITE_SERIAL_READ_PARALLEL_NROWS;
-        dataset_dims[1] = WRITE_SERIAL_READ_PARALLEL_NCOLS;
-        dataset_dims[2] = WRITE_SERIAL_READ_PARALLEL_DEPTH;
         chunk_dims[0] = WRITE_SERIAL_READ_PARALLEL_CH_NROWS;
         chunk_dims[1] = WRITE_SERIAL_READ_PARALLEL_CH_NCOLS;
         chunk_dims[2] = 1;
@@ -2202,28 +2193,7 @@ test_write_serial_read_parallel(void)
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
 
-    if (MAINPROCESS) {
-        printf("Correct buf: ");
-        for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-            printf("%ld, ", correct_buf[i]);
-        printf("\n\n");
-
-        printf("Read buf: ");
-        for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-            printf("%ld, ", read_buf[i]);
-        printf("\n\n");
-
-        fflush(stdout);
-
-        MPI_Barrier(MPI_COMM_WORLD);
-    }
-    else {
-        fflush(stdout);
-
-        MPI_Barrier(MPI_COMM_WORLD);
-    }
-
-    /* VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded"); */
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf) free(correct_buf);
     if (read_buf) free(read_buf);
