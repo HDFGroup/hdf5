@@ -867,6 +867,8 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
     HDassert(f->shared);
 
     if(1 == f->shared->nrefs) {
+        int actype;                         /* metadata cache type (enum value) */
+        H5F_io_info2_t fio_info;            /* I/O info for operation */
 
         /* FULLSWMR, delete delta t value at file close time */
         if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
@@ -874,9 +876,6 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
                 if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_SWMR_DELTAT_ID) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove SWMR delta t value")
  
-        int actype;                         /* metadata cache type (enum value) */
-        H5F_io_info2_t fio_info;            /* I/O info for operation */
-
         /* Flush at this point since the file will be closed (phase 1).
          * Only try to flush the file if it was opened with write access, and if
          * the caller requested a flush.

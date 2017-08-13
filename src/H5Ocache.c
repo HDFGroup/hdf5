@@ -69,7 +69,7 @@ static void *H5O__cache_deserialize(const void *image, size_t len,
 static herr_t H5O__cache_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_serialize(const H5F_t *f, void *image, size_t len,
     void *thing); 
-static herr_t H5O__cache_notify(H5AC_notify_action_t action, void *_thing);
+static herr_t H5O__cache_notify(H5AC_notify_action_t action, void *_thing, ...);
 static herr_t H5O__cache_free_icr(void *thing);
 
 static herr_t H5O__cache_chk_get_initial_load_size(void *udata, size_t *image_len);
@@ -79,7 +79,7 @@ static void *H5O__cache_chk_deserialize(const void *image, size_t len,
 static herr_t H5O__cache_chk_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing);
+static herr_t H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing, ...);
 static herr_t H5O__cache_chk_free_icr(void *thing);
 
 /* Prefix routines */
@@ -551,7 +551,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
+H5O__cache_notify(H5AC_notify_action_t action, void *_thing, ...)
 {
     H5O_t *oh = (H5O_t *)_thing;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -600,6 +600,7 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
 	case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
 	case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 
@@ -609,6 +610,14 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
                 if(H5AC_proxy_entry_remove_parent(oh->proxy, oh) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't remove object header as parent of proxy")
             } /* end if */
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
             break;
 
         default:
@@ -909,7 +918,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
+H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing, ...)
 {
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)_thing;
     H5O_chunk_proxy_t *cont_chk_proxy = NULL; /* Proxy for chunk containing continuation message that points to this chunk, if not chunk 0 */
@@ -991,6 +1000,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
 	case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
 	case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 
@@ -1012,6 +1022,14 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 if(H5AC_proxy_entry_remove_parent(chk_proxy->oh->proxy, chk_proxy) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't remove object header chunk as parent of proxy")
             } /* end if */
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
             break;
 
         default:

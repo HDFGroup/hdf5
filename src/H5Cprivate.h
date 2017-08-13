@@ -39,7 +39,7 @@
 /**************************/
 
 /* Cache configuration settings */
-#define H5C__MAX_NUM_TYPE_IDS   30
+#define H5C__MAX_NUM_TYPE_IDS   31
 #define H5C__PREFIX_LEN         32
 
 /* This sanity checking constant was picked out of the air.  Increase
@@ -870,7 +870,9 @@ typedef enum H5C_notify_action_t {
     H5C_NOTIFY_ACTION_CHILD_DIRTIED,    /* Dependent child has been marked dirty. */
     H5C_NOTIFY_ACTION_CHILD_CLEANED,    /* Dependent child has been marked clean. */
     H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED, /* Dependent child has been marked unserialized. */
-    H5C_NOTIFY_ACTION_CHILD_SERIALIZED  /* Dependent child has been marked serialized. */
+    H5C_NOTIFY_ACTION_CHILD_SERIALIZED, /* Dependent child has been marked serialized. */
+    H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT, /* Dependent child is about to be evicted. */
+    H5C_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY /* Dirty dependent child is being removed from a flush dependency. */
 } H5C_notify_action_t;
 
 /* Cache client callback function pointers */
@@ -886,7 +888,7 @@ typedef herr_t (*H5C_pre_serialize_func_t)(H5F_t *f, hid_t dxpl_id,
     size_t *new_len_ptr, unsigned *flags_ptr);
 typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f, void *image_ptr,
     size_t len, void *thing);
-typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action, void *thing);
+typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action, void *thing,...);
 typedef herr_t (*H5C_free_icr_func_t)(void *thing);
 typedef herr_t (*H5C_get_fsf_size_t)(const void * thing, size_t *fsf_size_ptr);
 
@@ -2312,6 +2314,9 @@ H5_DLL herr_t H5C_ignore_tags(H5C_t *cache_ptr);
 H5_DLL hbool_t H5C_get_ignore_tags(const H5C_t *cache_ptr);
 H5_DLL herr_t H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
 H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
+H5_DLL htri_t H5C_has_dirty_entry(const H5C_t *cache);
+H5_DLL herr_t H5C_get_flush_dep_nchildren(H5C_cache_entry_t *entry_ptr, unsigned *nchildren);
+H5_DLL void *H5C_get_entry_from_addr(H5C_t *cache, haddr_t addr);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
 H5_DLL herr_t H5C_unsettle_entry_ring(void *thing);
 H5_DLL herr_t H5C_unsettle_ring(H5F_t * f, H5C_ring_t ring);
@@ -2337,7 +2342,7 @@ H5_DLL herr_t H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL herr_t H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL hbool_t H5C_get_serialization_in_progress(const H5C_t *cache_ptr);
 H5_DLL hbool_t H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring);
-H5_DLL herr_t H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn);
+H5_DLL herr_t H5C_dump_cache_skip_list(FILE *stream, H5C_t *cache_ptr, const char *calling_fcn);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_dump_coll_write_list(H5C_t * cache_ptr, char * calling_fcn);
 #endif /* H5_HAVE_PARALLEL */

@@ -410,7 +410,6 @@ typedef struct H5AC_aux_t
 } H5AC_aux_t; /* struct H5AC_aux_t */
 #endif /* H5_HAVE_PARALLEL */
 
-
 /******************************/
 /* Package Private Prototypes */
 /******************************/
@@ -503,3 +502,4 @@ H5_DLL herr_t H5AC__write_remove_entry_log_msg(const H5AC_t *cache,
                                               herr_t fxn_ret_value);
 
 #endif /* _H5ACpkg_H */
+

@@ -78,7 +78,7 @@ static void *H5EA__cache_hdr_deserialize(const void *image, size_t len,
 static herr_t H5EA__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5EA__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *thing, ...);
 static herr_t H5EA__cache_hdr_free_icr(void *thing);
 
 static herr_t H5EA__cache_iblock_get_initial_load_size(void *udata, size_t *image_len);
@@ -88,7 +88,7 @@ static void *H5EA__cache_iblock_deserialize(const void *image, size_t len,
 static herr_t H5EA__cache_iblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5EA__cache_iblock_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *thing, ...);
 static herr_t H5EA__cache_iblock_free_icr(void *thing);
 
 static herr_t H5EA__cache_sblock_get_initial_load_size(void *udata, size_t *image_len);
@@ -98,7 +98,7 @@ static void *H5EA__cache_sblock_deserialize(const void *image, size_t len,
 static herr_t H5EA__cache_sblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5EA__cache_sblock_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *thing, ...);
 static herr_t H5EA__cache_sblock_free_icr(void *thing);
 
 static herr_t H5EA__cache_dblock_get_initial_load_size(void *udata, size_t *image_len);
@@ -108,7 +108,7 @@ static void *H5EA__cache_dblock_deserialize(const void *image, size_t len,
 static herr_t H5EA__cache_dblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5EA__cache_dblock_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *thing, ...);
 static herr_t H5EA__cache_dblock_free_icr(void *thing);
 static herr_t H5EA__cache_dblock_fsf_size(const void *thing, size_t *fsf_size);
 
@@ -120,7 +120,7 @@ static herr_t H5EA__cache_dblk_page_image_len(const void *thing,
     size_t *image_len);
 static herr_t H5EA__cache_dblk_page_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *thing, ...);
 static herr_t H5EA__cache_dblk_page_free_icr(void *thing);
 
 
@@ -533,7 +533,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_serialize() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
+H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...))
 
     /* Local variables */
     H5EA_hdr_t *hdr = (H5EA_hdr_t *)_thing;      /* Pointer to the object */
@@ -554,6 +554,7 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
             case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+            case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
 		/* do nothing */
 		break;
 
@@ -578,6 +579,14 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
 		break;
+
+            case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
+                break;
 
             default:
 #ifdef NDEBUG
@@ -936,7 +945,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_serialize() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing))
+H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing, ...))
 
     /* Local variables */
     H5EA_iblock_t *iblock = (H5EA_iblock_t *)_thing;      /* Pointer to the object */
@@ -960,6 +969,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing))
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 
@@ -974,6 +984,14 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing))
                     H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between index block and extensible array 'top' proxy")
                 iblock->top_proxy = NULL;
             } /* end if */
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
             break;
 
         default:
@@ -1333,7 +1351,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_serialize() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing))
+H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing, ...))
 
     /* Local variables */
     H5EA_sblock_t *sblock = (H5EA_sblock_t *)_thing;      /* Pointer to the object */
@@ -1385,7 +1403,16 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing))
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
             break;
 
         default:
@@ -1746,7 +1773,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_serialize() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing))
+H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing, ...))
 
     /* Local variables */
     H5EA_dblock_t *dblock = (H5EA_dblock_t *)_thing;      /* Pointer to the object */
@@ -1798,7 +1825,16 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing))
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
             break;
 
         default:
@@ -2127,7 +2163,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_serialize() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing))
+H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing, ...))
 
     /* Local variables */
     H5EA_dblk_page_t *dblk_page = (H5EA_dblk_page_t *)_thing;      /* Pointer to the object */
@@ -2179,7 +2215,16 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing))
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
             break;
 
         default:

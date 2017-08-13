@@ -6408,8 +6408,8 @@ test_swmr_deltat_read_concur(hid_t in_fapl)
     h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
 
     /* Set delta t value */
-    /* if(H5Pset_swmr_deltat(fapl, deltat) < 0) */
-    /*     FAIL_STACK_ERROR */
+    if(H5Pset_swmr_deltat(fapl, deltat) < 0)
+        FAIL_STACK_ERROR
 
     /* Create a file. */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
@@ -6420,15 +6420,14 @@ test_swmr_deltat_read_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     if(HDpipe(out_pdf) < 0)
-        FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Fork child process */
     if((childpid = HDfork()) < 0)
-    FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Parent process open with SWMR_WRITE, child process open with SWMR_READ */
     /* Verify child process gets the same delta t value set by parent process */ 
-
     if(childpid == 0) {         /* Child process */
         hid_t child_fid;        /* File ID */
         hid_t fapl_child = -1;  /* File access property list */
@@ -6439,10 +6438,9 @@ test_swmr_deltat_read_concur(hid_t in_fapl)
             HDexit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
-        while(child_notify != 1) {
+        while(child_notify != 1)
             if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
                 HDexit(EXIT_FAILURE);
-        }
 
         /* Open the test file */
         H5E_BEGIN_TRY {
@@ -6451,25 +6449,23 @@ test_swmr_deltat_read_concur(hid_t in_fapl)
 
         /* Should succeed */
         if(child_fid >= 0) {
-
             fapl_child = H5Fget_access_plist(child_fid);
-            if (H5Pget_swmr_deltat(fapl_child, &deltat))
+            if(H5Pget_swmr_deltat(fapl_child, &deltat))
                 FAIL_STACK_ERROR
-
             if(deltat != 17)
-                FAIL_STACK_ERROR
+                TEST_ERROR
 
             if(H5Fclose(child_fid) < 0)
                 FAIL_STACK_ERROR
             HDexit(EXIT_SUCCESS);
-        }
+        } /* end if */
 
         /* Close the pipe */
         if(HDclose(out_pdf[0]) < 0)
             HDexit(EXIT_FAILURE);
 
         HDexit(EXIT_FAILURE);
-    }
+    } /* end if */
 
     /* close unused read end for out_pdf */
     if(HDclose(out_pdf[0]) < 0)
@@ -6486,22 +6482,23 @@ test_swmr_deltat_read_concur(hid_t in_fapl)
     /* Notify child process */
     notify = 1;
     if(HDwrite(out_pdf[1], &notify, sizeof(int)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the pipe */
     if(HDclose(out_pdf[1]) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Wait for child process to complete */
     if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
-    FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Check if child terminated normally */
     if(WIFEXITED(child_status)) {
         /* Check exit status of the child */
         if(WEXITSTATUS(child_status) != 0)
             TEST_ERROR
-    } else
+    } /* end if */
+    else
         FAIL_STACK_ERROR
 
     /* Close the file */
@@ -6511,6 +6508,7 @@ test_swmr_deltat_read_concur(hid_t in_fapl)
     PASSED();
 
     return 0;
+
 error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl);

@@ -70,7 +70,7 @@ static void *H5B2__cache_hdr_deserialize(const void *image, size_t len,
 static herr_t H5B2__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *thing, ...);
 static herr_t H5B2__cache_hdr_free_icr(void *thing);
 
 static herr_t H5B2__cache_int_get_initial_load_size(void *udata, size_t *image_len);
@@ -80,7 +80,7 @@ static void *H5B2__cache_int_deserialize(const void *image, size_t len,
 static herr_t H5B2__cache_int_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_int_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5B2__cache_int_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5B2__cache_int_notify(H5AC_notify_action_t action, void *thing, ...);
 static herr_t H5B2__cache_int_free_icr(void *thing);
 
 static herr_t H5B2__cache_leaf_get_initial_load_size(void *udata, size_t *image_len);
@@ -90,7 +90,7 @@ static void *H5B2__cache_leaf_deserialize(const void *image, size_t len,
 static herr_t H5B2__cache_leaf_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_leaf_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *thing, ...);
 static herr_t H5B2__cache_leaf_free_icr(void *thing);
 
 /*********************/
@@ -447,7 +447,7 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
+H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing, ...)
 {
     H5B2_hdr_t 	*hdr = (H5B2_hdr_t *)_thing;
     herr_t 	ret_value = SUCCEED;
@@ -479,6 +479,7 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
             case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+            case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
 		/* do nothing */
                 break;
 
@@ -503,6 +504,14 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                     /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
                 } /* end if */
 		break;
+
+            case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
+                break;
 
             default:
 #ifdef NDEBUG
@@ -877,7 +886,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
+H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing, ...)
 {
     H5B2_internal_t 	*internal = (H5B2_internal_t *)_thing;
     herr_t   		ret_value = SUCCEED;
@@ -907,6 +916,7 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
             case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+            case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
 		/* do nothing */
 		break;
 
@@ -921,6 +931,14 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between internal node and v2 B-tree 'top' proxy")
                     internal->top_proxy = NULL;
                 } /* end if */
+                break;
+
+            case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
                 break;
 
             default:
@@ -1265,7 +1283,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
+H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing, ...)
 {
     H5B2_leaf_t 	*leaf = (H5B2_leaf_t *)_thing;
     herr_t              ret_value = SUCCEED;
@@ -1295,6 +1313,7 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
             case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+            case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
                 /* do nothing */
                 break;
 
@@ -1309,6 +1328,14 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy")
                     leaf->top_proxy = NULL;
                 } /* end if */
+                break;
+
+            case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
                 break;
 
             default:

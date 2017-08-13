@@ -141,7 +141,8 @@ static const H5AC_class_t *const H5AC_class_s[] = {
     H5AC_DRVRINFO,              /* (26) driver info block (supplements superblock) */
     H5AC_EPOCH_MARKER,          /* (27) epoch marker - always internal to cache */
     H5AC_PROXY_ENTRY,           /* (28) cache entry proxy               */
-    H5AC_PREFETCHED_ENTRY  	/* (29) prefetched entry - always internal to cache */
+    H5AC_PREFETCHED_ENTRY,  	/* (29) prefetched entry - always internal to cache */
+    H5AC_FREEDSPACE             /* (30) FULLSWMR freedspace            */
 };
 
 
@@ -3337,10 +3338,72 @@ done:
 
 /*-------------------------------------------------------------------------
  *
+ * Function:    H5AC_get_entry_type
+ *
+ * Purpose:     Get the cache entry type
+ *
+ * Return:      -1 if error is detected, cache entry type ID otherwise.
+ *
+ * Programmer:  Houjun Tang
+ *              June 8, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_get_entry_type(const H5C_cache_entry_t *entry)
+{
+    herr_t ret_value = FAIL;            /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    HDassert(entry);
+    HDassert(entry->type);
+
+    ret_value = entry->type->id;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_get_entry_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_has_dirty_entry
+ *
+ * Purpose:     Check if there are dirty entries in cache
+ *
+ * Return:	Success:	TRUE / FALSE
+ *		Failure:	FAIL
+ *
+ * Programmer:  Houjun Tang
+ *              June 8, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5AC_has_dirty_entry(const H5F_t *f)
+{
+    htri_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared->cache);
+
+    /* Check in the cache */
+    if((ret_value = H5C_has_dirty_entry(f->shared->cache)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get dirty entries status")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_has_dirty_entry() */
+
+
+/*-------------------------------------------------------------------------
+ *
  * Function:    H5AC_iterate
  *
- * Purpose:     Iterate over cache entries for full SWMR implementation, 
- *              making a callback for matches
+ * Purpose:     Iterate over cache entries, making a callback for each
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
@@ -3359,12 +3422,12 @@ H5AC_iterate(H5F_t *f, H5AC_cache_iter_cb_t cb, void *cb_ctx)
     /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
-     
-    /* Call cache-level function to re-tag entries with the COPIED tag */
+
+    /* Call cache-level function to iterate over entries */
     if(H5C_iterate(f->shared->cache, cb, cb_ctx) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTOPERATE, FAIL, "Can't iterate cache entries")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_iterate() */
+} /* end H5AC_iterate() */
 

@@ -2950,6 +2950,32 @@ datum_notify(H5C_notify_action_t action, void *thing)
             /* do nothing */
             break;
 
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+            if(callbacks_verbose) {
+                HDfprintf(stdout,
+                      "%d: notify() action = child entry before evict, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                HDfflush(stdout);
+            } /* end if */
+
+            nerrors++;
+            ret_value = FAIL;
+            if(verbose)
+                HDfprintf(stdout, "%d:%s: Invalid notify action.\n", world_mpi_rank, FUNC);
+	    break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = dirty child entry undepend, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            /* do nothing */
+            break;
+
 	default:
             nerrors++;
             ret_value = FAIL;

@@ -28,6 +28,7 @@
 #include "H5Cpkg.h"
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
+#include "H5MFprivate.h"
 
 /* Include test header files */
 #include "h5test.h"

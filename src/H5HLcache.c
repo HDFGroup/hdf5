@@ -86,7 +86,7 @@ static void *H5HL__cache_datablock_deserialize(const void *image, size_t len,
 static herr_t H5HL__cache_datablock_image_len(const void *thing, size_t *image_len);
 static herr_t H5HL__cache_datablock_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
-static herr_t H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing);
+static herr_t H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing, ...);
 static herr_t H5HL__cache_datablock_free_icr(void *thing);
 
 /* Header deserialization */
@@ -872,7 +872,7 @@ H5HL__cache_datablock_serialize(const H5F_t *f, void *image, size_t len,
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
+H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing, ...)
 {
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing;  /* Pointer to the local heap data block */
     herr_t      	 ret_value = SUCCEED;   /* Return value */
@@ -904,6 +904,7 @@ H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
         case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
 	    /* do nothing */
 	    break;
 
@@ -915,6 +916,14 @@ H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
             /* Unpin the local heap prefix */
             if(FAIL == H5AC_unpin_entry(dblk->heap->prfx))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap prefix")
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+#ifdef NDEBUG
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Invalid action?!?");
+#endif /* NDEBUG */
             break;
 
         default:

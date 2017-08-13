@@ -682,7 +682,8 @@ H5C_verify_tag(int id, haddr_t tag)
         } /* end else */
     
         /* Free Space Manager */
-        if(tag == H5AC__FREESPACE_TAG && ((id != H5AC_FSPACE_HDR_ID) && (id != H5AC_FSPACE_SINFO_ID)))
+        /* FULLSWMR */
+        if(tag == H5AC__FREESPACE_TAG && ((id != H5AC_FSPACE_HDR_ID) && (id != H5AC_FSPACE_SINFO_ID) && (id != H5AC_FREEDSPACE_ID)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry")
     
         /* SOHM */

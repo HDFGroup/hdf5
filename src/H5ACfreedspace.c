@@ -13,16 +13,13 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:             H5ACproxy_entry.c
+ * Created:             H5ACfreedspace.c
  *
- * Purpose:             Functions and a cache client for a "proxy" cache entry.
- *			A proxy cache entry is used as a placeholder for entire
- *			data structures to attach flush dependencies, etc.
+ * Purpose:             Functions for cache freed space management.
+ *                      Reused code from H5ACproxy_entry.c
  *
  *-------------------------------------------------------------------------
  */
-
-#ifdef FULLSWMR_DONE
 
 /****************/
 /* Module Setup */
@@ -36,6 +33,7 @@
 #include "H5ACpkg.h"            /* Metadata cache                       */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5ACprivate.h"
 
 
 /****************/
@@ -47,6 +45,13 @@
 /* Local Typedefs */
 /******************/
 
+typedef struct H5AC_freedspace_ctx_t {
+    H5F_t      *f;
+    hid_t      dxpl_id;
+    int        ring;
+    H5AC_freedspace_t *fs;
+} H5AC_freedspace_ctx_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -56,33 +61,35 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static int H5AC__freedspace_create_cb(H5C_cache_entry_t *entry, void *_ctx);
 
 /* Metadata cache (H5AC) callbacks */
-static herr_t H5AC__proxy_entry_image_len(const void *thing, size_t *image_len);
-static herr_t H5AC__proxy_entry_serialize(const H5F_t *f, void *image_ptr,
-    size_t len, void *thing);
-static herr_t H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *thing,...);
-static herr_t H5AC__proxy_entry_free_icr(void *thing);
+static herr_t H5AC__freedspace_notify(H5AC_notify_action_t action, void *_thing, ...);
+static herr_t H5AC__freedspace_image_len(const void *thing, size_t *image_len);
+static herr_t H5AC__freedspace_serialize(const H5F_t *f, void *image_ptr,
+            size_t len, void *thing);
+static herr_t H5AC__freedspace_free_icr(void *thing);
+
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-/* H5AC proxy entries inherit cache-like properties from H5AC */
-const H5AC_class_t H5AC_PROXY_ENTRY[1] = {{
-    H5AC_PROXY_ENTRY_ID,               	/* Metadata client ID */
-    "Proxy entry",           		/* Metadata client name (for debugging) */
+/* H5AC freedspace entries inherit cache-like properties from H5AC */
+const H5AC_class_t H5AC_FREEDSPACE[1] = {{
+    H5AC_FREEDSPACE_ID,               	/* Metadata client ID */
+    "Freed space",           		/* Metadata client name (for debugging) */
     H5FD_MEM_SUPER,                     /* File space memory type for client */
     0,					/* Client class behavior flags */
     NULL,    				/* 'get_initial_load_size' callback */
     NULL,    				/* 'get_final_load_size' callback */
     NULL,				/* 'verify_chksum' callback */
     NULL,    				/* 'deserialize' callback */
-    H5AC__proxy_entry_image_len,	/* 'image_len' callback */
+    H5AC__freedspace_image_len,	        /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
-    H5AC__proxy_entry_serialize,	/* 'serialize' callback */
-    H5AC__proxy_entry_notify,		/* 'notify' callback */
-    H5AC__proxy_entry_free_icr,        	/* 'free_icr' callback */
+    H5AC__freedspace_serialize,	        /* 'serialize' callback */
+    H5AC__freedspace_notify,		/* 'notify' callback */
+    H5AC__freedspace_free_icr,          /* 'free_icr' callback */
     NULL,                              	/* 'fsf_size' callback */
 }};
 
@@ -96,379 +103,25 @@ const H5AC_class_t H5AC_PROXY_ENTRY[1] = {{
 /* Local Variables */
 /*******************/
 
-/* Declare a free list to manage H5AC_proxy_entry_t objects */
-H5FL_DEFINE_STATIC(H5AC_proxy_entry_t);
+/* Declare a free list to manage H5AC_freedspace_t objects */
+H5FL_DEFINE_STATIC(H5AC_freedspace_t);
 
-/* FULLSWMR TODO */
-/* change proxy_entry -> freedspace */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_proxy_entry_create
- *
- * Purpose:     Create a new proxy entry
- *
- * Return:	Success:	Pointer to the new proxy entry object.
- *		Failure:	NULL
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
- *-------------------------------------------------------------------------
- */
-H5AC_proxy_entry_t *
-H5AC_proxy_entry_create(void)
-/* H5AC_proxy_entry_create(addr, type, size) */
-{
-    H5AC_proxy_entry_t *pentry = NULL;  /* Pointer to new proxy entry */
-    H5AC_proxy_entry_t *ret_value = NULL;       /* Return value */
-
-    FUNC_ENTER_NOAPI(NULL)
-
-    /* Allocate new proxy entry */
-    if(NULL == (pentry = H5FL_CALLOC(H5AC_proxy_entry_t)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "can't allocate proxy entry")
-
-    /* Set non-zero fields */
-    pentry->addr = HADDR_UNDEF;
-
-    /* Set return value */
-    ret_value = pentry;
-
-done:
-    /* Release resources on error */
-    if(!ret_value)
-        if(pentry)
-            pentry = H5FL_FREE(H5AC_proxy_entry_t, pentry);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_proxy_entry_create() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_proxy_entry_add_parent
- *
- * Purpose:     Add a parent to a proxy entry
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
-{
-    H5AC_info_t *parent = (H5AC_info_t *)_parent; /* Parent entry's cache info */
-    herr_t ret_value = SUCCEED;         	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(parent);
-    HDassert(pentry);
-
-    /* Add parent to the list of parents */
-    if(NULL == pentry->parents)
-        if(NULL == (pentry->parents = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to create skip list for parents of proxy entry")
-
-    /* Insert parent address into skip list */
-    if(H5SL_insert(pentry->parents, parent, &parent->addr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to insert parent into proxy's skip list")
-
-    /* Add flush dependency on parent */
-    if(pentry->nchildren > 0) {
-        /* Sanity check */
-        HDassert(H5F_addr_defined(pentry->addr));
-
-        if(H5AC_create_flush_dependency(parent, pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "unable to set flush dependency on proxy entry")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_proxy_entry_add_parent() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_proxy_entry_remove_parent
- *
- * Purpose:     Removes a parent from a proxy entry
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
-{
-    H5AC_info_t *parent = (H5AC_info_t *)_parent;   /* Pointer to the parent entry */
-    H5AC_info_t *rem_parent;            /* Pointer to the removed parent entry */
-    herr_t ret_value = SUCCEED;        	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(pentry);
-    HDassert(pentry->parents);
-    HDassert(parent);
-
-    /* Remove parent from skip list */
-    if(NULL == (rem_parent = (H5AC_info_t *)H5SL_remove(pentry->parents, &parent->addr)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove proxy entry parent from skip list")
-    if(!H5F_addr_eq(rem_parent->addr, parent->addr))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "removed proxy entry parent not the same as real parent")
-
-    /* Shut down the skip list, if this is the last parent */
-    if(0 == H5SL_count(pentry->parents)) {
-        /* Sanity check */
-        HDassert(0 == pentry->nchildren);
-
-        if(H5SL_close(pentry->parents) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CLOSEERROR, FAIL, "can't close proxy parent skip list")
-        pentry->parents = NULL;
-    } /* end if */
-
-    /* Remove flush dependency between the proxy entry and a parent */
-    if(pentry->nchildren > 0)
-        if(H5AC_destroy_flush_dependency(parent, pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on proxy entry")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_proxy_entry_remove_parent() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5AC__proxy_entry_add_child_cb
- *
- * Purpose:	Callback routine for adding an entry as a flush dependency for
- *		a proxy entry.
- *
- * Return:	Success:	Non-negative on success
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Thursday, September 22, 2016
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5AC__proxy_entry_add_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
-{
-    H5AC_info_t *parent = (H5AC_info_t *)_item;   /* Pointer to the parent entry */
-    H5AC_proxy_entry_t *pentry = (H5AC_proxy_entry_t *)_udata; /* Pointer to the proxy entry */
-    int ret_value = H5_ITER_CONT;     /* Callback return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Add flush dependency on parent for proxy entry */
-    if(H5AC_create_flush_dependency(parent, pentry) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, H5_ITER_ERROR, "unable to set flush dependency for virtual entry")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC__proxy_entry_add_child_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_proxy_entry_add_child
- *
- * Purpose:     Add a child a proxy entry
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, hid_t dxpl_id,
-    void *child)
-{
-    herr_t ret_value = SUCCEED;         	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(pentry);
-    HDassert(child);
-
-    /* Check for first child */
-    if(0 == pentry->nchildren) {
-        /* Get an address, if the proxy doesn't already have one */
-        if(!H5F_addr_defined(pentry->addr))
-            if(HADDR_UNDEF == (pentry->addr = H5MF_alloc_tmp(f, 1)))
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "temporary file space allocation failed for proxy entry")
-
-        /* Insert the proxy entry into the cache */
-        if(H5AC_insert_entry(f, dxpl_id, H5AC_PROXY_ENTRY, pentry->addr, pentry, H5AC__PIN_ENTRY_FLAG) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to cache proxy entry")
-
-        /* Proxies start out clean (insertions are automatically marked dirty) */
-        if(H5AC_mark_entry_clean(pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
-
-        /* Proxies start out serialized (insertions are automatically marked unserialized) */
-        if(H5AC_mark_entry_serialized(pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry clean")
-
-        /* If there are currently parents, iterate over the list of parents, creating flush dependency on them */
-        if(pentry->parents)
-            if(H5SL_iterate(pentry->parents, H5AC__proxy_entry_add_child_cb, pentry) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "can't visit parents")
-    } /* end if */
-
-    /* Add flush dependency on proxy entry */
-    if(H5AC_create_flush_dependency(pentry, child) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "unable to set flush dependency on proxy entry")
-
-    /* Increment count of children */
-    pentry->nchildren++;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_proxy_entry_add_child() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5AC__proxy_entry_remove_child_cb
- *
- * Purpose:	Callback routine for removing an entry as a flush dependency for
- *		proxy entry.
- *
- * Return:	Success:	Non-negative on success
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Thursday, September 22, 2016
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5AC__proxy_entry_remove_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
-{
-    H5AC_info_t *parent = (H5AC_info_t *)_item;   /* Pointer to the parent entry */
-    H5AC_proxy_entry_t *pentry = (H5AC_proxy_entry_t *)_udata; /* Pointer to the proxy entry */
-    int ret_value = H5_ITER_CONT;     /* Callback return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Remove flush dependency on parent for proxy entry */
-    if(H5AC_destroy_flush_dependency(parent, pentry) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, H5_ITER_ERROR, "unable to remove flush dependency for proxy entry")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC__proxy_entry_remove_child_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_proxy_entry_remove_child
- *
- * Purpose:     Remove a child a proxy entry
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child)
-{
-    herr_t ret_value = SUCCEED;         	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(pentry);
-    HDassert(child);
-
-    /* Remove flush dependency on proxy entry */
-    if(H5AC_destroy_flush_dependency(pentry, child) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on proxy entry")
-
-    /* Decrement count of children */
-    pentry->nchildren--;
-
-    /* Check for last child */
-    if(0 == pentry->nchildren) {
-        /* Check for flush dependencies on proxy's parents */
-        if(pentry->parents)
-            /* Iterate over the list of parents, removing flush dependency on them */
-            if(H5SL_iterate(pentry->parents, H5AC__proxy_entry_remove_child_cb, pentry) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "can't visit parents")
-
-        /* Unpin proxy */
-        if(H5AC_unpin_entry(pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin proxy entry")
-
-        /* Remove proxy entry from cache */
-        if(H5AC_remove_entry(pentry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "unable to remove proxy entry")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_proxy_entry_remove_child() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_proxy_entry_dest
- *
- * Purpose:     Destroys a proxy entry in memory.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry)
-{
-    herr_t ret_value = SUCCEED;         	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(pentry);
-    HDassert(NULL == pentry->parents);
-    HDassert(0 == pentry->nchildren);
-    HDassert(0 == pentry->ndirty_children);
-    HDassert(0 == pentry->nunser_children);
-
-    /* Free the proxy entry object */
-    pentry = H5FL_FREE(H5AC_proxy_entry_t, pentry);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_proxy_entry_dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC__proxy_entry_image_len
+ * Function:    H5AC__freedspace_image_len
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
+ * Programmer:  Houjun Tang
+ *              June 8, 2017
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__proxy_entry_image_len(const void H5_ATTR_UNUSED *thing, size_t *image_len)
+H5AC__freedspace_image_len(const void H5_ATTR_UNUSED *thing, size_t *image_len)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -479,25 +132,25 @@ H5AC__proxy_entry_image_len(const void H5_ATTR_UNUSED *thing, size_t *image_len)
     *image_len = 1;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5AC__proxy_entry_image_len() */
+} /* end H5AC__freedspace_image_len() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC__proxy_entry_serialize
+ * Function:    H5AC__freedspace_serialize
  *
- * Purpose:	Serializes a data structure for writing to disk.
+ * Purpose:     Serializes a data structure for writing to disk.
  *
- * Note:	Should never be invoked.
+ * Note:        Should never be invoked.
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
+ * Programmer:  Houjun Tang
+ *              June 8, 2017
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__proxy_entry_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *image,
+H5AC__freedspace_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *image,
     size_t H5_ATTR_UNUSED len, void H5_ATTR_UNUSED *thing)
 {
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
@@ -508,136 +161,307 @@ H5AC__proxy_entry_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *
     HERROR(H5E_CACHE, H5E_CANTSERIALIZE, "called unreachable fcn.");
 
     FUNC_LEAVE_NOAPI(FAIL)
-} /* end H5AC__proxy_entry_serialize() */
+} /* end H5AC__freedspace_serialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC__proxy_entry_notify
+ * Function:    H5AC__freedspace_free_icr
+ *
+ * Purpose:     Destroy/release an "in core representation" of a data
+ *              structure
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Houjun Tang
+ *              June 8, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5AC__freedspace_free_icr(void *_thing)
+{
+    H5AC_freedspace_t *pentry = (H5AC_freedspace_t *)_thing;
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Destroy the freedspace entry */
+    if(H5AC_freedspace_dest(pentry) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to destroy freedspace entry")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC__freedspace_free_icr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_freedspace_create_cb()
+ *
+ * Purpose:     Cache iteration callback, creates flush dep
+ *
+ * Return:      0 on success, non-zero on failure
+ *
+ * Programmer:  Houjun Tang
+ *              June 8, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5AC__freedspace_create_cb(H5C_cache_entry_t *entry, void *_ctx)
+{
+    H5AC_freedspace_ctx_t *ctx = (H5AC_freedspace_ctx_t*)_ctx;   /* Callback context */
+    H5P_genplist_t *dxpl = NULL;            /* DXPL for setting ring */
+    H5AC_ring_t orig_ring = H5AC_RING_INV;  /* Original ring value */
+    hbool_t reset_ring = FALSE;             /* Whether the ring was set */
+    int type_id;                            /* Cache client for entry */
+    int ret_value = H5_ITER_CONT;           /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(entry);
+    HDassert(ctx);
+
+    /* Retrieve type for entry */
+    if((type_id = H5AC_get_entry_type(entry)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, H5_ITER_ERROR, "unable to get entry type")
+
+    /* Don't create flush dependency on clean entries or cache-internal ones */
+    if(type_id != H5AC_FREEDSPACE_ID && type_id != H5AC_PROXY_ENTRY_ID
+            && type_id != H5AC_EPOCH_MARKER_ID && type_id != H5AC_PREFETCHED_ENTRY_ID
+            && entry->is_dirty) {
+
+        /* Only create flush dependencies on entries in rings which will be flushed same / earlier */
+        if(entry->ring <= ctx->ring) {
+            if(ctx->fs == NULL) {
+                haddr_t fs_addr;        /* Address of freedspace entry */
+
+                /* Allocate new freedspace object */
+                if(NULL == (ctx->fs = H5FL_CALLOC(H5AC_freedspace_t)))
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate freed space entry")
+
+                /* Allocate a temporary address for the freedspace entry */
+                if(HADDR_UNDEF == (fs_addr = H5MF_alloc_tmp(ctx->f, 1)))
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate temporary space for freed space entry")
+
+                /* Set the ring for the new freedspace entry */
+                if(H5AC_set_ring(ctx->dxpl_id, ctx->ring, &dxpl, &orig_ring) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, H5_ITER_ERROR, "unable to set ring value")
+                reset_ring = TRUE;
+
+                /* Insert freedspace entry into the cache */
+                if(H5AC_insert_entry(ctx->f, ctx->dxpl_id, H5AC_FREEDSPACE, fs_addr, ctx->fs, H5AC__PIN_ENTRY_FLAG) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert freedspace")
+            } /* if ctx->fs == NULL */
+
+            /* Create flush dependency between the freedspace entry and the dirty entry */
+            if(H5AC_create_flush_dependency(ctx->fs, entry) < 0)
+               HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, H5_ITER_ERROR, "can't create flush dependency")
+        } /* end if */
+    } /* end if */
+
+done:
+    /* Reset the ring in the DXPL */
+    if(reset_ring)
+        if(H5AC_reset_ring(dxpl, orig_ring) < 0)
+            HDONE_ERROR(H5E_CACHE, H5_ITER_ERROR, FAIL, "unable to reset ring value")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_freedspace_create_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_freedspace_create
+ *
+ * Purpose:     Create a new freedspace entry
+ *
+ * Return:	Success:	Pointer to the new freedspace entry object.
+ *		Failure:	NULL
+ *
+ * Programmer:  Houjun Tang
+ *              June 8, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_freedspace_create(H5F_t *f, hid_t dxpl_id, haddr_t client_addr,
+    herr_t (*cb)(void *), void *client_ctx, H5AC_freedspace_t** fs)
+{
+    herr_t ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(H5F_addr_defined(client_addr));
+    HDassert(cb);
+    HDassert(fs);
+    HDassert(NULL == *fs);
+
+    /* Check if there's any dirty entries in the cache currently */
+    if(H5AC_has_dirty_entry(f)) {
+        unsigned status = 0;    /* Cache entry status for address being freed */
+
+        /* Check cache status of address being freed */
+        if(H5AC_get_entry_status(f, client_addr, &status) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get entry status")
+
+        /* If the entry is in the cache, attempt to create a freedspace entry for it */
+        if((status & H5AC_ES__IN_CACHE) != 0) {
+            H5AC_freedspace_ctx_t fs_ctx;       /* Context for cache iteration */
+
+            /* Create a freed space ctx */
+            fs_ctx.fs          = NULL;
+            fs_ctx.f           = f;
+            fs_ctx.dxpl_id     = dxpl_id;
+            if(H5AC_get_entry_ring(f, client_addr, &fs_ctx.ring) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get ring of entry")
+
+            /* Iterate through cache entries, setting up flush dependencies */
+            if(H5AC_iterate(f, H5AC__freedspace_create_cb, &fs_ctx) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "unable to iterate cache entries")
+
+            /* If there were entries in the cache that set up flush dependencies, finish setting up freedspace object */
+            if(NULL != fs_ctx.fs) {
+                /* Set the callback and client context */
+                fs_ctx.fs->cb = cb;
+                fs_ctx.fs->client_ctx = client_ctx;
+
+                /* Set the pointer to the freedspace entry, for the calling routine */
+                *fs = fs_ctx.fs;
+            } /* end if */
+        } /* end if */
+
+        /* Add sanity check to make certain that freedspace entry has at least one flush dependency child entry */
+    } /* end if */
+
+done:
+    /* Release resources on error */
+    if(ret_value < 0)
+        if(*fs)
+            *fs = H5FL_FREE(H5AC_freedspace_t, *fs);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_freedspace_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_freedspace_dest
+ *
+ * Purpose:     Destroys a freedspace entry in memory.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Houjun Tang
+ *              June 8, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_freedspace_dest(H5AC_freedspace_t *pentry)
+{
+    herr_t ret_value = SUCCEED;         	/* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(pentry);
+
+    /* Free the freedspace entry object */
+    pentry = H5FL_FREE(H5AC_freedspace_t, pentry);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_freedspace_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC__freedspace_notify
  *
  * Purpose:     Handle cache action notifications
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
+ * Programmer:  Houjun Tang
+ *              June 8, 2017
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, const char *fmt,...)
+H5AC__freedspace_notify(H5AC_notify_action_t action, void *_thing, ...)
 {
     va_list ap;
-    H5AC_freed_space_entry_t *pentry = (H5AC_freed_space_entry_t *)_thing;
-    herr_t ret_value = SUCCEED;         	/* Return value */
+    hbool_t va_started = FALSE;     /* Whether the variable argument list is open */
+    H5AC_freedspace_t *pentry;      /* Pointer to freedspace entry being notified */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
 
-    /* Sanity check */
+    va_start (ap, _thing);         /* Initialize the argument list. */
+    va_started = TRUE;
+
+    pentry = (H5AC_freedspace_t*)_thing;
     HDassert(pentry);
 
-    va_start (ap, fmt);         /* Initialize the argument list. */
-
     switch(action) {
-        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
-	    break;
-
-	case H5AC_NOTIFY_ACTION_AFTER_LOAD:
-#ifdef NDEBUG
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Invalid action?!?");
-#endif /* NDEBUG */
-            break;
-
-	case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
-#ifdef NDEBUG
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Invalid action?!?");
-#endif /* NDEBUG */
-	    break;
-
-        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-            /* Sanity checks */
-            HDassert(0 == pentry->ndirty_children);
-            HDassert(0 == pentry->nunser_children);
-
-            /* No action */
-            break;
-
-        case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
-            /* Sanity checks */
-            HDassert(pentry->ndirty_children > 0);
-
-            /* No action */
-            break;
-
-        case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
-            /* Sanity checks */
-            HDassert(0 == pentry->ndirty_children);
-
-            /* No action */
-            break;
-
-        case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
-            /* Increment # of dirty children */
-            pentry->ndirty_children++;
-
-            /* Check for first dirty child */
-            if(1 == pentry->ndirty_children)
-                if(H5AC_mark_entry_dirty(pentry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTDIRTY, FAIL, "can't mark proxy entry dirty")
-            break;
-
+        case H5AC_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+            {
+                H5C_cache_entry_t *child_entry; /* Child entry */
+                haddr_t child_addr;             /* Address of child entry */
+                unsigned nchildren;             /* # of flush dependency children for freedspace entry */
 
-            /* FULLSWMR TODO */
-            /* <remove flush dependency on cleaned child> */
-            int ndirty_children;
-            /* if(H5AC_get_ndirty_children(pentry, &ndirty_children) < 0) */
-            /*         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get number of dirty children") */
+                /* The child freedspace entry address in the varg */
+                child_addr = va_arg(ap, haddr_t);
+                HDassert(H5F_addr_defined(child_addr));
 
-            /*     <assert nchildren == 0>  (makes certain all flush dependencies removed) */
-            if(ndirty_children == 0) {
-                HDassert(nchildren == 0);
-            /*     <free space (calling "H5MF_xfree_real") for this entry (use entries address & size)> */
-                /* H5MF_xfree_real(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size); */
-            /*     <delete freed space entry> */
-            }
+                /* Get the cache entry for the child */
+                if(NULL == (child_entry = (H5C_cache_entry_t *)H5C_get_entry_from_addr(pentry->cache_info.cache_ptr, child_addr)))
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get cache entry from address")
 
-            /* Sanity check */
-            HDassert(pentry->ndirty_children > 0);
+                /* Remove flush dependency on cleaned or evicted child */
+                if(H5AC_destroy_flush_dependency(pentry, child_entry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on freedspace entry")
 
-            /* Decrement # of dirty children */
-            pentry->ndirty_children--;
+                /* Get # of flush dependency children now */
+                if(H5C_get_flush_dep_nchildren((H5C_cache_entry_t *)pentry, &nchildren) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get cache entry nchildren")
 
-            /* Check for last dirty child */
-            if(0 == pentry->ndirty_children)
-                if(H5AC_mark_entry_clean(pentry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
+                /* If the # of children drops to zero, invoke the callback and delete the freedspace entry */
+                if(0 == nchildren ) {
+                    /* Invoke callback registered when freedspace entry was created */
+                    if(pentry->cb(pentry->client_ctx) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CALLBACK, FAIL, "freedspace client callback failed")
+
+                    if(H5AC_mark_entry_clean(pentry) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKCLEAN, FAIL, "can't mark entry clean")
+                    if(H5AC_unpin_entry(pentry) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin entry")
+                    if(H5AC_remove_entry(pentry) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry")
+
+                    if(H5AC_freedspace_dest(pentry) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, "can't destroy freedspace")
+                } /* end if */
+            } /* end case */
             break;
 
-        case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
-            /* Increment # of unserialized children */
-            pentry->nunser_children++;
-
-            /* Check for first unserialized child */
-            if(1 == pentry->nunser_children)
-                if(H5AC_mark_entry_unserialized(pentry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNSERIALIZE, FAIL, "can't mark proxy entry unserialized")
+        case H5AC_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
+            /* Ignore notification about undepending a dirty child, since it's
+             *  the result of removing the dependency from the "child before evict"
+             *  case above.  QAK - 2017/08/05
+             */
             break;
 
-        case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
-            /* Sanity check */
-            HDassert(pentry->nunser_children > 0);
-
-            /* Decrement # of unserialized children */
-            pentry->nunser_children--;
-
-            /* Check for last unserialized child */
-            if(0 == pentry->nunser_children)
-                if(H5AC_mark_entry_serialized(pentry) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry serialized")
+        case H5C_NOTIFY_ACTION_AFTER_INSERT:
+        case H5C_NOTIFY_ACTION_AFTER_LOAD:
+        case H5C_NOTIFY_ACTION_AFTER_FLUSH:
+        case H5C_NOTIFY_ACTION_ENTRY_DIRTIED:
+        case H5C_NOTIFY_ACTION_ENTRY_CLEANED:
+        case H5C_NOTIFY_ACTION_BEFORE_EVICT:
+        case H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+        case H5C_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5C_NOTIFY_ACTION_CHILD_DIRTIED:
             break;
 
         default:
@@ -651,38 +475,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing, const char *
 done:
     if(va_started)
         va_end(ap);
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC__proxy_entry_notify() */
+} /* end H5AC__freedspace_notify() */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5AC__proxy_entry_free_icr
- *
- * Purpose:	Destroy/release an "in core representation" of a data
- *              structure
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5AC__proxy_entry_free_icr(void *_thing)
-{
-    H5AC_proxy_entry_t *pentry = (H5AC_proxy_entry_t *)_thing;
-    herr_t ret_value = SUCCEED;     		/* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Destroy the proxy entry */
-    if(H5AC_proxy_entry_dest(pentry) < 0)
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to destroy proxy entry")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC__proxy_entry_free_icr() */
-
-
-#endif

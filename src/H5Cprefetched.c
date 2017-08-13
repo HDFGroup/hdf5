@@ -67,7 +67,7 @@ static herr_t H5C__prefetched_entry_pre_serialize(H5F_t *f,
 static herr_t H5C__prefetched_entry_serialize(const H5F_t *f, void *image_ptr,
     size_t len, void *thing);
 static herr_t H5C__prefetched_entry_notify(H5C_notify_action_t action, 
-    void *thing);
+    void *thing, ...);
 static herr_t H5C__prefetched_entry_free_icr(void *thing);
 static herr_t H5C__prefetched_entry_fsf_size(const void *thing,
     size_t *fsf_size_ptr);
@@ -228,7 +228,7 @@ H5C__prefetched_entry_serialize(const H5F_t H5_ATTR_UNUSED *f,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
+H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing, ...)
 {
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)_thing;
     unsigned 		u;
@@ -251,6 +251,8 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
         case H5C_NOTIFY_ACTION_CHILD_CLEANED: 
         case H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED: 
         case H5C_NOTIFY_ACTION_CHILD_SERIALIZED: 
+        case H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
+        case H5C_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
             /* do nothing */
             break;
 

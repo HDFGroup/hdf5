@@ -199,7 +199,7 @@ static herr_t variable_free_icr(void *thing);
 static herr_t notify_free_icr(void *thing);
 
 
-static herr_t notify_notify(H5C_notify_action_t action, void *thing);
+static herr_t notify_notify(H5C_notify_action_t action, void *thing, ...);
 
 static void mark_flush_dep_dirty(test_entry_t * entry_ptr);
 static void mark_flush_dep_clean(test_entry_t * entry_ptr);
@@ -1575,6 +1575,7 @@ notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
         case H5C_NOTIFY_ACTION_CHILD_CLEANED:
         case H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED:
         case H5C_NOTIFY_ACTION_CHILD_SERIALIZED:
+        case H5C_NOTIFY_ACTION_CHILD_UNDEPEND_DIRTY:
 	    /* do nothing */
 	    break;
 
@@ -1582,6 +1583,7 @@ notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
             entry->notify_before_evict_count++;
             break;
 
+        case H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT:
         default:
             HDassert(0 && "Unknown notify action!?!");
     } /* end switch */
@@ -1590,7 +1592,7 @@ notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
 } /* notify() */
 
 herr_t
-notify_notify(H5C_notify_action_t action, void *thing)
+notify_notify(H5C_notify_action_t action, void *thing, ...)
 {
     return(notify(action, thing, NOTIFY_ENTRY_TYPE));
 }

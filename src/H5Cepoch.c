@@ -69,7 +69,7 @@ static herr_t H5C__epoch_marker_pre_serialize(H5F_t *f,
     haddr_t * new_addr_ptr, size_t * new_len_ptr, unsigned * flags_ptr);
 static herr_t H5C__epoch_marker_serialize(const H5F_t *f,
     void * image_ptr, size_t len, void * thing);
-static herr_t H5C__epoch_marker_notify(H5C_notify_action_t action, void *thing);
+static herr_t H5C__epoch_marker_notify(H5C_notify_action_t action, void *thing, ...);
 static herr_t H5C__epoch_marker_free_icr(void * thing);
 static herr_t H5C__epoch_marker_fsf_size(const void H5_ATTR_UNUSED * thing, 
     size_t H5_ATTR_UNUSED * fsf_size_ptr);
@@ -207,7 +207,7 @@ H5C__epoch_marker_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *
 
 static herr_t
 H5C__epoch_marker_notify(H5C_notify_action_t H5_ATTR_UNUSED action,
-                       void H5_ATTR_UNUSED * thing)
+                       void H5_ATTR_UNUSED * thing, ...)
 {
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
 

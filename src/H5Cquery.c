@@ -409,6 +409,104 @@ H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_has_dirty_entry
+ *
+ * Purpose:     Check if there are dirty entries in cache
+ *
+ * Return:	Success:	TRUE / FALSE
+ *		Failure:	FAIL
+ *
+ * Programmer:  Houjun Tang
+ *              June 9, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5C_has_dirty_entry(const H5C_t *cache)
+{
+    htri_t ret_value = FAIL;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Sanity check */
+    HDassert(cache);
+
+    if(cache->dirty_index_size > 0)
+        ret_value = TRUE;
+    else
+        ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_has_dirty_entry() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_get_flush_dep_nchildren
+ *
+ * Purpose:     Get number of flush dependency children for an entry
+ *
+ * Return:	Success:	Non-negative value
+ *		Failure:	Negative value
+ *
+ * Programmer:  Houjun Tang
+ *              June 19, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_get_flush_dep_nchildren(H5C_cache_entry_t *entry, unsigned *nchildren)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Sanity checks */
+    HDassert(entry);
+    HDassert(nchildren);
+
+    *nchildren = entry->flush_dep_nchildren;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5C_get_flush_dep_nchildren */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_get_entry_from_addr
+ *
+ * Purpose:     Retrieve the entry at an address.
+ *
+ * Return:      Non-NULL on success/NULL on failure
+ *
+ * Programmer:  Houjun Tang
+ *              June 20, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5C_get_entry_from_addr(H5C_t *cache, haddr_t addr)
+{
+    H5C_cache_entry_t *entry;   /* Entry at address */
+    void *ret_value = NULL;     /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Sanity checks */
+    HDassert(cache);
+    HDassert(cache->magic == H5C__H5C_T_MAGIC);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Locate the entry at the address */
+    H5C__SEARCH_INDEX(cache, addr, entry, NULL)
+    if(entry == NULL)
+        HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, NULL, "can't find entry in index")
+
+    /* Set return value */
+    ret_value = entry;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_get_entry_from_addr() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_get_entry_ring
  *
  * Purpose:     Given a file address, retrieve the ring for an entry at that

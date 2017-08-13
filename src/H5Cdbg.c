@@ -275,7 +275,7 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
  */
 #ifndef NDEBUG
 herr_t
-H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
+H5C_dump_cache_skip_list(FILE *stream, H5C_t * cache_ptr, const char * calling_fcn)
 {
     herr_t              ret_value = SUCCEED;   /* Return value */
     int                 i;
@@ -288,16 +288,16 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(calling_fcn != NULL);
 
-    HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
-    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
-    HDfprintf(stdout, "	slist size = %lld.\n", (long long)(cache_ptr->slist_size));
+    HDfprintf(stream, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
+    HDfprintf(stream, "	slist len = %u.\n", cache_ptr->slist_len);
+    HDfprintf(stream, "	slist size = %lld.\n", (long long)(cache_ptr->slist_size));
 
     if(cache_ptr->slist_len > 0) {
         /* If we get this far, all entries in the cache are listed in the
          * skip list -- scan the skip list generating the desired output.
          */
-        HDfprintf(stdout,
-                  "Num:    Addr:               Len: Prot/Pind: Dirty: Type:\n");
+        HDfprintf(stream,
+                  "Num: Addr:                 Len: Prt/Pin: Dirty: Ring: NP/NC/NDC/NUC Type:\n");
 
         i = 0;
         node_ptr = H5SL_first(cache_ptr->slist_ptr);
@@ -309,17 +309,22 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
         while(entry_ptr != NULL) {
             HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
 
-            HDfprintf(stdout,
-               "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n",
+            HDfprintf(stream,
+               "%s%d    %020a  %4zu   %d/%d      %d     %d    %2u/%2u/%3u/%3u %s\n",
                cache_ptr->prefix, i,
-               (long long)(entry_ptr->addr),
-               (long long)(entry_ptr->size),
+               entry_ptr->addr,
+               entry_ptr->size,
                (int)(entry_ptr->is_protected),
                (int)(entry_ptr->is_pinned),
                (int)(entry_ptr->is_dirty),
+               (int)(entry_ptr->ring),
+               entry_ptr->flush_dep_nparents,
+               entry_ptr->flush_dep_nchildren,
+               entry_ptr->flush_dep_ndirty_children,
+               entry_ptr->flush_dep_nunser_children,
                entry_ptr->type->name);
 
-            HDfprintf(stdout, "		node_ptr = 0x%llx, item = %p\n",
+            HDfprintf(stream, "		node_ptr = 0x%llx, item = %p\n",
                       (unsigned long long)node_ptr,
                       H5SL_item(node_ptr));
 
@@ -334,7 +339,7 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
         } /* end while */
     } /* end if */
 
-    HDfprintf(stdout, "\n\n");
+    HDfprintf(stream, "\n\n");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_dump_cache_skip_list() */

@@ -29009,6 +29009,102 @@ check_iteration_mark_every_other_clean_cb(H5C_cache_entry_t *entry, void *_ctx)
 
 } /* check_iteration_inc_count_cb() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	check_freedspace()
+ *
+ * Purpose:	Exercise the cache freedspace class.
+ *
+ * Return:	0 on success, non-zero on failure
+ *
+ * Programmer:	Houjun Tang
+ *              June 22, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+check_freedspace(unsigned paged)
+{
+    H5F_t * file_ptr = NULL;            /* File for this test */
+    H5C_t * cache_ptr = NULL;           /* Metadata cache for this test */
+    test_entry_t *base_addr;            /* Base address of entries for test */
+    int entry_type = PICO_ENTRY_TYPE;   /* Use very small entry size (size of entries doesn't matter) */
+    size_t entry_size = PICO_ENTRY_SIZE;
+    unsigned u;                         /* Local index variable */
+    int32_t iter_count = 0;            /* Counter for iteration test */
+    int n_dirty_entry = 0;
+    herr_t result;                      /* Generic return value */
+    hbool_t is_dirty = FALSE;
+    hbool_t in_cache = FALSE;
+    H5AC_freedspace_t* fs;
+
+    struct expected_entry_status expected[5] =
+    {
+      /* entry			entry		in	at main                                                        flush dep flush dep child flush   flush       flush */
+      /* type:		index:	size:		cache:	addr:	dirty:	prot:	pinned:	dsrlzd:	srlzd:	dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:    corked: */
+      { PICO_ENTRY_TYPE, 0,	PICO_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 1,	PICO_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 2,	PICO_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 3,	PICO_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 4,	PICO_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
+    };
+
+    if(paged)
+        TESTING("cache iteration (paged aggregation)")
+    else
+        TESTING("cache iteration")
+
+    pass = TRUE;
+
+    /* allocate a cache, build up flush dependency hierarchy and tear it down.
+     * Verify that all performs as expected.
+     */
+
+    reset_entries();
+    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    cache_ptr = file_ptr->shared->cache;
+    base_addr = entries[entry_type];
+
+    if(!pass) CACHE_ERROR("setup_cache failed")
+
+    /* Insert entries to work with into the cache */
+    for(u = 0; u < 5; u++) {
+        insert_entry(file_ptr, entry_type, (int32_t)u, H5C__NO_FLAGS_SET);
+        if(!pass) CACHE_ERROR("insert_entry failed")
+
+        /* Change expected values, and verify the status of the entries
+         * after each insertion
+         */
+        expected[u].in_cache = TRUE;
+        expected[u].is_dirty = TRUE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)u,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if(!pass) CACHE_ERROR("verify_entry_status failed")
+    } /* end for */
+
+/* Test case #1, create a freedspace entry and insert to cache*/
+
+    /* fs = H5AC_freedspace_create(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, base_addr, PICO_ENTRY_SIZE, H5MF_xfree); */
+
+    /* check flush dependencies */
+
+done:
+    if(file_ptr)
+        takedown_cache(file_ptr, FALSE, FALSE);
+
+    if(pass)
+        PASSED()
+    else {
+        H5_FAILED();
+        HDfprintf(stdout, "%s.\n", failure_mssg);
+    } /* end else */
+
+    return (unsigned)!pass;
+} /* check_freedspace() */
 
 
 /*-------------------------------------------------------------------------
@@ -29030,7 +29126,7 @@ check_iteration(unsigned paged)
     H5C_t * cache_ptr = NULL;           /* Metadata cache for this test */
     test_entry_t *base_addr;            /* Base address of entries for test */
     int entry_type = PICO_ENTRY_TYPE;   /* Use very small entry size (size of entries doesn't matter) */
-    size_t entry_size = PICO_ENTRY_SIZE; 
+    size_t entry_size = PICO_ENTRY_SIZE;
     unsigned u;                         /* Local index variable */
     int32_t iter_count = 0;            /* Counter for iteration test */
     int n_dirty_entry = 0;
@@ -29088,10 +29184,10 @@ check_iteration(unsigned paged)
 
 
     /* Iteration test #1 - Simple callback */
-    /* define a iteration callback which takes &iter_count as callback context, 
+    /* define a iteration callback which takes &iter_count as callback context,
      * and increment counter in callback> */
     H5C_iterate(cache_ptr, check_iteration_inc_count_cb, &iter_count);
-    
+
     /* check iter_count for proper value */
     if (iter_count != 5) {
         CACHE_ERROR("cache iteration failed")
@@ -29101,7 +29197,7 @@ check_iteration(unsigned paged)
     if(!pass) CACHE_ERROR("takedown_cache failed")
     file_ptr = NULL;
 
-    /* Iteration test #2 - mark every other entry as dirty */
+    /* Iteration test #2 - mark every other entry as clean */
     pass = TRUE;
     reset_entries();
     file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
@@ -29119,7 +29215,7 @@ check_iteration(unsigned paged)
 
     /* Verify correctness */
     for(u = 0; u < 5; u++) {
-        if (u % 2 == 0) 
+        if (u % 2 == 0)
             expected[u].is_dirty = FALSE;
         else
             expected[u].is_dirty = TRUE;
@@ -29145,11 +29241,11 @@ check_iteration(unsigned paged)
             failure_mssg = "H5C_get_entry_status() reports failure.";
             CACHE_ERROR("H5C_get_entry_status() failed")
         }
-        else if (is_dirty == TRUE) 
+        else if (is_dirty == TRUE)
             n_dirty_entry++;
     }
 
-    if (n_dirty_entry != 2) 
+    if (n_dirty_entry != 2)
         CACHE_ERROR("cache iteration test of counting dirty entries failed")
 
     /* Unpin entries */
@@ -29170,10 +29266,7 @@ done:
     } /* end else */
 
     return (unsigned)!pass;
-} /* check_flush_deps() */
-
-
-
+} /* check_iteration() */
 
 
 /*-------------------------------------------------------------------------
@@ -36755,6 +36848,7 @@ main(void)
         nerrs += check_entry_deletions_during_scans(paged);
         nerrs += check_stats(paged);
         nerrs += check_iteration(paged);
+        nerrs += check_freedspace(paged);
     } /* end for */
 
     /* can't fail, returns void */
