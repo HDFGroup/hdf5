@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  John Mainzer
@@ -211,6 +209,11 @@ typedef struct flush_op
                                          */
 } flush_op;
 
+typedef enum test_entry_action_t {
+    TEST_ENTRY_ACTION_NUL = 0,          /* No action on entry */
+    TEST_ENTRY_ACTION_MOVE              /* Entry is beging moved */
+} test_entry_action_t;
+
 typedef struct test_entry_t
 {
     H5C_cache_entry_t	  header;	/* entry data used by the cache
@@ -219,6 +222,7 @@ typedef struct test_entry_t
     struct test_entry_t * self; 	/* pointer to this entry -- used for
 					 * sanity checking.
                                          */
+    test_entry_action_t action;         /* Action being performed on a test entry */
     H5F_t               * file_ptr;     /* pointer to the file in which the
                                          * entry resides, or NULL if the entry
                                          * is not in a file.
@@ -354,6 +358,9 @@ typedef struct test_entry_t
 
     unsigned              notify_after_insert_count;    /* Count of times that entry was inserted in cache */
     unsigned              notify_before_evict_count;    /* Count of times that entry was removed in cache */
+    size_t		  actual_len;	  /* Simulate the entry's actual size for a speculative load */
+    unsigned		  max_verify_ct;  /* Maximum # of times to verify an entry's checksum */
+    unsigned		  verify_ct;	  /* Count the # of checksum verification for an entry */
 } test_entry_t;
 
 /* The following are cut down test versions of the hash table manipulation
@@ -375,7 +382,7 @@ if ( ( (cache_ptr) == NULL ) ||                              \
     HDfprintf(stdout, "Pre HT search SC failed.\n");         \
 }
 
-#define H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
+#define H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)  \
 if ( ( (cache_ptr) == NULL ) ||                                   \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                \
      ( (cache_ptr)->index_len < 1 ) ||                            \
@@ -383,7 +390,6 @@ if ( ( (cache_ptr) == NULL ) ||                                   \
      ( (cache_ptr)->index_size < (entry_ptr)->size ) ||           \
      ( (cache_ptr)->index_size !=                                 \
        ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ) || \
-     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                \
      ( (entry_ptr)->size <= 0 ) ||                                \
      ( ((cache_ptr)->index)[k] == NULL ) ||                       \
      ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&              \
@@ -407,32 +413,29 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 #define H5C_TEST__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)              \
 {                                                                       \
     int k;                                                              \
-    int depth = 0;                                                      \
     H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                         \
     k = H5C__HASH_FCN(Addr);                                            \
     entry_ptr = ((cache_ptr)->index)[k];                                \
-    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) ) \
+    while ( entry_ptr )                                                 \
     {                                                                   \
-        (entry_ptr) = (entry_ptr)->ht_next;                             \
-        (depth)++;                                                      \
-    }                                                                   \
-    if ( entry_ptr )                                                    \
-    {                                                                   \
-        H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k)  \
-        if ( entry_ptr != ((cache_ptr)->index)[k] )                     \
+        if ( H5F_addr_eq(Addr, (entry_ptr)->addr) )                     \
         {                                                               \
-            if ( (entry_ptr)->ht_next )                                 \
+            H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)    \
+            if ( entry_ptr != ((cache_ptr)->index)[k] )                 \
             {                                                           \
-                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;   \
+                if ( (entry_ptr)->ht_next )                             \
+                    (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev; \
+                HDassert( (entry_ptr)->ht_prev != NULL );               \
+                (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;   \
+                ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);         \
+                (entry_ptr)->ht_next = ((cache_ptr)->index)[k];         \
+                (entry_ptr)->ht_prev = NULL;                            \
+                ((cache_ptr)->index)[k] = (entry_ptr);                  \
+                H5C_TEST__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k) \
             }                                                           \
-            HDassert( (entry_ptr)->ht_prev != NULL );                   \
-            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;       \
-            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);             \
-            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];             \
-            (entry_ptr)->ht_prev = NULL;                                \
-            ((cache_ptr)->index)[k] = (entry_ptr);                      \
-            H5C_TEST__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k)   \
+            break;                                                      \
         }                                                               \
+        (entry_ptr) = (entry_ptr)->ht_next;                             \
     }                                                                   \
 }
 
@@ -548,11 +551,10 @@ H5TEST_DLLVAR const int32_t max_indices[NUMBER_OF_ENTRY_TYPES];
 H5TEST_DLLVAR const size_t entry_sizes[NUMBER_OF_ENTRY_TYPES];
 H5TEST_DLLVAR const haddr_t base_addrs[NUMBER_OF_ENTRY_TYPES];
 H5TEST_DLLVAR const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES];
-H5TEST_DLLVAR const char * entry_type_names[NUMBER_OF_ENTRY_TYPES];
 
 /* callback table extern */
 
-H5TEST_DLLVAR const H5C_class_t types[NUMBER_OF_ENTRY_TYPES];
+H5TEST_DLLVAR const H5C_class_t *types[NUMBER_OF_ENTRY_TYPES];
 
 
 #ifdef __cplusplus
@@ -639,7 +641,7 @@ H5TEST_DLL void resize_entry(H5F_t * file_ptr,
                   size_t new_size,
                   hbool_t in_cache);
 
-H5TEST_DLL H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size);
+H5TEST_DLL H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged);
 
 H5TEST_DLL void row_major_scan_forward(H5F_t * file_ptr,
                             int32_t max_index,

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /****************/
@@ -2351,9 +2349,11 @@ H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     if(name == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
-    /* Check for removing '.' */
+    /* Check for non-existent (NULL) link.
+     * Note that this can also occur when attempting to remove '.'
+     */
     if(lnk == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "can't delete self")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "callback link pointer is NULL (specified link may be '.' or not exist)")
 
     /* Remove the link from the group */
     if(H5G_obj_remove(grp_loc->oloc, grp_loc->path->full_path_r, name, udata->dxpl_id) < 0)

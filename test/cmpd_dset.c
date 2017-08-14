@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -154,30 +152,28 @@ static unsigned
 test_compound (char *filename, hid_t fapl)
 {
     /* First dataset */
-    static s1_t		s1[NX*NY];
+    s1_t		*s1 = NULL;
     hid_t		s1_tid;
 
     /* Second dataset */
-    static s2_t		s2[NX*NY];
+    s2_t		*s2 = NULL;
     hid_t		s2_tid;
 
     /* Third dataset */
-    static s3_t		s3[NX*NY];
+    s3_t		*s3 = NULL;
     hid_t		s3_tid;
 
     /* Fourth dataset */
-    static s4_t		s4[NX*NY];
+    s4_t		*s4 = NULL;
     hid_t		s4_tid;
 
     /* Fifth dataset */
-    static s5_t		s5[NX*NY];
+    s5_t		*s5 = NULL;
     hid_t		s5_tid;
 
-    static s6_t		s6[NX*NY];
-    hid_t		s6_tid;
-
-
     /* Sixth dataset */
+    s6_t		*s6 = NULL;
+    hid_t		s6_tid;
 
     /* Seventh dataset */
     hid_t		s7_sid;
@@ -203,6 +199,20 @@ test_compound (char *filename, hid_t fapl)
     hsize_t 		h_size[2];	/*size of hyperslab		*/
     hsize_t		memb_size[1] = {4};
     int			ret_code;
+
+    /* Allocate buffers for datasets */
+    if(NULL == (s1 = (s1_t *)HDmalloc(sizeof(s1_t) * NX * NY)))
+        goto error;
+    if(NULL == (s2 = (s2_t *)HDmalloc(sizeof(s2_t) * NX * NY)))
+        goto error;
+    if(NULL == (s3 = (s3_t *)HDmalloc(sizeof(s3_t) * NX * NY)))
+        goto error;
+    if(NULL == (s4 = (s4_t *)HDmalloc(sizeof(s4_t) * NX * NY)))
+        goto error;
+    if(NULL == (s5 = (s5_t *)HDmalloc(sizeof(s5_t) * NX * NY)))
+        goto error;
+    if(NULL == (s6 = (s6_t *)HDmalloc(sizeof(s6_t) * NX * NY)))
+        goto error;
 
     /* Create the file */
     if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
@@ -848,11 +858,34 @@ test_compound (char *filename, hid_t fapl)
     H5Dclose (dataset);
     H5Fclose (file);
 
+    /* Release buffers */
+    HDfree(s1);
+    HDfree(s2);
+    HDfree(s3);
+    HDfree(s4);
+    HDfree(s5);
+    HDfree(s6);
+
     PASSED();
     return 0;
 
 error:
     puts("*** DATASET TESTS FAILED ***");
+
+    /* Release resources */
+    if(s1) 
+        HDfree(s1);
+    if(s2) 
+        HDfree(s2);
+    if(s3) 
+        HDfree(s3);
+    if(s4) 
+        HDfree(s4);
+    if(s5) 
+        HDfree(s5);
+    if(s6) 
+        HDfree(s6);
+
     return 1;
 }
 
@@ -2184,7 +2217,7 @@ main (int argc, char *argv[])
     if (argc>1) {
 	if (argc>2 || strcmp("--noopt", argv[1])) {
 	    fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
 	H5Tunregister(H5T_PERS_DONTCARE, NULL, (hid_t)-1, (hid_t)-1, H5T__conv_struct_opt);
     }
@@ -2217,7 +2250,7 @@ main (int argc, char *argv[])
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 
     h5_cleanup(FILENAME, fapl_id);

@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 
 top_builddir=@top_builddir@
@@ -35,7 +33,7 @@ nerrors=0
 
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
-BLDLIBDIR="./lib"
+BLDLIBDIR="$top_builddir/hdf5/lib"
 BLDREFDIR="./groups"
 BLDDIR="."
 HDFTEST_HOME="$top_srcdir/java/examples/groups"
@@ -153,6 +151,14 @@ CLEAN_DATAFILES_AND_BLDDIR()
 {
         $RM $BLDDIR/examples.groups.H5Ex_G_*.txt
         $RM $BLDDIR/H5Ex_G_*.out
+        $RM $BLDDIR/H5Ex_G_*.h5
+        SDIR=`$DIRNAME $tstfile`
+        INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+        INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
+        if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then            SDIR=`$DIRNAME $tstfile`
+            $RM $BLDDIR/h5ex_g_iterate.h5
+            $RM $BLDDIR/h5ex_g_visit.h5
+        fi  
 }
 
 COPY_REFFILES="$LIST_REF_FILES"

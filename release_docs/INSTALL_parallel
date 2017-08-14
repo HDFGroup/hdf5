@@ -1,6 +1,18 @@
 	    Installation instructions for Parallel HDF5
 	    -------------------------------------------
 
+0. Use Build Scripts
+--------------------
+The HDF Group is accumulating build scripts to handle building parallel HDF5
+on various platforms (Cray, IBM, SGI, etc...). These scripts are being 
+maintained and updated continuously for current and future systems. The reader
+is strongly encouraged to consult the repository at,
+
+https://github.com/HDFGroup/build_hdf5
+
+for building parallel HDF5 on these system. All contributions, additions
+and fixes to the repository are welcomed and encouraged.
+
 
 1. Overview
 -----------

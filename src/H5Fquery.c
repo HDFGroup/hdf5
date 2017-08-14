@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -363,6 +361,29 @@ H5F_get_subfile_name(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->subfile_name)
 } /* end H5F_get_subfile_name() */
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_read_attempts
+ *
+ * Purpose:	Retrieve the file's 'read_attempts' value
+ *
+ * Return:	'# of read attempts' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Vaili Choi; Sept 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_read_attempts(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->shared->read_attempts)
+} /* end H5F_get_read_attempts() */
 
 
 /*-------------------------------------------------------------------------
@@ -879,6 +900,34 @@ H5F_get_fc_degree(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_get_evict_on_close
+ *
+ * Purpose:     Checks if evict-on-close is desired for objects in the
+ *              file.
+ *
+ * Return:      Success:    Flag indicating whether the evict-on-close
+ *                          property was set for the file.
+ *              Failure:    (can't happen)
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_evict_on_close(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->evict_on_close)
+} /* end H5F_get_evict_on_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_store_msg_crt_idx
  *
  * Purpose:	Retrieve the 'store message creation index' flag for the file.
@@ -1143,4 +1192,235 @@ H5F_coll_md_read(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->coll_md_read)
 } /* end H5F_coll_md_read() */
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_use_mdc_logging
+ *
+ * Purpose:	Quick and dirty routine to determine if using MDC logging
+ *		is enabled for this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June  5, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_use_mdc_logging(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->use_mdc_logging)
+} /* end H5F_use_mdc_logging() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_start_mdc_log_on_access
+ *
+ * Purpose:	Quick and dirty routine to determine if we should start MDC
+ *		logging on access for this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June  5, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_start_mdc_log_on_access(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->start_mdc_log_on_access)
+} /* end H5F_start_mdc_log_on_access() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_mdc_log_location
+ *
+ * Purpose:	Quick and dirty routine to retrieve the MDC log location
+ *		for this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June  5, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5F_mdc_log_location(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->mdc_log_location)
+} /* end H5F_mdc_log_location() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_alignment
+ *
+ * Purpose:	Retrieve the 'alignment' for the file.
+ *
+ * Return:	Success:	Non-negative, the 'alignment'
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Vailin Choi; Dec 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5F_get_alignment(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->alignment)
+} /* end H5F_get_alignment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_threshold
+ *
+ * Purpose:	Retrieve the 'threshold' for alignment in the file.
+ *
+ * Return:	Success:	Non-negative, the 'threshold'
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Vailin Choi; Dec 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5F_get_threshold(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->threshold)
+} /* end H5F_get_threshold() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_pgend_meta_thres
+ *
+ * Purpose:	Retrieve the 'page end meta threshold size' for the file.
+ *
+ * Return:	Success:	Non-negative, the 'pgend_meta_thres'
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Vailin Choi; Dec 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5F_get_pgend_meta_thres(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->pgend_meta_thres)
+} /* end H5F_get_pgend_meta_thres() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_point_of_no_return
+ *
+ * Purpose:	Retrieve the 'point of no return' value for the file.
+ *
+ * Return:	Success:	Non-negative, the 'point_of_no_return'
+ * 		Failure:	(can't happen)
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_point_of_no_return(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->point_of_no_return)
+} /* end H5F_get_point_of_no_return() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_first_alloc_dealloc
+ *
+ * Purpose:	Retrieve the 'first alloc / dealloc' value for the file.
+ *
+ * Return:	Success:	Non-negative, the 'first_alloc_dealloc'
+ * 		Failure:	(can't happen)
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_first_alloc_dealloc(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->first_alloc_dealloc)
+} /* end H5F_get_first_alloc_dealloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_eoa_pre_fsm_fsalloc
+ *
+ * Purpose:	Retrieve the 'EOA pre-FSM fsalloc' value for the file.
+ *
+ * Return:	Success:	Non-negative, the 'EOA pre-FSM fsalloc'
+ * 		Failure:	(can't happen)
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->eoa_pre_fsm_fsalloc)
+} /* end H5F_get_eoa_pre_fsm_fsalloc() */
 

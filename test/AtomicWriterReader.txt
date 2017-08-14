@@ -1,0 +1,48 @@
+Atomic Tests Instructions
+=========================
+
+Purpose:
+--------
+This documents how to build and run the Atomic Writer and Reader tests.
+The atomic test is to verify if atomic read-write operation on a system works.
+The two programs are atomic_writer.c and atomic_reader.c.
+atomic_writer.c: is the "write" part of the test; and
+atomic_reader.c: is the "read" part of the test.
+
+Building the Tests
+------------------
+The two test parts are automically built during configure and make process.
+But to build them individually, you can do in test/ directory:
+$ gcc atomic_writer
+$ gcc atomic_reader
+
+Running the Tests
+-----------------
+$ atomic_writer -n <number of integers to write> -i <number of iterations for writer>
+$ atomic_reader -n <number of integers to read> -i <number of iterations for reader>
+
+Note**
+(1) "atomic_data" is the data file used by both the writer/reader in the
+    current directory.
+(2) The value for -n should be the same for both the writer and the reader.
+(3) The values for options n and i should be positive integers.
+(4) For this version, the user has to provide both options -n and -i to run
+    the writer and the reader.
+(5) If the user wants to run the writer for a long time, just provides a
+    large number for -i.
+
+Examples
+--------
+$ ./atomic_writer -n 10000 -i 5
+  Try to atomic write 10000 integers patterns 10000 time, and iterate the whole
+  write process 5 times.
+
+$ ./atomic_reader -n 10000 -i 2
+  Try to atomic read 10000 integers patterns 10000 times, and iterate only once.
+  A summary is posted at the end. If all atomic reads are correct, it will not
+  show any read beyond "0 re-tries", that is all reads have succeeded in the
+  first read attempt.
+
+Remark:
+You usually want the writer to iterate more times than the reader so that
+the writing will not finish before reading is done.

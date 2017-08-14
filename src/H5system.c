@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -32,10 +30,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Eprivate.h"        /* Error handling              */
+#include "H5Fprivate.h"        /* File access                */
+#include "H5MMprivate.h"    /* Memory management            */
 
 
 /****************/
@@ -474,6 +472,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
  *
  *-------------------------------------------------------------------------
  */
+#ifndef HDstrtoll
 int64_t
 HDstrtoll(const char *s, const char **rest, int base)
 {
@@ -549,7 +548,7 @@ HDstrtoll(const char *s, const char **rest, int base)
         *rest = s;
     return acc;
 } /* end HDstrtoll() */
-
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:  HDrand/HDsrand
@@ -604,7 +603,7 @@ void HDsrand(unsigned int seed)
 #ifdef H5_HAVE_FCNTL
 int
 Pflock(int fd, int operation) {
-    
+
     struct flock    flk;
 
     /* Set the lock type */
@@ -649,18 +648,18 @@ Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5_make_time
+ * Function:    H5_make_time
  *
- * Purpose:	Portability routine to abstract converting a 'tm' struct into
- *		a time_t value.
+ * Purpose:    Portability routine to abstract converting a 'tm' struct into
+ *        a time_t value.
  *
- * Note:	This is a little problematic because mktime() operates on
- *		local times.  We convert to local time and then figure out the
- *		adjustment based on the local time zone and daylight savings
- *		setting.
+ * Note:    This is a little problematic because mktime() operates on
+ *        local times.  We convert to local time and then figure out the
+ *        adjustment based on the local time zone and daylight savings
+ *        setting.
  *
- * Return:	Success:  The value of timezone
- *		Failure:  -1
+ * Return:    Success:  The value of timezone
+ *        Failure:  -1
  *
  * Programmer:  Quincey Koziol
  *              November 18, 2015
@@ -911,6 +910,76 @@ Wflock(int fd, int operation) {
     return 0;
 } /* end Wflock() */
 
+
+ /*--------------------------------------------------------------------------
+  * Function:    Wnanosleep
+  *
+  * Purpose:     Sleep for a given # of nanoseconds (Windows version)
+  *
+  * Return:      SUCCEED/FAIL
+  *
+  * Programmer:  Dana Robinson
+  *              Fall 2016
+  *--------------------------------------------------------------------------
+  */
+int
+Wnanosleep(const struct timespec *req, struct timespec *rem)
+{
+    /* XXX: Currently just a placeholder */
+    return 0;
+
+} /* end Wnanosleep() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
+ *
+ * Purpose:     Wrapper function for round functions for use with VS2012
+ *              and earlier.
+ *
+ * Return:      The rounded value that was passed in.
+ *
+ * Programmer:  Dana Robinson
+ *              December 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+long long
+Wllround(double arg)
+{
+    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long long
+Wllroundf(float arg)
+{
+    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+long
+Wlround(double arg)
+{
+    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long
+Wlroundf(float arg)
+{
+    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+double
+Wround(double arg)
+{
+    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
+}
+
+float
+Wroundf(float arg)
+{
+    return arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F);
+}
+
 #endif /* H5_HAVE_WIN32_API */
 
 
@@ -1068,7 +1137,7 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
         if(NULL == (*full_name = (char *)H5MM_strdup(path2)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    } /* end if */ 
+    } /* end if */
     else if(H5_CHECK_ABS_PATH(path2)) {
 
         /* On windows path2 is a path absolute name */
@@ -1106,5 +1175,111 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5_combine_name() */
+} /* end H5_combine_path() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5_nanosleep
+ *
+ * Purpose:     Sleep for a given # of nanoseconds
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              October 01, 2016
+ *--------------------------------------------------------------------------
+ */
+void
+H5_nanosleep(uint64_t nanosec)
+{
+    struct timespec sleeptime;  /* Struct to hold time to sleep */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Set up time to sleep */
+    sleeptime.tv_sec = 0;
+    sleeptime.tv_nsec = (long)nanosec;
+
+    HDnanosleep(&sleeptime, NULL);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5_nanosleep() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5_get_time
+ *
+ * Purpose:     Get the current time, as the time of seconds after the UNIX epoch
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              October 05, 2016
+ *--------------------------------------------------------------------------
+ */
+double
+H5_get_time(void)
+{
+#ifdef H5_HAVE_GETTIMEOFDAY
+    struct timeval curr_time;
+#endif /* H5_HAVE_GETTIMEOFDAY */
+    double ret_value = (double)0.0f;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+#ifdef H5_HAVE_GETTIMEOFDAY
+    HDgettimeofday(&curr_time, NULL);
+
+    ret_value = (double)curr_time.tv_sec + ((double)curr_time.tv_usec / (double)1000000.0f);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_get_time() */
+
+
+#ifdef H5_HAVE_WIN32_API
+
+#define H5_WIN32_ENV_VAR_BUFFER_SIZE    32767
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_expand_windows_env_vars()
+ *
+ * Purpose:     Replaces windows environment variables of the form %foo%
+ *              with user-specific values.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_expand_windows_env_vars(char **env_var)
+{
+    long    n_chars = 0;
+    char   *temp_buf = NULL;
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Allocate buffer for expanded environment variable string */
+    if (NULL == (temp_buf = (char *)H5MM_calloc((size_t)H5_WIN32_ENV_VAR_BUFFER_SIZE)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
+
+    /* Expand the environment variable string */
+    if ((n_chars = ExpandEnvironmentStringsA(*env_var, temp_buf, H5_WIN32_ENV_VAR_BUFFER_SIZE)) > H5_WIN32_ENV_VAR_BUFFER_SIZE)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+
+    if (0 == n_chars)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+
+    *env_var = (char *)H5MM_xfree(*env_var);
+    *env_var = temp_buf;
+
+done:
+    if (FAIL == ret_value && temp_buf)
+        temp_buf = (char *)H5MM_xfree(temp_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_expand_windows_env_vars() */
+#endif /* H5_HAVE_WIN32_API */
 

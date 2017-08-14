@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -118,10 +116,9 @@ H5HL__prfx_new(H5HL_t *heap))
 
 CATCH
     /* Ensure that the prefix memory is deallocated on errors */
-    if(!ret_value && prfx != NULL) {
+    if(!ret_value && prfx != NULL)
         /* H5FL_FREE always returns NULL so we can't check for errors */
         prfx = H5FL_FREE(H5HL_prfx_t, prfx);
-    }
 
 END_FUNC(PKG) /* end H5HL__prfx_new() */
 
@@ -164,3 +161,4 @@ CATCH
     prfx = H5FL_FREE(H5HL_prfx_t, prfx);
 
 END_FUNC(PKG) /* end H5HL__prfx_dest() */
+

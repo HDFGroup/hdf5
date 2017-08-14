@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 package test;
@@ -220,6 +218,7 @@ public class TestH5Pvirtual {
                 try {H5.H5Dclose(H5did);} catch (Exception ex) {}
         }
         assertTrue("testH5Pget_virtual_count: "+num_map, num_map >= 0);
+        assertEquals(3, num_map);
     }
 
     @Test
@@ -406,7 +405,7 @@ public class TestH5Pvirtual {
         }
     }
 
-    @Ignore
+    @Test
     public void  testH5Pset_get_virtual_printf_gap() {
         long ret_val = -1;
         H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
@@ -415,7 +414,7 @@ public class TestH5Pvirtual {
             assertTrue("H5Pget_virtual_printf_gap", ret_val >= 0);
             assertEquals(0, ret_val);
             H5.H5Pset_virtual_printf_gap(H5dapl_id, 2);
-            ret_val = H5.H5Pget_virtual_view(H5dapl_id);
+            ret_val = H5.H5Pget_virtual_printf_gap(H5dapl_id);
             assertTrue("H5Pget_virtual_printf_gap", ret_val >= 0);
             assertEquals(2, ret_val);
         }

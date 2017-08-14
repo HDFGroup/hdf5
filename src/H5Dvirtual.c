@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -803,7 +801,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
 #endif /* H5_HAVE_PARALLEL */
         {
         /* Open the source file */
-        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & H5F_ACC_RDWR, H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
+        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
             H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
         else
             src_file_open = TRUE;
@@ -844,7 +842,7 @@ done:
 
     /* Close source file */
     if(src_file_open)
-        if(H5F_try_close(src_file) < 0)
+        if(H5F_try_close(src_file, NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3003,7 +3001,7 @@ H5D__virtual_release_source_dset_files(H5D_virtual_held_file_t *head)
          *      essentially "private" to the virtual dataset, since it wasn't
          *      opened through an API routine -QAK)
          */
-        if(H5F_try_close(head->file) < 0)
+        if(H5F_try_close(head->file, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close")
 
         /* Delete node */

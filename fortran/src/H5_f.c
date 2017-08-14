@@ -10,12 +10,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  ******
@@ -23,6 +21,10 @@
 
 #include "H5f90.h"
 #include "H5fort_type_defines.h"
+
+int IntKinds_SizeOf[] = H5_FORTRAN_INTEGER_KINDS_SIZEOF;
+
+
 /****if* H5_f/h5init_types_c
  * NAME
  *  h5init_types_c
@@ -30,16 +32,16 @@
  *  Initialize predefined datatypes in Fortran
  * INPUTS
  *  types - array with the predefined Native Fortran
- *  type, its element and length must be the
- *  same as the types array defined in the
+ *          type, its element and length must be the
+ *          same as the types array defined in the
  *          H5f90global.F90
  *  floatingtypes - array with the predefined Floating Fortran
- *  type, its element and length must be the
- *  same as the floatingtypes array defined in the
- *                   H5f90global.F90
+ *                  type, its element and length must be the
+ *                  same as the floatingtypes array defined in the
+ *                  H5f90global.F90
  *  integertypes - array with the predefined Integer Fortran
- *  type, its element and length must be the
- *  same as the integertypes array defined in the
+ *                 type, its element and length must be the
+ *                 same as the integertypes array defined in the
  *                 H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
@@ -55,173 +57,116 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     int ret_value = -1;
     hid_t c_type_id;
     size_t tmp_val;
+    int i;
 
-/* Fortran INTEGER may not be the same as C; do all checking to find
-   an appropriate size
-*/
+    /* Fortran INTEGER may not be the same as C; do all checking to find
+       an appropriate size
+    */
+
+    /*
+     * Find the HDF5 type of the Fortran Integer KIND.
+     */
+
+    /* Initialized INTEGER KIND types to default to native integer */
+    for(i=0;i<5;i++) {
+      if ((types[i] = (hid_t_f)H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+    }
+
+    for(i=0;i<H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
+      if ( IntKinds_SizeOf[i] == sizeof(char)) {
+	if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
+      } /*end if */
+      else if ( IntKinds_SizeOf[i] == sizeof(short)) {
+	if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_SHORT)) < 0) return ret_value;
+      } /*end if */
+      else if ( IntKinds_SizeOf[i] == sizeof(int)) {
+	if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
+      } /*end if */
+      else if ( IntKinds_SizeOf[i] == sizeof(long long)) {
+	if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
+      } /*end if */
+      else {
+	if ((types[i] = (hid_t_f)H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+	if ( H5Tset_precision (types[i], 128) < 0) return ret_value;
+      } /*end else */
+
+    }
+
     if (sizeof(int_f) == sizeof(int)) {
-    if ((types[0] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
+      if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
     } /*end if */
     else if (sizeof(int_f) == sizeof(long)) {
-    if ((types[0] = (hid_t_f)H5Tcopy(H5T_NATIVE_LONG)) < 0) return ret_value;
+      if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_LONG)) < 0) return ret_value;
     } /*end if */
     else
-    if (sizeof(int_f) == sizeof(long long)) {
-    if ((types[0] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
+      if (sizeof(int_f) == sizeof(long long)) {
+	if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
-
+    
     /* Find appropriate size to store Fortran REAL */
     if(sizeof(real_f)==sizeof(float)) {
-        if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
+      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /* end if */
     else if(sizeof(real_f)==sizeof(double)){
-        if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /* end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
     else if (sizeof(real_f) == sizeof(long double)) {
-        if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
+      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /* end else */
 #endif
 
     /* Find appropriate size to store Fortran DOUBLE */
     if(sizeof(double_f)==sizeof(double)) {
-       if ((types[2] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+       if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     }/*end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
     else if(sizeof(double_f)==sizeof(long double)) {
-       if ((types[2] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
+       if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     }/*end else */
 #endif
 #ifdef H5_HAVE_FLOAT128
     else if(sizeof(double_f)==sizeof(__float128)) {
-      if ((types[2] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[2], 128) < 0) return ret_value;
+      if ((types[7] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
+      if ( H5Tset_precision (types[7], 128) < 0) return ret_value;
     }/*end else */
 #endif
 
-/*
-    if ((types[3] = H5Tcopy(H5T_NATIVE_UINT8)) < 0) return ret_value;
-*/
     if ((c_type_id = H5Tcopy(H5T_FORTRAN_S1)) < 0) return ret_value;
     tmp_val = 1;
     if(H5Tset_size(c_type_id, tmp_val) < 0) return ret_value;
     if(H5Tset_strpad(c_type_id, H5T_STR_SPACEPAD) < 0) return ret_value;
-    types[3] = (hid_t_f)c_type_id;
+    types[8] = (hid_t_f)c_type_id;
 
-/*
-    if ((types[3] = H5Tcopy(H5T_C_S1)) < 0) return ret_value;
-    if(H5Tset_strpad(types[3],H5T_STR_NULLTERM) < 0) return ret_value;
-    if(H5Tset_size(types[3],1) < 0) return ret_value;
-*/
-
-
-/*    if ((types[3] = H5Tcopy(H5T_STD_I8BE)) < 0) return ret_value;
-*/
-    if ((types[4] = (hid_t_f)H5Tcopy(H5T_STD_REF_OBJ)) < 0) return ret_value;
-    if ((types[5] = (hid_t_f)H5Tcopy(H5T_STD_REF_DSETREG)) < 0) return ret_value;
-    /*
-     * FIND H5T_NATIVE_INTEGER_1
-     */
-    if (sizeof(int_1_f) == sizeof(char)) {
-      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_1_f) == sizeof(short)) {
-      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_SHORT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_1_f) == sizeof(int)) {
-      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_1_f) == sizeof(long long)) {
-      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
-    } /*end if */
-    else {
-      if ((types[6] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[6], 128) < 0) return ret_value;
-    } /*end else */
-    /*
-     * FIND H5T_NATIVE_INTEGER_2
-     */
-    if (sizeof(int_2_f) == sizeof(char)) {
-      if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_2_f) == sizeof(short)) {
-      if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_SHORT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_2_f) == sizeof(int)) {
-      if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_2_f) == sizeof(long long)) {
-	if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
-    } /*end else */
-    else {
-      if ((types[7] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[7], 128) < 0) return ret_value;
-    } /*end else */
-    /*
-     * FIND H5T_NATIVE_INTEGER_4
-     */
-    if (sizeof(int_4_f) == sizeof(char)) {
-      if ((types[8] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_4_f) == sizeof(short)) {
-      if ((types[8] = (hid_t_f)H5Tcopy(H5T_NATIVE_SHORT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_4_f) == sizeof(int)) {
-      if ((types[8] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_4_f) == sizeof(long long)) {
-	if ((types[8] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
-    } /*end else */
-    else {
-      if ((types[8] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[8], 128) < 0) return ret_value;
-    } /*end else */
-    /*
-     * FIND H5T_NATIVE_INTEGER_8
-     */
-    if (sizeof(int_8_f) == sizeof(char)) {
-      if ((types[9] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_8_f) == sizeof(short)) {
-      if ((types[9] = (hid_t_f)H5Tcopy(H5T_NATIVE_SHORT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_8_f) == sizeof(int)) {
-      if ((types[9] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_8_f) == sizeof(long long)) {
-	if ((types[9] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
-    } /*end else */
-    else {
-      if ((types[9] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[9], 128) < 0) return ret_value;
-    } /*end else */
+    if ((types[9] = (hid_t_f)H5Tcopy(H5T_STD_REF_OBJ)) < 0) return ret_value;
+    if ((types[10] = (hid_t_f)H5Tcopy(H5T_STD_REF_DSETREG)) < 0) return ret_value;
 
     /*
      * FIND H5T_NATIVE_REAL_C_FLOAT
      */
     if (sizeof(real_C_FLOAT_f) == sizeof(float)) {
-      if ((types[10] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
+      if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /*end if */
     else if (sizeof(real_C_FLOAT_f) == sizeof(double)) {
-      if ((types[10] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+      if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /*end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
     else if (sizeof(real_C_FLOAT_f) == sizeof(long double)) {
-	if ((types[10] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
+	if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /*end else */
 #endif
     /*
      * FIND H5T_NATIVE_REAL_C_DOUBLE
      */
     if (sizeof(real_C_DOUBLE_f) == sizeof(float)) {
-      if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
+      if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /*end if */
     else if (sizeof(real_C_DOUBLE_f) == sizeof(double)) {
-      if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+      if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /*end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
     else if (sizeof(real_C_DOUBLE_f) == sizeof(long double)) {
-	if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
+	if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /*end else */
 #endif
     /*
@@ -229,66 +174,43 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
      */
 #if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
     if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(float)) {
-      if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
+      if ((types[13] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /*end if */
     else if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(double)) {
-      if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+      if ((types[13] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /*end if */
 # if H5_FORTRAN_HAVE_C_LONG_DOUBLE!=0
     else if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(long double)) {
       if ( H5_PAC_C_MAX_REAL_PRECISION >= H5_PAC_FC_MAX_REAL_PRECISION) {
-	if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
+	if ((types[13] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
       }
       else {
-	if ((types[12] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
-	if ( H5Tset_precision (types[12], 128) < 0) return ret_value;
+	if ((types[13] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
+	if ( H5Tset_precision (types[13], 128) < 0) return ret_value;
       }
     }
 # else
-    if ((types[12] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
-    if ( H5Tset_precision (types[12], 64) < 0) return ret_value;
+    if ((types[13] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
+    if ( H5Tset_precision (types[13], 64) < 0) return ret_value;
 # endif
 #else
-    if ((types[12] = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+    if ((types[13] = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
 #endif
     /*
      * FIND H5T_NATIVE_B_8
      */
-    if ((types[13] = (hid_t_f)H5Tcopy(H5T_NATIVE_B8))  < 0) return ret_value;
-    if ((types[14] = (hid_t_f)H5Tcopy(H5T_NATIVE_B16)) < 0) return ret_value;
-    if ((types[15] = (hid_t_f)H5Tcopy(H5T_NATIVE_B32)) < 0) return ret_value;
-    if ((types[16] = (hid_t_f)H5Tcopy(H5T_NATIVE_B64)) < 0) return ret_value;
+    if ((types[14] = (hid_t_f)H5Tcopy(H5T_NATIVE_B8))  < 0) return ret_value;
+    if ((types[15] = (hid_t_f)H5Tcopy(H5T_NATIVE_B16)) < 0) return ret_value;
+    if ((types[16] = (hid_t_f)H5Tcopy(H5T_NATIVE_B32)) < 0) return ret_value;
+    if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_B64)) < 0) return ret_value;
 
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-     /*
-     * FIND H5T_NATIVE_INTEGER_16
-     */
-    if (sizeof(int_16_f) == sizeof(char)) {
-      if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_16_f) == sizeof(short)) {
-      if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_SHORT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_16_f) == sizeof(int)) {
-      if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_16_f) == sizeof(long long)) {
-	if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
-    } /*end else */
-    else {
-      if ((types[17] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[17], 128) < 0) return ret_value;
-    } /*end else */
-#else
-    if ((types[17] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-    if ( H5Tset_precision (types[17], 128) < 0) return ret_value;
-#endif
-
-     /*
+    /*
      * FIND H5T_NATIVE_FLOAT_128
      */
     if ((types[18] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
     if ( H5Tset_precision (types[18], 128) < 0) return ret_value;
+
+    /*--------------------------------------------------------------------------------------*/
 
     if ((floatingtypes[0] = (hid_t_f)H5Tcopy(H5T_IEEE_F32BE)) < 0) return ret_value;
     if ((floatingtypes[1] = (hid_t_f)H5Tcopy(H5T_IEEE_F32LE)) < 0) return ret_value;
@@ -410,6 +332,7 @@ h5close_types_c( hid_t_f * types, int_f *lentypes,
  *  h5p_flags_int   - H5P interface flags of type integer
  *  h5r_flags       - H5R interface flags
  *  h5s_flags       - H5S interface flags
+ *  h5s_hid_flags   - H5S interface flags of type hid_t
  *  h5s_hsize_flags - H5S interface flags of type hsize_t
  *  h5t_flags       - H5T interface flags
  *  h5z_flags       - H5Z interface flags
@@ -432,6 +355,8 @@ h5close_types_c( hid_t_f * types, int_f *lentypes,
  *           MSB, July 9, 2009
  *  Added type h5d_flags of type size_t
  *           MSB, Feb. 28, 2014
+ *  Added type h5s_hid_flags of type hid_t
+ *           MSB, Oct. 10, 2016
  * SOURCE
  */
 int_f
@@ -439,8 +364,9 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 		int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
                 int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                 int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
-                hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
-		hsize_t_f *h5s_hsize_flags, int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags,
+                hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, 
+                int_f *h5s_flags, hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags, 
+		int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags,
                 haddr_t_f *h5_haddr_generic_flags)
 /******/
 {
@@ -669,29 +595,32 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 /*
  *  H5S flags
  */
+      
+      h5s_hid_flags[0] = (hid_t_f)H5S_ALL;
+
+      h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;
+
       h5s_flags[0] = (int_f)H5S_SCALAR;
       h5s_flags[1] = (int_f)H5S_SIMPLE;
       h5s_flags[2] = (int_f)H5S_NULL;
       h5s_flags[3] = (int_f)H5S_SELECT_SET;
       h5s_flags[4] = (int_f)H5S_SELECT_OR;
-      h5s_flags[5] = (int_f)H5S_ALL;
 
-      h5s_flags[6] = (int_f)H5S_SELECT_NOOP;
-      h5s_flags[7] = (int_f)H5S_SELECT_AND;
-      h5s_flags[8] = (int_f)H5S_SELECT_XOR;
-      h5s_flags[9] = (int_f)H5S_SELECT_NOTB;
-      h5s_flags[10] = (int_f)H5S_SELECT_NOTA;
-      h5s_flags[11] = (int_f)H5S_SELECT_APPEND;
-      h5s_flags[12] = (int_f)H5S_SELECT_PREPEND;
-      h5s_flags[13] = (int_f)H5S_SELECT_INVALID;
+      h5s_flags[5] = (int_f)H5S_SELECT_NOOP;
+      h5s_flags[6] = (int_f)H5S_SELECT_AND;
+      h5s_flags[7] = (int_f)H5S_SELECT_XOR;
+      h5s_flags[8] = (int_f)H5S_SELECT_NOTB;
+      h5s_flags[9] = (int_f)H5S_SELECT_NOTA;
 
-      h5s_flags[14] = (int_f)H5S_SEL_ERROR;
-      h5s_flags[15] = (int_f)H5S_SEL_NONE;
-      h5s_flags[16] = (int_f)H5S_SEL_POINTS;
-      h5s_flags[17] = (int_f)H5S_SEL_HYPERSLABS;
-      h5s_flags[18] = (int_f)H5S_SEL_ALL;
+      h5s_flags[10] = (int_f)H5S_SELECT_APPEND;
+      h5s_flags[11] = (int_f)H5S_SELECT_PREPEND;
+      h5s_flags[12] = (int_f)H5S_SELECT_INVALID;
+      h5s_flags[13] = (int_f)H5S_SEL_ERROR;
+      h5s_flags[14] = (int_f)H5S_SEL_NONE;
 
-      h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;
+      h5s_flags[15] = (int_f)H5S_SEL_POINTS;
+      h5s_flags[16] = (int_f)H5S_SEL_HYPERSLABS;
+      h5s_flags[17] = (int_f)H5S_SEL_ALL;
 
 /*
  *  H5T flags

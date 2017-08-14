@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -1892,7 +1890,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
         hsize_t	nelmts;
 
 	nelmts = max_size[0]*max_size[1]*max_size[2]*max_size[3]*max_size[4];
-	if((fd=HDopen(FILE_NAME_RAW, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0 ||
+	if((fd = HDopen(FILE_NAME_RAW, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0 ||
 	    HDclose(fd) < 0) goto error;
 	if(H5Pset_external(dcpl, FILE_NAME_RAW, (off_t)0, (hsize_t)nelmts*sizeof(int)) < 0)
 	    goto error;
@@ -2370,7 +2368,7 @@ main(int argc, char *argv[])
 {
     int	nerrors=0, argno, test_contig=1, test_chunk=1, test_compact=1;
     hid_t	fapl = (-1), fapl2 = (-1);    /* File access property lists */
-    unsigned new_format;     /* Whether to use the new format or not */
+    unsigned 	new_format;     	/* Whether to use the new format or not */
 
     if(argc >= 2) {
         test_contig = test_chunk = test_compact = 0;
@@ -2383,7 +2381,7 @@ main(int argc, char *argv[])
                 test_compact =1;
             else {
                 fprintf(stderr, "usage: %s [contiguous] [chunked] [compact]\n", argv[0]);
-                exit(1);
+                exit(EXIT_FAILURE);
             }
         } /* end for */
     } /* end if */

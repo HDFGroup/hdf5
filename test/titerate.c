@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
@@ -584,9 +582,9 @@ test_iter_group_large(hid_t fapl)
     hid_t		tid;       /* Datatype ID			*/
     hsize_t		dims[] = {SPACE1_DIM1};
     herr_t		ret;		/* Generic return value		*/
-    char gname[20];         /* Temporary group name */
-    iter_info names[ITER_NGROUPS+2]; /* Names of objects in the root group */
-    iter_info *curr_name;        /* Pointer to the current name in the root group */
+    char gname[20];             /* Temporary group name */
+    iter_info *names;           /* Names of objects in the root group */
+    iter_info *curr_name;       /* Pointer to the current name in the root group */
     int                 i;
 
     /* Compound datatype */
@@ -596,7 +594,9 @@ test_iter_group_large(hid_t fapl)
         float c;
     } s1_t;
 
-    HDmemset(names, 0, sizeof names);
+    /* Allocate & initialize array */
+    names = (iter_info *)HDcalloc(sizeof(iter_info), (ITER_NGROUPS + 2));
+    CHECK(names, NULL, "HDcalloc");
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
@@ -686,6 +686,9 @@ test_iter_group_large(hid_t fapl)
     /* Close file */
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
+
+    /* Release memory */
+    HDfree(names);
 } /* test_iterate_group_large() */
 
 /****************************************************************

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -81,6 +79,12 @@ main(void)
         0.2f,
         (256 * 2048),
         H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY};
+    H5AC_cache_image_config_t my_cache_image_config = {
+        H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION,
+        TRUE,
+	FALSE,
+        -1};
+
 
     /* check endianess */
     {
@@ -356,6 +360,9 @@ main(void)
         assert(ret > 0);
     if((ret = H5Pset_mdc_config(fapl1, &my_cache_config)) < 0)
         assert(ret > 0);
+    if((ret = H5Pset_mdc_image_config(fapl1, &my_cache_image_config)) < 0)
+        assert(ret > 0);
+
     if((ret = H5Pset_core_write_tracking(fapl1, TRUE, (size_t)(1024 * 1024))) < 0)
         assert(ret > 0);
 
@@ -392,6 +399,12 @@ main(void)
          assert(ret > 0);
 
     if((ret = H5Pset_sizes(fcpl1, 8, 4) < 0))
+         assert(ret > 0);
+
+    if((ret = H5Pset_file_space_strategy(fcpl1, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1)) < 0)
+         assert(ret > 0);
+
+    if((ret = H5Pset_file_space_page_size(fcpl1, (hsize_t)4096)) < 0)
          assert(ret > 0);
 
     if((ret = encode_plist(fcpl1, little_endian, word_length, "testfiles/plist_files/fcpl_")) < 0)
@@ -450,23 +463,23 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
 
     /* Generate filename */
     if((ret = HDsnprintf(filename, sizeof(filename), "%s%d%s", filename_prefix, word_length, little_endian ? "le" : "be")) < 0)
-        assert(ret > 0);
+        HDassert(ret > 0);
 
     /* first call to encode returns only the size of the buffer needed */
     if((ret = H5Pencode(plist_id, NULL, &temp_size)) < 0)
-        assert(ret > 0);
+        HDassert(ret > 0);
 
     temp_buf = (void *)HDmalloc(temp_size);
-    assert(temp_buf);
+    HDassert(temp_buf);
 
     if((ret = H5Pencode(plist_id, temp_buf, &temp_size)) < 0)
-        assert(ret > 0);
+        HDassert(ret > 0);
 
-    fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, 0666);
-    assert(fd > 0);
+    fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
+    HDassert(fd > 0);
 
     write_size = HDwrite(fd, temp_buf, temp_size);
-    assert(write_size == (ssize_t)temp_size);
+    HDassert(write_size == (ssize_t)temp_size);
 
     HDclose(fd);
     

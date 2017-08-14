@@ -1,0 +1,3 @@
+Opened "TEST.h5" with sec2 driver.
+Monitoring dataset /DSET_ALLOC_EARLY...
+dimension 0: 10->9 (decreases)

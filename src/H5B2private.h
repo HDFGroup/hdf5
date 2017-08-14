@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -31,7 +29,8 @@
 #include "H5B2public.h"
 
 /* Private headers needed by this file */
-#include "H5Fprivate.h"		/* File access				*/
+#include "H5ACprivate.h"        /* Metadata cache                   */
+#include "H5Fprivate.h"         /* File access                      */
 
 /**************************/
 /* Library Private Macros */
@@ -153,6 +152,7 @@ H5_DLL herr_t H5B2_size(H5B2_t *bt2, hid_t dxpl_id,
 H5_DLL herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
 H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     void *ctx_udata, H5B2_remove_t op, void *op_data);
+H5_DLL herr_t H5B2_depend(H5B2_t *bt2, hid_t dxpl_id, H5AC_proxy_entry_t *parent);
 H5_DLL herr_t H5B2_patch_file(H5B2_t *fa, H5F_t *f);
 
 /* Statistics routines */

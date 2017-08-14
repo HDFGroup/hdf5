@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -38,12 +36,6 @@
 /*****************************/
 /* Package Private Variables */
 /*****************************/
-
-/* The local heap prefix cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_LHEAP_PRFX[1];
-
-/* The local heap data block cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_LHEAP_DBLK[1];
 
 /* Declare extern the free list to manage the H5HL_free_t struct */
 H5FL_EXTERN(H5HL_free_t);
@@ -131,27 +123,11 @@ struct H5HL_prfx_t {
 
 /* Callback information for loading local heap prefix from disk */
 typedef struct H5HL_cache_prfx_ud_t {
-    /* Downwards */
-    hbool_t made_attempt;               /* Whether the deserialize routine */
-                                        /* was already attempted */
     size_t sizeof_size;                 /* Size of file sizes */
     size_t sizeof_addr;                 /* Size of file addresses */
     haddr_t prfx_addr;                  /* Address of prefix */
     size_t sizeof_prfx;                 /* Size of heap prefix */
-
-    /* Upwards */
-    hbool_t loaded;                     /* Whether prefix was loaded */
-                                        /* from file */
 } H5HL_cache_prfx_ud_t;
-
-/* Callback information for loading local heap data block from disk */
-typedef struct H5HL_cache_dblk_ud_t {
-    /* Downwards */
-    H5HL_t *heap;                       /* Local heap                               */
-
-    /* Upwards */
-    hbool_t loaded;                     /* Whether data block was loaded from file  */
-} H5HL_cache_dblk_ud_t;
 
 
 /******************************/

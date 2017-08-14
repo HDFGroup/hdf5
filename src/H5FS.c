@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -109,7 +107,7 @@ H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr, const H5FS_create_t *fs_c
     H5FS_t *fspace = NULL;      /* New free space structure */
     H5FS_t *ret_value = NULL;   /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, nclasses);
 #endif /* H5FS_DEBUG */
@@ -132,9 +130,10 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
     fspace->expand_percent = fs_create->expand_percent;
     fspace->max_sect_addr = fs_create->max_sect_addr;
     fspace->max_sect_size = fs_create->max_sect_size;
+    fspace->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
 
     fspace->alignment = alignment;
-    fspace->threshold = threshold;
+    fspace->align_thres = threshold;
 
     /* Check if the free space tracker is supposed to be persistant */
     if(fs_addr) {
@@ -167,7 +166,7 @@ done:
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
 #endif /* H5FS_DEBUG */
-    FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_create() */
 
 
@@ -192,7 +191,7 @@ H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, uint16_t nclasses,
     H5FS_hdr_cache_ud_t cache_udata;    /* User-data for metadata cache callback */
     H5FS_t *ret_value = NULL;           /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Opening free space manager, fs_addr = %a, nclasses = %Zu\n", FUNC, fs_addr, nclasses);
 #endif /* H5FS_DEBUG */
@@ -226,7 +225,7 @@ HDfprintf(stderr, "%s: fspace->rc = %u\n", FUNC, fspace->rc);
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINC, NULL, "unable to increment ref. count on free space header")
 
     fspace->alignment = alignment;
-    fspace->threshold = threshold;
+    fspace->align_thres = threshold;
 
     /* Unlock free space header */
     if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
@@ -236,7 +235,7 @@ HDfprintf(stderr, "%s: fspace->rc = %u\n", FUNC, fspace->rc);
     ret_value = fspace;
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_open() */
 
 
@@ -259,7 +258,7 @@ H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr)
     H5FS_hdr_cache_ud_t cache_udata; /* User-data for metadata cache callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Deleting free space manager, fs_addr = %a\n", FUNC, fs_addr);
 #endif /* H5FS_DEBUG */
@@ -364,7 +363,7 @@ HDfprintf(stderr, "%s: Expunging free space section info from cache\n", FUNC);
 
                 if(H5AC_expunge_entry(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, cache_flags) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove free space section info from cache")
-            }
+            } /* end block */
 
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Done expunging free space section info from cache\n", FUNC);
@@ -386,7 +385,7 @@ done:
     if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space header")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_delete() */
 
 
@@ -408,7 +407,7 @@ H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(f);
@@ -569,7 +568,7 @@ done:
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Leaving, ret_value = %d, fspace->rc = %u\n", FUNC, ret_value, fspace->rc);
 #endif /* H5FS_DEBUG */
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_close() */
 
 
@@ -824,7 +823,7 @@ H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr, hid_t dxpl_id)
 {
     herr_t  ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(f);
@@ -844,7 +843,7 @@ H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr, hid_t dxpl_id)
         *fs_addr = fspace->addr;
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_alloc_hdr() */
 
 
@@ -865,17 +864,14 @@ H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
 {
     herr_t  ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(f);
     HDassert(fspace);
 
     if(!H5F_addr_defined(fspace->sect_addr) && fspace->sinfo && fspace->serial_sect_count > 0) {
-        /* Allocate space for section info from aggregator/vfd (or temp. address space) */
-        /* (The original version called H5MF_alloc(), but that may cause sect_size to change again) */
-        /* (This routine is only called during file close operations, so don't allocate from temp. address space) */
-        if(HADDR_UNDEF == (fspace->sect_addr = H5MF_aggr_vfd_alloc(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->sect_size)))
+        if(HADDR_UNDEF == (fspace->sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->sect_size)))
             HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for section info")
         fspace->alloc_sect_size = fspace->sect_size;
 
@@ -887,11 +883,15 @@ H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
         if(H5AC_insert_entry(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
 
+        /* Since space has been allocated for the section info and the sinfo
+         * has been inserted into the cache, relinquish owership (i.e. float)
+         * the section info.
+         */
         fspace->sinfo = NULL;
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_alloc_sect() */
 
 
@@ -908,13 +908,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
+H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id, hbool_t free_file_space)
 {
     haddr_t	saved_addr;             /* Previous address of item */
     unsigned    cache_flags;        /* Flags for unprotecting cache entries */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(f);
@@ -922,6 +922,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
 
     cache_flags = H5AC__DELETED_FLAG | H5AC__TAKE_OWNERSHIP_FLAG;;
 
+    /* Free space for section info */
     if(H5F_addr_defined(fspace->sect_addr)) {
         hsize_t	saved_size;     /* Size of previous section info */
         unsigned sinfo_status = 0;      /* Section info cache status */
@@ -954,7 +955,8 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
 
         /* Free space for the free-space manager section info */
         if(!H5F_IS_TMP_ADDR(f, saved_addr)) {
-            if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, saved_addr, saved_size) < 0)
+            if(free_file_space &&
+               H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, saved_addr, saved_size) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space sections")
         } /* end if */
 
@@ -963,6 +965,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
     } /* end if */
 
+    /* Free space for header */
     if(H5F_addr_defined(fspace->addr)) {
         unsigned hdr_status = 0;        /* Header entry status */
 
@@ -995,12 +998,13 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
         fspace->addr = HADDR_UNDEF;
 
         /* Free space for the free-space manager header */
-        if(H5MF_xfree(f, H5FD_MEM_FSPACE_HDR, dxpl_id, saved_addr, (hsize_t)H5FS_HEADER_SIZE(f)) < 0)
+        if(free_file_space &&
+           H5MF_xfree(f, H5FD_MEM_FSPACE_HDR, dxpl_id, saved_addr, (hsize_t)H5FS_HEADER_SIZE(f)) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space header")
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_free() */
 
 
@@ -1169,6 +1173,23 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS_sinfo_dest() */
 
+herr_t 
+H5FS_get_sect_count(const H5FS_t *frsp, hsize_t *tot_sect_count)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check arguments. */
+    HDassert(frsp);
+    HDassert(tot_sect_count);
+
+    /* Report statistics for free space */
+    *tot_sect_count = frsp->serial_sect_count;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 #ifdef H5FS_DEBUG_ASSERT
 
 /*-------------------------------------------------------------------------
@@ -1212,3 +1233,4 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS_assert", fspace->t
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS_assert() */
 #endif /* H5FS_DEBUG_ASSERT */
+

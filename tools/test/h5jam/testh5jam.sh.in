@@ -1,0 +1,699 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# Tests for the h5jam/h5unjam tools
+
+srcdir=@srcdir@
+
+# Determine which filters are available
+USE_FILTER_SZIP="@USE_FILTER_SZIP@"
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+
+TESTNAME=../../src/h5jam/h5unjam
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+DUMPER=../../src/h5dump/h5dump               # The dumper to use
+DUMPER_BIN=`pwd`/../$DUMPER    # The path of the dumper binary
+JAM=../../src/h5jam/h5jam                     # Tool to test
+UNJAM=../../src/h5jam/h5unjam                     # Tool to test
+JAM_BIN="$RUNSERIAL "`pwd`    # The path of the jam binary
+UNJAM_BIN=`pwd`    # The path of the jam binary
+
+RM='rm -rf'
+CMP='cmp -s'
+DIFF='diff -c'
+AWK='awk'
+CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+nerrors=0
+verbose=yes
+
+# source dirs
+SRC_TOOLS="$srcdir/../.."
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
+
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES="
+$SRC_H5JAM_TESTFILES/tall.h5
+$SRC_H5JAM_TESTFILES/twithub.h5
+$SRC_H5JAM_TESTFILES/twithub513.h5
+"
+LIST_OTHER_TEST_FILES="
+$SRC_H5JAM_TESTFILES/u10.txt
+$SRC_H5JAM_TESTFILES/u511.txt
+$SRC_H5JAM_TESTFILES/u512.txt
+$SRC_H5JAM_TESTFILES/u513.txt
+$SRC_H5JAM_TESTFILES/h5jam-help.txt
+$SRC_H5JAM_TESTFILES/h5unjam-help.txt
+$SRC_H5JAM_TESTFILES/h5jam-ub-nohdf5.txt
+"
+
+# Source in the output filter function definitions.
+. $srcdir/../../../bin/output_filter.sh
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=$SRC_H5JAM_TESTFILES
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Compare".
+#
+COMPARE() {
+   SPACES="                                                               "
+   echo "Compare $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a "SKIP" message
+SKIP() {
+ TESTING $JAM $@
+ echo  " -SKIP-"
+}
+
+#
+#  COMPARE_FILES a.h5 b.h5
+#    Compare two files, skipping the first line.  This is used to
+#    compare the output of the dumper, skipping the file name which
+#    is different.
+#    The result is stored in 'compval'.
+#
+cmpval=0;
+COMPARE_FILES() {
+    $AWK 'NR > 1' $1 > $1.cmp
+    $AWK 'NR > 1' $2 > $2.cmp
+    $CMP $1.cmp $2.cmp
+    cmpval=$?
+        rm -f $1.cmp $2.cmp
+}
+
+#  CLEANUP files
+#     Clean up named files.
+CLEANUP() {
+   if test -z "$HDF5_NOCLEANUP"; then
+    for i in $*
+    do
+        rm -f $i
+    done
+   fi
+}
+
+#  SETUP file tocopy
+#    Clone a standard input file in the test directory
+#  Modification:
+#    Was using "cp" command which means file $2 will inherit the permission
+#    setting of file $1.  If $1 is read-only, so will $2.  That will cause
+#    failure when the test attempts to write it later on.  Changed to use
+#    the "cat" command.
+#
+SETUP() {
+    cat < $1 > $2
+}
+
+#
+#  CHECKFILE orig.h5 compar.h5
+#     Check that the test file is the same as an original.
+#     The two files are dumped with the dumper, and the output
+#     compared with COMPARE_FILES.
+#     If the files are the same, the test reports " PASSED",
+#     otherwise, it reports "*FAILED*"
+CHECKFILE() {
+   expected="`dirname $2`/`basename $2 .h5`.out"
+   expected_err="`dirname $2`/`basename $2 .h5`.err"
+   actual="`basename $1 .h5`.out"
+   actual_err="`basename $1 .h5`.err"
+
+   $RUNSERIAL $DUMPER_BIN/$DUMPER $1 >$expected 2>$expected_err
+   cat $expected_err >> $expected
+
+   # dump the test file
+   COMPARE $2 to $1
+   $RUNSERIAL $DUMPER_BIN/$DUMPER $2 >$actual 2>$actual_err
+   cat $actual_err >> $actual
+
+   # compare the two files (ignore line 1)
+   COMPARE_FILES $actual $expected
+   if [ "$cmpval" = 0 ] ; then
+      echo " PASSED"
+   else
+      echo "*FAILED*"
+      echo "    Expected result (*.ddl) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expected $actual |sed 's/^/    /'
+   fi
+
+   # Clean up output files
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $actual $actual_err
+      rm -f $expected $expected_err
+   fi
+}
+
+#
+# CHECK_UB file.h5 user_block_file origfile.h5
+#
+#   Check the user block in 'file.h5' is the same as
+#   'user_block' (allowing for padding).
+#
+#   If the original file had a user block before the test
+#   then 'compare.h5' is passed.  The user block must be extracted
+#   and the test file compared to:
+#      cat compare_ub user_block_file.
+#
+#   This test uses './getub' to extract the user block from
+#   'file.h5', which is compared to the file described above.
+#
+#   The result is set in variable 'result1'.
+#
+result1=0;
+CHECK_UB_1() {
+    hfile="$1"
+    ufile="$2"
+
+    # check for third argument (the original file)
+    origfile="";
+    if [ -n "$3" ];
+    then
+        origfile="$3"
+    fi
+
+    # find the length of the user block to check
+    s1=`cat $ufile | wc -c | sed -e 's/ //g'`
+    if [ "$s1" = "0" ];
+    then
+        echo "File "$ufile" is empty"
+        result1=1;
+    fi
+
+    # Get the size of the original user block, if any.
+    if [ -n "$origfile" ];
+    then
+        # 'tellub' calls H5Fget_user_block to get the size
+        #  of the user block
+        s2=`$JAM_BIN/tellub $origfile`
+        if [ "$s2" = "0" ];
+        then
+            size=$s1;
+            cmpfile=$ufile
+        else
+            cmpfile="tt2"
+            size=`expr $s2 + $s1`
+            $JAM_BIN/getub -c $s2 $origfile > $cmpfile
+            cat $ufile >> $cmpfile
+        fi
+    else
+        # assume no user block
+        s2="0"
+        size=$s1;
+        cmpfile=$ufile
+    fi
+
+    # Extract 'size' bytes from the front of 'hfile'
+    # Compare to 'cmpfile', result is set in result1
+    tfile="tt1"
+    $JAM_BIN/getub -c $size $hfile > $tfile
+    res=`cmp $cmpfile $tfile`
+    if [ "$?" != "0" ];
+    then
+        echo $res
+        result1=1;
+    else
+        result1=0;
+    fi
+
+    # clean up
+    rm -f  $tfile
+    if [ "$s2" != "0" ] ;
+    then
+        rm -f $cmpfile
+    fi
+}
+
+
+#  CHECK_NOUB file.h5
+#
+#  Check that 'file.h5' has no user block.
+#  Setst result2 to 1 if there is a user block (fail), 0 if none (pass)
+
+result2=0;
+
+CHECK_NOUB() {
+    hfile="$1"
+
+    # call 'ubsize' to get the size of the user block
+    ubsize=`$JAM_BIN/tellub $hfile`
+
+    if [ "$?" != "0" ];
+    then
+        # error
+        result2=1;
+    else
+    if [ "$ubsize" = "0" ];
+    then
+        # pass
+        result2=0;
+    else
+        # fail
+        result2=1;
+    fi
+    fi
+}
+
+#  JAMTEST user_block file.h5 [--clobber] [ofile.h5]
+#
+#    Test the 'jam' tool:
+#      1. figure out the input and output, and the comparision
+#         that will be done.
+#      2. call 'jam' with the appropriate arguments
+#      3. check the user block is correct in the output (Check_UB)
+#    If the user block is correct, print "PASSED", else "*FAILED*"
+JAMTEST() {
+    ufile="$1"
+    ifile="$2"
+    compare_test=""   # the file to test
+    compare_orig=""   # the comparison to test against
+    cleanup=""
+
+    # sort out the arguments for the test and the check
+    do_clobber="no"
+    if [ "$3" = "--clobber" ];
+    then
+        #  clobber overwrites any existing user block
+        do_clobber="yes"
+        clobber="--clobber"
+        compare_orig=""
+        if [ -z "$4" ];
+        then
+            # output goes to infile, compare ubfile to infile
+            ofile=""
+            compare_test="$ifile"
+        else
+            # output goes to $4,  compare ofile to ubfile
+            ofile="$4"
+            compare_test="$ofile"
+        fi
+    else
+        clobber=""
+        # add user block to existing ub, if any
+        if [ -z "$3" ];
+        then
+            # output goes to infile, compare ubfile to infile
+            ofile=""
+            compare_test="$ifile"
+            cp $ifile xxofile.h5
+            compare_orig="xxofile.h5"
+            cleanup="$cleanup $compare_orig"
+        else
+            # output goes to $3,  compare ofile to ubfile
+            ofile="$3"
+            compare_test="$ofile"
+            compare_orig="$ifile"
+        fi
+    fi
+
+    # call 'jam' with the appropriate arguments
+    if [ -n "$ofile" ];
+    then
+        TESTING h5jam -u `basename $ufile` -i `basename $ifile` -o `basename $ofile` $clobber
+        $JAM_BIN/$JAM -u $ufile -i $ifile -o $ofile $clobber
+    else
+        TESTING jam -u `basename $ufile` -i `basename $ifile` $clobber
+        $JAM_BIN/$JAM -u $ufile -i $ifile $clobber
+    fi
+
+    #echo "CHECK_UB_1 $compare_test $ufile $compare_orig"
+    CHECK_UB_1 $compare_test $ufile $compare_orig
+
+    if [ "$result1" = "0" ] ;
+    then
+        echo " PASSED"
+    else
+        echo " *FAILED*"
+            nerrors="`expr $nerrors + 1`"
+    fi
+    CLEANUP $cleanup
+}
+
+# UNJAMTEST  file.h5 [- | --delete] ofile
+#
+#  Test the 'unjam' tool
+#
+###fix the working directory here and in jamtest
+UNJAMTEST () {
+    infile="$1"
+    ofile="$3"
+    if [ "$2" = "-" ];
+    then
+        uofile="uofile"
+        TESTING h5unjam -i `basename $infile` -o `basename $ofile` "> "`basename $uofile`
+        $JAM_BIN/$UNJAM -i $infile -o $ofile > $uofile
+    else
+    if [ "$2" = "--delete" ];
+    then
+        uofile="none"
+        TESTING h5unjam -i `basename $infile` -o `basename $ofile` --delete
+        $JAM_BIN/$UNJAM  -i $infile -o $ofile --delete
+
+    else
+        uofile="$2"
+        TESTING h5unjam -i `basename $infile` -u `basename $uofile` -o `basename $ofile`
+        $JAM_BIN/$UNJAM  -i $infile -u $uofile -o $ofile
+    fi
+    fi
+
+    result1=0
+    result2=0
+    cleanup=""
+    if [ "$uofile" != "none" ];
+    then
+        # sets result1
+        CHECK_UB_1 $infile $uofile
+        CLEANUP $uofile
+    fi
+
+    # sets result2
+    CHECK_NOUB $ofile
+
+    if [ "$result1" = "0" -a "$result2" = "0" ];
+    then
+        echo " PASSED"
+    else
+        echo " *FAILED*"
+        nerrors="`expr $nerrors + 1`"
+    fi
+}
+
+
+#
+# TOOLTEST_OUTPUT < JAM | UNJAM > expect-output.txt exit-code options
+#
+# Only verify stdout/stderr output from h5jam and j5unjam
+#
+
+TOOLTEST_OUTPUT() {
+    if [ "$1" == "JAM" ]; then
+        TOOLCMD=$JAM_BIN/$JAM
+    elif [ "$1" == "UNJAM" ]; then
+        TOOLCMD=$JAM_BIN/$UNJAM
+    fi
+    shift
+    expect="$TESTDIR/$1"
+    actual="$TESTDIR/`basename $1 .ls`.out"
+    actual_err="$TESTDIR/`basename $1 .ls`.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
+    shift
+    retvalexpect=$1
+    shift
+
+    TESTING h5jam $@
+    (
+        cd $TESTDIR
+        $TOOLCMD "$@"
+    ) >$actual 2>$actual_err
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
+    # combine stderr to stdout for output compare
+    cat $actual_err >> $actual
+
+    if [ ! -f $expect ]; then
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+        echo "    Expected result (*.ls) missing"
+        nerrors="`expr $nerrors + 1`"
+        rm -f $actual $actual_sav $actual_err $actual_err_sav
+    elif $CMP $expect $actual; then
+        echo " PASSED"
+        rm -f $actual $actual_sav $actual_err $actual_err_sav
+    else
+        echo "*FAILED*"
+        echo "    Expected result differs from actual result"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+}
+
+##############################################################################
+##############################################################################
+###              T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
+
+#-------------------------------
+# Testing h5jam
+#-------------------------------
+# help page
+TOOLTEST_OUTPUT JAM h5jam-help.txt 0 -h
+
+# don't allow HDF5 format file as an user block file
+TOOLTEST_OUTPUT JAM h5jam-ub-nohdf5.txt 1 -i tall.h5 -u tall.h5 -o tall-tmp.h5
+
+JAMTEST $TESTDIR/u10.txt $TESTDIR/tall.h5 ta2.h5
+CHECKFILE $TESTDIR/tall.h5 ta2.h5
+CLEANUP ta2.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/tall.h5 ta3.h5
+CHECKFILE $TESTDIR/tall.h5 ta3.h5
+CLEANUP ta3.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/tall.h5 ta4.h5
+CHECKFILE $TESTDIR/tall.h5 ta4.h5
+CLEANUP ta4.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/tall.h5 ta5.h5
+CHECKFILE $TESTDIR/tall.h5 ta5.h5
+CLEANUP ta5.h5
+
+SETUP $TESTDIR/tall.h5 ta6.h5
+JAMTEST $TESTDIR/u10.txt ta6.h5
+CHECKFILE $TESTDIR/tall.h5 ta6.h5
+CLEANUP ta6.h5
+SETUP $TESTDIR/tall.h5 ta7.h5
+JAMTEST $TESTDIR/u511.txt ta7.h5
+CHECKFILE $TESTDIR/tall.h5 ta7.h5
+CLEANUP ta7.h5
+SETUP $TESTDIR/tall.h5 ta8.h5
+JAMTEST $TESTDIR/u512.txt ta8.h5
+CHECKFILE $TESTDIR/tall.h5 ta8.h5
+CLEANUP ta8.h5
+SETUP $TESTDIR/tall.h5 ta9.h5
+JAMTEST $TESTDIR/u513.txt ta9.h5
+CHECKFILE $TESTDIR/tall.h5 ta9.h5
+CLEANUP ta9.h5
+
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub.h5 tax2.h5
+CHECKFILE $TESTDIR/tall.h5 tax2.h5
+CLEANUP tax2.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub.h5 tax3.h5
+CHECKFILE $TESTDIR/tall.h5 tax3.h5
+CLEANUP tax3.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub.h5 tax4.h5
+CHECKFILE $TESTDIR/tall.h5 tax4.h5
+CLEANUP tax4.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub.h5 tax5.h5
+CHECKFILE $TESTDIR/tall.h5 tax5.h5
+CLEANUP tax5.h5
+
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub513.h5 tax6.h5
+CHECKFILE $TESTDIR/tall.h5 tax6.h5
+CLEANUP tax6.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub513.h5 tax7.h5
+CHECKFILE $TESTDIR/tall.h5 tax7.h5
+CLEANUP tax7.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub513.h5 tax8.h5
+CHECKFILE $TESTDIR/tall.h5 tax8.h5
+CLEANUP tax8.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub513.h5 tax9.h5
+CHECKFILE $TESTDIR/tall.h5 tax9.h5
+CLEANUP tax9.h5
+
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub.h5 --clobber taz2.h5
+CHECKFILE $TESTDIR/tall.h5 taz2.h5
+CLEANUP taz2.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub.h5 --clobber taz3.h5
+CHECKFILE $TESTDIR/tall.h5 taz3.h5
+CLEANUP taz3.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub.h5 --clobber taz4.h5
+CHECKFILE $TESTDIR/tall.h5 taz4.h5
+CLEANUP taz4.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub.h5 --clobber taz5.h5
+CHECKFILE $TESTDIR/tall.h5 taz5.h5
+CLEANUP taz5.h5
+
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub513.h5 --clobber taz6.h5
+CHECKFILE $TESTDIR/tall.h5 taz6.h5
+CLEANUP taz6.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub513.h5 --clobber taz7.h5
+CHECKFILE $TESTDIR/tall.h5 taz7.h5
+CLEANUP taz7.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub513.h5 --clobber taz8.h5
+CHECKFILE $TESTDIR/tall.h5 taz8.h5
+CLEANUP taz8.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub513.h5 --clobber taz9.h5
+CHECKFILE $TESTDIR/tall.h5 taz9.h5
+CLEANUP taz9.h5
+
+SETUP $TESTDIR/twithub.h5 tay2.h5
+JAMTEST $TESTDIR/u10.txt tay2.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay2.h5
+CLEANUP tay2.h5
+SETUP $TESTDIR/twithub.h5 tay3.h5
+JAMTEST $TESTDIR/u511.txt tay3.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay3.h5
+CLEANUP tay3.h5
+SETUP $TESTDIR/twithub.h5 tay4.h5
+JAMTEST $TESTDIR/u512.txt tay4.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay4.h5
+CLEANUP tay4.h5
+SETUP $TESTDIR/twithub.h5 tay5.h5
+JAMTEST $TESTDIR/u513.txt tay5.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay5.h5
+CLEANUP tay5.h5
+
+SETUP $TESTDIR/twithub513.h5 tay6.h5
+JAMTEST $TESTDIR/u10.txt tay6.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay6.h5
+CLEANUP tay6.h5
+SETUP $TESTDIR/twithub513.h5 tay7.h5
+JAMTEST $TESTDIR/u511.txt tay7.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay7.h5
+CLEANUP tay7.h5
+SETUP $TESTDIR/twithub513.h5 tay8.h5
+JAMTEST $TESTDIR/u512.txt tay8.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay8.h5
+CLEANUP tay8.h5
+SETUP $TESTDIR/twithub513.h5 tay9.h5
+JAMTEST $TESTDIR/u513.txt tay9.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay9.h5
+CLEANUP tay9.h5
+
+#---------------------------------
+# Testing h5unjam
+#---------------------------------
+# help page
+TOOLTEST_OUTPUT UNJAM h5unjam-help.txt 0 -h
+
+SETUP $TESTDIR/twithub.h5 tai1.h5
+UNJAMTEST tai1.h5 o10.txt taa1.h5
+CHECKFILE $TESTDIR/tall.h5 taa1.h5
+CLEANUP taa1.h5 tai1.h5 o10.txt
+SETUP $TESTDIR/twithub513.h5 tai2.h5
+UNJAMTEST tai2.h5 o512.txt taa2.h5
+CHECKFILE $TESTDIR/tall.h5 taa2.h5
+CLEANUP taa2.h5 tai2.h5 o512.txt
+
+SETUP $TESTDIR/twithub.h5 tai3.h5
+UNJAMTEST tai3.h5 - taa3.h5
+CHECKFILE $TESTDIR/tall.h5 taa3.h5
+CLEANUP taa3.h5 tai3.h5
+SETUP $TESTDIR/twithub513.h5 tai4.h5
+UNJAMTEST tai4.h5 - taa4.h5
+CHECKFILE $TESTDIR/tall.h5 taa4.h5
+CLEANUP taa4.h5 tai4.h5
+
+SETUP $TESTDIR/twithub.h5 taj2.h5
+UNJAMTEST taj2.h5 --delete tac2.h5
+CHECKFILE $TESTDIR/tall.h5 tac2.h5
+CLEANUP tac2.h5 taj2.h5
+SETUP $TESTDIR/twithub513.h5 taj3.h5
+UNJAMTEST taj3.h5 --delete tac3.h5
+CHECKFILE $TESTDIR/tall.h5 tac3.h5
+CLEANUP tac3.h5 taj3.h5
+
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
+
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi

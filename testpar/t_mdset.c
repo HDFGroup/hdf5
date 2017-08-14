@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "testphdf5.h"
@@ -510,7 +508,7 @@ void big_dataset(void)
 
     /* Check that file of the correct size was created */
     file_size = h5_get_file_size(filename, fapl);
-    VRFY((file_size == 2147485792ULL), "File is correct size(~2GB)");
+    VRFY((file_size == 2147485696ULL), "File is correct size(~2GB)");
 
     /*
      * Create >4GB HDF5 file
@@ -539,7 +537,7 @@ void big_dataset(void)
 
     /* Check that file of the correct size was created */
     file_size = h5_get_file_size(filename, fapl);
-    VRFY((file_size == 4294969440ULL), "File is correct size(~4GB)");
+    VRFY((file_size == 4294969344ULL), "File is correct size(~4GB)");
 
     /*
      * Create >8GB HDF5 file
@@ -568,7 +566,7 @@ void big_dataset(void)
 
     /* Check that file of the correct size was created */
     file_size = h5_get_file_size(filename, fapl);
-    VRFY((file_size == 8589936736ULL), "File is correct size(~8GB)");
+    VRFY((file_size == 8589936640ULL), "File is correct size(~8GB)");
 
     /* Close fapl */
     ret = H5Pclose(fapl);

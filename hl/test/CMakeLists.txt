@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_HL_TEST)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
@@ -14,8 +14,8 @@ PROJECT (HDF5_HL_TEST)
 set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file (${HDF5_HL_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
-INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
-INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
+include_directories (${HDF5_TEST_SRC_DIR})
 
 # --------------------------------------------------------------------
 #  Macro used to add a unit test
@@ -30,7 +30,7 @@ MACRO (HL_ADD_EXE hl_name)
       ${HDF5_LIB_TARGET}
   )
   set_target_properties (hl_${hl_name} PROPERTIES FOLDER test/hl)
-ENDMACRO (HL_ADD_EXE)
+ENDMACRO ()
 
 MACRO (HL_ADD_SHEXE hl_name)
   add_executable (hl_${hl_name} ${hl_name}.c)
@@ -42,7 +42,7 @@ MACRO (HL_ADD_SHEXE hl_name)
       ${HDF5_LIBSH_TARGET}
   )
   set_target_properties (hl_${hl_name} PROPERTIES FOLDER test/hl)
-ENDMACRO (HL_ADD_SHEXE)
+ENDMACRO ()
 
 HL_ADD_EXE (test_lite)
 HL_ADD_EXE (test_image)
@@ -88,6 +88,6 @@ if (HDF5_BUILD_GENERATORS)
       ${HDF5_LIB_TARGET}
   )
   set_target_properties (hl_gen_test_ld PROPERTIES FOLDER test/hl/gen)
-endif (HDF5_BUILD_GENERATORS)
+endif ()
 
 include (CMakeTests.cmake)

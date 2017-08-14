@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -1050,7 +1048,7 @@ H5A_close(H5A_t *attr)
     HDassert(attr->shared);
 
     /* Close the object's symbol-table entry */
-    if(attr->obj_opened && (H5O_close(&(attr->oloc)) < 0))
+    if(attr->obj_opened && (H5O_close(&(attr->oloc), NULL) < 0))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release object header info")
 
     /* Reference count can be 0.  It only happens when H5A_create fails. */
@@ -2106,10 +2104,9 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
             HDmemcpy(buf, attr_src->shared->data, attr_src->shared->data_size);
 
 	    /* Allocate background memory */
-	    if(H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst)) {
+	    if(H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst))
 		if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-		    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
-	    }
+		    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
             /* Convert from source file to memory */
             if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, bkg_buf, dxpl_id) < 0)

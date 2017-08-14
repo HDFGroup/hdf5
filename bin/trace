@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 ##
 require 5.003;
 $Source = "";
@@ -32,10 +30,10 @@ $Source = "";
                "hbool_t"                    => "b",
                "double"                     => "d",
                "H5D_alloc_time_t"           => "Da",
-	       "H5FD_mpio_collective_opt_t" => "Dc",
+               "H5FD_mpio_collective_opt_t" => "Dc",
                "H5D_fill_time_t"            => "Df",
                "H5D_fill_value_t"           => "DF",
-	       "H5FD_mpio_chunk_opt_t"      => "Dh",
+               "H5FD_mpio_chunk_opt_t"      => "Dh",
                "H5D_mpio_actual_io_mode_t"  => "Di",
                "H5D_chunk_index_t"          => "Dk",
                "H5D_layout_t"               => "Dl",
@@ -47,17 +45,19 @@ $Source = "";
                "herr_t"                     => "e",
                "H5E_direction_t"            => "Ed",
                "H5E_error_t"                => "Ee",
-	       "H5E_type_t"                 => "Et",
-	       "H5F_close_degree_t"         => "Fd",
-	       "H5F_file_space_type_t"      => "Ff",
-	       "H5F_mem_t"                  => "Fm",
+               "H5E_type_t"                 => "Et",
+               "H5F_close_degree_t"         => "Fd",
+               "H5F_fspace_strategy_t"      => "Ff",
+               "H5F_file_space_type_t"      => "Ff",
+               "H5F_mem_t"                  => "Fm",
                "H5F_scope_t"                => "Fs",
-	       "H5F_libver_t"               => "Fv",
+               "H5F_fspace_type_t"          => "Ft",
+               "H5F_libver_t"               => "Fv",
                "H5G_obj_t"                  => "Go",
                "H5G_stat_t"                 => "Gs",
-	       "hsize_t"                    => "h",
+               "hsize_t"                    => "h",
                "hssize_t"                   => "Hs",
-	       "H5E_major_t"                => "i",
+               "H5E_major_t"                => "i",
                "H5E_minor_t"                => "i",
                "H5_iter_order_t"            => "Io",
                "H5_index_t"                 => "Ii",
@@ -68,15 +68,15 @@ $Source = "";
                "unsigned int"               => "Iu",
                "uint32_t"                   => "Iu",
                "H5I_type_t"                 => "It",
-	       "H5G_link_t"                 => "Ll", #Same as H5L_type_t now
-	       "H5L_type_t"                 => "Ll",
+               "H5G_link_t"                 => "Ll", #Same as H5L_type_t now
+               "H5L_type_t"                 => "Ll",
                "MPI_Comm"                   => "Mc",
                "MPI_Info"                   => "Mi",
                "H5FD_mem_t"                 => "Mt",
                "off_t"                      => "o",
                "H5O_type_t"                 => "Ot",
                "H5P_class_t"                => "p",
-	       "hobj_ref_t"		    => "r",
+               "hobj_ref_t"                 => "r",
                "H5R_type_t"                 => "Rt",
                "char"                       => "s",
                "unsigned char"              => "s",
@@ -98,10 +98,11 @@ $Source = "";
                "void"                       => "x",
                "FILE"                       => "x",
                "H5A_operator_t"             => "x",
-	       "H5A_operator1_t"            => "x",
-	       "H5A_operator2_t"            => "x",
-	       "H5A_info_t"                 => "x",
+               "H5A_operator1_t"            => "x",
+               "H5A_operator2_t"            => "x",
+               "H5A_info_t"                 => "x",
                "H5AC_cache_config_t"        => "x",
+               "H5AC_cache_image_config_t"  => "x",
                "H5D_append_cb_t"            => "x",
                "H5D_gather_func_t"          => "x",
                "H5D_operator_t"             => "x",
@@ -113,23 +114,23 @@ $Source = "";
                "H5E_walk1_t"                => "x",
                "H5E_walk2_t"                => "x",
                "H5F_flush_cb_t"             => "x",
-	       "H5F_info1_t"                => "x",
-	       "H5F_info2_t"                => "x",
+               "H5F_info1_t"                => "x",
+               "H5F_info2_t"                => "x",
                "H5F_retry_info_t"           => "x",
                "H5FD_t"                     => "x",
                "H5FD_class_t"               => "x",
                "H5FD_stream_fapl_t"         => "x",
                "H5FD_file_image_callbacks_t" => "x",
                "H5G_iterate_t"              => "x",
-	       "H5G_info_t"                 => "x",
-	       "H5I_free_t"                 => "x",
-                "H5I_search_func_t"         => "x",
-                "H5L_class_t"                => "x",
+               "H5G_info_t"                 => "x",
+               "H5I_free_t"                 => "x",
+               "H5I_search_func_t"          => "x",
+               "H5L_class_t"                => "x",
                "H5L_elink_traverse_t"       => "x",
                "H5L_iterate_t"              => "x",
                "H5MM_allocate_t"            => "x",
                "H5MM_free_t"                => "x",
-	       "H5O_info_t"                 => "x",
+               "H5O_info_t"                 => "x",
                "H5O_iterate_t"              => "x",
                "H5O_mcdt_search_cb_t"       => "x",
                "H5P_cls_create_func_t"      => "x",
@@ -160,6 +161,8 @@ $Source = "";
 ##############################################################################
 # Print an error message.
 #
+my $found_errors = 0;
+
 sub errmesg ($$@) {
   my ($file, $func, @mesg) = @_;
   my ($mesg) = join "", @mesg;
@@ -168,6 +171,8 @@ sub errmesg ($$@) {
     local $_ = $1;
     $lineno = tr/\n/\n/;
   }
+
+  $found_errors = 1;
 
   print "$file: in function \`$func\':\n";
   print "$file:$lineno: $mesg\n";
@@ -239,34 +244,34 @@ sub rewrite_func ($$$$$) {
         next;
       }
       unless ($arg=~/^(([a-z_A-Z]\w*\s+)+\**)
-	      ([a-z_A-Z]\w*)(\[.*?\])?
-	      (\s*\/\*\s*(in|out|in_out)\s*\*\/)?\s*$/x) {
-	errmesg $file, $name, "unable to parse \`$arg\'";
-	goto error;
+              ([a-z_A-Z]\w*)(\[.*?\])?
+              (\s*\/\*\s*(in|out|in_out)\s*\*\/)?\s*$/x) {
+        errmesg $file, $name, "unable to parse \`$arg\'";
+        goto error;
       } else {
-	my ($atype, $aname, $array, $adir) = ($1, $3, $4, $6);
-	$names{$aname} = $argno++;
-	$adir ||= "in";
-	$atype =~ s/\s+$//;
-	push @arg_name, $aname;
+        my ($atype, $aname, $array, $adir) = ($1, $3, $4, $6);
+        $names{$aname} = $argno++;
+        $adir ||= "in";
+        $atype =~ s/\s+$//;
+        push @arg_name, $aname;
 
-	if ($adir eq "out") {
-	  push @arg_str, "x";
-	} else {
-	  if (defined $array) {
-	    $atype .= "*";
-	    if ($array =~ /^\[\/\*([a-z_A-Z]\w*)\*\/\]$/) {
-	      my $asize = $1;
-	      if (exists $names{$asize}) {
-		$atype .= '[a' . $names{$asize} . ']';
-	      } else {
-		warn "bad array size: $asize";
-		$atype .= "*";
-	      }
-	    }
-	  }
-	  push @arg_str, argstring $file, $name, $atype;
-	}
+        if ($adir eq "out") {
+          push @arg_str, "x";
+        } else {
+          if (defined $array) {
+            $atype .= "*";
+            if ($array =~ /^\[\/\*([a-z_A-Z]\w*)\*\/\]$/) {
+              my $asize = $1;
+              if (exists $names{$asize}) {
+                $atype .= '[a' . $names{$asize} . ']';
+              } else {
+                warn "bad array size: $asize";
+                $atype .= "*";
+              }
+            }
+          }
+          push @arg_str, argstring $file, $name, $atype;
+        }
       }
     }
     $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
@@ -274,11 +279,11 @@ sub rewrite_func ($$$$$) {
     my $len = 4 + length $trace;
     for (@arg_name) {
       if ($len + length >= 77) {
-	$trace .= ",\n             $_";
-	$len = 13 + length;
+        $trace .= ",\n             $_";
+        $len = 13 + length;
       } else {
-	$trace .= ", $_";
-	$len += 1 + length;
+        $trace .= ", $_";
+        $len += 1 + length;
       }
     }
     $trace .= ");\n";
@@ -338,5 +343,13 @@ for $file (@ARGV) {
   }
 }
 
-printf "Finished processing HDF5 API calls\n"
+if ($found_errors eq 1) {
+    printf "\n";
+    printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    printf "*** ERRORS FOUND *** ERRORS FOUND *** ERRORS FOUND ****\n";
+    printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    exit 1;
+} else {
+    printf "Finished processing HDF5 API calls\n";
+}
 

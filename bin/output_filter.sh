@@ -3,18 +3,31 @@
 ##
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
 ## terms governing use, modification, and redistribution, is contained in
-## the files COPYING and Copyright.html.  COPYING can be found at the root
-## of the source code distribution tree; Copyright.html can be found at the
-## root level of an installed copy of the electronic HDF5 document set and
-## is linked from the top-level documents page.  It can also be found at
-## http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from help@hdfgroup.org.
+## the COPYING file, which can be found at the root of the source code
+## distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+## If you do not have access to either file, you may request a copy from
+## help@hdfgroup.org.
 
 # This contains function definitions of output filtering.
 # This file should only be sourced in by another shell script.
 #
 # Programmer: Albert Cheng
 # Created Date: 2011/5/3
+
+
+# Comment added to address HDFFV-8270:
+# As I understand it, the purpose of this file is to remove extraneous messages 
+# that appear in stdout and stderr on some machines that have been tested outside 
+# of the HDF Group realm.  The purpose of this script is to filter those 
+# extraneous messages from stdout and stderr so that when the output files are
+# compared to the expected output, the extra messages will not cause failures in 
+# the tests.  The system messages in the comments below are out of date, meaning
+# I suppose that while the script code to filter messages on the system was 
+# correct correct when last used, the output in the comments doesn't match the
+# script code that follows.  I don't currently have access to any of these 
+# systems to see the current output and the effect of the script code. If using
+# this file in the future, please update the comments to match the scripts in use.
+# Larry Knox 2017/3/15
 
 
 # Some systems will dump some messages to stdout for various reasons.

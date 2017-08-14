@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -189,12 +187,9 @@ haddr_t, HADDR_UNDEF, HADDR_UNDEF,
 H5FA__dblock_create(H5FA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty))
 
     /* Local variables */
-    H5FA_dblock_t *dblock = NULL;       /* fixed array data block */
-    haddr_t dblock_addr;                /* fixed array data block address */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called, hdr->stats.nelmts = %Zu, nelmts = %Zu\n", FUNC, hdr->stats.nelmts, hdr->cparam.nelmts);
-#endif /* H5FA_DEBUG */
+    H5FA_dblock_t *dblock = NULL;       /* Fixed array data block */
+    haddr_t dblock_addr;                /* Fixed array data block address */
+    hbool_t inserted = FALSE;           /* Whether the header was inserted into cache */
 
     /* Sanity check */
     HDassert(hdr);
@@ -206,10 +201,6 @@ HDfprintf(stderr, "%s: Called, hdr->stats.nelmts = %Zu, nelmts = %Zu\n", FUNC, h
 
     /* Set size of data block on disk */
     hdr->stats.dblk_size = dblock->size = H5FA_DBLOCK_SIZE(dblock);
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
-#endif /* H5FA_DEBUG */
-
 
     /* Allocate space for the data block on disk */
     if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
@@ -225,6 +216,14 @@ HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
     /* Cache the new fixed array data block */
     if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTINSERT, "can't add fixed array data block to cache")
+    inserted = TRUE;
+
+    /* Add data block as child of 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
 
     /* Mark the header dirty (for updating statistics) */
     *hdr_dirty = TRUE;
@@ -236,6 +235,11 @@ CATCH
 
     if(!H5F_addr_defined(ret_value))
         if(dblock) {
+            /* Remove from cache, if inserted */
+            if(inserted)
+                if(H5AC_remove_entry(dblock) < 0)
+                    H5E_THROW(H5E_CANTREMOVE, "unable to remove fixed array data block from cache")
+
             /* Release data block's disk space */
             if(H5F_addr_defined(dblock->addr) && H5MF_xfree(hdr->f, H5FD_MEM_FARRAY_DBLOCK, dxpl_id, dblock->addr, (hsize_t)dblock->size) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to release fixed array data block")
@@ -266,11 +270,8 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr,
     unsigned flags))
 
     /* Local variables */
-    H5FA_dblock_cache_ud_t udata;      /* Information needed for loading data block */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
+    H5FA_dblock_t *dblock;              /* Fixed array data block */
+    H5FA_dblock_cache_ud_t udata;       /* Information needed for loading data block */
 
     /* Sanity check */
     HDassert(hdr);
@@ -284,10 +285,27 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     udata.dblk_addr = dblk_addr;
 
     /* Protect the data block */
-    if(NULL == (ret_value = (H5FA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblk_addr, &udata, flags)))
+    if(NULL == (dblock = (H5FA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblk_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr)
 
+    /* Create top proxy, if it doesn't exist */
+    if(hdr->top_proxy && NULL == dblock->top_proxy) {
+        /* Add data block as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Set return value */
+    ret_value = dblock;
+
 CATCH
+
+    /* Clean up on error */
+    if(!ret_value)
+        /* Release the data block, if it was protected */
+        if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+            H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect fixed array data block, address = %llu", (unsigned long long)dblock->addr)
 
 END_FUNC(PKG)   /* end H5FA__dblock_protect() */
 
@@ -309,10 +327,6 @@ herr_t, SUCCEED, FAIL,
 H5FA__dblock_unprotect(H5FA_dblock_t *dblock, hid_t dxpl_id, unsigned cache_flags))
 
     /* Local variables */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
 
     /* Sanity check */
     HDassert(dblock);
@@ -345,10 +359,6 @@ H5FA__dblock_delete(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr))
     /* Local variables */
     H5FA_dblock_t *dblock = NULL;       /* Pointer to data block */
 
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
-
     /* Sanity check */
     HDassert(hdr);
     HDassert(H5F_addr_defined(dblk_addr));
@@ -367,16 +377,10 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
         /* Iterate over pages in data block */
         for(u = 0; u < dblock->npages; u++) {
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Expunging data block page from cache\n", FUNC);
-#endif /* H5FA_DEBUG */
             /* Evict the data block page from the metadata cache */
             /* (OK to call if it doesn't exist in the cache) */
             if(H5AC_expunge_entry(hdr->f, dxpl_id, H5AC_FARRAY_DBLK_PAGE, dblk_page_addr, H5AC__NO_FLAGS_SET) < 0)
                 H5E_THROW(H5E_CANTEXPUNGE, "unable to remove array data block page from metadata cache")
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Done expunging data block page from cache\n", FUNC);
-#endif /* H5FA_DEBUG */
 
             /* Advance to next page address */
             dblk_page_addr += dblock->dblk_page_size;
@@ -433,6 +437,9 @@ H5FA__dblock_dest(H5FA_dblock_t *dblock))
             H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
         dblock->hdr = NULL;
     } /* end if */
+
+    /* Sanity check */
+    HDassert(NULL == dblock->top_proxy);
 
     /* Free the data block itself */
     dblock = H5FL_FREE(H5FA_dblock_t, dblock);

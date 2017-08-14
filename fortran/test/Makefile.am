@@ -5,12 +5,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
@@ -92,10 +90,10 @@ tf_gen.F90: H5_test_buildiface$(EXEEXT)
 
 H5_test_buildiface_SOURCES = H5_test_buildiface.F90
 
-# The build of the H5_test_buildiface does depend on any libraries, so set it 
+# The build of the H5_test_buildiface does not depend on any libraries, so set it 
 # to nothing.
 
-H5_test_buildiface_LDADD = 
+H5_test_buildiface_LDADD =
 
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_

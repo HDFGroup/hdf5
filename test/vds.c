@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -2812,7 +2810,7 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Write data directly to source dataset */
     if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR 
+        TEST_ERROR
 
     /* Close srcdset and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -7265,6 +7263,12 @@ test_printf(unsigned config, hid_t fapl)
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
+    /* Test H5Pget_virtual_printf_gap() */
+    if(H5Pget_virtual_printf_gap(dapl, &gap_size) < 0)
+        TEST_ERROR
+    if(gap_size != (hsize_t)2)
+        TEST_ERROR
+
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
         TEST_ERROR
@@ -7329,6 +7333,12 @@ test_printf(unsigned config, hid_t fapl)
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
+    /* Test H5Pget_virtual_printf_gap() */
+    if(H5Pget_virtual_printf_gap(dapl, &gap_size) < 0)
+        TEST_ERROR
+    if(gap_size != (hsize_t)3)
+        TEST_ERROR
+
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
         TEST_ERROR
@@ -7391,6 +7401,12 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
+        TEST_ERROR
+
+    /* Test H5Pget_virtual_printf_gap() */
+    if(H5Pget_virtual_printf_gap(dapl, &gap_size) < 0)
+        TEST_ERROR
+    if(gap_size != (hsize_t)4)
         TEST_ERROR
 
     /* Get VDS space */
@@ -11121,23 +11137,23 @@ error:
 static int
 test_dapl_values(hid_t fapl_id)
 {
-    hid_t	fid = -1;           /* file to write to                     */
-    hid_t	dcpl_id = -1;       /* dataset creation properties          */
-    hid_t	dapl_id1 = -1;      /* dataset access properties            */
-    hid_t	dapl_id2 = -1;      /* dataset access properties            */
-    hid_t	vds_sid = -1;       /* vds data space                       */
-    hid_t	src_sid = -1;       /* source data space                    */
-    hid_t	did1 = -1;          /* dataset                              */
-    hid_t	did2 = -1;          /* dataset                              */
-    hsize_t start;              /* hyperslab start                      */
-    hsize_t stride;             /* hyperslab count                      */
-    hsize_t count;              /* hyperslab count                      */
-    hsize_t block;              /* hyperslab count                      */
-    hsize_t dims;               /* dataset size                         */
-    hsize_t max_dims;           /* dataset max size                     */
-    H5D_vds_view_t view;        /* view from dapl                       */
-    hsize_t gap_size;           /* gap size from dapl                   */
-    char    filename[1024];     /* file names                           */
+    hid_t    fid = -1;           /* file to write to                     */
+    hid_t    dcpl_id = -1;       /* dataset creation properties          */
+    hid_t    dapl_id1 = -1;      /* dataset access properties            */
+    hid_t    dapl_id2 = -1;      /* dataset access properties            */
+    hid_t    vds_sid = -1;       /* vds data space                       */
+    hid_t    src_sid = -1;       /* source data space                    */
+    hid_t    did1 = -1;          /* dataset                              */
+    hid_t    did2 = -1;          /* dataset                              */
+    hsize_t  start;              /* hyperslab start                      */
+    hsize_t  stride;             /* hyperslab count                      */
+    hsize_t  count;              /* hyperslab count                      */
+    hsize_t  block;              /* hyperslab count                      */
+    hsize_t  dims;               /* dataset size                         */
+    hsize_t  max_dims;           /* dataset max size                     */
+    H5D_vds_view_t  view;        /* view from dapl                       */
+    hsize_t  gap_size;           /* gap size from dapl                   */
+    char     filename[1024];     /* file names                           */
 
     TESTING("H5Dget_access_plist() returns dapl w/ correct values");
 
@@ -11221,6 +11237,7 @@ test_dapl_values(hid_t fapl_id)
     if(H5Pget_virtual_printf_gap(dapl_id2, &gap_size) < 0)
         FAIL_STACK_ERROR
     if(gap_size != 123)
+        TEST_ERROR
 
     /* Close everything */
     if(H5Sclose(vds_sid) < 0) FAIL_STACK_ERROR

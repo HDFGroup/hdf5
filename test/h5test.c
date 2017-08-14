@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -74,7 +72,7 @@ char  *paraprefix = NULL;  /* for command line option para-prefix */
 MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
 #endif
 
-#define READ_BUF_SIZE           4096
+#define READ_BUF_SIZE           65536
 
 /*
  * These are the letters that are appended to the file name when generating
@@ -90,12 +88,83 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
+/* Length of multi-file VFD filename buffers */
+#define H5TEST_MULTI_FILENAME_LEN       1024
+
+/* Temporary file for sending signal messages */
+#define TMP_SIGNAL_FILE "tmp_signal_file"
+
+/* The # of seconds to wait for the message file--used by h5_wait_message() */
+#define MESSAGE_TIMEOUT         300             /* Timeout in seconds */
+
 /* Previous error reporting function */
 static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
 static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
                               char *fullname, size_t size, hbool_t nest_printf);
+
+
+
+/* A non-usable VFD class and its functions.
+ *
+ * Usable for testing things like ID handling where we shouldn't mess with the real VFDs.
+ */
+static H5FD_t *dummy_vfd_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+static H5FD_t *dummy_vfd_open(const char H5_ATTR_UNUSED *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED maxaddr) { return NULL; }
+
+static herr_t dummy_vfd_close(H5FD_t *_file);
+static herr_t dummy_vfd_close(H5FD_t H5_ATTR_UNUSED *_file) { return FAIL; }
+
+static haddr_t dummy_vfd_get_eoa(const H5FD_t *file, H5FD_mem_t type);
+static haddr_t dummy_vfd_get_eoa(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
+
+static herr_t dummy_vfd_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
+static herr_t dummy_vfd_set_eoa(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t H5_ATTR_UNUSED addr) { return FAIL; }
+
+static haddr_t dummy_vfd_get_eof(const H5FD_t *file, H5FD_mem_t type);
+static haddr_t dummy_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
+
+static herr_t dummy_vfd_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, void *buf);
+static herr_t dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, void H5_ATTR_UNUSED *buf) { return FAIL; }
+
+static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, const void *buf);
+static herr_t dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) { return FAIL; }
+
+static H5FD_class_t dummy_vfd_class_g = {
+    "fake",                     /* name                 */
+    1,                          /* maxaddr              */
+    H5F_CLOSE_WEAK,             /* fc_degree            */
+    NULL,                       /* terminate            */
+    NULL,                       /* sb_size              */
+    NULL,                       /* sb_encode            */
+    NULL,                       /* sb_decode            */
+    0,                          /* fapl_size            */
+    NULL,                       /* fapl_get             */
+    NULL,                       /* fapl_copy            */
+    NULL,                       /* fapl_free            */
+    0,                          /* dxpl_size            */
+    NULL,                       /* dxpl_copy            */
+    NULL,                       /* dxpl_free            */
+    dummy_vfd_open,             /* open                 */
+    dummy_vfd_close,            /* close                */
+    NULL,                       /* cmp                  */
+    NULL,                       /* query                */
+    NULL,                       /* get_type_map         */
+    NULL,                       /* alloc                */
+    NULL,                       /* free                 */
+    dummy_vfd_get_eoa,          /* get_eoa              */
+    dummy_vfd_set_eoa,          /* set_eoa              */
+    dummy_vfd_get_eof,          /* get_eof              */
+    NULL,                       /* get_handle           */
+    dummy_vfd_read,             /* read                 */
+    dummy_vfd_write,            /* write                */
+    NULL,                       /* flush                */
+    NULL,                       /* truncate             */
+    NULL,                       /* lock                 */
+    NULL,                       /* unlock               */
+    H5FD_FLMAP_DEFAULT          /* fl_map               */
+};
 
 
 /*-------------------------------------------------------------------------
@@ -196,7 +265,7 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *
  * Purpose      Clean up temporary test files.
  *
- *              When a test calls h5_fixname() get a VFD-dependent
+ *              When a test calls h5_fixname() to get a VFD-dependent
  *              test file name, this function can be used to clean it up.
  *
  * Return:      void
@@ -855,7 +924,7 @@ h5_fileaccess(void)
         H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
         hid_t memb_fapl[H5FD_MEM_NTYPES];
         const char *memb_name[H5FD_MEM_NTYPES];
-        char sv[H5FD_MEM_NTYPES][1024];
+        char *sv[H5FD_MEM_NTYPES];
         haddr_t memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t  mt;
 
@@ -867,6 +936,8 @@ h5_fileaccess(void)
         HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
+            if(NULL == (sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN)))
+                return -1;
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
@@ -874,6 +945,9 @@ h5_fileaccess(void)
 
         if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             return -1;
+
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            HDfree(sv[mt]);
     }
     else if(!HDstrcmp(name, "family")) {
         hsize_t fam_size = 100*1024*1024; /*100 MB*/
@@ -989,7 +1063,7 @@ h5_get_vfd_fapl(void)
         H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
         hid_t       memb_fapl[H5FD_MEM_NTYPES];
         const char  *memb_name[H5FD_MEM_NTYPES];
-        char        sv[H5FD_MEM_NTYPES][1024];
+        char        *sv[H5FD_MEM_NTYPES];
         haddr_t     memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t  mt;
 
@@ -1001,15 +1075,18 @@ h5_get_vfd_fapl(void)
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
+            sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN);
+            HDassert(sv[mt]);
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         } /* end for */
 
-        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
-          memb_addr, FALSE) < 0) {
+        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             return -1;
-        } /* end if */
+
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            HDfree(sv[mt]);
     } else if(!HDstrcmp(tok, "family")) {
         /* Family of files, each 1MB and using the default driver */
         hsize_t fam_size = 100*1024*1024; /*100 MB*/
@@ -1573,25 +1650,43 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
     ssize_t nread;                      /* Number of bytes read in */
-    char  buf[READ_BUF_SIZE];           /* Buffer for copying data */
-    const char *filename = H5_get_srcdir_filename(origfilename);;       /* Get the test file name to copy */
+    void  *buf = NULL;                  /* Buffer for copying data */
+    const char *filename = H5_get_srcdir_filename(origfilename);       /* Get the test file name to copy */
+
+    /* Allocate copy buffer */
+    if(NULL == (buf = HDcalloc((size_t)1, (size_t)READ_BUF_SIZE)))
+        goto error;
 
     /* Copy old file into temporary file */
-    if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0)
-        return -1;
-    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
-        return -1;
+    if((fd_old = HDopen(filename, O_RDONLY)) < 0)
+        goto error;
+    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
+        goto error;
 
     /* Copy data */
     while((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
         if(HDwrite(fd_new, buf, (size_t)nread) < 0)
-            return -1;
-
+            goto error;
+ 
     /* Close files */
-    if(HDclose(fd_old) < 0) return -1;
-    if(HDclose(fd_new) < 0) return -1;
+    if(HDclose(fd_old) < 0)
+        goto error;
+    if(HDclose(fd_new) < 0)
+        goto error;
+
+    /* Release memory */
+    HDfree(buf);
 
     return 0;
+
+error:
+    /* ignore return values since we're already noted the problem */
+    if(fd_old > 0)
+        HDclose(fd_old);
+    if(fd_new > 0)
+        HDclose(fd_new);
+    HDfree(buf);
+    return -1;
 } /* end h5_make_local_copy() */
 
 
@@ -1681,4 +1776,155 @@ error:
 
     return -1;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_send_message
+ * 
+ * Purpose:     Sends the specified signal.
+ * 
+ *              In terms of this test framework, a signal consists of a file
+ *              on disk. Since there are multiple processes that need to 
+ *              communicate with each other, they do so by writing and
+ *              reading signal files on disk, the names and contents of 
+ *              which are used to inform a process about when it can
+ *              proceed and what it should do next.
+ * 
+ *              This function writes a signal file. The first argument is
+ *              the name of the signal file, and the second and third
+ *              arguments are the contents of the first two lines of the
+ *              signal file. The last two arguments may be NULL.
+ *
+ * Return:      void
+ *
+ * Programmer:  Mike McGreevy
+ *              August 18, 2010
+ * 
+ *-------------------------------------------------------------------------
+ */
+void
+h5_send_message(const char *send, const char *arg1, const char *arg2)
+{
+    FILE *signalfile = NULL;
+
+    /* Create signal file (which will send signal to some other process) */
+    signalfile = HDfopen(TMP_SIGNAL_FILE, "w+");
+
+    /* Write messages to signal file, if provided */
+    if(arg2 != NULL) {
+        HDassert(arg1);
+        HDfprintf(signalfile, "%s\n%s\n", arg1, arg2);
+    } /* end if */
+    else if(arg1 != NULL) {
+        HDassert(arg2 == NULL);
+        HDfprintf(signalfile, "%s\n", arg1);
+    } /* end if */ 
+    else {
+        HDassert(arg1 == NULL);
+        HDassert(arg2 == NULL);
+    }/* end else */
+
+    HDfclose(signalfile);
+
+    HDrename(TMP_SIGNAL_FILE, send);
+} /* h5_send_message() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_wait_message
+ * 
+ * Purpose:     Waits for the specified signal.
+ * 
+ *              In terms of this test framework, a signal consists of a file
+ *              on disk. Since there are multiple processes that need to 
+ *              communicate with each other, they do so by writing and
+ *              reading signal files on disk, the names and contents of 
+ *              which are used to inform a process about when it can
+ *              proceed and what it should do next.
+ * 
+ *              This function continuously attempts to read the specified
+ *              signal file from disk, and only continues once it has
+ *              successfully done so (i.e., only after another process has
+ *              called the "h5_send_message" function to write the signal file).
+ *              This functon will then immediately remove the file (i.e., 
+ *              to indicate that it has been received and can be reused), 
+ *              and then exits, allowing the calling function to continue.
+ *
+ * Return:      void
+ *
+ * Programmer:  Mike McGreevy
+ *              August 18, 2010
+ * 
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_wait_message(const char *waitfor) 
+{
+    FILE *returnfile;
+    time_t t0,t1;
+
+    /* Start timer. If this function runs for too long (i.e., 
+        expected signal is never received), it will
+        return failure */
+    HDtime(&t0);
+
+    /* Wait for return signal from some other process */
+    while ((returnfile = HDfopen(waitfor, "r")) == NULL) {
+
+        /* make note of current time. */
+        HDtime(&t1);
+
+        /* If we've been waiting for a signal for too long, then
+            it was likely never sent and we should fail rather
+            than loop infinitely */
+        if(HDdifftime(t1, t0) > MESSAGE_TIMEOUT) {
+            HDfprintf(stdout, "Error communicating between processes. Make sure test script is running.\n");
+            TEST_ERROR;
+        } /* end if */
+    } /* end while */
+
+    HDfclose(returnfile);
+    HDunlink(waitfor);
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+} /* h5_wait_message() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_dummy_vfd_class()
+ *
+ * Purpose:     Returns a disposable, generally non-functional,
+ *              VFD class struct.
+ *
+ *              In some of the test code, we need a disposable VFD but
+ *              we don't want to mess with the real VFDs and we also
+ *              don't have access to the internals of the real VFDs (which
+ *              use static globals and functions) to easily duplicate
+ *              them (e.g.: for testing VFD ID handling).
+ *
+ *              This API call will return a pointer to a VFD class that
+ *              can be used to construct a test VFD using H5FDregister().
+ *
+ * Return:      Success:    A pointer to a VFD class struct
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5FD_class_t *
+h5_get_dummy_vfd_class(void)
+{
+    H5FD_class_t *vfd_class = NULL;
+
+    if(NULL == (vfd_class = (H5FD_class_t *)HDmalloc(sizeof(H5FD_class_t))))
+        TEST_ERROR;
+
+    HDmemcpy(vfd_class, &dummy_vfd_class_g, sizeof(H5FD_class_t));
+
+    return vfd_class;
+
+error:
+    if(vfd_class)
+        HDfree(vfd_class);
+    return NULL;
+} /* h5_get_dummy_vfd_class */
 

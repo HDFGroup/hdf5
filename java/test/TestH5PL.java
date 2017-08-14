@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 package test;
@@ -66,6 +64,84 @@ public class TestH5PL {
         catch (Throwable err) {
             err.printStackTrace();
             fail("TestH5PLplugins " + err);
+        }
+    }
+
+    @Test
+    public void TestH5PLpaths() {
+        try {
+            // Get the original number of paths
+            int nStartPaths = H5.H5PLsize();
+
+            int nPaths;                     /* # paths from H5PLSize()      */
+            int nTruePaths = nStartPaths;   /* What the # paths should be   */
+            int index;                      /* Path table index             */
+            String path;                    /* Path from H5PLget()          */
+
+            // APPEND a path and ensure it was added correctly
+            String pathAppend = "path_append";
+            H5.H5PLappend(pathAppend);
+
+            nPaths = H5.H5PLsize();
+            nTruePaths++;
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            index = nTruePaths - 1;
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathAppend + " but was " + path, path.compareToIgnoreCase(pathAppend) == 0);
+
+            // PREPEND a path and ensure it was added correctly
+            String pathPrepend = "path_prepend";
+            H5.H5PLprepend(pathPrepend);
+
+            nPaths = H5.H5PLsize();
+            nTruePaths++;
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            index = 0;
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathPrepend + " but was " + path, path.compareToIgnoreCase(pathPrepend) == 0);
+
+            // INSERT a path and ensure it was added correctly
+            // Inserting at the index == # of start paths ensures we're in the middle
+            String pathInsert = "path_insert";
+            index = nStartPaths;
+            H5.H5PLinsert(pathInsert, index);
+
+            nPaths = H5.H5PLsize();
+            nTruePaths++;
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathInsert + " but was " + path, path.compareToIgnoreCase(pathInsert) == 0);
+
+            // REPLACE the path we just added and ensure it updated correctly
+            String pathReplace = "path_replace";
+            index = nStartPaths;
+            H5.H5PLreplace(pathReplace, index);
+
+            nPaths = H5.H5PLsize();
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathReplace + " but was " + path, path.compareToIgnoreCase(pathReplace) == 0);
+
+            // REMOVE the path we just replaced and check that the table was compacted
+            // The (index+1) path should move down to fill the space when the path is removed.
+            index = nStartPaths;
+            String pathRemove = H5.H5PLget(index + 1);
+            H5.H5PLremove(index);
+
+            nPaths = H5.H5PLsize();
+            nTruePaths--;
+            assertTrue("# paths should be " + nTruePaths + " but was " + nPaths, nTruePaths == nPaths);
+
+            path = H5.H5PLget(index);
+            assertTrue("Path should be " + pathRemove + " but was " + path, path.compareToIgnoreCase(pathRemove) == 0);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("TestH5PLpaths " + err);
         }
     }
 

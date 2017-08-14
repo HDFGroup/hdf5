@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -301,7 +299,7 @@ done:
         if(ent) {
             if(open_file) {
                 ent->file->nopen_objs--;
-                if(H5F_try_close(ent->file) < 0)
+                if(H5F_try_close(ent->file, NULL) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file")
             } /* end if */
             ent->name = (char *)H5MM_xfree(ent->name);
@@ -350,7 +348,7 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
      * on the state of the efc. */
     if(!efc) {
         file->nopen_objs--;
-        if(H5F_try_close(file) < 0)
+        if(H5F_try_close(file, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
 
         HGOTO_DONE(SUCCEED)
@@ -364,7 +362,7 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
     for(ent = efc->LRU_head; ent && ent->file != file; ent = ent->LRU_next);
     if(!ent) {
         file->nopen_objs--;
-        if(H5F_try_close(file) < 0)
+        if(H5F_try_close(file, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
     } /* end if */
     else
@@ -572,7 +570,7 @@ H5F_efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
      * However we must still manipulate the nopen_objs field to prevent the file
      * from being closed out from under us. */
     ent->file->nopen_objs--;
-    if(H5F_try_close(ent->file) < 0)
+    if(H5F_try_close(ent->file, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
     ent->file = NULL;
 

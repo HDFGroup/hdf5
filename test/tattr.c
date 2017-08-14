@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
@@ -8029,7 +8027,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
     htri_t	is_shared;	/* Is attributes shared? */
     hsize_t     shared_refcount;        /* Reference count of shared attribute */
     unsigned    attr_value;     /* Attribute value */
-    unsigned	big_value[SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3];   /* Data for "big" attribute */
+    unsigned	*big_value;     /* Data for "big" attribute */
     size_t      mesg_count;     /* # of shared messages */
     unsigned    test_shared;    /* Index over shared component type */
     unsigned    u;              /* Local index variable */
@@ -8040,8 +8038,10 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Writing Shared & Unshared Attributes in Compact & Dense Storage\n"));
 
-    /* Initialize "big" attribute data */
-    HDmemset(big_value, 1, sizeof(big_value));
+    /* Allocate & initialize "big" attribute data */
+    big_value = (unsigned *)HDmalloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
+    CHECK(big_value, NULL, "HDmalloc");
+    HDmemset(big_value, 1, sizeof(unsigned) * (size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3));
 
     /* Create dataspace for dataset */
     sid = H5Screate(H5S_SCALAR);
@@ -8328,6 +8328,9 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
     ret = H5Sclose(big_sid);
     CHECK(ret, FAIL, "H5Sclose");
+
+    /* Release memory */
+    HDfree(big_value);
 }   /* test_attr_shared_write() */
 
 /****************************************************************
@@ -8355,7 +8358,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
     htri_t	is_shared;	/* Is attributes shared? */
     hsize_t     shared_refcount;        /* Reference count of shared attribute */
     unsigned    attr_value;     /* Attribute value */
-    unsigned	big_value[SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3];   /* Data for "big" attribute */
+    unsigned	*big_value;     /* Data for "big" attribute */
     size_t      mesg_count;     /* # of shared messages */
     unsigned    test_shared;    /* Index over shared component type */
     unsigned    u;              /* Local index variable */
@@ -8366,8 +8369,10 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Renaming Shared & Unshared Attributes in Compact & Dense Storage\n"));
 
-    /* Initialize "big" attribute data */
-    HDmemset(big_value, 1, sizeof(big_value));
+    /* Allocate & initialize "big" attribute data */
+    big_value = (unsigned *)HDmalloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
+    CHECK(big_value, NULL, "HDmalloc");
+    HDmemset(big_value, 1, sizeof(unsigned) * (size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3));
 
     /* Create dataspace for dataset */
     sid = H5Screate(H5S_SCALAR);
@@ -8770,6 +8775,9 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
     ret = H5Sclose(big_sid);
     CHECK(ret, FAIL, "H5Sclose");
+
+    /* Release memory */
+    HDfree(big_value);
 }   /* test_attr_shared_rename() */
 
 /****************************************************************
@@ -8796,7 +8804,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     htri_t	is_shared;	/* Is attributes shared? */
     hsize_t     shared_refcount;        /* Reference count of shared attribute */
     unsigned    attr_value;     /* Attribute value */
-    unsigned	big_value[SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3];   /* Data for "big" attribute */
+    unsigned	*big_value;     /* Data for "big" attribute */
     size_t      mesg_count;     /* # of shared messages */
     unsigned    test_shared;    /* Index over shared component type */
     unsigned    u;              /* Local index variable */
@@ -8807,8 +8815,10 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deleting Shared & Unshared Attributes in Compact & Dense Storage\n"));
 
-    /* Initialize "big" attribute data */
-    HDmemset(big_value, 1, sizeof(big_value));
+    /* Allocate & initialize "big" attribute data */
+    big_value = (unsigned *)HDmalloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
+    CHECK(big_value, NULL, "HDmalloc");
+    HDmemset(big_value, 1, sizeof(unsigned) * (size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3));
 
     /* Create dataspace for dataset */
     sid = H5Screate(H5S_SCALAR);
@@ -9134,6 +9144,9 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
     ret = H5Sclose(big_sid);
     CHECK(ret, FAIL, "H5Sclose");
+
+    /* Release memory */
+    HDfree(big_value);
 }   /* test_attr_shared_delete() */
 
 /****************************************************************
@@ -9160,7 +9173,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
     htri_t	is_shared;	/* Is attributes shared? */
     hsize_t     shared_refcount;        /* Reference count of shared attribute */
     unsigned    attr_value;     /* Attribute value */
-    unsigned	big_value[SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3];   /* Data for "big" attribute */
+    unsigned	*big_value;     /* Data for "big" attribute */
     size_t      mesg_count;     /* # of shared messages */
     unsigned    test_shared;    /* Index over shared component type */
     unsigned    u;              /* Local index variable */
@@ -9171,8 +9184,10 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Unlinking Object with Shared Attributes in Compact & Dense Storage\n"));
 
-    /* Initialize "big" attribute data */
-    HDmemset(big_value, 1, sizeof(big_value));
+    /* Allocate & initialize "big" attribute data */
+    big_value = (unsigned *)HDmalloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
+    CHECK(big_value, NULL, "HDmalloc");
+    HDmemset(big_value, 1, sizeof(unsigned) * (size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3));
 
     /* Create dataspace for dataset */
     sid = H5Screate(H5S_SCALAR);
@@ -9484,6 +9499,9 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
     ret = H5Sclose(big_sid);
     CHECK(ret, FAIL, "H5Sclose");
+
+    /* Release memory */
+    HDfree(big_value);
 }   /* test_attr_shared_unlink() */
 
 /****************************************************************

@@ -12,12 +12,10 @@ use strict;
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 # Robb Matzke <matzke@llnl.gov>
 # 17 July 1998
@@ -127,7 +125,7 @@ EOF
   exit 1;
 }
 
-# Parse arguments
+
 my ($verbose, $set, $inc, $file, $rc);
 my (@files) = ("H5public.h", "src/H5public.h", "../src/H5public.h");
 while ($_ = shift) {
@@ -160,9 +158,10 @@ die "mutually exclusive options given\n" if $set && $inc;
 
 # Determine file to use as H5public.h, README.txt,
 # release_docs/RELEASE.txt, configure.ac, windows/src/H5pubconf.h
-# and config/lt_vers.am. 
+# config/lt_vers.am and config/cmake/scripts/HDF5config.cmake. 
 # The README.txt, release_docs/RELEASE.txt, configure.ac, 
-# windows/src/H5pubconf.h, and config/lt_vers.am 
+# windows/src/H5pubconf.h, config/lt_vers.am and
+# config/cmake/scripts/HDF5config.cmake
 # files are always in the directory above H5public.h
 unless ($file) {
   for (@files) {
@@ -175,6 +174,10 @@ die "unable to read file: $file\n" unless -r $file;
 my $LT_VERS = $file;
 $LT_VERS =~ s/[^\/]*$/..\/config\/lt_vers.am/;
 die "unable to read file: $LT_VERS\n" unless -r $file;
+# config/cmake/scripts/HDF5config.cmake
+my $HDF5CONFIGCMAKE = $file;
+$HDF5CONFIGCMAKE =~ s/[^\/]*$/..\/config\/cmake\/scripts\/HDF5config.cmake/;
+die "unable to read file: $HDF5CONFIGCMAKE\n" unless -r $file;
 # README.txt
 my $README = $file;
 $README =~ s/[^\/]*$/..\/README.txt/;
@@ -191,6 +194,15 @@ die "unable to read file: $CONFIGURE\n" unless -r $file;
 my $CPP_DOC_CONFIG = $file;
 $CPP_DOC_CONFIG =~ s/[^\/]*$/..\/c++\/src\/cpp_doc_config/;
 die "unable to read file: $CPP_DOC_CONFIG\n"  unless -r $file;
+my $H5_JAVA = $file;
+$H5_JAVA =~ s/[^\/]*$/..\/java\/src\/hdf\/hdf5lib\/H5.java/;
+die "unable to read file: $H5_JAVA\n" unless -r $file;
+my $TESTH5_JAVA = $file;
+$TESTH5_JAVA =~ s/[^\/]*$/..\/java\/test\/TestH5.java/; 
+die "unable to read file: $TESTH5_JAVA\n" unless -r $file;
+my $REPACK_LAYOUT_PLUGIN_VERSION = $file;
+$REPACK_LAYOUT_PLUGIN_VERSION =~ s/[^\/]*$/..\/tools\/test\/h5repack\/testfiles\/h5repack_layout.h5-plugin_version_test.ddl/;
+die "unable to read file: $REPACK_LAYOUT_PLUGIN_VERSION\n" unless -r $file;
 
 # Get the current version number.
 open FILE, $file or die "unable to open $file: $!\n";
@@ -239,7 +251,8 @@ if ($set) {
   $RELEASE = "";
   $CONFIGURE = "";
   $CPP_DOC_CONFIG = "";
-  $LT_VERS = "";        
+  $LT_VERS = "";       
+  $HDF5CONFIGCMAKE = "";
   @newver = @curver;
 }
 
@@ -321,20 +334,88 @@ if ($RELEASE) {
 # Update the c++/src/cpp_doc_config file
 if ($CPP_DOC_CONFIG) {
   my $data = read_file($CPP_DOC_CONFIG);
-  my $version_string = sprintf("\"%d.%d.%d%s %s\"",
+  my $sub_rel_ver_str = (
+     $newver[3] eq "" 
+     ? sprintf("%s", "") 
+     : sprintf("%s", "-".$newver[3].", currently under development")
+     );
+  my $version_string = sprintf("\"%d.%d.%d%s%s\"",
                                @newver[0,1,2],
-                               $newver[3] eq "" ? "" : "-".$newver[3],
-                               "currently under development");
-
+                               $sub_rel_ver_str);
   $data =~ s/PROJECT_NUMBER\s*=.*/PROJECT_NUMBER         = $version_string/;
 
   write_file($CPP_DOC_CONFIG, $data);  
 }
 
-# helper function to read the file for updating c++/src/cpp_doc_config file.
+# Update the config/cmake/scripts/HDF5config.cmake file
+if ($HDF5CONFIGCMAKE) {
+  my $data = read_file($HDF5CONFIGCMAKE);
+#  my $sub_rel_ver_str = "";
+  my $sub_rel_ver_str = (
+     $newver[3] eq "" 
+     ? sprintf("\"%s\"", "") 
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
+     );
+  my $version_string = sprintf("\"%d.%d.%d\"", @newver[0,1,2]);
+
+  $data =~ s/set \(CTEST_SOURCE_VERSION .*\)/set \(CTEST_SOURCE_VERSION $version_string\)/;
+  $data =~ s/set \(CTEST_SOURCE_VERSEXT .*\)/set \(CTEST_SOURCE_VERSEXT $sub_rel_ver_str\)/;
+
+  write_file($HDF5CONFIGCMAKE, $data);  
+}
+
+# Update the java/src/hdf/hdf5lib/H5.java file
+if ($H5_JAVA) {
+  my $data = read_file($H5_JAVA);
+#  my $sub_rel_ver_str = "";
+  my $sub_rel_ver_str = (
+     $newver[3] eq ""
+     ? sprintf("\"%s\"", "")
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
+     );
+  my $version_string1 = sprintf("%d.%d.%d", @newver[0,1,2]);
+  my $version_string2 = sprintf("%d, %d, %d", @newver[0,1,2]);
+
+  $data =~ s/\@version HDF5 .* <BR>/\@version HDF5 $version_string1 <BR>/;
+  $data =~ s/    public final static int LIB_VERSION\[\] = { \d*, \d*, \d* };/    public final static int LIB_VERSION[] = { $version_string2 };/;        
+
+  write_file($H5_JAVA, $data);
+}
+
+# Update the java/test/TestH5.java file
+if ($TESTH5_JAVA) {
+  my $data = read_file($TESTH5_JAVA);
+#  my $sub_rel_ver_str = "";
+  my $sub_rel_ver_str = (
+     $newver[3] eq ""
+     ? sprintf("\"%s\"", "")
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
+     );
+  my $version_string1 = sprintf("%d, %d, %d", @newver[0,1,2]);
+  my $version_string2 = sprintf("int majnum = %d, minnum = %d, relnum = %d", @newver[0,1,2]);
+
+  $data =~ s/        int libversion\[\] = { .* };/        int libversion\[\] = { $version_string1 };/;
+  $data =~ s/        int majnum = \d*, minnum = \d*, relnum = \d*;/        $version_string2;/;        
+
+  write_file($TESTH5_JAVA, $data);
+}
+
+# Update the tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl file
+if ($REPACK_LAYOUT_PLUGIN_VERSION) {
+  my $data = read_file($REPACK_LAYOUT_PLUGIN_VERSION);
+  my $version_string = sprintf("%d %d %d", @newver[0,1,2]);
+
+  $data =~ s/            PARAMS { 9 \d* \d* \d* }/            PARAMS { 9 $version_string }/g;
+
+  write_file($REPACK_LAYOUT_PLUGIN_VERSION, $data);
+}
+
+# helper function to read the file for updating c++/src/cpp_doc_config, 
+# config/cmake/scripts/HDF5Config.cmake, and java files.
 # The version string in that file is not at the top, so the string replacement
 # is not for the first line, and reading/writing the entire file as one string
 # facilitates the substring replacement.
+#Presumably these will also work for resetting the version in HDF5config.cmake.
 sub read_file {
    my ($filename) = @_;
 
@@ -346,7 +427,8 @@ sub read_file {
     return $all;
 }
 
-# helper function to write the file for updating c++/src/cpp_doc_config file.
+# helper function to write the file for updating c++/src/cpp_doc_config, 
+# config/cmake/scripts/HDF5config.cmake and java files.
 sub write_file {
     my ($filename, $content) = @_;
 
@@ -381,12 +463,12 @@ sub gen_configure {
   $conf =~ /^(.*?)\/?configure.ac$/;
 
   if ($1) {
-    $rc = system("cd $1 && ./autogen.sh -p >/dev/null 2>/dev/null && rm -rf autom4te.cache");
+    $rc = system("cd $1 && ./autogen.sh >/dev/null 2>/dev/null && rm -rf autom4te.cache");
   } else {
-    $rc = system("./autogen.sh -p >/dev/null 2>/dev/null && rm -rf autom4te.cache");
+    $rc = system("./autogen.sh >/dev/null 2>/dev/null && rm -rf autom4te.cache");
   }
   if ($rc) {
-    printf("./autogen.sh -p failed with exit code %d. Aborted.\n", $rc);
+    printf("./autogen.sh failed with exit code %d. Aborted.\n", $rc);
     exit 1;
   }
 }

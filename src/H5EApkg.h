@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -206,6 +204,28 @@ typedef struct H5EA_hdr_t {
 
     /* Client information (not stored) */
     void *cb_ctx;                       /* Callback context */
+
+    /* SWMR / Flush dependency information (not stored) */
+    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
+    void *parent;		        /* Pointer to 'top' proxy flush dependency
+                                         * parent, if it exists, otherwise NULL.
+                                         * If the extensible array is being used
+                                         * to index a chunked dataset and the
+                                         * dataset metadata is modified by a
+                                         * SWMR writer, this field will be set
+                                         * equal to the object header proxy
+                                         * that is the flush dependency parent
+                                         * of the extensible array header.
+ 					 *
+ 					 * The field is used to avoid duplicate
+					 * setups of the flush dependency 
+					 * relationship, and to allow the 
+					 * extensible array header to destroy
+					 * the flush dependency on receipt of 
+					 * an eviction notification from the
+					 * metadata cache.
+					 */
 } H5EA_hdr_t;
 
 /* The extensible array index block information */
@@ -222,6 +242,9 @@ typedef struct H5EA_iblock_t {
     H5EA_hdr_t	*hdr;	        /* Shared array header info                     */
     haddr_t     addr;           /* Address of this index block on disk          */
     size_t      size;           /* Size of index block on disk                  */
+
+    /* SWMR / Flush dependency information (not stored) */
+    H5AC_proxy_entry_t *top_proxy;      /* "Top" proxy cache entry for all array entries */
 
     /* Computed/cached values (not stored) */
     size_t      nsblks;         /* # of super blocks whose data block addresses are in index block */
@@ -241,10 +264,13 @@ typedef struct H5EA_sblock_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t  *hdr;           /* Shared array header info                     */
-    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
-    H5EA_iblock_t *parent;      /* Parent object for super block (index block)  */
     haddr_t     addr;           /* Address of this index block on disk          */
     size_t      size;           /* Size of index block on disk                  */
+
+    /* SWMR / Flush dependency information (not stored) */
+    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
+    H5AC_proxy_entry_t *top_proxy;      /* "Top" proxy cache entry for all array entries */
+    H5EA_iblock_t *parent;      /* Parent object for super block (index block)  */
 
     /* Computed/cached values (not stored) */
     unsigned    idx;            /* Super block index within the extensible array */
@@ -266,10 +292,13 @@ typedef struct H5EA_dblock_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t  *hdr;           /* Shared array header info                             */
-    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
-    void        *parent;        /* Parent object for data block (index or super block)  */
     haddr_t     addr;           /* Address of this data block on disk                   */
     size_t      size;           /* Size of data block on disk                           */
+
+    /* SWMR / Flush dependency information (not stored) */
+    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
+    void        *parent;        /* Parent object for data block (index or super block)  */
 
     /* Computed/cached values (not stored) */
     size_t      nelmts;         /* Number of elements in block                */
@@ -286,10 +315,13 @@ typedef struct H5EA_dbk_page_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t  *hdr;           /* Shared array header info                         */
-    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
-    H5EA_sblock_t *parent;      /* Parent object for data block page (super block)  */
     haddr_t     addr;           /* Address of this data block page on disk          */
     size_t      size;           /* Size of data block page on disk                  */
+
+    /* SWMR / Flush dependency information (not stored) */
+    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
+    H5AC_proxy_entry_t *top_proxy;      /* "Top" proxy cache entry for all array entries */
+    H5EA_sblock_t *parent;      /* Parent object for data block page (super block)  */
 
     /* Computed/cached values (not stored) */
     /* <none> */
@@ -343,21 +375,6 @@ typedef struct H5EA__ctx_cb_t {
 /*****************************/
 /* Package Private Variables */
 /*****************************/
-
-/* H5EA header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_HDR[1];
-
-/* H5EA index block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_IBLOCK[1];
-
-/* H5EA index block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_SBLOCK[1];
-
-/* H5EA data block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLOCK[1];
-
-/* H5EA data block page inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1];
 
 /* Internal extensible array testing class */
 H5_DLLVAR const H5EA_class_t H5EA_CLS_TEST[1];

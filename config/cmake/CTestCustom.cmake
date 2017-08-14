@@ -1,4 +1,20 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 set (CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS 3000)
+# Allow full output to go to CDash set to 0
+SET(CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE 50000)
+SET(CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE 50000)
+# WARNING!  This could be a lot of output and could overwhelm CDash and the
+# MySQL DB so this might not be a good idea!
 
 set (CTEST_CUSTOM_WARNING_EXCEPTION
     ${CTEST_CUSTOM_WARNING_EXCEPTION}
@@ -40,6 +56,9 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     HL_FORTRAN_test-clear-objects
     FORTRAN_testhdf5-clear-objects
     CPP_testhdf5-clear-objects
+    ######### tools/h5clear #########
+    H5CLEAR-clearall-objects
+    H5CLEAR-h5clear_gentest      # does not close ids by design
     ######### tools/h5copy #########
     H5COPY-clearall-objects
     ######### tools/h5diff #########
@@ -49,6 +68,8 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP_PACKED_BITS-clearall-objects
     H5DUMP-XML-clearall-objects
     H5DUMP_VDS-clearall-objects
+    ######### tools/h5format_convert #########
+    H5FC-clearall-objects
     ######### tools/h5import #########
     H5IMPORT-h5importtest-clear-objects
     H5IMPORT-clear-objects
@@ -185,6 +206,7 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5JAM-NONE_COPY-ta_u513
     ######### tools/h5ls #########
     H5LS-clearall-objects
+    H5LS_VDS-clearall-objects
     ######### tools/h5repack #########
     H5REPACK-clearall-objects
     H5REPACK-gzip_verbose_filters                       #uses runTest.cmake
@@ -208,11 +230,14 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK_VERIFY_LAYOUT_ALL-layout_long_switches     #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT_ALL-layout_short_switches    #uses grepTest.cmake
     H5REPACK-plugin
+    H5REPACK_CMP-plugin_zero
     ######### tools/h5stat #########
     H5STAT-clearall-objects
     ######### tools/misc #########
     H5REPART-clearall-objects
     H5MKGRP-clearall-objects
+    ######### hl/tools/h5watch #########
+    H5WATCH-clearall-objects
     ######### examples #########
     EXAMPLES-clear-objects
     CPP_ex-clear-objects

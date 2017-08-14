@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -162,7 +160,7 @@ H5O_oh_tag(const H5O_loc_t *oloc, hid_t dxpl_id, haddr_t *tag)
     HDassert(oloc);
 
     /* Get object header for object */
-    if(NULL == (oh = H5O_protect(oloc, dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh = H5O_protect(oloc, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object's object header")
 
     /* Get object header's address (i.e. the tag value for this object) */
@@ -262,7 +260,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Re-open the object, re-fetching its metadata */
-        if((H5O_refresh_metadata_reopen(oid, &obj_loc, dxpl_id)) < 0)
+        if((H5O_refresh_metadata_reopen(oid, &obj_loc, dxpl_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
     } /* end if */
 
@@ -360,7 +358,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id, hbool_t start_swmr)
 {
     void *object = NULL;        /* Dataset for this operation */
     H5I_type_t type;            /* Type of object for the ID */
@@ -372,39 +370,40 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id)
     type = H5I_get_type(oid);
 
     switch(type) {
-        case(H5I_GROUP):
+        case H5I_GROUP:
             /* Re-open the group */
             if(NULL == (object = H5G_open(obj_loc, dxpl_id)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
             break;
 
-        case(H5I_DATATYPE):
+        case H5I_DATATYPE:
             /* Re-open the named datatype */
             if(NULL == (object = H5T_open(obj_loc, dxpl_id)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
             break;
 
-        case(H5I_DATASET):
+        case H5I_DATASET:
             /* Re-open the dataset */
             if(NULL == (object = H5D_open(obj_loc, H5P_DATASET_ACCESS_DEFAULT, dxpl_id)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
-	    if(H5D_mult_refresh_reopen((H5D_t *)object, dxpl_id) < 0)
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to finish refresh for dataset")
+            if(!start_swmr) /* No need to handle multiple opens when H5Fstart_swmr_write() */
+                if(H5D_mult_refresh_reopen((H5D_t *)object, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to finish refresh for dataset")
             break;
 
-        case(H5I_UNINIT):
-        case(H5I_BADID):
-        case(H5I_FILE):
-        case(H5I_DATASPACE):
-        case(H5I_ATTR):
-        case(H5I_REFERENCE):
-        case(H5I_VFL):
-        case(H5I_GENPROP_CLS):
-        case(H5I_GENPROP_LST):
-        case(H5I_ERROR_CLASS):
-        case(H5I_ERROR_MSG):
-        case(H5I_ERROR_STACK):
-        case(H5I_NTYPES):
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
         break;

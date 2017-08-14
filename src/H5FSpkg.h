@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -179,6 +177,7 @@ struct H5FS_t {
     haddr_t addr;               /* Address of free space header on disk       */
     size_t hdr_size;            /* Size of free space header on disk          */
     H5FS_sinfo_t *sinfo;        /* Section information                        */
+    hbool_t swmr_write;         /* Flag indicating the file is opened with SWMR-write access */
     unsigned sinfo_lock_count;  /* # of times the section info has been locked */
     hbool_t sinfo_protected;    /* Whether the section info was protected when locked */
     hbool_t sinfo_modified;     /* Whether the section info has been modified while locked */
@@ -186,8 +185,8 @@ struct H5FS_t {
                                 /* must be either H5C__NO_FLAGS_SET (i.e r/w)  */
 				/* or H5AC__READ_ONLY_FLAG (i.e. r/o).         */
     size_t max_cls_serial_size; /* Max. additional size of serialized form of section */
-    hsize_t    threshold;      	/* Threshold for alignment              */
     hsize_t    alignment;      	/* Alignment                            */
+    hsize_t    align_thres;     /* Threshold for alignment              */
 
 
 /* Memory data structures (not stored directly) */
@@ -198,12 +197,6 @@ struct H5FS_t {
 /*****************************/
 /* Package Private Variables */
 /*****************************/
-
-/* H5FS header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FSPACE_HDR[1];
-
-/* H5FS section info inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FSPACE_SINFO[1];
 
 /* Declare a free list to manage the H5FS_node_t struct */
 H5FL_EXTERN(H5FS_node_t);
@@ -221,6 +214,12 @@ H5FL_EXTERN(H5FS_t);
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+/* Generic routines */
+H5_DLL herr_t H5FS__create_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5FS__destroy_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
 
 /* Free space manager header routines */
 H5_DLL H5FS_t *H5FS__new(const H5F_t *f, uint16_t nclasses,

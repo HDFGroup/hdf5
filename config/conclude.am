@@ -7,28 +7,28 @@
 ##
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
 ## terms governing use, modification, and redistribution, is contained in
-## the files COPYING and Copyright.html.  COPYING can be found at the root
-## of the source code distribution tree; Copyright.html can be found at the
-## root level of an installed copy of the electronic HDF5 document set and
-## is linked from the top-level documents page.  It can also be found at
-## http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from help@hdfgroup.org.
+## the COPYING file, which can be found at the root of the source code
+## distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+## If you do not have access to either file, you may request a copy from
+## help@hdfgroup.org.
 
 
 ## Textually included at the end of most HDF5 Makefiles.am.
 ## Contains build rules.
 
-# Automake needs to be taught how to build lib, progs, and tests targets.
+# Automake needs to be taught how to build lib, dyn, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
-# be built at certain times. 
+# be built at certain times.
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
+DYN = $(dyn_LTLIBRARIES)
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
 TESTS = $(TEST_PROG) $(TEST_SCRIPT) $(EXTRA_TEST) 
+dyndir=$(libdir)
 
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
@@ -36,6 +36,7 @@ AM_SH_LOG_FLAGS =
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
+build-dyn: $(DYN)
 build-lib: $(LIB)
 build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(chk_TESTS)
@@ -43,7 +44,7 @@ build-tests: $(LIB) $(PROGS) $(chk_TESTS)
 # General rule for recursive building targets.
 # BUILT_SOURCES contain targets that need to be built before anything else
 # in the directory (e.g., for Fortran type detection)
-lib progs tests check-s check-p :: $(BUILT_SOURCES)
+lib dyn progs tests check-s check-p :: $(BUILT_SOURCES)
 	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
 	@for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X && test $$d != .; then                           \

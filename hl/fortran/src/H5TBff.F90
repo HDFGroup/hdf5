@@ -5,12 +5,10 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!   of the source code distribution tree; Copyright.html can be found at the  *
-!   root level of an installed copy of the electronic HDF5 document set and   *
-!   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-!   access to either file, you may request a copy from help@hdfgroup.org.     *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
@@ -376,7 +374,8 @@ CONTAINS
     INTEGER(size_t),  INTENT(in) :: dst_size                          ! The size of the structure type
     INTEGER(size_t),  DIMENSION(1:nfields), INTENT(in) :: dst_offset  ! An array containing the offsets of the fields
     INTEGER(size_t),  DIMENSION(1:nfields), INTENT(in) :: dst_sizes   ! An array containing the sizes of the fields
-    TYPE(C_PTR), INTENT(OUT) :: dst_buf                               ! Buffer with data
+    TYPE(C_PTR)                                        :: dst_buf     ! Buffer with data !! do not use INTENT, causes NAG
+                                                                      ! to segfault in C APIs
     INTEGER :: errcode                                                ! error code
 
     INTEGER(size_t) :: namelen                                        ! name length

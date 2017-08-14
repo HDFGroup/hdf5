@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -37,7 +35,6 @@
 /*******************/
 /* Local variables */
 /*******************/
-uint8_t large_buf[BUF_LEN];
 
 
 /****************************************************************
@@ -184,33 +181,41 @@ test_chksum_size_four(void)
 static void
 test_chksum_large(void)
 {
+    uint8_t *large_buf;         /* Buffer for checksum calculations */
     uint32_t chksum;            /* Checksum value */
     size_t u;                   /* Local index variable */
+
+    /* Allocate the buffer */
+    large_buf = (uint8_t *)HDmalloc((size_t)BUF_LEN);
+    CHECK(large_buf, NULL, "HDmalloc");
 
     /* Initialize buffer w/known data */
     for(u = 0; u < BUF_LEN; u++)
         large_buf[u] = (uint8_t)(u * 3);
 
     /* Buffer w/real data */
-    chksum = H5_checksum_fletcher32(large_buf, sizeof(large_buf));
+    chksum = H5_checksum_fletcher32(large_buf, (size_t)BUF_LEN);
     VERIFY(chksum, 0x85b4e2a, "H5_checksum_fletcher32");
 
-    chksum = H5_checksum_crc(large_buf, sizeof(large_buf));
+    chksum = H5_checksum_crc(large_buf, (size_t)BUF_LEN);
     VERIFY(chksum, 0xfbd0f7c0, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(large_buf, sizeof(large_buf), 0);
+    chksum = H5_checksum_lookup3(large_buf, (size_t)BUF_LEN, 0);
     VERIFY(chksum, 0x1bd2ee7b, "H5_checksum_lookup3");
 
     /* Buffer w/zero(s) for data */
-    HDmemset(large_buf, 0, sizeof(large_buf));
-    chksum = H5_checksum_fletcher32(large_buf, sizeof(large_buf));
+    HDmemset(large_buf, 0, (size_t)BUF_LEN);
+    chksum = H5_checksum_fletcher32(large_buf, (size_t)BUF_LEN);
     VERIFY(chksum, 0, "H5_checksum_fletcher32");
 
-    chksum = H5_checksum_crc(large_buf, sizeof(large_buf));
+    chksum = H5_checksum_crc(large_buf, (size_t)BUF_LEN);
     VERIFY(chksum, 0xfac8b4c4, "H5_checksum_crc");
 
-    chksum = H5_checksum_lookup3(large_buf, sizeof(large_buf), 0);
+    chksum = H5_checksum_lookup3(large_buf, (size_t)BUF_LEN, 0);
     VERIFY(chksum, 0x930c7afc, "H5_checksum_lookup3");
+
+    /* Release memory for buffer */
+    HDfree(large_buf);
 } /* test_chksum_large() */
 
 

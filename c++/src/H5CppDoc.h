@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __H5CppDoc_H
@@ -67,34 +65,34 @@
  * <br />
  */
 
-///	This example shows how to create datasets.
+///        This example shows how to create datasets.
 ///\par
 ///\example     create.cpp
 
 ///\par
-///	This example shows how to write datasets.
+///        This example shows how to write datasets.
 ///\example     writedata.cpp
 
 ///\par
-///	This example shows how to read datasets.
+///        This example shows how to read datasets.
 ///\example     readdata.cpp
 
 ///\par
-///	This example shows how to create a compound datatype,
-///	write an array which has the compound datatype to the file,
-///	and read back fields' subsets.
+///        This example shows how to create a compound datatype,
+///        write an array which has the compound datatype to the file,
+///        and read back fields' subsets.
 ///\example     compound.cpp
 
 ///\par
-///	This example shows how to work with extendible datasets.
+///        This example shows how to work with extendible datasets.
 ///\example     extend_ds.cpp
 
 ///\par
-///	This example shows how to read data from a chunked dataset.
+///        This example shows how to read data from a chunked dataset.
 ///\example     chunks.cpp
 
 ///\par
-///	This example shows how to work with groups.
+///        This example shows how to work with groups.
 ///\example     h5group.cpp
 
 #endif // __H5CppDoc_H
