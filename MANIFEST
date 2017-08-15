@@ -159,6 +159,7 @@
 ./examples/h5_vds-exc.c
 ./examples/h5_vds-exclim.c
 ./examples/h5_vds-eiger.c
+./examples/h5_vds_mpio.c
 ./examples/h5_vds-simpleIO.c
 ./examples/h5_vds-percival.c
 ./examples/h5_vds-percival-unlim.c
@@ -1160,6 +1161,7 @@
 ./testpar/t_pshutdown.c
 ./testpar/t_prestart.c
 ./testpar/t_span_tree.c
+./testpar/t_subfiling.c
 ./testpar/t_init_term.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
