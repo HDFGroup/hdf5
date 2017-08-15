@@ -784,15 +784,15 @@ H5S_point_serial_size (const H5S_t *space)
 
     /* Basic number of bytes required to serialize point selection:
      *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> +
-     *      <length (4 bytes)> + <rank (4 bytes)> + <# of points (8 bytes)> = 28 bytes
+     *      <length (4 bytes)> + <rank (4 bytes)> + <# of points (4 bytes)> = 24 bytes
      */
-    ret_value=28;
+    ret_value=24;
 
     /* Count points in selection */
     curr=space->select.sel_info.pnt_lst->head;
     while(curr!=NULL) {
-        /* Add 8 bytes times the rank for each element selected */
-        ret_value+=8*space->extent.rank;
+        /* Add 4 bytes times the rank for each element selected */
+        ret_value+=4*space->extent.rank;
         curr=curr->next;
     } /* end while */
 
@@ -849,18 +849,18 @@ H5S_point_serialize (const H5S_t *space, uint8_t **p)
     len+=4;
 
     /* Encode number of elements */
-    UINT64ENCODE(pp, space->select.num_elem);
-    len+=8;
+    UINT32ENCODE(pp, (uint32_t)space->select.num_elem);
+    len+=4;
 
     /* Encode each point in selection */
     curr=space->select.sel_info.pnt_lst->head;
     while(curr!=NULL) {
-        /* Add 8 bytes times the rank for each element selected */
-        len+=8*space->extent.rank;
+        /* Add 4 bytes times the rank for each element selected */
+        len+=4*space->extent.rank;
 
         /* Encode each point */
         for(u=0; u<space->extent.rank; u++)
-            UINT64ENCODE(pp, curr->pnt[u]);
+            UINT32ENCODE(pp, (uint32_t)curr->pnt[u]);
 
         curr=curr->next;
     } /* end while */
@@ -921,7 +921,7 @@ H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_
     /* Deserialize points to select */
     /* (The header and rank have already beed decoded) */
     rank = space->extent.rank;  /* Retrieve rank from space */
-    UINT64DECODE(pp, num_elem); /* decode the number of points */
+    UINT32DECODE(pp, num_elem); /* decode the number of points */
 
     /* Allocate space for the coordinates */
     if(NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
@@ -930,7 +930,7 @@ H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_
     /* Retrieve the coordinates from the buffer */
     for(tcoord = coord, i = 0; i < num_elem; i++)
         for(j = 0; j < (unsigned)rank; j++, tcoord++)
-            UINT64DECODE(pp, *tcoord);
+            UINT32DECODE(pp, *tcoord);
 
     /* Select points */
     if(H5S_select_elements(space, op, num_elem, (const hsize_t *)coord) < 0)
