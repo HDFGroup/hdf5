@@ -912,7 +912,7 @@ int main(int argc, char **argv)
 
     AddTest("subf_api", subf_api, NULL, "test subfiling API", PARATESTFILE);
     AddTest("subf_fpp_w", subf_fpp_w, NULL, "test subfiling I/O (file per proc) - Write", PARATESTFILE);
-    AddTest("subf_fpp_r", subf_fpp_r, NULL, "test subfiling I/O (file per proc)- Read", PARATESTFILE);
+    AddTest("subf_fpp_r", subf_fpp_r, NULL, "test subfiling I/O (file per proc) - Read", PARATESTFILE);
     if(mpi_size > 1) {
         AddTest("subf_2_w", subf_2_w, NULL, "test subfiling I/O to 2 files - Write", PARATESTFILE);
         AddTest("subf_2_r", subf_2_r, NULL, "test subfiling I/O to 2 files - Read", PARATESTFILE);
