@@ -6261,17 +6261,27 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to insert skip list item")
             } /* end if */
             else
+            {
 #endif /* H5_HAVE_PARALLEL */
 
-            if(entry_ptr->prefetched) {
-                HDassert(entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID);
-                mem_type = cache_ptr->class_table_ptr[entry_ptr->prefetch_type_id]->mem_type;
-            } /* end if */
-            else
-                mem_type = entry_ptr->type->mem_type;
+                if(entry_ptr->prefetched) {
+                    HDassert(entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID);
+                    mem_type = cache_ptr->
+                               class_table_ptr[entry_ptr->prefetch_type_id]->
+                               mem_type;
+                } /* end if */
+                else
+                    mem_type = entry_ptr->type->mem_type;
 
-            if(H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, dxpl_id, entry_ptr->image_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file")
+                if(H5F_block_write(f, mem_type, entry_ptr->addr, 
+                                   entry_ptr->size, dxpl_id, 
+                                   entry_ptr->image_ptr) < 0)
+
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                "Can't write image to file")
+#ifdef H5_HAVE_PARALLEL
+            }
+#endif /* H5_HAVE_PARALLEL */
         } /* end if */
 
         /* if the entry has a notify callback, notify it that we have 
