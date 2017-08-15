@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -152,7 +150,8 @@ herr_t, SUCCEED, FAIL,
 H5FA__dblk_page_create(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t addr, size_t nelmts))
 
     /* Local variables */
-    H5FA_dblk_page_t *dblk_page = NULL;      /* Fixed array data block page */
+    H5FA_dblk_page_t *dblk_page = NULL; /* Fixed array data block page */
+    hbool_t inserted = FALSE;           /* Whether the header was inserted into cache */
 
 #ifdef H5FA_DEBUG
 HDfprintf(stderr, "%s: Called, addr = %a\n", FUNC, addr);
@@ -179,10 +178,23 @@ HDfprintf(stderr, "%s: dblk_page->size = %Zu\n", FUNC, dblk_page->size);
     /* Cache the new fixed array data block page */
     if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_FARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTINSERT, "can't add fixed array data block page to cache")
+    inserted = TRUE;
+
+    /* Add data block page as child of 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblk_page) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
+        dblk_page->top_proxy = hdr->top_proxy;
+    } /* end if */
 
 CATCH
     if(ret_value < 0)
         if(dblk_page) {
+            /* Remove from cache, if inserted */
+            if(inserted)
+                if(H5AC_remove_entry(dblk_page) < 0)
+                    H5E_THROW(H5E_CANTREMOVE, "unable to remove fixed array data block page from cache")
+
             /* Destroy data block page */
             if(H5FA__dblk_page_dest(dblk_page) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array data block page")
@@ -210,7 +222,8 @@ H5FA__dblk_page_protect(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_page_addr,
     size_t dblk_page_nelmts, unsigned flags))
 
     /* Local variables */
-    H5FA_dblk_page_cache_ud_t udata;      /* Information needed for loading data block page */
+    H5FA_dblk_page_t *dblk_page = NULL;     /* Fixed array data block page */
+    H5FA_dblk_page_cache_ud_t udata;        /* Information needed for loading data block page */
 
 #ifdef H5FA_DEBUG
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -229,10 +242,28 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     udata.dblk_page_addr = dblk_page_addr;
 
     /* Protect the data block page */
-    if(NULL == (ret_value = (H5FA_dblk_page_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FARRAY_DBLK_PAGE, dblk_page_addr, &udata, flags)))
+    if(NULL == (dblk_page = (H5FA_dblk_page_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FARRAY_DBLK_PAGE, dblk_page_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
+    /* Create top proxy, if it doesn't exist */
+    if(hdr->top_proxy && NULL == dblk_page->top_proxy) {
+        /* Add data block page as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblk_page) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
+        dblk_page->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Set return value */
+    ret_value = dblk_page;
+
 CATCH
+
+    /* Clean up on error */
+    if(!ret_value) {
+        /* Release the data block page, if it was protected */
+        if(dblk_page && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
+            H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect fixed array data block page, address = %llu", (unsigned long long)dblk_page->addr)
+    } /* end if */
 
 END_FUNC(PKG)   /* end H5FA__dblk_page_protect() */
 
@@ -305,6 +336,9 @@ H5FA__dblk_page_dest(H5FA_dblk_page_t *dblk_page))
             H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
         dblk_page->hdr = NULL;
     } /* end if */
+
+    /* Sanity check */
+    HDassert(NULL == dblk_page->top_proxy);
 
     /* Free the data block page itself */
     dblk_page = H5FL_FREE(H5FA_dblk_page_t, dblk_page);

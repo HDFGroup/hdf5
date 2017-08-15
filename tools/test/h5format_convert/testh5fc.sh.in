@@ -1,0 +1,506 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# Tests for the h5format_convert tool
+#
+#
+
+srcdir=@srcdir@
+
+# Determine which filters are available
+USE_FILTER_SZIP="@USE_FILTER_SZIP@"
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
+USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
+USE_FILTER_NBIT="@USE_FILTER_NBIT@"
+USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
+
+TESTNAME=h5format_convert
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+FORMCONV=../../src/h5format_convert/h5format_convert       # The tool name
+FORMCONV_BIN=`pwd`/$FORMCONV    # The path of the tool binary
+
+CHK_IDX=h5fc_chk_idx		# The program name
+CHK_IDX_BIN=`pwd`/$CHK_IDX    	# The program to verify the chunk indexing type is v1 B-tree
+
+RM='rm -rf'
+CMP='cmp -s'
+DIFF='diff -c'
+CP='cp'
+H5DUMP=../../src/h5dump/h5dump         # The h5dump tool name
+H5DUMP_BIN=`pwd`/$H5DUMP        # The path of the h5dump tool binary
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+nerrors=0
+verbose=yes
+
+# source dirs
+SRC_TOOLS="$srcdir/../.."
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
+SRC_H5FORMCONV_TESTFILES="$SRC_TOOLS/test/h5format_convert/testfiles"
+
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
+
+# Copy the testfile to a temporary file for testing as h5format_convert is changing the file in place
+TMPOUTFILE=outtmp.h5
+TMPFILE=tmp.h5
+TMPCHKFILE=chktmp.h5
+TMPDMPFILE=dmptmp.h5
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES="
+$SRC_H5FORMCONV_TESTFILES/h5fc_non_v3.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_edge_v3.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext_none.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext_none.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_i.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_s.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_f.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_if.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_is.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_sf.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext3_isf.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_i.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_s.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_f.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_if.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_is.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_sf.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext3_isf.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_err_level.h5
+"
+
+LIST_OTHER_TEST_FILES="
+$SRC_H5FORMCONV_TESTFILES/h5fc_help.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_nooption.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_nonexistfile.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_d_file.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_dname.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_nonexistdset_file.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_v_non_chunked.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_v_bt1.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_v_ndata_bt1.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_v_all.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_v_n_1d.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_v_n_all.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_i.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_s.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_f.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_if.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_is.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_sf.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext3_isf.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_i.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_s.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_f.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_if.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_is.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_sf.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext3_isf.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_v_err.ddl
+"
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+    	        $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+                
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=$SRC_H5FORMCONV_TESTFILES
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    else
+	$RM $TESTDIR/$TMPFILE
+        $RM $TESTDIR/$TMPOUTFILE
+        $RM $TESTDIR/$TMPCHKFILE
+        $RM $TESTDIR/$TMPDMPFILE
+    fi
+}
+
+# Print a line-line message left justified in a field of 80 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-80 | tr -d '\012'
+}
+
+# Run a test and print PASS or *FAIL*.  If a test fails then increment
+# the `nerrors' global variable and (if $verbose is set) display the
+# difference between the actual output and the expected output. The
+# expected output is given as the first argument to this function and
+# the actual output file is calculated by replacing the `.ddl' with
+# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
+# non-zero value.
+#
+# $1: expected output
+# $2: the test file name 
+#	--fname might be empty or fname does not exist
+#	--fname is copied to a temporary file for testing
+# $3 to at most $6--options to the tool such as:
+# 	-d dname or --dname=dname 
+# 	-v or --verbose
+# 	-n or --noop
+TOOLTEST_OUT() {
+    # Prepare expected and actual output
+    expect="$TESTDIR/$1"
+    actual="$TESTDIR/`basename $1 .ddl`.out"
+    actual_err="$TESTDIR/`basename $1 .ddl`.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
+
+    # Prepare the test file
+    $RM $TESTDIR/$TMPOUTFILE
+    TFILE=$2
+    if [ ! -z "$2" ] && [ -e $TESTDIR/$2 ] ; then
+	$CP $TESTDIR/$2 $TESTDIR/$TMPOUTFILE
+	TFILE=$TMPOUTFILE
+    fi
+
+    # Run test.
+    TESTING $FORMCONV $3 $4 $5 $6 $2
+    (
+	cd $TESTDIR
+	$RUNSERIAL $FORMCONV_BIN $3 $4 $5 $6 $TFILE
+    ) >$actual 2>$actual_err
+    cp $actual $actual_sav
+    cp $actual_err $actual_err_sav
+    cat $actual_err >> $actual
+
+    # Compare output
+    COMPARE_OUT $expect $actual
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+	$RM $actual $actual_err
+	$RM $actual $actual_err $actual_sav $actual_err_sav
+    fi
+}
+
+# To check that the tool exits success, no output 
+# Assume all short options
+# $1 is the test file name 
+#	--fname exists
+#	--fname is copied to a temporary file for testing
+# $2 is the temporary file name 
+# $3 to at most $5--options to the tool such as:
+# 	-d dname
+# 	-n
+TOOLTEST() {
+    TESTING $FORMCONV $3 $4 $5 $1
+    $RM $TESTDIR/$2
+    $CP $TESTDIR/$1 $TESTDIR/$2
+    $RUNSERIAL $FORMCONV_BIN $3 $4 $5 $TESTDIR/$2
+    exitcode=$?
+    if [ $exitcode -ne 0 ]; then
+	echo "*FAILED*"
+	echo "    The tool exits failure"
+	nerrors="`expr $nerrors + 1`"
+    else
+	echo " PASSED"
+    fi
+}
+
+CHECKING() {
+   SPACES="                                                               "
+   echo "Verifying $* $SPACES" | cut -c1-80 | tr -d '\012'
+}
+
+# Assume $TESTDIR/$TMPFILE is the converted test file
+# $1 dataset name
+IDX_CHECK() {
+    CHECKING $1
+    $RUNSERIAL $CHK_IDX_BIN $TESTDIR/$TMPCHKFILE $1
+    ret=$?
+    if [ $ret -eq 0 ]; then
+	echo " PASSED"
+    else
+	echo "*FAILED*"
+	echo "    The chunk indexing type is not correct"
+	nerrors="`expr $nerrors + 1`"
+    fi
+}
+
+# $1 is the expected output
+# $2 is the output from testing
+COMPARE_OUT() {
+    if $CMP $1 $2; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected result (*.ddl) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+}
+
+# Assume $TESTDIR/$TMPFILE is the converted test file
+# $1 is the test file for verifying h5dump output
+# $2 is the expected output from h5dump
+H5DUMP_CHECK() {
+    CHECKING h5dump output for $1
+    expect="$TESTDIR/$2"
+    actual="$TESTDIR/`basename $2 .ddl`.out"
+    actual_err="$TESTDIR/`basename $2 .ddl`.err"
+    $RUNSERIAL $H5DUMP_BIN -BH $TESTDIR/$TMPDMPFILE > $actual 2>$actual_err
+    cat $actual_err >> $actual
+
+    # Compare output
+    COMPARE_OUT $expect $actual
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+	$RM $actual $actual_err
+    fi
+}
+
+# Print a "SKIP" message
+SKIP() {
+    TESTING $STAT $@
+    echo  " -SKIP-"
+}
+  
+
+
+##############################################################################
+##############################################################################
+###			  T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
+#
+#
+#
+# h5format_convert --help
+# h5format_convert (no options)
+# h5format_convert nonexist.h5  (no options, file does not exist)
+TOOLTEST_OUT h5fc_help.ddl '' --help
+TOOLTEST_OUT h5fc_nooption.ddl ''
+TOOLTEST_OUT h5fc_nonexistfile.ddl nonexist.h5
+#
+#
+# h5format_convert -d old_h5fc_ext_none.h5 (just -d option, file exists)
+# h5format_convert --dname old_h5fc_ext_none.h5 (just --dname option, file exists)
+# h5format_convert --dname (just --dname option)
+# h5format_convert --dname=nonexist old_h5fc_ext_none.h5 (dataset does not exist, file exists)
+TOOLTEST_OUT h5fc_d_file.ddl old_h5fc_ext_none.h5 -d
+TOOLTEST_OUT h5fc_d_file.ddl old_h5fc_ext_none.h5 --dname
+TOOLTEST_OUT h5fc_dname.ddl '' --dname
+TOOLTEST_OUT h5fc_nonexistdset_file.ddl old_h5fc_ext_none.h5 --dname=nonexist
+#
+#
+#
+# h5format_convert -d /DSET_CONTIGUOUS -v old_h5fc_ext_none.h5 (verbose, contiguous dataset)
+# h5format_convert -d /GROUP/DSET_BT2 --verbose old_h5fc_ext_none.h5 (verbose, bt1 dataset)
+# h5format_convert -d /DSET_NDATA_BT2 -v -n old_h5fc_ext_none.h5 (verbose, noop, bt1+nodata dataset)
+# h5format_convert -v old_h5fc_ext_none.h5 (verbose, all datasets)
+TOOLTEST_OUT h5fc_v_non_chunked.ddl old_h5fc_ext_none.h5 -d /DSET_CONTIGUOUS -v
+TOOLTEST_OUT h5fc_v_bt1.ddl old_h5fc_ext_none.h5 -d /GROUP/DSET_BT2 --verbose
+TOOLTEST_OUT h5fc_v_ndata_bt1.ddl old_h5fc_ext_none.h5 -d /DSET_NDATA_BT2 -v -n
+TOOLTEST_OUT h5fc_v_all.ddl old_h5fc_ext_none.h5 -v
+#
+#
+#
+# h5format_convert -d /DSET_EA -v -n h5fc_ext_none.h5 (verbose, noop, one ea dataset)
+# h5format_convert -v -n h5fc_non_v3.h5 (verbose, noop, all datasets)
+TOOLTEST_OUT h5fc_v_n_1d.ddl h5fc_ext_none.h5 -d /DSET_EA -v -n
+TOOLTEST_OUT h5fc_v_n_all.ddl h5fc_non_v3.h5 -v -n
+#
+#
+#
+# h5format_convert -v h5fc_err_level.h5 (error encountered in converting the dataset)
+TOOLTEST_OUT h5fc_v_err.ddl h5fc_err_level.h5 -v
+#
+#
+#
+# No output from tests
+# 1) Use the tool to convert the dataset
+# 2) Verify the chunk indexing type is correct
+# h5format_convert -d /DSET_EA h5fc_ext_none.h5
+# h5format_convert -d /GROUP/DSET_NDATA_EA h5fc_ext_none.h5
+# h5format_convert -d /GROUP/DSET_BT2 h5fc_ext_none.h5
+# h5format_convert -d /DSET_NDATA_BT2 h5fc_ext_none.h5
+# h5format_convert -d /DSET_FA h5fc_ext_none.h5
+# h5format_convert -d /GROUP/DSET_FA h5fc_ext_none.h5
+# h5format_convert -d /DSET_NONE h5fc_ext_none.h5
+# h5format_convert -d /GROUP/DSET_NDATA_NONE h5fc_ext_none.h5
+TOOLTEST h5fc_ext_none.h5 $TMPCHKFILE -d /DSET_EA
+IDX_CHECK /DSET_EA
+#
+TOOLTEST h5fc_ext_none.h5 $TMPCHKFILE -d /GROUP/DSET_NDATA_EA
+IDX_CHECK /GROUP/DSET_NDATA_EA
+#
+TOOLTEST h5fc_ext_none.h5 $TMPCHKFILE -d /GROUP/DSET_BT2
+IDX_CHECK /GROUP/DSET_BT2
+#
+TOOLTEST h5fc_ext_none.h5 $TMPCHKFILE -d /DSET_NDATA_BT2
+IDX_CHECK /DSET_NDATA_BT2
+#
+TOOLTEST h5fc_ext_none.h5 $TMPCHKFILE -d /DSET_FA
+IDX_CHECK /DSET_FA
+#
+TOOLTEST h5fc_ext_none.h5 $TMPCHKFILE -d /GROUP/DSET_NDATA_FA
+IDX_CHECK /GROUP/DSET_NDATA_FA
+#
+TOOLTEST h5fc_ext_none.h5 $TMPCHKFILE -d /DSET_NONE
+IDX_CHECK /DSET_NONE
+#
+TOOLTEST h5fc_ext_none.h5 $TMPCHKFILE -d /GROUP/DSET_NDATA_NONE
+IDX_CHECK /GROUP/DSET_NDATA_NONE
+#
+#
+#
+# No output from tests: just check exit code
+# h5format_convert -d /DSET_NDATA_BT2 old_h5fc_ext_none.h5 (v1-btree dataset)
+# h5format_convert -d /DSET_CONTIGUOUS h5fc_non_v3.h5 (non-chunked dataset)
+TOOLTEST old_h5fc_ext_none.h5 $TMPFILE -d /DSET_NDATA_BT2
+TOOLTEST h5fc_non_v3.h5 $TMPFILE -d /DSET_CONTIGUOUS
+#
+#
+#
+# No output from tests: just check exit code
+# h5format_convert -d /GROUP/DSET_BT2 -n h5fc_non_v3.h5 (noop, one dataset)
+# h5format_convert -n h5fc_non_v3.h5 (noop, all datasets)
+TOOLTEST h5fc_non_v3.h5 $TMPFILE -d /GROUP/DSET_BT2 -n
+TOOLTEST h5fc_non_v3.h5 $TMPFILE -n
+#
+#
+#
+# No output from tests: just check exit code
+# h5format_convert h5fc_non_v3.h5
+# 1) convert all datasets 
+# 2) verify indexing types
+TOOLTEST h5fc_non_v3.h5 $TMPCHKFILE
+IDX_CHECK /DSET_NDATA_EA
+IDX_CHECK /DSET_NDATA_BT2
+IDX_CHECK /GROUP/DSET_BT2
+IDX_CHECK /GROUP/DSET_EA
+#
+#
+#
+# No output from test: just check exit code
+# h5format_convert h5fc_edge_v3.h5
+# 1) convert the chunked dataset (filter, no-filter-edge-chunk)
+# 2) verify the indexing type
+TOOLTEST h5fc_edge_v3.h5 $TMPCHKFILE
+IDX_CHECK /DSET_EDGE
+#
+#
+
+# The following test files have messages in the superblock extension.
+# Verify h5dump output for correctness after conversion
+TOOLTEST h5fc_ext1_i.h5 $TMPDMPFILE
+H5DUMP_CHECK h5fc_ext1_i.h5 h5fc_ext1_i.ddl
+TOOLTEST h5fc_ext1_s.h5 $TMPDMPFILE
+H5DUMP_CHECK h5fc_ext1_s.h5 h5fc_ext1_s.ddl
+TOOLTEST h5fc_ext1_f.h5 $TMPDMPFILE
+H5DUMP_CHECK h5fc_ext1_f.h5 h5fc_ext1_f.ddl
+#
+TOOLTEST h5fc_ext2_if.h5 $TMPDMPFILE
+H5DUMP_CHECK h5fc_ext2_if.h5 h5fc_ext2_if.ddl
+TOOLTEST h5fc_ext2_is.h5 $TMPDMPFILE
+H5DUMP_CHECK h5fc_ext2_is.h5 h5fc_ext2_is.ddl
+TOOLTEST h5fc_ext2_sf.h5 $TMPDMPFILE
+H5DUMP_CHECK h5fc_ext2_sf.h5 h5fc_ext2_sf.ddl
+#
+TOOLTEST h5fc_ext3_isf.h5 $TMPDMPFILE
+H5DUMP_CHECK h5fc_ext3_isf.h5 h5fc_ext3_isf.ddl
+#
+#
+#
+TOOLTEST old_h5fc_ext1_i.h5 $TMPDMPFILE
+H5DUMP_CHECK old_h5fc_ext1_i.h5 old_h5fc_ext1_i.ddl
+TOOLTEST old_h5fc_ext1_s.h5 $TMPDMPFILE
+H5DUMP_CHECK old_h5fc_ext1_s.h5 old_h5fc_ext1_s.ddl
+TOOLTEST old_h5fc_ext1_f.h5 $TMPDMPFILE
+H5DUMP_CHECK old_h5fc_ext1_f.h5 old_h5fc_ext1_f.ddl
+#
+TOOLTEST old_h5fc_ext2_if.h5 $TMPDMPFILE
+H5DUMP_CHECK old_h5fc_ext2_if.h5 old_h5fc_ext2_if.ddl
+TOOLTEST old_h5fc_ext2_is.h5 $TMPDMPFILE
+H5DUMP_CHECK old_h5fc_ext2_is.h5 old_h5fc_ext2_is.ddl
+TOOLTEST old_h5fc_ext2_sf.h5 $TMPDMPFILE
+H5DUMP_CHECK old_h5fc_ext2_sf.h5 old_h5fc_ext2_sf.ddl
+#
+TOOLTEST old_h5fc_ext3_isf.h5 $TMPDMPFILE
+H5DUMP_CHECK old_h5fc_ext3_isf.h5 old_h5fc_ext3_isf.ddl
+#
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
+
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi
+

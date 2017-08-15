@@ -5,17 +5,15 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfdfgroup.org/HDF5/doc/
+ *    http://hdfgroup.org/HDF5/doc/
  *
  */
 
@@ -535,6 +533,83 @@ Java_hdf_hdf5lib_H5_H5Fclear_1elink_1file_1cache
     if (H5Fclear_elink_file_cache((hid_t)file_id) < 0)
         h5libraryError(env);
 } /* end Java_hdf_hdf5lib_H5_H5Fclear_1elink_1file_1cache */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstart_swmr_write
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fstart_1swmr_1write
+	(JNIEnv *env, jclass cls, jlong file_id)
+{
+    if (H5Fstart_swmr_write((hid_t)file_id) < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Fstart_1swmr_1write */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstart_mdc_logging
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fstart_1mdc_1logging
+	(JNIEnv *env, jclass cls, jlong file_id)
+{
+    if (H5Fstart_mdc_logging((hid_t)file_id) < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Fstart_1mdc_1logging */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstop_mdc_logging
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fstop_1mdc_1logging
+    (JNIEnv *env, jclass cls, jlong file_id)
+{
+    if (H5Fstop_mdc_logging((hid_t)file_id) < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Fstop_1mdc_1logging */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fget_mdc_logging_status
+ * Signature: (J[Z)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status
+	(JNIEnv *env, jclass cls, jlong file_id, jbooleanArray mdc_logging_status)
+{
+    hbool_t    is_enabled;
+    hbool_t    is_currently_logging;
+    jboolean  *mdc_logging_status_ptr;
+    jint       size;
+    jboolean   isCopy;
+
+    if (mdc_logging_status == NULL) {
+        h5nullArgument(env, "H5Fget_mdc_logging_status:  mdc_logging_status is NULL");
+    } /* end if */
+    else {
+        size = (int)ENVPTR->GetArrayLength(ENVPAR mdc_logging_status);
+        if (size < 2) {
+            h5badArgument(env, "H5Fget_mdc_logging_status:  length of mdc_logging_status < 2.");
+        } /* end if */
+        else {
+            if (H5Fget_mdc_logging_status((hid_t)file_id, &is_enabled, &is_currently_logging) < 0) {
+                h5libraryError(env);
+            } /* end if */
+            else {
+                mdc_logging_status_ptr = ENVPTR->GetBooleanArrayElements(ENVPAR mdc_logging_status, &isCopy);
+                mdc_logging_status_ptr[0] = (jboolean)is_enabled;
+                mdc_logging_status_ptr[1] = (jboolean)is_currently_logging;
+                ENVPTR->ReleaseBooleanArrayElements(ENVPAR mdc_logging_status, mdc_logging_status_ptr, 0);
+            } /* end else */
+        } /* end else */
+    } /* end else */
+} /* end Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status */
+
 
 
 #ifdef __cplusplus

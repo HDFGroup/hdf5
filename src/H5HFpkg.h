@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -544,21 +542,20 @@ typedef struct H5HF_dblock_cache_ud_t {
 				 * calls to it.
 				 */
     unsigned filter_mask;	/* Excluded filters for direct block */
+    uint8_t *dblk;  /* Pointer to the buffer containing the decompressed
+                     * direct block data obtained in verify_chksum callback.
+                     * It will be used later in deserialize callback.
+                     */
+    htri_t decompressed;    /* Indicate that the direct block has been
+                             * decompressed in verify_chksum callback.
+                             * It will be used later in deserialize callback.
+                             */
 } H5HF_dblock_cache_ud_t;
 
 
 /*****************************/
 /* Package Private Variables */
 /*****************************/
-
-/* H5HF header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_HDR[1];
-
-/* H5HF indirect block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_IBLOCK[1];
-
-/* H5HF direct block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
 
 /* The v2 B-tree class for tracking indirectly accessed 'huge' objects */
 H5_DLLVAR const H5B2_class_t H5HF_HUGE_BT2_INDIR[1];

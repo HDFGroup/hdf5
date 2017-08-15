@@ -1,10 +1,10 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
+PROJECT (HDF5_CPP_EXAMPLES)
+
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
 # with "cpp_ex_". This allows for easier filtering of the examples.
 # --------------------------------------------------------------------
-
-PROJECT (HDF5_CPP_EXAMPLES)
 
 #-----------------------------------------------------------------------------
 # Define examples
@@ -38,7 +38,7 @@ foreach (example ${examples})
   TARGET_C_PROPERTIES (cpp_ex_${example} STATIC " " " ")
   target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
-endforeach (example ${examples})
+endforeach ()
 
 foreach (example ${tutr_examples})
   add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
@@ -46,8 +46,8 @@ foreach (example ${tutr_examples})
   TARGET_C_PROPERTIES (cpp_ex_${example} STATIC " " " ")
   target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
-endforeach (example ${tutr_examples})
+endforeach ()
 
 if (BUILD_TESTING)
   include (CMakeTests.cmake)
-endif (BUILD_TESTING)
+endif ()

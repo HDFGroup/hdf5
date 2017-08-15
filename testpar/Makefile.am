@@ -5,12 +5,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
@@ -25,7 +23,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi testphdf5 t_subfiling t_cache t_pflush1 t_pflush2 t_pshutdown t_prestart t_init_term t_shapesame
+TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_subfiling t_cache t_cache_image t_pflush1 t_pflush2 t_pshutdown t_prestart t_init_term t_shapesame
 
 check_PROGRAMS = $(TEST_PROG_PARA)
 

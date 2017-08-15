@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <jni.h>
@@ -1385,22 +1383,75 @@ Java_hdf_hdf5lib_H5_H5Pset_1virtual_1printf_1gap
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Pget_file_space
- * Signature: (J[I[J)V
+ * Method:    H5Pget_file_space_strategy
+ * Signature: (J[Z[J)I
  */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1file_1space
-(JNIEnv *, jclass, jlong, jintArray, jlongArray);
-
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy
+(JNIEnv *, jclass, jlong, jbooleanArray, jlongArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Pset_file_space
- * Signature: (JIJ)V
+ * Method:    H5Pget_file_space_strategy_persist
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1persist
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_file_space_strategy_threshold
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1threshold
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_file_space_strategy
+ * Signature: (JIZJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1file_1space
-(JNIEnv *, jclass, jlong, jint, jlong);
+Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1strategy
+(JNIEnv *, jclass, jlong, jint, jboolean, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_file_space_page_size
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1page_1size
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_file_space_page_size
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1page_1size
+(JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_mdc_log_options
+ * Signature: (JZLjava/lang/String;Z)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1mdc_1log_1options
+(JNIEnv *, jclass, jlong, jboolean, jstring, jboolean);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_mdc_log_options
+ * Signature: (J[Z)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options
+(JNIEnv *, jclass, jlong, jbooleanArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -1472,6 +1523,25 @@ Java_hdf_hdf5lib_H5_H5Pinsert2
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Piterate
   (JNIEnv*, jclass, jlong, jintArray, jobject, jobject);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_metadata_read_attempts
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1metadata_1read_1attempts
+(JNIEnv *, jclass, jlong);
+
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_metadata_read_attempts
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts
+(JNIEnv *, jclass, jlong, jlong);
 
 
 #ifdef __cplusplus

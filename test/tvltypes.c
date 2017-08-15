@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
@@ -1001,8 +999,8 @@ test_vltypes_compound_vlen_vlen(void)
         float f;
         hvl_t v;
     } s1;
-    s1 wdata[SPACE3_DIM1];              /* data to write */
-    s1 rdata[SPACE3_DIM1];              /* data to read */
+    s1          *wdata;                 /* data to write */
+    s1          *rdata;                 /* data to read */
     hid_t	fid1;		        /* HDF5 File IDs		*/
     hid_t	dataset;	        /* Dataset ID			*/
     hid_t	sid1;                   /* Dataspace ID			*/
@@ -1016,6 +1014,10 @@ test_vltypes_compound_vlen_vlen(void)
     MESSAGE(5, ("Testing Compound Datatypes with VL Atomic Datatype Component Functionality\n"));
 
     /* Allocate and initialize VL data to write */
+    wdata = (s1 *)HDmalloc(sizeof(s1) * SPACE3_DIM1);
+    CHECK(wdata, NULL, "HDmalloc");
+    rdata = (s1 *)HDmalloc(sizeof(s1) * SPACE3_DIM1);
+    CHECK(rdata, NULL, "HDmalloc");
     for(i = 0; i < SPACE3_DIM1; i++) {
         wdata[i].i = (int)(i * 10);
         wdata[i].f = (float)(i * 20) / 3.0F;
@@ -1147,6 +1149,10 @@ test_vltypes_compound_vlen_vlen(void)
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
+
+    /* Release buffers */
+    HDfree(wdata);
+    HDfree(rdata);
 } /* end test_vltypes_compound_vlen_vlen() */
 
 /****************************************************************

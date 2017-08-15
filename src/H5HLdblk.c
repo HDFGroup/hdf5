@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -119,10 +117,9 @@ H5HL__dblk_new(H5HL_t *heap))
 
 CATCH
     /* Ensure that the data block memory is deallocated on errors */
-    if(!ret_value && dblk != NULL) {
+    if(!ret_value && dblk != NULL)
         /* H5FL_FREE always returns NULL so we can't check for errors */
         dblk = H5FL_FREE(H5HL_dblk_t, dblk);
-    }
 
 END_FUNC(PKG) /* end H5HL__dblk_new() */
 
@@ -150,10 +147,6 @@ H5HL__dblk_dest(H5HL_dblk_t *dblk))
     if(dblk->heap) {
         /* Unlink data block from heap */
         dblk->heap->dblk = NULL;
-
-        /* Unpin the local heap prefix */
-        if(FAIL == H5AC_unpin_entry(dblk->heap->prfx))
-            H5E_THROW(H5E_CANTUNPIN, "can't unpin local heap prefix")
 
         /* Decrement ref. count on heap data structure */
         if(FAIL == H5HL__dec_rc(dblk->heap))
@@ -223,7 +216,6 @@ H5HL__dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size))
             /* Resize the heap prefix in the cache */
             if(FAIL == H5AC_resize_entry(heap->prfx, (size_t)(heap->prfx_size + new_heap_size)))
                 H5E_THROW(H5E_CANTRESIZE, "unable to resize heap in cache");
-
         } /* end if */
         else {
             /* Sanity check */
@@ -233,7 +225,6 @@ H5HL__dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size))
             /* Resize the heap data block in the cache */
             if(H5AC_resize_entry(heap->dblk, (size_t)new_heap_size) < 0)
                 H5E_THROW(H5E_CANTRESIZE, "unable to resize heap (data block) in cache");
-
         } /* end else */
     } /* end if */
     else {
@@ -280,3 +271,4 @@ CATCH
     } /* end if */
 
 END_FUNC(PKG) /* end H5HL__dblk_realloc() */
+

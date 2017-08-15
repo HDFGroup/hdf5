@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 #-----------------------------------------------------------------------------
 # HDF5 Config file for compiling against hdf5 build/install directory
 #-----------------------------------------------------------------------------
@@ -33,6 +44,7 @@ set (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_ENCODING @HDF5_ENABLE_SZIP_ENCODING@)
 set (${HDF5_PACKAGE_NAME}_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
 set (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS      @HDF5_PACKAGE_EXTLIBS@)
 set (${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES @HDF5_LIBRARIES_TO_EXPORT@)
+set (${HDF5_PACKAGE_NAME}_TOOLSET "@CMAKE_GENERATOR_TOOLSET@")
 
 #-----------------------------------------------------------------------------
 # Dependencies
@@ -50,7 +62,7 @@ if (${HDF5_PACKAGE_NAME}_BUILD_JAVA)
   )
   set (${HDF5_PACKAGE_NAME}_JAVA_LIBRARY "@PACKAGE_CURRENT_BUILD_DIR@/lib")
   set (${HDF5_PACKAGE_NAME}_JAVA_LIBRARIES "${${HDF5_PACKAGE_NAME}_JAVA_LIBRARY}")
-endif()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Directories
@@ -157,12 +169,12 @@ foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
         else ()
           set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
           string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
-          set (${COMP_LIBRARY} ${${COMP_LIBRARY}} ${hdf5_comp2}-${libtype} ${hdf5_comp}-${libtype})
+          set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF5_PACKAGE@::${hdf5_comp2}-${libtype} @HDF5_PACKAGE@::${hdf5_comp}-${libtype})
         endif ()
       else ()
         set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
         string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
-        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} ${hdf5_comp}-${libtype})
+        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF5_PACKAGE@::${hdf5_comp}-${libtype})
       endif ()
     endif ()
   endforeach ()

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -94,6 +92,9 @@ static int skip_overflow_tests_g = 0;
 #define TEST_DENORM     2
 #define TEST_SPECIAL    3
 
+/* Temporary buffer sizes */
+#define TMP_BUF_DIM1    32
+#define TMP_BUF_DIM2    100
 
 /* Don't use hardware conversions if set */
 static int without_hardware_g = 0;
@@ -564,7 +565,7 @@ generates_sigfpe(void)
     HDfflush(stderr);
     if ((pid=fork()) < 0) {
 	HDperror("fork");
-	HDexit(1);
+	HDexit(EXIT_FAILURE);
     } else if (0==pid) {
 	for (i=0; i<2000; i++) {
 	    for(j = 0; j < sizeof(double); j++)
@@ -572,7 +573,7 @@ generates_sigfpe(void)
 	    f = (float)d;
 	    some_dummy_func((float)f);
 	}
-	HDexit(0);
+	HDexit(EXIT_SUCCESS);
     }
 
     while (pid!=waitpid(pid, &status, 0))
@@ -2673,14 +2674,16 @@ test_conv_int_2(void)
 {
     int		i, j;
     hid_t	src_type, dst_type;
-    char	buf[32*100];
+    char	*buf;
 
     printf("%-70s", "Testing overlap calculations");
     HDfflush(stdout);
 
-    HDmemset(buf, 0, sizeof buf);
-    for (i=1; i<=32; i++) {
-	for (j=1; j<=32; j++) {
+    buf = (char *)HDcalloc(TMP_BUF_DIM1, TMP_BUF_DIM2);
+    HDassert(buf);
+
+    for(i = 1; i <= TMP_BUF_DIM1; i++) {
+	for(j = 1; j <= TMP_BUF_DIM1; j++) {
 
 	    /* Source type */
 	    src_type = H5Tcopy(H5T_NATIVE_CHAR);
@@ -2694,12 +2697,13 @@ test_conv_int_2(void)
 	     * Conversion. If overlap calculations aren't right then an
 	     * assertion will fail in H5T__conv_i_i()
 	     */
-	    H5Tconvert(src_type, dst_type, (size_t)100, buf, NULL, H5P_DEFAULT);
+	    H5Tconvert(src_type, dst_type, (size_t)TMP_BUF_DIM2, buf, NULL, H5P_DEFAULT);
 	    H5Tclose(src_type);
 	    H5Tclose(dst_type);
 	}
     }
     PASSED();
+    HDfree(buf);
     return 0;
 }
 
@@ -3340,7 +3344,7 @@ done:
     if(run_test==TEST_NOOP || run_test==TEST_NORMAL)
         HDexit(MIN((int)fails_all_tests, 254));
     else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
-        HDexit(0);
+        HDexit(EXIT_SUCCESS);
     HDassert(0 && "Should not reach this point!");
     return 1;
 #else
@@ -3366,7 +3370,7 @@ error:
     if(run_test==TEST_NOOP || run_test==TEST_NORMAL)
         HDexit(MIN(MAX((int)fails_all_tests, 1), 254));
     else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     HDassert(0 && "Should not reach this point!");
     return 1;
 #else
@@ -5245,7 +5249,7 @@ main(void)
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
     printf("All data type tests passed.\n");
     return 0;

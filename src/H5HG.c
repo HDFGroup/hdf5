@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -155,7 +153,7 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
     H5_CHECK_OVERFLOW(size, size_t, hsize_t);
     if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_GHEAP, dxpl_id, (hsize_t)size)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file space for global heap")
-    if(NULL == (heap = H5FL_MALLOC(H5HG_heap_t)))
+    if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
     heap->addr = addr;
     heap->size = size;

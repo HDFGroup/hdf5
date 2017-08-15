@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
@@ -95,8 +93,10 @@ make_particle_type(void)
   return FAIL;
 
  /* Insert fields. */
- string_type = H5Tcopy( H5T_C_S1 );
- H5Tset_size( string_type, (size_t)16 );
+ if ((string_type = H5Tcopy(H5T_C_S1)) < 0)
+     return FAIL;
+ if (H5Tset_size(string_type, (size_t)16) < 0)
+     return FAIL;
 
  if ( H5Tinsert(type_id, "Name", HOFFSET(particle_t, name) , string_type ) < 0 )
      return FAIL;
@@ -133,8 +133,10 @@ static int create_hl_table(hid_t fid)
     herr_t     status;
 
     /* Initialize the field field_type */
-    string_type = H5Tcopy( H5T_C_S1 );
-    H5Tset_size( string_type, (size_t)16 );
+    if ((string_type = H5Tcopy(H5T_C_S1)) < 0)
+        return FAIL;
+    if (H5Tset_size(string_type, (size_t)16) < 0)
+        return FAIL;
     field_type[0] = string_type;
     field_type[1] = H5T_NATIVE_INT;
     field_type[2] = H5T_NATIVE_INT;
@@ -152,12 +154,14 @@ static int create_hl_table(hid_t fid)
                         field_names, part_offset, field_type,
                         chunk_size, fill_data, compress, testPart  );
 
-if(status<0)
-  return FAIL;
-else
-  return SUCCEED;
-}
+  if (H5Tclose(string_type) < 0)
+    return FAIL;
 
+  if(status<0)
+    return FAIL;
+  else
+    return SUCCEED;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -183,7 +187,8 @@ static int test_create_close(hid_t fid)
 
     /* Create the table */
     table = H5PTcreate_fl(fid, PT_NAME, part_t, (hsize_t)100, -1);
-    H5Tclose(part_t);
+    if (H5Tclose(part_t) < 0)
+	goto error;
     if( H5PTis_valid(table) < 0)
 	goto error;
     if( H5PTis_varlen(table) != 0)
@@ -248,7 +253,7 @@ static int test_append(hid_t fid)
 {
     herr_t err;
     hid_t table;
-    hsize_t count;
+    hsize_t count = 0;
 
     TESTING("H5PTappend");
 
@@ -458,7 +463,8 @@ static int    test_big_table(hid_t fid)
 
     /* Create a new table */
     table = H5PTcreate_fl(fid, "Packet Test Dataset2", part_t, (hsize_t)33, -1);
-    H5Tclose(part_t);
+    if (H5Tclose(part_t) < 0)
+        goto error;
     if( H5PTis_valid(table) < 0)
         goto error;
 
@@ -536,7 +542,8 @@ static int    test_opaque(hid_t fid)
 
     /* Create a new table */
     table = H5PTcreate_fl(fid, "Packet Test Dataset3", part_t, (hsize_t)100, -1);
-    H5Tclose(part_t);
+    if( H5Tclose(part_t) < 0)
+        goto error;
     if( H5PTis_valid(table) < 0)
         goto error;
 
@@ -743,9 +750,9 @@ static int test_rw_nonnative_dt(hid_t fid)
  /* Create a fixed-length packet table within the file */
  /* This table's "packets" will be simple integers and it will use no compression */
  if(H5Tget_order(H5T_NATIVE_INT) == H5T_ORDER_LE) {
-   ptable = H5PTcreate_fl(fid, "Packet Test Dataset, Non-native", H5T_STD_I32BE, (hsize_t)100, -1);
+   ptable = H5PTcreate(fid, "Packet Test Dataset, Non-native", H5T_STD_I32BE, (hsize_t)100, H5P_DEFAULT);
  } else {
-   ptable = H5PTcreate_fl(fid, "Packet Test Dataset, Non-native", H5T_STD_I32LE, (hsize_t)100, -1);
+   ptable = H5PTcreate(fid, "Packet Test Dataset, Non-native", H5T_STD_I32LE, (hsize_t)100, H5P_DEFAULT);
  }
  if(ptable == H5I_INVALID_HID)
         goto error;
@@ -973,7 +980,8 @@ int main(void)
         status = 1;
 
     /* Close the file */
-    H5Fclose(fid);
+    if (H5Fclose(fid) < 0)
+	status = 1;
 
     return status;
 }

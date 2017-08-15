@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <jni.h>
@@ -211,6 +209,42 @@ Java_hdf_hdf5lib_H5_H5Fget_1info
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Fclear_1elink_1file_1cache
   (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstart_swmr_write
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fstart_1swmr_1write
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstart_mdc_logging
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fstart_1mdc_1logging
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstop_mdc_logging
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fstop_1mdc_1logging
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fget_mdc_logging_status
+ * Signature: (J[Z)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status
+  (JNIEnv *, jclass, jlong, jbooleanArray);
 
 #ifdef __cplusplus
 } /* end extern "C" */

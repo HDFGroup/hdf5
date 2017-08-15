@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -93,7 +91,8 @@ H5FL_DEFINE(H5O_chunk_proxy_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
+H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
+    unsigned cont_chunkno)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Proxy for chunk, to mark it dirty in the cache */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -110,13 +109,15 @@ H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     if(NULL == (chk_proxy = H5FL_CALLOC(H5O_chunk_proxy_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    /* Set the values in the chunk proxy */
-    chk_proxy->oh = oh;
-    chk_proxy->chunkno = idx;
-
     /* Increment reference count on object header */
     if(H5O_inc_rc(oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "can't increment reference count on object header")
+
+    /* Set the values in the chunk proxy */
+    chk_proxy->f = f;
+    chk_proxy->oh = oh;
+    chk_proxy->chunkno = idx;
+    chk_proxy->cont_chunkno = cont_chunkno;
 
     /* Insert the chunk proxy into the cache */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, H5AC__NO_FLAGS_SET) < 0)
@@ -126,8 +127,8 @@ H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
 
 done:
     if(ret_value < 0)
-        if(chk_proxy)
-            chk_proxy = H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
+        if(chk_proxy && H5O__chunk_dest(chk_proxy) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header chunk")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5O_chunk_add() */
@@ -172,6 +173,7 @@ H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, NULL, "can't increment reference count on object header")
 
         /* Set chunk proxy fields */
+        chk_proxy->f = f;
         chk_proxy->oh = oh;
         chk_proxy->chunkno = idx;
     } /* end if */
@@ -200,8 +202,8 @@ H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
 done:
     /* Cleanup on error */
     if(!ret_value)
-        if(0 == idx && chk_proxy)
-            chk_proxy = H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
+        if(0 == idx && chk_proxy && H5O__chunk_dest(chk_proxy) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header chunk")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
 } /* end H5O_chunk_protect() */
@@ -399,7 +401,9 @@ H5O_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     HDassert(chk_proxy->oh == oh);
     HDassert(chk_proxy->chunkno == idx);
 
-    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
+    /* Only free file space if not doing SWMR writes */
+    if(!oh->swmr_write)
+        cache_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
     /* Release the chunk proxy from the cache, marking it deleted */
     if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, cache_flags) < 0)
@@ -408,4 +412,40 @@ H5O_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5O_chunk_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O__chunk_dest
+ *
+ * Purpose:	Destroy a chunk proxy object
+ *
+ * Return:	Success: SUCCEED
+ *              Failure: FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              July 13, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O__chunk_dest(H5O_chunk_proxy_t *chk_proxy)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check arguments */
+    HDassert(chk_proxy);
+
+    /* Decrement reference count of object header */
+    if(chk_proxy->oh && H5O_dec_rc(chk_proxy->oh) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement reference count on object header")
+
+    /* Release the chunk proxy object */
+    chk_proxy = H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O__chunk_dest() */
 

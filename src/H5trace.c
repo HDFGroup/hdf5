@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -895,32 +893,28 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5F_file_space_type_t fs_type = (H5F_file_space_type_t)va_arg(ap, int);
+                            H5F_fspace_strategy_t fs_strategy = (H5F_fspace_strategy_t)va_arg(ap, int);
 
-                            switch(fs_type) {
-                                case H5F_FILE_SPACE_DEFAULT:
-                                    fprintf(out, "H5F_FILE_SPACE_DEFAULT");
+                            switch(fs_strategy) {
+                                case H5F_FSPACE_STRATEGY_FSM_AGGR:
+                                    fprintf(out, "H5F_FSPACE_STRATEGY_FSM_AGGR");
                                     break;
 
-                                case H5F_FILE_SPACE_ALL_PERSIST:
-                                    fprintf(out, "H5F_FILE_SPACE_ALL_PERSIST");
+                                case H5F_FSPACE_STRATEGY_PAGE:
+                                    fprintf(out, "H5F_FSPACE_STRATEGY_PAGE");
                                     break;
 
-                                case H5F_FILE_SPACE_ALL:
-                                    fprintf(out, "H5F_FILE_SPACE_ALL");
+                                case H5F_FSPACE_STRATEGY_AGGR:
+                                    fprintf(out, "H5F_FSPACE_STRATEGY_AGGR");
                                     break;
 
-                                case H5F_FILE_SPACE_AGGR_VFD:
-                                    fprintf(out, "H5F_FILE_SPACE_AGGR_VFD");
+                                case H5F_FSPACE_STRATEGY_NONE:
+                                    fprintf(out, "H5F_FSPACE_STRATEGY_NONE");
                                     break;
 
-                                case H5F_FILE_SPACE_VFD:
-                                    fprintf(out, "H5F_FILE_SPACE_VFD");
-                                    break;
-
-                                case H5F_FILE_SPACE_NTYPES:
+                                case H5F_FSPACE_STRATEGY_NTYPES:
                                 default:
-                                    fprintf(out, "%ld", (long)fs_type);
+                                    fprintf(out, "%ld", (long)fs_strategy);
                                     break;
                             } /* end switch */
                         } /* end else */
@@ -1001,6 +995,15 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                             } /* end switch */
                         } /* end else */
+                        break;
+
+                    case 't':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
                         break;
 
                     case 'v':

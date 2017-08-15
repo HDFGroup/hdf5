@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_CPP)
 
 #-----------------------------------------------------------------------------
@@ -25,7 +25,7 @@ INCLUDE_DIRECTORIES (${HDF5_BINARY_DIR})
 if (H5_HAVE_PARALLEL)
   add_definitions ("-DMPICH_SKIP_MPICXX")
   add_definitions ("-DMPICH_IGNORE_CXX_SEEK")
-endif (H5_HAVE_PARALLEL)
+endif ()
 
 add_subdirectory (${HDF5_CPP_SOURCE_DIR}/src ${HDF5_CPP_BINARY_DIR}/src)
 
@@ -34,11 +34,11 @@ add_subdirectory (${HDF5_CPP_SOURCE_DIR}/src ${HDF5_CPP_BINARY_DIR}/src)
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_EXAMPLES)
   add_subdirectory (${HDF5_CPP_SOURCE_DIR}/examples ${HDF5_CPP_BINARY_DIR}/examples)
-endif (HDF5_BUILD_EXAMPLES)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Build the CPP unit tests
 #-----------------------------------------------------------------------------
 if (BUILD_TESTING)
   add_subdirectory (${HDF5_CPP_SOURCE_DIR}/test ${HDF5_CPP_BINARY_DIR}/test)
-endif (BUILD_TESTING)
+endif ()

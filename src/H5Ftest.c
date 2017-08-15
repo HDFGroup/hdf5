@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -185,4 +183,38 @@ H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_maxaddr_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_sbe_addr_test
+ *
+ * Purpose:     Retrieve the address of a superblock extension's object header
+ *		for a file
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Jul 10, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr)
+{
+    H5F_t	*file;                  /* File info */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check arguments */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* Retrieve maxaddr for file */
+    *sbe_addr = file->shared->sblock->ext_addr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_sbe_addr_test() */
 

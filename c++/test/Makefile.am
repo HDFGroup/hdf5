@@ -5,12 +5,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
@@ -34,7 +32,7 @@ LDADD=$(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
 testhdf5_SOURCES=testhdf5.cpp dsets.cpp tattr.cpp tarray.cpp	\
 	tcompound.cpp tdspl.cpp tfile.cpp tfilter.cpp th5s.cpp	\
 	tlinks.cpp tobject.cpp trefer.cpp ttypes.cpp tvlstr.cpp	\
-	h5cpputil.cpp
+	titerate.cpp h5cpputil.cpp
 
 # Tell conclude.am that these are C++ tests.
 CXX_API=yes

@@ -4,12 +4,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 #
 ## Makefile.am
@@ -47,7 +45,8 @@ endif
 CHECK_CLEANFILES+=combine_tables[1-2].h5 test_ds[1-9].h5 test_ds10.h5 \
 	test_image[1-3].h5 file_img[1-2].h5 test_lite[1-4].h5 test_table.h5 \
 	test_packet_table.h5 test_packet_compress.h5 test_detach.h5 \
-    test_dectris.h5 test_append.h5
+	test_packet_table_vlen.h5 testfl_packet_table_vlen.h5		\
+	test_dectris.h5 test_append.h5
 
 # Sources for test_packet executable
 test_packet_SOURCES=test_packet.c test_packet_vlen.c

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -331,8 +329,11 @@ H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
                                     dataset->shared->cache.chunk.scaled_dims[u] > dataset->shared->cache.chunk.nslots))
                             update_chunks = TRUE;
 
+                        if( !(scaled_power2up = H5VM_power2up(scaled)) )
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
+
                         /* Check if the number of bits required to encode the scaled size value changed */
-                        if(dataset->shared->cache.chunk.scaled_power2up[u] != (scaled_power2up = H5VM_power2up(scaled))) {
+                        if(dataset->shared->cache.chunk.scaled_power2up[u] != scaled_power2up) {
                             /* Update the 'power2up' & 'encode_bits' values for the current dimension */
                             dataset->shared->cache.chunk.scaled_power2up[u] = scaled_power2up;
                             dataset->shared->cache.chunk.scaled_encode_bits[u] = H5VM_log2_gen(scaled_power2up);

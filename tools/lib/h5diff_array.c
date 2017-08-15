@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5private.h"
@@ -130,7 +128,7 @@ typedef struct mcomp_t
 {
     unsigned        n;      /* number of members */
     hid_t           *ids;   /* member type id */
-    size_t          *offsets;   
+    size_t          *offsets;
     struct mcomp_t  **m;     /* members */
 }mcomp_t;
 
@@ -142,7 +140,7 @@ typedef struct mcomp_t
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t region2_id, diff_opt_t *options);
 static hbool_t all_zero(const void *_mem, size_t size);
 static int     ull2float(unsigned long long ull_value, float *f_value);
-static hsize_t character_compare(char *mem1,char *mem2,hsize_t i,unsigned u,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
+static hsize_t character_compare(char *mem1,char *mem2,hsize_t i,size_t u,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hbool_t equal_float(float value, float expected, diff_opt_t *options);
 static hbool_t equal_double(double value, double expected, diff_opt_t *options);
@@ -151,7 +149,7 @@ static hbool_t equal_ldouble(long double value, long double expected, diff_opt_t
 #endif
 static int print_data(diff_opt_t *options);
 static void print_pos(int *ph,int pp,hsize_t curr_pos,hsize_t *acc,hsize_t *pos,int rank,hsize_t *dims,const char *obj1,const char *obj2 );
-static void print_char_pos(int *ph,int pp,hsize_t curr_pos,unsigned u,hsize_t *acc,hsize_t *pos,int rank,hsize_t *dims,const char *obj1,const char *obj2 );
+static void print_char_pos(int *ph,int pp,hsize_t curr_pos,size_t u,hsize_t *acc,hsize_t *pos,int rank,hsize_t *dims,const char *obj1,const char *obj2 );
 static void h5diff_print_char(char ch);
 static hsize_t diff_datum(void       *_mem1,
                    void       *_mem2,
@@ -546,7 +544,7 @@ hsize_t diff_array( void *_mem1,
  *  Recursively call this function for each element
  * H5T_STRING
  *  compare byte by byte in a cycle from 0 to type_size. this type_size is the
- *  value obtained by the get_size function but it is the string lenght for
+ *  value obtained by the get_size function but it is the string length for
  *  variable sized strings
  * H5T_OPAQUE
  *  compare byte by byte in a cycle from 0 to type_size
@@ -577,7 +575,7 @@ static hsize_t diff_datum(void       *_mem1,
 {
     unsigned char *mem1 = (unsigned char*)_mem1;
     unsigned char *mem2 = (unsigned char*)_mem2;
-    unsigned      u;
+    size_t        u;
     hid_t         memb_type;
     size_t        type_size;
     H5T_sign_t    type_sign;
@@ -602,7 +600,7 @@ static hsize_t diff_datum(void       *_mem1,
 
     /* Fast comparison first for atomic type by memcmp().
      * It is OK not to list non-atomic type here because it will not be caught
-     * by the confition, but it gives more clarity for code planning
+     * by the condition, but it gives more clarity for code planning
      */
     if (type_class != H5T_REFERENCE &&
         type_class != H5T_COMPOUND &&
@@ -625,6 +623,7 @@ static hsize_t diff_datum(void       *_mem1,
     *-------------------------------------------------------------------------
     */
     case H5T_COMPOUND:
+        h5difftrace("diff_datum H5T_COMPOUND\n");
 
         nmembs = members->n;
 
@@ -657,33 +656,60 @@ static hsize_t diff_datum(void       *_mem1,
     *-------------------------------------------------------------------------
     */
     case H5T_STRING:
-
+        h5difftrace("diff_datum H5T_STRING\n");
         {
-            H5T_str_t pad;
-            char      *s;
-            char *s1;
-            char *s2;
-            size_t size1;
-            size_t size2;
+            char      *s = NULL;
+            char      *sx = NULL;
+            char      *s1 = NULL;
+            char      *s2 = NULL;
+            size_t     size1;
+            size_t     size2;
+            size_t     sizex;
+            size_t     size_mtype = H5Tget_size(m_type);
+            H5T_str_t  pad = H5Tget_strpad(m_type);
 
             /* if variable length string */
-            if(H5Tis_variable_str(m_type))
-            {
+            if(H5Tis_variable_str(m_type)) {
+                h5difftrace("diff_datum H5T_STRING variable\n");
                 /* Get pointer to first string */
                 s1 = *(char**) mem1;
-                size1 = HDstrlen(s1);
+                if(s1)
+                    size1 = HDstrlen(s1);
+                else
+                    size1 = 0;
                 /* Get pointer to second string */
                 s2 = *(char**) mem2;
-                size2 = HDstrlen(s2);
+                if(s2)
+                    size2 = HDstrlen(s2);
+                else
+                    size2 = 0;
             }
-            else
-            {
+            else if (H5T_STR_NULLTERM == pad) {
+                h5difftrace("diff_datum H5T_STRING null term\n");
+                /* Get pointer to first string */
+                s1 = (char*) mem1;
+                if(s1)
+                    size1 = HDstrlen(s1);
+                else
+                    size1 = 0;
+                if (size1 > size_mtype)
+                    size1 = size_mtype;
+                /* Get pointer to second string */
+                s2 = (char*) mem2;
+                if(s2)
+                    size2 = HDstrlen(s2);
+                else
+                    size2 = 0;
+                if (size2 > size_mtype)
+                    size2 = size_mtype;
+            }
+            else {
                 /* Get pointer to first string */
                 s1 = (char *)mem1;
-                size1 = H5Tget_size(m_type);
+                size1 = size_mtype;
                 /* Get pointer to second string */
                 s2 = (char *)mem2;
-                size2 = H5Tget_size(m_type);
+                size2 = size_mtype;
             }
 
             /*
@@ -692,40 +718,61 @@ static hsize_t diff_datum(void       *_mem1,
              *       of length of strings.
              *       For now mimic the previous way.
              */
-            if(size1 < size2)
-            {
+            h5diffdebug2("diff_datum string size:%d\n",size1);
+            h5diffdebug2("diff_datum string size:%d\n",size2);
+            if(size1 != size2) {
+                h5difftrace("diff_datum string sizes\n");
+                nfound++;
+            }
+            if(size1 < size2) {
                 size = size1;
                 s = s1;
+                sizex = size2;
+                sx = s2;
             }
-            else
-            {
+            else {
                 size = size2;
                 s = s2;
+                sizex = size1;
+                sx = s1;
             }
 
             /* check for NULL pointer for string */
-            if(s!=NULL)
-            {
+            if(s!=NULL) {
                 /* try fast compare first */
-                if (HDmemcmp(s1, s2, size)==0)
-                    break;
-
-                pad = H5Tget_strpad(m_type);
-
-                for (u=0; u<size && (s[u] || pad!=H5T_STR_NULLTERM); u++)
-                    nfound+=character_compare(
-                        s1 + u,
-                        s2 + u, /* offset */
-                        i,        /* index position */
-                        u,        /* string character position */
-                        rank,
-                        dims,
-                        acc,
-                        pos,
-                        options,
-                        obj1,
-                        obj2,
-                        ph);
+                if(HDmemcmp(s1, s2, size)==0) {
+                    if(size1 != size2)
+                        if(print_data(options))
+                            for (u=size; u<sizex; u++)
+                                character_compare(
+                                    s1 + u,
+                                    s2 + u, /* offset */
+                                    i,        /* index position */
+                                    u,        /* string character position */
+                                    rank,
+                                    dims,
+                                    acc,
+                                    pos,
+                                    options,
+                                    obj1,
+                                    obj2,
+                                    ph);
+                }
+                else
+                    for (u=0; u<size; u++)
+                        nfound+=character_compare(
+                            s1 + u,
+                            s2 + u, /* offset */
+                            i,        /* index position */
+                            u,        /* string character position */
+                            rank,
+                            dims,
+                            acc,
+                            pos,
+                            options,
+                            obj1,
+                            obj2,
+                            ph);
             }
 
         }
@@ -736,6 +783,7 @@ static hsize_t diff_datum(void       *_mem1,
     *-------------------------------------------------------------------------
     */
     case H5T_BITFIELD:
+        h5difftrace("diff_datum H5T_BITFIELD\n");
 
         /* byte-by-byte comparison */
         for (u=0; u<type_size; u++)
@@ -759,7 +807,7 @@ static hsize_t diff_datum(void       *_mem1,
      *-------------------------------------------------------------------------
      */
     case H5T_OPAQUE:
-
+        h5difftrace("diff_datum H5T_OPAQUE\n");
         /* byte-by-byte comparison */
         for (u=0; u<type_size; u++)
             nfound+=character_compare_opt(
@@ -783,6 +831,7 @@ static hsize_t diff_datum(void       *_mem1,
     *-------------------------------------------------------------------------
     */
     case H5T_ENUM:
+        h5difftrace("diff_datum H5T_ENUM\n");
 
     /* For enumeration types we compare the names instead of the
     integer values.  For each pair of elements being
@@ -2776,7 +2825,7 @@ static
 hsize_t character_compare(char *mem1,
                   char *mem2,
                   hsize_t       i,
-                  unsigned      u,
+                  size_t        u,
                   int           rank,
                   hsize_t       *dims,
                   hsize_t       *acc,
@@ -2792,7 +2841,7 @@ hsize_t character_compare(char *mem1,
 
     HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
     HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
-    h5difftrace("character_compare start\n");
+    h5diffdebug3("character_compare start %d=%d\n",temp1_uchar,temp2_uchar);
 
     if (temp1_uchar != temp2_uchar)
     {
@@ -5869,7 +5918,7 @@ static
 void print_char_pos( int        *ph,       /* print header */
                      int        pp,        /* print percentage */
                      hsize_t    curr_pos,
-                     unsigned   u,
+                     size_t     u,
                      hsize_t    *acc,
                      hsize_t    *pos,
                      int        rank,
@@ -5907,7 +5956,7 @@ void print_char_pos( int        *ph,       /* print header */
     }
     else
     {
-        parallel_print("%u", (unsigned)u);
+        parallel_print("%zu", u);
     }
     parallel_print("]" );
 }
@@ -5975,8 +6024,8 @@ static void get_member_types(hid_t tid, mcomp_t *members)
         hid_t base_tid = H5Tget_super(tid);
         get_member_types(base_tid, members);
         H5Tclose(base_tid);
-    } 
-    else if (tclass == H5T_COMPOUND) 
+    }
+    else if (tclass == H5T_COMPOUND)
     {
         int      nmembs;
 
@@ -5996,9 +6045,9 @@ static void get_member_types(hid_t tid, mcomp_t *members)
              members->m[u] = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
              HDmemset(members->m[u], 0, sizeof(mcomp_t));
              get_member_types(members->ids[u], members->m[u]);
-        }  
+        }
     }
-     
+
    return;
 
 

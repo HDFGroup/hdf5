@@ -1,0 +1,258 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# Tests for the h5ls tool
+
+srcdir=@srcdir@
+
+TESTNAME=h5ls
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+H5LS=../../src/h5ls/h5ls               # The tool name
+H5LS_BIN=`pwd`/$H5LS    # The path of the tool binary
+
+RM='rm -rf'
+CMP='cmp -s'
+DIFF='diff -c'
+CP='cp'
+NLINES=20          # Max. lines of output to display if test fails
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
+
+nerrors=0
+verbose=yes
+h5haveexitcode=yes      # default is yes
+
+# source dirs
+SRC_TOOLS="$srcdir/../.."
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
+
+TEST_P_DIR=./testfiles
+TESTDIR=./testfiles/vds
+test -d $TEST_P_DIR || mkdir -p $TEST_P_DIR
+test -d $TESTDIR || mkdir $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES="
+$SRC_H5LS_TESTFILES/vds/1_a.h5
+$SRC_H5LS_TESTFILES/vds/1_b.h5
+$SRC_H5LS_TESTFILES/vds/1_c.h5
+$SRC_H5LS_TESTFILES/vds/1_d.h5
+$SRC_H5LS_TESTFILES/vds/1_e.h5
+$SRC_H5LS_TESTFILES/vds/1_f.h5
+$SRC_H5LS_TESTFILES/vds/1_vds.h5
+$SRC_H5LS_TESTFILES/vds/2_a.h5
+$SRC_H5LS_TESTFILES/vds/2_b.h5
+$SRC_H5LS_TESTFILES/vds/2_c.h5
+$SRC_H5LS_TESTFILES/vds/2_d.h5
+$SRC_H5LS_TESTFILES/vds/2_e.h5
+$SRC_H5LS_TESTFILES/vds/2_vds.h5
+$SRC_H5LS_TESTFILES/vds/3_1_vds.h5
+$SRC_H5LS_TESTFILES/vds/3_2_vds.h5
+$SRC_H5LS_TESTFILES/vds/4_0.h5
+$SRC_H5LS_TESTFILES/vds/4_1.h5
+$SRC_H5LS_TESTFILES/vds/4_2.h5
+$SRC_H5LS_TESTFILES/vds/4_vds.h5
+$SRC_H5LS_TESTFILES/vds/5_a.h5
+$SRC_H5LS_TESTFILES/vds/5_b.h5
+$SRC_H5LS_TESTFILES/vds/5_c.h5
+$SRC_H5LS_TESTFILES/vds/5_vds.h5
+"
+
+LIST_OTHER_TEST_FILES="
+$SRC_H5LS_TESTFILES/vds/tvds-1.ls
+$SRC_H5LS_TESTFILES/vds/tvds-2.ls
+$SRC_H5LS_TESTFILES/vds/tvds-3_1.ls
+$SRC_H5LS_TESTFILES/vds/tvds-3_2.ls
+$SRC_H5LS_TESTFILES/vds/tvds-4.ls
+$SRC_H5LS_TESTFILES/vds/tvds-5.ls
+"
+
+
+# RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
+if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
+    echo "***Warning*** Serial Exit Code is not passed back to shell corretly."
+    echo "***Warning*** Exit code checking is skipped."
+    h5haveexitcode=no
+fi
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+              $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=$SRC_H5LS_TESTFILES/vds
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+TESTING() {
+    SPACES="                                                               "
+    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
+}
+
+# Source in the output filter function definitions.
+. $srcdir/../../../bin/output_filter.sh
+
+# Run a test and print PASS or *FAIL*. For now, if h5ls can complete
+# with exit status 0, consider it pass. If a test fails then increment
+# the `nerrors' global variable and (if $verbose is set) display up to $NLINS
+# lines of the actual output from the tool test.  The actual output is not
+# removed if $HDF5_NOCLEANUP has a non-zero value.
+# Arguemnts:
+# $1 -- actual output filename to use
+# $2 and on -- argument for the h5ls tool
+TOOLTEST() {
+    expect="$TESTDIR/$1"
+    actual="$TESTDIR/`basename $1 .ls`.out"
+    actual_err="$TESTDIR/`basename $1 .ls`.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
+    shift
+    retvalexpect=$1
+    shift
+
+    # Run test.
+    # Stderr is included in stdout so that the diff can detect
+    # any unexpected output from that stream too.
+    TESTING $H5LS $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5LS_BIN "$@"
+    ) >$actual 2>$actual_err
+
+    exitcode=$?
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
+    cat $actual_err >> $actual
+    if [ $h5haveexitcode = 'yes' -a $exitcode -ne $retvalexpect ]; then
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+        if [ yes = "$verbose" ]; then
+            echo "test returned with exit code $exitcode"
+            echo "test output: (up to $NLINES lines)"
+            head -$NLINES $actual
+            echo "***end of test output***"
+            echo ""
+        fi
+    elif [ ! -f $expect ]; then
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+        echo "    Expected result (*.ls) missing"
+        nerrors="`expr $nerrors + 1`"
+    elif $CMP $expect $actual; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected result differs from actual result"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $actual $actual_err $actual_sav $actual_err_sav
+    fi
+}
+
+##############################################################################
+##############################################################################
+###              T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
+
+####### test for dataset vds ######
+
+TOOLTEST tvds-1.ls 0 -w80 -v -S 1_vds.h5
+TOOLTEST tvds-2.ls 0 -w80 -v -S 2_vds.h5
+TOOLTEST tvds-3_1.ls 0 -w80 -v -S 3_1_vds.h5
+TOOLTEST tvds-3_2.ls 0 -w80 -v -S 3_2_vds.h5
+TOOLTEST tvds-4.ls 0 -w80 -v -S 4_vds.h5
+TOOLTEST tvds-5.ls 0 -w80 -v -S 5_vds.h5
+
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
+
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi

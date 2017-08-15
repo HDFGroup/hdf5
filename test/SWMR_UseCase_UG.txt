@@ -1,0 +1,223 @@
+1. Title:
+     User Guide for SWMR Use Case Programs
+
+2. Purpose:
+     This is a User Guide of the SWMR Use Case programs. It descibes the use
+    case program and explain how to run them.
+
+2.1. Author and Dates:
+     Version 2: By Albert Cheng (acheng@hdfgroup.org), 2013/06/18.
+     Version 1: By Albert Cheng (acheng@hdfgroup.org), 2013/06/01.
+
+
+%%%%Use Case 1.7%%%%
+   
+3. Use Case [1.7]:
+     Appending a single chunk
+
+3.1. Program name:
+     use_append_chunk
+
+3.2. Description:
+     Appending a single chunk of raw data to a dataset along an unlimited
+     dimension within a pre-created file and reading the new data back.
+
+     It first creates one 3d dataset using chunked storage, each chunk
+     is a (1, chunksize, chunksize) square.  The dataset is (unlimited,
+     chunksize, chunksize). Data type is 2 bytes integer.  It starts out
+     "empty", i.e., first dimension is 0.
+
+     The writer then appends planes, each of (1,chunksize,chunksize)
+     to the dataset. Fills each plan with plane number and then writes
+     it at the nth plane. Increases the plane number and repeats till
+     the end of dataset, when it reaches chunksize long. End product is
+     a chunksize^3 cube.
+
+     The reader is a separated process, running in parallel with
+     the writer.  It reads planes from the dataset.  It expects the
+     dataset is being changed (growing). It checks the unlimited dimension
+     (dimension[0]). When it increases, it will read in the new planes, one
+     by one, and verify the data correctness.  (The nth plan should contain
+     all "n".) When the unlimited dimension grows to the chunksize (it
+     becomes a cube), that is the expected end of data, the reader exits.
+
+3.3. How to run the program:
+     Simplest way is
+     $ use_append_chunk
+
+     It creates a skeleton dataset (0,256,256) of shorts. Then fork off
+     a process, which becomes the reader process to read planes from the
+     dataset, while the original process continues as the writer process
+     to append planes onto the dataset.
+
+     Other possible options:
+
+     1. -z option: different chunksize. Default is 256.
+     $ use_append_chunk -z 1024
+
+     It uses (1,1024,1024) chunks to produce a 1024^3 cube, about 2GB big.
+
+
+     2. -f filename: different dataset file name
+     $ use_append_chunk -f /gpfs/tmp/append_data.h5
+
+     The data file is /gpfs/tmp/append_data.h5. This allows two independent
+     processes in separated compute nodes to access the datafile on the
+     shared /gpfs file system.
+
+
+     3. -l option: launch only the reader or writer process.
+     $ use_append_chunk -f /gpfs/tmp/append_data.h5 -l w   # in node X
+     $ use_append_chunk -f /gpfs/tmp/append_data.h5 -l r   # in node Y
+
+     In node X, launch the writer process, which creates the data file
+     and appends to it.
+     In node Y, launch the read process to read the data file.
+
+     Note that you need to time the read process to start AFTER the write
+     process has created the skeleton data file. Otherwise, the reader
+     will encounter errors such as data file not found.
+
+     4. -n option: number of planes to write/read. Default is same as the
+     chunk size as specified by option -z.
+     $ use_append_chunk -n 1000	# 1000 planes are writtern and read.
+
+     5. -s option: use SWMR file access mode or not. Default is yes.
+     $ use_append_chunk -s 0
+
+     It opens the HDF5 data file without the SWMR access mode (0 means
+     off). This likely will result in error. This option is provided for
+     users to see the effect of the neede SWMR access mode for concurrent
+     access.
+
+3.4. Test Shell Script:
+     The Use Case program is installed in the test/ directory and is
+     compiled as part of the make process. A test script (test_usecases.sh)
+     is installed in the same directory to test the use case programs. The
+     test script is rather basic and is more for demonstrating how to
+     use the program.
+
+
+%%%%Use Case 1.8%%%%
+
+4. Use Case [1.8]:
+     Appending a hyperslab of multiple chunks.
+
+4.1. Program name:
+     use_append_mchunks
+
+4.2. Description:
+     Appending a hyperslab that spans several chunks of a dataset with
+     unlimited dimensions within a pre-created file and reading the new
+     data back.
+
+     It first creates one 3d dataset using chunked storage, each chunk is a (1,
+     chunksize, chunksize) square.  The dataset is (unlimited, 2*chunksize,
+     2*chunksize). Data type is 2 bytes integer. Therefore, each plane
+     consists of 4 chunks.  It starts out "empty", i.e., first dimension is 0.
+
+     The writer then appends planes, each of (1,2*chunksize,2*chunksize)
+     to the dataset. Fills each plan with plane number and then writes
+     it at the nth plane. Increases the plane number and repeats till
+     the end of dataset, when it reaches chunksize long. End product is
+     a (2*chunksize)^3 cube.
+
+     The reader is a separated process, running in parallel with
+     the writer.  It reads planes from the dataset.  It expects the
+     dataset is being changed (growing). It checks the unlimited dimension
+     (dimension[0]). When it increases, it will read in the new planes, one
+     by one, and verify the data correctness.  (The nth plan should contain
+     all "n".) When the unlimited dimension grows to the 2*chunksize (it
+     becomes a cube), that is the expected end of data, the reader exits.
+
+4.3. How to run the program:
+     Simplest way is
+     $ use_append_mchunks
+
+     It creates a skeleton dataset (0,512,512) of shorts. Then fork off
+     a process, which becomes the reader process to read planes from the
+     dataset, while the original process continues as the writer process
+     to append planes onto the dataset.
+
+     Other possible options:
+
+     1. -z option: different chunksize. Default is 256.
+     $ use_append_mchunks -z 512
+
+     It uses (1,512,512) chunks to produce a 1024^3 cube, about 2GB big.
+
+
+     2. -f filename: different dataset file name
+     $ use_append_mchunks -f /gpfs/tmp/append_data.h5
+
+     The data file is /gpfs/tmp/append_data.h5. This allows two independent
+     processes in separated compute nodes to access the datafile on the
+     shared /gpfs file system.
+
+
+     3. -l option: launch only the reader or writer process.
+     $ use_append_mchunks -f /gpfs/tmp/append_data.h5 -l w   # in node X
+     $ use_append_mchunks -f /gpfs/tmp/append_data.h5 -l r   # in node Y
+
+     In node X, launch the writer process, which creates the data file
+     and appends to it.
+     In node Y, launch the read process to read the data file.
+
+     Note that you need to time the read process to start AFTER the write
+     process has created the skeleton data file. Otherwise, the reader
+     will encounter errors such as data file not found.
+
+     4. -n option: number of planes to write/read. Default is same as the
+     chunk size as specified by option -z.
+     $ use_append_mchunks -n 1000	# 1000 planes are writtern and read.
+
+     5. -s option: use SWMR file access mode or not. Default is yes.
+     $ use_append_mchunks -s 0
+
+     It opens the HDF5 data file without the SWMR access mode (0 means
+     off). This likely will result in error. This option is provided for
+     users to see the effect of the neede SWMR access mode for concurrent
+     access.
+
+4.4. Test Shell Script:
+     The Use Case program is installed in the test/ directory and is
+     compiled as part of the make process. A test script (test_usecases.sh)
+     is installed in the same directory to test the use case programs. The
+     test script is rather basic and is more for demonstrating how to
+     use the program.
+
+
+%%%%Use Case 1.9%%%%
+
+5. Use Case [1.9]:
+     Appending n-1 dimensional planes
+
+5.1. Program names:
+     use_append_chunk and use_append_mchunks
+
+5.2. Description:
+     Appending n-1 dimensional planes or regions to a chunked dataset where
+     the data does not fill the chunk.
+
+     This means the chunks have multiple planes and when a plane is written,
+     only one of the planes in each chunk is written. This use case is
+     achieved by extending the previous use cases 1.7 and 1.8 by defining the
+     chunks to have more than 1 plane.  The -y option is implemented for both
+     use_append_chunk and use_append_mchunks.
+
+5.3. How to run the program:
+     Simplest way is
+     $ use_append_mchunks -y 5
+
+     It creates a skeleton dataset (0,512,512), with storage chunks (5,512,512)
+     of shorts. It then proceeds like use case 1.8 by forking off a reader
+     process.  The original process continues as the writer process that
+     writes 1 plane at a time, updating parts of the chunks involved. The
+     reader reads 1 plane at a time, retrieving data from partial chunks.
+
+     The other possible options will work just like the two use cases.
+
+5.4. Test Shell Script:
+     Commands are added with -y options to demonstrate how the two use case
+     programs can be used as for this use case.
+

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
@@ -159,28 +157,6 @@ typedef struct earray_test_t {
 
 /* Local prototypes */
 
-/* Metadata cache (H5AC) callbacks */
-
-static herr_t earray_cache_test_get_load_size(const void *udata_ptr,
-                                              size_t *image_len_ptr);
-
-static void *earray_cache_test_deserialize(const void *image_ptr,
-                                           size_t len,
-                                           void *udata_ptr,
-                                           hbool_t *dirty_ptr);
-
-static herr_t earray_cache_test_image_len(const void *thing,
-                                          size_t *image_len_ptr,
-                                          hbool_t *compressed_ptr,
-                                          size_t * compressed_len_ptr);
-
-static herr_t earray_cache_test_serialize(const H5F_t *f,
-                                          void *image_ptr,
-                                          size_t len,
-                                          void *thing);
-
-static herr_t earray_cache_test_free_icr(void *thing);
-
 
 /* Local variables */
 const char *FILENAME[] = {
@@ -194,23 +170,6 @@ char filename_g[EARRAY_FILENAME_LEN];
 
 /* Empty file size */
 h5_stat_size_t empty_size_g;
-
-/* H5EA test object inherits cache-like properties from H5AC */
-const H5AC_class_t H5AC_EARRAY_TEST[1] = {{
-    /* id            */ H5AC_TEST_ID,
-    /* name          */ "earray test",
-    /* mem_type      */ H5FD_MEM_DEFAULT,
-    /* flags         */ H5AC__CLASS_NO_IO_FLAG,
-    /* get_load_size */ (H5AC_get_load_size_func_t)earray_cache_test_get_load_size,
-    /* deserialize   */ (H5AC_deserialize_func_t)earray_cache_test_deserialize,
-    /* image_len     */ (H5AC_image_len_func_t)earray_cache_test_image_len,
-    /* pre_serialize */ (H5AC_pre_serialize_func_t)NULL,
-    /* serialize     */ (H5AC_serialize_func_t)earray_cache_test_serialize,
-    /* notify        */ (H5AC_notify_func_t)NULL,
-    /* free_icr      */ (H5AC_free_icr_func_t)earray_cache_test_free_icr,
-    /* clear         */ NULL,
-    /* fsf_size      */ NULL,
-}};
 
 
 /*-------------------------------------------------------------------------
@@ -628,247 +587,6 @@ HDsystem("cp earray.h5 earray.h5.save");
 error:
     return(-1);
 } /* finish() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    earray_cache_test_get_load_size()
- *
- * Purpose: place holder function -- should never be called
- *
- *
- *      A generic discussion of metadata cache callbacks of this type
- *      may be found in H5Cprivate.h:
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              8/2/14
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-earray_cache_test_get_load_size(const void *udata_ptr, size_t *image_len_ptr)
-{
-    HDassert(udata_ptr);
-    HDassert(image_len_ptr);
-
-    /* Should never be called */
-    HDassert(0 && "Can't be called!");
-
-    *image_len_ptr = 0;
-
-    return(SUCCEED);
-
-} /* end earray_cache_test_get_load_size() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    earray_cache_test_deserialize
- *
- * Purpose: place holder function -- should never be called.
- *
- *
- *      A generic discussion of metadata cache callbacks of this type
- *      may be found in H5Cprivate.h:
- *
- * Return:      Success:        Pointer to in core representation
- *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              8/2/14
- *
- *-------------------------------------------------------------------------
- */
-static void *
-earray_cache_test_deserialize(const void *image_ptr,
-                              size_t len,
-                              void *udata_ptr,
-                              hbool_t *dirty_ptr)
-{
-    HDassert(image_ptr);
-    HDassert(len > 0 );
-    HDassert(udata_ptr);
-    HDassert(dirty_ptr);
-
-
-    /* Should never be called */
-    HDassert(0 && "Can't be called!");
-
-    return(NULL);
-
-} /* end earray_cache_test_deserialize() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    earray_cache_test_image_len
- *
- * Purpose: test code place holder function -- just set *image_len_ptr to 
- *	one.
- *
- *
- *      A generic discussion of metadata cache callbacks of this type
- *      may be found in H5Cprivate.h:
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              8/2/14
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-earray_cache_test_image_len(const void *thing, size_t *image_len_ptr,
-    hbool_t H5_ATTR_UNUSED * compressed_ptr, size_t H5_ATTR_UNUSED * compressed_len_ptr)
-{
-
-    HDassert(thing);
-    HDassert(image_len_ptr);
-
-    /* Set size value */
-    /* (hard-code to 1) */
-    *image_len_ptr = 1;
-
-    return(SUCCEED);
-
-} /* end earray_cache_test_image_len() */
-
-
-/********************************/
-/* no H5O_cache_pre_serialize() */
-/********************************/
-
-
-/*-------------------------------------------------------------------------
- * Function:    earray_cache_test_serialize
- *
- * Purpose: Validate the contents of the instance of earray_test_t.
- *
- *
- *      A generic discussion of metadata cache callbacks of this type
- *      may be found in H5Cprivate.h:
- *
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              8/2/14
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-earray_cache_test_serialize(const H5F_t *f,
-                            void *image_ptr,
-                            H5_ATTR_UNUSED size_t len,
-                            void *thing)
-{
-    earray_test_t *test = NULL;
-
-    HDassert(f);
-    HDassert(image_ptr);
-    HDassert(thing);
-
-    test = (earray_test_t *)thing;
-
-    HDassert(test);
-    HDassert(test->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert((const H5AC_class_t *)(test->cache_info.type) == 
-             &(H5AC_EARRAY_TEST[0]));
-
-    /* Check for out of order flush */
-    if(test->fd_info->base_obj)
-        TEST_ERROR
-
-    /* Check which index this entry corresponds to */
-    if((uint64_t)0 == test->idx) {
-        /* Check for out of order flush */
-        if(test->fd_info->idx0_obj || test->fd_info->idx0_elem)
-            TEST_ERROR
-
-        /* Set flag for object flush */
-        test->fd_info->idx0_obj = TRUE;
-    } /* end if */
-    else if((uint64_t)1 == test->idx) {
-        /* Check for out of order flush */
-        if(test->fd_info->idx1_obj || test->fd_info->idx1_elem)
-            TEST_ERROR
-
-        /* Set flag for object flush */
-        test->fd_info->idx1_obj = TRUE;
-    } /* end if */
-    else if((uint64_t)10000 == test->idx) {
-        /* Check for out of order flush */
-        if(test->fd_info->idx10000_obj || test->fd_info->idx10000_elem)
-            TEST_ERROR
-
-        /* Set flag for object flush */
-        test->fd_info->idx10000_obj = TRUE;
-    } /* end if */
-    else if((uint64_t)-1 == test->idx) {
-        /* Set flag for object flush */
-        test->fd_info->base_obj = TRUE;
-    } /* end if */
-
-    return(SUCCEED);
-
-error:
-
-    return(FAIL);
-
-} /* end earray_cache_test_serialize() */
-
-
-/******************************************/
-/* no earray_cache_test_notify() function */
-/******************************************/
-
-
-/*-------------------------------------------------------------------------
- * Function:    earray_cache_test_free_icr
- *
- * Purpose: Destroy an extensible array test object in memory.
- *
- *
- *      A generic discussion of metadata cache callbacks of this type
- *      may be found in H5Cprivate.h:
- *
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              8/2/14
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-earray_cache_test_free_icr(void *thing)
-{
-    earray_test_t *test = NULL;
-
-    HDassert(thing);
-
-    test = (earray_test_t *)thing;
-
-    HDassert(test);
-
-    /* the metadata cache sets cache_info.magic to
-     * H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling the
-     * free_icr routine.  Hence the following assert:
-     */
-
-    HDassert(test->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert((const H5AC_class_t *)(test->cache_info.type) == 
-             &(H5AC_EARRAY_TEST[0]));
-
-    /* Free the shared info itself */
-    HDfree(test);
-
-    return(SUCCEED);
-
-} /* end earray_cache_test_free_icr() */
 
 
 /*-------------------------------------------------------------------------

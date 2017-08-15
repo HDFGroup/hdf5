@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -75,11 +73,11 @@ static hid_t H5FD_MULTI_g = 0;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_multi_fapl_t {
-    H5FD_mem_t	memb_map[H5FD_MEM_NTYPES]; /*memory usage map		*/
-    hid_t	memb_fapl[H5FD_MEM_NTYPES];/*member access properties	*/
-    char	*memb_name[H5FD_MEM_NTYPES];/*name generators		*/
-    haddr_t	memb_addr[H5FD_MEM_NTYPES];/*starting addr per member	*/
-    hbool_t	relax;			/*less stringent error checking	*/
+    H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];      /*memory usage map              */
+    hid_t       memb_fapl[H5FD_MEM_NTYPES];     /*member access properties      */
+    char        *memb_name[H5FD_MEM_NTYPES];    /*name generators               */
+    haddr_t     memb_addr[H5FD_MEM_NTYPES];     /*starting addr per member      */
+    hbool_t     relax;                          /*less stringent error checking	*/
 } H5FD_multi_fapl_t;
 
 /*
@@ -89,17 +87,17 @@ typedef struct H5FD_multi_fapl_t {
  * copied into the parent file struct in H5F_open().
  */
 typedef struct H5FD_multi_t {
-    H5FD_t	pub;		/*public stuff, must be first		*/
-    H5FD_multi_fapl_t fa;	/*driver-specific file access properties*/
-    haddr_t	memb_next[H5FD_MEM_NTYPES];/*addr of next member	*/
-    H5FD_t	*memb[H5FD_MEM_NTYPES];	/*member pointers		*/
-    haddr_t     memb_eoa[H5FD_MEM_NTYPES]; /*EOA for individual files,
-    				 *end of allocated addresses.  v1.6 library 
-                                 *have the EOA for the entire file. But it's
-                                 *meaningless for MULTI file.  We replaced it
-                                 *with the EOAs for individual files    */
-    unsigned	flags;		/*file open flags saved for debugging	*/
-    char	*name;		/*name passed to H5Fopen or H5Fcreate	*/
+    H5FD_t              pub;                        /*public stuff, must be first               */
+    H5FD_multi_fapl_t   fa;                         /*driver-specific file access properties    */
+    haddr_t             memb_next[H5FD_MEM_NTYPES]; /*addr of next member                       */
+    H5FD_t             *memb[H5FD_MEM_NTYPES];      /*member pointers                           */
+    haddr_t             memb_eoa[H5FD_MEM_NTYPES];  /*EOA for individual files,
+                                                     *end of allocated addresses.  v1.6 library 
+                                                     *have the EOA for the entire file. But it's
+                                                     *meaningless for MULTI file.  We replaced it
+                                                     *with the EOAs for individual files        */
+    unsigned            flags;                      /*file open flags saved for debugging       */
+    char               *name;                       /*name passed to H5Fopen or H5Fcreate       */
 } H5FD_multi_t;
 
 /* Driver specific data transfer properties */
@@ -233,9 +231,9 @@ H5FD_multi_init(void)
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if (H5I_VFL!=H5Iget_type(H5FD_MULTI_g)) {
-	H5FD_MULTI_g = H5FDregister(&H5FD_multi_g);
-    }
+    if(H5I_VFL!=H5Iget_type(H5FD_MULTI_g))
+        H5FD_MULTI_g = H5FDregister(&H5FD_multi_g);
+
     return H5FD_MULTI_g;
 }
 
@@ -285,7 +283,8 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
     H5FD_mem_t		memb_map[H5FD_MEM_NTYPES];
     hid_t		memb_fapl[H5FD_MEM_NTYPES];
     const char		*memb_name[H5FD_MEM_NTYPES];
-    char		meta_name[H5FD_MULT_MAX_FILE_NAME_LEN], raw_name[H5FD_MULT_MAX_FILE_NAME_LEN];
+    char		meta_name[H5FD_MULT_MAX_FILE_NAME_LEN];
+    char		raw_name[H5FD_MULT_MAX_FILE_NAME_LEN];
     haddr_t		memb_addr[H5FD_MEM_NTYPES];
 
     /*NO TRACE*/
@@ -534,7 +533,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
 		  hid_t *memb_fapl/*out*/, char **memb_name/*out*/,
 		  haddr_t *memb_addr/*out*/, hbool_t *relax)
 {
-    H5FD_multi_fapl_t	*fa;
+    const H5FD_multi_fapl_t *fa;
     H5FD_mem_t		mt;
     static const char *func="H5FDget_fapl_multi";  /* Function Name for error reporting */
 
@@ -548,7 +547,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not an access list", -1)
     if(H5FD_MULTI != H5Pget_driver(fapl_id))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1)
-    if(NULL == (fa= (H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id)))
+    if(NULL == (fa= (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id)))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1)
 
     if (memb_map)
@@ -992,7 +991,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
 {
     H5FD_multi_t	*file=NULL;
     hid_t		close_fapl=-1;
-    H5FD_multi_fapl_t	*fa;
+    const H5FD_multi_fapl_t *fa;
     H5FD_mem_t		m;
     static const char *func="H5FD_multi_open";  /* Function Name for error reporting */
 
@@ -1018,7 +1017,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
         if(H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE)<0)
             H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error)
     }
-    fa = (H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
+    fa = (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
     assert(fa);
     ALL_MEMBERS(mt) {
 	file->fa.memb_map[mt] = fa->memb_map[mt];
@@ -1111,6 +1110,7 @@ H5FD_multi_close(H5FD_t *_file)
 	if (file->fa.memb_fapl[mt]>=0) (void)H5Idec_ref(file->fa.memb_fapl[mt]);
 	if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
     } END_MEMBERS;
+
     free(file->name);
     free(file);
     return 0;
@@ -1149,14 +1149,18 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     ALL_MEMBERS(mt) {
         out_mt = mt;
-	if (f1->memb[mt] && f2->memb[mt]) break;
-	if (!cmp) {
-	    if (f1->memb[mt]) cmp = -1;
-	    else if (f2->memb[mt]) cmp = 1;
+	if(f1->memb[mt] && f2->memb[mt])
+            break;
+	if(!cmp) {
+	    if(f1->memb[mt])
+                cmp = -1;
+	    else if(f2->memb[mt])
+                cmp = 1;
 	}
     } END_MEMBERS;
     assert(cmp || out_mt<H5FD_MEM_NTYPES);
-    if (out_mt>=H5FD_MEM_NTYPES) return cmp;
+    if(out_mt>=H5FD_MEM_NTYPES)
+        return cmp;
 
     return H5FDcmp(f1->memb[out_mt], f2->memb[out_mt]);
 }
@@ -1186,8 +1190,10 @@ H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
-        *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_USE_ALLOC_SIZE;     /* OK just pass the allocation size to the alloc callback */
+        *flags |= H5FD_FEAT_PAGED_AGGR;         /* OK special file space mapping for paged aggregation */
     } /* end if */
 
     return(0);
@@ -1290,7 +1296,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     } else {
         H5FD_mem_t mmt = file->fa.memb_map[type];
 
-        if(H5FD_MEM_DEFAULT==mmt)
+        if(H5FD_MEM_DEFAULT == mmt)
             mmt = type;
 
 	if(file->memb[mmt]) {
@@ -1358,18 +1364,24 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     H5Eclear2(H5E_DEFAULT);
 
     mmt = file->fa.memb_map[type];
-    if(H5FD_MEM_DEFAULT == mmt)
-        mmt = type;
+    if(H5FD_MEM_DEFAULT == mmt) {
+        if(H5FD_MEM_DEFAULT == type)
+            mmt = H5FD_MEM_SUPER;
+        else
+            mmt = type;
+    } /* end if */
 
-    /* Handle backward compatibility in a quick and simple way.  v1.6 library had EOA for the entire virtual 
-     * file.  But it wasn't meaningful.  So v1.8 library doesn't have it anymore.  It saves the EOA for the 
-     * metadata file, instead.  Here we try to figure out whether the EOA is from a v1.6 file by comparing its 
-     * value.  If it is a big value, we assume it's from v1.6 and simply discard it. This is the normal case 
-     * when the metadata file has the smallest starting address.  If the metadata file has the biggest address,
-     * the EOAs of v1.6 and v1.8 files are the same.  It won't cause any trouble.  (Please see Issue 2598 
-     * in Jira) SLU - 2011/6/21
+    /* Handle backward compatibility in a quick and simple way.  v1.6 library
+     * had EOA for the entire virtual file.  But it wasn't meaningful.  So v1.8
+     * library doesn't have it anymore.  It saves the EOA for the metadata file,
+     * instead.  Here we try to figure out whether the EOA is from a v1.6 file
+     * by comparing its value.  If it is a big value, we assume it's from v1.6
+     * and simply discard it. This is the normal case when the metadata file
+     * has the smallest starting address.  If the metadata file has the biggest
+     * address, the EOAs of v1.6 and v1.8 files are the same.  It won't cause
+     * any trouble.  (Please see Issue 2598 in Jira) SLU - 2011/6/21
      */
-    if(H5FD_MEM_SUPER == type && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > file->memb_eoa[H5FD_MEM_SUPER])
+    if(H5FD_MEM_SUPER == mmt && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > (file->memb_next[H5FD_MEM_SUPER] / 2))
         return 0;
 
     assert(eoa >= file->fa.memb_addr[mmt]);
@@ -1378,7 +1390,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     H5E_BEGIN_TRY {
 	status = H5FDset_eoa(file->memb[mmt], mmt, (eoa - file->fa.memb_addr[mmt]));
     } H5E_END_TRY;
-    if (status<0)
+    if(status < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1)
 
     return 0;
@@ -1525,6 +1537,14 @@ H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
     mmt = file->fa.memb_map[type];
     if (H5FD_MEM_DEFAULT==mmt) mmt = type;
+
+    /* XXX: NEED to work on this again */
+    if(file->pub.paged_aggr) {
+        ALL_MEMBERS(mt) {
+            if(file->memb[mt])
+                file->memb[mt]->paged_aggr = file->pub.paged_aggr;
+        } END_MEMBERS;
+    }
 
     if (HADDR_UNDEF==(addr=H5FDalloc(file->memb[mmt], mmt, dxpl_id, size)))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file can't alloc", HADDR_UNDEF)

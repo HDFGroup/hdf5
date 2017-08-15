@@ -14,12 +14,10 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!   of the source code distribution tree; Copyright.html can be found at the  *
-!   root level of an installed copy of the electronic HDF5 document set and   *
-!   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-!   access to either file, you may request a copy from help@hdfgroup.org.     *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! CONTAINS SUBROUTINES
@@ -729,7 +727,7 @@ CONTAINS
 
           CALL h5fget_freespace_f(fid, free_space, error)
                CALL check("h5fget_freespace_f",error,total_error)
-               if(error .eq.0 .and. free_space .ne. 0) then
+               if(error .eq.0 .and. free_space .ne. 1248) then
                  total_error = total_error + 1
                  write(*,*) "1: Wrong amount of free space reported, ", free_space
                endif
@@ -745,7 +743,7 @@ CONTAINS
           ! Check the free space now
           CALL h5fget_freespace_f(fid, free_space, error)
                CALL check("h5fget_freespace_f",error,total_error)
-               if(error .eq.0 .and. free_space .ne. 0) then
+               if(error .eq.0 .and. free_space .ne. 216) then
                  total_error = total_error + 1
                  write(*,*) "2: Wrong amount of free space reported, ", free_space
                endif
@@ -757,7 +755,7 @@ CONTAINS
           ! Check the free space now
           CALL h5fget_freespace_f(fid, free_space, error)
                CALL check("h5fget_freespace_f",error,total_error)
-               if(error .eq.0 .and. free_space .ne. 0) then
+               if(error .eq.0 .and. free_space .ne. 1248) then
                  total_error = total_error + 1
                  write(*,*) "3: Wrong amount of free space reported, ", free_space
                endif

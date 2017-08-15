@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  John Mainzer
@@ -20,9 +18,6 @@
  *		with the cache implemented in H5C.c
  */
 
-#include "h5test.h"
-#include "H5Iprivate.h"
-#include "H5ACprivate.h"
 #include "cache_common.h"
 
 /* extern declarations */
@@ -33,12 +28,12 @@
 
 /* private function declarations: */
 
-static hbool_t check_fapl_mdc_api_calls(void);
-static hbool_t check_file_mdc_api_calls(void);
-static hbool_t mdc_api_call_smoke_check(int express_test);
+static hbool_t check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id);
+static hbool_t check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id);
+static hbool_t mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id);
 static H5AC_cache_config_t * init_invalid_configs(void);
 static hbool_t check_fapl_mdc_api_errs(void);
-static hbool_t check_file_mdc_api_errs(void);
+static hbool_t check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id);
 
 
 
@@ -67,7 +62,7 @@ static hbool_t check_file_mdc_api_errs(void);
  *-------------------------------------------------------------------------
  */
 static hbool_t
-check_fapl_mdc_api_calls(void)
+check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 {
     char filename[512];
     herr_t result;
@@ -116,7 +111,10 @@ check_fapl_mdc_api_calls(void)
     H5C_auto_size_ctl_t default_auto_size_ctl;
     H5C_auto_size_ctl_t mod_auto_size_ctl;
 
-    TESTING("MDC/FAPL related API calls");
+    if(paged)
+        TESTING("MDC/FAPL related API calls for paged aggregation strategy")
+    else
+        TESTING("MDC/FAPL related API calls")
 
     pass = TRUE;
 
@@ -220,7 +218,7 @@ check_fapl_mdc_api_calls(void)
     /* create the file using the default FAPL */
     if ( pass ) {
 
-        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
@@ -368,7 +366,7 @@ check_fapl_mdc_api_calls(void)
     /* create the file using the modified FAPL */
     if ( pass ) {
 
-        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
 
         if ( file_id < 0 ) {
 
@@ -520,7 +518,7 @@ check_fapl_mdc_api_calls(void)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-check_file_mdc_api_calls(void)
+check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 {
     char filename[512];
     hid_t file_id = -1;
@@ -672,7 +670,10 @@ check_file_mdc_api_calls(void)
 				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
 
-    TESTING("MDC/FILE related API calls");
+    if(paged)
+        TESTING("MDC/FILE related API calls for paged aggregation strategy")
+    else
+        TESTING("MDC/FILE related API calls")
 
     pass = TRUE;
 
@@ -698,7 +699,7 @@ check_file_mdc_api_calls(void)
     /* create the file using the default FAPL */
     if ( pass ) {
 
-        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
@@ -877,7 +878,7 @@ check_file_mdc_api_calls(void)
 #define NUM_RANDOM_ACCESSES     200000
 
 static hbool_t
-mdc_api_call_smoke_check(int express_test)
+mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 {
     char filename[512];
     hbool_t valid_chunk;
@@ -1006,7 +1007,10 @@ mdc_api_call_smoke_check(int express_test)
 				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
 
-    TESTING("MDC API smoke check");
+    if(paged)
+        TESTING("MDC API smoke check for paged aggregation strategy")
+    else
+        TESTING("MDC API smoke check")
 
     pass = TRUE;
 
@@ -1041,7 +1045,7 @@ mdc_api_call_smoke_check(int express_test)
     /* create the file using the default FAPL */
     if ( pass ) {
 
-        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
@@ -1924,7 +1928,7 @@ check_fapl_mdc_api_errs(void)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-check_file_mdc_api_errs(void)
+check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 {
     char filename[512];
     static char msg[128];
@@ -1940,7 +1944,10 @@ check_file_mdc_api_errs(void)
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t scratch;
 
-    TESTING("MDC/FILE related API input errors");
+    if(paged)
+        TESTING("MDC/FILE related API input errors for paged aggregation strategy")
+    else
+        TESTING("MDC/FILE related API input errors")
 
     pass = TRUE;
 
@@ -1971,7 +1978,7 @@ check_file_mdc_api_errs(void)
             HDfprintf(stdout, "%s: calling H5Fcreate().\n", FUNC);
         }
 
-        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
@@ -2270,6 +2277,9 @@ main(void)
 {
     unsigned nerrs = 0;
     int express_test;
+    hid_t fcpl_id = -1;
+    hid_t fcpl2_id = -1;
+    unsigned paged;
 
     H5open();
 
@@ -2284,52 +2294,67 @@ main(void)
     /* Initialize invalid configurations.
      */
     invalid_configs = init_invalid_configs();
-
     if ( NULL == invalid_configs ) {
-
         failure_mssg = "Unable to allocate memory for invalid configs.";
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
         return EXIT_FAILURE;
-    }
+    } /* end if */
 
-    if ( !check_fapl_mdc_api_calls() ) {
-
-        nerrs += 1;
-    }
-
-    if ( !check_file_mdc_api_calls() ) {
-
-        nerrs += 1;
-    }
-
-    if ( !mdc_api_call_smoke_check(express_test) ) {
-
-        nerrs += 1;
-    }
-
-    if ( !check_fapl_mdc_api_errs() ) {
-
-        nerrs += 1;
-    }
-
-    if ( !check_file_mdc_api_errs() ) {
-
-        nerrs += 1;
-    }
-
-    if ( invalid_configs ) {
-
-        HDfree(invalid_configs);
-    }
-
-    if ( nerrs > 0 ) {
-
+    if((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0) {
+        failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.\n";
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
         return EXIT_FAILURE;
+    } /* end if */
 
-    } else {
+    /* Set file space strategy to default or paged aggregation strategy */
+    if((fcpl2_id = H5Pcopy(fcpl_id)) < 0) {
+        failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.\n";
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        return EXIT_FAILURE;
+    } /* end if */
 
+    if(H5Pset_file_space_strategy(fcpl2_id, H5F_FSPACE_STRATEGY_PAGE, 1, (hsize_t)1) < 0) {
+        failure_mssg = "H5Pset_file_space_strategy() failed.\n";
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        return EXIT_FAILURE;
+    } /* end if */
+
+    /* Test with paged aggregation enabled or not */
+    /* The "my_fcpl" passed to each test has the paged or non-paged strategy set up accordinly */
+    for(paged = FALSE; paged <= TRUE; paged++) {
+        hid_t my_fcpl = fcpl_id;
+
+        if(paged)
+            my_fcpl = fcpl2_id;
+
+        if(!check_fapl_mdc_api_calls(paged, my_fcpl))
+            nerrs += 1;
+
+        if(!check_file_mdc_api_calls(paged, my_fcpl))
+            nerrs += 1;
+
+        if(!mdc_api_call_smoke_check(express_test, paged, my_fcpl))
+            nerrs += 1;
+
+        if(!check_file_mdc_api_errs(paged, my_fcpl))
+            nerrs += 1;
+    } /* end for paged */
+
+    if(!check_fapl_mdc_api_errs())
+        nerrs += 1;
+
+    if(invalid_configs)
+        HDfree(invalid_configs);
+
+    if(H5Pclose(fcpl_id) < 0 ) {
+        failure_mssg = "H5Pclose() failed.\n";
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        return EXIT_FAILURE;
+    } /* end if */
+
+    if(nerrs > 0)
+        return EXIT_FAILURE;
+    else
         return EXIT_SUCCESS;
-    }
-
 } /* main() */
 

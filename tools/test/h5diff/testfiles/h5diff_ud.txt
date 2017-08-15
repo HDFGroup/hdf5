@@ -1,0 +1,11 @@
+
+file1     file2
+---------------------------------------
+    x      x    /              
+    x      x    /dynlibud      
+
+group  : </> and </>
+0 differences found
+dataset: </dynlibud> and </dynlibud>
+0 differences found
+EXIT CODE: 0

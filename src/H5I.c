@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -453,9 +451,9 @@ H5I_nmembers(H5I_type_t type)
     FUNC_ENTER_NOAPI(FAIL)
 
     if(type <= H5I_BADID || type >= H5I_next_type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
     if(NULL == (type_ptr = H5I_id_type_list_g[type]) || type_ptr->init_count <= 0)
-	HGOTO_DONE(0);
+        HGOTO_DONE(0);
 
     /* Set return value */
     H5_CHECKED_ASSIGN(ret_value, int64_t, type_ptr->id_count, uint64_t);
@@ -890,7 +888,7 @@ H5I_subst(hid_t id, const void *new_object)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end if */
+} /* end H5I_subst() */
 
 
 /*-------------------------------------------------------------------------
@@ -922,7 +920,7 @@ H5I_object(hid_t id)
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end if */
+} /* end H5I_object() */
 
 
 /*-------------------------------------------------------------------------

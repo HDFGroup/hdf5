@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -183,8 +181,8 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_SELECT_IS_SINGLE(S)         (H5S_select_is_single(S))
 #define H5S_SELECT_IS_REGULAR(S)        (H5S_select_is_regular(S))
 #define H5S_SELECT_ADJUST_U(S,O)        (H5S_select_adjust_u(S, O))
-#define H5S_SELECT_PROJECT_SCALAR(S,O)  (H5S_select_project_scalar)(S, O))
-#define H5S_SELECT_PROJECT_SIMPLE(S,NS,O) (H5S_select_project_simple)(S, NS, O))
+#define H5S_SELECT_PROJECT_SCALAR(S,O)  (H5S_select_project_scalar(S, O))
+#define H5S_SELECT_PROJECT_SIMPLE(S,NS,O) (H5S_select_project_simple(S, NS, O))
 #define H5S_SELECT_ITER_COORDS(ITER,COORDS)     (H5S_select_iter_coords(ITER,COORDS))
 #define H5S_SELECT_ITER_BLOCK(ITER,START,END)   (H5S_select_iter_block(ITER,START,END))
 #define H5S_SELECT_ITER_NELMTS(ITER)    (H5S_select_iter_nelmts(ITER))

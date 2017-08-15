@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_CPP_TEST)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
@@ -20,6 +20,7 @@ set (CPP_TEST_SOURCES
     ${HDF5_CPP_TEST_SOURCE_DIR}/tfile.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tfilter.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/th5s.cpp
+    ${HDF5_CPP_TEST_SOURCE_DIR}/titerate.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tlinks.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tobject.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/trefer.cpp

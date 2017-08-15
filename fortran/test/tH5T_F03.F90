@@ -15,12 +15,10 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!   of the source code distribution tree; Copyright.html can be found at the  *
-!   root level of an installed copy of the electronic HDF5 document set and   *
-!   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-!   access to either file, you may request a copy from help@hdfgroup.org.     *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
@@ -66,6 +64,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
   CHARACTER(LEN=10), PARAMETER :: FILENAME = "tarray1.h5"
 
   TYPE s1_t
+     SEQUENCE
      INTEGER :: i
      REAL :: f
   END TYPE s1_t
@@ -248,7 +247,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
   ! Read dataset from disk 
 
   f_ptr = C_LOC(rdata(1,1))
-  CALL H5Dread_f(dataset, tid1, f_ptr, error)
+  CALL H5Dread_f(dataset, tid1, f_ptr, error, H5S_ALL_F, H5S_ALL_F, H5P_DEFAULT_F)
   CALL check("H5Dread_f", error, total_error)
 
   ! Compare data read in 
@@ -298,7 +297,8 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: SPACE1_DIM1 = 4
     CHARACTER(LEN=10), PARAMETER :: FILENAME = "tarray2.h5"
 
-    TYPE st_t_struct !  Typedef for compound datatype 
+    TYPE st_t_struct !  Typedef for compound datatype
+       SEQUENCE
        INTEGER :: i
        REAL, DIMENSION(1:ARRAY2_DIM1) :: f
        CHARACTER(LEN=2), DIMENSION(1:ARRAY2_DIM1) :: c
@@ -1144,33 +1144,33 @@ END SUBROUTINE test_array_compound_atomic
   !
   ! Read data back into an integer size that is larger then the original size used for 
   ! writing the data
-    f_ptr = C_LOC(data_out_i1)
+    f_ptr = C_LOC(data_out_i1(1))
     CALL h5dread_f(dset_id1, h5kind_to_type(int_kind_1,H5_INTEGER_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-    f_ptr = C_LOC(data_out_i4)
+    f_ptr = C_LOC(data_out_i4(1))
     CALL h5dread_f(dset_id4, h5kind_to_type(int_kind_4,H5_INTEGER_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-    f_ptr = C_LOC(data_out_i8)
+    f_ptr = C_LOC(data_out_i8(1))
     CALL h5dread_f(dset_id8, h5kind_to_type(int_kind_8,H5_INTEGER_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-    f_ptr = C_LOC(data_out_i16)
+    f_ptr = C_LOC(data_out_i16(1))
     CALL h5dread_f(dset_id16, h5kind_to_type(int_kind_16,H5_INTEGER_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-    f_ptr = C_LOC(data_out_i32)
+    f_ptr = C_LOC(data_out_i32(1))
     CALL h5dread_f(dset_id32, h5kind_to_type(int_kind_32,H5_INTEGER_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
 #endif
-    f_ptr = C_LOC(data_out_r)
+    f_ptr = C_LOC(data_out_r(1))
     CALL h5dread_f(dset_idr, H5T_NATIVE_REAL, f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-    f_ptr = C_LOC(data_out_r7)
+    f_ptr = C_LOC(data_out_r7(1))
     CALL h5dread_f(dset_idr4, h5kind_to_type(real_kind_7,H5_REAL_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-    f_ptr = C_LOC(data_out_r15)
+    f_ptr = C_LOC(data_out_r15(1))
     CALL h5dread_f(dset_idr8, h5kind_to_type(real_kind_15,H5_REAL_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-    f_ptr = C_LOC(data_out_r31)
+    f_ptr = C_LOC(data_out_r31(1))
     CALL h5dread_f(dset_idr16, h5kind_to_type(real_kind_31,H5_REAL_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
     DO i = 1, 4
@@ -2000,7 +2000,7 @@ SUBROUTINE t_regref(total_error)
   CALL h5dcreate_f(file,dataset2, H5T_STD_I8LE, space, dset2, error)
   CALL check("h5dcreate_f",error, total_error)
   f_ptr = C_LOC(wdata2(1,1))
-  CALL h5dwrite_f(dset2, H5T_NATIVE_INTEGER_1, f_ptr, error)
+  CALL h5dwrite_f(dset2, H5T_NATIVE_INTEGER_KIND(1), f_ptr, error)
   CALL check("h5dwrite_f",error, total_error)
   !
   ! Create reference to a list of elements in dset2.
@@ -2112,7 +2112,7 @@ SUBROUTINE t_regref(total_error)
      CALL check("h5screate_simple_f",error, total_error)
 
      f_ptr = C_LOC(rdata2(1)(1:1))
-     CALL h5dread_f( dset2, H5T_NATIVE_INTEGER_1, f_ptr, error, memspace, space)
+     CALL h5dread_f( dset2, H5T_NATIVE_INTEGER_KIND(1), f_ptr, error, memspace, space)
      CALL check("H5Dread_f",error, total_error)
      CALL verify("h5dread_f",rdata2(1)(1:npoints),TRIM(chrref_correct(i)), total_error)
 
@@ -2886,33 +2886,23 @@ SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
   
   CHARACTER(len=10), DIMENSION(:) :: data_in
   INTEGER(size_t), DIMENSION(:) :: line_lengths
-  INTEGER, DIMENSION(1:3) :: letters
-  CHARACTER(LEN=3) :: lets
+  CHARACTER(LEN=3) :: lets = 'abc'
   CHARACTER(KIND=C_CHAR,LEN=*) :: char_type
-  CHARACTER(KIND=C_CHAR,LEN=1) :: char_tmp
-  INTEGER :: i, j, n, ff
+  INTEGER :: i, j, n
 
-  ! Convert the letters and special character to integers    
-  lets = 'abc'
-  
-  READ(lets,'(3A1)') letters
-  READ(char_type,'(A1)') ff
   n = SIZE(data_in)
   j = 1
   DO i=1,n-1
      IF( j .EQ. 4 )THEN
-        WRITE(char_tmp,'(A1)') ff
-        data_in(i:i) = char_tmp
+        data_in(i:i) = char_type(1:1)
      ELSE
-        WRITE(char_tmp,'(A1)') letters(j)
-        data_in(i:i) = char_tmp
+        data_in(i:i) = lets(j:j)
      ENDIF
      line_lengths(i) = LEN_TRIM(data_in(i))
      j = j + 1
      IF( j .EQ. 5 ) j = 1
   END DO
-  WRITE(char_tmp,'(A1)') ff
-  data_in(n:n) =  char_tmp
+  data_in(n:n) =  char_type(1:1)
   line_lengths(n) = 1
   
 END SUBROUTINE setup_buffer

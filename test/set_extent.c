@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -139,6 +137,15 @@ int main( void )
     unsigned new_format;         /* Whether to use the latest file format */
     unsigned chunk_cache;        /* Whether to enable chunk caching */
     int	  nerrors = 0;
+    const char  *env_h5_drvr;	/* File Driver value from environment */
+    hbool_t contig_addr_vfd;    /* Whether VFD used has a contigous address space */
+
+
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if(env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+    /* Current VFD that does not support contigous address space */
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
 
     /* Initialize random number seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -194,12 +201,15 @@ int main( void )
                         H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
             /* Tests which use chunked datasets */
-            nerrors += do_ranks( my_fapl, new_format ) < 0 ? 1 : 0;
+	    if(!new_format || (new_format && contig_addr_vfd))
+		nerrors += do_ranks( my_fapl, new_format ) < 0 ? 1 : 0;
         } /* end for */
 
         /* Tests which do not use chunked datasets */
-        nerrors += test_external( fapl ) < 0 ? 1 : 0;
-        nerrors += do_layouts( fapl ) < 0 ? 1 : 0;
+	if(!new_format || (new_format && contig_addr_vfd)) {
+	    nerrors += test_external( fapl ) < 0 ? 1 : 0;
+	    nerrors += do_layouts( fapl ) < 0 ? 1 : 0;
+	}
     } /* end for */
 
     /* Close 2nd FAPL */
@@ -2591,13 +2601,6 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
     volatile unsigned i, j, k, l, m;            /* Local indices */
     char        filename[NAME_BUF_SIZE];
 
-    /*!FIXME Skip the test if a fixed array index is requested, as resizing
-     * fixed arrays is broken now.  Extensible arrays are also broken.  Remove
-     * these lines as appropriate when these problems are fixed. */
-    /* Fixed Array index type is now fixed */
-    if(index_type == RANK4_INDEX_EARRAY)
-        return 0;
-
     /* create a new file */
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -2801,12 +2804,6 @@ static int test_random_rank4_vl( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
     unsigned    scalar_iter;                    /* Iteration to shrink dset to 1x1x1x1 */
     volatile unsigned i, j, k, l, m;            /* Local indices */
     char        filename[NAME_BUF_SIZE];
-
-    /*!FIXME Skip the test if a fixed array index is requested, as resizing
-     * fixed arrays is broken now.  Extensible arrays are also broken.  Remove
-     * these lines as appropriate when these problems are fixed. */
-    if(index_type == RANK4_INDEX_FARRAY || index_type == RANK4_INDEX_EARRAY)
-        return 0;
 
     /* Initialize fill value buffers so they aren't freed in case of an error */
     fill_value.len = 0;

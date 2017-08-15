@@ -6,12 +6,10 @@ dnl All rights reserved.
 dnl
 dnl This file is part of HDF5.  The full HDF5 copyright notice, including
 dnl terms governing use, modification, and redistribution, is contained in
-dnl the files COPYING and Copyright.html.  COPYING can be found at the root
-dnl of the source code distribution tree; Copyright.html can be found at the
-dnl root level of an installed copy of the electronic HDF5 document set and
-dnl is linked from the top-level documents page.  It can also be found at
-dnl http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-dnl access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+dnl the COPYING file, which can be found at the root of the source code
+dnl distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+dnl If you do not have access to either file, you may request a copy from
+dnl help@hdfgroup.org
 dnl
 dnl -------------------------------------------------------------------------
 dnl -------------------------------------------------------------------------
@@ -280,7 +278,8 @@ AC_RUN_IFELSE([$TEST_SRC],
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
 
-	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `sed -n '4p' pac_fconftest.out`"
+        PAC_FORTRAN_NUM_INTEGER_KINDS="`sed -n '4p' pac_fconftest.out`"
+	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $PAC_FORTRAN_NUM_INTEGER_KINDS`"
 	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
 	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `sed -n '5p' pac_fconftest.out`"
 	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
@@ -290,6 +289,8 @@ AC_RUN_IFELSE([$TEST_SRC],
 	AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
 	AC_DEFINE_UNQUOTED([H5CONFIG_F_IKIND], $H5CONFIG_F_IKIND, [Define valid Fortran INTEGER KINDs])
 
+        AC_MSG_CHECKING([for Number of Fortran INTEGER KINDs])
+        AC_MSG_RESULT([$PAC_FORTRAN_NUM_INTEGER_KINDS])
         AC_MSG_CHECKING([for Fortran INTEGER KINDs])
         AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS])
 	AC_MSG_CHECKING([for Fortran REAL KINDs])
@@ -474,5 +475,4 @@ rm -f pac_Cconftest.out
             AC_MSG_ERROR([C program fails to build or run!])
         ],[])
 ])
-
 

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -35,6 +33,7 @@
 #include "H5Cprivate.h"		/* Cache				*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5SLprivate.h"        /* Skip lists 				*/
 
 #ifdef H5_METADATA_TRACE_FILE
 #define H5AC__TRACE_FILE_ENABLED	1
@@ -45,11 +44,16 @@
 /* Global metadata tag values */
 #define H5AC__INVALID_TAG      (haddr_t)0
 #define H5AC__IGNORE_TAG       (haddr_t)1
-#define H5AC__SUPERBLOCK_TAG   (haddr_t)2
-#define H5AC__FREESPACE_TAG    (haddr_t)3
-#define H5AC__SOHM_TAG         (haddr_t)4
-#define H5AC__GLOBALHEAP_TAG   (haddr_t)5
-#define H5AC__COPIED_TAG       (haddr_t)6
+#define H5AC__COPIED_TAG       (haddr_t)2
+#define H5AC__SUPERBLOCK_TAG   (haddr_t)3
+#define H5AC__FREESPACE_TAG    (haddr_t)4
+#define H5AC__SOHM_TAG         (haddr_t)5
+#define H5AC__GLOBALHEAP_TAG   (haddr_t)6
+
+/* Definitions for cache "tag" property */
+#define H5AC_TAG_NAME          "H5AC_tag"
+#define H5AC_TAG_SIZE          sizeof(haddr_t)
+#define H5AC_TAG_DEF           (H5AC__INVALID_TAG)
 
 /* Types of metadata objects cached */
 typedef enum {
@@ -80,7 +84,9 @@ typedef enum {
     H5AC_FARRAY_DBLK_PAGE_ID,   /* (24) fixed array data block page                 */
     H5AC_SUPERBLOCK_ID,         /* (25) file superblock                             */
     H5AC_DRVRINFO_ID,           /* (26) driver info block (supplements superblock)  */
-    H5AC_TEST_ID,               /* (27) test entry -- not used for actual files     */
+    H5AC_EPOCH_MARKER_ID,       /* (27) epoch marker - always internal to cache     */
+    H5AC_PROXY_ENTRY_ID,        /* (28) cache entry proxy                           */
+    H5AC_PREFETCHED_ENTRY_ID, 	/* (29) prefetched entry - always internal to cache */
     H5AC_NTYPES                 /* Number of types, must be last                    */
 } H5AC_type_t;
 
@@ -103,14 +109,22 @@ typedef enum {
  *	 use the dump_stats parameter to takedown_cache(), or call 
  *	 H5C_stats() directly.
  *					JRM -- 4/12/15
+ *
+ * Added the H5AC_DUMP_IMAGE_STATS_ON_CLOSE #define, which works much 
+ * the same way as H5AC_DUMP_STATS_ON_CLOSE.  However, the set of stats
+ * displayed is much smaller, and directed purely at the cache image feature.
+ *
+ *					JRM -- 11/1/15
  */
 #if H5C_COLLECT_CACHE_STATS
 
 #define H5AC_DUMP_STATS_ON_CLOSE	0
+#define H5AC_DUMP_IMAGE_STATS_ON_CLOSE  0
 
 #else /* H5C_COLLECT_CACHE_STATS */
 
 #define H5AC_DUMP_STATS_ON_CLOSE	0
+#define H5AC_DUMP_IMAGE_STATS_ON_CLOSE  0
 
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -136,7 +150,6 @@ typedef enum {
 
 #define H5AC__SERIALIZE_RESIZED_FLAG	H5C__SERIALIZE_RESIZED_FLAG
 #define H5AC__SERIALIZE_MOVED_FLAG	H5C__SERIALIZE_MOVED_FLAG
-#define H5AC__SERIALIZE_COMPRESSED_FLAG	H5C__SERIALIZE_COMPRESSED_FLAG
 
 /* Cork actions: cork/uncork/get cork status of an object */
 #define H5AC__SET_CORK             	H5C__SET_CORK
@@ -146,8 +159,9 @@ typedef enum {
 /* Aliases for the "ring" type and values */
 typedef H5C_ring_t       H5AC_ring_t;
 #define H5AC_RING_INV    H5C_RING_UNDEFINED
-#define H5AC_RING_US     H5C_RING_USER
-#define H5AC_RING_FSM    H5C_RING_FSM
+#define H5AC_RING_USER   H5C_RING_USER
+#define H5AC_RING_RDFSM  H5C_RING_RDFSM
+#define H5AC_RING_MDFSM  H5C_RING_MDFSM
 #define H5AC_RING_SBE    H5C_RING_SBE
 #define H5AC_RING_SB     H5C_RING_SB
 #define H5AC_RING_NTYPES H5C_RING_NTYPES
@@ -158,17 +172,23 @@ typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC_NOTIFY_ACTION_AFTER_LOAD   H5C_NOTIFY_ACTION_AFTER_LOAD
 #define H5AC_NOTIFY_ACTION_AFTER_FLUSH	H5C_NOTIFY_ACTION_AFTER_FLUSH
 #define H5AC_NOTIFY_ACTION_BEFORE_EVICT H5C_NOTIFY_ACTION_BEFORE_EVICT
+#define H5AC_NOTIFY_ACTION_ENTRY_DIRTIED H5C_NOTIFY_ACTION_ENTRY_DIRTIED
+#define H5AC_NOTIFY_ACTION_ENTRY_CLEANED H5C_NOTIFY_ACTION_ENTRY_CLEANED
+#define H5AC_NOTIFY_ACTION_CHILD_DIRTIED H5C_NOTIFY_ACTION_CHILD_DIRTIED
+#define H5AC_NOTIFY_ACTION_CHILD_CLEANED H5C_NOTIFY_ACTION_CHILD_CLEANED
+#define H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED
+#define H5AC_NOTIFY_ACTION_CHILD_SERIALIZED H5C_NOTIFY_ACTION_CHILD_SERIALIZED
 
 #define H5AC__CLASS_NO_FLAGS_SET 	H5C__CLASS_NO_FLAGS_SET
 #define H5AC__CLASS_SPECULATIVE_LOAD_FLAG H5C__CLASS_SPECULATIVE_LOAD_FLAG
-#define H5AC__CLASS_COMPRESSED_FLAG	H5C__CLASS_COMPRESSED_FLAG
 
 /* The following flags should only appear in test code */
-#define H5AC__CLASS_NO_IO_FLAG		H5C__CLASS_NO_IO_FLAG
-#define H5AC__CLASS_SKIP_READS		H5C__CLASS_SKIP_READS
-#define H5AC__CLASS_SKIP_WRITES		H5C__CLASS_SKIP_WRITES
+#define H5AC__CLASS_SKIP_READS              H5C__CLASS_SKIP_READS
+#define H5AC__CLASS_SKIP_WRITES             H5C__CLASS_SKIP_WRITES
 
-typedef H5C_get_load_size_func_t	H5AC_get_load_size_func_t;
+typedef H5C_get_initial_load_size_func_t	H5AC_get_initial_load_size_func_t;
+typedef H5C_get_final_load_size_func_t	H5AC_get_final_load_size_func_t;
+typedef H5C_verify_chksum_func_t	H5AC_verify_chksum_func_t;
 typedef H5C_deserialize_func_t		H5AC_deserialize_func_t;
 typedef H5C_image_len_func_t		H5AC_image_len_func_t;
 
@@ -180,7 +200,6 @@ typedef H5C_pre_serialize_func_t	H5AC_pre_serialize_func_t;
 typedef H5C_serialize_func_t		H5AC_serialize_func_t;
 typedef H5C_notify_func_t		H5AC_notify_func_t;
 typedef H5C_free_icr_func_t		H5AC_free_icr_func_t;
-typedef H5C_clear_func_t		H5AC_clear_func_t;
 typedef H5C_get_fsf_size_t		H5AC_get_fsf_size_t;
 
 typedef H5C_class_t			H5AC_class_t;
@@ -188,9 +207,29 @@ typedef H5C_class_t			H5AC_class_t;
 /* Cache entry info */
 typedef H5C_cache_entry_t		H5AC_info_t;
 
-
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
+
+/* Metadata cache proxy entry type */
+typedef struct H5AC_proxy_entry_t {
+    H5AC_info_t cache_info;             /* Information for H5AC cache functions */
+                                        /* (MUST be first field in structure) */
+
+    /* General fields */
+    haddr_t addr;                       /* Address of the entry in the file */
+                                        /* (Should be in 'temporary' address space) */
+
+    /* Parent fields */
+    H5SL_t *parents;                    /* Skip list to track parent addresses */
+
+    /* Child fields */
+    size_t nchildren;                   /* Number of children */
+    size_t ndirty_children;             /* Number of dirty children */
+                                        /* (Note that this currently duplicates some cache functionality) */
+    size_t nunser_children;             /* Number of unserialized children */
+                                        /* (Note that this currently duplicates some cache functionality) */
+} H5AC_proxy_entry_t;
+
 
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
@@ -286,7 +325,13 @@ H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 }
 #endif /* H5_HAVE_PARALLEL */
 
-
+#define H5AC__DEFAULT_CACHE_IMAGE_CONFIG                                     \
+{                                                                            \
+   /* int32_t version            = */ H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, \
+   /* hbool_t generate_image     = */ FALSE,                                 \
+   /* hbool_t save_resize_status = */ FALSE,                                 \
+   /* int32_t entry_ageout       = */ H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE  \
+}
 /*
  * Library prototypes.
  */
@@ -311,31 +356,65 @@ H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 #define H5AC__TAKE_OWNERSHIP_FLAG         H5C__TAKE_OWNERSHIP_FLAG
 #define H5AC__FLUSH_LAST_FLAG		  H5C__FLUSH_LAST_FLAG
 #define H5AC__FLUSH_COLLECTIVELY_FLAG	  H5C__FLUSH_COLLECTIVELY_FLAG
-#define H5AC__EVICT_ALLOW_LAST_PINS_FLAG  H5C__EVICT_ALLOW_LAST_PINS_FLAG
 
 
 /* #defines of flags used to report entry status in the
  * H5AC_get_entry_status() call.
  */
 
-#define H5AC_ES__IN_CACHE	0x0001
-#define H5AC_ES__IS_DIRTY	0x0002
-#define H5AC_ES__IS_PROTECTED	0x0004
-#define H5AC_ES__IS_PINNED	0x0008
-#define H5AC_ES__IS_FLUSH_DEP_PARENT	0x0010
-#define H5AC_ES__IS_FLUSH_DEP_CHILD	0x0020
-#define H5AC_ES__IS_CORKED	0x0040
+#define H5AC_ES__IN_CACHE               0x0001
+#define H5AC_ES__IS_DIRTY               0x0002
+#define H5AC_ES__IS_PROTECTED           0x0004
+#define H5AC_ES__IS_PINNED              0x0008
+#define H5AC_ES__IS_FLUSH_DEP_PARENT    0x0010
+#define H5AC_ES__IS_FLUSH_DEP_CHILD     0x0020
+#define H5AC_ES__IS_CORKED              0x0040
+#define H5AC_ES__IMAGE_IS_UP_TO_DATE    0x0080
+
+/* Metadata entry class declarations */
+H5_DLLVAR const H5AC_class_t H5AC_BT[1];
+H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
+H5_DLLVAR const H5AC_class_t H5AC_LHEAP_PRFX[1];
+H5_DLLVAR const H5AC_class_t H5AC_LHEAP_DBLK[1];
+H5_DLLVAR const H5AC_class_t H5AC_GHEAP[1];
+H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_OHDR_CHK[1];
+H5_DLLVAR const H5AC_class_t H5AC_BT2_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_BT2_INT[1];
+H5_DLLVAR const H5AC_class_t H5AC_BT2_LEAF[1];
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_IBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_FSPACE_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_FSPACE_SINFO[1];
+H5_DLLVAR const H5AC_class_t H5AC_SOHM_TABLE[1];
+H5_DLLVAR const H5AC_class_t H5AC_SOHM_LIST[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_IBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_SBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1];
+H5_DLLVAR const H5AC_class_t H5AC_FARRAY_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1];
+H5_DLLVAR const H5AC_class_t H5AC_SUPERBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_DRVRINFO[1];
+H5_DLLVAR const H5AC_class_t H5AC_EPOCH_MARKER[1];
+H5_DLLVAR const H5AC_class_t H5AC_PROXY_ENTRY[1];
+H5_DLLVAR const H5AC_class_t H5AC_PREFETCHED_ENTRY[1];
 
 
 /* external function declarations: */
 
 H5_DLL herr_t H5AC_init(void);
-H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr);
+H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr,
+    H5AC_cache_image_config_t * image_config_ptr);
 H5_DLL herr_t H5AC_get_entry_status(const H5F_t *f, haddr_t addr,
     unsigned *status_ptr);
 H5_DLL herr_t H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
     haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
+H5_DLL herr_t H5AC_prep_for_file_close(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
     haddr_t addr, void *udata, unsigned flags);
@@ -346,25 +425,39 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
     haddr_t addr, void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
+H5_DLL herr_t H5AC_mark_entry_clean(void *thing);
+H5_DLL herr_t H5AC_mark_entry_unserialized(void *thing);
+H5_DLL herr_t H5AC_mark_entry_serialized(void *thing);
 H5_DLL herr_t H5AC_move_entry(H5F_t *f, const H5AC_class_t *type,
     haddr_t old_addr, haddr_t new_addr, hid_t dxpl_id);
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5AC_evict(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id,
     const H5AC_class_t *type, haddr_t addr, unsigned flags);
+H5_DLL herr_t H5AC_remove_entry(void *entry);
 H5_DLL herr_t H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr,
-    size_t *min_clean_size_ptr, size_t *cur_size_ptr, int32_t *cur_num_entries_ptr);
+    size_t *min_clean_size_ptr, size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr);
 H5_DLL herr_t H5AC_get_cache_hit_rate(H5AC_t *cache_ptr, double *hit_rate_ptr);
 H5_DLL herr_t H5AC_reset_cache_hit_rate_stats(H5AC_t *cache_ptr);
 H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
 
+/* Cache image routines */
+H5_DLL herr_t H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, 
+    hsize_t len, hbool_t rw);
+H5_DLL herr_t H5AC_validate_cache_image_config(H5AC_cache_image_config_t *config_ptr);
+H5_DLL hbool_t H5AC_cache_image_pending(const H5F_t *f);
+H5_DLL herr_t H5AC_force_cache_image_load(H5F_t * f, hid_t dxpl_id);
+H5_DLL herr_t H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr,
+    hsize_t *image_len);
+
 /* Tag & Ring routines */
 H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag);
 H5_DLL herr_t H5AC_flush_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id);
-H5_DLL herr_t H5AC_evict_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id);
+H5_DLL herr_t H5AC_evict_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hbool_t match_global, hid_t dxpl_id);
 H5_DLL herr_t H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag);
 H5_DLL herr_t H5AC_ignore_tags(const H5F_t *f);
 H5_DLL herr_t H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked);
@@ -372,15 +465,37 @@ H5_DLL herr_t H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *rin
 H5_DLL herr_t H5AC_set_ring(hid_t dxpl_id, H5AC_ring_t ring, H5P_genplist_t **dxpl,
     H5AC_ring_t *orig_ring);
 H5_DLL herr_t H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring);
+H5_DLL herr_t H5AC_unsettle_entry_ring(void *entry);
+H5_DLL herr_t H5AC_unsettle_ring(H5F_t * f, H5AC_ring_t ring);
 H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
+H5_DLL herr_t H5AC_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
+
+/* Virtual entry routines */
+H5_DLL H5AC_proxy_entry_t *H5AC_proxy_entry_create(void);
+H5_DLL herr_t H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *parent);
+H5_DLL herr_t H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *parent);
+H5_DLL herr_t H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f,
+    hid_t dxpl_id, void *child);
+H5_DLL herr_t H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child);
+H5_DLL herr_t H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
 #endif /* H5_HAVE_PARALLEL */
 
-#ifndef NDEBUG  /* debugging functions */
+/* Debugging functions */
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
+#ifndef NDEBUG
 H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
+H5_DLL herr_t H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
+    void **entry_ptr_ptr);
+H5_DLL herr_t H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr,
+    haddr_t child_addr, hbool_t *fd_exists_ptr);
+H5_DLL herr_t H5AC_verify_entry_type(const H5F_t *f, haddr_t addr,
+    const H5AC_class_t *expected_type, hbool_t *in_cache_ptr,
+    hbool_t *type_ok_ptr);
+H5_DLL hbool_t H5AC_get_serialization_in_progress(H5F_t *f);
+H5_DLL hbool_t H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring);
 #endif /* NDEBUG */ /* end debugging functions */
 
 #endif /* !_H5ACprivate_H */

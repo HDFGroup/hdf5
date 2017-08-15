@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 
 # Make a release of hdf5.
@@ -190,7 +188,7 @@ today=`date +%Y%m%d`
 pmode='no'
 revmode='no'
 tmpdir="../#release_tmp.$$"	# tmp work directory
-DOC_URL=http://svn.hdfgroup.uiuc.edu/hdf5doc/trunk
+DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
 CPPLUS_RM_NAME=cpplus_RM
 
 # Restore previous Version information
@@ -279,7 +277,7 @@ if [ X$revmode = Xyes ]; then
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
     branch=`git branch | grep '*' | awk '{print $NF}'`
-    revision=`git rev-parse HEAD`
+    revision=`git rev-parse --short HEAD`
 # Set version information to m.n.r-r$revision.
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-$revision
@@ -334,7 +332,7 @@ done
 
 # trunk is different than branches.
 if [ "${DOCVERSION}" ]; then
-    DOC_URL=http://svn.hdfgroup.uiuc.edu/hdf5doc/branches/${DOCVERSION}
+    DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git -b ${DOCVERSION}
 fi
 
 # Create the tar file
@@ -371,11 +369,11 @@ for comp in $methods; do
 	    ;;
 	doc)
             if [ "${DOCVERSION}" = "" ]; then
-                DOCVERSION=trunk
+                DOCVERSION=master
             fi
 	    test "$verbose" && echo "   Creating docs..." 1>&2
-	    # Check out docs from svn repo
-	    (cd $tmpdir; svn co $DOC_URL > /dev/null) || exit 1
+	    # Check out docs from git repo
+	    (cd $tmpdir; git clone $DOC_URL > /dev/null) || exit 1
 	    # Create doxygen C++ RM
 	    (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
 	    # Replace version of C++ RM with just-created version

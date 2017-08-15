@@ -5,12 +5,10 @@
 *                                                                           *
 * This file is part of HDF5.  The full HDF5 copyright notice, including     *
 * terms governing use, modification, and redistribution, is contained in    *
-* the files COPYING and Copyright.html.  COPYING can be found at the root   *
-* of the source code distribution tree; Copyright.html can be found at the  *
-* root level of an installed copy of the electronic HDF5 document set and   *
-* is linked from the top-level documents page.  It can also be found at     *
-* http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-* access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5IMprivate.h"
@@ -31,7 +29,6 @@
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -86,7 +83,6 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Interlace Mode Dimensions in the Dataspace
 * INTERLACE_PIXEL [height][width][pixel components]
@@ -240,7 +236,6 @@ herr_t H5IM_find_palette( hid_t loc_id )
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -422,7 +417,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -473,7 +467,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -530,7 +523,6 @@ herr_t H5IMmake_palette( hid_t loc_id,
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 *  An image (dataset) within an HDF5 file may optionally specify an array of
 *  palettes to be viewed with. The dataset will have an attribute
@@ -708,7 +700,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -901,7 +892,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -1018,7 +1008,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -1126,7 +1115,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *
@@ -1231,7 +1219,6 @@ out:
 *
 * Comments:
 *  based on HDF5 Image and Palette Specification
-*  http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageSpec.html
 *
 * Modifications:
 *

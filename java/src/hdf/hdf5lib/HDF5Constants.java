@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
@@ -201,6 +199,8 @@ public class HDF5Constants {
     public static final int H5F_ACC_RDWR = H5F_ACC_RDWR();
     public static final int H5F_ACC_TRUNC = H5F_ACC_TRUNC();
     public static final int H5F_ACC_DEFAULT = H5F_ACC_DEFAULT();
+    public static final int H5F_ACC_SWMR_READ = H5F_ACC_SWMR_READ();
+    public static final int H5F_ACC_SWMR_WRITE = H5F_ACC_SWMR_WRITE();
     public static final int H5F_CLOSE_DEFAULT = H5F_CLOSE_DEFAULT();
     public static final int H5F_CLOSE_SEMI = H5F_CLOSE_SEMI();
     public static final int H5F_CLOSE_STRONG = H5F_CLOSE_STRONG();
@@ -217,12 +217,12 @@ public class HDF5Constants {
     public static final int H5F_SCOPE_GLOBAL = H5F_SCOPE_GLOBAL();
     public static final int H5F_SCOPE_LOCAL = H5F_SCOPE_LOCAL();
     public static final int H5F_UNLIMITED = H5F_UNLIMITED();
-    public static final int H5F_FILE_SPACE_DEFAULT = H5F_FILE_SPACE_DEFAULT();
-    public static final int H5F_FILE_SPACE_ALL_PERSIST = H5F_FILE_SPACE_ALL_PERSIST();
-    public static final int H5F_FILE_SPACE_ALL = H5F_FILE_SPACE_ALL();
-    public static final int H5F_FILE_SPACE_AGGR_VFD = H5F_FILE_SPACE_AGGR_VFD();
-    public static final int H5F_FILE_SPACE_VFD = H5F_FILE_SPACE_VFD();
-    public static final int H5F_FILE_SPACE_NTYPES = H5F_FILE_SPACE_NTYPES();
+
+    public static final int H5F_FSPACE_STRATEGY_FSM_AGGR = H5F_FSPACE_STRATEGY_FSM_AGGR();
+    public static final int H5F_FSPACE_STRATEGY_AGGR = H5F_FSPACE_STRATEGY_AGGR();
+    public static final int H5F_FSPACE_STRATEGY_PAGE = H5F_FSPACE_STRATEGY_PAGE();
+    public static final int H5F_FSPACE_STRATEGY_NONE = H5F_FSPACE_STRATEGY_NONE();
+    public static final int H5F_FSPACE_STRATEGY_NTYPES = H5F_FSPACE_STRATEGY_NTYPES();
 
     public static final long H5FD_CORE = H5FD_CORE();
     public static final long H5FD_DIRECT = H5FD_DIRECT();
@@ -984,6 +984,10 @@ public class HDF5Constants {
 
     private static native final int H5F_ACC_DEFAULT();
 
+    private static native final int H5F_ACC_SWMR_READ();
+
+    private static native final int H5F_ACC_SWMR_WRITE();
+
     private static native final int H5F_CLOSE_DEFAULT();
 
     private static native final int H5F_CLOSE_SEMI();
@@ -1018,17 +1022,15 @@ public class HDF5Constants {
 
     private static native final int H5F_UNLIMITED();
 
-    private static native final int H5F_FILE_SPACE_DEFAULT();
+    private static native final int H5F_FSPACE_STRATEGY_FSM_AGGR();
 
-    private static native final int H5F_FILE_SPACE_ALL_PERSIST();
+    private static native final int H5F_FSPACE_STRATEGY_AGGR();
 
-    private static native final int H5F_FILE_SPACE_ALL();
+    private static native final int H5F_FSPACE_STRATEGY_PAGE();
 
-    private static native final int H5F_FILE_SPACE_AGGR_VFD();
+    private static native final int H5F_FSPACE_STRATEGY_NONE();
 
-    private static native final int H5F_FILE_SPACE_VFD();
-
-    private static native final int H5F_FILE_SPACE_NTYPES();
+    private static native final int H5F_FSPACE_STRATEGY_NTYPES();
 
     private static native final long H5FD_CORE();
 

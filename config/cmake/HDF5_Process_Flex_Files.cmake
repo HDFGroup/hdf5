@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 # post process flex/bison files
 
 message (STATUS "File: ${GEN_DIR} ${FILE_PARSE} ${FILE_ANALYZE}")
@@ -49,7 +60,7 @@ if (FILE_PARSE)
     message (STATUS "processed pragma in ${FILE_PARSE}")
     file (READ ${GEN_DIR}/${FILE_PARSE}.h TEST_STREAM)
     file (WRITE ${FILE_PARSE}.h "${TEST_STREAM}")
-endif (FILE_PARSE)
+endif ()
 
 if (FILE_ANALYZE)
   # Add code that disables warnings in the flex/bison-generated code.
@@ -81,4 +92,4 @@ if (FILE_ANALYZE)
     ")
     file (APPEND ${FILE_ANALYZE} "${TEST_STREAM}")
     message (STATUS "processed pragma in ${FILE_ANALYZE}")
-endif (FILE_ANALYZE)
+endif ()

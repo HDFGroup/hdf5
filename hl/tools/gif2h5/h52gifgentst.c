@@ -5,14 +5,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "hdf5.h"
@@ -49,12 +48,15 @@ int main(void)
 {
     hid_t         fid;
     int           i, j, n, space;
-    unsigned char buf [ WIDTH*HEIGHT ];
+    unsigned char *buf;
     unsigned char pal[ PAL_ENTRIES * 3 ];        /* palette array */
     hsize_t       pal_dims[2] = {PAL_ENTRIES,3}; /* palette dimensions */
     hsize_t       width  = WIDTH;
     hsize_t       height = HEIGHT;
 
+    /* Allocate buffer */
+    if(NULL == (buf = (unsigned char *)malloc(WIDTH * HEIGHT)))
+        return EXIT_FAILURE;
 
     /* create a file  */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
@@ -98,6 +100,8 @@ int main(void)
 
     if(H5Fclose(fid)<0)
         return EXIT_FAILURE;
+
+    free(buf);
 
     return EXIT_SUCCESS;
 }

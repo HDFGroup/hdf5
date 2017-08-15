@@ -5,24 +5,16 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Thursday, July 23, 1998
- *
  * Purpose: A library for displaying the values of a dataset in a human
  *  readable format.
  */
-
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "h5tools.h"
 #include "h5tools_dump.h"
@@ -31,72 +23,73 @@
 #include "H5private.h"
 
 h5tool_format_t h5tools_dataformat = {
-0, /*raw */
+    0,          /*raw */
 
-"", /*fmt_raw */
-"%d", /*fmt_int */
-"%u", /*fmt_uint */
-"%hhd", /*fmt_schar */
-"%u", /*fmt_uchar */
-"%d", /*fmt_short */
-"%u", /*fmt_ushort */
-"%ld", /*fmt_long */
-"%lu", /*fmt_ulong */
-NULL, /*fmt_llong */
-NULL, /*fmt_ullong */
-"%g", /*fmt_double */
-"%g", /*fmt_float */
+    "",         /*fmt_raw */
+    "%d",       /*fmt_int */
+    "%u",       /*fmt_uint */
+    "%hhd",     /*fmt_schar */
+    "%u",       /*fmt_uchar */
+    "%d",       /*fmt_short */
+    "%u",       /*fmt_ushort */
+    "%ld",      /*fmt_long */
+    "%lu",      /*fmt_ulong */
+    NULL,       /*fmt_llong */
+    NULL,       /*fmt_ullong */
+    "%g",       /*fmt_double */
+    "%g",       /*fmt_float */
 
-0, /*ascii */
-0, /*str_locale */
-0, /*str_repeat */
+    0,          /*ascii */
+    0,          /*str_locale */
+    0,          /*str_repeat */
 
-"[ ", /*arr_pre */
-",", /*arr_sep */
-" ]", /*arr_suf */
-1, /*arr_linebreak */
+    "[ ",       /*arr_pre */
+    ",",        /*arr_sep */
+    " ]",       /*arr_suf */
+    1,          /*arr_linebreak */
 
-"", /*cmpd_name */
-",\n", /*cmpd_sep */
-"{", /*cmpd_pre */
-"}", /*cmpd_suf */
-"\n", /*cmpd_end */
+    "",         /*cmpd_name */
+    ",\n",      /*cmpd_sep */
+    "{",        /*cmpd_pre */
+    "}",        /*cmpd_suf */
+    "\n",       /*cmpd_end */
+    NULL,       /* cmpd_listv */
 
-", ", /*vlen_sep */
-"(", /*vlen_pre */
-")", /*vlen_suf */
-"", /*vlen_end */
+    ", ",       /*vlen_sep */
+    "(",        /*vlen_pre */
+    ")",        /*vlen_suf */
+    "",         /*vlen_end */
 
-"%s", /*elmt_fmt */
-",", /*elmt_suf1 */
-" ", /*elmt_suf2 */
+    "%s",       /*elmt_fmt */
+    ",",        /*elmt_suf1 */
+    " ",        /*elmt_suf2 */
 
-"", /*idx_n_fmt */
-"", /*idx_sep */
-"", /*idx_fmt */
+    "",         /*idx_n_fmt */
+    "",         /*idx_sep */
+    "",         /*idx_fmt */
 
-80, /*line_ncols *//*standard default columns */
-0, /*line_per_line */
-"", /*line_pre */
-"%s", /*line_1st */
-"%s", /*line_cont */
-"", /*line_suf */
-"", /*line_sep */
-1, /*line_multi_new */
-"   ", /*line_indent */
+    80,         /*line_ncols *//*standard default columns */
+    0,          /*line_per_line */
+    "",         /*line_pre */
+    "%s",       /*line_1st */
+    "%s",       /*line_cont */
+    "",         /*line_suf */
+    "",         /*line_sep */
+    1,          /*line_multi_new */
+    "   ",      /*line_indent */
 
-1, /*skip_first */
+    1,          /*skip_first */
 
-1, /*obj_hidefileno */
-" "H5_PRINTF_HADDR_FMT, /*obj_format */
+    1,          /*obj_hidefileno */
+    " "H5_PRINTF_HADDR_FMT, /*obj_format */
 
-1, /*dset_hidefileno */
-"DATASET %s ", /*dset_format */
-"%s", /*dset_blockformat_pre */
-"%s", /*dset_ptformat_pre */
-"%s", /*dset_ptformat */
-1, /*array indices */
-1 /*escape non printable characters */
+    1,          /*dset_hidefileno */
+    "DATASET %s ", /*dset_format */
+    "%s",       /*dset_blockformat_pre */
+    "%s",       /*dset_ptformat_pre */
+    "%s",       /*dset_ptformat */
+    1,          /*array indices */
+    1           /*escape non printable characters */
 };
 
 const h5tools_dump_header_t h5tools_standardformat = {
@@ -1485,6 +1478,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_co
         H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
     ctx->size_last_dim = total_size[ctx->ndims - 1];
 
+    /* Set the compound datatype field list for display */
+    ctx->cmpd_listv = info->cmpd_listv;
+
     h5tools_display_simple_subset(stream, info, ctx, dset, p_type, sset, f_space, total_size);
 
 CATCH
@@ -1793,7 +1789,7 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     else if (bin_form == 3)
         p_type = h5tools_get_big_endian_type(f_type);
     else
-        p_type = h5tools_get_native_type(f_type);
+        p_type = H5Tget_native_type(f_type, H5T_DIR_DEFAULT);
 
     if (p_type < 0)
         goto done;
@@ -2955,7 +2951,7 @@ h5tools_print_fill_value(h5tools_str_t *buffer/*in,out*/, const h5tool_format_t 
     hid_t             n_type;
     void             *buf = NULL;
 
-    n_type = h5tools_get_native_type(type_id);
+    n_type = H5Tget_native_type(type_id, H5T_DIR_DEFAULT);
 
     size = H5Tget_size(n_type);
     buf = HDmalloc(size);
@@ -3783,7 +3779,7 @@ void
 h5tools_print_packed_bits(h5tools_str_t *buffer, hid_t type)
 {
     unsigned packed_bits_size = 0;
-    hid_t n_type = h5tools_get_native_type(type);
+    hid_t n_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
 
     if(H5Tget_class(n_type) == H5T_INTEGER) {
         if(H5Tequal(n_type, H5T_NATIVE_SCHAR) == TRUE)
@@ -4041,7 +4037,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
             unsigned int        vl_data = 0; /* contains VL datatypes */
 
             type = H5Aget_type(obj_id);
-            p_type = h5tools_get_native_type(type);
+            p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
 
             ndims = H5Sget_simple_extent_dims(space, size, NULL);
 

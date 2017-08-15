@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -42,6 +40,11 @@
 #define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME	"direct_chunk_filters"
 #define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME		"direct_chunk_offset"
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME	"direct_chunk_datasize"
+
+/* Property names for H5LTDdirect_chunk_read */
+#define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME        "direct_chunk_read_flag"
+#define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME      "direct_chunk_read_offset"
+#define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME     "direct_chunk_read_filters"
  
 /*******************/
 /* Public Typedefs */
@@ -148,6 +151,7 @@ H5_DLL hid_t H5Dget_type(hid_t dset_id);
 H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
 H5_DLL hid_t H5Dget_access_plist(hid_t dset_id);
 H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
+H5_DLL herr_t H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_bytes);
 H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
 H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			hid_t file_space_id, hid_t plist_id, void *buf/*out*/);

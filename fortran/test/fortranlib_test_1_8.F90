@@ -14,12 +14,10 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!   of the source code distribution tree; Copyright.html can be found at the  *
-!   root level of an installed copy of the electronic HDF5 document set and   *
-!   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-!   access to either file, you may request a copy from help@hdfgroup.org.     *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !*****
@@ -48,11 +46,11 @@ PROGRAM fortranlibtest
   CALL h5get_libversion_f(majnum, minnum, relnum, total_error)
   IF(total_error .EQ. 0) THEN
      WRITE(*, '(" FORTRANLIB_TEST is linked with HDF5 Library version ")', advance="NO")
-     WRITE(*, '(I1)', advance="NO") majnum
+     WRITE(*, '(I0)', advance="NO") majnum
      WRITE(*, '(".")', advance="NO")
-     WRITE(*, '(I1)', advance="NO") minnum
+     WRITE(*, '(I0)', advance="NO") minnum
      WRITE(*, '(" release ")', advance="NO")
-     WRITE(*, '(I3)') relnum
+     WRITE(*, '(I0)') relnum
   ELSE
      total_error = total_error + 1
   ENDIF

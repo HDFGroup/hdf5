@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
@@ -666,58 +664,6 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
    } else /* fill value undefined */                                                   \
       H5Z_scaleoffset_modify_4(i, type, pow_fun, buf, d_nelmts, min, D_val)                     \
 }
-
-/* Include our own rounding routine and alias it to the stdc macros, if they
- *      aren't available.
- */
-#if !(defined(H5_HAVE_LLROUND) && defined(H5_HAVE_LLROUNDF) && defined(H5_HAVE_LROUND) && defined(H5_HAVE_LROUNDF) && defined(H5_HAVE_ROUND) && defined(H5_HAVE_ROUNDF))
-/* Round a floating-point value to the nearest integer value 4/19/05 */
-/* rounding to the bigger absolute value if val is in the middle,
- 0.5 -> 1, -0.5 ->-1
-5/9/05, KY */
-static double
-H5Z__scaleoffset_rnd(double val)
-{
-    double u_val, l_val;
-
-    u_val = HDceil(val);
-    l_val = HDfloor(val);
-
-    if(val > 0) {
-        if((u_val - val) <= (val - l_val))
-            return u_val;
-        else
-            return l_val;
-    } /* end if */
-    else {
-        if((val - l_val) <= (u_val - val))
-            return l_val;
-        else
-            return u_val;
-    }
-} /* H5Z__scaleoffset_rnd() */
-
-/* Alias rounding macros to routine above, if not defined */
-#if !defined(H5_HAVE_LLROUND)
-#define llround(x) H5Z__scaleoffset_rnd(x)
-#endif /* !defined(H5_HAVE_LLROUND) */
-#if !defined(H5_HAVE_LLROUNDF)
-#define llroundf(x) H5Z__scaleoffset_rnd(x)
-#endif /* !defined(H5_HAVE_LLROUNDF) */
-#if !defined(H5_HAVE_LROUND)
-#define lround(x) H5Z__scaleoffset_rnd(x)
-#endif /* !defined(H5_HAVE_LROUND) */
-#if !defined(H5_HAVE_LROUNDF)
-#define lroundf(x) H5Z__scaleoffset_rnd(x)
-#endif /* !defined(H5_HAVE_LROUNDF) */
-#if !defined(H5_HAVE_ROUND)
-#define round(x) H5Z__scaleoffset_rnd(x)
-#endif /* !defined(H5_HAVE_ROUND) */
-#if !defined(H5_HAVE_ROUNDF)
-#define roundf(x) H5Z__scaleoffset_rnd(x)
-#endif /* !defined(H5_HAVE_ROUNDF) */
-
-#endif /* !(defined(H5_HAVE_LLROUND) && defined(H5_HAVE_LLROUNDF) && defined(H5_HAVE_LROUND) && defined(H5_HAVE_LROUNDF) && defined(H5_HAVE_ROUND) && defined(H5_HAVE_ROUNDF)) */
 
 
 /*-------------------------------------------------------------------------

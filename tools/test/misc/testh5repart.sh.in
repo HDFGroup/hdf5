@@ -1,0 +1,195 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# Tests for the h5repart tool
+
+srcdir=@srcdir@
+
+TESTNAME=h5repart
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+REPART=../../src/misc/h5repart             # The tool name
+REPART_BIN=`pwd`/$REPART    # The path of the tool binary
+
+REPARTED_FAM=repart_test                # The test name
+REPARTED_FAM_BIN=`pwd`/$REPARTED_FAM    # The path of the test binary
+
+RM='rm -rf'
+CMP='cmp -s'
+DIFF='diff -c'
+CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+nerrors=0
+verbose=yes
+
+# source dirs
+SRC_TOOLS="$srcdir/../.."
+
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
+TESTDIR=./testrepart
+test -d $TESTDIR || mkdir -p $TESTDIR
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="
+$SRC_TOOLS_TESTFILES/family_file00000.h5
+$SRC_TOOLS_TESTFILES/family_file00001.h5
+$SRC_TOOLS_TESTFILES/family_file00002.h5
+$SRC_TOOLS_TESTFILES/family_file00003.h5
+$SRC_TOOLS_TESTFILES/family_file00004.h5
+$SRC_TOOLS_TESTFILES/family_file00005.h5
+$SRC_TOOLS_TESTFILES/family_file00006.h5
+$SRC_TOOLS_TESTFILES/family_file00007.h5
+$SRC_TOOLS_TESTFILES/family_file00008.h5
+$SRC_TOOLS_TESTFILES/family_file00009.h5
+$SRC_TOOLS_TESTFILES/family_file00010.h5
+$SRC_TOOLS_TESTFILES/family_file00011.h5
+$SRC_TOOLS_TESTFILES/family_file00012.h5
+$SRC_TOOLS_TESTFILES/family_file00013.h5
+$SRC_TOOLS_TESTFILES/family_file00014.h5
+$SRC_TOOLS_TESTFILES/family_file00015.h5
+$SRC_TOOLS_TESTFILES/family_file00016.h5
+$SRC_TOOLS_TESTFILES/family_file00017.h5
+"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=$SRC_TOOLS_TESTFILES
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Run a test and print PASS or *FAIL*.  If a test fails then increment
+# the `nerrors' global variable.
+#
+TOOLTEST() {
+   # Run tool test.
+   TESTING $REPART $@
+   (
+#      echo
+      cd $TESTDIR
+      $RUNSERIAL $REPART_BIN $@
+   )
+
+   if test $? -eq 0; then
+       echo " PASSED"
+   else
+       echo " FAILED"
+       nerrors=`expr $nerrors + 1`
+   fi
+}
+
+OUTPUTTEST() {
+   # Run test program.
+   TESTING $REPARTED_FAM $@
+   (
+      cd $TESTDIR
+      $RUNSERIAL $REPARTED_FAM_BIN $@
+   )
+
+   if test $? -eq 0; then
+       echo " PASSED"
+   else
+       echo " FAILED"
+       nerrors=`expr $nerrors + 1`
+   fi
+}
+
+# Print a "SKIP" message
+SKIP() {
+    TESTING $REPART $@
+    echo  " -SKIP-"
+}
+
+##############################################################################
+##############################################################################
+###              T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
+
+# repartition family member size to 20,000 bytes.
+TOOLTEST -m 20000 family_file%05d.h5 fst_family%05d.h5
+# repartition family member size to 5 KB.
+TOOLTEST -m 5k family_file%05d.h5 scd_family%05d.h5
+# convert family file to sec2 file of 20,000 bytes
+TOOLTEST -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5
+
+# test the output files repartitioned above.
+OUTPUTTEST
+echo
+
+# Clean up output file
+CLEAN_TESTFILES_AND_TESTDIR
+
+if test -z "$HDF5_NOCLEANUP"; then
+    cd $actual_dir
+    rm -f fst_family*.h5 scd_family*.h5 family_to_sec2.h5
+fi
+
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi

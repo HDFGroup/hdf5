@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <jni.h>
@@ -39,6 +37,69 @@ Java_hdf_hdf5lib_H5_H5PLset_1loading_1state
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5PLget_1loading_1state
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5PLappend
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5PLappend
+  (JNIEnv *, jclass, jobjectArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5PLprepend
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5PLprepend
+  (JNIEnv *, jclass, jobjectArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5PLreplace
+ * Signature: (Ljava/lang/String;I)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5PLreplace
+  (JNIEnv *, jclass, jobjectArray, jint);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5PLinsert
+ * Signature: (Ljava/lang/String;I)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5PLinsert
+  (JNIEnv *, jclass, jobjectArray, jint);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5PLremove
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5PLremove
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5PLget
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5PLget
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5PLsize
+ * Signature: (V)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5PLsize
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus
