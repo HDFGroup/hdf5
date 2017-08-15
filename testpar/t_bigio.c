@@ -785,7 +785,7 @@ dataset_big_write(void)
     }
 
     /* create a memory dataspace */
-    mem_dataspace = H5Screate_simple (1, &bigcount, NULL);
+    mem_dataspace = H5Screate_simple (1, dims, NULL);
     VRFY((mem_dataspace >= 0), "");
 
     /* set up the collective transfer properties list */
@@ -903,7 +903,7 @@ dataset_big_write(void)
     VRFY((ret >= 0), "H5Dclose1 succeeded");
 
     free(wdata);
-#endif    
+#endif
     H5Fclose(fid);
 }
 
@@ -1217,7 +1217,7 @@ dataset_big_read(void)
     if(coords) free(coords);
 
     /* create a memory dataspace */
-    mem_dataspace = H5Screate_simple (1, &bigcount, NULL);
+    mem_dataspace = H5Screate_simple (1, dims, NULL);
     VRFY((mem_dataspace >= 0), "");
 
     /* set up the collective transfer properties list */
@@ -1684,8 +1684,9 @@ coll_chunktest(const char* filename,
       VRFY((mem_dataspace >= 0), "mem dataspace created succeeded");
   }
   else {
+      hsize_t  dsdims[1] = {num_points};
       current_dims = num_points;
-      mem_dataspace = H5Screate_simple (1, &current_dims, NULL);
+      mem_dataspace = H5Screate_simple (1, dsdims, NULL);
       VRFY((mem_dataspace >= 0), "mem_dataspace create succeeded");
   }
 
@@ -1962,8 +1963,9 @@ coll_chunktest(const char* filename,
       VRFY((mem_dataspace >= 0), "");
   }
   else {
+      hsize_t  dsdims[1] = {num_points};
       current_dims = num_points;
-      mem_dataspace = H5Screate_simple (1, &current_dims, NULL);
+      mem_dataspace = H5Screate_simple (1, dsdims, NULL);
       VRFY((mem_dataspace >= 0), "mem_dataspace create succeeded");
   }
 
