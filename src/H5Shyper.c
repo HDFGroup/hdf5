@@ -1985,10 +1985,10 @@ H5S_hyper_serial_size(const H5S_t *space)
         /* Version 1 */
         /* Basic number of bytes required to serialize hyperslab selection:
          * <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> +
-         * <length (4 bytes)> + <rank (4 bytes)> + <# of blocks (8 bytes)>
-         * = 28 bytes
+         * <length (4 bytes)> + <rank (4 bytes)> + <# of blocks (4 bytes)>
+         * = 24 bytes
          */
-        ret_value = 28;
+        ret_value = 24;
 
         /* Check for a "regular" hyperslab selection */
         if(space->select.sel_info.hslab->diminfo_valid) {
@@ -2001,8 +2001,8 @@ H5S_hyper_serial_size(const H5S_t *space)
              * block */
             block_count = H5S_hyper_span_nblocks(space->select.sel_info.hslab->span_lst);
 
-        H5_CHECK_OVERFLOW((16 * space->extent.rank * block_count), hsize_t, hssize_t);
-        ret_value += (hssize_t)(16 * block_count * space->extent.rank);
+        H5_CHECK_OVERFLOW((8 * space->extent.rank * block_count), hsize_t, hssize_t);
+        ret_value += (hssize_t)(8 * block_count * space->extent.rank);
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2065,17 +2065,17 @@ H5S_hyper_serialize_helper(const H5S_hyper_span_info_t *spans,
 
             /* Encode previous starting points */
             for(u=0; u<rank; u++)
-                UINT64ENCODE(pp, start[u]);
+                UINT32ENCODE(pp, (uint32_t)start[u]);
 
             /* Encode starting point for this span */
-            UINT64ENCODE(pp, curr->low);
+            UINT32ENCODE(pp, (uint32_t)curr->low);
 
             /* Encode previous ending points */
             for(u=0; u<rank; u++)
-                UINT64ENCODE(pp, end[u]);
+                UINT32ENCODE(pp, (uint32_t)end[u]);
 
             /* Encode starting point for this span */
-            UINT64ENCODE(pp, curr->high);
+            UINT32ENCODE(pp, (uint32_t)curr->high);
         } /* end else */
 
         /* Advance to next node */
@@ -2121,7 +2121,7 @@ H5S_hyper_serialize(const H5S_t *space, uint8_t **p)
     hsize_t end[H5O_LAYOUT_NDIMS];     /* Location of end of hyperslab */
     hsize_t temp_off;            /* Offset in a given dimension */
     uint8_t *lenp;          /* pointer to length location for later storage */
-    uint64_t len = 0;       /* number of bytes used */
+    uint32_t len = 0;       /* number of bytes used */
     uint32_t version;       /* Version number */
     uint8_t flags = 0;      /* Flags for message */
     hsize_t block_count;    /* block counter for regular hyperslabs */
@@ -2186,8 +2186,9 @@ H5S_hyper_serialize(const H5S_t *space, uint8_t **p)
             block_count *= diminfo[u].count;
 
         /* Encode number of hyperslabs */
-        UINT64ENCODE(pp, block_count);
-        len+=8;
+        H5_CHECK_OVERFLOW(block_count, hsize_t, uint32_t);
+        UINT32ENCODE(pp, (uint32_t)block_count);
+        len+=4;
 
         /* Now serialize the information for the regular hyperslab */
 
@@ -2204,16 +2205,16 @@ H5S_hyper_serialize(const H5S_t *space, uint8_t **p)
         while(done==0) {
             /* Iterate over the blocks in the fastest dimension */
             while(tmp_count[fast_dim]>0) {
-                /* Add 16 bytes times the rank for each hyperslab selected */
-                len+=16*ndims;
+                /* Add 8 bytes times the rank for each hyperslab selected */
+                len+=8*ndims;
 
                 /* Encode hyperslab starting location */
                 for(u = 0; u < ndims; u++)
-                    UINT64ENCODE(pp, offset[u]);
+                    UINT32ENCODE(pp, (uint32_t)offset[u]);
 
                 /* Encode hyperslab ending location */
                 for(u = 0; u < ndims; u++)
-                    UINT64ENCODE(pp, (offset[u] + (diminfo[u].block - 1)));
+                    UINT32ENCODE(pp, (uint32_t)(offset[u] + (diminfo[u].block - 1)));
 
                 /* Move the offset to the next sequence to start */
                 offset[fast_dim]+=diminfo[fast_dim].stride;
@@ -2263,11 +2264,13 @@ H5S_hyper_serialize(const H5S_t *space, uint8_t **p)
     else {
         /* Encode number of hyperslabs */
         block_count = H5S_hyper_span_nblocks(space->select.sel_info.hslab->span_lst);
-        UINT64ENCODE(pp, block_count);
-        len+=8;
+        H5_CHECK_OVERFLOW(block_count, hsize_t, uint32_t);
+        UINT32ENCODE(pp, (uint32_t)block_count);
+        len+=4;
 
         /* Add 8 bytes times the rank for each hyperslab selected */
-        len += (8 * space->extent.rank * block_count);
+        H5_CHECK_OVERFLOW((8 * space->extent.rank * block_count), hsize_t, size_t);
+        len += (uint32_t)(8 * space->extent.rank * block_count);
 
         /* Encode each hyperslab in selection */
         H5S_hyper_serialize_helper(space->select.sel_info.hslab->span_lst, start, end, (hsize_t)0, &pp);
@@ -2358,7 +2361,7 @@ H5S_hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t fla
     } /* end if */
     else {
         /* decode the number of points */
-        UINT64DECODE(pp, num_elem);
+        UINT32DECODE(pp,num_elem);
 
         /* Set the count & stride for all blocks */
         for(tcount = count, tstride = stride, j = 0; j < rank; j++, tstride++, tcount++) {
@@ -2370,11 +2373,11 @@ H5S_hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t fla
         for(i = 0; i < num_elem; i++) {
             /* Decode the starting points */
             for(tstart=start,j=0; j<rank; j++,tstart++)
-                UINT64DECODE(pp, *tstart);
+                UINT32DECODE(pp, *tstart);
 
             /* Decode the ending points */
             for(tend = end, j = 0; j < rank; j++, tend++)
-                UINT64DECODE(pp, *tend);
+                UINT32DECODE(pp, *tend);
 
             /* Change the ending points into blocks */
             for(tblock=block,tstart=start,tend=end,j=0; j<rank; j++,tstart++,tend++,tblock++)
