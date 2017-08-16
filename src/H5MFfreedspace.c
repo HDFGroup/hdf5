@@ -85,6 +85,70 @@ H5FL_DEFINE_STATIC(H5MF_freedspace_t);
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5MF__freedspace_new
+ *
+ * Purpose:     Creates new freedspace object and insert it into the cache
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              August 16, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5MF_freedspace_t *
+H5MF__freedspace_new(H5MF_freedspace_ctx_t *ctx)
+{
+    H5MF_freedspace_t *fs;                  /* New freedspace entry */
+    H5P_genplist_t *dxpl = NULL;            /* DXPL for setting ring */
+    haddr_t fs_addr;                        /* Address of freedspace entry */
+    H5AC_ring_t orig_ring = H5AC_RING_INV;  /* Original ring value */
+    hbool_t reset_ring = FALSE;             /* Whether the ring was set */
+    H5MF_freedspace_t *ret_value = NULL;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(ctx);
+
+    /* Allocate new freedspace object */
+    if(NULL == (fs = H5FL_CALLOC(H5MF_freedspace_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate freed space entry")
+
+    /* Initialize new freedspace object */
+    fs->f           = ctx->f;
+    fs->dxpl_id     = ctx->dxpl_id;
+    fs->alloc_type  = ctx->alloc_type;
+    fs->addr        = ctx->addr;
+    fs->size        = ctx->size;
+
+    /* Allocate a temporary address for the freedspace entry */
+    if(HADDR_UNDEF == (fs_addr = H5MF_alloc_tmp(ctx->f, 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate temporary space for freed space entry")
+
+    /* Set the ring for the new freedspace entry in the cache */
+    if(H5AC_set_ring(ctx->dxpl_id, ctx->ring, &dxpl, &orig_ring) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, NULL, "unable to set ring value")
+    reset_ring = TRUE;
+
+    /* Insert freedspace entry into the cache */
+    if(H5AC_insert_entry(ctx->f, ctx->dxpl_id, H5AC_FREEDSPACE, fs_addr, ctx->fs, H5AC__PIN_ENTRY_FLAG) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, NULL, "unable to insert freedspace")
+
+    /* Set the return value */
+    ret_value = fs;
+
+done:
+    /* Reset the ring in the DXPL */
+    if(reset_ring)
+        if(H5AC_reset_ring(dxpl, orig_ring) < 0)
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTSET, NULL, "unable to reset ring value")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5MF__freedspace_new() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5MF__freedspace_create_cb()
  *
  * Purpose:     Cache iteration callback, creates flush dep
@@ -100,11 +164,8 @@ static int
 H5MF__freedspace_create_cb(H5AC_info_t *entry, void *_ctx)
 {
     H5MF_freedspace_ctx_t *ctx = (H5MF_freedspace_ctx_t*)_ctx;   /* Callback context */
-    H5P_genplist_t *dxpl = NULL;            /* DXPL for setting ring */
-    H5AC_ring_t orig_ring = H5AC_RING_INV;  /* Original ring value */
-    hbool_t reset_ring = FALSE;             /* Whether the ring was set */
-    int type_id;                            /* Cache client for entry */
-    int ret_value = H5_ITER_CONT;           /* Return value */
+    int type_id;                        /* Cache client for entry */
+    int ret_value = H5_ITER_CONT;       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -123,32 +184,11 @@ H5MF__freedspace_create_cb(H5AC_info_t *entry, void *_ctx)
 
         /* Only create flush dependencies on entries in rings which will be flushed same / earlier */
         if(entry->ring <= ctx->ring) {
+            /* Create freedspace object, if not already available */
             if(ctx->fs == NULL) {
-                haddr_t fs_addr;        /* Address of freedspace entry */
-
                 /* Allocate new freedspace object */
-                if(NULL == (ctx->fs = H5FL_CALLOC(H5MF_freedspace_t)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate freed space entry")
-
-                /* Initialize new freedspace object */
-                ctx->fs->f           = ctx->f;
-                ctx->fs->dxpl_id     = ctx->dxpl_id;
-                ctx->fs->alloc_type  = ctx->alloc_type;
-                ctx->fs->addr        = ctx->addr;
-                ctx->fs->size        = ctx->size;
-
-                /* Allocate a temporary address for the freedspace entry */
-                if(HADDR_UNDEF == (fs_addr = H5MF_alloc_tmp(ctx->f, 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate temporary space for freed space entry")
-
-                /* Set the ring for the new freedspace entry in the cache */
-                if(H5AC_set_ring(ctx->dxpl_id, ctx->ring, &dxpl, &orig_ring) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, H5_ITER_ERROR, "unable to set ring value")
-                reset_ring = TRUE;
-
-                /* Insert freedspace entry into the cache */
-                if(H5AC_insert_entry(ctx->f, ctx->dxpl_id, H5AC_FREEDSPACE, fs_addr, ctx->fs, H5AC__PIN_ENTRY_FLAG) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert freedspace")
+                if(NULL == (ctx->fs = H5MF__freedspace_new(ctx)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, H5_ITER_ERROR, "can't create freed space entry")
             } /* if ctx->fs == NULL */
 
             /* Create flush dependency between the freedspace entry and the dirty entry */
@@ -158,11 +198,6 @@ H5MF__freedspace_create_cb(H5AC_info_t *entry, void *_ctx)
     } /* end if */
 
 done:
-    /* Reset the ring in the DXPL */
-    if(reset_ring)
-        if(H5AC_reset_ring(dxpl, orig_ring) < 0)
-            HDONE_ERROR(H5E_RESOURCE, H5_ITER_ERROR, FAIL, "unable to reset ring value")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF__freedspace_create_cb() */
 

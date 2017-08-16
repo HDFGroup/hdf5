@@ -68,15 +68,6 @@ typedef struct {
     size_t sect_idx;            /* the current count of sections */
 } H5MF_sect_iter_ud_t;
 
-/* Context for freedspace client, from H5MX_xfree() */
-typedef struct H5MF_freedspace_ctx_t {
-    H5F_t      *f;
-    hid_t      dxpl_id;
-    H5FD_mem_t alloc_type;
-    haddr_t    addr;
-    size_t     size;
-} H5MF_freedspace_ctx_t;
-
 
 /********************/
 /* Package Typedefs */
@@ -1386,14 +1377,14 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
         if(H5MF__freedspace_create(f, dxpl_id, alloc_type, addr, size, &fs) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, FAIL, "unable to create freed space entry")
 
-        /* if a freed space entry is not created, just free the part directly */
-        if(NULL == fs) {
+        /* Check if a freed space entry is created */
+        if(fs)
+            /* Add amount of free space to the file's deferred free space */
+            f->shared->deferred_free_space += size;
+        else
+            /* If no freedspace object is needed, free now */
             if(H5MF__xfree_real(f, alloc_type, dxpl_id, addr, size) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free raw data")
-        } /* end if */
-        else
-            /* Add free space to the file's deferred amount */
-            f->shared->deferred_free_space += size;
     } /* end if */
     else {  /* Raw data, call the normal xfree */
         if(H5MF__xfree_real(f, alloc_type, dxpl_id, addr, size) < 0)
