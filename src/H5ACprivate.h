@@ -87,7 +87,7 @@ typedef enum {
     H5AC_EPOCH_MARKER_ID,       /* (27) epoch marker - always internal to cache     */
     H5AC_PROXY_ENTRY_ID,        /* (28) cache entry proxy                           */
     H5AC_PREFETCHED_ENTRY_ID, 	/* (29) prefetched entry - always internal to cache */
-    H5AC_FREEDSPACE_ID,         /* (30) FULLSWMR freedspace                         */
+    H5AC_FREEDSPACE_ID,         /* (30) freedspace                                  */
     H5AC_NTYPES                 /* Number of types, must be last                    */
 } H5AC_type_t;
 
@@ -233,17 +233,7 @@ typedef struct H5AC_proxy_entry_t {
                                         /* (Note that this currently duplicates some cache functionality) */
 } H5AC_proxy_entry_t;
 
-
-/* FULLSWMR */
-typedef struct H5AC_freedspace_t {
-    H5AC_info_t cache_info;             /* Information for H5AC cache functions */
-                                        /* (MUST be first field in structure) */
-    /* General fields */
-    herr_t (*cb)(void *ctx);
-    void *client_ctx;
-} H5AC_freedspace_t;
-
-
+/* Name of property for ring info in DXPL */
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
 /* Dataset transfer property lists for metadata calls */
@@ -260,7 +250,6 @@ H5_DLLVAR hid_t H5AC_noio_dxpl_id;
 H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 
 /* Default cache configuration. */
-
 #define H5AC__DEFAULT_METADATA_WRITE_STRATEGY   \
                                 H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED
 
@@ -415,8 +404,6 @@ H5_DLLVAR const H5AC_class_t H5AC_DRVRINFO[1];
 H5_DLLVAR const H5AC_class_t H5AC_EPOCH_MARKER[1];
 H5_DLLVAR const H5AC_class_t H5AC_PROXY_ENTRY[1];
 H5_DLLVAR const H5AC_class_t H5AC_PREFETCHED_ENTRY[1];
-
-/* FULLSWMR */
 H5_DLLVAR const H5AC_class_t H5AC_FREEDSPACE[1];
 
 /* external function declarations: */
@@ -459,8 +446,12 @@ H5_DLL herr_t H5AC_reset_cache_hit_rate_stats(H5AC_t *cache_ptr);
 H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
-H5_DLL herr_t H5AC_get_entry_type(const H5C_cache_entry_t *entry);
-H5_DLL htri_t H5AC_has_dirty_entry(const H5F_t *f);
+H5_DLL herr_t H5AC_get_entry_type(const H5AC_info_t *entry);
+H5_DLL herr_t H5AC_get_flush_dep_nchildren(const H5AC_info_t *entry,
+    unsigned *nchildren);
+H5_DLL herr_t H5AC_get_entry_from_addr(const H5F_t *f, haddr_t addr,
+    void **entry_ptr_ptr);
+H5_DLL htri_t H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring);
 
 /* Cache image routines */
 H5_DLL herr_t H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, 
@@ -496,11 +487,6 @@ H5_DLL herr_t H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f,
 H5_DLL herr_t H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child);
 H5_DLL herr_t H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry);
 
-/* FULLSWMR freedspace routines */
-H5_DLL herr_t H5AC_freedspace_create(H5F_t *f, hid_t dxpl_id, haddr_t client_addr, herr_t (*cb)(void *ctx), void *ctx, H5AC_freedspace_t **fx);
-H5_DLL herr_t H5AC_freedspace_dest(H5AC_freedspace_t *pentry);
-
-
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
 #endif /* H5_HAVE_PARALLEL */
@@ -509,15 +495,12 @@ H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
 #ifndef NDEBUG
 H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
-H5_DLL herr_t H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
-    void **entry_ptr_ptr);
 H5_DLL herr_t H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr,
     haddr_t child_addr, hbool_t *fd_exists_ptr);
 H5_DLL herr_t H5AC_verify_entry_type(const H5F_t *f, haddr_t addr,
     const H5AC_class_t *expected_type, hbool_t *in_cache_ptr,
     hbool_t *type_ok_ptr);
 H5_DLL hbool_t H5AC_get_serialization_in_progress(H5F_t *f);
-H5_DLL hbool_t H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring);
 #endif /* NDEBUG */ /* end debugging functions */
 
 /* FULLSWMR: cache iteration callback */

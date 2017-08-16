@@ -472,10 +472,6 @@ H5C_create(size_t		      max_cache_size,
 
     cache_ptr->prefix[0]			= '\0';  /* empty string */
 
-#ifndef NDEBUG
-    cache_ptr->get_entry_ptr_from_addr_counter  = 0;
-#endif /* NDEBUG */
-
     /* Set return value */
     ret_value = cache_ptr;
 
@@ -868,12 +864,6 @@ H5C_dest(H5F_t * f, hid_t dxpl_id)
     } /* end if */
 
 #ifndef NDEBUG
-#if H5C_DO_SANITY_CHECKS
-    if(cache_ptr->get_entry_ptr_from_addr_counter > 0)
-        HDfprintf(stdout, "*** %ld calls to H5C_get_entry_ptr_from_add(). ***\n",
-                cache_ptr->get_entry_ptr_from_addr_counter);
-#endif /* H5C_DO_SANITY_CHECKS */
-
     cache_ptr->magic = 0;
 #endif /* NDEBUG */
 

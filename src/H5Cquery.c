@@ -409,38 +409,6 @@ H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_has_dirty_entry
- *
- * Purpose:     Check if there are dirty entries in cache
- *
- * Return:	Success:	TRUE / FALSE
- *		Failure:	FAIL
- *
- * Programmer:  Houjun Tang
- *              June 9, 2017
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5C_has_dirty_entry(const H5C_t *cache)
-{
-    htri_t ret_value = FAIL;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOERR
-
-    /* Sanity check */
-    HDassert(cache);
-
-    if(cache->dirty_index_size > 0)
-        ret_value = TRUE;
-    else
-        ret_value = FALSE;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_has_dirty_entry() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5C_get_flush_dep_nchildren
  *
  * Purpose:     Get number of flush dependency children for an entry
@@ -454,7 +422,7 @@ H5C_has_dirty_entry(const H5C_t *cache)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_flush_dep_nchildren(H5C_cache_entry_t *entry, unsigned *nchildren)
+H5C_get_flush_dep_nchildren(const H5C_cache_entry_t *entry, unsigned *nchildren)
 {
     FUNC_ENTER_NOAPI_NOERR
 
@@ -469,37 +437,45 @@ H5C_get_flush_dep_nchildren(H5C_cache_entry_t *entry, unsigned *nchildren)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_get_entry_from_addr
  *
- * Purpose:     Retrieve the entry at an address.
+ * Function:    H5C_get_entry_from_addr()
  *
- * Return:      Non-NULL on success/NULL on failure
+ * Purpose:     Attempt to look up an entry in the cache by its file address,
+ *              and if found, returns a pointer to the entry in *entry_ptr_ptr.
+ *              If the entry is not in the cache, *entry_ptr_ptr is set to NULL.
  *
- * Programmer:  Houjun Tang
- *              June 20, 2017
+ *              WARNING: If we ever multi-thread the cache, 
+ *                       this routine will have to be either discarded 
+ *                       or heavily re-worked.
+ *
+ *                       Finally, keep in mind that the entry whose 
+ *                       pointer is obtained in this fashion may not 
+ *                       be in a stable state.  
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  John Mainzer, 5/30/14
  *
  *-------------------------------------------------------------------------
  */
-void *
-H5C_get_entry_from_addr(H5C_t *cache, haddr_t addr)
+herr_t
+H5C_get_entry_from_addr(H5C_t *cache_ptr, haddr_t addr, void **entry_ptr_ptr)
 {
-    H5C_cache_entry_t *entry;   /* Entry at address */
-    void *ret_value = NULL;     /* Return value */
+    H5C_cache_entry_t * entry_ptr = NULL;       /* Pointer to the entry found */
+    herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(cache);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(H5F_addr_defined(addr));
+    HDassert(entry_ptr_ptr);
 
-    /* Locate the entry at the address */
-    H5C__SEARCH_INDEX(cache, addr, entry, NULL)
-    if(entry == NULL)
-        HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, NULL, "can't find entry in index")
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
 
-    /* Set return value */
-    ret_value = entry;
+    /* Set the (possibly NULL) entry pointer */
+    *entry_ptr_ptr = entry_ptr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -550,6 +526,49 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_get_entry_ring() */
 
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_cache_is_clean()
+ *
+ * Purpose:     Check if all rings in the metadata cache are clean from the
+ *              outermost ring, inwards to the inner ring specified.
+ *
+ * Return:      TRUE if the indicated ring(s) are clean, FALSE if not,
+ *              and FAIL on error.
+ *
+ * Programmer:  John Mainzer, 6/18/16
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring)
+{
+    H5C_ring_t  ring;                   /* Ring iteration value */
+    htri_t      ret_value = TRUE;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(inner_ring >= H5C_RING_USER);
+    HDassert(inner_ring <= H5C_RING_SB);
+
+    /* Loop over specified rings */
+    ring = H5C_RING_USER;
+    while(ring <= inner_ring) {
+	if(cache_ptr->dirty_index_ring_size[ring] > 0)
+            HGOTO_DONE(FALSE)
+
+	ring++;
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_cache_is_clean() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5C_get_mdc_image_info
  *

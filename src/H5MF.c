@@ -124,8 +124,6 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
-/* Declare a free list to manage H5MF_freedspace_ctx_t objects */
-H5FL_DEFINE_STATIC(H5MF_freedspace_ctx_t);
 
 
 /*-------------------------------------------------------------------------
@@ -1323,34 +1321,30 @@ H5MF_sects_dump(f, dxpl_id, stderr);
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5MF__xfree_cb(void *_ctx)
+herr_t
+H5MF__xfree_freedspace(H5MF_freedspace_t *freedspace)
 {
-    H5MF_freedspace_ctx_t *ctx = (H5MF_freedspace_ctx_t *)_ctx; /* Context for space to free */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(ctx);
-    HDassert(ctx->f);
-    HDassert(H5F_addr_defined(ctx->addr));
-    HDassert(ctx->size > 0);
-    HDassert(ctx->f->shared->deferred_free_space >= ctx->size);
+    HDassert(freedspace);
+    HDassert(freedspace->f);
+    HDassert(H5F_addr_defined(freedspace->addr));
+    HDassert(freedspace->size > 0);
+    HDassert(freedspace->f->shared->deferred_free_space >= freedspace->size);
 
     /* Re-issue call to H5MF_xfree_real() */
-    if(H5MF__xfree_real(ctx->f, ctx->alloc_type, ctx->dxpl_id, ctx->addr, ctx->size) < 0)
+    if(H5MF__xfree_real(freedspace->f, freedspace->alloc_type, freedspace->dxpl_id, freedspace->addr, freedspace->size) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free data")
 
     /* Reduce the amount of deferred free space */
-    ctx->f->shared->deferred_free_space -= ctx->size;
+    freedspace->f->shared->deferred_free_space -= freedspace->size;
 
 done:
-    /* Release the context */
-    H5FL_FREE(H5MF_freedspace_ctx_t, ctx);
-
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MF__xfree_cb() */
+} /* end H5MF__xfree_freedspace() */
 
 
 /*-------------------------------------------------------------------------
@@ -1371,9 +1365,7 @@ done:
 herr_t
 H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr, hsize_t size)
 {
-    H5AC_freedspace_t *fs = NULL;
-    H5MF_freedspace_ctx_t *ctx = NULL;
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
@@ -1388,17 +1380,10 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
 
     /* Create a freed space entry for metadata (i.e. non-raw, non-"default" types) */
     if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) && (H5FD_MEM_DRAW != alloc_type && H5FD_MEM_DEFAULT != alloc_type)) {
-        /* Create context for eventual free of file space */
-        if(NULL == (ctx = H5FL_MALLOC(H5MF_freedspace_ctx_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate freedspace context")
+        H5MF_freedspace_t *fs = NULL;   /* Freed space object for space freed */
 
-        /* Set up context to pass to freesspace object */
-        ctx->f = f;
-        ctx->dxpl_id = dxpl_id;
-        ctx->alloc_type = alloc_type;
-        ctx->addr = addr;
-        ctx->size = size;
-        if(H5AC_freedspace_create(f, dxpl_id, addr, H5MF__xfree_cb, ctx, &fs) < 0)
+        /* Attempt to create freedspace object */
+        if(H5MF__freedspace_create(f, dxpl_id, alloc_type, addr, size, &fs) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, FAIL, "unable to create freed space entry")
 
         /* if a freed space entry is not created, just free the part directly */
@@ -1406,12 +1391,9 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
             if(H5MF__xfree_real(f, alloc_type, dxpl_id, addr, size) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free raw data")
         } /* end if */
-        else {
+        else
             /* Add free space to the file's deferred amount */
             f->shared->deferred_free_space += size;
-
-            ctx = NULL; /* Freed space entry owns the context now */
-        } /* end else */
     } /* end if */
     else {  /* Raw data, call the normal xfree */
         if(H5MF__xfree_real(f, alloc_type, dxpl_id, addr, size) < 0)
@@ -1419,9 +1401,6 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     } /* end else */
 
 done:
-    if(ctx)
-        H5FL_FREE(H5MF_freedspace_ctx_t, ctx);
-
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_xfree() */
 

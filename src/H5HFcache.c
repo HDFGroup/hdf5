@@ -2820,14 +2820,10 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, hid_t dxpl_id,
                      * legitimate way of getting a pointer to it.
                      *
                      * We square this circle by using the 
-                     * H5AC_get_entry_ptr_from_addr() to get the needed
+                     * H5AC_get_entry_from_addr() to get the needed
                      * pointer.
                      *
-                     * WARNING: This call should be used only in debugging
-                     *          routines, and it should be avoided there when
-                     *          possible.
-                     *
-                     *          Further, if we ever multi-thread the cache,
+                     * WARNING: If we ever multi-thread the cache,
                      *          this routine will have to be either discarded
                      *          or heavily re-worked.
                      *
@@ -2845,14 +2841,14 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, hid_t dxpl_id,
                      * the root iblock is in an unstable state.
                      *
                      * All this suggests that using 
-                     * H5AC_get_entry_ptr_from_addr() to obtain the pointer 
+                     * H5AC_get_entry_from_addr() to obtain the pointer 
                      * to the protected root iblock is questionable here.  
                      * However, since this is test/debugging code, I expect 
                      * that we will use this approach until it causes problems,
                      *  or we think of a better way.
                      */
-                    if(H5AC_get_entry_ptr_from_addr(f, root_iblock_addr, (void **)(&root_iblock)) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "H5AC_get_entry_ptr_from_addr() failed.")
+                    if(H5AC_get_entry_from_addr(f, root_iblock_addr, (void **)(&root_iblock)) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "H5AC_get_entry_from_addr() failed.")
                     HDassert(root_iblock);
                 } /* end else */
             } /* end if */
@@ -3470,11 +3466,11 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, hid_t dxpl_id,
                         } /* end if */
                         else {
                             /* child iblock is protected -- use             */
-                            /* H5AC_get_entry_ptr_from_addr() to get a      */
+                            /* H5AC_get_entry_from_addr() to get a      */
                             /* pointer to the entry.  This is very slimy -- */
                             /* come up with a better solution.              */
-                            if(H5AC_get_entry_ptr_from_addr(f, child_iblock_addr, (void **)(&child_iblock)) < 0)
-                                HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "H5AC_get_entry_ptr_from_addr() faild.")
+                            if(H5AC_get_entry_from_addr(f, child_iblock_addr, (void **)(&child_iblock)) < 0)
+                                HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "H5AC_get_entry_from_addr() faild.")
                             HDassert(child_iblock);
                         } /* end else */
                     } /* end if */

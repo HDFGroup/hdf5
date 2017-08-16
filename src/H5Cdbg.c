@@ -1392,77 +1392,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- *
- * Function:    H5C_get_entry_ptr_from_addr()
- *
- * Purpose:     Debugging function that attempts to look up an entry in the 
- *              cache by its file address, and if found, returns a pointer 
- *              to the entry in *entry_ptr_ptr.  If the entry is not in the 
- *              cache, *entry_ptr_ptr is set to NULL.
- *
- *              WARNING: This call should be used only in debugging  
- *                       routines, and it should be avoided when 
- *                       possible.
- *
- *                       Further, if we ever multi-thread the cache, 
- *                       this routine will have to be either discarded 
- *                       or heavily re-worked.
- *
- *                       Finally, keep in mind that the entry whose 
- *                       pointer is obtained in this fashion may not 
- *                       be in a stable state.  
- *
- *              Note that this function is only defined if NDEBUG
- *              is not defined.
- *
- *              As heavy use of this function is almost certainly a 
- *              bad idea, the metadata cache tracks the number of 
- *              successful calls to this function, and (if 
- *              H5C_DO_SANITY_CHECKS is defined) displays any 
- *              non-zero count on cache shutdown.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  John Mainzer, 5/30/14
- *
- *-------------------------------------------------------------------------
- */
-#ifndef NDEBUG
-herr_t
-H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr, void **entry_ptr_ptr)
-{
-    H5C_cache_entry_t * entry_ptr = NULL;
-    herr_t		ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(entry_ptr_ptr);
-
-    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
-
-    if(entry_ptr == NULL)
-        /* the entry doesn't exist in the cache -- report this
-         * and quit.
-         */
-        *entry_ptr_ptr = NULL;
-    else {
-        *entry_ptr_ptr = entry_ptr;
-
-	/* increment call counter */
-	(cache_ptr->get_entry_ptr_from_addr_counter)++;
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_get_entry_ptr_from_addr() */
-#endif /* NDEBUG */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5C_get_serialization_in_progress
  *
  * Purpose:     Return the current value of 
@@ -1487,51 +1416,6 @@ H5C_get_serialization_in_progress(const H5C_t *cache_ptr)
 
     FUNC_LEAVE_NOAPI(cache_ptr->serialization_in_progress)
 } /* H5C_get_serialization_in_progress() */
-#endif /* NDEBUG */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_cache_is_clean()
- *
- * Purpose:     Debugging function that verifies that all rings in the 
- *		metadata cache are clean from the outermost ring, inwards
- *		to the inner ring specified.
- *
- *		Returns TRUE if all specified rings are clean, and FALSE
- *		if not.  Throws an assertion failure on error.
- *
- * Return:      TRUE if the indicated ring(s) are clean, and FALSE otherwise.
- *
- * Programmer:  John Mainzer, 6/18/16
- *
- *-------------------------------------------------------------------------
- */
-#ifndef NDEBUG
-hbool_t
-H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring)
-{
-    H5C_ring_t		ring = H5C_RING_USER;
-    hbool_t             ret_value = TRUE;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Sanity checks */
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(inner_ring >= H5C_RING_USER);
-    HDassert(inner_ring <= H5C_RING_SB);
-
-    while(ring <= inner_ring) {
-	if(cache_ptr->dirty_index_ring_size[ring] > 0)
-            HGOTO_DONE(FALSE)
-
-	ring++;
-    } /* end while */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_cache_is_clean() */
 #endif /* NDEBUG */
 
 

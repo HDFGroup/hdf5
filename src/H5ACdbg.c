@@ -251,68 +251,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- *
- * Function:    H5AC_get_entry_ptr_from_addr()
- *
- * Purpose:     Debugging function that attempts to look up an entry in the
- *              cache by its file address, and if found, returns a pointer
- *              to the entry in *entry_ptr_ptr.  If the entry is not in the
- *              cache, *entry_ptr_ptr is set to NULL.
- *
- *              WARNING: This call should be used only in debugging
- *                       routines, and it should be avoided when
- *                       possible.
- *
- *                       Further, if we ever multi-thread the cache,
- *                       this routine will have to be either discarded
- *                       or heavily re-worked.
- *
- *                       Finally, keep in mind that the entry whose
- *                       pointer is obtained in this fashion may not
- *                       be in a stable state.
- *
- *              Note that this function is only defined if NDEBUG
- *              is not defined.
- *
- *              As heavy use of this function is almost certainly a
- *              bad idea, the metadata cache tracks the number of
- *              successful calls to this function, and (if
- *              H5C_DO_SANITY_CHECKS is defined) displays any
- *              non-zero count on cache shutdown.
- *
- *              This function is just a wrapper that calls the H5C
- *              version of the function.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  John Mainzer, 5/30/14
- *
- *-------------------------------------------------------------------------
- */
-#ifndef NDEBUG
-herr_t
-H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr, void **entry_ptr_ptr)
-{
-    H5C_t *cache_ptr;               /* Ptr to cache */
-    herr_t ret_value = SUCCEED;     /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    cache_ptr = f->shared->cache;
-
-    if(H5C_get_entry_ptr_from_addr(cache_ptr, addr, entry_ptr_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_ptr_from_addr() failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_get_entry_ptr_from_addr() */
-#endif /* NDEBUG */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5AC_flush_dependency_exists()
  *
  * Purpose:     Test to see if a flush dependency relationship exists
@@ -448,45 +386,5 @@ H5AC_get_serialization_in_progress(H5F_t *f)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_serialization_in_progress() */
-#endif /* NDEBUG */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5AC_cache_is_clean()
- *
- * Purpose:     Debugging function that verifies that all rings in the
- *              metadata cache are clean from the outermost ring, inwards
- *              to the inner ring specified.
- *
- *              Returns TRUE if all specified rings are clean, and FALSE
- *              if not.  Throws an assertion failure on error.
- *
- * Return:      TRUE if the indicated ring(s) are clean, and FALSE otherwise.
- *
- * Programmer:  John Mainzer, 6/18/16
- *
- * Changes:     None.
- *
- *-------------------------------------------------------------------------
- */
-#ifndef NDEBUG
-hbool_t
-H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring)
-{
-    H5C_t *cache_ptr;
-    hbool_t ret_value = FALSE;  /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    cache_ptr = f->shared->cache;
-
-    ret_value = H5C_cache_is_clean(cache_ptr, inner_ring);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_cache_is_clean() */
 #endif /* NDEBUG */
 

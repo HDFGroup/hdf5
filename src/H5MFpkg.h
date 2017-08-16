@@ -30,6 +30,7 @@
 #include "H5MFprivate.h"
 
 /* Other private headers needed by this file */
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5FSprivate.h"	/* File free space                      */
 
 
@@ -165,6 +166,19 @@ typedef struct H5MF_fs_t {
     hsize_t     alignment;      /* Alignment                            */
 } H5MF_fs_t;
 
+/* Information about freed space that can't be recycled yet */
+/* (Inserted into metadata cache at some points in its lifecycle) */
+typedef struct H5MF_freedspace_t {
+    H5AC_info_t cache_info;             /* Information for H5AC cache functions */
+                                        /* (MUST be first field in structure) */
+    H5F_t      *f;                      /* File that space was freed within */
+    hid_t      dxpl_id;                 /* DXPL for free operation */
+    H5FD_mem_t alloc_type;              /* File type for space */
+    haddr_t    addr;                    /* Address of freed space */
+    hsize_t     size;                   /* Size of freed space */
+} H5MF_freedspace_t;
+
+
 
 /*****************************/
 /* Package Private Variables */
@@ -206,6 +220,12 @@ H5_DLL herr_t H5MF_aggr_absorb(const H5F_t *f, H5F_blk_aggr_t *aggr,
     H5MF_free_section_t *sect, hbool_t allow_sect_absorb);
 H5_DLL herr_t H5MF_aggr_query(const H5F_t *f, const H5F_blk_aggr_t *aggr,
     haddr_t *addr, hsize_t *size);
+
+/* Freedspace routines */
+H5_DLL herr_t H5MF__freedspace_create(H5F_t *f, hid_t dxpl_id,
+    H5FD_mem_t alloc_type, haddr_t addr, hsize_t siz, H5MF_freedspace_t** fs);
+H5_DLL herr_t H5MF__xfree_freedspace(H5MF_freedspace_t *freedspace);
+H5_DLL herr_t H5MF__freedspace_dest(H5MF_freedspace_t *pentry);
 
 /* Testing routines */
 #ifdef H5MF_TESTING

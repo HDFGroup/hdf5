@@ -40,7 +40,7 @@ DISTCLEANFILES=H5pubconf.h
 # library sources
 libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
-        H5AC.c H5ACdbg.c H5ACfreedspace.c H5AClog.c H5ACproxy_entry.c \
+        H5AC.c H5ACdbg.c H5AClog.c H5ACproxy_entry.c \
         H5B.c H5Bcache.c H5Bdbg.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2hdr.c H5B2int.c H5B2internal.c \
         H5B2leaf.c H5B2stat.c H5B2test.c \
@@ -77,7 +77,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5HG.c H5HGcache.c H5HGdbg.c H5HGquery.c \
         H5HL.c H5HLcache.c H5HLdbg.c H5HLint.c H5HLprfx.c H5HLdblk.c\
         H5HP.c H5I.c H5Itest.c H5L.c H5Lexternal.c H5lib_settings.c \
-        H5MF.c H5MFaggr.c H5MFdbg.c H5MFsection.c \
+        H5MF.c H5MFaggr.c H5MFcache.c H5MFdbg.c H5MFfreedspace.c H5MFsection.c \
         H5MM.c H5MP.c H5MPtest.c \
         H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
         H5Oattribute.c H5Obogus.c H5Obtreek.c H5Ocache.c H5Ocache_image.c \

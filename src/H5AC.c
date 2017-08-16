@@ -3350,7 +3350,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_entry_type(const H5C_cache_entry_t *entry)
+H5AC_get_entry_type(const H5AC_info_t *entry)
 {
     herr_t ret_value = FAIL;            /* Return value */
 
@@ -3367,36 +3367,37 @@ H5AC_get_entry_type(const H5C_cache_entry_t *entry)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_has_dirty_entry
  *
- * Purpose:     Check if there are dirty entries in cache
+ * Function:    H5AC_cache_is_clean()
  *
- * Return:	Success:	TRUE / FALSE
- *		Failure:	FAIL
+ * Purpose:     Checks if all entries in the metadata cache are clean from
+ *              the outermost ring, inwards to the inner ring specified.
  *
- * Programmer:  Houjun Tang
- *              June 8, 2017
+ * Return:      TRUE if the indicated ring(s) are clean, FALSE if not,
+ *              and FAIL on error.
+ *
+ * Programmer:  John Mainzer, 6/18/16
  *
  *-------------------------------------------------------------------------
  */
 htri_t
-H5AC_has_dirty_entry(const H5F_t *f)
+H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring)
 {
-    htri_t ret_value = SUCCEED;         /* Return value */
+    htri_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(f);
-    HDassert(f->shared->cache);
+    HDassert(f->shared);
 
-    /* Check in the cache */
-    if((ret_value = H5C_has_dirty_entry(f->shared->cache)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get dirty entries status")
+    /* Call routine in cache proper */
+    if((ret_value = H5C_cache_is_clean(f->shared->cache, inner_ring)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get dirty entry status")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_has_dirty_entry() */
+} /* H5AC_cache_is_clean() */
 
 
 /*-------------------------------------------------------------------------
@@ -3430,4 +3431,78 @@ H5AC_iterate(H5F_t *f, H5AC_cache_iter_cb_t cb, void *cb_ctx)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_get_flush_dep_nchildren
+ *
+ * Purpose:     Retrieve the number of flush dependency children for an entry
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  Quincey Koziol
+ *              August 15, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_get_flush_dep_nchildren(const H5AC_info_t *entry, unsigned *nchildren)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(entry);
+
+    /* Check in the cache */
+    if(nchildren)
+        if(H5C_get_flush_dep_nchildren((const H5C_cache_entry_t *)entry, nchildren) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get number of flush dependency children")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_get_flush_dep_nchildren() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_get_entry_from_addr()
+ *
+ * Purpose:     Attempts to look up an entry in the cache by its file address,
+ *              and if found, returns a pointer to the entry in *entry_ptr_ptr.
+ *              If the entry is not in the cache, *entry_ptr_ptr is set to NULL.
+ *
+ *              WARNING: If we ever multi-thread the cache,
+ *                       this routine will have to be either discarded
+ *                       or heavily re-worked.
+ *
+ *                       Finally, keep in mind that the entry whose
+ *                       pointer is obtained in this fashion may not
+ *                       be in a stable state.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  John Mainzer, 5/30/14
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_get_entry_from_addr(const H5F_t *f, haddr_t addr, void **entry_ptr_ptr)
+{
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Retrieve entry for address */
+    if(H5C_get_entry_from_addr(f->shared->cache, addr, entry_ptr_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get entry for address")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_get_entry_from_addr() */
 

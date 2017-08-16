@@ -474,7 +474,6 @@
 ./src/H5Apublic.h
 ./src/H5AC.c
 ./src/H5ACdbg.c
-./src/H5ACfreedspace.c
 ./src/H5AClog.c
 ./src/H5ACmodule.h
 ./src/H5ACmpio.c
@@ -720,7 +719,9 @@
 ./src/H5Lpublic.h
 ./src/H5MF.c
 ./src/H5MFaggr.c
+./src/H5MFcache.c
 ./src/H5MFdbg.c
+./src/H5MFfreedspace.c
 ./src/H5MFmodule.h
 ./src/H5MFsection.c
 ./src/H5MFpkg.h
