@@ -259,6 +259,16 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     Tools
     -----
+    - h5ls
+
+      h5ls generated error on stack when it encountered a H5S_NULL
+      dataspace.
+
+      Adding checks for H5S_NULL before calling H5Sis_simple (located
+      in the h5tools_dump_mem function) fixed the issue.
+
+      (ADB - 2017/08/17, HDFFV-10188)
+
     - h5repack
 
       Add tests to h5repack.sh.in to verify options added for paged 
