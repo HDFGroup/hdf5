@@ -104,6 +104,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tgrp_comments.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.ddl
       ${HDF5_TOOLS_DIR}/testfiles/thlink-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/thlink-2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/thlink-3.ddl
@@ -272,6 +273,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tfvalues.h5
       ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5
       ${HDF5_TOOLS_DIR}/testfiles/tgrp_comments.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.h5
       ${HDF5_TOOLS_DIR}/testfiles/thlink.h5
       ${HDF5_TOOLS_DIR}/testfiles/thyperslab.h5
       ${HDF5_TOOLS_DIR}/testfiles/tints4dims.h5
@@ -887,6 +889,8 @@
           tgroup-2.out.err
           tgrp_comments.out
           tgrp_comments.out.err
+          tgrpnullspace.out
+          tgrpnullspace.out.err
           thlink-1.out
           thlink-1.out.err
           thlink-2.out
@@ -1394,6 +1398,7 @@
 
   # test for displaying dataset and attribute of null space
   ADD_H5_TEST (tnullspace 0 --enable-error-stack tnullspace.h5)
+  ADD_H5_TEST (tgrpnullspace 0 -p --enable-error-stack tgrpnullspace.h5)
 
   # test for displaying dataset and attribute of space with 0 dimension size
   ADD_H5_TEST (zerodim 0 --enable-error-stack zerodim.h5)
