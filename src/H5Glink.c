@@ -224,7 +224,9 @@ herr_t
 H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap,
     const H5G_entry_t *ent, const char *name)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(lnk);
@@ -243,7 +245,8 @@ H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap,
     if(ent->type == H5G_CACHED_SLINK) {
         const char *s;          /* Pointer to link value */
 
-        s = (const char *)H5HL_offset_into(heap, ent->cache.slink.lval_offset);
+        if((s = (const char *)H5HL_offset_into(heap, ent->cache.slink.lval_offset)) == NULL)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link name")
         HDassert(s);
 
         /* Copy the link value */
@@ -260,7 +263,10 @@ H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap,
         lnk->type = H5L_TYPE_HARD;
     } /* end else */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    if(ret_value < 0 && lnk->name)
+        H5MM_xfree(lnk->name);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__ent_to_link() */
 
 
