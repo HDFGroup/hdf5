@@ -724,9 +724,8 @@ H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     if((name = (const char *)H5HL_offset_into(udata->heap, name_off)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table link name")
 
-    HDassert(name);
-    udata->name = H5MM_strdup(name);
-    HDassert(udata->name);
+    if((udata->name = H5MM_strdup(name)) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to duplicate symbol table link name")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -948,7 +947,6 @@ H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     /* Get a pointer to the link name */
     if((name = (const char *)H5HL_offset_into(udata->heap, ent->name_off)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table link name")
-    HDassert(name);
 
     /* Convert the entry to a link */
     if(H5G__ent_to_link(udata->lnk, udata->heap, ent, name) < 0)

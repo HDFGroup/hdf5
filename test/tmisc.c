@@ -5547,7 +5547,7 @@ test_misc(void)
     test_misc30();      /* Exercise local heap loading bug where free lists were getting dropped */
     test_misc31();      /* Test Reentering library through deprecated routines after H5close() */
     test_misc32();      /* Test filter memory allocation functions */
-    test_misc33();      /* ??? */
+    test_misc33();      /* Test to verify that H5HL_offset_into() returns error if offset exceeds heap block */
 
 } /* test_misc() */
 
