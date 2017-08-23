@@ -909,6 +909,7 @@
 ./test/atomic_reader.c
 ./test/atomic_writer.c
 ./test/bad_compound.h5
+./test/bad_offset.h5
 ./test/be_data.h5
 ./test/be_extlink1.h5
 ./test/be_extlink2.h5
@@ -972,6 +973,7 @@
 ./test/fsm_aggr_persist.h5
 ./test/genall5.c
 ./test/genall5.h
+./test/gen_bad_offset.c
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c
