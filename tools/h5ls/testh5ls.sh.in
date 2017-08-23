@@ -393,7 +393,7 @@ TOOLTEST tarray1.ls 0 -w80 -r -d tarray1.h5
 TOOLTEST tempty.ls 0 -w80 -d tempty.h5
 
 # test for displaying dataset and attribute of null space
-TOOLTEST tgrpnullspace.ls 0 -w80 -v tgrpnullspace.h5
+TOOLTEST tgrpnullspace.ls 0 -w80 -v -S tgrpnullspace.h5
 
 # test for all dataset types written to attributes
 # enable -S for avoiding printing NATIVE types

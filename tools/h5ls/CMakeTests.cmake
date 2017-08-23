@@ -418,7 +418,7 @@
   ADD_H5_TEST (tempty 0 -w80 -d tempty.h5)
 
  # test for displaying dataset and attribute of null space
-  ADD_H5_TEST (tgrpnullspace 0 -w80 -v tgrpnullspace.h5)
+  ADD_H5_TEST (tgrpnullspace 0 -w80 -v -S tgrpnullspace.h5)
 
   # test for all dataset types written to attributes
   # enable -S for avoiding printing NATIVE types
