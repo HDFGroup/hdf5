@@ -1390,6 +1390,9 @@
 ./tools/testfiles/tgrp_comments.ls
 ./tools/testfiles/tgrp_comments.ddl
 ./tools/testfiles/tgrp_comments.h5
+./tools/testfiles/tgrpnullspace.h5
+./tools/testfiles/tgrpnullspace.ddl
+./tools/testfiles/tgrpnullspace.ls
 ./tools/testfiles/thlink-1.ddl
 ./tools/testfiles/thlink-2.ddl
 ./tools/testfiles/thlink-3.ddl
@@ -1445,6 +1448,7 @@
 ./tools/testfiles/tno-subset.h5
 ./tools/testfiles/tno-subset.ddl
 ./tools/testfiles/tnullspace.h5
+./tools/testfiles/tnullspace.h5.xml
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
 ./tools/testfiles/topaque.h5

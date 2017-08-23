@@ -1958,28 +1958,32 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
             H5Tclose(type);
 
             space = H5Aget_space(obj_id);
-
-            ndims = H5Sget_simple_extent_dims(space, size, NULL);
-
-            for (i = 0; i < ndims; i++)
-                nelmts *= size[i];
-
-            buf = HDmalloc((size_t)(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type))));
-            HDassert(buf);
-
-            if (H5Aread(obj_id, p_type, buf) >= 0) {
-                h5tools_context_t datactx;
-                HDmemset(&datactx, 0, sizeof(datactx));
-                datactx.need_prefix = TRUE;
-                datactx.indent_level = ctx.indent_level;
-                datactx.cur_column = ctx.cur_column;
-                status = h5tools_dump_mem(rawoutstream, outputformat, &datactx, obj_id, p_type, space, buf);
+            if(space == H5S_NULL || space == H5S_NO_CLASS) {
+                status = SUCCEED;
             }
-            /* Reclaim any VL memory, if necessary */
-            if (vl_data)
-                H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+            else {
+                ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
-            HDfree(buf);
+                for (i = 0; i < ndims; i++)
+                    nelmts *= size[i];
+
+                buf = HDmalloc((size_t)(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type))));
+                HDassert(buf);
+
+                if (H5Aread(obj_id, p_type, buf) >= 0) {
+                    h5tools_context_t datactx;
+                    HDmemset(&datactx, 0, sizeof(datactx));
+                    datactx.need_prefix = TRUE;
+                    datactx.indent_level = ctx.indent_level;
+                    datactx.cur_column = ctx.cur_column;
+                    status = h5tools_dump_mem(rawoutstream, outputformat, &datactx, obj_id, p_type, space, buf);
+                }
+                /* Reclaim any VL memory, if necessary */
+                if (vl_data)
+                    H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+
+                HDfree(buf);
+            }
             H5Tclose(p_type);
             H5Sclose(space);
             H5Tclose(type);
