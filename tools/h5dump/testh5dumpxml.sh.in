@@ -97,6 +97,7 @@ $SRC_H5DUMP_TESTFILES/tname-sp.h5
 $SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5
 $SRC_H5DUMP_TESTFILES/tnestedcomp.h5
 $SRC_H5DUMP_TESTFILES/tnodata.h5
+$SRC_H5DUMP_TESTFILES/tnullspace.h5
 $SRC_H5DUMP_TESTFILES/tobjref.h5
 $SRC_H5DUMP_TESTFILES/topaque.h5
 $SRC_H5DUMP_TESTFILES/torderattr.h5
@@ -162,6 +163,7 @@ $SRC_H5DUMP_TESTFILES/tname-quot.h5.xml
 $SRC_H5DUMP_TESTFILES/tname-sp.h5.xml
 $SRC_H5DUMP_TESTFILES/tnestedcomp.h5.xml
 $SRC_H5DUMP_TESTFILES/tnodata.h5.xml
+$SRC_H5DUMP_TESTFILES/tnullspace.h5.xml
 $SRC_H5DUMP_TESTFILES/tobjref.h5.xml
 $SRC_H5DUMP_TESTFILES/topaque.h5.xml
 $SRC_H5DUMP_TESTFILES/torderattr1.h5.xml
@@ -355,9 +357,7 @@ TOOLTEST tvlstr.h5.xml --xml tvlstr.h5
 TOOLTEST tsaf.h5.xml --xml tsaf.h5
 TOOLTEST tempty.h5.xml --xml tempty.h5
 TOOLTEST tnamed_dtype_attr.h5.xml --xml tnamed_dtype_attr.h5
-##Test dataset and attribute of null space.  Commented out:
-## wait until the XML schema is updated for null space.
-##TOOLTEST tnullspace.h5.xml --xml tnulspace.h5
+TOOLTEST tnullspace.h5.xml --xml tnullspace.h5
 
 # other options for xml
 
