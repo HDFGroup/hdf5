@@ -112,6 +112,7 @@
 #define FILE82  "tcompound_complex2.h5"
 #define FILE83  "tvlenstr_array.h5"
 #define FILE84  "tudfilter.h5"
+#define FILE85  "tgrpnullspace.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -286,9 +287,9 @@ typedef struct s1_t {
 #define F64_DIM1            (F64_ARRAY_BUF_LEN / sizeof(int) + 1)
 
 /* File 65 macros */
-#define STRATEGY  H5F_FSPACE_STRATEGY_NONE 	/* File space handling strategy */
-#define THRESHOLD10   		10   		/* Free-space section threshold */
-#define FSPACE_PAGE_SIZE     	8192 		/* File space page size */
+#define STRATEGY  H5F_FSPACE_STRATEGY_NONE     /* File space handling strategy */
+#define THRESHOLD10           10           /* Free-space section threshold */
+#define FSPACE_PAGE_SIZE         8192         /* File space page size */
 
 /* "FILE66" macros and for FILE69 */
 #define F66_XDIM        8
@@ -7041,8 +7042,8 @@ gent_extlinks(void)
  * Function:    gent_fs_strategy_threshold
  *
  * Purpose:     Generate a file with non-default file space strategy,
- *    		non-default free-space section threshold,
- *		non-default file space page size.
+ *            non-default free-space section threshold,
+ *        non-default file space page size.
  *-------------------------------------------------------------------------
  */
 static void
@@ -9721,7 +9722,7 @@ static void gent_bitnopaquefields(void)
         uint32_t    c;
         uint64_t    d;
     } s_t;
-    
+
     hid_t  file, grp=-1, type=-1, space=-1, dset=-1;
     size_t  i;
     hsize_t  nelmts = F80_DIM32;
@@ -10437,6 +10438,43 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
  *-------------------------------------------------------------------------
  */
 
+/*-------------------------------------------------------------------------
+ * Function: gent_null_space_group
+ *
+ * Purpose: generates dataset and attribute of null dataspace in a group
+ *-------------------------------------------------------------------------
+ */
+static void gent_null_space_group(void)
+{
+    hid_t fid, root, group, dataset, space, attr;
+    int dset_buf = 10;
+    int point = 4;
+
+    fid = H5Fcreate(FILE85, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    root = H5Gopen2(fid, "/", H5P_DEFAULT);
+
+    group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* null space */
+    space = H5Screate(H5S_NULL);
+
+    /* dataset */
+    dataset = H5Dcreate2(group, "dset", H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    /* nothing should be written */
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dset_buf);
+
+    /* attribute */
+    attr = H5Acreate2(group, "attr", H5T_NATIVE_UINT, space, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, H5T_NATIVE_INT, &point); /* Nothing can be written */
+
+    H5Dclose(dataset);
+    H5Aclose(attr);
+    H5Gclose(group);
+    H5Gclose(root);
+    H5Sclose(space);
+    H5Fclose(fid);
+}
+
 int main(void)
 {
     gent_group();
@@ -10526,6 +10564,7 @@ int main(void)
     gent_bitnopaquefields();
 
     gent_intsfourdims();
+    gent_null_space_group();
 
     gent_udfilter();
 

@@ -33,6 +33,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/textlinktar.h5
       ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5
       ${HDF5_TOOLS_DIR}/testfiles/tgrp_comments.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.h5
       ${HDF5_TOOLS_DIR}/testfiles/thlink.h5
       ${HDF5_TOOLS_DIR}/testfiles/tloop.h5
       ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5
@@ -89,6 +90,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-1.ls
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-2.ls
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-3.ls
+      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.ls
       ${HDF5_TOOLS_DIR}/testfiles/thlink-1.ls
       ${HDF5_TOOLS_DIR}/testfiles/tloop-1.ls
       ${HDF5_TOOLS_DIR}/testfiles/tmultifile.ls
@@ -241,6 +243,8 @@
           textlinksrc-7-old.out.err
           tgrp_comments.out
           tgrp_comments.out.err
+          tgrpnullspace.out
+          tgrpnullspace.out.err
           tsoftlinks-1.out
           tsoftlinks-1.out.err
           tsoftlinks-2.out
@@ -414,6 +418,9 @@
 
   # test for empty data
   ADD_H5_TEST (tempty 0 -w80 -d tempty.h5)
+
+ # test for displaying dataset and attribute of null space
+  ADD_H5_TEST (tgrpnullspace 0 -w80 -v -S tgrpnullspace.h5)
 
   # test for all dataset types written to attributes
   # enable -S for avoiding printing NATIVE types
