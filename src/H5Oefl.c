@@ -151,7 +151,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
 
         if((s = (const char *)H5HL_offset_into(heap, mesg->slot[u].name_offset)) == NULL)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "unable to get external file name")
-        if(*s == NULL)
+        if(*s == (char)NULL)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "invalid external file name")
         mesg->slot[u].name = H5MM_xstrdup (s);
         HDassert(mesg->slot[u].name);
