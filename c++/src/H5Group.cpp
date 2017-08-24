@@ -62,44 +62,6 @@ Group::Group(const Group& original) : H5Object(), CommonFG(), id(original.id)
 }
 
 //--------------------------------------------------------------------------
-// Function:    Group::getObjId
-///\brief       Opens an object via object header.
-///\param       obj_name - IN: Path to the object
-///\param       plist    - IN: Access property list for the link pointing to
-///                            the object
-///\exception   H5::FileIException or H5::GroupIException
-///\par Description
-///             This function opens an object in a group or file, using
-///             H5Oopen.  Thus, an object can be opened without knowing
-///             the object's type.
-// Programmer   Binh-Minh Ribler - March, 2017
-//--------------------------------------------------------------------------
-hid_t Group::getObjId(const char* obj_name, const PropList& plist) const
-{
-    hid_t ret_value = H5Oopen(getId(), obj_name, plist.getId());
-    if (ret_value < 0)
-    {
-        throwException("Group::getObjId", "H5Oopen failed");
-    }
-    return(ret_value);
-}
-
-//--------------------------------------------------------------------------
-// Function:    Group::getObjId
-///\brief       This is an overloaded member function, provided for convenience.
-///             It takes a reference to a \c H5std_string for the object's name.
-///\param       obj_name - IN: Path to the object
-///\param       plist    - IN: Access property list for the link pointing to
-///                            the object
-///\exception   H5::FileIException or H5::GroupIException
-// Programmer   Binh-Minh Ribler - March, 2017
-//--------------------------------------------------------------------------
-hid_t Group::getObjId(const H5std_string& obj_name, const PropList& plist) const
-{
-    return(getObjId(obj_name.c_str(), plist));
-}
-
-//--------------------------------------------------------------------------
 // Function:    Group::closeObjId
 ///\brief       Closes an object, which was opened with Group::getObjId
 ///\exception   H5::FileIException or H5::GroupIException
@@ -179,6 +141,61 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const 
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
  */ 
+
+//--------------------------------------------------------------------------
+// Function:    Group::getNumObjs
+///\brief       Returns the number of objects in this group.
+///\return      Number of objects
+///\exception   H5::FileIException or H5::GroupIException
+// Programmer   Binh-Minh Ribler - January, 2003
+//--------------------------------------------------------------------------
+hsize_t Group::getNumObjs() const
+{
+    H5G_info_t ginfo;      // Group information
+
+    herr_t ret_value = H5Gget_info(getId(), &ginfo);
+    if(ret_value < 0)
+        throwException("getNumObjs", "H5Gget_info failed");
+    return (ginfo.nlinks);
+}
+
+//--------------------------------------------------------------------------
+// Function:    Group::getObjId
+///\brief       Opens an object via object header.
+///\param       obj_name - IN: Path to the object
+///\param       plist    - IN: Access property list for the link pointing to
+///                            the object
+///\exception   H5::FileIException or H5::GroupIException
+///\par Description
+///             This function opens an object in a group or file, using
+///             H5Oopen.  Thus, an object can be opened without knowing
+///             the object's type.
+// Programmer   Binh-Minh Ribler - March, 2017
+//--------------------------------------------------------------------------
+hid_t Group::getObjId(const char* obj_name, const PropList& plist) const
+{
+    hid_t ret_value = H5Oopen(getId(), obj_name, plist.getId());
+    if (ret_value < 0)
+    {
+        throwException("Group::getObjId", "H5Oopen failed");
+    }
+    return(ret_value);
+}
+
+//--------------------------------------------------------------------------
+// Function:    Group::getObjId
+///\brief       This is an overloaded member function, provided for convenience.
+///             It takes a reference to a \c H5std_string for the object's name.
+///\param       obj_name - IN: Path to the object
+///\param       plist    - IN: Access property list for the link pointing to
+///                            the object
+///\exception   H5::FileIException or H5::GroupIException
+// Programmer   Binh-Minh Ribler - March, 2017
+//--------------------------------------------------------------------------
+hid_t Group::getObjId(const H5std_string& obj_name, const PropList& plist) const
+{
+    return(getObjId(obj_name.c_str(), plist));
+}
 
 //--------------------------------------------------------------------------
 // Function:    Group::getId
