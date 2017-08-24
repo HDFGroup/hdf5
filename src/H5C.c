@@ -6023,8 +6023,33 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
                     protected_entries++;
                 } /* end if */
                 else {
+/* <<<<<<< HEAD */
+/* #if H5C_DO_SANITY_CHECKS */
+/*                     flushed_entries_count++; */
+/*                     flushed_entries_size += (int64_t)entry_ptr->size; */
+/*                     entry_size_change = 0; */
+/* #endif /\* H5C_DO_SANITY_CHECKS *\/ */
+
+/* #ifdef H5_HAVE_PARALLEL */
+/*                     if(TRUE == entry_ptr->coll_access) { */
+/*                         entry_ptr->coll_access = FALSE; */
+/*                         H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL) */
+/*                     } /\* end if *\/ */
+/* #endif */
+/*                     if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, flags, entry_size_change_ptr, NULL) < 0) */
+/*                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry.") */
+
+/* #if H5C_DO_SANITY_CHECKS */
+/*                     /\* it is possible that the entry size changed */
+/*                      * during flush -- update flushed_entries_size */
+/*                      * to account for this. */
+/*                      *\/ */
+/*                     flushed_entries_size += entry_size_change; */
+/* #endif /\* H5C_DO_SANITY_CHECKS *\/ */
+/* ======= */
                     if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, (flags | H5C__DURING_FLUSH_FLAG)) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry")
+/* >>>>>>> develop */
 
                     if(cache_ptr->slist_changed) {
                         /* The slist has been modified by something
@@ -8670,8 +8695,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
+/* <<<<<<< HEAD */
+/* H5C__generate_image(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,  */
+/*     hid_t dxpl_id, int64_t *entry_size_change_ptr) */
+/* ======= */
 H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, 
     hid_t dxpl_id)
+/* >>>>>>> develop */
 {
     haddr_t		new_addr = HADDR_UNDEF;
     haddr_t		old_addr = HADDR_UNDEF;

@@ -1606,6 +1606,8 @@ typedef struct H5C_cache_entry_t {
     H5C_t                      *cache_ptr;
     haddr_t			addr;
     size_t			size;
+    hbool_t			compressed;
+    size_t			compressed_size;
     void  		       *image_ptr;
     hbool_t			image_up_to_date;
     const H5C_class_t	       *type;
@@ -2321,11 +2323,14 @@ H5_DLL herr_t H5C_cache_image_status(H5F_t * f, hbool_t *load_ci_ptr,
 H5_DLL hbool_t H5C_cache_image_pending(const H5C_t *cache_ptr);
 H5_DLL herr_t H5C_get_mdc_image_info(H5C_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len);
 
+herr_t H5C__generate_image(H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
+                           hid_t dxpl_id);
+
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
     H5C_t *cache_ptr, unsigned num_candidates, haddr_t *candidates_list_ptr,
     int mpi_rank, int mpi_size);
-H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5F_t *f, H5C_t *cache_ptr, hid_t dxpl_id);
 H5_DLL herr_t H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial);
 H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, unsigned ce_array_len,

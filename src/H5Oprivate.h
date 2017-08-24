@@ -531,6 +531,11 @@ typedef struct H5O_storage_virtual_ent_t {
     hsize_t clip_size_source;           /* Size selection would be clipped to in source selection when virtual extent == unlim_extent_virtual */
     H5O_virtual_space_status_t source_space_status; /* Extent patching status of source_select */
     H5O_virtual_space_status_t virtual_space_status; /* Extent patching status of virtual_select */
+
+#ifdef H5_HAVE_PARALLEL
+    /* only used in I/O for subfiling */
+    const struct H5S_t *virtual_select; /* file space selection in VDS */
+#endif /* H5_HAVE_PARALLEL */
 } H5O_storage_virtual_ent_t;
 
 typedef struct H5O_storage_virtual_t {
@@ -548,6 +553,8 @@ typedef struct H5O_storage_virtual_t {
     hsize_t     printf_gap;             /* Maximum number of sequential missing source datasets before terminating the search for more */
     hid_t       source_fapl;            /* FAPL to use to open source files */
     hid_t       source_dapl;            /* DAPL to use to open source datasets */
+    H5F_t       **source_files;         /* array to hold open the source files in parallel */
+
     hbool_t     init;                   /* Whether all information has been completely initialized */
 } H5O_storage_virtual_t;
 

@@ -166,7 +166,8 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED = 0x08,
     H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES = 0x10,
     H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x20,
-    H5D_MPIO_FILTERS = 0x40
+    H5D_MPIO_FILTERS = 0x40,
+    H5D_MPIO_VDS_PARALLEL_READ = 0x80
 } H5D_mpio_no_collective_cause_t;
 
 /********************/
@@ -364,6 +365,10 @@ H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
 H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
+H5_DLL herr_t H5Pset_subfiling_access(hid_t plist_id, const char *subfile_name, 
+    MPI_Comm comm, MPI_Info info);
+H5_DLL herr_t H5Pget_subfiling_access(hid_t plist_id, char **subfile_name, 
+    MPI_Comm *comm, MPI_Info *info);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr);
 H5_DLL herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr /*out*/);
@@ -426,6 +431,10 @@ H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, unsigned dims,
     hsize_t boundary[], H5D_append_cb_t *func, void **udata);
 H5_DLL herr_t H5Pset_efile_prefix(hid_t dapl_id, const char* prefix);
 H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5Pset_subfiling_selection(hid_t plist_id, hid_t space_id);
+H5_DLL herr_t H5Pget_subfiling_selection(hid_t plist_id, hid_t *space_id);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);

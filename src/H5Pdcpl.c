@@ -168,7 +168,6 @@ static herr_t H5P__dcrt_ext_file_list_copy(const char *name, size_t size, void *
 static int H5P__dcrt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__dcrt_ext_file_list_close(const char *name, size_t size, void *value);
 
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -224,7 +223,6 @@ static H5O_layout_t H5D_def_layout_chunk_g = H5D_DEF_LAYOUT_CHUNK;
 static H5O_layout_t H5D_def_layout_virtual_g = H5D_DEF_LAYOUT_VIRTUAL;
 static hbool_t H5P_dcrt_def_layout_init_g = FALSE;
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
-
 
 
 /*-------------------------------------------------------------------------
@@ -2118,14 +2116,8 @@ herr_t
 H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     const char *src_dset_name, hid_t src_space_id)
 {
-    H5P_genplist_t *plist;          /* Property list pointer */
-    H5O_layout_t virtual_layout;    /* Layout information for setting virtual info */
     H5S_t *vspace;                  /* Virtual dataset space selection */
     H5S_t *src_space;               /* Source dataset space selection */
-    H5O_storage_virtual_ent_t *old_list = NULL; /* List pointer previously on property list */
-    H5O_storage_virtual_ent_t *ent = NULL; /* Convenience pointer to new VDS entry */
-    hbool_t retrieved_layout = FALSE;   /* Whether the layout has been retrieved */
-    hbool_t free_list = FALSE;      /* Whether to free the list of virtual entries */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2141,6 +2133,37 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataspace")
     if(NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataspace")
+
+    if(H5P_set_virtual(dcpl_id, vspace, src_file_name, src_dset_name, src_space) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set virtual layout")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_virtual() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_set_virtual
+ *
+ * Purpose:     Private version of H5P_set_virtual
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_set_virtual(hid_t dcpl_id, H5S_t *vspace, const char *src_file_name,
+    const char *src_dset_name, H5S_t *src_space)
+{
+    H5P_genplist_t *plist;          /* Property list pointer */
+    H5O_layout_t virtual_layout;    /* Layout information for setting virtual info */
+    H5O_storage_virtual_ent_t *old_list = NULL; /* List pointer previously on property list */
+    H5O_storage_virtual_ent_t *ent = NULL; /* Convenience pointer to new VDS entry */
+    hbool_t retrieved_layout = FALSE;   /* Whether the layout has been retrieved */
+    hbool_t free_list = FALSE;      /* Whether to free the list of virtual entries */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check selections for validity */
     if(H5D_virtual_check_mapping_pre(vspace, src_space, H5O_VIRTUAL_STATUS_USER) < 0)
@@ -2277,8 +2300,8 @@ done:
             virtual_layout.storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_xfree(virtual_layout.storage.u.virt.list);
     } /* end if */
 
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_virtual() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_set_virtual() */
 
 
 /*-------------------------------------------------------------------------
@@ -3732,4 +3755,3 @@ H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time/*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fill_time() */
-

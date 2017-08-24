@@ -52,7 +52,12 @@
 /* Local Macros */
 /****************/
 #define H5C_APPLY_CANDIDATE_LIST__DEBUG 0
-
+#if H5C_DO_MEMORY_SANITY_CHECKS
+#define H5C_IMAGE_EXTRA_SPACE 8
+#define H5C_IMAGE_SANITY_VALUE "DeadBeef"
+#else /* H5C_DO_MEMORY_SANITY_CHECKS */
+#define H5C_IMAGE_EXTRA_SPACE 0
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
 /******************/
 /* Local Typedefs */
@@ -416,10 +421,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_construct_candidate_list__clean_cache
  *
- * Purpose:     Construct the list of entries that should be flushed to 
+ * Purpose:     Construct the list of entries that should be flushed to
  *		clean all entries in the cache.
  *
- *		This function is used in managing sync points, and 
+ *		This function is used in managing sync points, and
  *		shouldn't be used elsewhere.
  *
  * Return:      Success:        SUCCEED
@@ -432,7 +437,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_construct_candidate_list__clean_cache(H5C_t * cache_ptr)
+H5C_construct_candidate_list__clean_cache(H5F_t *f, H5C_t * cache_ptr, hid_t dxpl_id)
 {
     size_t              space_needed;
     herr_t              ret_value = SUCCEED;      /* Return value */
@@ -452,9 +457,9 @@ H5C_construct_candidate_list__clean_cache(H5C_t * cache_ptr)
      * point, it is possible that some dirty entries may reside on the
      * pinned list at this point.
      */
-    HDassert( cache_ptr->slist_size <= 
+    HDassert( cache_ptr->slist_size <=
               (cache_ptr->dLRU_list_size + cache_ptr->pel_size) );
-    HDassert( cache_ptr->slist_len  <= 
+    HDassert( cache_ptr->slist_len  <=
               (cache_ptr->dLRU_list_len + cache_ptr->pel_len) );
 
     if(space_needed > 0) { /* we have work to do */
@@ -466,7 +471,76 @@ H5C_construct_candidate_list__clean_cache(H5C_t * cache_ptr)
         HDassert( cache_ptr->slist_len > 0 );
 
         /* Scan the dirty LRU list from tail forward and nominate sufficient
-         * entries to free up the necessary space. 
+         * entries to free up the necessary space.
+         */
+        entry_ptr = cache_ptr->dLRU_tail_ptr;
+        while((nominated_entries_size < space_needed) &&
+                (nominated_entries_count < cache_ptr->slist_len) &&
+                (entry_ptr != NULL)) {
+            if(NULL == entry_ptr->image_ptr) {
+                size_t image_size;
+
+                if(entry_ptr->compressed)
+                    image_size = entry_ptr->compressed_size;
+                else
+                    image_size = entry_ptr->size;
+                HDassert(image_size > 0);
+
+
+                if(NULL == (entry_ptr->image_ptr = H5MM_malloc(image_size + H5C_IMAGE_EXTRA_SPACE)))
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
+#if H5C_DO_MEMORY_SANITY_CHECKS
+                        HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + image_size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+            } /* end if */
+            if(!(entry_ptr->image_up_to_date)) {
+                /* Generate the entry's image */
+                if(H5C__generate_image(f, cache_ptr, entry_ptr, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't generate entry's image")
+            } /* end if ( ! (entry_ptr->image_up_to_date) ) */
+
+            nominated_entries_size += entry_ptr->size;
+            nominated_entries_count++;
+            entry_ptr = entry_ptr->aux_prev;
+        } /* end while */
+        entry_ptr = cache_ptr->pel_head_ptr;
+        while((nominated_entries_size < space_needed) &&
+                (nominated_entries_count < cache_ptr->slist_len) &&
+                (entry_ptr != NULL)) {
+            if(entry_ptr->is_dirty) {
+                if(NULL == entry_ptr->image_ptr) {
+                    size_t image_size;
+
+                    if(entry_ptr->compressed)
+                        image_size = entry_ptr->compressed_size;
+                    else
+                        image_size = entry_ptr->size;
+                    HDassert(image_size > 0);
+
+                    if(NULL == (entry_ptr->image_ptr = H5MM_malloc(image_size + H5C_IMAGE_EXTRA_SPACE)))
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
+#if H5C_DO_MEMORY_SANITY_CHECKS
+                            HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + image_size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+                } /* end if */
+
+                if(!(entry_ptr->image_up_to_date)) {
+                    /* Generate the entry's image */
+                    if(H5C__generate_image(f, cache_ptr, entry_ptr, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't generate entry's image")
+                } /* end if ( ! (entry_ptr->image_up_to_date) ) */
+                nominated_entries_size += entry_ptr->size;
+                nominated_entries_count++;
+            } /* end if */
+
+            entry_ptr = entry_ptr->next;
+        } /* end while */
+
+        nominated_entries_count = 0;
+        nominated_entries_size = 0;
+        space_needed = cache_ptr->slist_size;
+        /* Scan the dirty LRU list from tail forward and nominate sufficient
+         * entries to free up the necessary space.
          */
         entry_ptr = cache_ptr->dLRU_tail_ptr;
         while((nominated_entries_size < space_needed) &&
@@ -488,7 +562,7 @@ H5C_construct_candidate_list__clean_cache(H5C_t * cache_ptr)
         } /* end while */
         HDassert( entry_ptr == NULL );
 
-        /* it is possible that there are some dirty entries on the 
+        /* it is possible that there are some dirty entries on the
          * protected entry list as well -- scan it too if necessary
          */
         entry_ptr = cache_ptr->pel_head_ptr;

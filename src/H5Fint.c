@@ -74,9 +74,12 @@ typedef struct H5F_olist_t {
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);/* Declare a free list to manage the H5F_t struct */
+#ifdef H5_HAVE_PARALLEL
+static herr_t H5F__open_subfile(H5F_t *file, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id);
+#endif /* H5_HAVE_PARALLEL */
+
 static herr_t H5F__flush_phase1(H5F_t *f, hid_t meta_dxpl_id);
 static herr_t H5F__flush_phase2(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing);
-
 
 /*********************/
 /* Package Variables */
@@ -193,6 +196,30 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
     if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
+
+    /* Set subfiling properties */
+    {
+        H5F_subfiling_config_t config;
+
+        if(H5P_peek(new_plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling configuration")
+
+        if(f->subfile_name) {
+            if(NULL == (config.file_name = H5MM_strdup(f->subfile_name)))
+                HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate subfile name")
+            config.comm = f->subfile_comm;
+            config.info = f->subfile_info;
+        }
+        else {
+            config.file_name = NULL;
+            config.comm = MPI_COMM_NULL;
+            config.info = MPI_INFO_NULL;
+        }
+
+        if(H5P_poke(new_plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile name")
+    }
+        
 #endif /* H5_HAVE_PARALLEL */
     if(H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial metadata cache resize config.")
@@ -700,6 +727,24 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata read flag")
         if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag")
+
+        {
+            H5F_subfiling_config_t config;
+
+            f->subfile_name = NULL;
+            f->subfile_comm = MPI_COMM_NULL;
+            f->subfile_info = MPI_INFO_NULL;
+
+            if(H5P_peek(plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get subfiling configuration")
+
+            if(config.file_name) {
+                if(NULL == (f->subfile_name = H5MM_strdup(config.file_name)))
+                    HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate subfile name")
+                f->subfile_comm = config.comm;
+                f->subfile_info = config.info;
+            }
+        }
 #endif /* H5_HAVE_PARALLEL */
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
@@ -1074,6 +1119,9 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
     }
 
     /* Free the non-shared part of the file */
+#ifdef H5_HAVE_PARALLEL
+    f->subfile_name = (char *)H5MM_xfree(f->subfile_name);
+#endif /* H5_HAVE_PARALLEL */
     f->open_name = (char *)H5MM_xfree(f->open_name);
     f->actual_name = (char *)H5MM_xfree(f->actual_name);
     f->extpath = (char *)H5MM_xfree(f->extpath);
@@ -1486,6 +1534,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         } /* end else */
     } /* end if set_flag */
 
+#ifdef H5_HAVE_PARALLEL
+    /* create or open the subfile if subfiling is enabled */
+    if(H5F__open_subfile(file, flags, fcpl_id, fapl_id, meta_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create sub-file")
+#endif /* H5_HAVE_PARALLEL */
+
     /* Success */
     ret_value = file;
 
@@ -1698,6 +1752,13 @@ H5F_close(H5F_t *f)
 
     /* Reset the file ID for this file */
     f->file_id = -1;
+
+#ifdef H5_HAVE_PARALLEL
+    /* if subfiling is enabled, close the subfile */
+    if(f->subfile)
+        if(H5I_dec_app_ref(f->subfile->file_id) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Attempt to close the file/mount hierarchy */
     if(H5F_try_close(f, NULL) < 0)
@@ -2782,6 +2843,89 @@ H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* H5F_set_coll_md_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__open_subfile
+ *
+ * Purpose:     Create the subfile for the calling process
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi; March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__open_subfile(H5F_t *file, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
+{
+    H5P_genplist_t *plist;
+    H5F_subfiling_config_t config;
+    hid_t subfile_fapl_id = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* get the subfile configuration of calling process */
+    if(H5P_peek(plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling selection")
+
+    if(config.file_name) {
+        H5P_genplist_t *new_plist = NULL, *old_plist = NULL;
+        H5FD_mpio_fapl_t fa;
+
+        if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+        /* copy the fapl id of the main file to create the subfile with */
+        if((subfile_fapl_id = H5P_copy_plist(old_plist, TRUE)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list");
+
+        /* Get the property list structure */
+        if(NULL == (new_plist = H5P_object_verify(subfile_fapl_id, H5P_FILE_ACCESS)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        /* reset subfiling properties */
+        {
+            H5F_subfiling_config_t default_config;
+
+            if(H5P_peek(new_plist, H5F_ACS_SUBFILING_CONFIG_NAME, &default_config) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling configuration")
+
+            default_config.file_name = NULL;
+            default_config.comm = MPI_COMM_NULL;
+            default_config.info = MPI_INFO_NULL;
+
+            if(H5P_poke(new_plist, H5F_ACS_SUBFILING_CONFIG_NAME, &default_config) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile configuration")
+        }
+
+        /* Initialize driver specific properties */
+        fa.comm = file->subfile_comm;
+        fa.info = file->subfile_info;
+        if(H5P_set_driver(new_plist, H5FD_MPIO, &fa) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get driver info")
+
+        /* create the subfile */
+        if(NULL == (file->subfile = H5F_open(config.file_name, flags, fcpl_id, subfile_fapl_id, dxpl_id)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create sub-file")
+
+        /* Get an atom for the file */
+        if((file->subfile->file_id = H5I_register(H5I_FILE, file->subfile, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+    }
+
+done:
+    if(subfile_fapl_id != H5I_INVALID_HID && H5I_dec_ref(subfile_fapl_id) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "unable to decrement ref count on property list")
+        
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__open_subfile() */
 #endif /* H5_HAVE_PARALLEL */
 
 

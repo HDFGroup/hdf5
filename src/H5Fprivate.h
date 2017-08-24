@@ -317,6 +317,8 @@
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
 #define H5F_SET_LATEST_FLAGS(F, FL)  ((F)->shared->latest_flags = (FL))
 #ifdef H5_HAVE_PARALLEL
+#define H5F_SUBFILE(F)          ((F)->subfile)
+#define H5F_SUBFILE_NAME(F)     ((F)->subfile_name)
 #define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
 #define H5F_USE_MDC_LOGGING(F)  ((F)->shared->use_mdc_logging)
@@ -374,6 +376,8 @@
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_is_tmp_addr((F), (ADDR)))
 #define H5F_SET_LATEST_FLAGS(F, FL)  (H5F_set_latest_flags((F), (FL)))
 #ifdef H5_HAVE_PARALLEL
+#define H5F_SUBFILE(F)          (H5F_get_subfile(F))
+#define H5F_SUBFILE_NAME(F)     (H5F_get_subfile_name(F))
 #define H5F_COLL_MD_READ(F)     (H5F_coll_md_read(F))
 #endif /* H5_HAVE_PARALLEL */
 #define H5F_USE_MDC_LOGGING(F)  (H5F_use_mdc_logging(F))
@@ -462,8 +466,6 @@
 #define H5F_CRT_FREE_SPACE_THRESHOLD_NAME "free_space_threshold"  /* Free space section threshold */
 #define H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME "file_space_page_size"  /* File space page size */
 
-
-
 /* ========= File Access properties ============ */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_NAME	"mdc_initCacheCfg" /* Initial metadata cache resize configuration */
 #define H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME       "rdcc_nslots"   /* Size of raw data chunk cache(slots) */
@@ -495,6 +497,7 @@
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME        "evict_on_close_flag" /* Whether or not the metadata cache will evict objects on close */
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
+#define H5F_ACS_SUBFILING_CONFIG_NAME           "subfiling_configuration"  /* The subfiling parameters for a file */
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME "mdc_initCacheImageCfg" /* Initial metadata cache image creation configuration */
 #define H5F_ACS_PAGE_BUFFER_SIZE_NAME           "page_buffer_size" /* the maximum size for the page buffer cache */
 #define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME  "page_buffer_min_meta_perc" /* the min metadata percentage for the page buffer cache */
@@ -689,6 +692,15 @@ typedef struct H5F_block_t {
     hsize_t length;             /* Length of the block in the file */
 } H5F_block_t;
 
+#ifdef H5_HAVE_PARALLEL
+/* Subfiling properties */
+typedef struct H5F_subfiling_config_t {
+    char *file_name;            /* Name of the subfile of the calling process */
+    MPI_Comm comm;              /* Subfiling Communicator for opening & accessing the subfile */
+    MPI_Info info;              /* Subfiling MPI Info Object */
+} H5F_subfiling_config_t;
+#endif /* H5_HAVE_PARALLEL */
+
 /* Enum for free space manager state */
 typedef enum H5F_fs_state_t {
     H5F_FS_STATE_CLOSED = 0,                /* Free space manager is closed */
@@ -746,6 +758,8 @@ H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 H5_DLL hid_t H5F_get_file_id(const H5F_t *f);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
+H5_DLL H5F_t *H5F_get_subfile(const H5F_t *f);
+H5_DLL const char *H5F_get_subfile_name(const H5F_t *f);
 H5_DLL unsigned H5F_get_read_attempts(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
 H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);

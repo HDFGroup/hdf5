@@ -222,6 +222,11 @@
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEF    FALSE
 #define H5F_ACS_COLL_MD_WRITE_FLAG_ENC    H5P__encode_hbool_t
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEC    H5P__decode_hbool_t
+/* Definitions for subfiling source filename */
+#define H5F_ACS_SUBFILING_CONFIG_SIZE        sizeof(H5F_subfiling_config_t)
+#define H5F_ACS_SUBFILING_CONFIG_DEF         {NULL, MPI_COMM_NULL, MPI_INFO_NULL}
+#define H5F_ACS_SUBFILING_CONFIG_COPY        H5P__subfiling_config_copy
+#define H5F_ACS_SUBFILING_CONFIG_CLOSE       H5P__subfiling_config_close
 #endif /* H5_HAVE_PARALLEL */
 /* Definitions for the initial metadata cache image configuration */
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_SIZE sizeof(H5AC_cache_image_config_t)
@@ -244,6 +249,7 @@
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF            0
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC            H5P__encode_unsigned
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC            H5P__decode_unsigned
+
 
 
 /******************/
@@ -290,6 +296,18 @@ static herr_t H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t 
 static herr_t H5P__facc_fclose_degree_dec(const void **pp, void *value);
 static herr_t H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_multi_type_dec(const void **_pp, void *value);
+
+#ifdef H5_HAVE_PARALLEL
+/* subfiling file name callbacks */
+static herr_t H5P__subfiling_config_set(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_config_get(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_config_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__subfiling_config_dec(const void **_pp, void *value);
+static herr_t H5P__subfiling_config_del(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_config_copy(const char* name, size_t size, void* value);
+static int H5P__subfiling_config_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__subfiling_config_close(const char* name, size_t size, void* value);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Metadata cache log location property callbacks */
 static herr_t H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size);
@@ -370,6 +388,7 @@ static const hbool_t H5F_def_evict_on_close_flag_g = H5F_ACS_EVICT_ON_CLOSE_FLAG
 #ifdef H5_HAVE_PARALLEL
 static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
 static const hbool_t H5F_def_coll_md_write_flag_g = H5F_ACS_COLL_MD_WRITE_FLAG_DEF;  /* Default setting for the collective metedata write flag */
+static const H5F_subfiling_config_t H5F_def_subfiling_config_g = H5F_ACS_SUBFILING_CONFIG_DEF;
 #endif /* H5_HAVE_PARALLEL */
 static const H5AC_cache_image_config_t H5F_def_mdc_initCacheImageCfg_g = H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEF;  /* Default metadata cache image settings */
 static const size_t H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF;      /* Default page buffer size */
@@ -582,6 +601,13 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, H5F_ACS_COLL_MD_WRITE_FLAG_ENC, H5F_ACS_COLL_MD_WRITE_FLAG_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register property for subfiling config */
+    if(H5P_register_real(pclass, H5F_ACS_SUBFILING_CONFIG_NAME, H5F_ACS_SUBFILING_CONFIG_SIZE, &H5F_def_subfiling_config_g, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, 
+                         H5F_ACS_SUBFILING_CONFIG_COPY, NULL, H5F_ACS_SUBFILING_CONFIG_CLOSE) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 #endif /* H5_HAVE_PARALLEL */
 
     /* Register the initial metadata cache image configuration */
@@ -4715,6 +4741,158 @@ H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_coll_metadata_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__subfiling_config_copy
+ *
+ * Purpose:     Creates a copy of the subfiling file name string
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_config_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    H5F_subfiling_config_t *config = (H5F_subfiling_config_t *)value; /* Create local aliases for values */
+    H5F_subfiling_config_t new_config;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(value);
+
+    if(config->file_name) {
+        new_config.file_name = H5MM_strdup(config->file_name);
+        new_config.comm = config->comm;
+        new_config.info = config->info;
+    }
+    else {
+        new_config.file_name = NULL;
+        new_config.comm = MPI_COMM_NULL;
+        new_config.info = MPI_INFO_NULL;
+    }
+
+    *config = new_config;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__subfiling_config_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__subfiling_config_close
+ *
+ * Purpose:     Frees memory used to store the subfiling filename property
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_config_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    H5F_subfiling_config_t *config = (H5F_subfiling_config_t *)value; /* Create local aliases for values */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(value);
+
+    config->file_name = (char *)H5MM_xfree(config->file_name);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__subfiling_config_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_subfiling_access
+ *
+ * Purpose:	Sets subfiled file access with the number of communicators 
+ *              and the communicator for the calling process.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi, February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_subfiling_access(hid_t plist_id, const char *subfile_name, MPI_Comm comm, MPI_Info info)
+{
+    H5F_subfiling_config_t config;
+    H5P_genplist_t *plist = NULL;       /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* return value */ 
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*sMcMi", plist_id, subfile_name, comm, info);
+
+    /* Check arguments */
+    if(!subfile_name)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "subfile name not provided")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(H5P_peek(plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling configuration")
+
+    config.file_name = (char *)H5MM_xfree(config.file_name);
+
+    if(NULL == (config.file_name = H5MM_strdup(subfile_name)))
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate subfile name")
+    config.comm = comm;
+    config.info = info;
+
+    if(H5P_poke(plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile name")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_subfiling_access() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_subfiling_access
+ *
+ * Purpose:	Retrieves the subfiled access parameters.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi, February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_subfiling_access(hid_t plist_id, char **subfile_name, MPI_Comm *comm, MPI_Info *info)
+{
+    H5F_subfiling_config_t config;
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i**s*Mc*Mi", plist_id, subfile_name, comm, info);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(H5P_peek(plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling configuration")
+
+    if(subfile_name)
+        *subfile_name = HDstrdup(config.file_name);
+    if(comm)
+        *comm = config.comm;
+    if(info)
+        *info = config.info;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_subfiling_access() */
 #endif /* H5_HAVE_PARALLEL */
 
 

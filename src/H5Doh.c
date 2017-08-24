@@ -285,9 +285,12 @@ H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
     HDassert(f);
     HDassert(crt_info);
     HDassert(obj_loc);
+    HDassert(crt_info->loc);
+    HDassert(crt_info->name);
 
     /* Create the the dataset */
-    if(NULL == (dset = H5D__create(f, crt_info->type_id, crt_info->space, crt_info->dcpl_id, crt_info->dapl_id, dxpl_id)))
+    if(NULL == (dset = H5D__create(f, crt_info->loc, crt_info->name, crt_info->type_id, crt_info->space, 
+                                   crt_info->dcpl_id, crt_info->dapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset")
 
     /* Set up the new dataset's location */
