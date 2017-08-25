@@ -1282,6 +1282,23 @@ int H5Location::iterateElems(const H5std_string& name, int *idx, H5G_iterate_t o
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
+// Function:    H5Location::getNumObjs
+///\brief       Deprecated - moved to H5::Group in 1.10.2.
+///\return      Deprecated
+///\exception   Deprecated
+// Programmer   Binh-Minh Ribler - January, 2003
+//--------------------------------------------------------------------------
+hsize_t H5Location::getNumObjs() const
+{
+    H5G_info_t ginfo;      // Group information
+
+    herr_t ret_value = H5Gget_info(getId(), &ginfo);
+    if(ret_value < 0)
+        throwException("getNumObjs", "H5Gget_info failed");
+    return (ginfo.nlinks);
+}
+
+//--------------------------------------------------------------------------
 // Function:    H5Location::getObjnameByIdx
 ///\brief       Returns the name of an object in this group, given the
 ///             object's index.
