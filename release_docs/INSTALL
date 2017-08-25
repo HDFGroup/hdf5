@@ -56,20 +56,9 @@ CONTENTS
 
 1. Obtaining HDF5
         The latest supported public release of HDF5 is available from
-        ftp://ftp.hdfgroup.org/HDF5/current/src.  For Unix and UNIX-like 
-        platforms, it is available in tar format compressed with gzip.  
+        https://support.hdfgroup.org/HDF5/release/obtain5.html.  For Unix and 
+        UNIX-like platforms, it is available in tar format compressed with gzip.  
         For Microsoft Windows, it is in ZIP format.
-
-        The HDF team also makes snapshots of the source code available on
-        a regular basis. These snapshots are unsupported (that is, the
-        HDF team will not release a bug-fix on a particular snapshot;
-        rather any bug fixes will be rolled into the next snapshot).
-        Furthermore, the snapshots have only been tested on a few
-        machines and may not test correctly for parallel applications.
-        Snapshots, in a limited number of formats, can be found on The
-        HDF Group's development FTP server:
-
-            ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots 
 
 
 2. Quick installation

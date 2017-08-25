@@ -846,10 +846,16 @@ case $host_os in
   ;;
 esac
 
+## -----------
+## if `uname` is not CYGWIN, save that information to pass to Makefiles
+## to disable building and testing plugins.
+AC_SUBST([UNAME_CYGWIN]) UNAME_CYGWIN="no"
+
 ## Windows
 case "`uname`" in
   CYGWIN*)
     AC_CHECK_HEADERS([io.h sys/timeb.h])
+    UNAME_CYGWIN="yes"
     ;;
   MINGW*)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
@@ -859,6 +865,7 @@ case "`uname`" in
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
     ;;
 esac
+AM_CONDITIONAL([NOT_UNAME_CYGWIN], [test "X$UNAME_CYGWIN" = "Xno"])
 
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
@@ -1715,7 +1722,7 @@ AC_ARG_ENABLE([debug],
                                ])],
               [DEBUG_PKG=$enableval])
 
-## Default to no if producton is enabled
+## Default to no if production is enabled
 if test "X-$DEBUG_PKG" = X- ; then
     if test "$enable_production" = yes ; then
 	DEBUG_PKG=no

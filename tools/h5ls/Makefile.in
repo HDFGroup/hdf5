@@ -118,39 +118,10 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = h5ls_plugin.sh testh5ls.sh
 CONFIG_CLEAN_VPATH_FILES =
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-am__installdirs = "$(DESTDIR)$(dyndir)" "$(DESTDIR)$(bindir)"
-LTLIBRARIES = $(dyn_LTLIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdynlibls_la_LIBADD =
 am__libdynlibls_la_SOURCES_DIST = dynlib_ls.c
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibls_la_OBJECTS =  \
-@HAVE_SHARED_CONDITIONAL_TRUE@	dynlib_ls.lo
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibls_la_OBJECTS = dynlib_ls.lo
 libdynlibls_la_OBJECTS = $(am_libdynlibls_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -160,8 +131,8 @@ libdynlibls_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(libdynlibls_la_LDFLAGS) $(LDFLAGS) -o \
 	$@
-@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibls_la_rpath = -rpath \
-@HAVE_SHARED_CONDITIONAL_TRUE@	$(dyndir)
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@am_libdynlibls_la_rpath =
+am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 h5ls_SOURCES = h5ls.c
 h5ls_OBJECTS = h5ls.$(OBJEXT)
@@ -252,6 +223,33 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
 am__recheck_rx = ^[ 	]*:recheck:[ 	]*
 am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
 am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
@@ -561,6 +559,7 @@ THREADSAFE = @THREADSAFE@
 TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
+UNAME_CYGWIN = @UNAME_CYGWIN@
 UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
@@ -690,12 +689,9 @@ h5ls_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # All programs depend on the hdf5 and h5tools libraries
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
-@HAVE_SHARED_CONDITIONAL_TRUE@dyn_LTLIBRARIES = libdynlibls.la
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibls_la_SOURCES = dynlib_ls.c
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibls_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
-
-#install-exec-hook:
-#	$(RM) $(DESTDIR)$(libdir)/*dynlib*
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@noinst_LTLIBRARIES = libdynlibls.la
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibls_la_SOURCES = dynlib_ls.c
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibls_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
 DISTCLEANFILES = h5ls_plugin.sh
 
 # Automake needs to be taught how to build lib, dyn, progs, and tests targets.
@@ -706,12 +702,10 @@ DISTCLEANFILES = h5ls_plugin.sh
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
-DYN = $(dyn_LTLIBRARIES)
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
 chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
-dyndir = $(libdir)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
@@ -758,33 +752,9 @@ h5ls_plugin.sh: $(top_builddir)/config.status $(srcdir)/h5ls_plugin.sh.in
 testh5ls.sh: $(top_builddir)/config.status $(srcdir)/testh5ls.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
-install-dynLTLIBRARIES: $(dyn_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	@list='$(dyn_LTLIBRARIES)'; test -n "$(dyndir)" || list=; \
-	list2=; for p in $$list; do \
-	  if test -f $$p; then \
-	    list2="$$list2 $$p"; \
-	  else :; fi; \
-	done; \
-	test -z "$$list2" || { \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(dyndir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(dyndir)" || exit 1; \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(dyndir)'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(dyndir)"; \
-	}
-
-uninstall-dynLTLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dyn_LTLIBRARIES)'; test -n "$(dyndir)" || list=; \
-	for p in $$list; do \
-	  $(am__strip_dir) \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(dyndir)/$$f'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(dyndir)/$$f"; \
-	done
-
-clean-dynLTLIBRARIES:
-	-test -z "$(dyn_LTLIBRARIES)" || rm -f $(dyn_LTLIBRARIES)
-	@list='$(dyn_LTLIBRARIES)'; \
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; \
 	locs=`for p in $$list; do echo $$p; done | \
 	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
 	      sort -u`; \
@@ -795,6 +765,9 @@ clean-dynLTLIBRARIES:
 
 @HAVE_SHARED_CONDITIONAL_FALSE@libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES) 
 @HAVE_SHARED_CONDITIONAL_FALSE@	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD) $(LIBS)
+
+@NOT_UNAME_CYGWIN_FALSE@libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES) 
+@NOT_UNAME_CYGWIN_FALSE@	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -1118,7 +1091,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
 installdirs:
-	for dir in "$(DESTDIR)$(dyndir)" "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1157,8 +1130,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-dynLTLIBRARIES clean-generic \
-	clean-libtool mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1178,7 +1151,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dynLTLIBRARIES
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -1224,26 +1197,25 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-dynLTLIBRARIES
+uninstall-am: uninstall-binPROGRAMS
 
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
-	check-am clean clean-binPROGRAMS clean-dynLTLIBRARIES \
-	clean-generic clean-libtool cscopelist-am ctags ctags-am \
-	distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-dynLTLIBRARIES install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool mostlyclean-local pdf pdf-am ps ps-am \
-	recheck tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-dynLTLIBRARIES
+	check-am clean clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES cscopelist-am ctags ctags-am distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
+	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS
 
 .PRECIOUS: Makefile
 
@@ -1259,14 +1231,13 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dynLTLIBRARIES
 help:
 	@$(top_srcdir)/bin/makehelp
 
-@HAVE_SHARED_CONDITIONAL_TRUE@  # Build it as shared library if configure is enabled for shared library.
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@  # Build it as shared library if configure is enabled for shared library.
 
-@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES)
-@HAVE_SHARED_CONDITIONAL_TRUE@	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD)
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES)
+@HAVE_SHARED_CONDITIONAL_TRUE@@NOT_UNAME_CYGWIN_TRUE@	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD)
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
-build-dyn: $(DYN)
 build-lib: $(LIB)
 build-progs: $(LIB) $(PROGS)
 build-tests: $(LIB) $(PROGS) $(chk_TESTS)
@@ -1274,7 +1245,7 @@ build-tests: $(LIB) $(PROGS) $(chk_TESTS)
 # General rule for recursive building targets.
 # BUILT_SOURCES contain targets that need to be built before anything else
 # in the directory (e.g., for Fortran type detection)
-lib dyn progs tests check-s check-p :: $(BUILT_SOURCES)
+lib progs tests check-s check-p :: $(BUILT_SOURCES)
 	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
 	@for d in X $(SUBDIRS); do                                             \
 	    if test $$d != X && test $$d != .; then                           \

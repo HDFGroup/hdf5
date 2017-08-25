@@ -90,6 +90,22 @@ New Features
     - None
 
 
+    High-Level APIs
+    ---------------
+    - H5DOread_chunk
+
+      Users wanted to read compressed data directly from a file without any
+      processing by the HDF5 data transfer pipeline, just as they were able
+      to write it directly to a file with H5DOwrite_chunk.
+    
+      New API function, corresponding to existing function H5DOwrite_chunk.
+      H5DOread_chunk reads a raw data chunk directly from a chunked dataset
+      in the file into the application buffer, bypassing the library’s internal
+      data transfer pipeline, including filters.
+
+      (VC - 2017/05/02, HDFFV-9934)
+
+
 Support for New Platforms, Languages, and Compilers
 ===================================================
 
@@ -334,6 +350,12 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+
+    The dynamically loaded plugin test libraries require undefined references 
+    to HDF5 functions to be resolved at runtime in order to function properly.
+    With autotools on CYGWIN this results in build errors, and we have not 
+    found a solution that satisfies both.  Therefore the dynamically loaded 
+    plugin tests have been disabled on CYGWIN.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
