@@ -863,18 +863,14 @@ test_filtered_dataset_point_selection(void)
     filespace = H5Dget_space(dset_id);
     VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
-    num_points = (hsize_t) (POINT_SELECTION_FILTERED_CHUNKS_NROWS * POINT_SELECTION_FILTERED_CHUNKS_NCOLS / mpi_size);
+    num_points = (hsize_t) POINT_SELECTION_FILTERED_CHUNKS_NROWS * (hsize_t) POINT_SELECTION_FILTERED_CHUNKS_NCOLS / (hsize_t) mpi_size;
     coords = (hsize_t *) calloc(1, 2 * num_points * sizeof(*coords));
     VRFY((NULL != coords), "Coords calloc succeeded");
 
     for (i = 0; i < num_points; i++)
-        for (j = 0; j < POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS; j++) {
-            if (j > 0)
-                coords[(i * POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS) + j] = i % (hsize_t) POINT_SELECTION_FILTERED_CHUNKS_NCOLS;
-            else
-                coords[(i * POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS) + j] = (hsize_t) mpi_rank
-                                                                               + ((i / (hsize_t) POINT_SELECTION_FILTERED_CHUNKS_NCOLS) * (hsize_t) POINT_SELECTION_FILTERED_CHUNKS_CH_NROWS);
-        }
+        for (j = 0; j < POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS; j++)
+            coords[(i * POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS) + j] = (j > 0) ? (i % (hsize_t) POINT_SELECTION_FILTERED_CHUNKS_NCOLS)
+                                                                                     : ((hsize_t) mpi_rank + ((hsize_t) mpi_size * (i / (hsize_t) POINT_SELECTION_FILTERED_CHUNKS_NCOLS)));
 
     VRFY((H5Sselect_elements(filespace, H5S_SELECT_SET, (hsize_t) num_points, (const hsize_t *) coords) >= 0),
             "Point selection succeeded");
@@ -917,24 +913,6 @@ test_filtered_dataset_point_selection(void)
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
-
-    {
-        if (MAINPROCESS) {
-            printf("Read buf: [");
-            for (i = 0; i < correct_buf_size / sizeof(*read_buf); i++)
-                printf("%ld, ", read_buf[i]);
-            printf("]\n");
-            fflush(stdout);
-
-            printf("Correct buf: [");
-            for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-                printf("%ld, ", correct_buf[i]);
-            printf("]\n");
-            fflush(stdout);
-        }
-
-        MPI_Barrier(MPI_COMM_WORLD);
-    }
 
     VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
@@ -999,8 +977,8 @@ test_filtered_dataset_interleaved_write(void)
     dataset_dims[1] = (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS;
     chunk_dims[0] = (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_CH_NROWS;
     chunk_dims[1] = (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_CH_NCOLS;
-    sel_dims[0] = (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_NROWS / 2;
-    sel_dims[1] = (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS / 2;
+    sel_dims[0] = (hsize_t) (INTERLEAVED_WRITE_FILTERED_DATASET_NROWS / mpi_size);
+    sel_dims[1] = (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS;
 
     filespace = H5Screate_simple(INTERLEAVED_WRITE_FILTERED_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
@@ -1027,14 +1005,14 @@ test_filtered_dataset_interleaved_write(void)
     /* Each process defines the dataset selection in memory and writes
      * it to the hyperslab in the file
      */
-    count[0] = (hsize_t) SHARED_FILTERED_CHUNKS_NROWS / 2;
-    count[1] = (hsize_t) SHARED_FILTERED_CHUNKS_NCOLS / 2;
-    stride[0] = 2;
-    stride[1] = (hsize_t) SHARED_FILTERED_CHUNKS_CH_NCOLS;
+    count[0] = (hsize_t) (INTERLEAVED_WRITE_FILTERED_DATASET_NROWS / INTERLEAVED_WRITE_FILTERED_DATASET_CH_NROWS);
+    count[1] = (hsize_t) (INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS / INTERLEAVED_WRITE_FILTERED_DATASET_CH_NCOLS);
+    stride[0] = (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_CH_NROWS;
+    stride[1] = (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_CH_NCOLS;
     block[0] = 1;
-    block[1] = 1;
-    offset[0] = (hsize_t) mpi_rank / (hsize_t) SHARED_FILTERED_CHUNKS_CH_NCOLS;
-    offset[1] = (hsize_t) mpi_rank % (hsize_t) SHARED_FILTERED_CHUNKS_CH_NCOLS;
+    block[1] = (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_CH_NCOLS;
+    offset[0] = (hsize_t) mpi_rank;
+    offset[1] = 0;
 
     if (VERBOSE_MED)
         printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], offset[ %llu, %llu ], block size[ %llu, %llu ]\n",
@@ -1060,9 +1038,14 @@ test_filtered_dataset_interleaved_write(void)
         data[i] = (C_DATATYPE) GEN_DATA(i);
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)  (((i % (hsize_t) SHARED_FILTERED_CHUNKS_NCOLS) / (hsize_t) SHARED_FILTERED_CHUNKS_CH_NCOLS)
-                                     + ((i % (hsize_t) SHARED_FILTERED_CHUNKS_NCOLS) % (hsize_t) SHARED_FILTERED_CHUNKS_CH_NCOLS)
-                                     + ((hsize_t) SHARED_FILTERED_CHUNKS_CH_NCOLS * (i / (hsize_t) SHARED_FILTERED_CHUNKS_NCOLS)));
+                                        /* Add Column Index */
+        correct_buf[i] = (C_DATATYPE) ( (i % (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)
+
+                                        /* Add the Row Index */
+                                      + ((i % (hsize_t) (mpi_size * INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)) / (hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)
+
+                                        /* Add the amount that gets added when a rank moves down to its next section vertically in the dataset */
+                                      + ((hsize_t) INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS * (i / (hsize_t) (mpi_size * INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS))));
 
     /* Create property list for collective dataset write */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -1448,8 +1431,8 @@ test_3d_filtered_dataset_overlap(void)
     chunk_dims[0] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_CH_NROWS;
     chunk_dims[1] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_CH_NCOLS;
     chunk_dims[2] = 1;
-    sel_dims[0] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_NROWS / 2;
-    sel_dims[1] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_NCOLS / 2;
+    sel_dims[0] = (hsize_t) (SHARED_FILTERED_CHUNKS_3D_NROWS / mpi_size);
+    sel_dims[1] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_NCOLS;
     sel_dims[2] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_DEPTH;
 
     filespace = H5Screate_simple(SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS, dataset_dims, NULL);
@@ -1477,17 +1460,17 @@ test_3d_filtered_dataset_overlap(void)
     /* Each process defines the dataset selection in memory and writes
      * it to the hyperslab in the file
      */
-    count[0] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_NROWS / 2;
-    count[1] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_NCOLS / 2;
+    count[0] = (hsize_t) (SHARED_FILTERED_CHUNKS_3D_NROWS / SHARED_FILTERED_CHUNKS_3D_CH_NROWS);
+    count[1] = (hsize_t) (SHARED_FILTERED_CHUNKS_3D_NCOLS / SHARED_FILTERED_CHUNKS_3D_CH_NCOLS);
     count[2] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_DEPTH;
-    stride[0] = 2;
+    stride[0] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_CH_NROWS;
     stride[1] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_CH_NCOLS;
     stride[2] = 1;
     block[0] = 1;
-    block[1] = 1;
+    block[1] = (hsize_t) SHARED_FILTERED_CHUNKS_3D_CH_NCOLS;
     block[2] = 1;
-    offset[0] = (hsize_t) mpi_rank / (hsize_t) SHARED_FILTERED_CHUNKS_3D_CH_NCOLS;
-    offset[1] = (hsize_t) mpi_rank % (hsize_t) SHARED_FILTERED_CHUNKS_3D_CH_NCOLS;
+    offset[0] = (hsize_t) mpi_rank;
+    offset[1] = 0;
     offset[2] = 0;
 
     if (VERBOSE_MED)
@@ -1513,40 +1496,15 @@ test_3d_filtered_dataset_overlap(void)
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE) GEN_DATA(i);
 
-    /* This style of data verification is very ugly for cases like this,
-     * but avoids the problem of needing to have each rank send its data
-     * plus its selection to a single rank, then have that rank scatter
-     * all of the data one at a time to a single buffer and finally
-     * compare that buffer to the read buffer. - JTH
-     */
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-                                       /* Start with a base index */
-        correct_buf[i] = (C_DATATYPE)  ((i % (hsize_t) mpi_size)
+                                       /* Add the Column Index */
+        correct_buf[i] = (C_DATATYPE) ( (i % (hsize_t) (SHARED_FILTERED_CHUNKS_3D_DEPTH * SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-                                       /* Add the value for the increasing column index */
-                                     + ( (hsize_t) mpi_size *
-                                           (
-                                               (i % (hsize_t) (SHARED_FILTERED_CHUNKS_3D_NCOLS * SHARED_FILTERED_CHUNKS_3D_DEPTH))
-                                             / (hsize_t) (mpi_size * SHARED_FILTERED_CHUNKS_3D_CH_NCOLS)
-                                           )
-                                       )
+                                       /* Add the Row Index */
+                                      + ((i % (hsize_t) (mpi_size * SHARED_FILTERED_CHUNKS_3D_DEPTH * SHARED_FILTERED_CHUNKS_3D_NCOLS)) / (hsize_t) (SHARED_FILTERED_CHUNKS_3D_DEPTH * SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-                                       /* Add the value for the increasing row index */
-                                     + (
-                                               (hsize_t) (SHARED_FILTERED_CHUNKS_3D_NCOLS * (SHARED_FILTERED_CHUNKS_3D_CH_NROWS * SHARED_FILTERED_CHUNKS_3D_CH_NCOLS / mpi_size))
-                                             * (i / (hsize_t) (SHARED_FILTERED_CHUNKS_3D_NCOLS * SHARED_FILTERED_CHUNKS_3D_DEPTH * (SHARED_FILTERED_CHUNKS_3D_CH_NROWS * SHARED_FILTERED_CHUNKS_3D_CH_NCOLS / mpi_size)))
-                                       )
-
-                                       /* Add the value for the increasing row index in a particular chunk */
-                                     + ( (hsize_t) SHARED_FILTERED_CHUNKS_3D_CH_NCOLS *
-                                           (
-                                               (i % (hsize_t) (SHARED_FILTERED_CHUNKS_3D_NCOLS * SHARED_FILTERED_CHUNKS_3D_DEPTH * (SHARED_FILTERED_CHUNKS_3D_CH_NROWS * SHARED_FILTERED_CHUNKS_3D_CH_NCOLS / mpi_size)))
-                                             / (hsize_t) (SHARED_FILTERED_CHUNKS_3D_NCOLS * SHARED_FILTERED_CHUNKS_3D_DEPTH)
-                                           )
-                                       )
-
-                                       /* Add the value for the increasing column index in a particular chunk */
-                                     + ((i % (hsize_t) (SHARED_FILTERED_CHUNKS_3D_CH_NCOLS * SHARED_FILTERED_CHUNKS_3D_DEPTH)) / (hsize_t) mpi_size));
+                                       /* Add the amount that gets added when a rank moves down to its next section vertically in the dataset */
+                                      + ((hsize_t) (SHARED_FILTERED_CHUNKS_3D_DEPTH * SHARED_FILTERED_CHUNKS_3D_NCOLS) * (i / (hsize_t) (mpi_size * SHARED_FILTERED_CHUNKS_3D_DEPTH * SHARED_FILTERED_CHUNKS_3D_NCOLS))));
 
     /* Create property list for collective dataset write */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -2507,7 +2465,7 @@ exit:
 
     ALARM_OFF;
 
-    /* XXX: h5_clean_files(FILENAME, fapl); */
+    h5_clean_files(FILENAME, fapl);
 
     H5close();
 
