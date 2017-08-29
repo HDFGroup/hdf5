@@ -679,6 +679,9 @@ BUILD_SHARED_SZIP_CONDITIONAL_TRUE
 LL_PATH
 USE_FILTER_SZIP
 USE_FILTER_DEFLATE
+NOT_UNAME_CYGWIN_FALSE
+NOT_UNAME_CYGWIN_TRUE
+UNAME_CYGWIN
 AM_MAKEFLAGS
 LT_STATIC_EXEC
 USE_PLUGINS_CONDITIONAL_FALSE
@@ -22794,6 +22797,11 @@ $as_echo "#define HAVE_DARWIN 1" >>confdefs.h
   ;;
 esac
 
+## -----------
+## if `uname` is not CYGWIN, save that information to pass to Makefiles
+## to disable building and testing plugins.
+ UNAME_CYGWIN="no"
+
 ## Windows
 case "`uname`" in
   CYGWIN*)
@@ -22810,6 +22818,7 @@ fi
 
 done
 
+    UNAME_CYGWIN="yes"
     ;;
   MINGW*)
     for ac_header in io.h winsock2.h sys/timeb.h
@@ -22890,6 +22899,14 @@ done
 
     ;;
 esac
+ if test "X$UNAME_CYGWIN" = "Xno"; then
+  NOT_UNAME_CYGWIN_TRUE=
+  NOT_UNAME_CYGWIN_FALSE='#'
+else
+  NOT_UNAME_CYGWIN_TRUE='#'
+  NOT_UNAME_CYGWIN_FALSE=
+fi
+
 
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
@@ -27007,7 +27024,7 @@ if test "${enable_debug+set}" = set; then :
 fi
 
 
-## Default to no if producton is enabled
+## Default to no if production is enabled
 if test "X-$DEBUG_PKG" = X- ; then
     if test "$enable_production" = yes ; then
 	DEBUG_PKG=no
@@ -30920,6 +30937,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_PLUGINS_CONDITIONAL_TRUE}" && test -z "${USE_PLUGINS_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"USE_PLUGINS_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${NOT_UNAME_CYGWIN_TRUE}" && test -z "${NOT_UNAME_CYGWIN_FALSE}"; then
+  as_fn_error $? "conditional \"NOT_UNAME_CYGWIN\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

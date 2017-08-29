@@ -40,17 +40,16 @@ h5ls_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 # All programs depend on the hdf5 and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
+if NOT_UNAME_CYGWIN
 if HAVE_SHARED_CONDITIONAL
   # Build it as shared library if configure is enabled for shared library.
-  dyn_LTLIBRARIES=libdynlibls.la
+  noinst_LTLIBRARIES=libdynlibls.la
   libdynlibls_la_SOURCES=dynlib_ls.c
-  libdynlibls_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlibls_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
 
 libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD)
-
-#install-exec-hook:
-#	$(RM) $(DESTDIR)$(libdir)/*dynlib*
+endif
 endif
 
 DISTCLEANFILES=h5ls_plugin.sh
