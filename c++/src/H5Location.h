@@ -114,6 +114,7 @@ class H5_DLLCPP H5Location : public IdComponent {
         H5std_string getLinkval(const H5std_string& link_name, size_t size=0) const;
 
         // Returns the number of objects in this group.
+        // Deprecated - moved to H5::Group in 1.10.2.
         hsize_t getNumObjs() const;
 
         // Retrieves the name of an object in this group, given the
