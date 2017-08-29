@@ -519,6 +519,7 @@ dataset_big_write(void)
     /* Create a large dataset */
     dims[0] = bigcount;
     dims[1] = mpi_size;
+
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
     dataset = H5Dcreate2(fid, DATASET1, H5T_NATIVE_LLONG, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -596,6 +597,7 @@ dataset_big_write(void)
     /* Create a large dataset */
     dims[0] = bigcount;
     dims[1] = mpi_size;
+
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
     dataset = H5Dcreate2(fid, DATASET2, H5T_NATIVE_LLONG, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -673,6 +675,7 @@ dataset_big_write(void)
     /* Create a large dataset */
     dims[0] = bigcount;
     dims[1] = 1;
+
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
     dataset = H5Dcreate2(fid, DATASET3, H5T_NATIVE_LLONG, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -748,6 +751,7 @@ dataset_big_write(void)
     /* Create a large dataset */
     dims[0] = bigcount;
     dims[1] = mpi_size * 4;
+
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
     dataset = H5Dcreate2(fid, DATASET4, H5T_NATIVE_LLONG, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -785,6 +789,10 @@ dataset_big_write(void)
     }
 
     /* create a memory dataspace */
+    /* Warning: H5Screate_simple requires an array of hsize_t elements
+     * even if we only pass only a single value.  Attempting anything else
+     * appears to cause problems with 32 bit compilers.
+     */
     mem_dataspace = H5Screate_simple (1, dims, NULL);
     VRFY((mem_dataspace >= 0), "");
 
@@ -821,6 +829,7 @@ dataset_big_write(void)
     /* Create a large dataset */
     dims[0] = bigcount/6;
     dims[1] = mpi_size * 4;
+
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
     dataset = H5Dcreate2(fid, DATASET5, H5T_NATIVE_LLONG, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -841,7 +850,7 @@ dataset_big_write(void)
     file_dataspace = H5Dget_space (dataset);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
 
-    dims[1] = 4;
+    // dims[1] = 4;
     /* create a memory dataspace */
     mem_dataspace = H5Screate_simple (RANK, dims, NULL);
     VRFY((mem_dataspace >= 0), "");
@@ -1217,6 +1226,10 @@ dataset_big_read(void)
     if(coords) free(coords);
 
     /* create a memory dataspace */
+    /* Warning: H5Screate_simple requires an array of hsize_t elements
+     * even if we only pass only a single value.  Attempting anything else
+     * appears to cause problems with 32 bit compilers.
+     */
     mem_dataspace = H5Screate_simple (1, dims, NULL);
     VRFY((mem_dataspace >= 0), "");
 
@@ -1276,7 +1289,6 @@ dataset_big_read(void)
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
 
     /* create a memory dataspace */
-    dims[1] = 4;
     mem_dataspace = H5Screate_simple (RANK, dims, NULL);
     VRFY((mem_dataspace >= 0), "");
 
@@ -1645,7 +1657,6 @@ coll_chunktest(const char* filename,
 
   size_t  num_points;           /* for point selection */
   hsize_t *coords = NULL;       /* for point selection */
-  hsize_t current_dims;         /* for point selection */
   int i;
 
   /* Create the data space */
@@ -1676,6 +1687,10 @@ coll_chunktest(const char* filename,
   VRFY((coords != NULL), "coords malloc succeeded");
   point_set(start, count, stride, block, num_points, coords, mode);
 
+  /* Warning: H5Screate_simple requires an array of hsize_t elements
+   * even if we only pass only a single value.  Attempting anything else
+   * appears to cause problems with 32 bit compilers.
+   */
   file_dataspace = H5Screate_simple(2, dims, NULL);
   VRFY((file_dataspace >= 0), "file dataspace created succeeded");
 
@@ -1684,8 +1699,8 @@ coll_chunktest(const char* filename,
       VRFY((mem_dataspace >= 0), "mem dataspace created succeeded");
   }
   else {
-      hsize_t  dsdims[1] = {num_points};
-      current_dims = num_points;
+      /* Putting the warning about H5Screate_simple (above) into practice... */
+      hsize_t dsdims[1] = {num_points};
       mem_dataspace = H5Screate_simple (1, dsdims, NULL);
       VRFY((mem_dataspace >= 0), "mem_dataspace create succeeded");
   }
@@ -1963,8 +1978,11 @@ coll_chunktest(const char* filename,
       VRFY((mem_dataspace >= 0), "");
   }
   else {
-      hsize_t  dsdims[1] = {num_points};
-      current_dims = num_points;
+      /* Warning: H5Screate_simple requires an array of hsize_t elements
+       * even if we only pass only a single value.  Attempting anything else
+       * appears to cause problems with 32 bit compilers.
+       */
+      hsize_t dsdims[1] = {num_points};
       mem_dataspace = H5Screate_simple (1, dsdims, NULL);
       VRFY((mem_dataspace >= 0), "mem_dataspace create succeeded");
   }
