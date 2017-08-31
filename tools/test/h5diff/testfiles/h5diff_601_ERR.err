@@ -1,0 +1,4 @@
+H5tools-DIAG: Error detected in HDF5:tools (1.11.0) thread 0:
+  #000: /home/byrn/HDF_Projects/hdf5/dev/tools/lib/h5diff.c line 690 in h5diff(): Error: Object could not be found
+    major: Failure in tools library
+    minor: error in function

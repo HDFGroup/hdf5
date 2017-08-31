@@ -69,6 +69,10 @@
 int main(int argc, const char *argv[])
 {
     int        ret;
+    H5E_auto2_t         func;
+    H5E_auto2_t         tools_func;
+    void               *edata;
+    void               *tools_edata;
     const char *fname1 = NULL;
     const char *fname2 = NULL;
     const char *objname1  = NULL;
@@ -79,8 +83,16 @@ int main(int argc, const char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
+    /* Disable error reporting */
+    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
     /* Initialize h5tools lib */
     h5tools_init();
+
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /*-------------------------------------------------------------------------
     * process the command-line
@@ -88,12 +100,17 @@ int main(int argc, const char *argv[])
     */
     parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
+    if (enable_error_stack) {
+        H5Eset_auto2(H5E_DEFAULT, func, edata);
+        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+    }
+
     /*-------------------------------------------------------------------------
     * do the diff
     *-------------------------------------------------------------------------
     */
 
-    nfound = h5diff(fname1,fname2,objname1,objname2,&options);
+    nfound = h5diff(fname1, fname2, objname1, objname2, &options);
 
     print_info(&options);
 
@@ -103,17 +120,17 @@ int main(int argc, const char *argv[])
     *-------------------------------------------------------------------------
     */
 
-    ret = (nfound == 0 ? 0 : 1 );
+    ret = (nfound == 0 ? 0 : 1);
 
     /* if graph difference return 1 for differences  */
-    if ( options.contents == 0 )
+    if (options.contents == 0)
         ret = 1;
 
     /* and return 2 for error */
     if (options.err_stat)
         ret = 2;
 
-    return ret;
+    h5diff_exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -135,6 +152,8 @@ int main(int argc, const char *argv[])
 H5_ATTR_NORETURN void
 h5diff_exit(int status)
 {
+    h5tools_close();
+
     HDexit(status);
 }
 

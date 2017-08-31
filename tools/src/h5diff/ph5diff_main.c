@@ -316,6 +316,8 @@ void h5diff_exit(int status)
         status = EXIT_SUCCESS;  /* Reset exit status, since some mpiexec commands generate output on failure status */
     }
 
+    h5tools_close();
+
     /* Always exit(0), since MPI implementations do weird stuff when they
      *  receive a non-zero exit value. - QAK
      */
