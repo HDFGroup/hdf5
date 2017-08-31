@@ -72,7 +72,14 @@ New Features
 
     Tools
     -----
-    - None
+    - h5diff
+
+      h5diff now supports the 'enable-error-stack' argument.
+
+      Improved h5diff by adding the enable-error-stack argument.
+      This will capture any H5E error traces to stderr.
+
+      (ADB - 2017/08/31, HDFFV-9774)
 
 
     High-Level APIs
@@ -97,7 +104,7 @@ New Features
       Users wanted to read compressed data directly from a file without any
       processing by the HDF5 data transfer pipeline, just as they were able
       to write it directly to a file with H5DOwrite_chunk.
-    
+
       New API function, corresponding to existing function H5DOwrite_chunk.
       H5DOread_chunk reads a raw data chunk directly from a chunked dataset
       in the file into the application buffer, bypassing the library’s internal
@@ -351,10 +358,10 @@ The following platforms are not supported but have been tested for this release.
 Known Problems
 ==============
 
-    The dynamically loaded plugin test libraries require undefined references 
+    The dynamically loaded plugin test libraries require undefined references
     to HDF5 functions to be resolved at runtime in order to function properly.
-    With autotools on CYGWIN this results in build errors, and we have not 
-    found a solution that satisfies both.  Therefore the dynamically loaded 
+    With autotools on CYGWIN this results in build errors, and we have not
+    found a solution that satisfies both.  Therefore the dynamically loaded
     plugin tests have been disabled on CYGWIN.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
