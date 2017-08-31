@@ -175,6 +175,9 @@ if(WIN32)
   list(APPEND _MPI_PREFIX_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MPICH\\SMPD;binary]/..")
   list(APPEND _MPI_PREFIX_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MPICH2;Path]")
   list(APPEND _MPI_PREFIX_PATH "$ENV{ProgramW6432}/MPICH2/")
+  # INTEL MPI
+  list(APPEND _MPI_PREFIX_PATH "$ENV{I_MPI_ROOT}/intel64/")
+
 endif()
 
 # Build a list of prefixes to search for MPI.
