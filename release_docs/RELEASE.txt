@@ -72,15 +72,7 @@ New Features
 
     Tools
     -----
-    - h5diff
-
-      h5diff now supports the 'enable-error-stack' argument.
-
-      Improved h5diff by adding the enable-error-stack argument.
-      This will capture any H5E error traces to stderr.
-
-      (ADB - 2017/08/31, HDFFV-9774)
-
+    -
 
     High-Level APIs
     ---------------
@@ -143,6 +135,15 @@ Bug Fixes since HDF5-1.8.19
 
     Tools
     -----
+    - h5repack
+
+      h5repack always set the User Defined filter flag to H5Z_FLAG_MANDATORY.
+
+      Added another parameter to the 'UD=' option to set the flag by default
+      to '0' or H5Z_FLAG_MANDATORY, the other choice is '1' or H5Z_FLAG_OPTIONAL.
+
+      (ADB - 2017/08/31, HDFFV-10276)
+
     - h5ls
 
       h5ls generated error on stack when it encountered a H5S_NULL
