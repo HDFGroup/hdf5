@@ -93,7 +93,7 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -f FILT, --filter=FILT  Filter type\n");
     PRINTVALSTREAM(rawoutstream, "   -l LAYT, --layout=LAYT  Layout type\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
+    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0)\n");
     PRINTVALSTREAM(rawoutstream, "    E - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "    S - is an integer\n");
     PRINTVALSTREAM(rawoutstream, "    U - is a filename.\n");
@@ -134,8 +134,8 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "        NBIT (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
     PRINTVALSTREAM(rawoutstream, "            is either IN or DS\n");
-    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>\n");
-    PRINTVALSTREAM(rawoutstream, "            required values for filter_number,cd_value_count,value_1\n");
+    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,filter_flag,cd_value_count,value_1[,value_2,...,value_N]>\n");
+    PRINTVALSTREAM(rawoutstream, "            required values for filter_number,filter_flag,cd_value_count,value_1\n");
     PRINTVALSTREAM(rawoutstream, "            optional values for value_2 to value_N\n");
     PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -179,7 +179,7 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add both filters SHUF and GZIP in this order to all datasets\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,1,9 file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,0,1,9 file1 file2 \n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add bzip2 filter to all datasets\n");
     PRINTVALSTREAM(rawoutstream, "\n");

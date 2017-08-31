@@ -54,6 +54,7 @@ typedef struct {
 
 typedef struct {
  H5Z_filter_t filtn;                           /* filter identification number */
+ unsigned     filt_flag;                       /* filter definition flag */
  unsigned     cd_values[CD_VALUES];            /* filter client data values */
  size_t       cd_nelmts;                       /* filter client number of values */
 } filter_info_t;
@@ -139,10 +140,10 @@ int h5repack_end(pack_opt_t *options);
 int h5repack_verify(const char *out_fname, pack_opt_t *options);
 int h5repack_cmp_pl(const char *fname1, const char *fname2);
 
-/* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr() 
- * and struct named_dt_t were located in h5repack_copy.c as static prior to 
- * bugfix1726. 
- * Made shared functions as copy_attr() was needed in h5repack_refs.c. 
+/* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr()
+ * and struct named_dt_t were located in h5repack_copy.c as static prior to
+ * bugfix1726.
+ * Made shared functions as copy_attr() was needed in h5repack_refs.c.
  * However copy_attr() may be obsoleted when H5Acopy is available and put back
  * others to static in h5repack_copy.c.
  */

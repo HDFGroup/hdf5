@@ -207,7 +207,8 @@
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_CMP-${testname}
-            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile})
+            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+        )
       else ()
         add_test (
             NAME H5REPACK_CMP-${testname}
@@ -240,7 +241,8 @@
       # If using memchecker add tests without using scripts
       add_test (
           NAME H5REPACK_DMP-${testname}
-          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile})
+          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+      )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
@@ -1000,15 +1002,15 @@
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-  ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,4,9,${H5_VERS_MAJOR},${H5_VERS_MINOR},${H5_VERS_RELEASE})
-  ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,1,9)
+  ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,0,4,9,${H5_VERS_MAJOR},${H5_VERS_MINOR},${H5_VERS_RELEASE})
+  ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,0,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
   # check for no parameters
   set (TESTRETVAL 255)
   if (WIN32)
     set (TESTRETVAL -1)
   endif ()
-  ADD_H5_CMP_TEST (plugin_zero "" "TEST" ${TESTRETVAL} h5repack_layout.h5 -v -f UD=250,0)
+  ADD_H5_CMP_TEST (plugin_zero "" "TEST" ${TESTRETVAL} h5repack_layout.h5 -v -f UD=250,0,0)
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver
