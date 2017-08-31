@@ -90,8 +90,8 @@ typedef struct H5AC_addr_list_ud_t
 static herr_t H5AC__broadcast_candidate_list(H5AC_t *cache_ptr,
     unsigned *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
 static herr_t H5AC__broadcast_clean_list(H5AC_t *cache_ptr);
-static herr_t H5AC__construct_candidate_list(H5F_t *f, H5AC_t *cache_ptr,
-    H5AC_aux_t *aux_ptr, int sync_point_op, hid_t dxpl_id);
+static herr_t H5AC__construct_candidate_list(H5AC_t *cache_ptr,
+    H5AC_aux_t *aux_ptr, int sync_point_op);
 static herr_t H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr,
     unsigned *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
 static herr_t H5AC__propagate_and_apply_candidate_list(H5F_t  *f, hid_t dxpl_id);
@@ -498,8 +498,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__construct_candidate_list(H5F_t *f, H5AC_t *cache_ptr, H5AC_aux_t *aux_ptr,
-                               int sync_point_op, hid_t dxpl_id)
+H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t *aux_ptr,
+    int sync_point_op)
 {
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -525,7 +525,7 @@ H5AC__construct_candidate_list(H5F_t *f, H5AC_t *cache_ptr, H5AC_aux_t *aux_ptr,
 	    break;
 
 	case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
-	    if(H5C_construct_candidate_list__clean_cache(f, (H5C_t *)cache_ptr, dxpl_id) < 0)
+            if(H5C_construct_candidate_list__clean_cache((H5C_t *)cache_ptr) < 0)
 		HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_construct_candidate_list__clean_cache() failed.")
 	    break;
 
@@ -1682,7 +1682,7 @@ H5AC__rsp__dist_md_write__flush(H5F_t *f, hid_t dxpl_id)
     /* first construct the candidate list -- initially, this will be in the 
      * form of a skip list.  We will convert it later.
      */
-    if(H5C_construct_candidate_list__clean_cache(f, cache_ptr, dxpl_id) < 0)
+    if(H5C_construct_candidate_list__clean_cache(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate list.")
 
     if(H5SL_count(aux_ptr->candidate_slist_ptr) > 0) {
@@ -1826,7 +1826,7 @@ H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f, hid_t dxpl_id)
     if(evictions_enabled) {
         /* construct candidate list -- process 0 only */
         if(aux_ptr->mpi_rank == 0)
-            if(H5AC__construct_candidate_list(f, cache_ptr, aux_ptr, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN, dxpl_id) < 0)
+            if(H5AC__construct_candidate_list(cache_ptr, aux_ptr, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate list.")
 
         /* propagate and apply candidate list -- all processes */
