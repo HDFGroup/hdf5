@@ -168,6 +168,7 @@ static herr_t H5P__dcrt_ext_file_list_copy(const char *name, size_t size, void *
 static int H5P__dcrt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__dcrt_ext_file_list_close(const char *name, size_t size, void *value);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
