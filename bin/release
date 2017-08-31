@@ -214,12 +214,12 @@ tar2cmakezip()
     fi
 
     # step 2: add batch file for building CMake on window
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2012-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2012-64.bat $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-32.bat $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-64.bat $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-32.bat $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-64.bat $cmziptmpdir
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpdir
