@@ -21,7 +21,7 @@ namespace H5 {
     \brief Class H5File represents an HDF5 file and inherits from class Group
     as file is a root group.
 
-    Inheritance: Group -> H5Object -> H5Location -> IdComponent
+    Inheritance: Group -> CommonFG/H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP H5File : public Group {
    public:
@@ -92,7 +92,7 @@ class H5_DLLCPP H5File : public Group {
         // Throw file exception.
         virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
 
-        // for CommonFG to get the file id.
+        // For CommonFG to get the file id.
         virtual hid_t getLocId() const;
 
         // Default constructor
