@@ -107,19 +107,21 @@ static int
 init_ref_path_table(void)
 {
     /* Sanity check */
-    HDassert(thefile > 0);
+    if(thefile > 0) {
+        /* Create skip list to store reference path information */
+        if((ref_path_table = H5SL_create(H5SL_TYPE_HADDR, NULL))==NULL)
+            return (-1);
 
-    /* Create skip list to store reference path information */
-    if((ref_path_table = H5SL_create(H5SL_TYPE_HADDR, NULL))==NULL)
+        /* Iterate over objects in this file */
+        if(h5trav_visit(thefile, "/", TRUE, TRUE, init_ref_path_cb, NULL, NULL) < 0) {
+            error_msg("unable to construct reference path table\n");
+            h5tools_setstatus(EXIT_FAILURE);
+        } /* end if */
+
+        return(0);
+    }
+    else
         return (-1);
-
-    /* Iterate over objects in this file */
-    if(h5trav_visit(thefile, "/", TRUE, TRUE, init_ref_path_cb, NULL, NULL) < 0) {
-        error_msg("unable to construct reference path table\n");
-        h5tools_setstatus(EXIT_FAILURE);
-    } /* end if */
-
-    return(0);
 }
 
 /*-------------------------------------------------------------------------
@@ -164,7 +166,8 @@ haddr_t
 ref_path_table_lookup(const char *thepath)
 {
     H5O_info_t  oi;
-
+    if((HDstrlen(thepath) == 0) || (thepath == NULL))
+        return HADDR_UNDEF;
     /* Allow lookups on the root group, even though it doesn't have any link info */
     if(HDstrcmp(thepath, "/")) {
         H5L_info_t  li;
@@ -211,16 +214,17 @@ ref_path_table_put(const char *path, haddr_t objno)
 {
     ref_path_node_t *new_node;
 
-    HDassert(ref_path_table);
-    HDassert(path);
+    if(ref_path_table && path) {
+        if((new_node = (ref_path_node_t *)HDmalloc(sizeof(ref_path_node_t))) == NULL)
+            return(-1);
 
-    if((new_node = (ref_path_node_t *)HDmalloc(sizeof(ref_path_node_t))) == NULL)
-        return(-1);
+        new_node->objno = objno;
+        new_node->path = HDstrdup(path);
 
-    new_node->objno = objno;
-    new_node->path = HDstrdup(path);
-
-    return(H5SL_insert(ref_path_table, new_node, &(new_node->objno)));
+        return(H5SL_insert(ref_path_table, new_node, &(new_node->objno)));
+    }
+    else
+        return (-1);
 }
 
 /*

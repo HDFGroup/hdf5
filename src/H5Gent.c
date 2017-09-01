@@ -541,8 +541,8 @@ herr_t
 H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth,
     const H5HL_t *heap)
 {
-    const char		*lval = NULL;
-    int nested_indent, nested_fwidth;
+    const char  *lval = NULL;
+    int         nested_indent, nested_fwidth;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -551,14 +551,14 @@ H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth,
     nested_fwidth = MAX(0, fwidth - 3);
 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	      "Name offset into private heap:",
-	      (unsigned long) (ent->name_off));
+              "Name offset into private heap:",
+	          (unsigned long) (ent->name_off));
 
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-	      "Object header address:", ent->header);
+              "Object header address:", ent->header);
 
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth,
-	      "Cache info type:");
+              "Cache info type:");
     switch(ent->type) {
         case H5G_NOTHING_CACHED:
             HDfprintf(stream, "Nothing Cached\n");
@@ -581,13 +581,13 @@ H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth,
             HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth,
                       "Cached information:");
             HDfprintf(stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
-                       "Link value offset:",
-                       (unsigned long)(ent->cache.slink.lval_offset));
+                      "Link value offset:",
+                      (unsigned long)(ent->cache.slink.lval_offset));
             if(heap) {
                 lval = (const char *)H5HL_offset_into(heap, ent->cache.slink.lval_offset);
                 HDfprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
-                           "Link value:",
-                           lval);
+                          "Link value:",
+                          (lval == NULL) ? "" : lval);
             } /* end if */
             else
                 HDfprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth, "Warning: Invalid heap address given, name not displayed!");

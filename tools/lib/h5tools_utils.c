@@ -608,7 +608,6 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:
-            HDassert(0);
             break;
     } /* end switch */
 
@@ -777,8 +776,11 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
     } /* end if */
 
     /* trg_path must be freed out of this function when finished using */
-    link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char));
-    HDassert(link_info->trg_path);
+    if((link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char))) == NULL) {
+        if(link_info->opt.msg_mode == 1)
+            parallel_print("Warning: unable to allocate buffer for <%s>\n",linkpath);
+        goto out;
+    } /* end if */
 
     /* get link value */
     if(H5Lget_val(file_id, linkpath, (void *)link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0) {

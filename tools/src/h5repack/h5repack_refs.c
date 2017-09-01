@@ -189,8 +189,7 @@ int do_copy_refobjs(hid_t fidin,
                                     /* create the reference, -1 parameter for objects */
                                     if(H5Rcreate(&refbuf[u], fidout, refname, H5R_OBJECT, (hid_t)-1) < 0)
                                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Rcreate failed");
-                                    if(options->verbose)
-                                    {
+                                    if(options->verbose) {
                                         printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> object reference created to <%s>\n",
                                             travt->objs[i].name,
@@ -278,8 +277,7 @@ int do_copy_refobjs(hid_t fidin,
                                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Rcreate failed");
                                     if(H5Sclose(region_id) < 0)
                                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
-                                    if(options->verbose)
-                                    {
+                                    if(options->verbose) {
                                         printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> region reference created to <%s>\n",
                                             travt->objs[i].name,
@@ -319,8 +317,6 @@ int do_copy_refobjs(hid_t fidin,
                         if((dset_out = H5Dopen2(fidout, travt->objs[i].name, H5P_DEFAULT)) < 0)
                             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
                     } /* end else */
-
-                    HDassert(dset_out != FAIL);
 
                     /*-------------------------------------------------------------------------
                     * copy referenced objects in attributes
