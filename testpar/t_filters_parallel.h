@@ -50,7 +50,7 @@ size_t             cd_nelmts = FILTER_NUM_CDVALUES;
 #define GEN_DATA(i)          INCREMENTAL_DATA(i)
 #define INCREMENTAL_DATA(i)  ((size_t) mpi_rank + i)      /* Generates incremental test data */
 
-/* XXX: For experimental purposes only, will cause tests to fail data verification phase */
+/* For experimental purposes only, will cause tests to fail data verification phase - JTH */
 /* #define GEN_DATA(i)          RANK_DATA(i) */  /* Given an index value i, generates test data based upon selected mode */
 #define RANK_DATA(i)         (mpi_rank)          /* Generates test data to visibly show which rank wrote to which parts of the dataset */
 

@@ -2005,7 +2005,6 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
 
                 /* Collect the new chunk info back to the local copy, since only the record in the
                  * collective array gets updated by the chunk re-allocation */
-                /* XXX: This step may no longer be necessary */
                 HDmemcpy(&chunk_list[i].chunk_states.new_chunk, &collective_chunk_list[offset].chunk_states.new_chunk, sizeof(chunk_list[i].chunk_states.new_chunk));
 
                 H5_CHECKED_ASSIGN(mpi_type_count, int, chunk_list[i].chunk_states.new_chunk.length, hsize_t);
@@ -2773,7 +2772,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
             local_info_array[i].io_size = (size_t) select_npoints * type_info->src_type_size;
 
-            /* XXX: Currently the full overwrite status of a chunk is only obtained on a per-process
+            /* Currently the full overwrite status of a chunk is only obtained on a per-process
              * basis. This means that if the total selection in the chunk, as determined by the combination
              * of selections of all of the processes interested in the chunk, covers the entire chunk,
              * the performance optimization of not reading the chunk from the file is still valid, but
@@ -3257,7 +3256,9 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     if (!chunk_entry->full_overwrite || io_info->op_type == H5D_IO_OP_READ) {
         chunk_entry->chunk_states.new_chunk.length = chunk_entry->chunk_states.chunk_current.length;
 
-        /* XXX: Test with MPI types and collective read to improve performance */
+        /* Currently, these chunk reads are done independently and will likely
+	 * cause issues with collective metadata reads enabled. In the future,
+	 * this should be refactored to use collective chunk reads - JTH */
         if (H5F_block_read(io_info->dset->oloc.file, H5FD_MEM_DRAW, chunk_entry->chunk_states.chunk_current.offset,
                 chunk_entry->chunk_states.new_chunk.length, H5AC_rawdata_dxpl_id, chunk_entry->buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
