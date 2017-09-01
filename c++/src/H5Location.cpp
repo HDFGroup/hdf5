@@ -1283,9 +1283,9 @@ int H5Location::iterateElems(const H5std_string& name, int *idx, H5G_iterate_t o
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getNumObjs
-///\brief       Returns the number of objects in this group.
-///\return      Number of objects
-///\exception   H5::FileIException or H5::GroupIException
+///\brief       Deprecated - moved to H5::Group in 1.10.2.
+///\return      Deprecated
+///\exception   Deprecated
 // Programmer   Binh-Minh Ribler - January, 2003
 //--------------------------------------------------------------------------
 hsize_t H5Location::getNumObjs() const

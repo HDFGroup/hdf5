@@ -13,8 +13,8 @@
 
 #include <string>
 
-#include "H5Include.h"
 #include "H5private.h"             // for HDstrcpy
+#include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5DataSpace.h"
@@ -64,7 +64,8 @@ DataType CommonFG::openDataType(const char* name) const
         throwException("openDataType", "H5Topen2 failed");
 
     // No failure, create and return the DataType object
-    DataType data_type(type_id);
+    DataType data_type;
+    f_DataType_setId(&data_type, type_id);
     return(data_type);
 }
 

@@ -358,7 +358,6 @@ hsize_t diff_datasetid( hid_t did1,
             nelmts2 *= dims2[i];
 
         h5diffdebug3("nelmts: %ld - %ld\n", nelmts1, nelmts2);
-        HDassert(nelmts1 == nelmts2);
 
         if(tclass != H5T_ARRAY) {
             /*-----------------------------------------------------------------
@@ -459,7 +458,7 @@ hsize_t diff_datasetid( hid_t did1,
                     size = 1;
                 sm_size[i - 1] = MIN(dadims[i - 1], size);
                 sm_nbytes *= sm_size[i - 1];
-                HDassert(sm_nbytes > 0);
+                h5diffdebug2("sm_nbytes: %ld\n", sm_nbytes);
             } /* end for */
 
             /* malloc return code should be verified.
@@ -469,10 +468,10 @@ hsize_t diff_datasetid( hid_t did1,
              * that fails to address freeing other objects created here.
              * E.g., sm_space.
              */
-            sm_buf1 = HDmalloc((size_t)sm_nbytes);
-            HDassert(sm_buf1);
-            sm_buf2 = HDmalloc((size_t)sm_nbytes);
-            HDassert(sm_buf2);
+            if((sm_buf1 = HDmalloc((size_t)sm_nbytes)) == NULL)
+                goto error;
+            if((sm_buf2 = HDmalloc((size_t)sm_nbytes)) == NULL)
+                goto error;
 
             sm_nelmts = sm_nbytes / p_type_nbytes;
             sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
@@ -682,7 +681,6 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     * check for non supported classes
     *-------------------------------------------------------------------------
     */
-    HDassert(tclass1 == tclass2);
     switch (tclass1) {
         case H5T_TIME:
             if((options->m_verbose || options->m_list_not_cmp) && obj1_name && obj2_name) {
@@ -754,7 +752,6 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     * check for different dimensions
     *-------------------------------------------------------------------------
     */
-    HDassert(rank1 == rank2);
     for(i = 0; i<rank1; i++) {
         if(maxdim1 && maxdim2) {
             if(maxdim1[i] != maxdim2[i])
