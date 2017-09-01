@@ -484,10 +484,10 @@ H5D__mpio_array_gatherv(void *local_array, size_t local_array_num_entries,
         if (NULL == (gathered_array = H5MM_malloc(gathered_array_num_entries * array_entry_size)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate gathered array")
 
-        if (NULL == (receive_counts_array = (int *) H5MM_malloc((size_t) nprocs * sizeof(*receive_counts_array))))
+        if (NULL == (receive_counts_array = (int *) H5MM_malloc((size_t) nprocs * sizeof(int))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate receive counts array")
 
-        if (NULL == (displacements_array = (int *) H5MM_malloc((size_t) nprocs * sizeof(*displacements_array))))
+        if (NULL == (displacements_array = (int *) H5MM_malloc((size_t) nprocs * sizeof(int))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate receive displacements array")
 
         /* Inform each process of how many entries each other process is contributing to the resulting array */
@@ -1476,7 +1476,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
         /* Gather the new chunk sizes to all processes for a collective reallocation
          * of the chunks in the file.
          */
-        if (H5D__mpio_array_gatherv(chunk_list, chunk_list_num_entries, sizeof(*chunk_list),
+        if (H5D__mpio_array_gatherv(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
                 (void **) &collective_chunk_list, &collective_chunk_list_num_entries, mpi_size,
                 true, 0, io_info->comm, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather new chunk sizes")
@@ -1490,7 +1490,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
         } /* end for */
 
-        if (NULL == (num_chunks_selected_array = (size_t *) H5MM_malloc((size_t) mpi_size * sizeof(*num_chunks_selected_array))))
+        if (NULL == (num_chunks_selected_array = (size_t *) H5MM_malloc((size_t) mpi_size * sizeof(size_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate num chunks selected array")
 
         if (MPI_SUCCESS != (mpi_code = MPI_Allgather(&chunk_list_num_entries, 1, MPI_UNSIGNED_LONG_LONG, num_chunks_selected_array,
@@ -1943,16 +1943,16 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
         /* Allocate arrays for storing MPI file and mem types and whether or not the
          * types were derived.
          */
-        if (NULL == (file_type_array = (MPI_Datatype *) H5MM_malloc(max_num_chunks * sizeof(*file_type_array))))
+        if (NULL == (file_type_array = (MPI_Datatype *) H5MM_malloc(max_num_chunks * sizeof(MPI_Datatype))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate file type array")
 
-        if (NULL == (file_type_is_derived_array = (hbool_t *) H5MM_calloc(max_num_chunks * sizeof(*file_type_is_derived_array))))
+        if (NULL == (file_type_is_derived_array = (hbool_t *) H5MM_calloc(max_num_chunks * sizeof(hbool_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate file type is derived array")
 
-        if (NULL == (mem_type_array = (MPI_Datatype *) H5MM_malloc(max_num_chunks * sizeof(*mem_type_array))))
+        if (NULL == (mem_type_array = (MPI_Datatype *) H5MM_malloc(max_num_chunks * sizeof(MPI_Datatype))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate mem type array")
 
-        if (NULL == (mem_type_is_derived_array = (hbool_t *) H5MM_calloc(max_num_chunks * sizeof(*mem_type_is_derived_array))))
+        if (NULL == (mem_type_is_derived_array = (hbool_t *) H5MM_calloc(max_num_chunks * sizeof(hbool_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate mem type is derived array")
 
         /* Iterate over the max number of chunks among all processes, as this process could
@@ -1970,7 +1970,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
             /* Gather the new chunk sizes to all processes for a collective re-allocation
              * of the chunks in the file
              */
-            if (H5D__mpio_array_gatherv(&chunk_list[i], have_chunk_to_process ? 1 : 0, sizeof(*chunk_list),
+            if (H5D__mpio_array_gatherv(&chunk_list[i], have_chunk_to_process ? 1 : 0, sizeof(H5D_filtered_collective_io_info_t),
                     (void **) &collective_chunk_list, &collective_chunk_list_num_entries, mpi_size,
                     true, 0, io_info->comm, NULL) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather new chunk sizes")
@@ -1986,7 +1986,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
             } /* end for */
 
-            if (NULL == (has_chunk_selected_array = (hbool_t *) H5MM_malloc((size_t) mpi_size * sizeof(*has_chunk_selected_array))))
+            if (NULL == (has_chunk_selected_array = (hbool_t *) H5MM_malloc((size_t) mpi_size * sizeof(hbool_t))))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate num chunks selected array")
 
             if (MPI_SUCCESS != (mpi_code = MPI_Allgather(&have_chunk_to_process, 1, MPI_C_BOOL, has_chunk_selected_array,
@@ -2601,7 +2601,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
 
         /* pre-computing: calculate number of processes and
             regularity of the selection occupied in each chunk */
-        if(NULL == (nproc_per_chunk = (unsigned*)H5MM_calloc(total_chunks * sizeof(*nproc_per_chunk))))
+        if(NULL == (nproc_per_chunk = (unsigned*)H5MM_calloc(total_chunks * sizeof(unsigned))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate nproc_per_chunk buffer")
 
         /* calculating the chunk address */
@@ -2745,7 +2745,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
         hssize_t          select_npoints;
         hssize_t          chunk_npoints;
 
-        if (NULL == (local_info_array = (H5D_filtered_collective_io_info_t *) H5MM_malloc(num_chunks_selected * sizeof(*local_info_array))))
+        if (NULL == (local_info_array = (H5D_filtered_collective_io_info_t *) H5MM_malloc(num_chunks_selected * sizeof(H5D_filtered_collective_io_info_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate local io info array buffer")
 
         chunk_node = H5SL_first(fm->sel_chunks);
@@ -2874,7 +2874,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
 
     if (*local_chunk_array_num_entries)
-        if (NULL == (send_requests = (MPI_Request *) H5MM_malloc(*local_chunk_array_num_entries * sizeof(*send_requests))))
+        if (NULL == (send_requests = (MPI_Request *) H5MM_malloc(*local_chunk_array_num_entries * sizeof(MPI_Request))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate send requests buffer")
 
     if (NULL == (mem_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(H5S_sel_iter_t))))
@@ -2883,20 +2883,20 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
     /* Gather every rank's list of chunks to rank 0 to allow it to perform the redistribution operation. After this
      * call, the gathered list will initially be sorted in increasing order of chunk offset in the file.
      */
-    if (H5D__mpio_array_gatherv(local_chunk_array, *local_chunk_array_num_entries, sizeof(*local_chunk_array),
+    if (H5D__mpio_array_gatherv(local_chunk_array, *local_chunk_array_num_entries, sizeof(H5D_filtered_collective_io_info_t),
             (void **) &shared_chunks_info_array, &shared_chunks_info_array_num_entries, mpi_size,
             false, 0, io_info->comm, H5D__cmp_filtered_collective_io_info_entry) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather array")
 
     /* Rank 0 redistributes any shared chunks to new owners as necessary */
     if (mpi_rank == 0) {
-        if (NULL == (send_counts = (int *) H5MM_calloc((size_t) mpi_size * sizeof(*send_counts))))
+        if (NULL == (send_counts = (int *) H5MM_calloc((size_t) mpi_size * sizeof(int))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate send counts buffer")
 
-        if (NULL == (send_displacements = (int *) H5MM_malloc((size_t) mpi_size * sizeof(*send_displacements))))
+        if (NULL == (send_displacements = (int *) H5MM_malloc((size_t) mpi_size * sizeof(int))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate send displacements buffer")
 
-        if (NULL == (num_assigned_chunks_array = (size_t *) H5MM_calloc((size_t) mpi_size * sizeof(*num_assigned_chunks_array))))
+        if (NULL == (num_assigned_chunks_array = (size_t *) H5MM_calloc((size_t) mpi_size * sizeof(size_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate number of assigned chunks array")
 
         for (i = 0; i < shared_chunks_info_array_num_entries;) {
@@ -2935,7 +2935,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
          * entry gets that entry back, with the possibly newly-modified "new_owner" field
          */
         HDqsort(shared_chunks_info_array, shared_chunks_info_array_num_entries,
-                sizeof(*shared_chunks_info_array), H5D__cmp_filtered_collective_io_info_entry_owner);
+                sizeof(H5D_filtered_collective_io_info_t), H5D__cmp_filtered_collective_io_info_entry_owner);
 
         send_displacements[0] = 0;
         for (i = 1; i < (size_t) mpi_size; i++)
@@ -2943,7 +2943,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
     } /* end if */
 
     /* Scatter the segments of the list back to each process */
-    H5_CHECKED_ASSIGN(scatter_recvcount_int, int, *local_chunk_array_num_entries * sizeof(*local_chunk_array), size_t);
+    H5_CHECKED_ASSIGN(scatter_recvcount_int, int, *local_chunk_array_num_entries * sizeof(H5D_filtered_collective_io_info_t), size_t);
     if (MPI_SUCCESS != (mpi_code = MPI_Scatterv(shared_chunks_info_array, send_counts, send_displacements,
             MPI_BYTE, local_chunk_array, scatter_recvcount_int, MPI_BYTE, 0, io_info->comm)))
         HMPI_GOTO_ERROR(FAIL, "unable to scatter shared chunks info buffer", mpi_code)
@@ -2959,7 +2959,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
      * chunks it is assigned, in order to avoid potential deadlocking issues.
      */
     if (*local_chunk_array_num_entries)
-        if (NULL == (mod_data = (unsigned char **) H5MM_malloc(*local_chunk_array_num_entries * sizeof(*mod_data))))
+        if (NULL == (mod_data = (unsigned char **) H5MM_malloc(*local_chunk_array_num_entries * sizeof(unsigned char *))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate modification data buffer array")
 
     for (i = 0, last_assigned_idx = 0; i < *local_chunk_array_num_entries; i++) {
@@ -3062,7 +3062,7 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *io_info, const H5D_ty
 
     /* Wait for all async send requests to complete before returning */
     if (num_send_requests) {
-        if (NULL == (send_statuses = (MPI_Status *) H5MM_malloc(num_send_requests * sizeof(*send_statuses))))
+        if (NULL == (send_statuses = (MPI_Status *) H5MM_malloc(num_send_requests * sizeof(MPI_Status))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate send statuses buffer")
 
         H5_CHECK_OVERFLOW(num_send_requests, size_t, int);
@@ -3151,7 +3151,7 @@ H5D__mpio_filtered_collective_write_type(H5D_filtered_collective_io_info_t *chun
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for collective write offset array")
 
         /* Ensure the list is sorted in ascending order of offset in the file */
-        HDqsort(chunk_list, num_entries, sizeof(*chunk_list), H5D__cmp_filtered_collective_io_info_entry);
+        HDqsort(chunk_list, num_entries, sizeof(H5D_filtered_collective_io_info_t), H5D__cmp_filtered_collective_io_info_entry);
 
         base_buf = chunk_list[0].buf;
         for (i = 0; i < num_entries; i++) {
@@ -3273,7 +3273,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     } /* end else */
 
     /* Initialize iterator for memory selection */
-    if (NULL == (mem_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(*mem_iter))))
+    if (NULL == (mem_iter = (H5S_sel_iter_t *) H5MM_malloc(sizeof(H5S_sel_iter_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate memory iterator")
 
     if (H5S_select_iter_init(mem_iter, chunk_info->mspace, type_info->src_type_size) < 0)
