@@ -136,7 +136,7 @@ test_one_chunk_filtered_dataset(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -199,7 +199,7 @@ test_one_chunk_filtered_dataset(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" ONE_CHUNK_FILTERED_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" ONE_CHUNK_FILTERED_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -282,7 +282,7 @@ test_filtered_dataset_no_overlap(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -344,7 +344,7 @@ test_filtered_dataset_no_overlap(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" UNSHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" UNSHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -428,7 +428,7 @@ test_filtered_dataset_overlap(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, SHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, SHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -491,7 +491,7 @@ test_filtered_dataset_overlap(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" SHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" SHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -581,7 +581,7 @@ test_filtered_dataset_single_no_selection(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -650,7 +650,7 @@ test_filtered_dataset_single_no_selection(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -732,7 +732,7 @@ test_filtered_dataset_all_no_selection(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -773,7 +773,7 @@ test_filtered_dataset_all_no_selection(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -852,7 +852,7 @@ test_filtered_dataset_point_selection(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -909,7 +909,7 @@ test_filtered_dataset_point_selection(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -995,7 +995,7 @@ test_filtered_dataset_interleaved_write(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, INTERLEAVED_WRITE_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, INTERLEAVED_WRITE_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -1063,7 +1063,7 @@ test_filtered_dataset_interleaved_write(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" INTERLEAVED_WRITE_FILTERED_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" INTERLEAVED_WRITE_FILTERED_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -1148,7 +1148,7 @@ test_3d_filtered_dataset_no_overlap_separate_pages(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -1213,7 +1213,7 @@ test_3d_filtered_dataset_no_overlap_separate_pages(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -1299,7 +1299,7 @@ test_3d_filtered_dataset_no_overlap_same_pages(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -1364,7 +1364,7 @@ test_3d_filtered_dataset_no_overlap_same_pages(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -1450,7 +1450,7 @@ test_3d_filtered_dataset_overlap(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -1522,7 +1522,7 @@ test_3d_filtered_dataset_overlap(void)
     read_buf = (C_DATATYPE *) calloc(1, correct_buf_size);
     VRFY((NULL != read_buf), "calloc succeeded");
 
-    dset_id = H5Dopen(file_id, "/" SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0), "Dataset read succeeded");
@@ -1612,7 +1612,7 @@ test_cmpd_filtered_dataset_no_conversion_unshared(void)
     VRFY((H5Tinsert(memtype, "LongData", HOFFSET(cmpd_filtered_t, field3), H5T_NATIVE_LONG) >= 0), "Datatype insertion succeeded");
     VRFY((H5Tinsert(memtype, "DoubleData", HOFFSET(cmpd_filtered_t, field4), H5T_NATIVE_DOUBLE) >= 0), "Datatype insertion succeeded");
 
-    dset_id = H5Dcreate(file_id, COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, memtype, filespace,
+    dset_id = H5Dcreate2(file_id, COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, memtype, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -1744,7 +1744,7 @@ test_cmpd_filtered_dataset_no_conversion_shared(void)
     VRFY((H5Tinsert(memtype, "LongData", HOFFSET(cmpd_filtered_t, field3), H5T_NATIVE_LONG) >= 0), "Datatype insertion succeeded");
     VRFY((H5Tinsert(memtype, "DoubleData", HOFFSET(cmpd_filtered_t, field4), H5T_NATIVE_DOUBLE) >= 0), "Datatype insertion succeeded");
 
-    dset_id = H5Dcreate(file_id, COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, memtype, filespace,
+    dset_id = H5Dcreate2(file_id, COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, memtype, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -1890,7 +1890,7 @@ test_cmpd_filtered_dataset_type_conversion_unshared(void)
     VRFY((H5Tinsert(filetype, "LongData", 16, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
     VRFY((H5Tinsert(filetype, "DoubleData", 24, H5T_IEEE_F64BE) >= 0), "Datatype insertion succeeded");
 
-    dset_id = H5Dcreate(file_id, COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, filetype, filespace,
+    dset_id = H5Dcreate2(file_id, COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, filetype, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -2040,7 +2040,7 @@ test_cmpd_filtered_dataset_type_conversion_shared(void)
     VRFY((H5Tinsert(filetype, "LongData", 16, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
     VRFY((H5Tinsert(filetype, "DoubleData", 24, H5T_IEEE_F64BE) >= 0), "Datatype insertion succeeded");
 
-    dset_id = H5Dcreate(file_id, COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, filetype, filespace,
+    dset_id = H5Dcreate2(file_id, COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, filetype, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -2163,7 +2163,7 @@ test_write_serial_read_parallel(void)
         /* Add test filter to the pipeline */
         VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-        dset_id = H5Dcreate(file_id, WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+        dset_id = H5Dcreate2(file_id, WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                 H5P_DEFAULT, plist_id, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -2210,7 +2210,7 @@ test_write_serial_read_parallel(void)
 
     VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
 
-    dset_id = H5Dopen(file_id, "/" WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, H5P_DEFAULT);
+    dset_id = H5Dopen2(file_id, "/" WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -2300,7 +2300,7 @@ test_write_parallel_read_serial(void)
     /* Add test filter to the pipeline */
     VRFY((SET_FILTER(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate(file_id, WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+    dset_id = H5Dcreate2(file_id, WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
             H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
@@ -2369,7 +2369,7 @@ test_write_parallel_read_serial(void)
 
         VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
 
-        dset_id = H5Dopen(file_id, "/" WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, H5P_DEFAULT);
+        dset_id = H5Dopen2(file_id, "/" WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
         correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
