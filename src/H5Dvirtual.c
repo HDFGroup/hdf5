@@ -86,6 +86,8 @@ static herr_t H5D__virtual_flush(H5D_t *dset, hid_t dxpl_id);
 static herr_t H5D__virtual_dest(H5D_t *dset, hid_t dxpl_id);
 
 /* Other functions */
+static herr_t H5D__virtual_insert_gh_obj(H5F_t *f,
+    H5O_storage_virtual_t *storage);
 static herr_t H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_ent_t *virtual_ent,
     H5O_storage_virtual_srcdset_t *source_dset, hid_t dxpl_id);
@@ -656,10 +658,7 @@ H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_dst, H5O_layout_t *layout_dst,
 {
     herr_t          ret_value = SUCCEED;
 
-#ifdef NOT_YET
     FUNC_ENTER_PACKAGE
-#endif /* NOT_YET */
-    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef NOT_YET
     /* Check for copy to the same file */
@@ -671,15 +670,16 @@ H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_dst, H5O_layout_t *layout_dst,
     else
 #endif /* NOT_YET */
     {
-        /* Reset global heap id so a new heap object is created when the message
-         * is flushed */
+        /* Reset global heap id */
         layout_dst->storage.u.virt.serial_list_hobjid.addr = HADDR_UNDEF;
         layout_dst->storage.u.virt.serial_list_hobjid.idx = (size_t)0;
+
+        /* Insert new global heap object */
+        if(H5D__virtual_insert_gh_obj(f_dst, &layout_dst->storage.u.virt) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert global heap object for virtual dataset")
     } /* end block/else */
 
-#ifdef NOT_YET
 done:
-#endif /* NOT_YET */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy() */
 
@@ -731,6 +731,133 @@ H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_delete */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_insert_gh_obj
+ *
+ * Purpose:     Creates and inserts the global heap object for the virtual
+ *              dataset.  This object contains the VDS mappings.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              August 11, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_insert_gh_obj(H5F_t *f, H5O_storage_virtual_t *storage)
+{
+    uint8_t     *heap_block = NULL;
+    size_t      *str_size = NULL;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Note that we assume here that the contents of the heap block cannot
+     * change!  If this ever stops being the case we must change this code to
+     * allow overwrites of the heap block.  -NAF */
+    HDassert(storage->serial_list_hobjid.addr == HADDR_UNDEF);
+
+    /* Check for empty mapping */
+    if(storage->list_nused > 0) {
+        uint8_t *heap_block_p;
+        size_t block_size;
+        hssize_t select_serial_size;
+        hsize_t tmp_hsize;
+        uint32_t chksum;
+        size_t i;
+
+        /* Allocate array for caching results of strlen */
+        if(NULL == (str_size = (size_t *)H5MM_malloc(2 * storage->list_nused *sizeof(size_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to allocate string length array")
+
+        /*
+         * Calculate heap block size
+         */
+        /* Version and number of entries */
+        block_size = (size_t)1 + H5F_SIZEOF_SIZE(f);
+
+        /* Calculate size of each entry */
+        for(i = 0; i < storage->list_nused; i++) {
+            HDassert(storage->list[i].source_file_name);
+            HDassert(storage->list[i].source_dset_name);
+            HDassert(storage->list[i].source_select);
+            HDassert(storage->list[i].source_dset.virtual_select);
+
+            /* Source file name */
+            str_size[2 * i] = HDstrlen(storage->list[i].source_file_name) + (size_t)1;
+            block_size += str_size[2 * i];
+
+            /* Source dset name */
+            str_size[(2 * i) + 1] = HDstrlen(storage->list[i].source_dset_name) + (size_t)1;
+            block_size += str_size[(2 * i) + 1];
+
+            /* Source selection */
+            if((select_serial_size = H5S_SELECT_SERIAL_SIZE(storage->list[i].source_select)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
+            block_size += (size_t)select_serial_size;
+
+            /* Virtual dataset selection */
+            if((select_serial_size = H5S_SELECT_SERIAL_SIZE(storage->list[i].source_dset.virtual_select)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
+            block_size += (size_t)select_serial_size;
+        } /* end for */
+
+        /* Checksum */
+        block_size += 4;
+
+        /* Allocate heap block */
+        if(NULL == (heap_block = (uint8_t *)H5MM_malloc(block_size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to allocate heap block")
+
+        /*
+         * Encode heap block
+         */
+        heap_block_p = heap_block;
+
+        /* Encode heap block encoding version */
+        *heap_block_p++ = (uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS;
+
+        /* Number of entries */
+        tmp_hsize = (hsize_t)storage->list_nused;
+        H5F_ENCODE_LENGTH(f, heap_block_p, tmp_hsize)
+
+        /* Encode each entry */
+        for(i = 0; i < storage->list_nused; i++) {
+            /* Source file name */
+            (void)HDmemcpy((char *)heap_block_p, storage->list[i].source_file_name, str_size[2 * i]);
+            heap_block_p += str_size[2 * i];
+
+            /* Source dataset name */
+            (void)HDmemcpy((char *)heap_block_p, storage->list[i].source_dset_name, str_size[(2 * i) + 1]);
+            heap_block_p += str_size[(2 * i) + 1];
+
+            /* Source selection */
+            if(H5S_SELECT_SERIALIZE(storage->list[i].source_select, &heap_block_p) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to serialize source selection")
+
+            /* Virtual selection */
+            if(H5S_SELECT_SERIALIZE(storage->list[i].source_dset.virtual_select, &heap_block_p) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to serialize virtual selection")
+        } /* end for */
+
+        /* Checksum */
+        chksum = H5_checksum_metadata(heap_block, block_size - (size_t)4, 0);
+        UINT32ENCODE(heap_block_p, chksum)
+
+        /* Insert block into global heap */
+        if(H5HG_insert(f, H5AC_ind_read_dxpl_id, block_size, heap_block, &storage->serial_list_hobjid) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert virtual dataset heap block")
+    } /* end if */
+
+done:
+    heap_block = (uint8_t *)H5MM_xfree(heap_block);
+    str_size = (size_t *)H5MM_xfree(str_size);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_insert_gh_obj() */
 
 
 /*-------------------------------------------------------------------------
@@ -2061,6 +2188,13 @@ H5D__virtual_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     /* Mark layout as not fully initialized (must be done prior to I/O for
      * unlimited/printf selections) */
     storage->init = FALSE;
+
+    /* Insert global heap object if it does not already exist.  Do this now so
+     * we don't have to insert an object into the cache when encoding the
+     * layout, which would cause problems in parallel. */
+    if(storage->serial_list_hobjid.addr == HADDR_UNDEF)
+        if(H5D__virtual_insert_gh_obj(f, storage) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert global heap object for virtual dataset")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -33,9 +33,6 @@
 
 /* Local macros */
 
-/* Version # of encoded virtual dataset global heap blocks */
-#define H5O_LAYOUT_VDS_GH_ENC_VERS      0
-
 
 /* PRIVATE PROTOTYPES */
 static void *H5O__layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
@@ -550,8 +547,6 @@ static herr_t
 H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    uint8_t                *heap_block = NULL;
-    size_t                  *str_size = NULL;
     unsigned               u;
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -676,101 +671,9 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
             break;
 
         case H5D_VIRTUAL:
-            /* Create heap block if it has not been created yet */
-            /* Note that we assume here that the contents of the heap block
-             * cannot change!  If this ever stops being the case we must change
-             * this code to allow overwrites of the heap block.  -NAF */
-            if((mesg->storage.u.virt.serial_list_hobjid.addr == HADDR_UNDEF)
-                    && (mesg->storage.u.virt.list_nused > 0)) {
-                uint8_t *heap_block_p;
-                size_t block_size;
-                hssize_t select_serial_size;
-                hsize_t tmp_hsize;
-                uint32_t chksum;
-                size_t i;
-
-                /* Allocate array for caching results of strlen */
-                if(NULL == (str_size = (size_t *)H5MM_malloc(2 * mesg->storage.u.virt.list_nused *sizeof(size_t))))
-                    HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, FAIL, "unable to allocate string length array")
-
-                /*
-                 * Calculate heap block size
-                 */
-                /* Version and number of entries */
-                block_size = (size_t)1 + H5F_SIZEOF_SIZE(f);
-
-                /* Calculate size of each entry */
-                for(i = 0; i < mesg->storage.u.virt.list_nused; i++) {
-                    HDassert(mesg->storage.u.virt.list[i].source_file_name);
-                    HDassert(mesg->storage.u.virt.list[i].source_dset_name);
-                    HDassert(mesg->storage.u.virt.list[i].source_select);
-                    HDassert(mesg->storage.u.virt.list[i].source_dset.virtual_select);
-
-                    /* Source file name */
-                    str_size[2 * i] = HDstrlen(mesg->storage.u.virt.list[i].source_file_name) + (size_t)1;
-                    block_size += str_size[2 * i];
-
-                    /* Source dset name */
-                    str_size[(2 * i) + 1] = HDstrlen(mesg->storage.u.virt.list[i].source_dset_name) + (size_t)1;
-                    block_size += str_size[(2 * i) + 1];
-
-                    /* Source selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_select)) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
-                    block_size += (size_t)select_serial_size;
-
-                    /* Virtual dataset selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select)) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
-                    block_size += (size_t)select_serial_size;
-                } /* end for */
-
-                /* Checksum */
-                block_size += 4;
-
-                /* Allocate heap block */
-                if(NULL == (heap_block = (uint8_t *)H5MM_malloc(block_size)))
-                    HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, FAIL, "unable to allocate heap block")
-
-                /*
-                 * Encode heap block
-                 */
-                heap_block_p = heap_block;
-
-                /* Encode heap block encoding version */
-                *heap_block_p++ = (uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS;
-
-                /* Number of entries */
-                tmp_hsize = (hsize_t)mesg->storage.u.virt.list_nused;
-                H5F_ENCODE_LENGTH(f, heap_block_p, tmp_hsize)
-
-                /* Encode each entry */
-                for(i = 0; i < mesg->storage.u.virt.list_nused; i++) {
-                    /* Source file name */
-                    (void)HDmemcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_file_name, str_size[2 * i]);
-                    heap_block_p += str_size[2 * i];
-
-                    /* Source dataset name */
-                    (void)HDmemcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_dset_name, str_size[(2 * i) + 1]);
-                    heap_block_p += str_size[(2 * i) + 1];
-
-                    /* Source selection */
-                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize source selection")
-
-                    /* Virtual selection */
-                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize virtual selection")
-                } /* end for */
-
-                /* Checksum */
-                chksum = H5_checksum_metadata(heap_block, block_size - (size_t)4, 0);
-                UINT32ENCODE(heap_block_p, chksum)
-
-                /* Insert block into global heap */
-                if(H5HG_insert(f, H5AC_ind_read_dxpl_id, block_size, heap_block, &((H5O_layout_t *)mesg)->storage.u.virt.serial_list_hobjid) < 0) /* Casting away const OK  --NAF */
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to insert virtual dataset heap block")
-            } /* end if */
+            /* Heap block should have been created */
+            HDassert((mesg->storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF)
+                    || (mesg->storage.u.virt.list_nused == 0));
 
             /* Heap information */
             H5F_addr_encode(f, &p, mesg->storage.u.virt.serial_list_hobjid.addr);
@@ -785,9 +688,6 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     } /* end switch */
 
 done:
-    heap_block = (uint8_t *)H5MM_xfree(heap_block);
-    str_size = (size_t *)H5MM_xfree(str_size);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__layout_encode() */
 

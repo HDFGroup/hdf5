@@ -113,6 +113,7 @@
 #define H5F_CRT_FILE_SPACE_PAGE_SIZE_ENC        H5P__encode_hsize_t
 #define H5F_CRT_FILE_SPACE_PAGE_SIZE_DEC        H5P__decode_hsize_t
 
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -190,6 +191,7 @@ static const H5F_fspace_strategy_t H5F_def_file_space_strategy_g = H5F_CRT_FILE_
 static const hbool_t H5F_def_free_space_persist_g = H5F_CRT_FREE_SPACE_PERSIST_DEF;
 static const hsize_t H5F_def_free_space_threshold_g = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
 static const hsize_t H5F_def_file_space_page_size_g = H5F_CRT_FILE_SPACE_PAGE_SIZE_DEF;
+
 
 
 /*-------------------------------------------------------------------------
