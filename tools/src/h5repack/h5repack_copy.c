@@ -782,7 +782,6 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
         switch (travt->objs[i].type) {
             case H5TRAV_TYPE_UNKNOWN:
-                HDassert(0);
                 break;
 
                 /*-------------------------------------------------------------------------
@@ -1486,7 +1485,6 @@ static int copy_user_block(const char *infile, const char *outfile, hsize_t size
     int infid = -1, outfid = -1; /* File descriptors */
 
     /* User block must be any power of 2 equal to 512 or greater (512, 1024, 2048, etc.) */
-    HDassert(size > 0);
 
     /* Open files */
     if ((infid = HDopen(infile, O_RDONLY)) < 0)
