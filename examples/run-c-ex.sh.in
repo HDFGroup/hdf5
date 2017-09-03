@@ -122,6 +122,11 @@ then
         rm h5_extlink &&\
         RunTest h5_elink_unix2win &&\
         rm h5_elink_unix2win &&\
+        OLD_DEBUG_STRING=$HDF5_DEBUG &&\
+        export HDF5_DEBUG="+all +trace +ttimes" &&\
+        RunTest h5_debug_trace &&\
+        HDF5_DEBUG=$OLD_DEBUG_STRING &&\
+        rm h5_debug_trace &&\
         RunTest h5_shared_mesg &&\
         rm h5_shared_mesg &&\
         RunTest h5_vds-eiger &&\

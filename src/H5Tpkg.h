@@ -146,7 +146,7 @@
 struct H5T_stats_t {
     unsigned	ncalls;			/*num calls to conversion function   */
     hsize_t	nelmts;			/*total data points converted	     */
-    H5_timer_t	timer;			/*total time for conversion	     */
+    H5_timevals_t times;		/*total time for conversion	     */
 };
 
 /* The datatype conversion database */

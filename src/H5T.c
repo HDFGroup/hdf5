@@ -4806,34 +4806,47 @@ done:
  */
 herr_t
 H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
-        size_t buf_stride, size_t bkg_stride, void *buf, void *bkg,
-            hid_t dset_xfer_plist)
+    size_t buf_stride, size_t bkg_stride, void *buf, void *bkg,
+    hid_t dset_xfer_plist)
 {
 #ifdef H5T_DEBUG
-    H5_timer_t        timer;
+    H5_timer_t  timer;                  /* Timer for conversion */
 #endif
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
 #ifdef H5T_DEBUG
-    if (H5DEBUG(T)) H5_timer_begin(&timer);
+    if(H5DEBUG(T)) {
+        /* Initialize and start timer */
+        H5_timer_init(&timer);
+        H5_timer_start(&timer);
+    } /* end if */
 #endif
+
+    /* Call the appropriate conversion callback */
     tpath->cdata.command = H5T_CONV_CONV;
-    if ((tpath->func)(src_id, dst_id, &(tpath->cdata), nelmts, buf_stride,
-                      bkg_stride, buf, bkg, dset_xfer_plist)<0)
+    if((tpath->func)(src_id, dst_id, &(tpath->cdata), nelmts, buf_stride,
+                      bkg_stride, buf, bkg, dset_xfer_plist) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed");
+
 #ifdef H5T_DEBUG
-    if (H5DEBUG(T)) {
-        H5_timer_end(&(tpath->stats.timer), &timer);
+    if(H5DEBUG(T)) {
+        /* Stop timer */
+        H5_timer_stop(&timer);
+
+        /* Record elapsed timer info */
+        H5_timer_get_times(timer, &tpath->stats.times);
+
+        /* Increment # of calls and # of elements converted */
         tpath->stats.ncalls++;
         tpath->stats.nelmts += nelmts;
-    }
+    } /* end if */
 #endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5T_convert() */
 
 
 /*-------------------------------------------------------------------------

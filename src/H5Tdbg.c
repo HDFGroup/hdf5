@@ -102,15 +102,13 @@
 herr_t
 H5T__print_stats(H5T_path_t H5_ATTR_UNUSED * path, int H5_ATTR_UNUSED * nprint/*in,out*/)
 {
-#ifdef H5T_DEBUG
-    hsize_t	nbytes;
-    char	bandwidth[32];
-#endif
-
     FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5T_DEBUG
     if(H5DEBUG(T) && path->stats.ncalls > 0) {
+        hsize_t	nbytes;
+        char	bandwidth[32];
+
 	if(nprint && 0 == (*nprint)++) {
 	    HDfprintf(H5DEBUG(T), "H5T: type conversion statistics:\n");
 	    HDfprintf(H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n",
@@ -119,7 +117,8 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED * path, int H5_ATTR_UNUSED * nprint/*
 	    HDfprintf(H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n",
 		       "----------", "-----", "-----", "----",
 		       "------", "-------", "---------");
-	}
+	} /* end if */
+
         if(path->src && path->dst)
             nbytes = MAX(H5T_get_size(path->src), H5T_get_size(path->dst));
         else if(path->src)
@@ -128,18 +127,20 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED * path, int H5_ATTR_UNUSED * nprint/*
             nbytes = H5T_get_size(path->dst);
         else
             nbytes = 0;
+
 	nbytes *= path->stats.nelmts;
-	H5_bandwidth(bandwidth, (double)nbytes, path->stats.timer.etime);
-	HDfprintf(H5DEBUG(T), "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n",
+        H5_bandwidth(bandwidth, (double)nbytes, path->stats.times.elapsed);
+        HDfprintf(H5DEBUG(T), "   %-16s %10Hd %10d %8T %8T %8T %10s\n",
 		   path->name,
 		   path->stats.nelmts,
 		   path->stats.ncalls,
-		   path->stats.timer.utime,
-		   path->stats.timer.stime,
-		   path->stats.timer.etime,
+                   path->stats.times.user,
+                   path->stats.times.system,
+                   path->stats.times.elapsed,
 		   bandwidth);
-    }
+    } /* end if */
 #endif
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__print_stats() */
 
