@@ -127,6 +127,27 @@ IntType::IntType(const H5Location& loc, const H5std_string& dtype_name) : AtomTy
 }
 
 //--------------------------------------------------------------------------
+// Function:    IntType::decode
+///\brief       Returns an IntType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* IntType::decode() const
+{
+    hid_t encoded_inttype_id;
+    try {
+        encoded_inttype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    IntType *encoded_inttype = new IntType;
+    encoded_inttype->p_setId(encoded_inttype_id);
+    return(encoded_inttype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    IntType::getSign
 ///\brief       Retrieves the sign type for an integer type.
 ///\return      Valid sign type

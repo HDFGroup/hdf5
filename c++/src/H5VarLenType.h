@@ -29,6 +29,10 @@ class H5_DLLCPP VarLenType : public DataType {
         // on the specified base type.
         VarLenType(const DataType* base_type);
 
+        // Returns an VarLenType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
+
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("VarLenType"); }
 
