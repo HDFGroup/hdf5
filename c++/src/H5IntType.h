@@ -35,6 +35,10 @@ class H5_DLLCPP IntType : public AtomType {
         IntType(const H5Location& loc, const char* name);
         IntType(const H5Location& loc, const H5std_string& name);
 
+        // Returns an IntType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
+
         // Retrieves the sign type for an integer type
         H5T_sign_t getSign() const;
 

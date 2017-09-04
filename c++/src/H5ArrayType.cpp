@@ -139,6 +139,27 @@ ArrayType& ArrayType::operator=(const ArrayType& rhs)
 }
 
 //--------------------------------------------------------------------------
+// Function:    ArrayType::decode
+///\brief       Returns an ArrayType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* ArrayType::decode() const
+{
+    hid_t encoded_arrtype_id;
+    try {
+        encoded_arrtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    ArrayType *encoded_arrtype = new ArrayType;
+    encoded_arrtype->p_setId(encoded_arrtype_id);
+    return(encoded_arrtype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    ArrayType::getArrayNDims
 ///\brief       Returns the number of dimensions for an array datatype.
 ///\return      Number of dimensions

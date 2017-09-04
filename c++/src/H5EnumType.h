@@ -40,6 +40,10 @@ class H5_DLLCPP EnumType : public DataType {
         EnumType(const H5Location& loc, const char* name);
         EnumType(const H5Location& loc, const H5std_string& name);
 
+        // Returns an EnumType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
+
         // Returns the number of members in this enumeration datatype.
         int getNmembers () const;
 

@@ -109,6 +109,27 @@ VarLenType::VarLenType(const H5Location& loc, const H5std_string& dtype_name) : 
 }
 
 //--------------------------------------------------------------------------
+// Function:    VarLenType::decode
+///\brief       Returns an VarLenType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* VarLenType::decode() const
+{
+    hid_t encoded_vltype_id;
+    try {
+        encoded_vltype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    VarLenType *encoded_vltype = new VarLenType;
+    encoded_vltype->p_setId(encoded_vltype_id);
+    return(encoded_vltype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    VarLenType destructor
 ///\brief       Properly terminates access to this datatype.
 // Programmer   Binh-Minh Ribler - May, 2004

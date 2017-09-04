@@ -71,7 +71,7 @@ FloatType::FloatType(const hid_t existing_id) : AtomType( existing_id ) {}
 FloatType::FloatType(const FloatType&  original) : AtomType( original ){}
 
 //--------------------------------------------------------------------------
-// Function:    EnumType overloaded constructor
+// Function:    FloatType overloaded constructor
 ///\brief       Gets the floating-point datatype of the specified dataset
 ///\param       dataset - IN: Dataset that this floating-point datatype
 ///             associates with
@@ -125,6 +125,27 @@ FloatType::FloatType(const H5Location& loc, const char *dtype_name) : AtomType()
 FloatType::FloatType(const H5Location& loc, const H5std_string& dtype_name) : AtomType()
 {
     id = p_opentype(loc, dtype_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    FloatType::decode
+///\brief       Returns an FloatType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* FloatType::decode() const
+{
+    hid_t encoded_flttype_id;
+    try {
+        encoded_flttype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    FloatType *encoded_flttype = new FloatType;
+    encoded_flttype->p_setId(encoded_flttype_id);
+    return(encoded_flttype);
 }
 
 //--------------------------------------------------------------------------
