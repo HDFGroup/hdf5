@@ -262,7 +262,6 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
 
                 /* Check if this type is the one requested */
                 if (oinfo.addr == dt->addr_in) {
-                    HDassert(!dt_ret);
                     dt_ret = dt;
                 } /* end if */
             } /* end if */
