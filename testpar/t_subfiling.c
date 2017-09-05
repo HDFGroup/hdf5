@@ -851,7 +851,10 @@ subf_2_r(void)
     mrc = MPI_Comm_free(&comm);
     VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
 
+#ifdef H5_HAVE_MPE
     MPI_Barrier(MPI_COMM_WORLD);
+#endif
+
     MPI_File_delete(subfile_name, MPI_INFO_NULL);
 
     return;
