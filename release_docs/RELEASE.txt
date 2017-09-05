@@ -175,6 +175,15 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     Library
     -------
+    - Fix H5HL_offset_into()
+
+      (1) Fix H5HL_offset_into() to return error when offset exceeds heap data
+          block size.
+      (2) Fix other places in the library that call this routine to detect
+          error routine.
+        
+      (HDFFV-10216, VC, 2017/08/30)
+
     - Fixes for paged aggregation
 
       Skip test in test/fheap.c when:
