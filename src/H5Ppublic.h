@@ -168,6 +168,7 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x20,
     H5D_MPIO_FILTERS = 0x40,
     H5D_MPIO_VDS_PARALLEL_READ = 0x80
+    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x40
 } H5D_mpio_no_collective_cause_t;
 
 /********************/
