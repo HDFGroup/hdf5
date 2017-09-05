@@ -92,7 +92,6 @@ h5tools_get_little_endian_type(hid_t tid)
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
-            HDassert(0);
             break;
 
     } /* end switch */
@@ -179,7 +178,6 @@ h5tools_get_big_endian_type(hid_t tid)
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
-            HDassert(0);
             break;
     } /* end switch */
 
