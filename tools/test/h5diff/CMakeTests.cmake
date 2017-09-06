@@ -412,6 +412,7 @@
               -D "TEST_OUTPUT=${resultfile}_ERR.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}_ERR.txt"
+              -D "TEST_MASK_ERROR=true"
               -D "TEST_APPEND=EXIT CODE:"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
@@ -521,6 +522,7 @@
                 -D "TEST_OUTPUT=${resultfile}_ERR.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_REFERENCE=${resultfile}_ERR.txt"
+                -D "TEST_MASK_ERROR=true"
                 -D "TEST_APPEND=EXIT CODE:"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
@@ -536,6 +538,7 @@
                 -D "TEST_OUTPUT=${resultfile}_ERR.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_REFERENCE=${resultfile}_ERR.txt"
+                -D "TEST_MASK_ERROR=true"
                 -D "TEST_APPEND=EXIT CODE:"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
