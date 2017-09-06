@@ -32,11 +32,11 @@
  *
  *-------------------------------------------------------------------------
  */
-static int aux_find_obj(const char  *name,    /* object name from traverse list */
-                        pack_opt_t  *options, /* repack options */
-                        pack_info_t *obj)     /* (OUT) info about object to filter */
+static int aux_find_obj(const char* name, /* object name from traverse list */
+        pack_opt_t *options, /* repack options */
+        pack_info_t *obj /*OUT*/) /* info about object to filter */
 {
-    char        *pdest;
+    char         *pdest;
     int          result;
     unsigned int i;
 
@@ -69,9 +69,9 @@ static int aux_find_obj(const char  *name,    /* object name from traverse list 
  *
  *-------------------------------------------------------------------------
  */
-static int aux_assign_obj(const char *name,    /* object name from traverse list */
-                         pack_opt_t  *options, /* repack options */
-                         pack_info_t *obj)     /* (OUT) info about object to filter */
+static int aux_assign_obj(const char* name, /* object name from traverse list */
+        pack_opt_t *options, /* repack options */
+        pack_info_t *obj /*OUT*/) /* info about object to filter */
 {
 
     int         idx, i;
@@ -184,19 +184,19 @@ static int aux_assign_obj(const char *name,    /* object name from traverse list
  *-------------------------------------------------------------------------
  */
 
-int apply_filters(const char *name,       /* object name from traverse list */
-                  int         rank,       /* rank of dataset */
-                  hsize_t    *dims,       /* dimensions of dataset */
-                  size_t      msize,      /* size of type */
-                  hid_t       dcpl_id,    /* dataset creation property list */
-                  pack_opt_t *options,    /* repack options */
-                  int        *has_filter) /* (OUT) object NAME has a filter */
+int apply_filters(const char* name, /* object name from traverse list */
+        int rank, /* rank of dataset */
+        hsize_t *dims, /* dimensions of dataset */
+        size_t msize, /* size of type */
+        hid_t dcpl_id, /* dataset creation property list */
+        pack_opt_t *options, /* repack options */
+        int *has_filter) /* (OUT) object NAME has a filter */
 {
-    int          nfilters;   /* number of filters in DCPL */
-    hsize_t      chsize[64]; /* chunk size in elements */
+    int         nfilters; /* number of filters in DCPL */
+    hsize_t     chsize[64]; /* chunk size in elements */
     H5D_layout_t layout;
-    int          i;
-    pack_info_t  obj;
+    int         i;
+    pack_info_t obj;
 
     *has_filter = 0;
 

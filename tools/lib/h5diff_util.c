@@ -283,7 +283,6 @@ get_sign(H5T_sign_t sign)
             return "H5T_NSGN";
 
         default:
-            HDassert(0);
             return "unknown sign value";
     } /* end switch */
 }
@@ -340,7 +339,6 @@ get_class(H5T_class_t tclass)
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
-            HDassert(0);
             return("Invalid class");
     } /* end switch */
 } /* end get_class() */
@@ -395,7 +393,10 @@ herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
             *m_size2 = H5Tget_size(*m_tid2);
         } /* end else */
     } /* end if */
-    HDassert((*m_size1) == (*m_size2));
+    if((*m_size1) != (*m_size2)) {
+        ret = FAIL;
+        goto out;
+    }
 
 out:
     return ret;
