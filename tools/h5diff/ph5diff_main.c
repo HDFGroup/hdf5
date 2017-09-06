@@ -11,9 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 #include "H5private.h"
 #include "h5diff.h"
 #include "ph5diff.h"
@@ -318,6 +315,8 @@ void h5diff_exit(int status)
         MPI_Finalize();
         status = EXIT_SUCCESS;  /* Reset exit status, since some mpiexec commands generate output on failure status */
     }
+
+    h5tools_close();
 
     /* Always exit(0), since MPI implementations do weird stuff when they
      *  receive a non-zero exit value. - QAK

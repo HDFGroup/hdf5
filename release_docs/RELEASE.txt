@@ -72,7 +72,16 @@ New Features
 
     Tools
     -----
-    - None
+    - h5diff
+
+      h5diff has new option enable-error-stack.
+
+      Updated h5diff with the --enable-error-stack argument, which
+      enables the display of the hdf5 error stack. This completes the
+      improvement to the main tools; h5copy, h5diff, h5dump, h5ls and
+      h5repack.
+
+      (ADB - 2017/08/30, HDFFV-9774)
 
 
     High-Level APIs
