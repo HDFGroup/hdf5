@@ -1618,9 +1618,9 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
 
         if(space_type != H5S_NULL && space_type != H5S_NO_CLASS) {
             if(hexdump_g)
-            p_type = H5Tcopy(type);
+                p_type = H5Tcopy(type);
             else
-            p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
+                p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
 
             if(p_type >= 0) {
                 /* VL data special information */
@@ -1630,23 +1630,22 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
                 if (h5tools_detect_vlen(p_type) == TRUE)
                     vl_data = TRUE;
 
-                temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-                HDassert(temp_need == (hsize_t)((size_t)temp_need));
+                temp_need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
                 need = (size_t)temp_need;
-                buf = HDmalloc(need);
-                HDassert(buf);
-                if(H5Aread(attr, p_type, buf) >= 0) {
-                    ctx.need_prefix = TRUE;
-                    ctx.indent_level = 2;
-                    ctx.cur_column = (size_t)curr_pos;
-                    h5tools_dump_mem(rawoutstream, info, &ctx, attr, p_type, space, buf);
+                if((buf = HDmalloc(need)) != NULL) {
+                    if(H5Aread(attr, p_type, buf) >= 0) {
+                        ctx.need_prefix = TRUE;
+                        ctx.indent_level = 2;
+                        ctx.cur_column = (size_t)curr_pos;
+                        h5tools_dump_mem(rawoutstream, info, &ctx, attr, p_type, space, buf);
+                    }
+
+                    /* Reclaim any VL memory, if necessary */
+                    if (vl_data)
+                        H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+
+                    HDfree(buf);
                 }
-
-                /* Reclaim any VL memory, if necessary */
-                if (vl_data)
-                    H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
-
-                HDfree(buf);
                 H5Tclose(p_type);
             } /* end if */
         }
@@ -1847,7 +1846,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 } /* end if */
                 break;
             default:
-                HDassert(0);
+                h5tools_str_append(&buffer, "layout information not available");
                 break;
         }
         /* Print total raw storage size */

@@ -10,8 +10,6 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "h5dump.h"
 #include "h5dump_ddl.h"
@@ -719,93 +717,100 @@ parse_mask_list(const char *h_list)
     const char        *ptr = NULL;
 
     /* sanity check */
-    HDassert(h_list);
+    if(h_list) {
+        HDmemset(packed_mask,0,sizeof(packed_mask));
 
-    HDmemset(packed_mask,0,sizeof(packed_mask));
-
-    packed_bits_num = 0;
-    /* scan in pair of offset,length separated by commas. */
-    ptr = h_list;
-    while (*ptr) {
-        /* scan for an offset which is an unsigned int */
-        if (!HDisdigit(*ptr)) {
-            error_msg("Bad mask list(%s)\n", h_list);
-            return FAIL;
-        }
-        soffset_value = HDatoi(ptr);
-        offset_value = (unsigned)soffset_value;
-        if (soffset_value < 0 || offset_value >= PACKED_BITS_SIZE_MAX) {
-            error_msg("Packed Bit offset value(%d) must be between 0 and %u\n",
-                    soffset_value, (unsigned)(PACKED_BITS_SIZE_MAX - 1));
-            return FAIL;
-        }
-
-        /* skip to end of integer */
-        while (HDisdigit(*++ptr))
-            ;
-        /* Look for the common separator */
-        if (*ptr++ != ',') {
-            error_msg("Bad mask list(%s), missing expected comma separator.\n", h_list);
-            return FAIL;
-        }
-
-        /* scan for a length which is a positive int */
-        if (!HDisdigit(*ptr)) {
-            error_msg("Bad mask list(%s)\n", h_list);
-            return FAIL;
-        }
-        slength_value = HDatoi(ptr);
-        if (slength_value <= 0) {
-            error_msg("Packed Bit length value(%d) must be positive.\n", slength_value);
-            return FAIL;
-        }
-        length_value = (unsigned)slength_value;
-        if ((offset_value + length_value) > PACKED_BITS_SIZE_MAX) {
-            error_msg("Packed Bit offset+length value(%u) too large. Max is %u\n",
-                       offset_value+length_value, (unsigned)PACKED_BITS_SIZE_MAX);
-            return FAIL;
-        }
-
-        /* skip to end of int */
-        while (HDisdigit(*++ptr))
-            ;
-
-        /* store the offset,length pair */
-        if (packed_bits_num >= PACKED_BITS_MAX) {
-            /* too many requests */
-            error_msg("Too many masks requested (max. %d). Mask list(%s)\n", PACKED_BITS_MAX, h_list);
-            return FAIL;
-        }
-        packed_offset[packed_bits_num] = offset_value;
-        packed_length[packed_bits_num] = length_value;
-        /* create the bit mask by left shift 1's by length, then negate it. */
-        /* After packed_mask is calculated, packed_length is not needed but  */
-        /* keep it for debug purpose. */
-        temp_mask = ~0ULL;
-        if(length_value < (int)(8 *sizeof(unsigned long long))) {
-            temp_mask = temp_mask << length_value;
-            packed_mask[packed_bits_num] = ~temp_mask;
-        }
-        else
-            packed_mask[packed_bits_num] = temp_mask;
-        packed_bits_num++;
-
-        /* skip a possible comma separator */
-        if (*ptr == ',') {
-            if (!(*++ptr)) {
-                /* unexpected end of string */
-                error_msg("Bad mask list(%s), unexpected end of string.\n", h_list);
+        packed_bits_num = 0;
+        /* scan in pair of offset,length separated by commas. */
+        ptr = h_list;
+        while (*ptr) {
+            /* scan for an offset which is an unsigned int */
+            if (!HDisdigit(*ptr)) {
+                error_msg("Bad mask list(%s)\n", h_list);
                 return FAIL;
             }
+            soffset_value = HDatoi(ptr);
+            offset_value = (unsigned)soffset_value;
+            if (soffset_value < 0 || offset_value >= PACKED_BITS_SIZE_MAX) {
+                error_msg("Packed Bit offset value(%d) must be between 0 and %u\n",
+                        soffset_value, (unsigned)(PACKED_BITS_SIZE_MAX - 1));
+                return FAIL;
+            }
+
+            /* skip to end of integer */
+            while (HDisdigit(*++ptr))
+                ;
+            /* Look for the common separator */
+            if (*ptr++ != ',') {
+                error_msg("Bad mask list(%s), missing expected comma separator.\n", h_list);
+                return FAIL;
+            }
+
+            /* scan for a length which is a positive int */
+            if (!HDisdigit(*ptr)) {
+                error_msg("Bad mask list(%s)\n", h_list);
+                return FAIL;
+            }
+            slength_value = HDatoi(ptr);
+            if (slength_value <= 0) {
+                error_msg("Packed Bit length value(%d) must be positive.\n", slength_value);
+                return FAIL;
+            }
+            length_value = (unsigned)slength_value;
+            if ((offset_value + length_value) > PACKED_BITS_SIZE_MAX) {
+                error_msg("Packed Bit offset+length value(%u) too large. Max is %u\n",
+                        offset_value+length_value, (unsigned)PACKED_BITS_SIZE_MAX);
+                return FAIL;
+            }
+
+            /* skip to end of int */
+            while (HDisdigit(*++ptr))
+                ;
+
+            /* store the offset,length pair */
+            if (packed_bits_num >= PACKED_BITS_MAX) {
+                /* too many requests */
+                error_msg("Too many masks requested (max. %d). Mask list(%s)\n", PACKED_BITS_MAX, h_list);
+                return FAIL;
+            }
+            packed_offset[packed_bits_num] = offset_value;
+            packed_length[packed_bits_num] = length_value;
+            /* create the bit mask by left shift 1's by length, then negate it. */
+            /* After packed_mask is calculated, packed_length is not needed but  */
+            /* keep it for debug purpose. */
+            temp_mask = ~0ULL;
+            if(length_value < (int)(8 *sizeof(unsigned long long))) {
+                temp_mask = temp_mask << length_value;
+                packed_mask[packed_bits_num] = ~temp_mask;
+            }
+            else
+                packed_mask[packed_bits_num] = temp_mask;
+            packed_bits_num++;
+
+            /* skip a possible comma separator */
+            if (*ptr == ',') {
+                if (!(*++ptr)) {
+                    /* unexpected end of string */
+                    error_msg("Bad mask list(%s), unexpected end of string.\n", h_list);
+                    return FAIL;
+                }
+            }
         }
+        if(packed_bits_num > PACKED_BITS_MAX) {
+            error_msg("Maximum number of packed bits exceeded\n");
+            return FAIL;
+        }
+        if (packed_bits_num == 0) {
+            /* got no masks! */
+            error_msg("Bad mask list(%s)\n", h_list);
+            return FAIL;
+        }
+        return SUCCEED;
     }
-    HDassert(packed_bits_num <= PACKED_BITS_MAX);
-    if (packed_bits_num == 0) {
-        /* got no masks! */
-        error_msg("Bad mask list(%s)\n", h_list);
+    else  {
+        error_msg("Bad mask list argument\n");
         return FAIL;
     }
-    return SUCCEED;
 }
 
 
@@ -1696,13 +1701,18 @@ h5_fileaccess(void)
         HDmemset(memb_name, 0, sizeof memb_name);
         HDmemset(memb_addr, 0, sizeof memb_addr);
 
-        HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
-            memb_fapl[mt] = H5P_DEFAULT;
-            memb_map[mt] = mt;
-            sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
-            memb_name[mt] = sv[mt];
-            memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
+        if(HDstrlen(multi_letters)==H5FD_MEM_NTYPES) {
+            for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+                memb_fapl[mt] = H5P_DEFAULT;
+                memb_map[mt] = mt;
+                sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+                memb_name[mt] = sv[mt];
+                memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
+            }
+        }
+        else {
+            error_msg("Bad multi_letters list\n");
+            return FAIL;
         }
 
         if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
@@ -1755,8 +1765,10 @@ h5_fileaccess(void)
 static void
 init_prefix(char **prfx, size_t prfx_len)
 {
-    HDassert(prfx_len > 0);
-    *prfx = (char *)HDcalloc(prfx_len, 1);
+    if(prfx_len > 0)
+        *prfx = (char *)HDcalloc(prfx_len, 1);
+    else
+        error_msg("unable to allocate prefix buffer\n");
 }
 
 

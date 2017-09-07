@@ -12,15 +12,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Thursday, July 23, 1998
- *
  * Purpose: A library for displaying the values of a dataset in a human
  *  readable format.
  */
-
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "h5tools.h"
 #include "h5tools_dump.h"
@@ -40,7 +34,7 @@ FILE       *rawinstream = NULL;        /* should initialize to stdin but gcc moa
 FILE       *rawoutstream = NULL;       /* should initialize to stdout but gcc moans about it */
 FILE       *rawerrorstream = NULL;     /* should initialize to stderr but gcc moans about it */
 int         bin_output;         /* binary output */
-int         bin_form;           /* binary form */
+int         bin_form = 0;       /* binary form, default NATIVE */
 int         region_output;      /* region output */
 int         oid_output;         /* oid output */
 int         data_output;        /* data output */
@@ -1289,13 +1283,13 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
     int i;
     unsigned j;
 
-    HDassert(ctx->ndims);
-
-    ctx->acc[ctx->ndims - 1] = 1;
-    for (i = ((int)ctx->ndims - 2); i >= 0; i--)
-        ctx->acc[i] = ctx->acc[i + 1] * dims[i + 1];
-    for (j = 0; j < ctx->ndims; j++)
-        ctx->pos[j] = 0;
+    if(ctx->ndims > 0) {
+        ctx->acc[ctx->ndims - 1] = 1;
+        for (i = ((int)ctx->ndims - 2); i >= 0; i--)
+            ctx->acc[i] = ctx->acc[i + 1] * dims[i + 1];
+        for (j = 0; j < ctx->ndims; j++)
+            ctx->pos[j] = 0;
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -1416,13 +1410,17 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 memb = H5Tget_super(tid);
                 ndims = H5Tget_array_ndims(tid);
                 H5Tget_array_dims2(tid, dims);
-                HDassert(ndims >= 1 && ndims <= H5S_MAX_RANK);
-
-                /* calculate the number of array elements */
-                for (k = 0, nelmts = 1; k < ndims; k++) {
-                    temp_nelmts = nelmts;
-                    temp_nelmts *= dims[k];
-                    nelmts = (size_t) temp_nelmts;
+                if(ndims >= 1 && ndims <= H5S_MAX_RANK) {
+                    /* calculate the number of array elements */
+                    for (k = 0, nelmts = 1; k < ndims; k++) {
+                        temp_nelmts = nelmts;
+                        temp_nelmts *= dims[k];
+                        nelmts = (size_t) temp_nelmts;
+                    }
+                }
+                else {
+                    H5Tclose(memb);
+                    H5E_THROW(FAIL, H5E_tools_min_id_g, "calculate the number of array elements failed");
                 }
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
@@ -1647,7 +1645,6 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     ndims = (unsigned)sndims;
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-    HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
     if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL)
         HGOTO_ERROR(FALSE, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
 
