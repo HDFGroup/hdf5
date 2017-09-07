@@ -1582,6 +1582,7 @@ void print_user_block(const char *filename, hid_t fid)
 
     /* open file */
     if((fh = HDopen(filename, O_RDONLY, 0)) < 0) {
+        error_msg("failed to open file\n");
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "HDopen failed");
     }
 

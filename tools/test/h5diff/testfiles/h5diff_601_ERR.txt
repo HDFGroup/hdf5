@@ -1,0 +1,6 @@
+Object </nono_obj> could not be found in <h5diff_basic1.h5>
+H5tools-DIAG: Error detected in HDF5:tools (version (number)) thread (IDs):
+  #000: (file name) line (number) in h5diff(): Error: Object could not be found
+    major: Failure in tools library
+    minor: error in function
+EXIT CODE: 2

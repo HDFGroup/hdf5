@@ -7042,8 +7042,8 @@ gent_extlinks(void)
  * Function:    gent_fs_strategy_threshold
  *
  * Purpose:     Generate a file with non-default file space strategy,
- *    		non-default free-space section threshold,
- *		non-default file space page size.
+ *            non-default free-space section threshold,
+ *        non-default file space page size.
  *-------------------------------------------------------------------------
  */
 static void

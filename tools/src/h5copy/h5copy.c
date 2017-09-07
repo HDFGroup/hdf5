@@ -101,6 +101,8 @@ usage (void)
     PRINTVALSTREAM(rawoutstream, "      -p, --parents      No error if existing, make parent groups as needed\n");
     PRINTVALSTREAM(rawoutstream, "      -v, --verbose      Print information about OBJECTS and OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "      -V, --version      Print version number and exit\n");
+    PRINTVALSTREAM(rawoutstream, "      --enable-error-stack\n");
+    PRINTVALSTREAM(rawoutstream, "                  Prints messages from the HDF5 error stack as they occur.\n");
     PRINTVALSTREAM(rawoutstream, "      -f, --flag         Flag type\n\n");
     PRINTVALSTREAM(rawoutstream, "      Flag type is one of the following strings:\n\n");
     PRINTVALSTREAM(rawoutstream, "      shallow     Copy only immediate members for groups\n\n");
