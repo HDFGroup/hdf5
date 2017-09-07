@@ -132,7 +132,7 @@ CompType::CompType(const H5Location& loc, const H5std_string& dtype_name) : Data
 //--------------------------------------------------------------------------
 DataType* CompType::decode() const
 {
-    hid_t encoded_cmptype_id;
+    hid_t encoded_cmptype_id = H5I_INVALID_HID;
     try {
         encoded_cmptype_id = p_decode();
     }

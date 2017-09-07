@@ -285,7 +285,7 @@ hid_t DataType::p_decode() const
 //--------------------------------------------------------------------------
 DataType* DataType::decode() const
 {
-    hid_t encoded_dtype_id;
+    hid_t encoded_dtype_id = H5I_INVALID_HID;
     try {
         encoded_dtype_id = p_decode();
     }

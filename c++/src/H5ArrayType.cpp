@@ -147,7 +147,7 @@ ArrayType& ArrayType::operator=(const ArrayType& rhs)
 //--------------------------------------------------------------------------
 DataType* ArrayType::decode() const
 {
-    hid_t encoded_arrtype_id;
+    hid_t encoded_arrtype_id = H5I_INVALID_HID;
     try {
         encoded_arrtype_id = p_decode();
     }

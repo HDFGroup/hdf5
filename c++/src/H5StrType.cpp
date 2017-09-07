@@ -189,7 +189,7 @@ StrType::StrType(const H5Location& loc, const H5std_string& dtype_name) : AtomTy
 //--------------------------------------------------------------------------
 DataType* StrType::decode() const
 {
-    hid_t encoded_strtype_id;
+    hid_t encoded_strtype_id = H5I_INVALID_HID;
     try {
         encoded_strtype_id = p_decode();
     }
