@@ -136,7 +136,7 @@ FloatType::FloatType(const H5Location& loc, const H5std_string& dtype_name) : At
 //--------------------------------------------------------------------------
 DataType* FloatType::decode() const
 {
-    hid_t encoded_flttype_id;
+    hid_t encoded_flttype_id = H5I_INVALID_HID;
     try {
         encoded_flttype_id = p_decode();
     }

@@ -154,16 +154,16 @@ EnumType::EnumType(const H5Location& loc, const H5std_string& dtype_name) : Data
 //--------------------------------------------------------------------------
 DataType* EnumType::decode() const
 {
-    hid_t encoded_cmptype_id;
+    hid_t encoded_enumtype_id = H5I_INVALID_HID;
     try {
-        encoded_cmptype_id = p_decode();
+        encoded_enumtype_id = p_decode();
     }
     catch (DataTypeIException &err) {
         throw;
     }
-    EnumType *encoded_cmptype = new EnumType;
-    encoded_cmptype->p_setId(encoded_cmptype_id);
-    return(encoded_cmptype);
+    EnumType *encoded_enumtype = new EnumType;
+    encoded_enumtype->p_setId(encoded_enumtype_id);
+    return(encoded_enumtype);
 }
 
 //--------------------------------------------------------------------------

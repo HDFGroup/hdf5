@@ -135,7 +135,7 @@ IntType::IntType(const H5Location& loc, const H5std_string& dtype_name) : AtomTy
 //--------------------------------------------------------------------------
 DataType* IntType::decode() const
 {
-    hid_t encoded_inttype_id;
+    hid_t encoded_inttype_id = H5I_INVALID_HID;
     try {
         encoded_inttype_id = p_decode();
     }
