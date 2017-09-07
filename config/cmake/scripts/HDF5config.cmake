@@ -12,7 +12,7 @@
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
 ### BUILD_GENERATOR required [Unix, VS2017, VS201764, VS2015, VS201564, VS2013, VS201364] ###
-### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -VV -O hdf5.log         ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
 cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
@@ -21,13 +21,13 @@ cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
-#            Unix    * Unix Makefiles
+#            Unix      * Unix Makefiles
 #            VS2017    * Visual Studio 15 2017
-#            VS201764 * Visual Studio 15 2017 Win64
+#            VS201764  * Visual Studio 15 2017 Win64
 #            VS2015    * Visual Studio 14 2015
-#            VS201564 * Visual Studio 14 2015 Win64
+#            VS201564  * Visual Studio 14 2015 Win64
 #            VS2013    * Visual Studio 12 2013
-#            VS201364 * Visual Studio 12 2013 Win64
+#            VS201364  * Visual Studio 12 2013 Win64
 #
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
