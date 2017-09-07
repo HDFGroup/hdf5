@@ -107,7 +107,6 @@ New Features
 
       (ADB - 2017/08/30, HDFFV-9774)
 
-
     High-Level APIs:
     ---------------
     -
@@ -157,6 +156,15 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5repack
+
+      h5repack always set the User Defined filter flag to H5Z_FLAG_MANDATORY.
+
+      Added another parameter to the 'UD=' option to set the flag by default
+      to '0' or H5Z_FLAG_MANDATORY, the other choice is '1' or H5Z_FLAG_OPTIONAL.
+
+      (ADB - 2017/08/31, HDFFV-10276)
+
     - h5ls
 
       h5ls generated error on stack when it encountered a H5S_NULL

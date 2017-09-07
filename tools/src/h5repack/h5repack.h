@@ -61,6 +61,7 @@ typedef struct {
 
 typedef struct {
  H5Z_filter_t filtn;                           /* filter identification number */
+ unsigned     filt_flag;                       /* filter definition flag */
  unsigned     cd_values[CD_VALUES];            /* filter client data values */
  size_t       cd_nelmts;                       /* filter client number of values */
 } filter_info_t;
