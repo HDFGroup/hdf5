@@ -230,8 +230,9 @@ void parse_command_line(int argc,
             options->percent = atof(opt_arg);
 
             /* -p 0 is the same as default */
-            if (H5_DBL_ABS_EQUAL(options->percent, (double)0.0F))
-                options->p = 0;
+            if (options->percent == 0)
+            options->p = 0;
+
             break;
 
         case 'n':
@@ -341,7 +342,7 @@ void parse_command_line(int argc,
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE static int
+static int
 check_n_input( const char *str )
 {
     unsigned i;
