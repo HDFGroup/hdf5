@@ -41,6 +41,10 @@ class H5_DLLCPP StrType : public AtomType {
         StrType(const H5Location& loc, const char* name);
         StrType(const H5Location& loc, const H5std_string& name);
 
+        // Returns an StrType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
+
         // Retrieves the character set type of this string datatype.
         H5T_cset_t getCset() const;
 
