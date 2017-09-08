@@ -622,6 +622,9 @@ H5_DLL herr_t H5D__select_write(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     const H5D_dxpl_cache_t *dxpl_cache, void *_buf);
+H5_DLL size_t H5D__gather_mem(const void *_buf,
+    const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
+    const H5D_dxpl_cache_t *dxpl_cache, void *_tgath_buf/*out*/);
 H5_DLL herr_t H5D__scatgath_read(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
@@ -671,6 +674,8 @@ H5_DLL herr_t H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *scaled, H5D_chunk_ud_t *udata);
 H5_DLL herr_t H5D__chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[]);
+H5_DLL herr_t H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
+    H5F_block_t *new_chunk, hbool_t *need_insert, hsize_t scaled[]);
 H5_DLL herr_t H5D__chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id,
     hsize_t old_dim[]);
 H5_DLL herr_t H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
@@ -781,8 +786,7 @@ H5_DLL herr_t H5D__virtual_collective_write(H5D_io_info_t *io_info,
  * memory and the file */
 H5_DLL htri_t H5D__mpio_opt_possible(const H5D_io_info_t *io_info,
     const H5S_t *file_space, const H5S_t *mem_space,
-    const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm,
-    H5P_genplist_t *dx_plist);
+    const H5D_type_info_t *type_info, H5P_genplist_t *dx_plist);
 
 #endif /* H5_HAVE_PARALLEL */
 
