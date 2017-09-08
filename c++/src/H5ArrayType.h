@@ -36,6 +36,10 @@ class H5_DLLCPP ArrayType : public DataType {
         ArrayType(const H5Location& loc, const char* name);
         ArrayType(const H5Location& loc, const H5std_string& name);
 
+        // Returns an ArrayType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
+
         // Returns the number of dimensions of this array datatype.
         int getArrayNDims() const;
         //int getArrayNDims(); // removed 1.8.18 and 1.10.1

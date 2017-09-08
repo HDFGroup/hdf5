@@ -181,6 +181,27 @@ StrType::StrType(const H5Location& loc, const H5std_string& dtype_name) : AtomTy
 }
 
 //--------------------------------------------------------------------------
+// Function:    StrType::decode
+///\brief       Returns an StrType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* StrType::decode() const
+{
+    hid_t encoded_strtype_id = H5I_INVALID_HID;
+    try {
+        encoded_strtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    StrType *encoded_strtype = new StrType;
+    encoded_strtype->p_setId(encoded_strtype_id);
+    return(encoded_strtype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    StrType::getCset
 ///\brief       Retrieves the character set type of this string datatype.
 ///\return      Character set type, which can be:
