@@ -402,7 +402,7 @@ int apply_filters(const char* name, /* object name from traverse list */
             default:
                 {
                     if (H5Pset_filter(dcpl_id, obj.filter[i].filtn,
-                            H5Z_FLAG_MANDATORY, obj.filter[i].cd_nelmts,
+                            obj.filter[i].filt_flag, obj.filter[i].cd_nelmts,
                             obj.filter[i].cd_values) < 0)
                         return -1;
                     if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
