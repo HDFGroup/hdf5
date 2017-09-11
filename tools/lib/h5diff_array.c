@@ -1515,7 +1515,7 @@ static hsize_t diff_datum(
                     }
                     else if (per > options->percent && (double) ABS(temp1_float - temp2_float) > options->delta) {
                         if (print_data(options)) {
-                            print_pos(ph, 1, index, acc, pos, rank, dims, obj1,
+                            print_pos(ph, 1, index, acc, pos, rank, dims, obj1, obj2);
                             parallel_print(SPACES);
                             parallel_print(F_FORMAT_P, (double) temp1_float, (double) temp2_float,
                                     (double) ABS(temp1_float - temp2_float), (double) ABS(1 - temp2_float / temp1_float));
@@ -2762,7 +2762,7 @@ static hsize_t diff_ldouble(unsigned char *mem1,
                 if (print_data(options)) {
                     print_pos(ph, 0, hyper_start + i, acc, pos, rank, dims, obj1, obj2);
                     parallel_print(SPACES);
-                    parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - emp2_double));
+                    parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
                 }
                 nfound++;
 
@@ -3196,7 +3196,7 @@ static hsize_t diff_short(unsigned char *mem1, unsigned char *mem2,
 
             if (ABS(temp1_short-temp2_short) > options->delta) {
                 if (print_data(options)) {
-                    print_pos(ph, 0, hyper_start + i, acc, pos, rank, dims obj1, obj2);
+                    print_pos(ph, 0, hyper_start + i, acc, pos, rank, dims, obj1, obj2);
                     parallel_print(SPACES);
                     parallel_print(I_FORMAT, temp1_short, temp2_short, ABS(temp1_short - temp2_short));
                 }
