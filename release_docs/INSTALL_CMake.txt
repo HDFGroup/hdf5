@@ -398,7 +398,6 @@ These five steps are described in detail below.
                 set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
                 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
                 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
-                set (HDF5_BUILD_GENERATORS OFF CACHE BOOL "Build Test Generators" FORCE)
                 set (HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
                 set (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
                 set (HDF5_ENABLE_SZIP_ENCODING ON CACHE BOOL "Use SZip Encoding" FORCE)
@@ -591,7 +590,7 @@ HDF5_ENABLE_LARGE_FILE         "Enable support for large (64-bit) files on Linux
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
-HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
+HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      OFF
 HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                            OFF
 HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
 HDF5_METADATA_TRACE_FILE       "Enable metadata trace file collection"                        OFF
