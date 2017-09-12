@@ -851,8 +851,8 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
   option (SKIP_HDF5_FORTRAN_SHARED "Do not build the fortran shared libraries" OFF)
   if (HDF5_BUILD_FORTRAN)
     if (BUILD_SHARED_LIBS AND APPLE)
-      # Tell cmake to do the right thing with COMMON symbols, this fixes 
-      # corrupt values with COMMON and EQUIVALENCE when building shared 
+      # Tell cmake to do the right thing with COMMON symbols, this fixes
+      # corrupt values with COMMON and EQUIVALENCE when building shared
       # Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
       # *** NOTE: Fix does not work with Cmake. ***
       # set (HDF5_LINKER_FLAGS "-Wl,-commons,use_dylibs")
