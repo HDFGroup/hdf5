@@ -27,6 +27,9 @@ class H5_DLLCPP VarLenType : public DataType {
    public:
         // Constructor that creates a variable-length datatype based
         // on the specified base type.
+        VarLenType(const DataType& base_type);
+
+        // Deprecated - will be removed after 1.10.2
         VarLenType(const DataType* base_type);
 
         // Returns an VarLenType object via DataType* by decoding the

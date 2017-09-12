@@ -17,6 +17,7 @@
 
 namespace H5 {
 
+// Class forwarding
 class DataType;
 class DataSpace;
 

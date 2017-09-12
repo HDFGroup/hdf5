@@ -17,7 +17,6 @@
 
 namespace H5 {
 
-//! Class PropList provides operations for generic property lists.
 /*! \class PropList
     \brief Class PropList inherits from IdComponent and provides wrappers for
     the HDF5 generic property list.
