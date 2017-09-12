@@ -591,7 +591,7 @@ HDF5_ENABLE_LARGE_FILE         "Enable support for large (64-bit) files on Linux
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
-HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
+HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      OFF
 HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                            OFF
 HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
 HDF5_METADATA_TRACE_FILE       "Enable metadata trace file collection"                        OFF
