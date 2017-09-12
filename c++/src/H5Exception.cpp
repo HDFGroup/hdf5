@@ -317,11 +317,12 @@ void Exception::printErrorStack(FILE* stream, hid_t err_stack)
 //              This function can be removed in next major release.
 //              -BMR, 2014/04/24
 //              Removed from documentation. -BMR, 2016/03/23
+//              Removed from code. -BMR, 2017/08/11 1.8.20 and 1.10.2
 //--------------------------------------------------------------------------
-void Exception::printError(FILE* stream) const
-{
-    Exception::printErrorStack(stream, H5E_DEFAULT);
-}
+//void Exception::printError(FILE* stream) const
+//{
+//    Exception::printErrorStack(stream, H5E_DEFAULT);
+//}
 
 //--------------------------------------------------------------------------
 // Function:    Exception destructor

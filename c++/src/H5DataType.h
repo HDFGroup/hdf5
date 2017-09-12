@@ -114,6 +114,7 @@ class H5_DLLCPP DataType : public H5Object {
 
         // Checks whether this datatype contains (or is) a certain type class.
         bool detectClass(H5T_class_t cls) const;
+        static bool detectClass(const PredType& pred_type, H5T_class_t cls);
 
         // Checks whether this datatype is a variable-length string.
         bool isVariableStr() const;

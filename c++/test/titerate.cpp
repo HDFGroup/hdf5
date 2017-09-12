@@ -12,8 +12,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
-   FILE
-   titerate.cpp - HDF5 C++ testing iterate related functionality
+    FILE
+        titerate.cpp - HDF5 C++ testing iterate related functionality
 
  ***************************************************************************/
 #ifdef OLD_HEADER_FILENAME
@@ -94,8 +94,7 @@ int iter_strcmp(const void *s1, const void *s2)
 **
 ****************************************************************/
 static herr_t
-liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_info,
-    void *op_data)
+liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_info, void *op_data)
 {
     iter_info *info = (iter_info *)op_data;
     static int count = 0;
@@ -208,7 +207,7 @@ static void test_iter_group(FileAccPropList& fapl)
         H5std_string obj_name;
         for (i = 0; i < nobjs; i++)
         {
-            //H5O_info_t oinfo;               /* Object info */
+            //H5O_info_t oinfo;                /* Object info */
 
             obj_name = root_group.getObjnameByIdx(i);
         //ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
@@ -380,23 +379,11 @@ void printelems(const Group& group, const H5std_string& dsname, const H5std_stri
 
         a1.close();
   }
-   // catch failure caused by the DataSpace operations
-   catch( DataSpaceIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the Group operations
-   catch( GroupIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
-        error.printError();
-   }
+    // Catch all exceptions and rethrow so caller can handle
+    catch (Exception& E)
+    {
+        throw;
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -413,11 +400,11 @@ void printelems(const Group& group, const H5std_string& dsname, const H5std_stri
  */
 static void test_HDFFV_9920()
 {
-   int attr_data[2] = { 100, 200};
-   hsize_t dims[1] = { DIM1 };
-   
-   try
-   {
+    int attr_data[2] = { 100, 200};
+    hsize_t dims[1] = { DIM1 };
+    
+    try
+    {
         // Create a new file and a group in it
         H5File file( FILE_NAME, H5F_ACC_TRUNC );
 
@@ -448,31 +435,13 @@ static void test_HDFFV_9920()
         printelems(file, FDATASET_NAME, FATTR_NAME);
         printelems(gr1, GDATASET_NAME, GATTR_NAME);
 
-   }  // end of try block
+    }  // end of try block
 
-   // catch failure caused by the H5File operations
-   catch( DataSpaceIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the H5File operations
-   catch( AttributeIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the H5File operations
-   catch( FileIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
-        error.printError();
-   }
+    // Catch all failures for handling in the same way
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_HDFFV_9920()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
 }
 
 
@@ -503,9 +472,9 @@ void test_iterate()
 
     test_iter_group(fapl);    // Test iterating groups
     test_HDFFV_9920();        // Test the fix of HDFFV-9920
-    //test_iter_attr(fapl);   // Test iterating attributes
+    //test_iter_attr(fapl);    // Test iterating attributes
 
-}   // test_iterate
+}    // test_iterate
 
 /*-------------------------------------------------------------------------
  * Function:    cleanup_iterate
