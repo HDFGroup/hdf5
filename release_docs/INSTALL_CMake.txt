@@ -261,7 +261,7 @@ IV. Further considerations
             -DSZIP_INCLUDE_DIR:PATH=some_location/include
          where "some_location" is the full path to the extlibs folder.
 
-      B. Use source packages from an SVN server by adding the following CMake
+      B. Use source packages from an GIT server by adding the following CMake
          options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
             ZLIB_GIT_URL:STRING="http://some_location/zlib"
@@ -397,31 +397,16 @@ These five steps are described in detail below.
                 ########################
                 set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
                 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
+                set (HDF5_GENERATE_HEADERS ON CACHE BOOL "Rebuild Generated Files" FORCE)
                 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
                 set (HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
                 set (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
                 set (HDF5_ENABLE_SZIP_ENCODING ON CACHE BOOL "Use SZip Encoding" FORCE)
-                set (HDF5_ENABLE_HSIZET ON CACHE BOOL "Enable datasets larger than memory" FORCE)
-                set (ALLOW_UNSUPPORTED OFF CACHE BOOL "Enable unsupported combinations of configuration options" FORCE)
-                set (HDF5_ENABLE_DEPRECATED_SYMBOLS ON CACHE BOOL "Enable deprecated public API symbols" FORCE)
-                set (HDF5_ENABLE_DIRECT_VFD OFF CACHE BOOL "Build the Direct I/O Virtual File Driver" FORCE)
-                set (HDF5_ENABLE_PARALLEL OFF CACHE BOOL "Enable parallel build (requires MPI)" FORCE)
                 set (MPIEXEC_MAX_NUMPROCS "3" CACHE STRING "Minimum number of processes for HDF parallel tests" FORCE)
-                set (HDF5_BUILD_PARALLEL_ALL OFF CACHE BOOL "Build Parallel Programs" FORCE)
-                set (HDF5_ENABLE_COVERAGE OFF CACHE BOOL "Enable code coverage for Libraries and Programs" FORCE)
-                set (HDF5_ENABLE_USING_MEMCHECKER OFF CACHE BOOL "Indicate that a memory checker is used" FORCE)
-                set (HDF5_MEMORY_ALLOC_SANITY_CHECK OFF CACHE BOOL "Indicate that internal memory allocation sanity checks are enabled" FORCE)
-                set (HDF5_DISABLE_COMPILER_WARNINGS OFF CACHE BOOL "Disable compiler warnings" FORCE)
                 set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
-                set (HDF5_USE_FOLDERS ON CACHE BOOL "Enable folder grouping of projects in IDEs." FORCE)
-                set (HDF5_USE_16_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.6.x API by default" FORCE)
-                set (HDF5_USE_18_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.8.x API by default" FORCE)
-                set (HDF5_ENABLE_THREADSAFE OFF CACHE BOOL "(WINDOWS)Enable Threadsafety" FORCE)
                 set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
-                set (HDF5_PACKAGE_EXTLIBS OFF CACHE BOOL "(WINDOWS)CPACK - include external libraries" FORCE)
-                set (HDF5_NO_PACKAGES OFF CACHE BOOL "CPACK - Disable packaging" FORCE)
-                set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT SVN TGZ)" FORCE)
-                set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT SVN TGZ)
+                set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
+                set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
                 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
                 set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
                 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
@@ -578,6 +563,7 @@ HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
 ---------------- HDF5 Advanced Options ---------------------
 ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"          OFF
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                    OFF
+HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                          OFF
 HDF5_ENABLE_INSTRUMENT         "Instrument The library"                                       OFF
 HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)." OFF
 HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"              OFF
@@ -590,7 +576,8 @@ HDF5_ENABLE_LARGE_FILE         "Enable support for large (64-bit) files on Linux
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
-HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      OFF
+HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
+HDF5_BUILD_GENERATORS          "Build Test Generators"                                        OFF
 HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                            OFF
 HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
 HDF5_METADATA_TRACE_FILE       "Enable metadata trace file collection"                        OFF
@@ -603,7 +590,7 @@ HDF_TEST_EXPRESS               "Control testing framework (0-3)"                
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
 HDF5_USE_18_API_DEFAULT        "Use the HDF5 1.8.x API by default"                            OFF
-HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  OFF
+HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  ON
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
