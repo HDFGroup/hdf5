@@ -1317,6 +1317,102 @@ test_h5s_encode(void)
 
 /****************************************************************
 **
+**  test_h5s_encode_exceed32():
+**    Verify that encoding selection that exceeds (2^32 - 1)
+**    (32 bit integer limit) will return error.
+**    See HDFFV-9947 and the RFC for "H5Sencode/H5Sdecode Format Change"
+**
+****************************************************************/
+static void
+test_h5s_encode_exceed32(void)
+{
+    hid_t sid;                      /* Dataspace ID */
+    size_t hyper_buf_size=0, pt_buf_size=0;         /* Buffer size for H5Sencode */
+    unsigned char *hyper_buf=NULL, *pt_buf=NULL;    /* Buffers for H5Sencode */
+    hsize_t numparticles = 8388608;
+    unsigned num_dsets = 513;
+    hsize_t total_particles = numparticles * num_dsets;
+    hsize_t vdsdims[1] = {total_particles};
+    hsize_t start, count, block;    /* Hyperslab selection specification */
+    hsize_t coord[4];               /* Coordinates for point selection */
+    herr_t ret;                     /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Dataspace Encoding Exceeding 32 bits integer limit\n"));
+
+    /*-------------------------------------------------------------------------
+     * Test encoding and decoding of simple dataspace and hyperslab selection.
+     *-------------------------------------------------------------------------
+     */
+
+    /* Create dataspace */
+    sid = H5Screate_simple(1, vdsdims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    start = 0;
+    block = total_particles;    /* 4303355904 (exceeds 2^32) */
+    count = 1;
+
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, NULL, &count, &block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Encode data space in a buffer */
+    ret = H5Sencode(sid, NULL, &hyper_buf_size);
+    CHECK(ret, FAIL, "H5Sencode");
+
+    /* Allocate buffer */
+    if(hyper_buf_size > 0) {
+        hyper_buf = (unsigned char*)HDcalloc((size_t)1, hyper_buf_size);
+        CHECK(hyper_buf, NULL, "HDcalloc");
+    }
+
+    /* H5Sencode should fail because block exceeds (2^32 - 1) */
+    H5E_BEGIN_TRY {
+        ret = H5Sencode(sid, hyper_buf, &hyper_buf_size);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Sencode");
+
+    /*-------------------------------------------------------------------------
+     * Test encoding and decoding of simple dataspace and points selection.
+     *-------------------------------------------------------------------------
+     */
+
+    /* Select points in dataspace */
+    coord[0] = 5;
+    coord[1] = 15;
+    coord[2] = 4294967296;      /* 2^32 */
+    coord[3] = 19;
+    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)4, coord);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Encode data space in a buffer */
+    ret = H5Sencode(sid, NULL, &pt_buf_size);
+    CHECK(ret, FAIL, "H5Sencode");
+
+    /* Allocate buffer */
+    if(pt_buf_size > 0)
+        pt_buf = (unsigned char*)HDcalloc((size_t)1, pt_buf_size);
+
+    /* H5Sencode should fail because coord[2] exceeds (2^32 - 1) */
+    H5E_BEGIN_TRY {
+        ret = H5Sencode(sid, pt_buf, &pt_buf_size);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Sencode");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Free the buffers */
+    if(hyper_buf)
+        HDfree(hyper_buf);
+    if(pt_buf)
+        HDfree(pt_buf);
+
+} /* test_h5s_encode_exceed32() */
+
+/****************************************************************
+**
 **  test_h5s_scalar_write(): Test scalar H5S (dataspace) writing code.
 **
 ****************************************************************/
@@ -2384,6 +2480,7 @@ test_h5s(void)
     test_h5s_null();		/* Test Null dataspace H5S code */
     test_h5s_zero_dim();        /* Test dataspace with zero dimension size */
     test_h5s_encode();          /* Test encoding and decoding */
+    test_h5s_encode_exceed32(); /* Testing encoding when selection exceeds 32 bits limit */
     test_h5s_scalar_write();	/* Test scalar H5S writing code */
     test_h5s_scalar_read();	/* Test scalar H5S reading code */
 

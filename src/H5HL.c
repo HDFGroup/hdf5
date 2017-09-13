@@ -533,17 +533,18 @@ done:
 void *
 H5HL_offset_into(const H5HL_t *heap, size_t offset)
 {
-    /*
-     * We need to have called some other function before this to get a
-     * valid heap pointer. So, this can remain "FUNC_ENTER_NOAPI_NOINIT"
-     */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity check */
     HDassert(heap);
-    HDassert(offset < heap->dblk_size);
+    if(offset >= heap->dblk_size)
+       HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, NULL, "unable to offset into local heap data block")
+    ret_value = heap->dblk_image + offset;
 
-    FUNC_LEAVE_NOAPI(heap->dblk_image + offset)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_offset_into() */
 
 

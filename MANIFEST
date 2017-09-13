@@ -831,6 +831,7 @@
 ./test/accum.c
 ./test/app_ref.c
 ./test/bad_compound.h5
+./test/bad_offset.h5
 ./test/be_data.h5
 ./test/be_extlink1.h5
 ./test/be_extlink2.h5
@@ -876,6 +877,7 @@
 ./test/fixed_idx.h5
 ./test/flush1.c
 ./test/flush2.c
+./test/gen_bad_offset.c
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c

@@ -103,6 +103,7 @@ endif ()
 # --------------------------------------------------------------------
 set (HDF5_REFERENCE_TEST_FILES
     bad_compound.h5
+    bad_offset.h5
     be_data.h5
     be_extlink1.h5
     be_extlink2.h5
@@ -1016,6 +1017,7 @@ if (HDF5_BUILD_GENERATORS)
 
   # generator executables
   set (H5_GENERATORS
+      gen_bad_offset
       gen_bad_ohdr
       gen_bogus
       gen_cross
