@@ -130,7 +130,14 @@ Bug Fixes since HDF5-1.8.19
 
     Library
     -------
-    - None
+    - Fix H5HL_offset_into()
+
+      (1) Fix H5HL_offset_into() to return error when offset exceeds heap data
+          block size.
+      (2) Fix other places in the library that call this routine to detect
+          error routine.
+        
+      (HDFFV-10216, VC, 2017/09/05)
 
 
     Parallel Library

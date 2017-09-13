@@ -46,6 +46,9 @@
  *      and 'size' callbacks for places to change when updating this. */
 #define H5O_SDSPACE_VERSION_LATEST H5O_SDSPACE_VERSION_2
 
+/* Maximum values for uint16_t and uint32_t */
+#define H5S_UINT16_MAX      65535       /* 2^16 - 1 */
+#define H5S_UINT32_MAX      4294967295  /* 2^32 - 1 */
 
 /*
  * Dataspace extent information
