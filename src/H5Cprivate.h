@@ -1606,8 +1606,6 @@ typedef struct H5C_cache_entry_t {
     H5C_t                      *cache_ptr;
     haddr_t			addr;
     size_t			size;
-    hbool_t			compressed;
-    size_t			compressed_size;
     void  		       *image_ptr;
     hbool_t			image_up_to_date;
     const H5C_class_t	       *type;
