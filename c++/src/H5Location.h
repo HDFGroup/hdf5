@@ -30,9 +30,9 @@ namespace H5 {
     Inheritance: IdComponent
 */
 // Class forwarding
-class H5_DLLCPP ArrayType;
-class H5_DLLCPP LinkAccPropList;
-class H5_DLLCPP VarLenType;
+//class H5_DLLCPP ArrayType;
+//class H5_DLLCPP LinkAccPropList;
+//class H5_DLLCPP VarLenType;
 class H5_DLLCPP H5Location : public IdComponent {
    public:
         // Checks if a link of a given name exists in a location

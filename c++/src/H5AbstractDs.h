@@ -31,7 +31,7 @@ class DataSpace;
      and DataSet.
 
     It provides a collection of services that are common to both Attribute
-    and DataSet.  AbstractDs inherits from H5Object.
+    and DataSet.
 */
 class H5_DLLCPP AbstractDs {
    public:

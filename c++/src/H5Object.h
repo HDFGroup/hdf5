@@ -39,9 +39,6 @@ namespace H5 {
 
     Inheritance: H5Location -> IdComponent
 */
-// Class forwarding
-class H5_DLLCPP H5Object;
-class H5_DLLCPP Attribute;
 
 // Define the operator function pointer for H5Aiterate().
 typedef void (*attr_operator_t)(H5Object& loc/*in*/,
@@ -96,12 +93,13 @@ class H5_DLLCPP H5Object : public H5Location {
         // Returns an identifier.
         virtual hid_t getId() const = 0;
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
         // Gets the name of this HDF5 object, i.e., Group, DataSet, or
-        // DataType.  These should have const but are retiring anyway.
+        // DataType.
         ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
         ssize_t getObjName(H5std_string& obj_name, size_t len = 0) const;
         H5std_string getObjName() const;
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
    protected:
         // Default constructor
