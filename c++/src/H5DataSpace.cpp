@@ -468,7 +468,7 @@ hssize_t DataSpace::getSelectElemNpoints () const
 ///\par Description
 ///             For more information, please refer to the C layer Reference
 ///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectElemPointList
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectElemPointList
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::getSelectElemPointlist (hsize_t startpoint, hsize_t numpoints, hsize_t *buf) const
@@ -492,7 +492,7 @@ void DataSpace::getSelectElemPointlist (hsize_t startpoint, hsize_t numpoints, h
 ///\par Description
 ///             For more information, please refer to the C layer Reference
 ///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectBounds
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectBounds
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::getSelectBounds (hsize_t* start, hsize_t* end) const
@@ -518,7 +518,7 @@ void DataSpace::getSelectBounds (hsize_t* start, hsize_t* end) const
 ///\par Description
 ///             For more information, please refer to the C layer Reference
 ///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectElements
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectElements
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::selectElements (H5S_seloper_t op, const size_t num_elements, const hsize_t *coord) const
@@ -600,7 +600,7 @@ bool DataSpace::selectValid () const
 ///\par Description
 ///             For more information, please refer to the C layer Reference
 ///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectHyperslab
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectHyperslab
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::selectHyperslab(H5S_seloper_t op, const hsize_t *count, const hsize_t *start, const hsize_t *stride, const hsize_t *block) const
