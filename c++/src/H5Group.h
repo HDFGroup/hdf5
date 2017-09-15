@@ -19,23 +19,10 @@ namespace H5 {
 
 /*! \class Group
     \brief Class Group represents an HDF5 group.
-
-    Inheritance: H5Object -> H5Location -> IdComponent
 */
-// Class forwarding
-class ArrayType;
-class VarLenType;
-
+//  Inheritance: CommonFG/H5Object -> H5Location -> IdComponent
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
-        // Group constructor to create a group or file (aka root group).
-        Group(const char* name, size_t size_hint = 0);
-        Group(const H5std_string& name, size_t size_hint = 0);
-
-        // Group constructor to open a group or file (aka root group).
-        Group(const char* name);
-        Group(const H5std_string& name);
-
         // Close this group.
         virtual void close();
 
