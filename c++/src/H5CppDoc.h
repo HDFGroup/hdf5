@@ -50,6 +50,9 @@
     Dataspace Interface (H5S)         DataSpace
     Datatype Interface (H5T)          DataType and subclasses
   \endverbatim
+ *
+ * This <a href="https://support.hdfgroup.org/HDF5/doc/cpplus_RM/C2Cppfunction_map.html">
+ * table </a> provides a map from the C APIs to the C++ member functions.
  * <br />
  * \section install_sec Installation
  *
