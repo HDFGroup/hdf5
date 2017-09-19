@@ -36,9 +36,8 @@ namespace H5 {
                 into H5Object.  This way, C functions that takes attribute id
                 can be in H5Location and those that cannot take attribute id
                 can be in H5Object.
-
-    Inheritance: H5Location -> IdComponent
 */
+// Inheritance: H5Location -> IdComponent
 
 // Define the operator function pointer for H5Aiterate().
 typedef void (*attr_operator_t)(H5Object& loc/*in*/,
@@ -113,7 +112,7 @@ class H5_DLLCPP H5Object : public H5Location {
         // removal does not raise any problems in two 1.10 releases.
 
         // Creates a copy of an existing object giving the object id
-        H5Object(const hid_t object_id);
+        // H5Object(const hid_t object_id);
 
         // Copy constructor: makes copy of an H5Object object.
         // H5Object(const H5Object& original);

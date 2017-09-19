@@ -137,7 +137,8 @@ void H5Location::flush(H5F_scope_t scope) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getFileName
-///\brief       Gets the name of the file, in which this HDF5 object belongs.
+///\brief       Gets the name of the file, in which an HDF5 object at this
+///             location belongs.
 ///\return      File name
 ///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - Jul, 2004
@@ -557,7 +558,7 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 ///             \li \c H5G_TYPE Object - is a named datatype
 ///             \li \c H5G_LINK  - Object is a symbolic link.
 ///             \li \c H5G_UDLINK  - Object is a user-defined link.
-///\exception   H5::LocationException
+///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - May, 2004
 // Modification
 //      Sep 2012: Moved up from H5File, Group, DataSet, and DataType
