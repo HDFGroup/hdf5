@@ -575,6 +575,9 @@ if (MAKE_SYSTEM)
   set (CFG_INIT "")
 endif ()
 
+# Do not generate test programs by default
+option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
+
 #-----------------------------------------------------------------------------
 # Add some definitions for Debug Builds
 #-----------------------------------------------------------------------------
@@ -753,7 +756,7 @@ endif ()
 #-----------------------------------------------------------------------------
 add_subdirectory (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
-if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
+if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
     ADD_DEPENDENCIES (${HDF5_LIB_TARGET} ZLIB)
     if (BUILD_SHARED_LIBS)
@@ -851,8 +854,8 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
   option (SKIP_HDF5_FORTRAN_SHARED "Do not build the fortran shared libraries" OFF)
   if (HDF5_BUILD_FORTRAN)
     if (BUILD_SHARED_LIBS AND APPLE)
-      # Tell cmake to do the right thing with COMMON symbols, this fixes 
-      # corrupt values with COMMON and EQUIVALENCE when building shared 
+      # Tell cmake to do the right thing with COMMON symbols, this fixes
+      # corrupt values with COMMON and EQUIVALENCE when building shared
       # Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
       # *** NOTE: Fix does not work with Cmake. ***
       # set (HDF5_LINKER_FLAGS "-Wl,-commons,use_dylibs")
