@@ -216,7 +216,6 @@ int CompType::getMemberIndex(const H5std_string& name) const
 ///             respect to the beginning of the compound data type datum.
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      Byte offset
-///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 // Description
 ///             Members are stored in no particular order with numbers 0

@@ -51,18 +51,37 @@ VarLenType::VarLenType(const VarLenType& original) : DataType(original) {}
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType overloaded constructor
-///\brief       Creates a new variable-length datatype based on the specified
-///             \a base_type.
+///\brief       Deprecated - will be removed after 1.10.2
 ///\param       base_type - IN: Pointer to existing datatype
 ///\exception   H5::DataTypeIException
 // Description
 //              DataType passed by pointer to avoid clashing with copy
 //              constructor.
+//              Updated: this is unnecessary.
+//              -BMR, Sep, 2017
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 VarLenType::VarLenType(const DataType* base_type) : DataType()
 {
     id = H5Tvlen_create(base_type->getId());
+    if (id < 0)
+    {
+        throw DataTypeIException("VarLenType constructor",
+                "H5Tvlen_create returns negative value");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    VarLenType overloaded constructor
+///\brief       Creates a new variable-length datatype based on the specified
+///             \a base_type.
+///\param       base_type - IN: An existing datatype
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+VarLenType::VarLenType(const DataType& base_type) : DataType()
+{
+    id = H5Tvlen_create(base_type.getId());
     if (id < 0)
     {
         throw DataTypeIException("VarLenType constructor",

@@ -797,6 +797,28 @@ bool DataType::detectClass(H5T_class_t cls) const
 }
 
 //--------------------------------------------------------------------------
+// Function:    DataType::detectClass (static)
+///\brief       Checks whether a predtype is a certain class of datatype.
+///\return      true if this predtype is the specified type class, and false,
+///             otherwise.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - August, 2017
+//--------------------------------------------------------------------------
+bool DataType::detectClass(const PredType& pred_type, H5T_class_t cls)
+{
+    htri_t ret_value = H5Tdetect_class(pred_type.getId(), cls);
+    if (ret_value > 0)
+        return true;
+    else if (ret_value == 0)
+        return false;
+    else
+    {
+        throw DataTypeIException("detectClass on PredType",
+            "H5Tdetect_class returns negative value");
+    }
+}
+
+//--------------------------------------------------------------------------
 // Function:    DataType::isVariableStr
 ///\brief       Check whether this datatype is a variable-length string.
 ///\return      true if this datatype is a variable-length string, and
