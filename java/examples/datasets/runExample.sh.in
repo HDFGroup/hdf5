@@ -228,7 +228,8 @@ esac
 export LD_LIBRARY_PATH
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Alloc"
-TESTING examples.datasets.H5Ex_D_Alloc (
+TESTING examples.datasets.H5Ex_D_Alloc
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Alloc > H5Ex_D_Alloc.out
 )
 if diff H5Ex_D_Alloc.out examples.datasets.H5Ex_D_Alloc.txt > /dev/null; then
@@ -239,7 +240,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Checksum"
-TESTING examples.datasets.H5Ex_D_Checksum (
+TESTING examples.datasets.H5Ex_D_Checksum
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Checksum > H5Ex_D_Checksum.out
 )
 if diff H5Ex_D_Checksum.out examples.datasets.H5Ex_D_Checksum.txt > /dev/null; then
@@ -250,7 +252,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Chunk"
-TESTING examples.datasets.H5Ex_D_Chunk (
+TESTING examples.datasets.H5Ex_D_Chunk
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Chunk > H5Ex_D_Chunk.out
 )
 if diff H5Ex_D_Chunk.out examples.datasets.H5Ex_D_Chunk.txt > /dev/null; then
@@ -261,7 +264,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Compact"
-TESTING examples.datasets.H5Ex_D_Compact (
+TESTING examples.datasets.H5Ex_D_Compact
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Compact > H5Ex_D_Compact.out
 )
 if diff H5Ex_D_Compact.out examples.datasets.H5Ex_D_Compact.txt > /dev/null; then
@@ -272,7 +276,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_External"
-TESTING examples.datasets.H5Ex_D_External (
+TESTING examples.datasets.H5Ex_D_External
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_External > H5Ex_D_External.out
 )
 if diff H5Ex_D_External.out examples.datasets.H5Ex_D_External.txt > /dev/null; then
@@ -283,7 +288,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_FillValue"
-TESTING examples.datasets.H5Ex_D_FillValue (
+TESTING examples.datasets.H5Ex_D_FillValue
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_FillValue > H5Ex_D_FillValue.out
 )
 if diff H5Ex_D_FillValue.out examples.datasets.H5Ex_D_FillValue.txt > /dev/null; then
@@ -294,7 +300,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Gzip"
-TESTING examples.datasets.H5Ex_D_Gzip (
+TESTING examples.datasets.H5Ex_D_Gzip
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Gzip > H5Ex_D_Gzip.out
 )
 if diff H5Ex_D_Gzip.out examples.datasets.H5Ex_D_Gzip.txt > /dev/null; then
@@ -305,7 +312,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Hyperslab"
-TESTING examples.datasets.H5Ex_D_Hyperslab (
+TESTING examples.datasets.H5Ex_D_Hyperslab
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Hyperslab > H5Ex_D_Hyperslab.out
 )
 if diff H5Ex_D_Hyperslab.out examples.datasets.H5Ex_D_Hyperslab.txt > /dev/null; then
@@ -316,7 +324,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_ReadWrite"
-TESTING examples.datasets.H5Ex_D_ReadWrite (
+TESTING examples.datasets.H5Ex_D_ReadWrite
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_ReadWrite > H5Ex_D_ReadWrite.out
 )
 if diff H5Ex_D_ReadWrite.out examples.datasets.H5Ex_D_ReadWrite.txt > /dev/null; then
@@ -327,7 +336,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Shuffle"
-TESTING examples.datasets.H5Ex_D_Shuffle (
+TESTING examples.datasets.H5Ex_D_Shuffle
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Shuffle > H5Ex_D_Shuffle.out
 )
 if diff H5Ex_D_Shuffle.out examples.datasets.H5Ex_D_Shuffle.txt > /dev/null; then
@@ -339,7 +349,8 @@ fi
 
 if test $USE_FILTER_SZIP = "yes"; then
     echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Szip"
-    TESTING examples.datasets.H5Ex_D_Szip (
+    TESTING examples.datasets.H5Ex_D_Szip
+    (
     $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Szip > H5Ex_D_Szip.out
     )
     if diff H5Ex_D_Szip.out examples.datasets.H5Ex_D_Szip.txt > /dev/null; then
@@ -351,7 +362,8 @@ if test $USE_FILTER_SZIP = "yes"; then
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedAdd"
-TESTING examples.datasets.H5Ex_D_UnlimitedAdd (
+TESTING examples.datasets.H5Ex_D_UnlimitedAdd
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedAdd > H5Ex_D_UnlimitedAdd.out
 )
 if diff H5Ex_D_UnlimitedAdd.out examples.datasets.H5Ex_D_UnlimitedAdd.txt > /dev/null; then
@@ -362,7 +374,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedGzip"
-TESTING examples.datasets.H5Ex_D_UnlimitedGzip (
+TESTING examples.datasets.H5Ex_D_UnlimitedGzip
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedGzip > H5Ex_D_UnlimitedGzip.out
 )
 if diff H5Ex_D_External.out examples.datasets.H5Ex_D_External.txt > /dev/null; then
@@ -373,7 +386,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedMod"
-TESTING examples.datasets.H5Ex_D_UnlimitedMod (
+TESTING examples.datasets.H5Ex_D_UnlimitedMod
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedMod > H5Ex_D_UnlimitedMod.out
 )
 if diff H5Ex_D_UnlimitedMod.out examples.datasets.H5Ex_D_UnlimitedMod.txt > /dev/null; then
@@ -384,7 +398,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Nbit"
-TESTING examples.datasets.H5Ex_D_Nbit (
+TESTING examples.datasets.H5Ex_D_Nbit
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Nbit > H5Ex_D_Nbit.out
 )
 if diff H5Ex_D_Nbit.out examples.datasets.H5Ex_D_Nbit.txt > /dev/null; then
@@ -395,7 +410,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Transform"
-TESTING examples.datasets.H5Ex_D_Transform (
+TESTING examples.datasets.H5Ex_D_Transform
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Transform > H5Ex_D_Transform.out
 )
 if diff H5Ex_D_Transform.out examples.datasets.H5Ex_D_Transform.txt > /dev/null; then
@@ -406,7 +422,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Sofloat"
-TESTING examples.datasets.H5Ex_D_Sofloat (
+TESTING examples.datasets.H5Ex_D_Sofloat
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Sofloat > H5Ex_D_Sofloat.out
 )
 if diff H5Ex_D_Sofloat.out examples.datasets.H5Ex_D_Sofloat.txt > /dev/null; then
@@ -417,7 +434,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Soint"
-TESTING examples.datasets.H5Ex_D_Soint (
+TESTING examples.datasets.H5Ex_D_Soint
+(
 $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Soint > H5Ex_D_Soint.out
 )
 if diff H5Ex_D_Soint.out examples.datasets.H5Ex_D_Soint.txt > /dev/null; then
