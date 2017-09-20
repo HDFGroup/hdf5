@@ -3434,13 +3434,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  java/test/junit.sh
                  java/examples/Makefile
                  java/examples/intro/Makefile
-                 java/examples/intro/runExample.sh
+                 java/examples/intro/JavaIntroExample.sh
                  java/examples/datasets/Makefile
-                 java/examples/datasets/runExample.sh
+                 java/examples/datasets/JavaDatasetExample.sh
                  java/examples/datatypes/Makefile
-                 java/examples/datatypes/runExample.sh
+                 java/examples/datatypes/JavaDatatypeExample.sh
                  java/examples/groups/Makefile
-                 java/examples/groups/runExample.sh
+                 java/examples/groups/JavaGroupExample.sh
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile
