@@ -164,7 +164,8 @@ haddr_t
 ref_path_table_lookup(const char *thepath)
 {
     H5O_info_t  oi;
-    if((HDstrlen(thepath) == 0) || (thepath == NULL))
+
+    if((thepath == NULL) || (HDstrlen(thepath) == 0))
         return HADDR_UNDEF;
     /* Allow lookups on the root group, even though it doesn't have any link info */
     if(HDstrcmp(thepath, "/")) {
