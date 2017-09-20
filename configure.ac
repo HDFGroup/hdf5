@@ -918,8 +918,8 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-  ## tell libtool to do the right thing with COMMON symbols, this fixes 
-  ## corrupt values with COMMON and EQUIVALENCE when building shared 
+  ## tell libtool to do the right thing with COMMON symbols, this fixes
+  ## corrupt values with COMMON and EQUIVALENCE when building shared
   ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
   case "`uname`" in
     Darwin*)
@@ -1251,9 +1251,9 @@ AC_ARG_WITH([fnord],
   ])
 
 ## ----------------------------------------------------------------------
-## Is dmalloc (debug malloc library) requested? It has a header file 
+## Is dmalloc (debug malloc library) requested? It has a header file
 ## `dmalloc.h' and a library `-ldmalloc' and their locations might be
-## specified with the `--with-dmalloc' command-line switch. The value 
+## specified with the `--with-dmalloc' command-line switch. The value
 ## is an include path and/or a library path. If the library path is
 ## specified then it must be preceded by a comma.
 ##
@@ -3340,7 +3340,7 @@ fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
-  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler 
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
   ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
@@ -3455,13 +3455,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  java/test/junit.sh
                  java/examples/Makefile
                  java/examples/intro/Makefile
-                 java/examples/intro/runExample.sh
+                 java/examples/intro/JavaIntroExample.sh
                  java/examples/datasets/Makefile
-                 java/examples/datasets/runExample.sh
+                 java/examples/datasets/JavaDatasetExample.sh
                  java/examples/datatypes/Makefile
-                 java/examples/datatypes/runExample.sh
+                 java/examples/datatypes/JavaDatatypeExample.sh
                  java/examples/groups/Makefile
-                 java/examples/groups/runExample.sh
+                 java/examples/groups/JavaGroupExample.sh
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile
@@ -3501,8 +3501,8 @@ fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
-  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
-  ## on OS X, which is needed when building shared libraries on OS X.  This script 
+  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler
+  ## on OS X, which is needed when building shared libraries on OS X.  This script
   ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
   case "`uname`" in
     Darwin*)
@@ -3510,7 +3510,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 
-  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler 
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
   ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
