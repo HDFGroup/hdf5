@@ -132,7 +132,7 @@ H5MF__freedspace_new(H5MF_freedspace_ctx_t *ctx)
     reset_ring = TRUE;
 
     /* Insert freedspace entry into the cache */
-    if(H5AC_insert_entry(ctx->f, ctx->dxpl_id, H5AC_FREEDSPACE, fs_addr, ctx->fs, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_insert_entry(ctx->f, ctx->dxpl_id, H5AC_FREEDSPACE, fs_addr, fs, H5AC__PIN_ENTRY_FLAG) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, NULL, "unable to insert freedspace")
 
     /* Set the return value */
