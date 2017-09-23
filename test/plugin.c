@@ -736,11 +736,19 @@ test_path_api_calls(void)
      */
     n_starting_paths = 42;
 
+    /* Check that initialization is correct */
     TESTING("    initialize");
-    H5PLsize(&ndx);
-    if(ndx!=2) TEST_ERROR
+
+    if(H5PLsize(&n_paths) < 0)
+        TEST_ERROR
+    if(n_paths != 2)
+        TEST_ERROR
 
     PASSED();
+
+    /****************/
+    /* H5PLremove() */
+    /****************/
 
     /* Remove all the current paths */
     TESTING("    remove");

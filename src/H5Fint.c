@@ -197,10 +197,9 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial metadata cache resize config.")
 
-    /* QAK - Add H5P_set for SWMR deltat value from internal file struct */
+    /* Add H5P_set for SWMR deltat value from internal file struct */
     if(H5P_set(new_plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set SWMR deltat.")
-
 
     /* Prepare the driver property */
     driver_prop.driver_id = f->shared->lf->driver_id;
@@ -711,10 +710,9 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
 
-/* QAK - Get SWMR delta t property */
-//        if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-            if(H5P_get(plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SWMR delta t value")
+        /* Get SWMR delta t property */
+        if(H5P_get(plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SWMR delta t value")
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -871,7 +869,7 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
             if(f->shared->swmr_deltat != 0 && H5F_addr_defined(f->shared->sblock->ext_addr) )
                 if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_SWMR_DELTAT_ID) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove SWMR delta t value")
- 
+
         /* Flush at this point since the file will be closed (phase 1).
          * Only try to flush the file if it was opened with write access, and if
          * the caller requested a flush.
@@ -1706,7 +1704,6 @@ H5F_close(H5F_t *f)
     HDassert(f);
     HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
 
-
     /* Perform checks for "semi" file close degree here, since closing the
      * file is not allowed if there are objects still open */
     if(f->shared->fc_degree == H5F_CLOSE_SEMI) {
@@ -1724,14 +1721,13 @@ H5F_close(H5F_t *f)
         if(nopen_files == 1 && nopen_objs > 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
     } /* end if */
-   
+
     /* Reset the file ID for this file */
     f->file_id = -1;
 
     /* Attempt to close the file/mount hierarchy */
     if(H5F_try_close(f, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
-
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

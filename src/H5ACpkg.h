@@ -410,6 +410,7 @@ typedef struct H5AC_aux_t
 } H5AC_aux_t; /* struct H5AC_aux_t */
 #endif /* H5_HAVE_PARALLEL */
 
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/
