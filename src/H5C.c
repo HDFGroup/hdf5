@@ -8023,7 +8023,7 @@ H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry)
 
         /* If the parent has a 'notify' callback, send a 'child entry cleaned' notice */
         if(entry->flush_dep_parent[i]->type->notify &&
-                (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, entry->flush_dep_parent[i], entry->addr) < 0)
+                (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, entry->flush_dep_parent[i]) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag reset")
     } /* end for */
 

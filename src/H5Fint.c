@@ -1472,12 +1472,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) {
                 file->shared->sblock->status_flags |= H5F_SUPER_SWMR_WRITE_ACCESS;
 
-                /* FULLSWMR */
                 /* Check for non-default SWMR delta t, and if so, write out the SWMR delta t message */
                 if(file->shared->swmr_deltat != 0)
                     if(H5F_super_ext_write_msg(file, meta_dxpl_id, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "error in writing deltat message to superblock extension")
-
             } /* end if */
 
             /* Flush the superblock & superblock extension */
