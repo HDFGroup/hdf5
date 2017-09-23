@@ -4066,8 +4066,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
         child_entry->flush_dep_parent_nalloc = 0;
     } /* end if */
     else if(child_entry->flush_dep_parent_nalloc > H5C_FLUSH_DEP_PARENT_INIT
-            && child_entry->flush_dep_nparents
-            <= (child_entry->flush_dep_parent_nalloc / 4)) {
+            && child_entry->flush_dep_nparents <= (child_entry->flush_dep_parent_nalloc / 4)) {
         if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(parent, child_entry->flush_dep_parent, (child_entry->flush_dep_parent_nalloc / 4) * sizeof(H5C_cache_entry_t *))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
         child_entry->flush_dep_parent_nalloc /= 4;
@@ -6432,7 +6431,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
                 HDassert(entry_ptr->flush_dep_ndirty_children == 0);
             if(entry_ptr->flush_dep_nparents > 0)
                 if(H5C__mark_flush_dep_clean(entry_ptr) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Can't propagate flush dep clean flag")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKCLEAN, FAIL, "Can't propagate flush dep clean flag")
         } /* end if */
     } /* end else */
 
@@ -7997,7 +7996,7 @@ done:
 static herr_t
 H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry)
 {
-    unsigned u;                         /* Local index variable */
+    int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -8006,16 +8005,19 @@ H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry)
     HDassert(entry);
 
     /* Iterate over the parent entries, if any */
-    for(u = 0; u < entry->flush_dep_nparents; u++) {
+    /* Note reverse iteration order, in case the callback removes the flush
+     *  dependency - QAK, 2017/08/12
+     */
+    for(i = ((int)entry->flush_dep_nparents) - 1; i >= 0; i--) {
 	/* Sanity check */
-	HDassert(entry->flush_dep_parent[u]->flush_dep_ndirty_children > 0);
+	HDassert(entry->flush_dep_parent[i]->flush_dep_ndirty_children > 0);
 
 	/* Adjust the parent's number of dirty children */
-	entry->flush_dep_parent[u]->flush_dep_ndirty_children--;
+	entry->flush_dep_parent[i]->flush_dep_ndirty_children--;
 
         /* If the parent has a 'notify' callback, send a 'child entry cleaned' notice */
-        if(entry->flush_dep_parent[u]->type->notify &&
-                (entry->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, entry->flush_dep_parent[u]) < 0)
+        if(entry->flush_dep_parent[i]->type->notify &&
+                (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, entry->flush_dep_parent[i]) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag reset")
     } /* end for */
 
@@ -8041,7 +8043,7 @@ done:
 herr_t
 H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry_ptr)
 {
-    unsigned u;                         /* Local index variable */
+    int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -8050,18 +8052,21 @@ H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry_ptr)
     HDassert(entry_ptr);
 
     /* Iterate over the parent entries, if any */
-    for(u = 0; u < entry_ptr->flush_dep_nparents; u++) {
-
+    /* Note reverse iteration order, in case the callback removes the flush
+     *  dependency - QAK, 2017/08/12
+     */
+    for(i = ((int)entry_ptr->flush_dep_nparents) - 1; i >= 0; i--) {
+	/* Sanity checks */
         HDassert(entry_ptr->flush_dep_parent);
-        HDassert(entry_ptr->flush_dep_parent[u]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-        HDassert(entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children > 0);
+        HDassert(entry_ptr->flush_dep_parent[i]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+        HDassert(entry_ptr->flush_dep_parent[i]->flush_dep_nunser_children > 0);
 
         /* decrement the parents number of unserialized children */
-        entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children--;
+        entry_ptr->flush_dep_parent[i]->flush_dep_nunser_children--;
 
         /* If the parent has a 'notify' callback, send a 'child entry serialized' notice */
-        if(entry_ptr->flush_dep_parent[u]->type->notify &&
-                (entry_ptr->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, entry_ptr->flush_dep_parent[u]) < 0)
+        if(entry_ptr->flush_dep_parent[i]->type->notify &&
+                (entry_ptr->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, entry_ptr->flush_dep_parent[i]) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag set")
     } /* end for */
 
@@ -8073,7 +8078,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C__mark_flush_dep_unserialized()
  *
- * Purpose:     Decrement the flush_dep_nunser_children fields of all the 
+ * Purpose:     Increment the flush_dep_nunser_children fields of all the
  *              target entry's flush dependency parents in response to 
  *              the target entry becoming unserialized.
  *
@@ -8880,6 +8885,12 @@ H5C_remove_entry(void *_entry)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove protected entry from cache")
     if(entry->is_pinned)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove pinned entry from cache")
+    /* NOTE: If these two errors are getting tripped because the entry is
+     *          in a flush dependency with a freedspace entry, move the checks
+     *          after the "before evict" message is sent, and add the
+     *          "child being evicted" message to the "before evict" notify
+     *          section below.  QAK - 2017/08/03
+     */
     if(entry->flush_dep_nparents > 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry with flush dependency parents from cache")
     if(entry->flush_dep_nchildren > 0)

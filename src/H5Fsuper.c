@@ -974,6 +974,9 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
     /* Bump superblock version if latest superblock version support is enabled */
     if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_SUPERBLOCK))
         super_vers = HDF5_SUPERBLOCK_VERSION_LATEST;
+    /* Bump superblock version to use version 3 superblock for SWMR writing */
+    else if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
+        super_vers = HDF5_SUPERBLOCK_VERSION_3;
     /* Bump superblock version to create superblock extension for SOHM info */
     else if(f->shared->sohm_nindexes > 0)
         super_vers = HDF5_SUPERBLOCK_VERSION_2;
