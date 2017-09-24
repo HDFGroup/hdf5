@@ -234,9 +234,6 @@ if (${HDF_PREFIX}_HAVE_STDINT_H AND CMAKE_CXX_COMPILER_LOADED)
   endif ()
 endif ()
 
-# Darwin
-CHECK_INCLUDE_FILE_CONCAT ("mach/mach_time.h" ${HDF_PREFIX}_HAVE_MACH_MACH_TIME_H)
-
 # Windows
 CHECK_INCLUDE_FILE_CONCAT ("io.h"            ${HDF_PREFIX}_HAVE_IO_H)
 if (NOT CYGWIN)

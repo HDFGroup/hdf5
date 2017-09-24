@@ -1050,8 +1050,6 @@ AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 AC_CHECK_HEADERS([stdbool.h])
 
 ## Darwin
-AC_CHECK_HEADERS([mach/mach_time.h])
-## Also need to detect Darwin for pubconf
 case $host_os in
   darwin*)
     AC_DEFINE([HAVE_DARWIN], [1], [Define if Darwin or Mac OS X])
