@@ -269,3 +269,42 @@ H5_now(void)
     return(now);
 } /* end H5_now() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_now_usec
+ *
+ * Purpose:	Retrieves the current time, as microseconds after the UNIX epoch.
+ *
+ * Return:	# of microseconds from the epoch (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 28, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+uint64_t
+H5_now_usec(void)
+{
+    uint64_t	now;                    /* Current time, in microseconds */
+
+#if defined(H5_HAVE_CLOCK_GETTIME)
+    {
+        struct timespec ts;
+
+        HDclock_gettime(CLOCK_MONOTONIC, &ts);
+        now = (uint64_t)(ts.tv_sec * (1000 * 1000)) + (uint64_t)(ts.tv_nsec * 1000);
+    }
+#elif defined(H5_HAVE_GETTIMEOFDAY)
+    {
+        struct timeval now_tv;
+
+        HDgettimeofday(&now_tv, NULL);
+        now = (uint64_t)(now_tv.tv_sec * (1000 * 1000)) + (uint64_t)now_tv.tv_usec;
+    }
+#else /* H5_HAVE_GETTIMEOFDAY */
+    now = (uint64_t)(HDtime(NULL) * (1000 * 1000));
+#endif /* H5_HAVE_GETTIMEOFDAY */
+
+    return(now);
+} /* end H5_now_usec() */
+

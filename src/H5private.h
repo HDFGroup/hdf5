@@ -588,6 +588,7 @@ H5_DLL void H5_timer_end (H5_timer_t *sum/*in,out*/,
          H5_timer_t *timer/*in,out*/);
 H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 H5_DLL time_t H5_now(void);
+H5_DLL uint64_t H5_now_usec(void);
 
 /* Depth of object copy */
 typedef enum {
@@ -703,6 +704,9 @@ typedef struct {
 #ifndef HDclock
     #define HDclock()    clock()
 #endif /* HDclock */
+#ifndef HDclock_gettime
+    #define HDclock_gettime(CID, TS)    clock_gettime(CID, TS)
+#endif /* HDclock_gettime */
 #ifndef HDclose
     #define HDclose(F)    close(F)
 #endif /* HDclose */
