@@ -193,7 +193,14 @@ H5_now_usec(void)
 {
     uint64_t	now;                    /* Current time, in microseconds */
 
-#ifdef H5_HAVE_GETTIMEOFDAY
+#if defined(H5_HAVE_CLOCK_GETTIME)
+    {
+        struct timespec ts;
+
+        HDclock_gettime(CLOCK_MONOTONIC, &ts);
+        now = (uint64_t)(ts.tv_sec * (1000 * 1000)) + (uint64_t)(ts.tv_nsec * 1000);
+    }
+#elif defined(H5_HAVE_GETTIMEOFDAY)
     {
         struct timeval now_tv;
 
