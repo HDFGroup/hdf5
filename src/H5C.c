@@ -1483,8 +1483,10 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->next = NULL;
     entry_ptr->prev = NULL;
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     entry_ptr->aux_next = NULL;
     entry_ptr->aux_prev = NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 #ifdef H5_HAVE_PARALLEL
     entry_ptr->coll_next = NULL;
@@ -6952,8 +6954,10 @@ H5C_load_entry(H5F_t *              f,
     entry->next                         = NULL;
     entry->prev                         = NULL;
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     entry->aux_next                     = NULL;
     entry->aux_prev                     = NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 #ifdef H5_HAVE_PARALLEL
     entry->coll_next                    = NULL;
