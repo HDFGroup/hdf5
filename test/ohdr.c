@@ -392,8 +392,9 @@ test_ohdr_swmr(hbool_t new_format)
     if(H5Oget_info(did, &obj_info) < 0)
         FAIL_STACK_ERROR
 
-    if(obj_info.hdr.version != OBJ_VERSION_LATEST)
-        FAIL_STACK_ERROR
+    if(new_format)
+        if(obj_info.hdr.version != OBJ_VERSION_LATEST)
+            FAIL_STACK_ERROR
 
     /* The size of object header should be greater than the speculative read size of H5O_SPEC_READ_SIZE */
     /* This will exercise the coding for the re-read of the object header for SWMR access */
