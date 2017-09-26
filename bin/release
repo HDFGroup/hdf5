@@ -445,6 +445,12 @@ fi
 bin/chkmanifest || fail=yes
 if [ "X$fail" = "Xyes" ]; then
     if [ $check = yes ]; then
+        echo ""
+        echo "Note!  If you are running bin/release in a development branch"
+        echo "later than v 1.8 the MANIFEST check is expected to fail when"
+        echo "autogen.sh has not been run successfully. Either run autogen.sh " 
+        echo "with /usr/hdf/bin/AUTOTOOLS at the beginning of PATH or add the"
+        echo "--nocheck argument to the bin/release command."
         exit 1
     else
 	echo "Continuing anyway..."
