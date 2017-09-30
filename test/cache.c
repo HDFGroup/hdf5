@@ -3119,13 +3119,14 @@ check_insert_entry(unsigned paged)
 	     (cache_ptr->pel_len != 2) ||
 	     (cache_ptr->pel_size != 2 * entry_sizes[entry_type]) ||
 	     (cache_ptr->LRU_list_len != 2) ||
-	     (cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type]) ||
+	     (cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type])
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
-	     (cache_ptr->dLRU_list_len != 2) ||
+	     || (cache_ptr->dLRU_list_len != 2) ||
 	     (cache_ptr->dLRU_list_size != 2 * entry_sizes[entry_type]) ||
-#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 	     (cache_ptr->cLRU_list_len != 0) ||
-	     (cache_ptr->cLRU_list_size != (size_t)0)) {
+	     (cache_ptr->cLRU_list_size != (size_t)0)
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+             ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected insert results 10.";

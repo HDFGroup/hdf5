@@ -2438,8 +2438,10 @@ reset_entries(void)
                 base_addr[j].header.ro_ref_count = FALSE;
                 base_addr[j].header.next = NULL;
                 base_addr[j].header.prev = NULL;
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
                 base_addr[j].header.aux_next = NULL;
                 base_addr[j].header.aux_prev = NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
                 base_addr[j].self = &(base_addr[j]);
                 base_addr[j].cache_ptr = NULL;
