@@ -807,17 +807,17 @@
 # filters are defined.
 
 # detect whether the encoder is present.
-  set (USE_FILTER_SZIP_ENCODER "no")
+#  set (USE_FILTER_SZIP_ENCODER 0)
   if (HDF5_ENABLE_SZIP_ENCODING)
     set (USE_FILTER_SZIP_ENCODER ${testh5repack_detect_szip})
   endif ()
 
   if (H5_HAVE_FILTER_DEFLATE)
-    set (USE_FILTER_DEFLATE "true")
+    set (USE_FILTER_DEFLATE 1)
   endif ()
 
   if (H5_HAVE_FILTER_SZIP)
-    set (USE_FILTER_SZIP "true")
+    set (USE_FILTER_SZIP 1)
   endif ()
 
 # copy files (these files have no filters)
@@ -856,16 +856,20 @@
 # szip with individual object
   set (arg ${FILE4} -f dset2:SZIP=8,EC  -l dset2:CHUNK=20x10)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
-    set (TESTTYPE "SKIP")
+  if (NOT USE_FILTER_SZIP_ENCODER)
+    if (NOT USE_FILTER_SZIP)
+      set (TESTTYPE "SKIP")
+    endif ()
   endif ()
   ADD_H5_TEST (szip_individual ${TESTTYPE} ${arg})
 
 # szip for all
   set (arg ${FILE4} -f SZIP=8,NN)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
-    set (TESTTYPE "SKIP")
+  if (NOT USE_FILTER_SZIP_ENCODER)
+    if (NOT USE_FILTER_SZIP)
+      set (TESTTYPE "SKIP")
+    endif ()
   endif ()
   ADD_H5_TEST (szip_all ${TESTTYPE} ${arg})
 
@@ -888,8 +892,10 @@
 # all filters
   set (arg ${FILE4} -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8,NN -f dset2:GZIP=1 -l dset2:CHUNK=20x10)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
-    set (TESTTYPE "SKIP")
+  if (NOT USE_FILTER_SZIP_ENCODER)
+    if (NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
+      set (TESTTYPE "SKIP")
+    endif ()
   endif ()
   ADD_H5_TEST (all_filters ${TESTTYPE} ${arg})
 
@@ -908,16 +914,20 @@
 # szip copy
   set (arg ${FILE7})
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
-    set (TESTTYPE "SKIP")
+  if (NOT USE_FILTER_SZIP_ENCODER)
+    if (NOT USE_FILTER_SZIP)
+      set (TESTTYPE "SKIP")
+    endif ()
   endif ()
   ADD_H5_TEST (szip_copy ${TESTTYPE} ${arg})
 
 # szip remove
   set (arg ${FILE7} --filter=dset_szip:NONE)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
-    set (TESTTYPE "SKIP")
+  if (NOT USE_FILTER_SZIP_ENCODER)
+    if (NOT USE_FILTER_SZIP)
+      set (TESTTYPE "SKIP")
+    endif ()
   endif ()
   ADD_H5_TEST (szip_remove ${TESTTYPE} ${arg})
 
@@ -980,23 +990,29 @@
 # remove all  filters
   set (arg ${FILE11} -f NONE)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER)
-    set (TESTTYPE "SKIP")
+  if (NOT USE_FILTER_SZIP_ENCODER)
+    if (NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
+      set (TESTTYPE "SKIP")
+    endif ()
   endif ()
   ADD_H5_TEST (remove_all ${TESTTYPE} ${arg})
 
 #filter conversions
   set (arg ${FILE8} -f dset_deflate:SZIP=8,NN)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
-    set (TESTTYPE "SKIP")
+  if (NOT USE_FILTER_SZIP_ENCODER)
+    if (NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
+      set (TESTTYPE "SKIP")
+    endif ()
   endif ()
   ADD_H5_TEST (deflate_convert ${TESTTYPE} ${arg})
 
   set (arg ${FILE7} -f dset_szip:GZIP=1)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_DEFLATE)
-    set (TESTTYPE "SKIP")
+  if (NOT USE_FILTER_SZIP_ENCODER)
+    if (NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
+      set (TESTTYPE "SKIP")
+    endif ()
   endif ()
   ADD_H5_TEST (szip_convert ${TESTTYPE} ${arg})
 
