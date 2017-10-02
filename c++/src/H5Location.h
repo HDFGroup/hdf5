@@ -26,13 +26,8 @@ namespace H5 {
     location identifier to specify the HDF5 object.  The location identifier
     can be either file, group, dataset, attribute, or named datatype.
     Wrappers for H5A functions stay in H5Object.
-
-    Inheritance: IdComponent
 */
-// Class forwarding
-class H5_DLLCPP ArrayType;
-class H5_DLLCPP LinkAccPropList;
-class H5_DLLCPP VarLenType;
+// Inheritance: IdComponent
 class H5_DLLCPP H5Location : public IdComponent {
    public:
         // Checks if a link of a given name exists in a location
@@ -195,7 +190,7 @@ class H5_DLLCPP H5Location : public IdComponent {
         // removal does not raise any problems in two 1.10 releases.
 
         // Creates a copy of an existing object giving the location id.
-        H5Location(const hid_t loc_id);
+        // H5Location(const hid_t loc_id);
 
         // Creates a reference to an HDF5 object or a dataset region.
         void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;

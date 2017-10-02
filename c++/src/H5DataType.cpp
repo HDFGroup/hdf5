@@ -48,7 +48,7 @@ using std::endl;
 ///\brief       Default constructor: Creates a stub datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType() : H5Object(), id(H5I_INVALID_HID) {}
+DataType::DataType() : H5Object(), id(H5I_INVALID_HID), encoded_buf(NULL), buf_size(0) {}
 
 //--------------------------------------------------------------------------
 // Function:    DataType overloaded constructor
@@ -63,7 +63,7 @@ DataType::DataType() : H5Object(), id(H5I_INVALID_HID) {}
 //              Removed second argument, "predefined", after changing to the
 //              new ref counting mechanism that relies on C's ref counting.
 //--------------------------------------------------------------------------
-DataType::DataType(const hid_t existing_id) : H5Object(), id(existing_id)
+DataType::DataType(const hid_t existing_id) : H5Object(), id(existing_id), encoded_buf(NULL), buf_size(0)
 {
     incRefCount(); // increment number of references to this id
 }
@@ -76,7 +76,7 @@ DataType::DataType(const hid_t existing_id) : H5Object(), id(existing_id)
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType(const H5T_class_t type_class, size_t size) : H5Object()
+DataType::DataType(const H5T_class_t type_class, size_t size) : H5Object(), encoded_buf(NULL), buf_size(0)
 {
     // Call C routine to create the new datatype
     id = H5Tcreate(type_class, size);
@@ -100,7 +100,7 @@ DataType::DataType(const H5T_class_t type_class, size_t size) : H5Object()
 //        Jul, 2008
 //              Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object()
+DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), encoded_buf(NULL), buf_size(0)
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
@@ -119,7 +119,7 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 //        Jul, 2008
 //              Added for application convenience.
 //--------------------------------------------------------------------------
- /* DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
+ /* DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID), encoded_buf(NULL), buf_size(0)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
@@ -130,7 +130,7 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 ///\brief       Copy constructor: makes a copy of the original DataType object
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType(const DataType& original) : H5Object(), id(original.id)
+DataType::DataType(const DataType& original) : H5Object(), id(original.id), encoded_buf(NULL), buf_size(0)
 {
     incRefCount(); // increment number of references to this id
 }
@@ -148,7 +148,7 @@ DataType::DataType(const DataType& original) : H5Object(), id(original.id)
 //              unnecessarily and will produce undefined behavior.
 //              -BMR, Apr 2015
 //--------------------------------------------------------------------------
-DataType::DataType(const PredType& pred_type) : H5Object()
+DataType::DataType(const PredType& pred_type) : H5Object(), encoded_buf(NULL), buf_size(0)
 {
     // Call C routine to copy the datatype
     id = H5Tcopy(pred_type.getId());
@@ -170,7 +170,7 @@ DataType::DataType(const PredType& pred_type) : H5Object()
 //              improve usability.
 //              -BMR, Dec 2016
 //--------------------------------------------------------------------------
-DataType::DataType(const H5Location& loc, const char *dtype_name) : H5Object()
+DataType::DataType(const H5Location& loc, const char *dtype_name) : H5Object(), encoded_buf(NULL), buf_size(0)
 {
     id = p_opentype(loc, dtype_name);
 }
@@ -189,7 +189,7 @@ DataType::DataType(const H5Location& loc, const char *dtype_name) : H5Object()
 //              improve usability.
 //              -BMR, Dec 2016
 //--------------------------------------------------------------------------
-DataType::DataType(const H5Location& loc, const H5std_string& dtype_name) : H5Object()
+DataType::DataType(const H5Location& loc, const H5std_string& dtype_name) : H5Object(), encoded_buf(NULL), buf_size(0)
 {
     id = p_opentype(loc, dtype_name.c_str());
 }
@@ -245,6 +245,102 @@ void DataType::copy(const DataSet& dset)
     id = H5Tcopy(dset.getId());
     if (id < 0)
         throw DataTypeIException(inMemFunc("copy"), "H5Tcopy failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType::p_decode
+// Purpose      Returns an id of a type by decoding the binary object
+///             description of this datatype.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+hid_t DataType::p_decode() const
+{
+    // Make sure that the buffer can be decoded
+    if (encoded_buf == NULL)
+    {
+        throw DataTypeIException("DataType::p_decode", "No encoded buffer");
+    }
+
+    // Call C function to decode the binary object description
+    hid_t encoded_dtype_id = H5Tdecode(encoded_buf);
+
+    // If H5Tdecode fails, raise exception
+    if (encoded_dtype_id < 0)
+    {
+        throw DataTypeIException("DataType::p_decode", "H5Tdecode failed");
+    }
+    else
+    {
+        return(encoded_dtype_id);
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType::decode
+///\brief       Returns a DataType instance by decoding the binary object
+///             description of this datatype.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* DataType::decode() const
+{
+    hid_t encoded_dtype_id = H5I_INVALID_HID;
+    try {
+        encoded_dtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    DataType *encoded_dtype = new DataType;
+    encoded_dtype->p_setId(encoded_dtype_id);
+    return(encoded_dtype);
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType::encode
+///\brief       Creates a binary object description of this datatype.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+void DataType::encode()
+{
+    // Call H5Tencode passing in null to determine the size of the buffer
+    herr_t ret_value = H5Tencode(id, NULL, &buf_size);
+    if (ret_value < 0)
+    {
+        throw DataTypeIException("DataType::encode", "Failed to get buf_size");
+    }
+
+    // Allocate buffer and call C function again to encode
+    if (buf_size > 0)
+    {
+        encoded_buf = (unsigned char *)HDcalloc((size_t)1, buf_size);
+        ret_value = H5Tencode(id, encoded_buf, &buf_size);
+        if (ret_value < 0)
+        {
+            throw DataTypeIException("DataType::encode", "H5Tencode failed");
+        }
+    }
+    else
+    {
+        throw DataTypeIException("DataType::encode", "Failed to allocate buffer for encoding");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType::hasBinaryDesc
+///\brief       Determines whether this datatype has a binary object
+///             description.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+bool DataType::hasBinaryDesc() const
+{
+    if (encoded_buf != NULL)
+        return true;
+    else
+        return false;
 }
 
 //--------------------------------------------------------------------------
@@ -558,7 +654,7 @@ DataType DataType::getSuper() const
 ///\exception   H5::DataTypeIException
 ///\par Description
 ///             For more information, please see:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-Register
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-Register
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataType::registerFunc(H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func) const
@@ -701,6 +797,28 @@ bool DataType::detectClass(H5T_class_t cls) const
 }
 
 //--------------------------------------------------------------------------
+// Function:    DataType::detectClass (static)
+///\brief       Checks whether a predtype is a certain class of datatype.
+///\return      true if this predtype is the specified type class, and false,
+///             otherwise.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - August, 2017
+//--------------------------------------------------------------------------
+bool DataType::detectClass(const PredType& pred_type, H5T_class_t cls)
+{
+    htri_t ret_value = H5Tdetect_class(pred_type.getId(), cls);
+    if (ret_value > 0)
+        return true;
+    else if (ret_value == 0)
+        return false;
+    else
+    {
+        throw DataTypeIException("detectClass on PredType",
+            "H5Tdetect_class returns negative value");
+    }
+}
+
+//--------------------------------------------------------------------------
 // Function:    DataType::isVariableStr
 ///\brief       Check whether this datatype is a variable-length string.
 ///\return      true if this datatype is a variable-length string, and
@@ -827,8 +945,15 @@ void DataType::close()
         {
             throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
         }
-        // reset the id
+        // Reset the id
         id = H5I_INVALID_HID;
+
+        // Free and reset buffer of encoded object description if it's been used
+        if (encoded_buf != NULL)
+        {
+            HDfree(encoded_buf);
+            buf_size = 0;
+        }
     }
 }
 

@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class DataSpace
     \brief Class DataSpace inherits from IdComponent and provides wrappers for
      the HDF5's dataspaces.
-
-    Inheritance: IdComponent
 */
+//  Inheritance: IdComponent
 class H5_DLLCPP DataSpace : public IdComponent {
    public:
         ///\brief Default DataSpace objects

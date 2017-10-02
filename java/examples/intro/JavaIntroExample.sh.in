@@ -16,7 +16,7 @@ top_builddir=@top_builddir@
 top_srcdir=@top_srcdir@
 srcdir=@srcdir@
 
-TESTNAME=EX_Groups
+TESTNAME=EX_Intro
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
@@ -34,13 +34,11 @@ nerrors=0
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
 BLDLIBDIR="$top_builddir/hdf5/lib"
-BLDREFDIR="./groups"
 BLDDIR="."
-HDFTEST_HOME="$top_srcdir/java/examples/groups"
+HDFTEST_HOME="$top_srcdir/java/examples/intro"
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
-TESTJARFILE=jar@PACKAGE_TARNAME@groups.jar
+TESTJARFILE=jar@PACKAGE_TARNAME@intro.jar
 test -d $BLDLIBDIR || mkdir -p $BLDLIBDIR
-test -d $BLDREFDIR || mkdir -p $BLDREFDIR
 
 ######################################################################
 # library files
@@ -57,18 +55,14 @@ $top_builddir/src/.libs/libhdf5.*
 $top_builddir/java/src/jni/.libs/libhdf5_java.*
 $top_builddir/java/src/$JARFILE
 "
-LIST_REF_FILES="
-$HDFTEST_HOME/h5ex_g_iterate.h5
-$HDFTEST_HOME/h5ex_g_visit.h5
-"
 LIST_DATA_FILES="
-$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Create.txt
-$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Iterate.txt
-$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Compact.txt
-$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Corder.txt
-$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Intermediate.txt
-$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Phase.txt
-$HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Visit.txt
+$HDFTEST_HOME/../testfiles/examples.intro.H5_CreateDataset.txt
+$HDFTEST_HOME/../testfiles/examples.intro.H5_CreateAttribute.txt
+$HDFTEST_HOME/../testfiles/examples.intro.H5_CreateFile.txt
+$HDFTEST_HOME/../testfiles/examples.intro.H5_CreateGroup.txt
+$HDFTEST_HOME/../testfiles/examples.intro.H5_CreateGroupAbsoluteRelative.txt
+$HDFTEST_HOME/../testfiles/examples.intro.H5_CreateGroupDataset.txt
+$HDFTEST_HOME/../testfiles/examples.intro.H5_ReadWrite.txt
 "
 
 #
@@ -149,59 +143,9 @@ COPY_DATAFILES_TO_BLDDIR()
 
 CLEAN_DATAFILES_AND_BLDDIR()
 {
-        $RM $BLDDIR/examples.groups.H5Ex_G_*.txt
-        $RM $BLDDIR/H5Ex_G_*.out
-        $RM $BLDDIR/H5Ex_G_*.h5
-        SDIR=`$DIRNAME $tstfile`
-        INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-        INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
-        if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then            SDIR=`$DIRNAME $tstfile`
-            $RM $BLDDIR/h5ex_g_iterate.h5
-            $RM $BLDDIR/h5ex_g_visit.h5
-        fi  
-}
-
-COPY_REFFILES="$LIST_REF_FILES"
-
-COPY_REFFILES_TO_BLDREFDIR()
-{
-    # copy test files. Used -f to make sure get a new copy
-    for tstfile in $COPY_REFFILES
-    do
-        # ignore '#' comment
-        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
-        RET=$?
-        if [ $RET -eq 1 ]; then
-            # skip cp if srcdir is same as destdir
-            # this occurs when build/test performed in source dir and
-            # make cp fail
-            SDIR=`$DIRNAME $tstfile`
-            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-            INODE_DDIR=`$LS -i -d $BLDREFDIR | $AWK -F' ' '{print $1}'`
-            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-                $CP -f $tstfile $BLDREFDIR
-                if [ $? -ne 0 ]; then
-                    echo "Error: FAILED to copy $tstfile ."
-
-                    # Comment out this to CREATE expected file
-                    exit $EXIT_FAILURE
-                fi
-            fi
-        fi
-    done
-}
-
-CLEAN_REFFILES_AND_BLDREFDIR()
-{
-    # skip rm if srcdir is same as destdir
-    # this occurs when build/test performed in source dir and
-    # make cp fail
-    SDIR=`$DIRNAME $HDFTEST_HOME/h5ex_g_iterate.h5`
-    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $BLDREFDIR | $AWK -F' ' '{print $1}'`
-    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDREFDIR
-    fi
+        $RM $BLDDIR/examples.intro.H5_*.txt
+        $RM $BLDDIR/H5_*.out
+        $RM $BLDDIR/H5_*.h5
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -223,7 +167,6 @@ JAVAEXEFLAGS=@H5_JAVAFLAGS@
 # prepare for test
 COPY_LIBFILES_TO_BLDLIBDIR
 COPY_DATAFILES_TO_BLDDIR
-COPY_REFFILES_TO_BLDREFDIR
 
 CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/slf4j-api-1.7.5.jar:"$BLDLIBDIR"/slf4j-simple-1.7.5.jar:"$TESTJARFILE""
 
@@ -269,73 +212,79 @@ esac
 
 export LD_LIBRARY_PATH
 
-echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Create"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Create > H5Ex_G_Create.out)
-if diff H5Ex_G_Create.out examples.groups.H5Ex_G_Create.txt > /dev/null; then
-    echo "  PASSED      groups.H5Ex_G_Create"
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateDataset"
+TESTING examples.intro.H5_CreateDataset
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateDataset > H5_CreateDataset.out)
+if diff H5_CreateDataset.out examples.intro.H5_CreateDataset.txt > /dev/null; then
+    echo "  PASSED      intro.H5_CreateDataset"
 else
-    echo "**FAILED**    groups.H5Ex_G_Create"
+    echo "**FAILED**    intro.H5_CreateDataset"
     nerrors="`expr $nerrors + 1`"
 fi
 
-echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Iterate"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Iterate > H5Ex_G_Iterate.out)
-if diff H5Ex_G_Iterate.out examples.groups.H5Ex_G_Iterate.txt > /dev/null; then
-    echo "  PASSED      groups.H5Ex_G_Iterate"
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateAttribute"
+TESTING examples.intro.H5_CreateAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateAttribute > H5_CreateAttribute.out)
+if diff H5_CreateAttribute.out examples.intro.H5_CreateAttribute.txt > /dev/null; then
+    echo "  PASSED      intro.H5_CreateAttribute"
 else
-    echo "**FAILED**    groups.H5Ex_G_Iterate"
+    echo "**FAILED**    intro.H5_CreateAttribute"
     nerrors="`expr $nerrors + 1`"
 fi
 
-echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Compact"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Compact > H5Ex_G_Compact.out)
-if diff H5Ex_G_Compact.out examples.groups.H5Ex_G_Compact.txt > /dev/null; then
-    echo "  PASSED      groups.H5Ex_G_Compact"
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateFile"
+TESTING examples.intro.H5_CreateFile
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateFile > H5_CreateFile.out)
+if diff H5_CreateFile.out examples.intro.H5_CreateFile.txt > /dev/null; then
+    echo "  PASSED      intro.H5_CreateFile"
 else
-    echo "**FAILED**    groups.H5Ex_G_Compact"
+    echo "**FAILED**    intro.H5_CreateFile"
     nerrors="`expr $nerrors + 1`"
 fi
 
-echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Corder"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Corder > H5Ex_G_Corder.out)
-if diff H5Ex_G_Corder.out examples.groups.H5Ex_G_Corder.txt > /dev/null; then
-    echo "  PASSED      groups.H5Ex_G_Corder"
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateGroup"
+TESTING examples.intro.H5_CreateGroup
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateGroup > H5_CreateGroup.out)
+if diff H5_CreateGroup.out examples.intro.H5_CreateGroup.txt > /dev/null; then
+    echo "  PASSED      intro.H5_CreateGroup"
 else
-    echo "**FAILED**    groups.H5Ex_G_Corder"
+    echo "**FAILED**    intro.H5_CreateGroup"
     nerrors="`expr $nerrors + 1`"
 fi
 
-echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Intermediate"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Intermediate > H5Ex_G_Intermediate.out)
-if diff H5Ex_G_Intermediate.out examples.groups.H5Ex_G_Intermediate.txt > /dev/null; then
-    echo "  PASSED      groups.H5Ex_G_Intermediate"
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateGroupAbsoluteRelative"
+TESTING examples.intro.H5_CreateGroupAbsoluteRelative
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateGroupAbsoluteRelative > H5_CreateGroupAbsoluteRelative.out)
+if diff H5_CreateGroupAbsoluteRelative.out examples.intro.H5_CreateGroupAbsoluteRelative.txt > /dev/null; then
+    echo "  PASSED      intro.H5_CreateGroupAbsoluteRelative"
 else
-    echo "**FAILED**    groups.H5Ex_G_Intermediate"
+    echo "**FAILED**    intro.H5_CreateGroupAbsoluteRelative"
     nerrors="`expr $nerrors + 1`"
 fi
 
-echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Phase"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Phase > H5Ex_G_Phase.out)
-if diff H5Ex_G_Phase.out examples.groups.H5Ex_G_Phase.txt > /dev/null; then
-    echo "  PASSED      groups.H5Ex_G_Phase"
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateGroupDataset"
+TESTING examples.intro.H5_CreateGroupDataset
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_CreateGroupDataset > H5_CreateGroupDataset.out)
+if diff H5_CreateGroupDataset.out examples.intro.H5_CreateGroupDataset.txt > /dev/null; then
+    echo "  PASSED      intro.H5_CreateGroupDataset"
 else
-    echo "**FAILED**    groups.H5Ex_G_Phase"
+    echo "**FAILED**    intro.H5_CreateGroupDataset"
     nerrors="`expr $nerrors + 1`"
 fi
 
-echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Visit"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.groups.H5Ex_G_Visit > H5Ex_G_Visit.out)
-if diff H5Ex_G_Visit.out examples.groups.H5Ex_G_Visit.txt > /dev/null; then
-    echo "  PASSED      groups.H5Ex_G_Visit"
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_ReadWrite"
+TESTING examples.intro.H5_ReadWrite
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.intro.H5_ReadWrite > H5_ReadWrite.out)
+if diff H5_ReadWrite.out examples.intro.H5_ReadWrite.txt > /dev/null; then
+    echo "  PASSED      intro.H5_ReadWrite"
 else
-    echo "**FAILED**    groups.H5Ex_G_Visit"
+    echo "**FAILED**    intro.H5_ReadWrite"
     nerrors="`expr $nerrors + 1`"
 fi
 
 # Clean up temporary files/directories
 CLEAN_LIBFILES_AND_BLDLIBDIR
 CLEAN_DATAFILES_AND_BLDDIR
-CLEAN_REFFILES_AND_BLDREFDIR
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then

@@ -23,9 +23,8 @@ namespace H5 {
     DataType inherits from H5Object because a named datatype is an HDF5
     object and is a base class of ArrayType, AtomType, CompType, EnumType,
     and VarLenType.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP DataType : public H5Object {
    public:
         // Creates a datatype given its class and size
@@ -49,6 +48,13 @@ class H5_DLLCPP DataType : public H5Object {
 
         // Copies the datatype of dset to this datatype object.
         void copy(const DataSet& dset);
+
+        // Returns a DataType instance by decoding the binary object
+        // description of this datatype.
+        virtual DataType* decode() const;
+
+        // Creates a binary object description of this datatype.
+        void encode();
 
         // Returns the datatype class identifier.
         H5T_class_t getClass() const;
@@ -107,6 +113,7 @@ class H5_DLLCPP DataType : public H5Object {
 
         // Checks whether this datatype contains (or is) a certain type class.
         bool detectClass(H5T_class_t cls) const;
+        static bool detectClass(const PredType& pred_type, H5T_class_t cls);
 
         // Checks whether this datatype is a variable-length string.
         bool isVariableStr() const;
@@ -130,6 +137,9 @@ class H5_DLLCPP DataType : public H5Object {
         // Default constructor
         DataType();
 
+        // Determines whether this datatype has a binary object description.
+        bool hasBinaryDesc() const;
+
         // Gets the datatype id.
         virtual hid_t getId() const;
 
@@ -140,6 +150,10 @@ class H5_DLLCPP DataType : public H5Object {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
         hid_t id;    // HDF5 datatype id
 
+        // Returns an id of a type by decoding the binary object
+        // description of this datatype.
+        hid_t p_decode() const;
+
         // Sets the datatype id.
         virtual void p_setId(const hid_t new_id);
 
@@ -149,6 +163,11 @@ class H5_DLLCPP DataType : public H5Object {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
+        // Buffer for binary object description of this datatype, allocated
+        // in DataType::encode and used in DataType::decode
+        unsigned char *encoded_buf;
+        size_t buf_size;
+
         // Friend function to set DataType id.  For library use only.
         friend void f_DataType_setId(DataType* dtype, hid_t new_id);
 

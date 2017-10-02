@@ -435,7 +435,7 @@ void DSetMemXferPropList::getVlenMemManager(H5MM_allocate_t& alloc_func, void** 
 ///\exception   H5::PropListIException
 ///\par Description
 ///             For detail, please refer to the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSmallData
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSmallData
 // Programmer   Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void DSetMemXferPropList::setSmallDataBlockSize(hsize_t size) const
@@ -475,7 +475,7 @@ hsize_t DSetMemXferPropList::getSmallDataBlockSize() const
 ///\par Description
 ///             For information, please refer to the C layer Reference
 ///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetHyperVectorSize
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetHyperVectorSize
 // Programmer   Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void DSetMemXferPropList::setHyperVectorSize(size_t vector_size) const
