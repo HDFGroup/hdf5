@@ -90,8 +90,8 @@ ENDMACRO ()
 
 if (BUILD_TESTING)
   foreach (example ${HDF_JAVA_EXAMPLES})
-    if (NOT ${example} STREQUAL "H5Ex_G_Iterate" AND NOT ${example} STREQUAL "H5Ex_G_Visit")
-      if (${example} STREQUAL "H5Ex_G_Compact")
+    if (NOT "${example}" STREQUAL "H5Ex_G_Iterate" AND NOT "${example}" STREQUAL "H5Ex_G_Visit")
+      if ("${example}" STREQUAL "H5Ex_G_Compact")
         add_test (
             NAME JAVA_groups-${example}-clear-h5s
             COMMAND    ${CMAKE_COMMAND}

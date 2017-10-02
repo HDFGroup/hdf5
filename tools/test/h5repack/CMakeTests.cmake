@@ -1264,7 +1264,7 @@
   if (WIN32)
     set (TESTRETVAL -1)
   endif ()
-  ADD_H5_CMP_TEST (plugin_zero "" "TEST" ${TESTRETVAL} h5repack_layout.h5 -v -f UD=250,0,0)
+  ADD_H5_MASK_TEST (plugin_zero "TEST" ${TESTRETVAL} h5repack_layout.h5 --enable-error-stack -v -f UD=250,0,0)
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver
