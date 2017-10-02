@@ -221,10 +221,6 @@ static void usage(const char *prog) {
  * Purpose:     Shutdown MPI & HDF5 and call exit()
  *
  * Return:      Does not return
- *
- * Programmer:  Quincey Koziol
- *              Saturday, 31. January 2004
- *
  *-------------------------------------------------------------------------
  */
 static void leave(int ret)
@@ -239,11 +235,6 @@ static void leave(int ret)
  * Purpose: read comp and chunk options from a file
  *
  * Return: void, exit on error
- *
- * Programmer: pvn@ncsa.uiuc.edu
- *
- * Date: September, 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -425,7 +416,6 @@ set_sort_order(const char *form)
  * Function: parse_command_line
  *
  * Purpose: parse command line input
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -674,13 +664,6 @@ done:
  * Return: Success: EXIT_SUCCESS(0)
  *
  * Failure: EXIT_FAILURE(1)
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 int main(int argc, const char **argv)
