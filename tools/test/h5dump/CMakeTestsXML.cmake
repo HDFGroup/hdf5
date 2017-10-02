@@ -161,7 +161,7 @@
 ##############################################################################
 
   macro (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
-    if (${testtype} STREQUAL "SKIP")
+    if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5DUMP-XML-${skipresultfile}-SKIPPED
@@ -177,7 +177,7 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
       set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_xml_test}" STREQUAL "")

@@ -74,7 +74,7 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
-      if (${resultcode} STREQUAL "1")
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")

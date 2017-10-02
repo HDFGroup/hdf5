@@ -366,7 +366,7 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
       set_tests_properties (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
@@ -396,7 +396,7 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DIFF_ERR-${resultfile} COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${ARGN})
       set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
@@ -428,7 +428,7 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME PH5DIFF-${resultfile} COMMAND $<TARGET_FILE:ph5diff> ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} ${ARGN})
       set_tests_properties (PH5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (PH5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
@@ -467,7 +467,7 @@
               testfiles/${resultfile}.out
               testfiles/${resultfile}.out.err
       )
-      if (${resultcode} STREQUAL "2")
+      if ("${resultcode}" STREQUAL "2")
         add_test (
             NAME H5DIFF_UD-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -512,7 +512,7 @@
               testfiles/${resultfile}_ERR.out
               testfiles/${resultfile}_ERR.out.err
       )
-      if (${resultcode} STREQUAL "2")
+      if ("${resultcode}" STREQUAL "2")
         add_test (
             NAME H5DIFF_UD_ERR-${testname}
             COMMAND "${CMAKE_COMMAND}"
