@@ -366,6 +366,7 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->coll_write_list			= NULL;
 #endif /* H5_HAVE_PARALLEL */
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     cache_ptr->cLRU_list_len			= 0;
     cache_ptr->cLRU_list_size			= (size_t)0;
     cache_ptr->cLRU_head_ptr			= NULL;
@@ -375,6 +376,7 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->dLRU_list_size			= (size_t)0;
     cache_ptr->dLRU_head_ptr			= NULL;
     cache_ptr->dLRU_tail_ptr			= NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     cache_ptr->size_increase_possible		= FALSE;
     cache_ptr->flash_size_increase_possible     = FALSE;
@@ -1481,8 +1483,10 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->next = NULL;
     entry_ptr->prev = NULL;
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     entry_ptr->aux_next = NULL;
     entry_ptr->aux_prev = NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 #ifdef H5_HAVE_PARALLEL
     entry_ptr->coll_next = NULL;
@@ -6949,8 +6953,10 @@ H5C_load_entry(H5F_t *              f,
     entry->next                         = NULL;
     entry->prev                         = NULL;
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     entry->aux_next                     = NULL;
     entry->aux_prev                     = NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 #ifdef H5_HAVE_PARALLEL
     entry->coll_next                    = NULL;
@@ -7285,6 +7291,7 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
 
         HDassert( H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS );
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
         initial_list_len = cache_ptr->cLRU_list_len;
         entry_ptr = cache_ptr->cLRU_tail_ptr;
 
@@ -7329,6 +7336,7 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
             entry_ptr = prev_ptr;
 	    entries_examined++;
         }
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
     }
 
 done:
