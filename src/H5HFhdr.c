@@ -424,11 +424,9 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
         if(NULL == H5O_msg_copy(H5O_PLINE_ID, &(cparam->pline), &(hdr->pline)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOPY, HADDR_UNDEF, "can't copy I/O filter pipeline")
 
-        /* Pay attention to the latest version flag for the file */
-        if(H5F_USE_LATEST_FLAGS(hdr->f, H5F_LATEST_PLINE_MSG))
-            /* Set the latest version for the I/O pipeline message */
-            if(H5O_pline_set_latest_version(&(hdr->pline)) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "can't set latest version of I/O filter pipeline")
+        /* Set the version for the I/O pipeline message */
+        if(H5O_pline_set_version(hdr->f, &(hdr->pline)) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "can't set version of I/O filter pipeline")
 
         /* Compute the I/O filters' encoded size */
         if(0 == (hdr->filter_len = (unsigned)H5O_msg_raw_size(hdr->f, H5O_PLINE_ID, FALSE, &(hdr->pline))))

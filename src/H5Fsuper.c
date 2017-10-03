@@ -59,7 +59,6 @@ static herr_t H5F__update_super_ext_driver_msg(H5F_t *f, hid_t dxpl_id);
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -72,6 +71,12 @@ H5FL_DEFINE(H5F_super_t);
 /* Local Variables */
 /*******************/
 
+/* Format version bounds for superblock */
+static const unsigned HDF5_superblock_ver_bounds[] = {
+    HDF5_SUPERBLOCK_VERSION_DEF,    /* H5F_LIBVER_EARLIEST */
+    HDF5_SUPERBLOCK_VERSION_2,      /* H5F_LIBVER_V18 */
+    HDF5_SUPERBLOCK_VERSION_LATEST  /* H5F_LIBVER_LATEST */
+};
 
 
 /*-------------------------------------------------------------------------
@@ -405,13 +410,23 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
     if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, meta_dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw_flags)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
 
-    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-       	if(sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "invalid superblock version for SWMR_WRITE")
+     /* Upgrade low bound to at least V18 when encountering version 2 superblock */
+    if(sblock->super_vers == HDF5_SUPERBLOCK_VERSION_2)
+        f->shared->low_bound = MAX(H5F_LIBVER_V18, f->shared->low_bound);
 
-    /* Enable all latest version support when file has v3 superblock */
-    if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
-	f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
+    /* Upgrade low bound to at least V110 when encountering version 3 superblock or SWMR_WRITE */
+    if((sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3) || (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
+        f->shared->low_bound = MAX(H5F_LIBVER_V110, f->shared->low_bound);
+
+    /* File bound check */
+    if(sblock->super_vers > HDF5_superblock_ver_bounds[f->shared->high_bound])
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "superblock version out of bounds (high bound)")
+
+    /* SWMR requires at least superblock version 3 */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
+        if(sblock->super_vers  < HDF5_superblock_ver_bounds[f->shared->low_bound])
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "superblock version out of bounds (low bound)")
+    }
 
     /* Pin the superblock in the cache */
     if(H5AC_pin_protected_entry(sblock) < 0)
@@ -971,14 +986,12 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
 	    f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF))
         non_default_fs_settings = TRUE;
 
-    /* Bump superblock version if latest superblock version support is enabled */
-    if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_SUPERBLOCK))
-        super_vers = HDF5_SUPERBLOCK_VERSION_LATEST;
-    /* Bump superblock version to use version 3 superblock for SWMR writing */
-    else if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
         super_vers = HDF5_SUPERBLOCK_VERSION_3;
+        f->shared->low_bound = MAX(H5F_LIBVER_V110, f->shared->low_bound);
+
     /* Bump superblock version to create superblock extension for SOHM info */
-    else if(f->shared->sohm_nindexes > 0)
+    } else if(f->shared->sohm_nindexes > 0)
         super_vers = HDF5_SUPERBLOCK_VERSION_2;
     /* 
      *	Bump superblock version to create superblock extension for:
@@ -995,6 +1008,13 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
      */
     else if(sblock->btree_k[H5B_CHUNK_ID] != HDF5_BTREE_CHUNK_IK_DEF)
         super_vers = HDF5_SUPERBLOCK_VERSION_1;
+
+    /* Upgrade to the version indicated by the file's low bound if higher */
+    super_vers = MAX(super_vers, HDF5_superblock_ver_bounds[f->shared->low_bound]);
+
+    /* File bound check */
+    if(super_vers > HDF5_superblock_ver_bounds[f->shared->high_bound])
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "superblock version out of bounds")
 
     /* If a newer superblock version is required, set it here */
     if(super_vers != HDF5_SUPERBLOCK_VERSION_DEF) {

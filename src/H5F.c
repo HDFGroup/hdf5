@@ -1633,7 +1633,6 @@ H5Fstart_swmr_write(hid_t file_id)
 
     if(file->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file superblock version should be at least 3")
-    HDassert((file->shared->latest_flags | H5F_LATEST_LAYOUT_MSG) > 0);
 
     /* Should not be marked for SWMR writing mode already */
     if(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
@@ -1899,9 +1898,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:   H5Fset_latest_format
+ * Function:   H5Fset_libver_bounds (Internal library use)
  *
- * Purpose:    Enable switching the "latest format" flag while a file is open.
+ * Purpose:    Set .... the "latest format" flag while a file is open.
  *
  * Return:     Non-negative on success/Negative on failure
  *
@@ -1910,33 +1909,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
+H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
 {
     H5F_t *f;                           /* File */
-    unsigned latest_flags;              /* Latest format flags for file */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ib", file_id, latest_format);
+    H5TRACE3("e", "iFvFv", file_id, low, high);
 
     /* Check args */
     if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* Check if the value is changing */
-    latest_flags = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ALL_FLAGS);
-    if(latest_format != (H5F_LATEST_ALL_FLAGS == latest_flags)) {
-        /* Call the flush routine, for this file */
-        if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+    /* Call the flush routine, for this file */
+    if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
-        /* Toggle the 'latest format' flag */
-        H5F_SET_LATEST_FLAGS(f, latest_format ? H5F_LATEST_ALL_FLAGS : 0);
-    } /* end if */
+    f->shared->low_bound = low;
+    f->shared->high_bound = high;
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Fset_latest_format() */
+} /* end H5Fset_libver_bounds() */
 
 
 /*-------------------------------------------------------------------------

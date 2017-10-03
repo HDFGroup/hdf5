@@ -89,6 +89,12 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     H5O_pline_shared_debug	/* debug the message		*/
 }};
 
+/* Format version bounds for filter pipleline */
+static const unsigned H5O_pline_ver_bounds[] = {
+    H5O_PLINE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
+    H5O_PLINE_VERSION_2,        /* H5F_LIBVER_V18 */
+    H5O_PLINE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
+};
 
 /* Declare a free list to manage the H5O_pline_t struct */
 H5FL_DEFINE(H5O_pline_t);
@@ -664,11 +670,11 @@ H5O_pline_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const voi
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_pline_set_latest_version
+ * Function:    H5O_pline_set_version
  *
- * Purpose:     Set the encoding for a I/O filter pipeline to the latest version.
+ * Purpose:     Set the version to encode an I/O filter pipeline with.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Tuesday, July 24, 2007
@@ -676,16 +682,23 @@ H5O_pline_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const voi
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_pline_set_latest_version(H5O_pline_t *pline)
+H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
+    HDassert(f);
     HDassert(pline);
 
-    /* Set encoding of I/O pipeline to latest version */
-    pline->version = H5O_PLINE_VERSION_LATEST;
+    /* Upgrade to the version indicated by the file's low bound if higher */
+    pline->version = MAX(pline->version, H5O_pline_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_pline_set_latest_version() */
+    /* File bound check */
+    if(pline->version > H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_PLINE, H5E_BADRANGE, FAIL, "Filter pipeline version out of bounds")
 
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_pline_set_version() */

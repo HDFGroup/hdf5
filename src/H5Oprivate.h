@@ -961,14 +961,14 @@ H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
 /* Fill value operators */
 H5_DLL herr_t H5O_fill_reset_dyn(H5O_fill_t *fill);
 H5_DLL herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type, hbool_t *fill_changed, hid_t dxpl_id);
-H5_DLL herr_t H5O_fill_set_latest_version(H5O_fill_t *fill);
+H5_DLL herr_t H5O_fill_set_version(H5F_t * f, H5O_fill_t *fill);
 
 /* Link operators */
 H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
 
 /* Filter pipeline operators */
-H5_DLL herr_t H5O_pline_set_latest_version(H5O_pline_t *pline);
+H5_DLL herr_t H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline);
 
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);

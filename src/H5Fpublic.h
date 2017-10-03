@@ -175,9 +175,14 @@ typedef struct H5F_sect_info_t {
 
 /* Library's file format versions */
 typedef enum H5F_libver_t {
-    H5F_LIBVER_EARLIEST,        /* Use the earliest possible format for storing objects */
-    H5F_LIBVER_LATEST           /* Use the latest possible format available for storing objects*/
+    H5F_LIBVER_ERROR = -1,
+    H5F_LIBVER_EARLIEST = 0,    /* Use the earliest possible format for storing objects */
+    H5F_LIBVER_V18 = 1,         /* Use the latest v18 format for storing objects */
+    H5F_LIBVER_V110 = 2,        /* Use the latest v10 format for storing objects */
+    H5F_LIBVER_NBOUNDS
 } H5F_libver_t;
+
+#define H5F_LIBVER_LATEST   H5F_LIBVER_V110
 
 /* File space handling strategy */
 typedef enum H5F_fspace_strategy_t {
@@ -255,7 +260,7 @@ H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
 H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info/*out*/);
 H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
-H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
+H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
 H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
 H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id,

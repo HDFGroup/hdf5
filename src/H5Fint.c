@@ -130,7 +130,6 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
     hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
     unsigned    efc_size = 0;
-    hbool_t	latest_format = FALSE;	    /* Always use the latest format? */
     hid_t	ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -167,10 +166,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't sieve buffer size")
     if(H5P_set(new_plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->sdata_aggr.alloc_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
-    if(f->shared->latest_flags > 0)
-        latest_format = TRUE;
-    if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+    if(H5P_set(new_plist, H5F_ACS_FORMAT_LOW_BOUND_NAME, &f->shared->low_bound) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'low' bound for library format versions")
+    if(H5P_set(new_plist, H5F_ACS_FORMAT_HIGH_BOUND_NAME, &f->shared->high_bound) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'high' bound for library format versions")
     if(H5P_set(new_plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &(f->shared->read_attempts)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'read attempts ' flag")
     if(H5P_set(new_plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
@@ -593,7 +592,6 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
     else {
         H5P_genplist_t *plist;          /* Property list */
         unsigned        efc_size;       /* External file cache size */
-        hbool_t	latest_format;	        /* Always use the latest format?	*/
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
@@ -675,13 +673,10 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get garbage collect reference")
         if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &(f->shared->sieve_buf_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size")
-        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
-        /* For latest format or SWMR_WRITE, activate all latest version support */
-        if(latest_format)
-            f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
-        else if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-            f->shared->latest_flags |= H5F_LATEST_LAYOUT_MSG;
+        if(H5P_get(plist, H5F_ACS_FORMAT_LOW_BOUND_NAME, &(f->shared->low_bound)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'low' bound for library format versions")
+        if(H5P_get(plist, H5F_ACS_FORMAT_HIGH_BOUND_NAME, &(f->shared->high_bound)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'high' bound for library format versions")
         if(H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &(f->shared->use_mdc_logging)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'use mdc logging' flag")
         if(H5P_get(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &(f->shared->start_mdc_log_on_access)) < 0)
@@ -2787,34 +2782,3 @@ H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
     FUNC_LEAVE_NOAPI_VOID
 } /* H5F_set_coll_md_read() */
 #endif /* H5_HAVE_PARALLEL */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_set_latest_flags
- *
- * Purpose:     Set the latest_flags field with a new value.
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              4/26/16
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_set_latest_flags(H5F_t *f, unsigned flags)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(0 == ((~flags) & H5F_LATEST_ALL_FLAGS));
-
-    f->shared->latest_flags = flags;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5F_set_latest_flags() */
-

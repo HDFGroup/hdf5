@@ -101,6 +101,56 @@ H5F_get_intent(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_low_bound
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's low_bound.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	low_bound on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Vailin Choi; June 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_low_bound(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->shared->low_bound)
+} /* end H5F_get_low_bound() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_high_bound
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's high_bound.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	high_bound on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Vailin Choi; June 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_high_bound(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->shared->high_bound)
+} /* end H5F_get_high_bound() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_open_name
  *
  * Purpose:	Retrieve the name used to open a file.
@@ -797,34 +847,6 @@ H5F_gc_ref(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->gc_ref)
 } /* end H5F_gc_ref() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_use_latest_flags
- *
- * Purpose:	Retrieve the 'latest version support' for the file.
- *
- * Return:	Success:	Non-negative, the requested 'version support'
- *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Mar  5 2007
- *
- *-------------------------------------------------------------------------
- */
-unsigned
-H5F_use_latest_flags(const H5F_t *f, unsigned fl)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(f);
-    HDassert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->latest_flags & (fl))
-} /* end H5F_use_latest_flags() */
 
 
 /*-------------------------------------------------------------------------

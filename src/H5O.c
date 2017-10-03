@@ -137,6 +137,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
 #endif /* H5O_ENABLE_BOGUS */
 };
 
+
 /* Declare a free list to manage the H5O_t struct */
 H5FL_DEFINE(H5O_t);
 
@@ -180,6 +181,12 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
     H5O_OBJ_GROUP,		/* Group object (H5O_TYPE_GROUP - 0) */
 };
 
+/* Format version bounds for object header */
+static const unsigned H5O_obj_ver_bounds[] = {
+    H5O_VERSION_1,      /* H5F_LIBVER_EARLIEST */
+    H5O_VERSION_2,      /* H5F_LIBVER_V18 */
+    H5O_VERSION_LATEST  /* H5F_LIBVER_LATEST */
+};
 
 
 /*-------------------------------------------------------------------------
@@ -1214,6 +1221,51 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_set_version
+ *
+ * Purpose:     Sets the correct version to encode the object header.
+ *              Chooses the oldest version possible, unless the file's
+ *              low bound indicates otherwise.
+ *
+ * Return:	Success:    Non-negative
+ *		    Failure:	Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Jul 17 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(oh);
+
+    /* Set the correct version to encode object header with */
+    if(store_msg_crt_idx || (oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
+        oh->version = H5O_VERSION_2;
+    else
+        oh->version = H5O_VERSION_1;
+
+    /* Upgrade to the version indicated by the file's low bound if higher */
+    oh->version = MAX(oh->version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]);
+
+    /* File bound check */
+    if(oh->version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "object header version out of bounds")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_set_version() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_create
  *
  * Purpose:	Creates a new object header. Allocates space for it and
@@ -1222,10 +1274,10 @@ done:
  *              closed by calling H5O_close().
  *
  * Return:	Success:	Non-negative, the ENT argument contains
- *				information about the object header,
- *				including its address.
+ *	                    information about the object header,
+ *                      including its address.
  *
- *		Failure:	Negative
+ *          Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1237,14 +1289,14 @@ herr_t
 H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
     hid_t ocpl_id, H5O_loc_t *loc/*out*/)
 {
-    H5P_genplist_t  *oc_plist;          /* Object creation property list */
-    H5O_t      *oh = NULL;              /* Object header created */
-    haddr_t     oh_addr;                /* Address of initial object header */
-    size_t      oh_size;                /* Size of initial object header */
-    uint8_t	oh_flags;		/* Object header's initial status flags */
-    unsigned    insert_flags = H5AC__NO_FLAGS_SET; /* Flags for inserting object header into cache */
-    hbool_t     store_msg_crt_idx;      /* Whether to always store message creation indices for this file */
-    herr_t      ret_value = SUCCEED;    /* return value */
+    H5P_genplist_t *oc_plist;   /* Object creation property list */
+    H5O_t *oh = NULL;           /* Object header created */
+    haddr_t oh_addr;            /* Address of initial object header */
+    size_t oh_size;             /* Size of initial object header */
+    hbool_t store_msg_crt_idx;  /* Whether to always store message creation indices for this file */
+    uint8_t	oh_flags;	        /* Object header's initial status flags */
+    unsigned insert_flags = H5AC__NO_FLAGS_SET; /* Flags for inserting object header into cache */
+    herr_t ret_value = SUCCEED;                 /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1274,10 +1326,10 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
 
     /* Initialize file-specific information for object header */
     store_msg_crt_idx = H5F_STORE_MSG_CRT_IDX(f);
-    if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_OBJ_HEADER) || store_msg_crt_idx || (oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
-        oh->version = H5O_VERSION_LATEST;
-    else
-        oh->version = H5O_VERSION_1;
+
+    if(H5O_set_version(f, oh, oh_flags, store_msg_crt_idx) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set version of objecdt header")
+
     oh->sizeof_size = H5F_SIZEOF_SIZE(f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
     oh->swmr_write = !!(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE);
