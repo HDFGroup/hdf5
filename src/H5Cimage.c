@@ -649,8 +649,10 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
     /* Initialize fields supporting replacement policies: */
     ds_entry_ptr->next                      	= NULL;
     ds_entry_ptr->prev                      	= NULL;
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     ds_entry_ptr->aux_next                  	= NULL;
     ds_entry_ptr->aux_prev                  	= NULL;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 #ifdef H5_HAVE_PARALLEL
     pf_entry_ptr->coll_next                 	= NULL;
     pf_entry_ptr->coll_prev                 	= NULL;
