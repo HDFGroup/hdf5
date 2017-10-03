@@ -564,7 +564,7 @@
             COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-object)
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname}-clear-objects)
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP
             COMMAND "${CMAKE_COMMAND}"
