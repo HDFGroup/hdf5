@@ -557,7 +557,7 @@ trav_info_free(trav_info_t *info)
 
     if(info) {
         /* Free visited symbolic links path and file (if alloc) */
-        for(u=0; u < info->symlink_visited.nused; u++) 
+        for(u=0; u < info->symlink_visited.nused; u++)
         {
             if (info->symlink_visited.objs[u].file)
                 HDfree(info->symlink_visited.objs[u].file);
@@ -789,8 +789,6 @@ trav_table_addlink(trav_table_t *table, haddr_t objno, const char *path)
             return;
         } /* end for */
     } /* end for */
-
-    HDassert(0 && "object not in table?!?");
 }
 
 
@@ -1017,7 +1015,7 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
         /* Finish printing line about object */
         printf("\n");
         if(trav_verbosity > 0)
-            H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order, 
+            H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order,
                                NULL, trav_attr, &op_data, H5P_DEFAULT);
     }
     else
@@ -1051,12 +1049,12 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
         case H5L_TYPE_SOFT:
             if(linfo->u.val_size > 0) {
                 char *targbuf = (char*)HDmalloc(linfo->u.val_size + 1);
-                HDassert(targbuf);
-
-                if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
-                    targbuf[0] = 0;
-                printf(" %-10s %s -> %s\n", "link", path, targbuf);
-                HDfree(targbuf);
+                if(targbuf) {
+                    if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
+                        targbuf[0] = 0;
+                    printf(" %-10s %s -> %s\n", "link", path, targbuf);
+                    HDfree(targbuf);
+                }
             } /* end if */
             else
                 printf(" %-10s %s ->\n", "link", path);
@@ -1069,13 +1067,13 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
                 const char *objname = NULL;
 
                 targbuf = (char*)HDmalloc(linfo->u.val_size + 1);
-                HDassert(targbuf);
-
-                if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
-                    targbuf[0] = 0;
-                if(H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &objname) >= 0)
-                    printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
-                HDfree(targbuf);
+                if(targbuf) {
+                    if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
+                        targbuf[0] = 0;
+                    if(H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &objname) >= 0)
+                        printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
+                    HDfree(targbuf);
+                }
             } /* end if */
             else
                 printf(" %-10s %s ->\n", "ext link", path);

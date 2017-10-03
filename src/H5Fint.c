@@ -679,8 +679,10 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
         /* For latest format or SWMR_WRITE, activate all latest version support */
-        if(latest_format || (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
+        if(latest_format)
             f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
+        else if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+            f->shared->latest_flags |= H5F_LATEST_LAYOUT_MSG;
         if(H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &(f->shared->use_mdc_logging)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'use mdc logging' flag")
         if(H5P_get(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &(f->shared->start_mdc_log_on_access)) < 0)
@@ -1457,11 +1459,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)
                 file->shared->sblock->status_flags |= H5F_SUPER_SWMR_WRITE_ACCESS;
 
-            /* Flush the superblock */
+            /* Flush the superblock & superblock extension */
             if(H5F_super_dirty(file) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, NULL, "unable to mark superblock as dirty")
             if(H5F_flush_tagged_metadata(file, H5AC__SUPERBLOCK_TAG, meta_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock")
+            if(H5F_flush_tagged_metadata(file, file->shared->sblock->ext_addr, meta_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock extension")
 
             /* Remove the file lock for SWMR_WRITE */
             if(use_file_locking && (H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)) { 

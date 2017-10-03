@@ -1634,7 +1634,7 @@ H5Fstart_swmr_write(hid_t file_id)
 
     if(file->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file superblock version should be at least 3")
-    HDassert(file->shared->latest_flags == H5F_LATEST_ALL_FLAGS);
+    HDassert((file->shared->latest_flags | H5F_LATEST_LAYOUT_MSG) > 0);
 
     /* Should not be marked for SWMR writing mode already */
     if(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
@@ -1647,6 +1647,10 @@ H5Fstart_swmr_write(hid_t file_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
     if(ci_load || ci_write )
         HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and MDC cache image")
+
+    /* Flush the superblock extension */
+    if(H5F_flush_tagged_metadata(file, file->shared->sblock->ext_addr, H5AC_ind_read_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock extension")
 
     /* Flush data buffers */
     if(H5F__flush(file, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)

@@ -392,6 +392,7 @@
 ./c++/src/H5VarLenType.h
 ./c++/src/Makefile.am
 ./c++/src/RM_stylesheet.css
+./c++/src/C2Cppfunction_map.mht
 ./c++/src/cpp_doc_config
 ./c++/src/h5c++.in
 ./c++/src/footer.html
@@ -916,6 +917,7 @@
 ./test/atomic_reader.c
 ./test/atomic_writer.c
 ./test/bad_compound.h5
+./test/bad_offset.h5
 ./test/be_data.h5
 ./test/be_extlink1.h5
 ./test/be_extlink2.h5
@@ -979,6 +981,7 @@
 ./test/fsm_aggr_persist.h5
 ./test/genall5.c
 ./test/genall5.h
+./test/gen_bad_offset.c
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c
@@ -1243,6 +1246,8 @@
 ./testpar/t_file.c
 ./testpar/t_file_image.c
 ./testpar/t_filter_read.c
+./testpar/t_filters_parallel.c
+./testpar/t_filters_parallel.h
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
@@ -1721,6 +1726,9 @@
 ./tools/testfiles/tgrp_comments.ls
 ./tools/testfiles/tgrp_comments.ddl
 ./tools/testfiles/tgrp_comments.h5
+./tools/testfiles/tgrpnullspace.h5
+./tools/testfiles/tgrpnullspace.ddl
+./tools/testfiles/tgrpnullspace.ls
 ./tools/testfiles/thlink-1.ddl
 ./tools/testfiles/thlink-2.ddl
 ./tools/testfiles/thlink-3.ddl
@@ -1776,6 +1784,7 @@
 ./tools/testfiles/tno-subset.h5
 ./tools/testfiles/tno-subset.ddl
 ./tools/testfiles/tnullspace.h5
+./tools/testfiles/tnullspace.h5.xml
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
 ./tools/testfiles/topaque.h5
@@ -2206,6 +2215,8 @@
 ./tools/test/h5diff/testfiles/h5diff_63.txt
 ./tools/test/h5diff/testfiles/h5diff_600.txt
 ./tools/test/h5diff/testfiles/h5diff_601.txt
+./tools/test/h5diff/testfiles/h5diff_601_ERR.err
+./tools/test/h5diff/testfiles/h5diff_601_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_603.txt
 ./tools/test/h5diff/testfiles/h5diff_604.txt
 ./tools/test/h5diff/testfiles/h5diff_605.txt
@@ -2312,11 +2323,21 @@
 ./tools/test/h5diff/testfiles/h5diff_452.txt
 ./tools/test/h5diff/testfiles/h5diff_453.txt
 ./tools/test/h5diff/testfiles/h5diff_454.txt
+./tools/test/h5diff/testfiles/h5diff_454_ERR.err
+./tools/test/h5diff/testfiles/h5diff_454_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_455.txt
+./tools/test/h5diff/testfiles/h5diff_455_ERR.err
+./tools/test/h5diff/testfiles/h5diff_455_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_456.txt
 ./tools/test/h5diff/testfiles/h5diff_457.txt
+./tools/test/h5diff/testfiles/h5diff_457_ERR.err
+./tools/test/h5diff/testfiles/h5diff_457_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_458.txt
+./tools/test/h5diff/testfiles/h5diff_458_ERR.err
+./tools/test/h5diff/testfiles/h5diff_458_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_459.txt
+./tools/test/h5diff/testfiles/h5diff_459_ERR.err
+./tools/test/h5diff/testfiles/h5diff_459_ERR.txt
 ./tools/test/h5diff/testfiles/h5diff_465.txt
 ./tools/test/h5diff/testfiles/h5diff_466.txt
 ./tools/test/h5diff/testfiles/h5diff_467.txt
@@ -2456,6 +2477,7 @@
 ./tools/test/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/test/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/test/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
+./tools/test/h5repack/testfiles/plugin_zero.h5repack_layout.h5.tst
 ./tools/test/h5repack/testfiles/plugin_version_test.h5repack_layout.h5.tst
 ./tools/test/h5repack/testfiles/h5repack-help.txt
 ./tools/test/h5repack/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
@@ -2464,7 +2486,7 @@
 ./tools/test/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
-./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
+./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.ddl
 ./tools/test/h5repack/testfiles/GS.h5repack_paged_nopersist.h5.ddl
 ./tools/test/h5repack/testfiles/S.h5repack_fsm_aggr_persist.h5.ddl
 ./tools/test/h5repack/testfiles/SP.h5repack_fsm_aggr_nopersist.h5.ddl
@@ -2869,7 +2891,7 @@
 
 ./java/examples/intro/Makefile.am
 ./java/examples/intro/CMakeLists.txt
-./java/examples/intro/runExample.sh.in
+./java/examples/intro/JavaIntroExample.sh.in
 ./java/examples/intro/H5_CreateAttribute.java
 ./java/examples/intro/H5_CreateDataset.java
 ./java/examples/intro/H5_CreateFile.java
@@ -2880,7 +2902,7 @@
 
 ./java/examples/groups/Makefile.am
 ./java/examples/groups/CMakeLists.txt
-./java/examples/groups/runExample.sh.in
+./java/examples/groups/JavaGroupExample.sh.in
 ./java/examples/groups/H5Ex_G_Create.java
 ./java/examples/groups/H5Ex_G_Iterate.java
 ./java/examples/groups/H5Ex_G_Compact.java
@@ -2894,7 +2916,7 @@
 
 ./java/examples/datasets/Makefile.am
 ./java/examples/datasets/CMakeLists.txt
-./java/examples/datasets/runExample.sh.in
+./java/examples/datasets/JavaDatasetExample.sh.in
 ./java/examples/datasets/H5Ex_D_Alloc.java
 ./java/examples/datasets/H5Ex_D_Checksum.java
 ./java/examples/datasets/H5Ex_D_Chunk.java
@@ -2916,7 +2938,7 @@
 
 ./java/examples/datatypes/Makefile.am
 ./java/examples/datatypes/CMakeLists.txt
-./java/examples/datatypes/runExample.sh.in
+./java/examples/datatypes/JavaDatatypeExample.sh.in
 ./java/examples/datatypes/H5Ex_T_Array.java
 ./java/examples/datatypes/H5Ex_T_ArrayAttribute.java
 ./java/examples/datatypes/H5Ex_T_Bit.java

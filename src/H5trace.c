@@ -622,10 +622,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "%sH5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET", flag_already_displayed ? " | " : "");
                                 flag_already_displayed = TRUE;
                             } /* end if */
-                            if(nocol_cause_mode & H5D_MPIO_FILTERS) {
-                                fprintf(out, "%sH5D_MPIO_FILTERS", flag_already_displayed ? " | " : "");
-                                flag_already_displayed = TRUE;
-                            } /* end if */
 
                             /* Display '<none>' if there's no flags set */
                             if(!flag_already_displayed)

@@ -146,6 +146,27 @@ EnumType::EnumType(const H5Location& loc, const H5std_string& dtype_name) : Data
 }
 
 //--------------------------------------------------------------------------
+// Function:    EnumType::decode
+///\brief       Returns an EnumType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* EnumType::decode() const
+{
+    hid_t encoded_enumtype_id = H5I_INVALID_HID;
+    try {
+        encoded_enumtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    EnumType *encoded_enumtype = new EnumType;
+    encoded_enumtype->p_setId(encoded_enumtype_id);
+    return(encoded_enumtype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    EnumType::insert
 ///\brief       Inserts a new member to this enumeration datatype.
 ///\param       name  - IN: Name of the new member

@@ -80,6 +80,7 @@ $SRC_H5LS_TESTFILES/textlinksrc.h5
 $SRC_H5LS_TESTFILES/textlinktar.h5
 $SRC_H5LS_TESTFILES/tgroup.h5
 $SRC_H5LS_TESTFILES/tgrp_comments.h5
+$SRC_H5LS_TESTFILES/tgrpnullspace.h5
 $SRC_H5LS_TESTFILES/thlink.h5
 $SRC_H5LS_TESTFILES/tloop.h5
 $SRC_H5LS_TESTFILES/tnestedcomp.h5
@@ -135,6 +136,7 @@ $SRC_H5LS_TESTFILES/tgroup.ls
 $SRC_H5LS_TESTFILES/tgroup-1.ls
 $SRC_H5LS_TESTFILES/tgroup-2.ls
 $SRC_H5LS_TESTFILES/tgroup-3.ls
+$SRC_H5LS_TESTFILES/tgrpnullspace.ls
 $SRC_H5LS_TESTFILES/thlink-1.ls
 $SRC_H5LS_TESTFILES/tloop-1.ls
 $SRC_H5LS_TESTFILES/tmultifile.ls
@@ -391,6 +393,9 @@ TOOLTEST tarray1.ls 0 -w80 -r -d tarray1.h5
 
 # test for empty data
 TOOLTEST tempty.ls 0 -w80 -d tempty.h5
+
+# test for displaying dataset and attribute of null space
+TOOLTEST tgrpnullspace.ls 0 -w80 -v -S tgrpnullspace.h5
 
 # test for all dataset types written to attributes
 # enable -S for avoiding printing NATIVE types

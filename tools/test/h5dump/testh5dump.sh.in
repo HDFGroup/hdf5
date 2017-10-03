@@ -132,6 +132,7 @@ $SRC_H5DUMP_TESTFILES/tfpformat.h5
 $SRC_H5DUMP_TESTFILES/tfvalues.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
 $SRC_H5DUMP_TESTFILES/tgrp_comments.h5
+$SRC_H5DUMP_TESTFILES/tgrpnullspace.h5
 $SRC_H5DUMP_TESTFILES/thlink.h5
 $SRC_H5DUMP_TESTFILES/thyperslab.h5
 $SRC_H5DUMP_TESTFILES/tintsattrs.h5
@@ -260,6 +261,7 @@ $SRC_H5DUMP_TESTFILES/tfpformat.ddl
 $SRC_H5DUMP_TESTFILES/tgroup-1.ddl
 $SRC_H5DUMP_TESTFILES/tgroup-2.ddl
 $SRC_H5DUMP_TESTFILES/tgrp_comments.ddl
+$SRC_H5DUMP_TESTFILES/tgrpnullspace.ddl
 $SRC_H5DUMP_TESTFILES/thlink-1.ddl
 $SRC_H5DUMP_TESTFILES/thlink-2.ddl
 $SRC_H5DUMP_TESTFILES/thlink-3.ddl
@@ -1268,6 +1270,7 @@ TOOLTEST thyperslab.ddl --enable-error-stack thyperslab.h5
 
 # test for displaying dataset and attribute of null space
 TOOLTEST tnullspace.ddl --enable-error-stack tnullspace.h5
+TOOLTEST tgrpnullspace.ddl -p --enable-error-stack tgrpnullspace.h5
 
 # test for displaying dataset and attribute of space with 0 dimension size
 TOOLTEST zerodim.ddl --enable-error-stack zerodim.h5

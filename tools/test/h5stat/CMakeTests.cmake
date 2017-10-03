@@ -20,37 +20,37 @@
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   set (HDF5_REFERENCE_FILES
-      h5stat_help1.ddl
-      h5stat_help2.ddl
-      h5stat_notexist.ddl
-      h5stat_nofile.ddl
-      h5stat_filters.ddl
-      h5stat_filters-file.ddl
-      h5stat_filters-F.ddl
-      h5stat_filters-d.ddl
-      h5stat_filters-g.ddl
-      h5stat_filters-dT.ddl
-      h5stat_filters-UD.ddl
-      h5stat_filters-UT.ddl
-      h5stat_tsohm.ddl
-      h5stat_newgrat.ddl
-      h5stat_newgrat-UG.ddl
-      h5stat_newgrat-UA.ddl
-      h5stat_err1_links.ddl
-      h5stat_links1.ddl
-      h5stat_links2.ddl
-      h5stat_links3.ddl
-      h5stat_links4.ddl
-      h5stat_links5.ddl
-      h5stat_err1_dims.ddl
-      h5stat_dims1.ddl
-      h5stat_dims2.ddl
-      h5stat_err1_numattrs.ddl
-      h5stat_err2_numattrs.ddl
-      h5stat_numattrs1.ddl
-      h5stat_numattrs2.ddl
-      h5stat_numattrs3.ddl
-      h5stat_numattrs4.ddl
+      h5stat_help1
+      h5stat_help2
+      h5stat_notexist
+      h5stat_nofile
+      h5stat_filters
+      h5stat_filters-file
+      h5stat_filters-F
+      h5stat_filters-d
+      h5stat_filters-g
+      h5stat_filters-dT
+      h5stat_filters-UD
+      h5stat_filters-UT
+      h5stat_tsohm
+      h5stat_newgrat
+      h5stat_newgrat-UG
+      h5stat_newgrat-UA
+      h5stat_err1_links
+      h5stat_links1
+      h5stat_links2
+      h5stat_links3
+      h5stat_links4
+      h5stat_links5
+      h5stat_err1_dims
+      h5stat_dims1
+      h5stat_dims2
+      h5stat_err1_numattrs
+      h5stat_err2_numattrs
+      h5stat_numattrs1
+      h5stat_numattrs2
+      h5stat_numattrs3
+      h5stat_numattrs4
   )
   set (HDF5_REFERENCE_TEST_FILES
       h5stat_filters.h5
@@ -60,7 +60,7 @@
   )
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${ddl_file}" "${PROJECT_BINARY_DIR}/${ddl_file}" "h5stat_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
@@ -78,13 +78,23 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5STAT-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${resultfile}.out
+              ${resultfile}.out.err
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -96,6 +106,7 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+      set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS H5STAT-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -107,72 +118,13 @@
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
+    foreach (ddl_file ${HDF5_REFERENCE_FILES})
+      set (CLEAR_LIST ${CLEAR_LIST} ${ddl_file}.out ${ddl_file}.out.err)
+    endforeach ()
     add_test (
       NAME H5STAT-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          h5stat_help1.out
-          h5stat_help1.out.err
-          h5stat_help2.out
-          h5stat_help2.out.err
-          h5stat_notexist.out
-          h5stat_notexist.out.err
-          h5stat_nofile.out
-          h5stat_nofile.out.err
-          h5stat_filters.out
-          h5stat_filters.out.err
-          h5stat_filters-file.out
-          h5stat_filters-file.out.err
-          h5stat_filters-F.out
-          h5stat_filters-F.out.err
-          h5stat_filters-d.out
-          h5stat_filters-d.out.err
-          h5stat_filters-g.out
-          h5stat_filters-g.out.err
-          h5stat_filters-dT.out
-          h5stat_filters-dT.out.err
-          h5stat_filters-UD.out
-          h5stat_filters-UD.out.err
-          h5stat_filters-UT.out
-          h5stat_filters-UT.out.err
-          h5stat_tsohm.out
-          h5stat_tsohm.out.err
-          h5stat_newgrat.out
-          h5stat_newgrat.out.err
-          h5stat_newgrat-UG.out
-          h5stat_newgrat-UG.out.err
-          h5stat_newgrat-UA.out
-          h5stat_newgrat-UA.out.err
-          h5stat_err1_links.out
-          h5stat_err1_links.out.err
-          h5stat_links1.out
-          h5stat_links1.out.err
-          h5stat_links2.out
-          h5stat_links2.out.err
-          h5stat_links3.out
-          h5stat_links3.out.err
-          h5stat_links4.out
-          h5stat_links4.out.err
-          h5stat_links5.out
-          h5stat_links5.out.err
-          h5stat_err1_dims.out
-          h5stat_err1_dims.out.err
-          h5stat_dims1.out
-          h5stat_dims1.out.err
-          h5stat_dims2.out
-          h5stat_dims2.out.err
-          h5stat_err1_numattrs.out
-          h5stat_err1_numattrs.out.err
-          h5stat_err2_numattrs.out
-          h5stat_err2_numattrs.out.err
-          h5stat_numattrs1.out
-          h5stat_numattrs1.out.err
-          h5stat_numattrs2.out
-          h5stat_numattrs2.out.err
-          h5stat_numattrs3.out
-          h5stat_numattrs3.out.err
-          h5stat_numattrs4.out
-          h5stat_numattrs4.out.err
+          -E remove ${CLEAR_LIST}
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})

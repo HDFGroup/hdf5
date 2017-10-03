@@ -400,18 +400,20 @@ END_FUNC(PRIV) /* end H5HL_protect() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, NOERR,
-void *, NULL, -,
+BEGIN_FUNC(PRIV, ERR,
+void *, NULL, NULL,
 H5HL_offset_into(const H5HL_t *heap, size_t offset))
 
     /* Sanity check */
     HDassert(heap);
-    HDassert(offset < heap->dblk_size);
+    if(offset >= heap->dblk_size)
+       H5E_THROW(H5E_CANTGET, "unable to offset into local heap data block");
 
     ret_value = heap->dblk_image + offset;
 
+CATCH
+    /* No special processing on errors */
 END_FUNC(PRIV) /* end H5HL_offset_into() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5HL_unprotect

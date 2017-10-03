@@ -101,7 +101,7 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -T FS_THRESHOLD, --fs_threshold=FS_THRESHOLD   Free-space section threshold for H5Pset_file_space_strategy\n");
     PRINTVALSTREAM(rawoutstream, "   -G FS_PAGESIZE, --fs_pagesize=FS_PAGESIZE   File space page size for H5Pset_file_space_page_size\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
+    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0)\n");
     PRINTVALSTREAM(rawoutstream, "    E - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "    S - is an integer\n");
     PRINTVALSTREAM(rawoutstream, "    U - is a filename.\n");
@@ -164,8 +164,8 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "        NBIT (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
     PRINTVALSTREAM(rawoutstream, "            is either IN or DS\n");
-    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>\n");
-    PRINTVALSTREAM(rawoutstream, "            required values for filter_number,cd_value_count,value_1\n");
+    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,filter_flag,cd_value_count,value_1[,value_2,...,value_N]>\n");
+    PRINTVALSTREAM(rawoutstream, "            required values for filter_number,filter_flag,cd_value_count,value_1\n");
     PRINTVALSTREAM(rawoutstream, "            optional values for value_2 to value_N\n");
     PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -200,16 +200,16 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2\n");
     PRINTVALSTREAM(rawoutstream, "   and remove filters to objects dset3, dset4, dset5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "4) h5repack -L -c 10 -s 20:dtype file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "4) h5repack -L -c 10 -s 20:dtype file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Using latest file format with maximum compact group size of 10 and\n");
     PRINTVALSTREAM(rawoutstream, "   and minimum shared datatype size of 20\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add both filters SHUF and GZIP in this order to all datasets\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,1,9 file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,0,1,9 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add bzip2 filter to all datasets\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -221,10 +221,6 @@ static void usage(const char *prog) {
  * Purpose:     Shutdown MPI & HDF5 and call exit()
  *
  * Return:      Does not return
- *
- * Programmer:  Quincey Koziol
- *              Saturday, 31. January 2004
- *
  *-------------------------------------------------------------------------
  */
 static void leave(int ret)
@@ -239,11 +235,6 @@ static void leave(int ret)
  * Purpose: read comp and chunk options from a file
  *
  * Return: void, exit on error
- *
- * Programmer: pvn@ncsa.uiuc.edu
- *
- * Date: September, 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -425,7 +416,6 @@ set_sort_order(const char *form)
  * Function: parse_command_line
  *
  * Purpose: parse command line input
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -674,13 +664,6 @@ done:
  * Return: Success: EXIT_SUCCESS(0)
  *
  * Failure: EXIT_FAILURE(1)
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 int main(int argc, const char **argv)
