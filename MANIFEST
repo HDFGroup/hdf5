@@ -2468,6 +2468,7 @@
 ./tools/test/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/test/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/test/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
+./tools/test/h5repack/testfiles/plugin_zero.h5repack_layout.h5.tst
 ./tools/test/h5repack/testfiles/plugin_version_test.h5repack_layout.h5.tst
 ./tools/test/h5repack/testfiles/h5repack-help.txt
 ./tools/test/h5repack/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
@@ -2476,7 +2477,7 @@
 ./tools/test/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
-./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
+./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.ddl
 ./tools/test/h5repack/testfiles/GS.h5repack_paged_nopersist.h5.ddl
 ./tools/test/h5repack/testfiles/S.h5repack_fsm_aggr_persist.h5.ddl
 ./tools/test/h5repack/testfiles/SP.h5repack_fsm_aggr_nopersist.h5.ddl
