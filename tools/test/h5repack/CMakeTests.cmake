@@ -134,10 +134,10 @@
   set (LIST_TST_TEST_FILES
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_filters.h5-gzip_verbose_filters
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-dset2_chunk_20x10-errstk
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_zero
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_test.h5repack_layout.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_none.h5repack_layout.UD.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_version_test.h5repack_layout.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_zero.h5repack_layout.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_none.h5repack_layout.UD.h5
   )
 
   set (LIST_DDL_TEST_FILES
@@ -146,6 +146,7 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_test
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_version_test
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_zero
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.UD.h5-plugin_none
       # fsm
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/STG.h5repack_none.h5
