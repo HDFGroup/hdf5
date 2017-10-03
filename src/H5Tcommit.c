@@ -327,9 +327,9 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
      * a named type should always succeed.
      */
     if(H5T_STATE_NAMED == type->shared->state || H5T_STATE_OPEN == type->shared->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is already committed")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is already committed")
     if(H5T_STATE_IMMUTABLE == type->shared->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is immutable")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is immutable")
 
     /* Check for a "sensible" datatype to store on disk */
     if(H5T_is_sensible(type) <= 0)
@@ -343,15 +343,13 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
 
     /* Reset datatype location and path */
     if(H5O_loc_reset(&temp_oloc) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize location")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize location")
     if(H5G_name_reset(&temp_path) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize path")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize path")
     loc_init = TRUE;
 
-    /* Set the latest format, if requested */
-    if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_DATATYPE))
-        if(H5T_set_latest_version(type) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
+    if(H5T_set_version(file, type) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set version of datatype")
 
     /* Calculate message size infomation, for creating object header */
     dtype_size = H5O_msg_size_f(file, tcpl_id, H5O_DTYPE_ID, type, (size_t)0);
@@ -362,15 +360,15 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
      * type message and then give the object header a name.
      */
     if(H5O_create(file, dxpl_id, dtype_size, (size_t)1, tcpl_id, &temp_oloc) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header")
     if(H5O_msg_create(&temp_oloc, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, type, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")
 
     /* Copy the new object header's location into the datatype, taking ownership of it */
     if(H5O_loc_copy(&(type->oloc), &temp_oloc, H5_COPY_SHALLOW) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype location")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype location")
     if(H5G_name_copy(&(type->path), &temp_path, H5_COPY_SHALLOW) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype location")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype location")
     loc_init = FALSE;
 
     /* Set the shared info fields */
@@ -399,12 +397,12 @@ done:
         if((type->shared->state == H5T_STATE_TRANSIENT || type->shared->state == H5T_STATE_RDONLY) && (type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED)) {
             if(H5O_dec_rc_by_loc(&(type->oloc), dxpl_id) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
-	    if(H5O_close(&(type->oloc), NULL) < 0)
+            if(H5O_close(&(type->oloc), NULL) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header")
             if(H5O_delete(file, dxpl_id, type->sh_loc.u.loc.oh_addr) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header")
-	    type->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
-	} /* end if */
+            type->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
+        } /* end if */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -1017,10 +1017,16 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "H5F_LIBVER_EARLIEST");
                                     break;
 
+                                case H5F_LIBVER_V18:
+                                    fprintf(out, "H5F_LIBVER_V18");
+                                    break;
+
                                 case H5F_LIBVER_LATEST:
                                     fprintf(out, "H5F_LIBVER_LATEST");
                                     break;
 
+                                case H5F_LIBVER_ERROR:
+                                case H5F_LIBVER_NBOUNDS:
                                 default:
                                     fprintf(out, "%ld", (long)libver_vers);
                                     break;

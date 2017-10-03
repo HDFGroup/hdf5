@@ -151,6 +151,13 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     H5O_fill_new_shared_debug	/*debug the message			*/
 }};
 
+/* Format version bounds for fill value */
+static const unsigned H5O_fill_ver_bounds[] = {
+    H5O_FILL_VERSION_1,         /* H5F_LIBVER_EARLIEST */
+    H5O_FILL_VERSION_3,     /* H5F_LIBVER_V18 */
+    H5O_FILL_VERSION_LATEST /* H5F_LIBVER_LATEST */
+};
+
 /* Masks, shift values & flags for fill value message */
 #define H5O_FILL_MASK_ALLOC_TIME        0x03
 #define H5O_FILL_SHIFT_ALLOC_TIME       0
@@ -997,11 +1004,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_set_latest_version
+ * Function:    H5O_fill_set_version
  *
- * Purpose:     Set the encoding for a fill value to the latest version.
+ * Purpose:     Set the version to encode a fill value with.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Tuesday, July 24, 2007
@@ -1009,16 +1016,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_fill_set_latest_version(H5O_fill_t *fill)
+H5O_fill_set_version(H5F_t *f, H5O_fill_t *fill)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
+    HDassert(f);
     HDassert(fill);
 
-    /* Set encoding of fill value to latest version */
-    fill->version = H5O_FILL_VERSION_LATEST;
+    /* Upgrade to the version indicated by the file's low bound if higher */
+    fill->version = MAX(fill->version, H5O_fill_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_fill_set_latest_version() */
+    /* File bound check */
+    if(fill->version > H5O_fill_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "Filter pipeline version out of bounds")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_fill_set_version() */
 
