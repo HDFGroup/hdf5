@@ -661,7 +661,7 @@ foreach (test ${H5TEST_TESTS})
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
   else ()
-    if (${test} STREQUAL "big" AND CYGWIN)
+    if ("${test}" STREQUAL "big" AND CYGWIN)
       add_test (NAME H5TEST-${test}
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}"
       )
@@ -702,7 +702,7 @@ if (BUILD_SHARED_LIBS)
   )
 
   foreach (test ${H5TEST_TESTS})
-    if (${test} STREQUAL "big" AND CYGWIN)
+    if ("${test}" STREQUAL "big" AND CYGWIN)
       add_test (NAME H5TEST-shared-${test}
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}-shared"
       )
@@ -1115,8 +1115,8 @@ if (HDF5_TEST_VFD)
 
   # Windows only macro
   macro (CHECK_VFD_TEST vfdtest vfdname resultcode)
-    if (${vfdtest} STREQUAL "flush1" OR ${vfdtest} STREQUAL "flush2")
-      if (${vfdname} STREQUAL "multi" OR ${vfdname} STREQUAL "split")
+    if ("${vfdtest}" STREQUAL "flush1" OR "${vfdtest}" STREQUAL "flush2")
+      if ("${vfdname}" STREQUAL "multi" OR "${vfdname}" STREQUAL "split")
         if (NOT BUILD_SHARED_LIBS AND NOT CMAKE_BUILD_TYPE MATCHES Debug)
           add_test (NAME VFD-${vfdname}-${vfdtest}
               COMMAND "${CMAKE_COMMAND}"
@@ -1205,7 +1205,7 @@ if (HDF5_TEST_VFD)
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
-      if (BUILD_SHARED_LIBS AND NOT ${vfdtest} STREQUAL "cache")
+      if (BUILD_SHARED_LIBS AND NOT "${vfdtest}" STREQUAL "cache")
         add_test (NAME VFD-${vfdname}-${vfdtest}-shared
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}-shared>"

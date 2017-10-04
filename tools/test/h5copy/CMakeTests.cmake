@@ -71,13 +71,13 @@
     endif ()
 
     # resultcode=2 will cause the test to skip the diff test
-    if (NOT ${resultcode} STREQUAL "2")
+    if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY_F-${testname}-DIFF
           COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY_F-${testname}-DIFF PROPERTIES DEPENDS H5COPY_F-${testname})
-      if (${resultcode} STREQUAL "1")
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY_F-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
     endif ()
@@ -107,13 +107,13 @@
     endif ()
 
     # resultcode=2 will cause the test to skip the diff test
-    if (NOT ${resultcode} STREQUAL "2")
+    if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY-${testname}-DIFF
           COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
-      if (${resultcode} STREQUAL "1")
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
     endif ()
@@ -157,13 +157,13 @@
     )
     set_tests_properties (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-${testname}-prefill)
     # resultcode=2 will cause the test to skip the diff test
-    if (NOT ${resultcode} STREQUAL "2")
+    if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY-${testname}-DIFF
           COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
-      if (${resultcode} STREQUAL "1")
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
     endif ()
@@ -198,13 +198,13 @@
     )
     set_tests_properties (H5COPY_SAME-${testname} PROPERTIES DEPENDS H5COPY_SAME-${testname}-prefill)
     # resultcode=2 will cause the test to skip the diff test
-    if (NOT ${resultcode} STREQUAL "2")
+    if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY_SAME-${testname}-DIFF
           COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${testname}.out.h5 ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY_SAME-${testname}-DIFF PROPERTIES DEPENDS H5COPY_SAME-${testname})
-      if (${resultcode} STREQUAL "1")
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY_SAME-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
     endif ()
@@ -218,7 +218,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5COPY-CMP-${testname} COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
-      if (${resultcode} STREQUAL "1")
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
@@ -231,6 +231,8 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               ./testfiles/${testname}.out.h5
+              ./testfiles/${testname}.out.out
+              ./testfiles/${testname}.out.out.err
       )
       add_test (
           NAME H5COPY-CMP-${testname}
