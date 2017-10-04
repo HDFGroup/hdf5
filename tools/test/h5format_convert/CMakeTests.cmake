@@ -94,7 +94,10 @@
       add_test (
           NAME H5FC-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/outtmp.h5
+              -E remove
+              ./testfiles/outtmp.h5
+              ./testfiles/${testname}.out
+              ./testfiles/${testname}.out.err
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -143,7 +146,10 @@
       add_test (
           NAME H5FC-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/tmp.h5
+              -E remove
+              ./testfiles/tmp.h5
+              ./testfiles/${testname}.out
+              ./testfiles/${testname}.out.err
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -187,7 +193,10 @@
       add_test (
           NAME H5FC-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/chktmp.h5
+              -E remove
+              ./testfiles/chktmp.h5
+              ./testfiles/${testname}.out
+              ./testfiles/${testname}.out.err
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -225,7 +234,12 @@
       add_test (
           NAME H5FC-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/dmptmp.h5
+              -E remove
+              ./testfiles/dmptmp.h5
+              ./testfiles/${testname}.out
+              ./testfiles/${testname}.out.err
+              ./testfiles/${testname}_chk.out
+              ./testfiles/${testname}_chk.out.err
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -254,7 +268,7 @@
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=-BH;./testfiles/dmptmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=testfiles/${testname}.out"
+              -D "TEST_OUTPUT=testfiles/${testname}_chk.out"
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=testfiles/${testname}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"

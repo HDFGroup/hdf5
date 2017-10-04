@@ -199,6 +199,7 @@ int apply_filters(const char* name, /* object name from traverse list */
         pack_opt_t *options, /* repack options */
         int *has_filter) /* (OUT) object NAME has a filter */
 {
+    int         ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     int         nfilters; /* number of filters in DCPL */
     hsize_t     chsize[64]; /* chunk size in elements */
     H5D_layout_t layout;
@@ -208,7 +209,7 @@ int apply_filters(const char* name, /* object name from traverse list */
     *has_filter = 0;
 
     if (rank == 0) /* scalar dataset, do not apply */
-        return 0;
+        HGOTO_DONE(0);
 
     /*-------------------------------------------------------------------------
     * initialize the assigment object
@@ -221,11 +222,11 @@ int apply_filters(const char* name, /* object name from traverse list */
     *-------------------------------------------------------------------------
     */
     if (aux_assign_obj(name, options, &obj) == 0)
-        return 0;
+        HGOTO_DONE(0);
 
     /* get information about input filters */
     if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
-        return -1;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_nfilters failed");
 
     /*-------------------------------------------------------------------------
     * check if we have filters in the pipeline
@@ -236,7 +237,7 @@ int apply_filters(const char* name, /* object name from traverse list */
     if (nfilters && obj.nfilters) {
         *has_filter = 1;
         if (H5Premove_filter(dcpl_id, H5Z_FILTER_ALL) < 0)
-            return -1;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Premove_filter failed");
     }
 
     /*-------------------------------------------------------------------------
@@ -246,11 +247,11 @@ int apply_filters(const char* name, /* object name from traverse list */
     */
     if (obj.layout == -1) {
         if ((layout = H5Pget_layout(dcpl_id)) < 0)
-            return -1;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_layout failed");
 
         if (layout == H5D_CHUNKED) {
             if ((rank = H5Pget_chunk(dcpl_id, NELMTS(chsize), chsize/*out*/)) < 0)
-                return -1;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_chunk failed");
             obj.layout = H5D_CHUNKED;
             obj.chunk.rank = rank;
             for (i = 0; i < rank; i++)
@@ -323,9 +324,9 @@ int apply_filters(const char* name, /* object name from traverse list */
                     aggression = obj.filter[i].cd_values[0];
                     /* set up for deflated data */
                     if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
-                        return -1;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_chunk failed");
                     if (H5Pset_deflate(dcpl_id, aggression) < 0)
-                        return -1;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_deflate failed");
                 }
                 break;
 
@@ -343,9 +344,9 @@ int apply_filters(const char* name, /* object name from traverse list */
 
                     /* set up for szip data */
                     if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
-                        return -1;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_chunk failed");
                     if (H5Pset_szip(dcpl_id, options_mask, pixels_per_block) < 0)
-                        return -1;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_szip failed");
                 }
                 break;
 
@@ -355,9 +356,9 @@ int apply_filters(const char* name, /* object name from traverse list */
                 */
             case H5Z_FILTER_SHUFFLE:
                 if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
-                    return -1;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_chunk failed");
                 if (H5Pset_shuffle(dcpl_id) < 0)
-                    return -1;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_shuffle failed");
                 break;
 
                 /*-------------------------------------------------------------------------
@@ -366,9 +367,9 @@ int apply_filters(const char* name, /* object name from traverse list */
                 */
             case H5Z_FILTER_FLETCHER32:
                 if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
-                    return -1;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_chunk failed");
                 if (H5Pset_fletcher32(dcpl_id) < 0)
-                    return -1;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fletcher32 failed");
                 break;
                 /*----------- -------------------------------------------------------------
                 * H5Z_FILTER_NBIT , NBIT compression
@@ -376,9 +377,9 @@ int apply_filters(const char* name, /* object name from traverse list */
                 */
             case H5Z_FILTER_NBIT:
                 if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
-                    return -1;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_chunk failed");
                 if (H5Pset_nbit(dcpl_id) < 0)
-                    return -1;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_nbit failed");
                 break;
                 /*----------- -------------------------------------------------------------
                 * H5Z_FILTER_SCALEOFFSET , scale+offset compression
@@ -394,9 +395,9 @@ int apply_filters(const char* name, /* object name from traverse list */
                     scale_factor = (int) obj.filter[i].cd_values[1];
 
                     if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
-                        return -1;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_chunk failed");
                     if (H5Pset_scaleoffset(dcpl_id, scale_type, scale_factor) < 0)
-                        return -1;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_scaleoffset failed");
                 }
                 break;
             default:
@@ -404,9 +405,9 @@ int apply_filters(const char* name, /* object name from traverse list */
                     if (H5Pset_filter(dcpl_id, obj.filter[i].filtn,
                             obj.filter[i].filt_flag, obj.filter[i].cd_nelmts,
                             obj.filter[i].cd_values) < 0)
-                        return -1;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_filter failed");
                     if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
-                        return -1;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_chunk failed");
                 }
                 break;
             } /* switch */
@@ -422,24 +423,25 @@ int apply_filters(const char* name, /* object name from traverse list */
     if (obj.layout >= 0) {
         /* a layout was defined */
         if (H5Pset_layout(dcpl_id, obj.layout) < 0)
-            return -1;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_layout failed");
 
         if (H5D_CHUNKED == obj.layout) {
             if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
-                return -1;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_chunk failed");
         }
         else if (H5D_COMPACT == obj.layout) {
             if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY) < 0)
-                return -1;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_alloc_time failed");
         }
         /* remove filters for the H5D_CONTIGUOUS case */
         else if (H5D_CONTIGUOUS == obj.layout) {
             if (H5Premove_filter(dcpl_id, H5Z_FILTER_ALL) < 0)
-                return -1;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Premove_filter failed");
         }
 
     }
 
-    return 0;
+done:
+    return ret_value;
 }
 

@@ -640,8 +640,8 @@ static hsize_t diff_datum(
          * compared, we convert both bit patterns to their corresponding
          * enumeration constant and do a string comparison
          */
+        h5difftrace("diff_datum H5T_ENUM\n");
         {
-            h5difftrace("diff_datum H5T_ENUM\n");
             char enum_name1[1024];
             char enum_name2[1024];
             herr_t err1;

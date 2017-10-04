@@ -61,8 +61,8 @@
           NAME H5CLEAR_CMP-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove
-                  ${testname}.out
-                  ${testname}.out.err
+                  testfiles/${testname}.out
+                  testfiles/${testname}.out.err
       )
       add_test (
           NAME H5CLEAR_CMP-${testname}
@@ -94,34 +94,36 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_TEST testname resultcode)
+  macro (ADD_H5_TEST testname testfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME H5CLEAR-clear_open_chk-copy_${testname}.h5
+          NAME H5CLEAR-clr_open_chk-copy_${testname}.h5
           COMMAND    ${CMAKE_COMMAND}
               -E copy_if_different
-              "${PROJECT_SOURCE_DIR}/testfiles/${testname}.h5" "${PROJECT_BINARY_DIR}/testfiles/${testname}.h5"
+              "${PROJECT_SOURCE_DIR}/testfiles/${testfile}.h5" "${PROJECT_BINARY_DIR}/testfiles/${testfile}.h5"
       )
       if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5CLEAR-clear_open_chk-copy_${testname}.h5 PROPERTIES DEPENDS ${last_test})
+        set_tests_properties (H5CLEAR-clr_open_chk-copy_${testname}.h5 PROPERTIES DEPENDS ${last_test})
       endif ()
-      set (last_test "H5CLEAR-clear_open_chk-copy_${testname}.h5")
+      set (last_test "H5CLEAR-clr_open_chk-copy_${testname}.h5")
+
       # Initial file open fails OR
       # File open succeeds because the library does not check status_flags for file with < v3 superblock
-      add_test (NAME H5CLEAR-clear_open_chk-${testname}_${resultcode} COMMAND $<TARGET_FILE:clear_open_chk> ${testname}.h5)
-      set_tests_properties (H5CLEAR-clear_open_chk-${testname}_${resultcode} PROPERTIES WILL_FAIL "${resultcode}")
-      set_tests_properties (H5CLEAR-clear_open_chk-${testname}_${resultcode} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      add_test (NAME H5CLEAR-clr_open_chk-${testname}_${resultcode} COMMAND $<TARGET_FILE:clear_open_chk> ${testfile}.h5)
+      set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES WILL_FAIL "${resultcode}")
+      set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5CLEAR-clear_open_chk-${testname}_${resultcode} PROPERTIES DEPENDS ${last_test})
+        set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES DEPENDS ${last_test})
       endif ()
+
       # After "h5clear" the file, the subsequent file open succeeds
-      add_test (NAME H5CLEAR-h5clear-${testname} COMMAND $<TARGET_FILE:h5clear> -s ${testname}.h5)
-      set_tests_properties (H5CLEAR-h5clear-${testname} PROPERTIES DEPENDS H5CLEAR-clear_open_chk-${testname}_${resultcode})
-      set_tests_properties (H5CLEAR-h5clear-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      add_test (NAME H5CLEAR-clear_open_chk-${testname} COMMAND $<TARGET_FILE:clear_open_chk> ${testname}.h5)
-      set_tests_properties (H5CLEAR-clear_open_chk-${testname} PROPERTIES DEPENDS H5CLEAR-h5clear-${testname})
-      set_tests_properties (H5CLEAR-clear_open_chk-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      set (last_test "H5CLEAR-clear_open_chk-${testname}")
+      add_test (NAME H5CLEAR-h5clr-${testname} COMMAND $<TARGET_FILE:h5clear> -s ${testfile}.h5)
+      set_tests_properties (H5CLEAR-h5clr-${testname} PROPERTIES DEPENDS H5CLEAR-clr_open_chk-${testname}_${resultcode})
+      set_tests_properties (H5CLEAR-h5clr-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      add_test (NAME H5CLEAR-clr_open_chk-${testname} COMMAND $<TARGET_FILE:clear_open_chk> ${testfile}.h5)
+      set_tests_properties (H5CLEAR-clr_open_chk-${testname} PROPERTIES DEPENDS H5CLEAR-h5clr-${testname})
+      set_tests_properties (H5CLEAR-clr_open_chk-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      set (last_test "H5CLEAR-clr_open_chk-${testname}")
     endif ()
   endmacro ()
 
@@ -185,15 +187,15 @@ if (HDF5_ENABLE_USING_MEMCHECKER)
   endforeach ()
   # make second copy of mod_h5clear_mdc_image.h5
   add_test (
-      NAME H5CLEAR-copy_mod_h5clear_mdc_image2.h5
+      NAME H5CLEAR-copy_mod_h5clr_mdc_image2.h5
       COMMAND    ${CMAKE_COMMAND}
           -E copy_if_different
           "${PROJECT_SOURCE_DIR}/testfiles/mod_h5clear_mdc_image.h5" "${PROJECT_BINARY_DIR}/testfiles/mod_h5clear_mdc_image2.h5"
   )
   if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (H5CLEAR-copy_mod_h5clear_mdc_image2.h5 PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (H5CLEAR-copy_mod_h5clr_mdc_image2.h5 PROPERTIES DEPENDS ${last_test})
   endif ()
-  set (last_test "H5CLEAR-copy_mod_h5clear_mdc_image2.h5")
+  set (last_test "H5CLEAR-copy_mod_h5clr_mdc_image2.h5")
 endif()
 
 #
@@ -210,16 +212,16 @@ endif()
 # "h5clear -m -s junk.h5"                   (valid 2 options, nonexisting file)
 # "h5clear -m orig_h5clear_sec2_v2.h5"      (valid 1 option, existing file, no cache image)
 # "h5clear -s -m orig_h5clear_sec2_v0.h5"   (valid 2 options, existing file, no cache image)
-  ADD_H5_CMP (h5clear_usage_h h5clear_usage 0 "-h")
-  ADD_H5_CMP (h5clear_usage h5clear_usage 1 "")
-  ADD_H5_CMP (h5clear_usage_junk h5clear_usage 1 "" junk.h5)
-  ADD_H5_CMP (h5clear_usage_none h5clear_usage 1 "" orig_h5clear_sec2_v3.h5)
-  ADD_H5_CMP (h5clear_missing_file_m h5clear_missing_file 1 "-m")
-  ADD_H5_CMP (h5clear_open_fail_s h5clear_open_fail 1 "-s" junk.h5)
-  ADD_H5_CMP (h5clear_missing_file_ms h5clear_missing_file 1 "-m" "-s")
-  ADD_H5_CMP (h5clear_open_fail_ms h5clear_open_fail 1 "-m" "-s"  junk.h5)
-  ADD_H5_CMP (h5clear_no_mdc_image_m h5clear_no_mdc_image 0 "-m" orig_h5clear_sec2_v2.h5)
-  ADD_H5_CMP (h5clear_no_mdc_image_ms h5clear_no_mdc_image 0 "-s" "-m" orig_h5clear_sec2_v0.h5)
+  ADD_H5_CMP (h5clr_usage_h h5clear_usage 0 "-h")
+  ADD_H5_CMP (h5clr_usage h5clear_usage 1 "")
+  ADD_H5_CMP (h5clr_usage_junk h5clear_usage 1 "" junk.h5)
+  ADD_H5_CMP (h5clr_usage_none h5clear_usage 1 "" orig_h5clear_sec2_v3.h5)
+  ADD_H5_CMP (h5clr_missing_file_m h5clear_missing_file 1 "-m")
+  ADD_H5_CMP (h5clr_open_fail_s h5clear_open_fail 1 "-s" junk.h5)
+  ADD_H5_CMP (h5clr_missing_file_ms h5clear_missing_file 1 "-m" "-s")
+  ADD_H5_CMP (h5clr_open_fail_ms h5clear_open_fail 1 "-m" "-s"  junk.h5)
+  ADD_H5_CMP (h5clr_no_mdc_image_m h5clear_no_mdc_image 0 "-m" orig_h5clear_sec2_v2.h5)
+  ADD_H5_CMP (h5clr_no_mdc_image_ms h5clear_no_mdc_image 0 "-s" "-m" orig_h5clear_sec2_v0.h5)
 #
 #
 #
@@ -235,30 +237,30 @@ endif()
 # "h5clear -l -m junk.h5"               (invalid/valid 2 options, nonexisting file, fail exit code)
 # "h5clear -m -l h5clear_sec2_v0.h5"    (valid/invalid 2 options, existing file, fail exit code)
 # "h5clear -l -m h5clear_sec2_v0.h5"    (invalid/valid 2 options, existing file, fail exit code)
-  ADD_H5_RETTEST (h5clear_mdc_image "false" "-m" h5clear_mdc_image.h5)
-  ADD_H5_RETTEST (h5clear_vers "false" "--vers")
-  ADD_H5_RETTEST (h5clear_k "true" "-k")
-  ADD_H5_RETTEST (h5clear_k_junk "true" "-k" junk.h5)
-  ADD_H5_RETTEST (h5clear_l_sec2 "true" "-l" h5clear_sec2_v2.h5)
-  ADD_H5_RETTEST (h5clear_mk "true" "-m" "-k")
-  ADD_H5_RETTEST (h5clear_lm "true" "-l" "-m")
-  ADD_H5_RETTEST (h5clear_ml_junk "true" "-m" "-l" junk.h5)
-  ADD_H5_RETTEST (h5clear_lm_junk "true" "-l" "-m" junk.h5)
-  ADD_H5_RETTEST (h5clear_ml_sec2 "true" "-m" "-l" h5clear_sec2_v0.h5)
-  ADD_H5_RETTEST (h5clear_lm_sec2 "true" "-l" "-m" h5clear_sec2_v0.h5)
+  ADD_H5_RETTEST (h5clr_mdc_image "false" "-m" h5clear_mdc_image.h5)
+  ADD_H5_RETTEST (h5clr_vers "false" "--vers")
+  ADD_H5_RETTEST (h5clr_k "true" "-k")
+  ADD_H5_RETTEST (h5clr_k_junk "true" "-k" junk.h5)
+  ADD_H5_RETTEST (h5clr_l_sec2 "true" "-l" h5clear_sec2_v2.h5)
+  ADD_H5_RETTEST (h5clr_mk "true" "-m" "-k")
+  ADD_H5_RETTEST (h5clr_lm "true" "-l" "-m")
+  ADD_H5_RETTEST (h5clr_ml_junk "true" "-m" "-l" junk.h5)
+  ADD_H5_RETTEST (h5clr_lm_junk "true" "-l" "-m" junk.h5)
+  ADD_H5_RETTEST (h5clr_ml_sec2 "true" "-m" "-l" h5clear_sec2_v0.h5)
+  ADD_H5_RETTEST (h5clr_lm_sec2 "true" "-l" "-m" h5clear_sec2_v0.h5)
 #
 #
 #
 # h5clear_mdc_image.h5 already has cache image removed earlier, verify the expected warning from h5clear:
-  ADD_H5_CMP (h5clear_mdc_image_m h5clear_no_mdc_image 0 "-m" mod_h5clear_mdc_image.h5)
-  ADD_H5_CMP (h5clear_mdc_image_sm h5clear_no_mdc_image 0 "-s" "-m" mod_h5clear_mdc_image2.h5)
+  ADD_H5_CMP (h5clr_mdc_image_m h5clear_no_mdc_image 0 "-m" mod_h5clear_mdc_image.h5)
+  ADD_H5_CMP (h5clr_mdc_image_sm h5clear_no_mdc_image 0 "-s" "-m" mod_h5clear_mdc_image2.h5)
 #
 #
 #
 # The following are tests to verify the status_flags field is cleared properly:
-  ADD_H5_TEST (h5clear_sec2_v3 "true")
-  ADD_H5_TEST (h5clear_log_v3 "true")
-  ADD_H5_TEST (latest_h5clear_sec2_v3 "true")
-  ADD_H5_TEST (latest_h5clear_log_v3 "true")
-  ADD_H5_TEST (h5clear_sec2_v0 "false")
-  ADD_H5_TEST (h5clear_sec2_v2 "false")
+  ADD_H5_TEST (h5clr_sec2_v3 h5clear_sec2_v3 "true")
+  ADD_H5_TEST (h5clr_log_v3 h5clear_log_v3 "true")
+  ADD_H5_TEST (latest_h5clr_sec2_v3 latest_h5clear_sec2_v3 "true")
+  ADD_H5_TEST (latest_h5clr_log_v3 latest_h5clear_log_v3 "true")
+  ADD_H5_TEST (h5clr_sec2_v0 h5clear_sec2_v0 "false")
+  ADD_H5_TEST (h5clr_sec2_v2 h5clear_sec2_v2 "false")
