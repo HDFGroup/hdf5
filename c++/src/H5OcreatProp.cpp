@@ -115,7 +115,7 @@ ObjCreatPropList::ObjCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 ///             If \c max_compact is set to 0, dense storage will be used.
 ///             For more detail about on attribute storage, please refer to the
 ///             C layer Reference Manual at:
-/// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrPhaseChange
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrPhaseChange
 // Programmer:  Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_dense) const
@@ -139,7 +139,7 @@ void ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_den
 ///             If \c max_compact is set to 0, dense storage will be used.
 ///             For more detail about on attribute storage, please refer to the
 ///             C layer Reference Manual at:
-/// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrPhaseChange
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrPhaseChange
 // Programmer:  Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void ObjCreatPropList::getAttrPhaseChange(unsigned& max_compact, unsigned& min_dense) const
@@ -168,7 +168,7 @@ void ObjCreatPropList::getAttrPhaseChange(unsigned& max_compact, unsigned& min_d
 ///             mechanism to turn on attribute creation order tracking at object
 ///             creation time and to build the index later.
 ///             The C layer Reference Manual at can be found at:
-/// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrCreationOrder
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrCreationOrder
 // Programmer:  Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
@@ -190,7 +190,7 @@ void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
 ///             When no flag is set, i.e. crt_order_flags = 0, attribute
 ///             creation order is neither tracked not indexed.
 ///             The C layer Reference Manual at can be found at:
-/// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrCreationOrder
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrCreationOrder
 // Programmer:  Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 unsigned ObjCreatPropList::getAttrCrtOrder() const

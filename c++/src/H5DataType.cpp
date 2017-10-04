@@ -514,7 +514,7 @@ DataType DataType::getSuper() const
 ///\exception   H5::DataTypeIException
 ///\par Description
 ///             For more information, please see:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-Register
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-Register
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataType::registerFunc(H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func) const
