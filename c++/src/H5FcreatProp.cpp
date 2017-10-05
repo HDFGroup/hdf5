@@ -173,7 +173,7 @@ hsize_t FileCreatPropList::getUserblock() const
 ///\par Description
 ///             For information on setting sizes, please refer to the
 ///             C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSizes
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSizes
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileCreatPropList::setSizes(size_t sizeof_addr, size_t sizeof_size) const
@@ -213,7 +213,7 @@ void FileCreatPropList::getSizes(size_t& sizeof_addr, size_t& sizeof_size) const
 ///\exception   H5::PropListIException
 ///\par Description
 ///             For information, please see the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSymK
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSymK
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileCreatPropList::setSymk(unsigned ik, unsigned lk) const
@@ -234,7 +234,7 @@ void FileCreatPropList::setSymk(unsigned ik, unsigned lk) const
 ///\exception   H5::PropListIException
 ///\par Description
 ///             For information, please see
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetSymK
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetSymK
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileCreatPropList::getSymk(unsigned& ik, unsigned& lk) const
@@ -255,7 +255,7 @@ void FileCreatPropList::getSymk(unsigned& ik, unsigned& lk) const
 ///\exception   H5::PropListIException
 ///\par Description
 ///             For information, please see the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetIstoreK
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetIstoreK
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileCreatPropList::setIstorek(unsigned ik) const
@@ -275,7 +275,7 @@ void FileCreatPropList::setIstorek(unsigned ik) const
 ///\exception   H5::PropListIException
 ///\par Description
 ///             For information, please see
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetIstoreK
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetIstoreK
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 unsigned FileCreatPropList::getIstorek() const

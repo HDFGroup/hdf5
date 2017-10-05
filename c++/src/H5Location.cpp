@@ -87,7 +87,7 @@ H5Location::H5Location() : IdComponent() {}
                            Notes for H5A wrappers
                            ======================
 May, 2017 (1.8.19)
-        These H5A wrappers are copied from H5Object to prevent an attribute
+        These H5A wrappers are copied to H5Object to prevent an attribute
         id being passed in to H5A APIs.  The original H5A wrapper functions
         here will be deprecated in future releases.
 
@@ -218,7 +218,7 @@ Attribute H5Location::openAttribute(const unsigned int idx) const
 ///             void (*)(H5::H5Location&, H5std_string, void*).
 ///             For information, please refer to the C layer Reference Manual
 ///             at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Iterate
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Iterate
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Location::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)

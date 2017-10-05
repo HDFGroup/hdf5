@@ -223,7 +223,7 @@ H5T_str_t StrType::getStrpad() const
 ///\exception   H5::DataTypeIException
 ///\par Description
 ///             For detail, please refer to the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetStrpad
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetStrpad
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void StrType::setStrpad(H5T_str_t strpad) const
