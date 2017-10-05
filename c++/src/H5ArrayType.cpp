@@ -70,6 +70,44 @@ ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) 
 }
 
 //--------------------------------------------------------------------------
+// Function:    ArrayType overloaded constructor
+///\brief       Creates an ArrayType instance by opening an HDF5 array datatype
+///             given its name, provided as a C character string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Array type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openArrayType(const char*) to
+//              improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+ArrayType::ArrayType(const H5Location& loc, const char *type_name) : DataType()
+{
+    id = p_opentype(loc, type_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:    ArrayType overloaded constructor
+///\brief       Creates an ArrayType instance by opening an HDF5 array datatype
+///             given its name, provided as an \c H5std_string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Array type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openArrayType(const H5std_string&) to
+//              improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+ArrayType::ArrayType(const H5Location& loc, const H5std_string& type_name) : DataType()
+{
+    id = p_opentype(loc, type_name.c_str());
+}
+
+//--------------------------------------------------------------------------
 // Function:    ArrayType::operator=
 ///\brief       Assignment operator
 ///\param       rhs - IN: Reference to the existing array datatype
@@ -96,6 +134,27 @@ ArrayType& ArrayType::operator=(const ArrayType& rhs)
         }
     }
     return(*this);
+}
+
+//--------------------------------------------------------------------------
+// Function:    ArrayType::decode
+///\brief       Returns an ArrayType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+//--------------------------------------------------------------------------
+DataType* ArrayType::decode() const
+{
+    hid_t encoded_arrtype_id = H5I_INVALID_HID;
+    try {
+        encoded_arrtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    ArrayType *encoded_arrtype = new ArrayType;
+    encoded_arrtype->p_setId(encoded_arrtype_id);
+    return(encoded_arrtype);
 }
 
 //--------------------------------------------------------------------------

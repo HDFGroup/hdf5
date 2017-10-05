@@ -87,6 +87,65 @@ FloatType::FloatType(const DataSet& dataset) : AtomType()
 }
 
 //--------------------------------------------------------------------------
+// Function:    FloatType overloaded constructor
+///\brief       Creates an FloatType instance by opening an HDF5 float datatype
+///             given its name, provided as a C character string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Float type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openFloatType(const char*)
+//              to improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+FloatType::FloatType(const H5Location& loc, const char *type_name) : AtomType()
+{
+    id = p_opentype(loc, type_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:    FloatType overloaded constructor
+///\brief       Creates an FloatType instance by opening an HDF5 float datatype
+///             given its name, provided as an \c H5std_string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Float type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openFloatType(const H5std_string&)
+//              to improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+FloatType::FloatType(const H5Location& loc, const H5std_string& type_name) : AtomType()
+{
+    id = p_opentype(loc, type_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    FloatType::decode
+///\brief       Returns an FloatType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+//--------------------------------------------------------------------------
+DataType* FloatType::decode() const
+{
+    hid_t encoded_flttype_id = H5I_INVALID_HID;
+    try {
+        encoded_flttype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    FloatType *encoded_flttype = new FloatType;
+    encoded_flttype->p_setId(encoded_flttype_id);
+    return(encoded_flttype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    FloatType::getFields
 ///\brief       Retrieves floating point datatype bit field information.
 ///\param       spos  - OUT: Retrieved floating-point sign bit

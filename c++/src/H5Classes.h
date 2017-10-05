@@ -30,10 +30,10 @@ namespace H5 {
         class DataSpace;
         class AtomType;
         class PredType;
-        class EnumType;
         class IntType;
         class FloatType;
         class StrType;
+        class EnumType;
         class CompType;
         class AbstractDs;
         class DataSet;

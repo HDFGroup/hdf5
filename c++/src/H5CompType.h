@@ -43,6 +43,14 @@ class H5_DLLCPP CompType : public DataType {
         // Copy constructor - makes a copy of original object
         CompType(const CompType& original);
 
+        // Constructors that open a compound datatype, given a location.
+        CompType(const H5Location& loc, const char* name);
+        CompType(const H5Location& loc, const H5std_string& name);
+
+        // Returns a CompType object via DataType* by decoding the binary
+        // object description of this type.
+        virtual DataType* decode() const;
+
         // Returns the type class of the specified member of this compound
         // datatype.  It provides to the user a way of knowing what type
         // to create another datatype of the same class

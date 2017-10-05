@@ -36,6 +36,10 @@ class H5_DLLCPP DataType : public H5Object {
         // Creates a copy of a predefined type
         DataType(const PredType& pred_type);
 
+        // Opens a generic named datatype at a given location.
+        DataType(const H5Location& loc, const char* name);
+        DataType(const H5Location& loc, const H5std_string& name);
+
         // Creates a datatype by way of dereference.
         DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
         DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
@@ -49,6 +53,13 @@ class H5_DLLCPP DataType : public H5Object {
         // Copies the datatype of dset to this datatype object.
         void copy(const DataSet& dset);
 
+        // Returns a DataType instance by decoding the binary object
+        // description of this datatype.
+        virtual DataType* decode() const;
+
+        // Creates a binary object description of this datatype.
+        void encode();
+
         // Returns the datatype class identifier.
         H5T_class_t getClass() const;
 
@@ -56,10 +67,6 @@ class H5_DLLCPP DataType : public H5Object {
         // a named datatype which can be accessed from the location.
         void commit(const H5Location& loc, const char* name);
         void commit(const H5Location& loc, const H5std_string& name);
-        // These two overloaded functions are kept for backward compatibility
-        // only; they missed the const - removed from 1.8.18 and 1.10.1
-        //void commit(H5Location& loc, const char* name);
-        //void commit(H5Location& loc, const H5std_string& name);
 
         // Determines whether this datatype is a named datatype or
         // a transient datatype.
@@ -121,6 +128,9 @@ class H5_DLLCPP DataType : public H5Object {
         // Default constructor
         DataType();
 
+        // Determines whether this datatype has a binary object description.
+        bool hasBinaryDesc() const;
+
         // Gets the datatype id.
         virtual hid_t getId() const;
 
@@ -131,11 +141,24 @@ class H5_DLLCPP DataType : public H5Object {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
         hid_t id;       // HDF5 datatype id
 
+        // Returns an id of a type by decoding the binary object
+        // description of this datatype.
+        hid_t p_decode() const;
+
         // Sets the datatype id.
         virtual void p_setId(const hid_t new_id);
+
+        // Opens a datatype and returns the id.
+        hid_t p_opentype(const H5Location& loc, const char* dtype_name) const;
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
+        // Buffer for binary object description of this datatype, allocated
+        // in DataType::encode and used in DataType::decode
+        unsigned char *encoded_buf;
+        size_t buf_size;
+
         // Friend function to set DataType id.  For library use only.
         friend void f_DataType_setId(DataType* dtype, hid_t new_id);
 

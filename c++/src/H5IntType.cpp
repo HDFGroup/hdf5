@@ -86,6 +86,65 @@ IntType::IntType(const DataSet& dataset) : AtomType()
 }
 
 //--------------------------------------------------------------------------
+// Function:    IntType overloaded constructor
+///\brief       Creates a IntType instance by opening an HDF5 integer datatype
+///             given its name as a char*.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Integer type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openIntType(const char*) to
+//              improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+IntType::IntType(const H5Location& loc, const char *type_name) : AtomType()
+{
+    id = p_opentype(loc, type_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:    IntType overloaded constructor
+///\brief       Creates a IntType instance by opening an HDF5 integer datatype
+///             given its name, provided as an \c H5std_string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Integer type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openIntType(const H5std_string&)
+//              to improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+IntType::IntType(const H5Location& loc, const H5std_string& type_name) : AtomType()
+{
+    id = p_opentype(loc, type_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    IntType::decode
+///\brief       Returns an IntType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+//--------------------------------------------------------------------------
+DataType* IntType::decode() const
+{
+    hid_t encoded_inttype_id = H5I_INVALID_HID;
+    try {
+        encoded_inttype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    IntType *encoded_inttype = new IntType;
+    encoded_inttype->p_setId(encoded_inttype_id);
+    return(encoded_inttype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    IntType::getSign
 ///\brief       Retrieves the sign type for an integer type.
 ///\return      Valid sign type

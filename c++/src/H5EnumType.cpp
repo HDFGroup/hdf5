@@ -106,6 +106,65 @@ EnumType::EnumType(const IntType& data_type) : DataType()
 }
 
 //--------------------------------------------------------------------------
+// Function:    EnumType overloaded constructor
+///\brief       Creates an EnumType instance by opening an HDF5 enum datatype
+///             given its name, provided as a C character string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Enum datatype name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openEnumType(const char*) to
+//              improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+EnumType::EnumType(const H5Location& loc, const char *type_name) : DataType()
+{
+    id = p_opentype(loc, type_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:    EnumType overloaded constructor
+///\brief       Creates an EnumType instance by opening an HDF5 enum datatype
+///             given its name, provided as an \c H5std_string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Enum datatype name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openEnumType(const H5std_string&)
+//              to improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+EnumType::EnumType(const H5Location& loc, const H5std_string& type_name) : DataType()
+{
+    id = p_opentype(loc, type_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    EnumType::decode
+///\brief       Returns an EnumType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+//--------------------------------------------------------------------------
+DataType* EnumType::decode() const
+{
+    hid_t encoded_enumtype_id = H5I_INVALID_HID;
+    try {
+        encoded_enumtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    EnumType *encoded_enumtype = new EnumType;
+    encoded_enumtype->p_setId(encoded_enumtype_id);
+    return(encoded_enumtype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    EnumType::insert
 ///\brief       Inserts a new member to this enumeration datatype.
 ///\param       name  - IN: Name of the new member

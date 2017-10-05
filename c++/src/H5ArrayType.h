@@ -28,8 +28,16 @@ class H5_DLLCPP ArrayType : public DataType {
         // specified base type.
         ArrayType(const DataType& base_type, int ndims, const hsize_t* dims);
 
+        // Constructors that open an array datatype, given a location.
+        ArrayType(const H5Location& loc, const char* name);
+        ArrayType(const H5Location& loc, const H5std_string& name);
+
         // Assignment operator
         ArrayType& operator=(const ArrayType& rhs);
+
+        // Returns an ArrayType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
 
         // Returns the number of dimensions of this array datatype.
         int getArrayNDims() const;
