@@ -178,10 +178,10 @@
       add_test (NAME H5DUMP_XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
       set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
       if (NOT "${resultcode}" STREQUAL "0")
-        set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WILL_FAIL "true")
+        set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_xml_test}" STREQUAL "")
-        set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
+        set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
       endif ()
     else ()
       # Remove any output file left over from previous test run
