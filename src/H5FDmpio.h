@@ -29,6 +29,7 @@
 #endif /* H5_HAVE_PARALLEL */
 
 #ifdef H5_HAVE_PARALLEL
+#if 0 /* delete this eventually */
 #define H5FD_GET_MPI_RANK_AND_SIZE(rank,size, f) { \
   (rank) = 0; (size) = 1;                          \
   if (H5F_HAS_FEATURE((f), H5FD_FEAT_HAS_MPI)) {   \
@@ -49,6 +50,7 @@
       (comm) = H5F_mpi_get_comm((f));              \
   else (comm) = MPI_COMM_WORLD;                    \
   }
+#endif /* delete this eventually */
 
 /*Turn on H5FDmpio_debug if H5F_DEBUG is on */
 #ifdef H5F_DEBUG

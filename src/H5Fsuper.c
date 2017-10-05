@@ -333,7 +333,10 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
     unsigned      	rw_flags;           /* Read/write permissions for file */
     hbool_t 		skip_eof_check = FALSE; /* Whether to skip checking the EOF value */
     herr_t              ret_value = SUCCEED; /* Return value */
+#ifdef H5_HAVE_PARALLEL
     int                 mpi_rank = 0, mpi_size = 1;
+    int                 mpi_result;
+#endif	/* H5_HAVE_PARALLEL */
 
     FUNC_ENTER_PACKAGE_TAG(meta_dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
 
@@ -356,21 +359,43 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
 
     /* Find the superblock */
 #ifdef H5_HAVE_PARALLEL
+#if 0
     H5FD_GET_MPI_RANK_AND_SIZE(mpi_rank, mpi_size, f);
+#else
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+
+        if((mpi_rank = H5F_mpi_get_rank(f)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Can't get MPI rank")
+
+        if((mpi_size = H5F_mpi_get_size(f)) < 0)
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size")
+    }
+#endif
     /* If we are an MPI application with at least two processes, the
      * following superblock signature location optimization is applicable.
      */
     if ( mpi_size > 1 ) {
-         MPI_Comm this_comm = MPI_COMM_NULL;
+        MPI_Comm this_comm = MPI_COMM_NULL;
 
-	 if ( mpi_rank == 0 ) {
-	      if(H5FD_locate_signature(&fdio_info, &super_addr) < 0)
-		  HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
-	 }
-	 H5FD_GET_MPI_COMM(this_comm, f);
-	 if (( this_comm == MPI_COMM_NULL ) ||
-	     ( MPI_Bcast(&super_addr,sizeof(super_addr), MPI_BYTE, 0, this_comm) != MPI_SUCCESS))
-               HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
+	if ( mpi_rank == 0 ) {
+	    if(H5FD_locate_signature(&fdio_info, &super_addr) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
+        }
+#if 0
+	H5FD_GET_MPI_COMM(this_comm, f);
+        if (( this_comm == MPI_COMM_NULL ) ||
+            ( MPI_Bcast(&super_addr,sizeof(super_addr), MPI_BYTE, 0, this_comm) != MPI_SUCCESS))
+            HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
+#else
+        HDassert(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI));
+
+        if ( MPI_COMM_NULL == (this_comm = H5F_mpi_get_comm(f)) )
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI communicator")
+        
+        if ( MPI_SUCCESS != 
+            (mpi_result = MPI_Bcast(&super_addr,sizeof(super_addr), MPI_BYTE, 0, this_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
+#endif
     }
     else {
     /* Locate the signature as per per the serial library */
@@ -381,7 +406,7 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
 
 #ifdef H5_HAVE_PARALLEL
     }
-#endif
+#endif	/* H5_HAVE_PARALLEL */
     if(HADDR_UNDEF == super_addr)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "file signature not found")
 
