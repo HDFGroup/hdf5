@@ -609,12 +609,6 @@ H5Zfilter_avail(H5Z_filter_t id)
 
     if((ret_value = H5Z_filter_avail(id)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
-    else if(ret_value == FALSE) {
-        const H5Z_class2_t *filter_info;
-
-        if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)id)))
-                ret_value = TRUE;
-    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -633,6 +627,7 @@ htri_t
 H5Z_filter_avail(H5Z_filter_t id)
 {
     size_t i;                   /* Local index variable */
+    const H5Z_class2_t *filter_info;
     htri_t ret_value = FALSE;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -640,8 +635,12 @@ H5Z_filter_avail(H5Z_filter_t id)
     /* Is the filter already registered? */
     for(i = 0; i < H5Z_table_used_g; i++)
         if(H5Z_table_g[i].id == id)
-        HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE)
 
+    if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)id)))
+        if(H5Z_register(filter_info) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register loaded filter")
+        HGOTO_DONE(TRUE)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_filter_avail() */
@@ -1136,7 +1135,7 @@ H5Z_find(H5Z_filter_t id)
 
     /* Get the index in the global table */
     if((idx=H5Z_find_idx(id))<0)
-        HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, NULL, "required filter is not registered")
+        HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, NULL, "required filter %d is not registered", id)
 
     /* Set return value */
     ret_value=H5Z_table_g+idx;
