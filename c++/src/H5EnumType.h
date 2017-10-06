@@ -34,6 +34,14 @@ class H5_DLLCPP EnumType : public DataType {
         // Creates a new enum datatype based on an integer datatype
         EnumType(const IntType& data_type);  // H5Tenum_create
 
+        // Constructors that open an enum datatype, given a location.
+        EnumType(const H5Location& loc, const char* name);
+        EnumType(const H5Location& loc, const H5std_string& name);
+
+        // Returns an EnumType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
+
         // Returns the number of members in this enumeration datatype.
         int getNmembers () const;
 

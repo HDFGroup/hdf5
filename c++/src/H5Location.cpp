@@ -338,10 +338,13 @@ void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& new
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getNumAttrs
-///\brief       Returns the number of attributes attached to this HDF5 object.
+///\brief       Deprecated - Returns the number of attributes attached to
+///                          this HDF5 object.
 ///\return      Number of attributes
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
+// Modification
+//          - Moved to H5Object in 1.8.20. -BMR
 //--------------------------------------------------------------------------
 int H5Location::getNumAttrs() const
 {

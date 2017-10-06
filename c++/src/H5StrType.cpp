@@ -142,6 +142,65 @@ StrType::StrType(const DataSet& dataset) : AtomType ()
 }
 
 //--------------------------------------------------------------------------
+// Function:    StrType overloaded constructor
+///\brief       Creates an StrType instance by opening an HDF5 string datatype
+///             given its name, provided as a C character string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: String type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openStrType(const char*)
+//              to improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+StrType::StrType(const H5Location& loc, const char *type_name) : AtomType()
+{
+    id = p_opentype(loc, type_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:    StrType overloaded constructor
+///\brief       Creates an StrType instance by opening an HDF5 string datatype
+///             given its name, provided as an \c H5std_string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: String type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openStrType(const H5std_string&)
+//              to improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+StrType::StrType(const H5Location& loc, const H5std_string& type_name) : AtomType()
+{
+    id = p_opentype(loc, type_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    StrType::decode
+///\brief       Returns an StrType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+//--------------------------------------------------------------------------
+DataType* StrType::decode() const
+{
+    hid_t encoded_strtype_id = H5I_INVALID_HID;
+    try {
+        encoded_strtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    StrType *encoded_strtype = new StrType;
+    encoded_strtype->p_setId(encoded_strtype_id);
+    return(encoded_strtype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    StrType::getCset
 ///\brief       Retrieves the character set type of this string datatype.
 ///\return      Character set type, which can be:
