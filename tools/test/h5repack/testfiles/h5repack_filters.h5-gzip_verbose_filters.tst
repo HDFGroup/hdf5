@@ -1,5 +1,5 @@
-Objects to modify layout are...
-Objects to apply filter are...
+No all objects to modify layout
+No all objects to apply filter
  </dset_deflate> with GZIP filter
  </dset_deflate>...Found
 -----------------------------------------
