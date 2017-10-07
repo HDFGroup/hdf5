@@ -101,7 +101,7 @@ if (BUILD_TESTING)
   endif (H5_HAVE_FILTER_SZIP)
 
   foreach (example ${HDF_JAVA_EXAMPLES})
-    if (${example} STREQUAL "H5Ex_D_External")
+    if ("${example}" STREQUAL "H5Ex_D_External")
       add_test (
           NAME JAVA_datasets-${example}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -129,7 +129,7 @@ if (BUILD_TESTING)
     )
     set_tests_properties (JAVA_datasets-${example}-copy-objects PROPERTIES DEPENDS JAVA_datasets-${example}-clear-objects)
     set (last_test "JAVA_datasets-${example}-copy-objects")
-    if (${example} STREQUAL "H5Ex_D_Szip")
+    if ("${example}" STREQUAL "H5Ex_D_Szip")
       if (USE_FILTER_SZIP)
         ADD_H5_TEST (${example} 0)
       endif ()
