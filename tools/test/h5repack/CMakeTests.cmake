@@ -1377,11 +1377,7 @@
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,0,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
   # check for no parameters
-  set (TESTRETVAL 255)
-  if (WIN32)
-    set (TESTRETVAL -1)
-  endif ()
-  ADD_H5_UD_TEST (plugin_zero ${TESTRETVAL} h5repack_layout.h5 -v -f UD=250,0,0)
+  ADD_H5_UD_TEST (plugin_zero 0 h5repack_layout.h5 -v -f UD=250,0,0)
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver
