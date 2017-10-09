@@ -39,7 +39,7 @@ static void print_warning(const char *dname, const char *fname)
 int h5tools_canreadf(const char* name, /* object name, serves also as boolean print */
                      hid_t dcpl_id)    /* dataset creation property list */
 {
-
+    int ret_value = 1;  /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     int nfilters;       /* number of filters */
     H5Z_filter_t filtn; /* filter identification number */
     int i;              /* index */
@@ -47,16 +47,16 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
 
     /* get information about filters */
     if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
-        return -1;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_nfilters failed");
 
     /* if we do not have filters, we can read the dataset safely */
     if (!nfilters)
-        return 1;
+        HGOTO_DONE(1);
 
     /* check availability of filters */
     for (i = 0; i < nfilters; i++) {
         if ((filtn = H5Pget_filter2(dcpl_id, (unsigned) i, 0, 0, 0, (size_t) 0, 0, NULL)) < 0)
-            return -1;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_filter2 failed");
 
         switch (filtn) {
         /*-------------------------------------------------------------------------
@@ -64,12 +64,13 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
          *-------------------------------------------------------------------------
          */
         default:
-            if ((udfilter_avail = H5Zfilter_avail(filtn)) < 0)
-                return -1;
-            else if (udfilter_avail == 0) {
+            if ((udfilter_avail = H5Zfilter_avail(filtn)) < 0) {
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Zfilter_avail failed");
+            }
+            else if (!udfilter_avail) {
                 if (name)
                     print_warning(name, "user defined");
-                return 0;
+                ret_value = 0;
             }
             break;
 
@@ -81,7 +82,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
 #ifndef H5_HAVE_FILTER_DEFLATE
             if (name)
                 print_warning(name,"deflate");
-            return 0;
+            ret_value = 0;
 #endif
             break;
             /*-------------------------------------------------------------------------
@@ -92,7 +93,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
 #ifndef H5_HAVE_FILTER_SZIP
             if (name)
                 print_warning(name,"SZIP");
-            return 0;
+            ret_value = 0;
 #endif
             break;
             /*-------------------------------------------------------------------------
@@ -122,7 +123,8 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
         }/*switch*/
     }/*for*/
 
-    return 1;
+done:
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
