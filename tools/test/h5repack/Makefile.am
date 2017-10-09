@@ -45,19 +45,16 @@ h5repacktst_SOURCES=h5repacktst.c
 
 if HAVE_SHARED_CONDITIONAL
   # Build it as shared library if configure is enabled for shared library.
-  dyn_LTLIBRARIES=libdynlibadd.la libdynlibvers.la
+  noinst_LTLIBRARIES=libdynlibadd.la libdynlibvers.la
   libdynlibadd_la_SOURCES=dynlib_rpk.c
   libdynlibvers_la_SOURCES=dynlib_vrpk.c
-  libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
-  libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+  libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
 
-libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES)
+  libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) 
-libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES)
+  libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) 
-
-#install-exec-hook:
-#	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
 endif
 
 
