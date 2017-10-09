@@ -501,7 +501,7 @@
         add_test (
             NAME H5DIFF_UD-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}.out"
@@ -516,7 +516,7 @@
         add_test (
             NAME H5DIFF_UD-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}.out"
@@ -546,7 +546,7 @@
         add_test (
             NAME H5DIFF_UD_ERR-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=--enable-error-stack;${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}_ERR.out"
@@ -562,7 +562,7 @@
         add_test (
             NAME H5DIFF_UD_ERR-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=--enable-error-stack;${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}_ERR.out"
@@ -1653,8 +1653,10 @@ ADD_H5_TEST (h5diff_v3 0 -c ${FILEV1} ${FILEV2})
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-ADD_H5_UD_TEST (h5diff_plugin_test 0 h5diff_ud -v tudfilter.h5 tudfilter2.h5)
-ADD_H5_UD_TEST (h5diff_plugin_fail 2 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)
+if (BUILD_SHARED_LIBS)
+  ADD_H5_UD_TEST (h5diff_plugin_test 0 h5diff_ud -v tudfilter.h5 tudfilter2.h5)
+  ADD_H5_UD_TEST (h5diff_plugin_fail 2 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)
+endif ()
 
 # ##############################################################################
 # # END
