@@ -693,6 +693,7 @@ static int check_objects(const char* fname, pack_opt_t *options) {
     hid_t         did;
     hid_t         sid;
     unsigned int  i;
+    unsigned int  uf;
     trav_table_t *travt = NULL;
 
     /* nothing to do */
@@ -740,52 +741,54 @@ static int check_objects(const char* fname, pack_opt_t *options) {
         if (options->verbose)
             printf("...Found\n");
 
-        if (options->op_tbl->objs[i].filter->filtn < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid filter");
-        /* check for extra filter conditions */
-        switch (options->op_tbl->objs[i].filter->filtn) {
-        /* chunk size must be smaller than pixels per block */
-        case H5Z_FILTER_SZIP:
-            {
-                int j;
-                hsize_t csize = 1;
-                unsigned ppb = options->op_tbl->objs[i].filter->cd_values[0];
-                hsize_t dims[H5S_MAX_RANK];
-                int rank;
+        for (uf = 0; uf < options->op_tbl->objs[i].nfilters; uf++) {
+            if (options->op_tbl->objs[i].filter[uf].filtn < 0)
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid filter");
+            /* check for extra filter conditions */
+            switch (options->op_tbl->objs[i].filter[uf].filtn) {
+            /* chunk size must be smaller than pixels per block */
+            case H5Z_FILTER_SZIP:
+                {
+                    int j;
+                    hsize_t csize = 1;
+                    unsigned ppb = options->op_tbl->objs[i].filter[uf].cd_values[0];
+                    hsize_t dims[H5S_MAX_RANK];
+                    int rank;
 
-                if (options->op_tbl->objs[i].chunk.rank > 0) {
-                    rank = options->op_tbl->objs[i].chunk.rank;
-                    for (j = 0; j < rank; j++)
-                        csize *= options->op_tbl->objs[i].chunk.chunk_lengths[j];
-                }
-                else {
-                    if ((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
-                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
-                    if ((sid = H5Dget_space(did)) < 0)
-                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
-                    if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
-                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
-                    HDmemset(dims, 0, sizeof dims);
-                    if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
-                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
-                    for (j = 0; j < rank; j++)
-                        csize *= dims[j];
-                    if (H5Sclose(sid) < 0)
-                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
-                    if (H5Dclose(did) < 0)
-                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
-                }
+                    if (options->op_tbl->objs[i].chunk.rank > 0) {
+                        rank = options->op_tbl->objs[i].chunk.rank;
+                        for (j = 0; j < rank; j++)
+                            csize *= options->op_tbl->objs[i].chunk.chunk_lengths[j];
+                    }
+                    else {
+                        if ((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
+                        if ((sid = H5Dget_space(did)) < 0)
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
+                        if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
+                        HDmemset(dims, 0, sizeof dims);
+                        if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
+                        for (j = 0; j < rank; j++)
+                            csize *= dims[j];
+                        if (H5Sclose(sid) < 0)
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
+                        if (H5Dclose(did) < 0)
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                    }
 
-                if (csize < ppb) {
-                    printf(" <warning: SZIP settings, chunk size is smaller than pixels per block>\n");
-                    HGOTO_DONE(0);
+                    if (csize < ppb) {
+                        printf(" <warning: SZIP settings, chunk size is smaller than pixels per block>\n");
+                        HGOTO_DONE(0);
+                    }
                 }
+                break;
+            default:
+                break;
             }
-            break;
-        default:
-            break;
-        }
-    } /* i */
+        } /* for uf */
+    } /* for i */
 
 done:
     H5E_BEGIN_TRY {
