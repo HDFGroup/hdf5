@@ -698,6 +698,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
     unsigned crt_order_flags; /* group creation order flag */
     unsigned i;
     unsigned u;
+    unsigned uf;
     int is_ref = 0;
     htri_t is_named;
     hbool_t limit_maxdims;
@@ -803,8 +804,10 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                 if (options->op_tbl->objs) {
                     for (u = 0; u < options->op_tbl->nelems; u++) {
                         if (HDstrcmp(travt->objs[i].name, options->op_tbl->objs[u].path) == 0)
-                            if (options->op_tbl->objs[u].filter->filtn > 0)
-                                req_filter = 1;
+                            for (uf = 0; uf < options->op_tbl->objs[uf].nfilters; uf++) {
+                                if (options->op_tbl->objs[u].filter[uf].filtn > 0)
+                                    req_filter = 1;
+                            }
                     }
                 }
 
@@ -1293,7 +1296,7 @@ done:
         HDfree(hslab_buf);
 
     /* Finalize (link) the stack of named datatypes (if any) */
-    if (0 == ret_value)
+    if (0 == ret_value && named_dt_head != NULL)
         named_datatype_free(&named_dt_head, 0);
     else
         H5E_BEGIN_TRY {

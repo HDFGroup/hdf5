@@ -472,8 +472,8 @@ hsize_t diff_attr(hid_t loc1_id,
             for(j = 0; j < rank1; j++)
                 nelmts1 *= dims1[j];
 
-            buf1 = (void *)HDmalloc((size_t)(nelmts1 * msize1));
-            buf2 = (void *)HDmalloc((size_t)(nelmts1 * msize2));
+            buf1 = (void *)HDcalloc((size_t)(nelmts1), msize1);
+            buf2 = (void *)HDcalloc((size_t)(nelmts1), msize2);
             if(buf1 == NULL || buf2 == NULL) {
                 parallel_print("cannot read into memory\n");
                 goto error;

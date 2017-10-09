@@ -2,6 +2,7 @@ No all objects to modify layout
 No all objects to apply filter
  </dset_deflate> with GZIP filter
  </dset_deflate>...Found
+Making new file ...
 -----------------------------------------
  Type     Filter (Compression)     Name
 -----------------------------------------

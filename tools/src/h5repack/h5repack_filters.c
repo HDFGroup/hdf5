@@ -469,9 +469,33 @@ int apply_filters(const char* name, /* object name from traverse list */
 
             if (H5Zfilter_avail(filtobj.filter[i].filtn) <= 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "%d filter unavailable", filtobj.filter[i].filtn);
-        }/*for*/
+        } /* for */
+    } /* nfilters */
+
+    /*-------------------------------------------------------------------------
+     * layout
+     *-------------------------------------------------------------------------
+     */
+
+    if (obj.layout >= 0) {
+        /* a layout was defined */
+        if (H5Pset_layout(dcpl_id, obj.layout) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_layout failed");
+
+        if (H5D_CHUNKED == obj.layout) {
+            if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_chunk failed");
+        }
+        else if (H5D_COMPACT == obj.layout) {
+            if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY) < 0)
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_alloc_time failed");
+        }
+        /* remove filters for the H5D_CONTIGUOUS case */
+        else if (H5D_CONTIGUOUS == obj.layout) {
+            if (H5Premove_filter(dcpl_id, H5Z_FILTER_ALL) < 0)
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Premove_filter failed");
+        }
     }
-    /*nfilters*/
 
 done:
     return ret_value;
