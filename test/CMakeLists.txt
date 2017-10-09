@@ -218,6 +218,7 @@ set (H5_TESTS
     dtypes
     dsets
     cmpd_dset
+    mdset
     filter_fail
     extend
     external

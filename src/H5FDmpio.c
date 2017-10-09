@@ -600,6 +600,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* TODO: This can be removed as we decided to remove multi-chunk-opt feature.
+ * For now, leave it here to make 'enc_dec_plist_with_endianess' test pass. 
+ * This can be removed after HDFFV-8281 done */
 herr_t
 H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
 {
@@ -645,6 +648,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* TODO: This can be removed as we decided to remove multi-chunk-opt feature.
+ * For now, leave it here to make 'enc_dec_plist_with_endianess' test pass. 
+ * This can be removed after HDFFV-8281 done */
 herr_t
 H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_chunk)
 {
@@ -995,7 +1001,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 
     if(MPI_SUCCESS != (mpi_code = MPI_File_open(comm_dup, name, mpi_amode, info_dup, &fh)))
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mpi_code)
-    file_opened=1;
+    file_opened = 1;
 
     /* Get the MPI rank of this process and the total number of processes */
     if (MPI_SUCCESS != (mpi_code=MPI_Comm_rank (comm_dup, &mpi_rank)))

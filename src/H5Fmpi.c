@@ -84,20 +84,24 @@
  * Return:      Success:        The size (positive)
  *              Failure:        Negative
  *
+ * Programmer:  Jonathan Kim
+ *              June 5, 2013
+ *
+ * Modifications:
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle)
 {
     herr_t ret_value = SUCCEED;
-    hid_t fapl = -1;
+    hid_t fapl=-1;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     assert(f && f->shared);
 
     /* Dispatch to driver */
-    if ((ret_value = H5FD_get_vfd_handle(f->shared->lf, fapl, (void **)f_handle)) < 0)
+    if ((ret_value=H5FD_get_vfd_handle(f->shared->lf, fapl, f_handle)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
 
 done:

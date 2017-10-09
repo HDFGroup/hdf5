@@ -290,6 +290,8 @@
 ./fortran/testpar/ptest.f90
 ./fortran/testpar/hyper.f90
 ./fortran/testpar/mdset.f90
+./fortran/testpar/ptest_F03.f90
+./fortran/testpar/multidsetrw_F03.f90
 
 #------------------------------------------------------------------------------
 #
@@ -1016,6 +1018,7 @@
 ./test/le_extlink2.h5
 ./test/lheap.c
 ./test/links.c
+./test/mdset.c
 ./test/mergemsg.h5
 ./test/mf.c
 ./test/mount.c
@@ -1244,6 +1247,7 @@
 ./testpar/t_ph5basic.c
 ./testpar/t_pflush1.c
 ./testpar/t_pflush2.c
+./testpar/t_pmulti_dset.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c
 ./testpar/t_pshutdown.c

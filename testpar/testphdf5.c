@@ -383,11 +383,12 @@ int main(int argc, char **argv)
             "parallel extend Chunked allocation on serial file", PARATESTFILE);
     AddTest("fltread", test_filter_read, NULL,
 	    "parallel read of dataset written serially with filters", PARATESTFILE);
-
+#if 0 //MSB FIX
 #ifdef H5_HAVE_FILTER_DEFLATE
     AddTest("cmpdsetr", compress_readAll, NULL,
 	    "compressed dataset collective read", PARATESTFILE);
 #endif /* H5_HAVE_FILTER_DEFLATE */
+#endif
 
     AddTest("zerodsetr", zero_dim_dset, NULL,
 	    "zero dim dset", PARATESTFILE);
@@ -439,23 +440,6 @@ int main(int argc, char **argv)
     AddTest((mpi_size <3)? "-cchunk5":"cchunk5" ,
         coll_chunk5,NULL,
 	"linked chunk collective IO without optimization",PARATESTFILE);
-    AddTest((mpi_size < 3)? "-cchunk6" : "cchunk6",
-	coll_chunk6,NULL,
-	"multi-chunk collective IO with direct request",PARATESTFILE);
-    AddTest((mpi_size < 3)? "-cchunk7" : "cchunk7",
-	coll_chunk7,NULL,
-	"linked chunk collective IO with optimization",PARATESTFILE);
-    AddTest((mpi_size < 3)? "-cchunk8" : "cchunk8",
-	coll_chunk8,NULL,
-	"linked chunk collective IO transferring to multi-chunk",PARATESTFILE);
-    AddTest((mpi_size < 3)? "-cchunk9" : "cchunk9",
-	coll_chunk9,NULL,
-	"multiple chunk collective IO with optimization",PARATESTFILE);
-    AddTest((mpi_size < 3)? "-cchunk10" : "cchunk10",
-	coll_chunk10,NULL,
-	"multiple chunk collective IO transferring to independent IO",PARATESTFILE);
-
-
 
 /* irregular collective IO tests*/
     AddTest("ccontw",

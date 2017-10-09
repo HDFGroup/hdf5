@@ -105,6 +105,19 @@ typedef enum H5D_fill_value_t {
     H5D_FILL_VALUE_USER_DEFINED =2
 } H5D_fill_value_t;
 
+/* parameter sturct for multi-dset Read/Write */
+typedef struct H5D_rw_multi_t
+{
+    hid_t dset_id;          /* dataset ID */
+    hid_t dset_space_id;    /* dataset selection dataspace ID */
+    hid_t mem_type_id;      /* memory datatype ID */
+    hid_t mem_space_id;     /* memory selection dataspace ID */
+    union {
+        void *rbuf;         /* pointer to read buffer */
+        const void *wbuf;   /* pointer to write buffer */
+    } u;
+} H5D_rw_multi_t;
+
 /* Values for VDS bounds option */
 typedef enum H5D_vds_view_t {
     H5D_VDS_ERROR               = -1,
