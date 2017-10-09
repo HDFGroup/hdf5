@@ -359,9 +359,6 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
 
     /* Find the superblock */
 #ifdef H5_HAVE_PARALLEL
-#if 0
-    H5FD_GET_MPI_RANK_AND_SIZE(mpi_rank, mpi_size, f);
-#else
     if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
 
         if((mpi_rank = H5F_mpi_get_rank(f)) < 0)
@@ -370,9 +367,15 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
         if((mpi_size = H5F_mpi_get_size(f)) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size")
     }
-#endif
+
     /* If we are an MPI application with at least two processes, the
      * following superblock signature location optimization is applicable.
+     *
+     * Note:: For parallel applications which don't setup for using the
+     * HDF5 MPIO driver, we will arrive here with mpi_size == 1.
+     * This occurs because of the variable initialization (above) and the
+     * fact that we have skipped actually calling MPI functions to determine
+     * our MPI rank and size.
      */
     if ( mpi_size > 1 ) {
         MPI_Comm this_comm = MPI_COMM_NULL;
@@ -381,12 +384,6 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
 	    if(H5FD_locate_signature(&fdio_info, &super_addr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
         }
-#if 0
-	H5FD_GET_MPI_COMM(this_comm, f);
-        if (( this_comm == MPI_COMM_NULL ) ||
-            ( MPI_Bcast(&super_addr,sizeof(super_addr), MPI_BYTE, 0, this_comm) != MPI_SUCCESS))
-            HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
-#else
         HDassert(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI));
 
         if ( MPI_COMM_NULL == (this_comm = H5F_mpi_get_comm(f)) )
@@ -395,7 +392,6 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
         if ( MPI_SUCCESS != 
             (mpi_result = MPI_Bcast(&super_addr,sizeof(super_addr), MPI_BYTE, 0, this_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
-#endif
     }
     else {
     /* Locate the signature as per per the serial library */
