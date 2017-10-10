@@ -35,6 +35,7 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
+#include "H5VLprivate.h"	/* VOL drivers				*/
 
 
 /****************/
@@ -512,53 +513,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fopen
+ * Function:    H5Fopen
  *
- * Purpose:	This is the primary function for accessing existing HDF5
- *		files.  The FLAGS argument determines whether writing to an
- *		existing file will be allowed or not.  All flags may be
- *		combined with the bit-wise OR operator (`|') to change the
- *		behavior of the file open call.  The more complex behaviors
- *		of a file's access are controlled through the file-access
- *		property list.
+ * Purpose:     This is the primary function for accessing existing HDF5
+ *              files.  The FLAGS argument determines whether writing to an
+ *              existing file will be allowed or not.  All flags may be
+ *              combined with the bit-wise OR operator (`|') to change the
+ *              behavior of the file open call.  The more complex behaviors
+ *              of a file's access are controlled through the file-access
+ *              property list.
  *
- * See Also:	H5Fpublic.h for a list of possible values for FLAGS.
+ * See Also:    H5Fpublic.h for a list of possible values for FLAGS.
  *
- * Return:	Success:	A file ID
+ * Return:      Success:    A file ID
  *
- *		Failure:	FAIL
+ *              Failure:    FAIL
  *
- * Programmer:	Unknown
+ * Programmer:  Unknown
  *
- * Modifications:
- *	  	Robb Matzke, 1997-07-18
- *		File struct creation and destruction is through H5F_new() and
- *		H5F__dest(). Reading the root symbol table entry is done with
- *		H5G_decode().
- *
- *  		Robb Matzke, 1997-09-23
- *		Most of the work is now done by H5F_open() since H5Fcreate()
- *		and H5Fopen() originally contained almost identical code.
- *
- *	 	Robb Matzke, 1998-02-18
- *		Added better error checking for the flags and the file access
- *		property list.  It used to be possible to make the library
- *		dump core by passing an object ID that was not a file access
- *		property list.
- *
- * 		Robb Matzke, 1999-08-02
- *		The file access property list is passed to the H5F_open() as
- *		object IDs.
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    hbool_t      ci_load = FALSE;       /* whether MDC ci load requested */
-    hbool_t      ci_write = FALSE;      /* whether MDC CI write requested */
-    H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
-    hid_t	 ret_value;	        /*return value			*/
+    hbool_t     ci_load = FALSE;                    /* whether MDC ci load requested            */
+    hbool_t     ci_write = FALSE;                   /* whether MDC CI write requested           */
+    H5F_t       *new_file = NULL;                   /* file struct for new file                 */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library                     */
+    H5VL_driver_prop_t  driver_prop;                /* Property for vol plugin ID & info        */
+    H5VL_class_t        *vol_cls = NULL;            /* VOL Class structure for callback info    */
+    H5VL_t              *vol_info = NULL;           /* VOL info struct                          */
+    hid_t       ret_value;                          /* return value                             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);

@@ -27,6 +27,25 @@
 /* Library Private Typedefs */
 /****************************/
 
+/* Internal struct to track VOL driver information for objects */
+typedef struct H5VL_t {
+    const H5VL_class_t *vol_cls;        /* constant driver class info                           */
+    int                 nrefs;          /* number of references by objects using this struct    */
+    hid_t               vol_id;         /* identifier for the VOL class                         */
+} H5VL_t;
+
+/* Internal vol object structure returned to the API */
+typedef struct H5VL_object_t {
+    void               *vol_obj;        /* pointer to object created by driver                  */
+    H5VL_t             *vol_info;       /* pointer to VOL info struct                           */
+} H5VL_object_t;
+
+/* Internal structure to hold the driver ID & info for FAPLs */
+typedef struct H5VL_driver_prop_t {
+    hid_t               driver_id;      /* VOL driver's ID                                      */
+    const void         *driver_info;    /* VOL driver info, for open callbacks                  */
+} H5VL_driver_prop_t;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
