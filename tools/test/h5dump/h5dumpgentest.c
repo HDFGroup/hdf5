@@ -287,9 +287,9 @@ typedef struct s1_t {
 #define F64_DIM1            (F64_ARRAY_BUF_LEN / sizeof(int) + 1)
 
 /* File 65 macros */
-#define STRATEGY  H5F_FSPACE_STRATEGY_NONE 	/* File space handling strategy */
-#define THRESHOLD10   		10   		/* Free-space section threshold */
-#define FSPACE_PAGE_SIZE     	8192 		/* File space page size */
+#define STRATEGY  H5F_FSPACE_STRATEGY_NONE     /* File space handling strategy */
+#define THRESHOLD10           10           /* Free-space section threshold */
+#define FSPACE_PAGE_SIZE         8192         /* File space page size */
 
 /* "FILE66" macros and for FILE69 */
 #define F66_XDIM        8
