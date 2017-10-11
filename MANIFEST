@@ -1046,11 +1046,17 @@
 ./tools/h5import/h5importtestutil.sh.in
 
 # testfiles for h5import
+./tools/h5import/testfiles/binfp64.conf
 ./tools/h5import/testfiles/binfp64.h5
+./tools/h5import/testfiles/binin16.conf
 ./tools/h5import/testfiles/binin16.h5
+./tools/h5import/testfiles/binin32.conf
 ./tools/h5import/testfiles/binin32.h5
+./tools/h5import/testfiles/binin8.conf
 ./tools/h5import/testfiles/binin8.h5
+./tools/h5import/testfiles/binin8w.conf
 ./tools/h5import/testfiles/binin8w.h5
+./tools/h5import/testfiles/binuin16.conf
 ./tools/h5import/testfiles/binuin16.h5
 ./tools/h5import/testfiles/binuin32.h5
 ./tools/h5import/testfiles/tall_fp32.ddl
@@ -2075,13 +2081,13 @@
 ./tools/h5repack/testfiles/plugin_zero.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/plugin_version_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
-./tools/h5repack/testfiles/h5repack_filters.h5.tst
+./tools/h5repack/testfiles/h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
 ./tools/h5repack/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
-./tools/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
+./tools/h5repack/testfiles/h5repack_layout.h5-plugin_zero.ddl
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c
