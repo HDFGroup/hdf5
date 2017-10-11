@@ -20,11 +20,24 @@
 #include "h5test.h"
 #include "testpar.h"
 
-#define NFILENAME 3
-const char *FILENAMES[NFILENAME + 1]={"t_pread_data_file", 
-                                     "reloc_t_pread_data_file", 
-                                     "prefix_file", 
-                                     NULL};
+/* The collection of files is included below to aid
+ * an external "cleanup" process if required.
+ *
+ * Note that the code below relies on the ordering of this array
+ * since each set of three is used by the tests either to construct
+ * or to read and validate.
+ */
+#define NFILENAME 9
+const char *FILENAMES[NFILENAME + 1]={"t_pread_data_file",
+                                      "reloc_t_pread_data_file",
+                                      "prefix_file",
+                                      "t_pread_group_0_file",
+                                      "reloc_t_pread_group_0_file",
+                                      "prefix_file_0",
+                                      "t_pread_group_1_file",
+                                      "reloc_t_pread_group_1_file",
+                                      "prefix_file_1",
+                                      NULL};
 #define FILENAME_BUF_SIZE 1024
 
 #define COUNT 1000
@@ -56,15 +69,19 @@ static int test_parallel_read(MPI_Comm comm, int mpi_rank, int group);
  *
  *              Since data will be read back and validated, we generate
  *              data in a predictable manner rather than randomly.
- *              For now, we simply use the mpi_rank of the writing
- *              process as a starting component of the data generation.
+ *              For now, we simply use the global mpi_rank of the writing
+ *              process as a starting component for the data generation.
  *              Subsequent writes are increments from the initial start
  *              value.
  *
  *              In the overall scheme of running the test, we'll call
- *              this function twice so as to create two seperate files.
- *              Each file will serve as the input data for two
- *              independent parallel reads.
+ *              this function twice: first as a collection of all MPI
+ *              processes and then a second time with the processes split
+ *              more or less in half. Each sub group will operate 
+ *              collectively on their assigned file.  This split into
+ *              subgroups validates that parallel groups can successfully
+ *              open and read data independantly from the other parallel
+ *              operations taking place.
  *
  * Return:      Success: 0
  *
@@ -83,10 +100,11 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     FILE *header;
     const char *fcn_name = "generate_test_file()";
     const char *failure_mssg = NULL;
-    char group_file[FILENAME_BUF_SIZE];
+    const char *group_filename = NULL;
     char data_filename[FILENAME_BUF_SIZE];
     char reloc_data_filename[FILENAME_BUF_SIZE];
     char prolog_filename[FILENAME_BUF_SIZE];
+    int file_index;
     int group_size;
     int group_rank;
     int local_failure = 0;
@@ -123,14 +141,32 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         HDfprintf(stdout, "Constructing test files...");
     }
 
-    /* setup the file names */
+    /* Setup the file names
+     * The test specfic filenames are stored as consecutive
+     * array entries in the global 'FILENAMES' array above.
+     * Here, we simply decide on the starting index for
+     * file construction.  The reading portion of the test
+     * will have a similar setup process...
+     */
     if ( pass ) {
-        HDassert(FILENAMES[0]);
-	if ( HDsprintf(group_file, "%s_%d", FILENAMES[0], group_id) < 0) {
-            pass = FALSE;
-            failure_mssg = "HDsprintf(0) failed.\n";
-	}
-        else if ( h5_fixname(group_file, H5P_DEFAULT, data_filename,
+        if ( comm == MPI_COMM_WORLD ) { /* Test 1 */
+            file_index = 0;
+        } 
+        else if ( group_id == 0 ) {     /* Test 2 group 0 */
+            file_index = 3;
+        }
+        else {				/* Test 2 group 1 */
+            file_index = 6;
+        }
+
+	/* The 'group_filename' is just a temp variable and 
+         * is used to call into the h5_fixname function. No 
+         * need to worry that we reassign it for each file!
+	 */
+        HDassert((group_filename = FILENAMES[file_index]));
+
+	/* Assign the 'data_filename' */
+        if ( h5_fixname(group_filename, H5P_DEFAULT, data_filename,
                         sizeof(data_filename)) == NULL ) {
             pass = FALSE;
             failure_mssg = "h5_fixname(0) failed.\n";
@@ -138,12 +174,11 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     }
 
     if ( pass ) {
-        HDassert(FILENAMES[1]);
-	if ( HDsprintf(group_file, "%s_%d", FILENAMES[1], group_id) < 0) {
-            pass = FALSE;
-            failure_mssg = "HDsprintf(1) failed.\n";
-	}
-        else if ( h5_fixname(group_file, H5P_DEFAULT, reloc_data_filename,
+
+        HDassert( (group_filename = FILENAMES[file_index+1]) );
+
+	/* Assign the 'reloc_data_filename' */
+        if ( h5_fixname(group_filename, H5P_DEFAULT, reloc_data_filename,
                         sizeof(reloc_data_filename)) == NULL ) {
 
             pass = FALSE;
@@ -152,12 +187,11 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     }
 
     if ( pass ) {
-        HDassert(FILENAMES[2]);
-	if ( HDsprintf(group_file, "%s_%d", FILENAMES[2], group_id) < 0) {
-            pass = FALSE;
-            failure_mssg = "HDsprintf(2) failed.\n";
-	}
-        else if ( h5_fixname(group_file, H5P_DEFAULT, prolog_filename,
+
+        HDassert( (group_filename = FILENAMES[file_index+2]) );
+
+	/* Assing the 'prolog_filename' */
+        if ( h5_fixname(group_filename, H5P_DEFAULT, prolog_filename,
                         sizeof(prolog_filename)) == NULL ) {
             pass = FALSE;
             failure_mssg = "h5_fixname(2) failed.\n";
@@ -305,11 +339,20 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         }
     }
 
-    /* add a userblock to the head of the datafile.
+    /* Add a userblock to the head of the datafile.
      * We will use this to for a functional test of the 
-     * file open optimization.
+     * file open optimization.  This is superblock
+     * relocation is done by the rank 0 process associated
+     * with the communicator being used.  For test 1, we
+     * utilize MPI_COMM_WORLD, so group_rank 0 is the
+     * same as mpi_rank 0.  For test 2 which utilizes
+     * two groups resulting from an MPI_Comm_split, we
+     * will have parallel groups and hence two 
+     * group_rank(0) processes. Each parallel group 
+     * will create a unique file with different text
+     * headers and different data.
      *
-     * Also delete files that are no longer needed.
+     * We also delete files that are no longer needed.
      */
     if ( group_rank == 0 ) {
 
@@ -443,7 +486,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
 {
     const char *failure_mssg;
     const char *fcn_name = "test_parallel_read()";
-    char group_file[FILENAME_BUF_SIZE];
+    const char *group_filename = NULL;
     char reloc_data_filename[FILENAME_BUF_SIZE];
     int local_failure = 0;
     int global_failures = 0; 
@@ -476,8 +519,12 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
     }
 
     if ( mpi_rank == 0 ) {
-
-        TESTING("parallel file open test 1");
+        if ( comm == MPI_COMM_WORLD ) {
+            TESTING("parallel file open test 1");
+        }
+        else {
+            TESTING("parallel file open test 2");
+        }
     }
 
     /* allocate space for the data_slice array */
@@ -489,14 +536,21 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
     }
 
 
-    /* construct file file name */
+    /* Select the file file name to read
+     * Please see the comments in the 'generate_test_file' function
+     * for more details...
+     */
     if ( pass ) {
-        HDassert(FILENAMES[1]);
-	if ( HDsprintf(group_file, "%s_%d", FILENAMES[1], group_id) < 0) {
-            pass = FALSE;
-            failure_mssg = "HDsprintf(0) failed.\n";
-        }
-        else if ( h5_fixname(group_file, H5P_DEFAULT, reloc_data_filename,
+
+        if ( comm == MPI_COMM_WORLD )	    /* test 1 */
+            group_filename = FILENAMES[1];
+        else if ( group_id == 0 )	    /* test 2 group 0 */
+            group_filename = FILENAMES[4];
+        else				    /* test 2 group 1 */
+            group_filename = FILENAMES[7];
+
+        HDassert(group_filename);
+        if ( h5_fixname(group_filename, H5P_DEFAULT, reloc_data_filename,
                         sizeof(reloc_data_filename)) == NULL ) {
 
             pass = FALSE;
@@ -702,11 +756,11 @@ int
 main( int argc, char **argv)
 {
     int nerrs = 0;
-    int which_group;
+    int which_group = 0;
     int mpi_rank;
     int mpi_size;
     int split_size;
-    MPI_Comm group_comm = MPI_COMM_NULL;
+    MPI_Comm group_comm = MPI_COMM_WORLD;
 
     if ( (MPI_Init(&argc, &argv)) != MPI_SUCCESS) {
        HDfprintf(stderr, "FATAL: Unable to initialize MPI\n");
@@ -741,9 +795,42 @@ main( int argc, char **argv)
         goto finish;
     }
 
-    /* Divide the available processes into two groups
-     * that are the same size (plus or minus).
+    /* ------ Test 1 of 2 ------
+     * In this test we utilize all processes which makeup MPI_COMM_WORLD.
+     * We generate the test file which we'll shortly try to read.
      */
+    nerrs += generate_test_file( group_comm, mpi_rank, which_group );
+
+    /* abort tests if there were any errors in test file construction */
+    if ( nerrs > 0 ) {
+        if ( mpi_rank == 0 ) {
+            HDprintf("    Test file construction failed -- skipping tests.\n");
+        }
+        goto finish;
+    }
+
+    /* Now read the generated test file (stil using MPI_COMM_WORLD) */
+    nerrs += test_parallel_read( group_comm, mpi_rank, which_group);
+
+    if ( nerrs > 0 ) {
+        if ( mpi_rank == 0 ) {
+            HDprintf("    Parallel read test failed -- skipping tests.\n");
+        }
+        goto finish;
+    }
+
+    /* Update the user on our progress so far. */
+    if ( mpi_rank == 0 ) {
+        HDprintf("    Test 1 of 2 succeeded\n");
+        HDprintf("    -- Starting multi-group parallel read test.\n");
+    }
+
+    /* ------ Test 2 of 2 ------
+     * Create two more or less equal MPI groups to
+     * initialize the test files and then verify that parallel
+     * operations by independent group succeeds.  
+     */
+
     split_size = mpi_size / 2;
     which_group = (mpi_rank < split_size ? 0 : 1);
 
@@ -756,12 +843,6 @@ main( int argc, char **argv)
 	exit(2);
     }
 
-
-    /* create the test files & verify that the process 
-     * succeeded.  If not, abort the remaining tests as 
-     * they depend on the test files.
-     */
-
     nerrs += generate_test_file( group_comm, mpi_rank, which_group );
 
     /* abort tests if there were any errors in test file construction */
@@ -772,8 +853,19 @@ main( int argc, char **argv)
         goto finish;
     }
 
-    /* run the tests */
+    /* run the 2nd set of tests */
     nerrs += test_parallel_read(group_comm, mpi_rank, which_group);
+
+    if ( nerrs > 0 ) {
+        if ( mpi_rank == 0 ) {
+            HDprintf("    Multi-group read test failed\n");
+        }
+        goto finish;
+    }
+
+    if ( mpi_rank == 0 ) {
+        HDprintf("    Test 2 of 2 succeeded\n");
+    }
 
 finish:
 
