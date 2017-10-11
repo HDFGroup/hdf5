@@ -87,17 +87,13 @@ static int test_parallel_read(MPI_Comm comm, int mpi_rank, int group);
  *
  *              Failure: 1
  *
- * Programmer:  Richard Warren
- *              10/1/17
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static int
 generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 {
-    FILE *header;
+    FILE *header = NULL;
     const char *fcn_name = "generate_test_file()";
     const char *failure_mssg = NULL;
     const char *group_filename = NULL;
@@ -113,12 +109,12 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     hsize_t i;
     hsize_t offset;
     hsize_t dims[1] = {0};
-    hid_t file_id;
-    hid_t memspace; 
-    hid_t filespace; 
-    hid_t fapl_id;
-    hid_t dxpl_id;
-    hid_t dset_id;
+    hid_t file_id   = -1;
+    hid_t memspace  = -1; 
+    hid_t filespace = -1; 
+    hid_t fapl_id   = -1;
+    hid_t dxpl_id   = -1;
+    hid_t dset_id   = -1;
     float nextValue;
     float *data_slice = NULL;
 
@@ -155,17 +151,17 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         else if ( group_id == 0 ) {     /* Test 2 group 0 */
             file_index = 3;
         }
-        else {				/* Test 2 group 1 */
+        else {                          /* Test 2 group 1 */
             file_index = 6;
         }
 
-	/* The 'group_filename' is just a temp variable and 
+        /* The 'group_filename' is just a temp variable and 
          * is used to call into the h5_fixname function. No 
          * need to worry that we reassign it for each file!
-	 */
+         */
         HDassert((group_filename = FILENAMES[file_index]));
 
-	/* Assign the 'data_filename' */
+        /* Assign the 'data_filename' */
         if ( h5_fixname(group_filename, H5P_DEFAULT, data_filename,
                         sizeof(data_filename)) == NULL ) {
             pass = FALSE;
@@ -177,7 +173,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
         HDassert( (group_filename = FILENAMES[file_index+1]) );
 
-	/* Assign the 'reloc_data_filename' */
+        /* Assign the 'reloc_data_filename' */
         if ( h5_fixname(group_filename, H5P_DEFAULT, reloc_data_filename,
                         sizeof(reloc_data_filename)) == NULL ) {
 
@@ -190,7 +186,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
         HDassert( (group_filename = FILENAMES[file_index+2]) );
 
-	/* Assing the 'prolog_filename' */
+        /* Assign the 'prolog_filename' */
         if ( h5_fixname(group_filename, H5P_DEFAULT, prolog_filename,
                         sizeof(prolog_filename)) == NULL ) {
             pass = FALSE;
@@ -211,7 +207,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
         for(i=0; i<COUNT; i++) {
             data_slice[i] = nextValue;
-	    nextValue += 1;
+            nextValue += 1;
         }
     }
 
@@ -297,42 +293,42 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     }
 
     /* close file, etc. */
-    if ( pass ) {
+    if ( pass || (dset_id != -1)) {
         if ( H5Dclose(dset_id) < 0 ) {
             pass = false;
             failure_mssg = "H5Dclose(dset_id) failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass || (memspace != -1) ) {
         if ( H5Sclose(memspace) < 0 ) {
             pass = false;
             failure_mssg = "H5Sclose(memspace) failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass || (filespace != -1) ) {
         if ( H5Sclose(filespace) < 0 ) {
             pass = false;
             failure_mssg = "H5Sclose(filespace) failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass || (file_id != -1) ) {
         if ( H5Fclose(file_id) < 0 ) {
             pass = false;
             failure_mssg = "H5Fclose(file_id) failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass || (dxpl_id != -1) ) {
         if ( H5Pclose(dxpl_id) < 0 ) {
             pass = false;
             failure_mssg = "H5Pclose(dxpl_id) failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass || (fapl_id != -1) ) {
         if ( H5Pclose(fapl_id) < 0 ) {
             pass = false;
             failure_mssg = "H5Pclose(fapl_id) failed.\n";
@@ -361,10 +357,10 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
         if (group_id == 0)
             text_to_write = random_hdf5_text;
-	else
+        else
             text_to_write = hitchhiker_quote;
 
-	bytes_to_write = strlen(text_to_write);
+        bytes_to_write = strlen(text_to_write);
 
         if ( pass ) {
             if ( (header = HDfopen(prolog_filename, "w+")) == NULL ) {
@@ -382,7 +378,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
             }
         }
 
-        if ( pass ) {
+        if ( pass || (header != NULL) ) {
             if ( HDfclose(header) != 0 ) {
                 pass = FALSE;
                 failure_mssg = "HDfclose() failed.\n";
@@ -395,16 +391,14 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
             HDsprintf(cmd, "../tools/src/h5jam/h5jam -i %s -u %s -o %s", 
                       data_filename, prolog_filename, reloc_data_filename);
 
-	    if ( system(cmd) != 0 ) {
+            if ( system(cmd) != 0 ) {
                 pass = FALSE;
                 failure_mssg = "invocation of h5jam failed.\n";
             }
         }
 
-        if ( pass ) {
-            HDremove(prolog_filename);
-            HDremove(data_filename);
-        }
+        HDremove(prolog_filename);
+        HDremove(data_filename);
     }
 
     /* collect results from other processes.
@@ -492,10 +486,10 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
     int global_failures = 0; 
     int group_size;
     int group_rank;
-    hid_t fapl_id;
-    hid_t file_id;
-    hid_t dset_id;
-    hid_t memspace = -1;
+    hid_t fapl_id   = -1;
+    hid_t file_id   = -1;
+    hid_t dset_id   = -1;
+    hid_t memspace  = -1;
     hid_t filespace = -1;
     hsize_t i;
     hsize_t offset;
@@ -542,11 +536,11 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
      */
     if ( pass ) {
 
-        if ( comm == MPI_COMM_WORLD )	    /* test 1 */
+        if ( comm == MPI_COMM_WORLD )       /* test 1 */
             group_filename = FILENAMES[1];
-        else if ( group_id == 0 )	    /* test 2 group 0 */
+        else if ( group_id == 0 )           /* test 2 group 0 */
             group_filename = FILENAMES[4];
-        else				    /* test 2 group 1 */
+        else                                /* test 2 group 1 */
             group_filename = FILENAMES[7];
 
         HDassert(group_filename);
@@ -645,35 +639,35 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
     }
 
     /* close file, etc. */
-    if ( pass ) {
+    if ( pass || (dset_id != -1) ) {
         if ( H5Dclose(dset_id) < 0 ) {
             pass = false;
             failure_mssg = "H5Dclose(dset_id) failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass || (memspace != -1) ) {
         if ( H5Sclose(memspace) < 0 ) {
             pass = false;
             failure_mssg = "H5Sclose(memspace) failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass || (filespace != -1) ) {
         if ( H5Sclose(filespace) < 0 ) {
             pass = false;
             failure_mssg = "H5Sclose(filespace) failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass || (file_id != -1) ) {
         if ( H5Fclose(file_id) < 0 ) {
             pass = false;
             failure_mssg = "H5Fclose(file_id) failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass || (fapl_id != -1) ) {
         if ( H5Pclose(fapl_id) < 0 ) {
             pass = false;
             failure_mssg = "H5Pclose(fapl_id) failed.\n";
@@ -764,17 +758,17 @@ main( int argc, char **argv)
 
     if ( (MPI_Init(&argc, &argv)) != MPI_SUCCESS) {
        HDfprintf(stderr, "FATAL: Unable to initialize MPI\n");
-       exit(1);
+       HDexit(FAIL);
     }
 
     if ( (MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank)) != MPI_SUCCESS) {
         HDfprintf(stderr, "FATAL: MPI_Comm_rank returned an error\n");
-        exit(2);
+        HDexit(FAIL);
     }
 
     if ( (MPI_Comm_size(MPI_COMM_WORLD, &mpi_size)) != MPI_SUCCESS) {
         HDfprintf(stderr, "FATAL: MPI_Comm_size returned an error\n");
-        exit(2);
+        HDexit(FAIL);
     }
 
     H5open();
@@ -835,12 +829,12 @@ main( int argc, char **argv)
     which_group = (mpi_rank < split_size ? 0 : 1);
 
     if ( (MPI_Comm_split(MPI_COMM_WORLD,
-			 which_group,
-			 0,
-			 &group_comm)) != MPI_SUCCESS) {
+                         which_group,
+                         0,
+                         &group_comm)) != MPI_SUCCESS) {
 
         HDfprintf(stderr, "FATAL: MPI_Comm_split returned an error\n");
-	exit(2);
+        HDexit(FAIL);
     }
 
     nerrs += generate_test_file( group_comm, mpi_rank, which_group );
@@ -870,7 +864,7 @@ main( int argc, char **argv)
 finish:
 
     if ((group_comm != MPI_COMM_NULL) &&
-	(MPI_Comm_free(&group_comm)) != MPI_SUCCESS) {
+        (MPI_Comm_free(&group_comm)) != MPI_SUCCESS) {
         HDfprintf(stderr, "MPI_Comm_free failed!\n");
     }
 
@@ -895,12 +889,14 @@ finish:
     }
 
     /* close HDF5 library */
-    H5close();
+    if (H5close() != SUCCEED) {
+        HDfprintf(stdout, "H5close() failed. (Ignoring)\n");
+    }
 
     /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
     MPI_Finalize();
 
     /* cannot just return (nerrs) because exit code is limited to 1byte */
-    return(nerrs > 0);
+    return((nerrs > 0) ? FAIL : SUCCEED );
 
 } /* main() */
