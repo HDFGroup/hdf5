@@ -30,6 +30,7 @@ void init_packobject(pack_info_t *obj) {
     HDstrcpy(obj->path, "\0");
     for (j = 0; j < H5_REPACK_MAX_NFILTERS; j++) {
         obj->filter[j].filtn = -1;
+        obj->filter[j].cd_nelmts = CD_VALUES;
         for (k = 0; k < CD_VALUES; k++)
             obj->filter[j].cd_values[k] = 0;
     }
@@ -261,7 +262,7 @@ options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt, pa
 
     /* search if this object is already in the table; "path" is the key */
     if (table->nelems > 0) {
-        /* go tru the supplied list of names */
+        /* go through the supplied list of names */
         for (j = 0; j < n_objs; j++) {
             /* linear table search */
             for (i = 0; i < table->nelems; i++) {
