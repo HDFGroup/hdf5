@@ -268,6 +268,7 @@ add_test (NAME H5TEST-clear-testhdf5-objects
         tfile5.h5
         tfile6.h5
         tfile7.h5
+        tfilespace.h5
         th5o_file
         th5s1.h5
         tselect.h5
@@ -334,6 +335,7 @@ else ()
             tfile5.h5
             tfile6.h5
             tfile7.h5
+            tfilespace.h5
             th5o_file
             th5s1.h5
             tselect.h5
