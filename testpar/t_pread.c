@@ -16,7 +16,6 @@
  *
  */
 
-
 #include "h5test.h"
 #include "testpar.h"
 
@@ -87,7 +86,11 @@ static int test_parallel_read(MPI_Comm comm, int mpi_rank, int group);
  *
  *              Failure: 1
  *
+ * Programmer:  Richard Warren
+ *              10/1/17
  *
+ * Modifications:
+ * 
  *-------------------------------------------------------------------------
  */
 static int
@@ -758,17 +761,17 @@ main( int argc, char **argv)
 
     if ( (MPI_Init(&argc, &argv)) != MPI_SUCCESS) {
        HDfprintf(stderr, "FATAL: Unable to initialize MPI\n");
-       HDexit(FAIL);
+       HDexit(EXIT_FAILURE);
     }
 
     if ( (MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank)) != MPI_SUCCESS) {
         HDfprintf(stderr, "FATAL: MPI_Comm_rank returned an error\n");
-        HDexit(FAIL);
+        HDexit(EXIT_FAILURE);
     }
 
     if ( (MPI_Comm_size(MPI_COMM_WORLD, &mpi_size)) != MPI_SUCCESS) {
         HDfprintf(stderr, "FATAL: MPI_Comm_size returned an error\n");
-        HDexit(FAIL);
+        HDexit(EXIT_FAILURE);
     }
 
     H5open();
@@ -789,26 +792,53 @@ main( int argc, char **argv)
         goto finish;
     }
 
-    /* ------ Test 1 of 2 ------
-     * In this test we utilize all processes which makeup MPI_COMM_WORLD.
-     * We generate the test file which we'll shortly try to read.
+    /* ------  Create two (2) MPI groups  ------
+     *
+     * We split MPI_COMM_WORLD into 2 more or less equal sized 
+     * groups.  The resulting communicators will be used to generate
+     * two HDF files which in turn will be opened in parallel and the
+     * contents verified in the second read test below.
      */
-    nerrs += generate_test_file( group_comm, mpi_rank, which_group );
+    split_size = mpi_size / 2;
+    which_group = (mpi_rank < split_size ? 0 : 1);
 
-    /* abort tests if there were any errors in test file construction */
+    if ( (MPI_Comm_split(MPI_COMM_WORLD,
+                         which_group,
+                         0,
+                         &group_comm)) != MPI_SUCCESS) {
+
+        HDfprintf(stderr, "FATAL: MPI_Comm_split returned an error\n");
+        HDexit(EXIT_FAILURE);
+    }
+
+    /* ------  Generate all files ------ */
+
+    /* We generate the file used for test 1 */
+    nerrs += generate_test_file( MPI_COMM_WORLD, mpi_rank, which_group );
+
     if ( nerrs > 0 ) {
         if ( mpi_rank == 0 ) {
-            HDprintf("    Test file construction failed -- skipping tests.\n");
+            HDprintf("    Test(1) file construction failed -- skipping tests.\n");
+        }
+        goto finish;
+    }
+    
+    /* We generate the file used for test 2 */
+    nerrs += generate_test_file( group_comm, mpi_rank, which_group );
+
+    if ( nerrs > 0 ) {
+        if ( mpi_rank == 0 ) {
+            HDprintf("    Test(2) file construction failed -- skipping tests.\n");
         }
         goto finish;
     }
 
     /* Now read the generated test file (stil using MPI_COMM_WORLD) */
-    nerrs += test_parallel_read( group_comm, mpi_rank, which_group);
+    nerrs += test_parallel_read( MPI_COMM_WORLD, mpi_rank, which_group);
 
     if ( nerrs > 0 ) {
         if ( mpi_rank == 0 ) {
-            HDprintf("    Parallel read test failed -- skipping tests.\n");
+            HDprintf("    Parallel read test(1) failed -- skipping tests.\n");
         }
         goto finish;
     }
@@ -819,40 +849,12 @@ main( int argc, char **argv)
         HDprintf("    -- Starting multi-group parallel read test.\n");
     }
 
-    /* ------ Test 2 of 2 ------
-     * Create two more or less equal MPI groups to
-     * initialize the test files and then verify that parallel
-     * operations by independent group succeeds.  
-     */
-
-    split_size = mpi_size / 2;
-    which_group = (mpi_rank < split_size ? 0 : 1);
-
-    if ( (MPI_Comm_split(MPI_COMM_WORLD,
-                         which_group,
-                         0,
-                         &group_comm)) != MPI_SUCCESS) {
-
-        HDfprintf(stderr, "FATAL: MPI_Comm_split returned an error\n");
-        HDexit(FAIL);
-    }
-
-    nerrs += generate_test_file( group_comm, mpi_rank, which_group );
-
-    /* abort tests if there were any errors in test file construction */
-    if ( nerrs > 0 ) {
-        if ( mpi_rank == 0 ) {
-            HDprintf("    Test file construction failed -- skipping tests.\n");
-        }
-        goto finish;
-    }
-
     /* run the 2nd set of tests */
     nerrs += test_parallel_read(group_comm, mpi_rank, which_group);
 
     if ( nerrs > 0 ) {
         if ( mpi_rank == 0 ) {
-            HDprintf("    Multi-group read test failed\n");
+            HDprintf("    Multi-group read test(2) failed\n");
         }
         goto finish;
     }
@@ -897,6 +899,6 @@ finish:
     MPI_Finalize();
 
     /* cannot just return (nerrs) because exit code is limited to 1byte */
-    return((nerrs > 0) ? FAIL : SUCCEED );
+    return((nerrs > 0) ? EXIT_FAILURE : EXIT_SUCCESS );
 
 } /* main() */
