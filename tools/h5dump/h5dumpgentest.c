@@ -10070,7 +10070,6 @@ static void gent_compound_complex2(void)
         H5Tclose(type);
     }
 */
-
     H5Fclose(file);
 }
 
@@ -10123,7 +10122,7 @@ static void gent_vlenstr_array(void)
         if ((type = H5Tarray_create2(array_tid, F83_RANK, arraydim)) >= 0) {
             if ((dset = H5Dcreate2(file, F83_DATASETNAME, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                 if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
-                    fprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
+                    HDfprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
 
                 H5Dclose(dset);
             }
@@ -10169,7 +10168,6 @@ static void gent_udfilter(void)
     hid_t    dcpl; /* dataset creation property list */
     hid_t    dsid;  /* dataset ID */
     hid_t    sid;  /* dataspace ID */
-    hid_t    tid;  /* datatype ID */
 
     hsize_t  dims1[RANK]      = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};

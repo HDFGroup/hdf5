@@ -1038,7 +1038,6 @@
 ./tools/h5dump/testh5dumpxml.sh.in
 ./tools/h5dump/binread.c
 
-
 ./tools/h5import/Makefile.am
 ./tools/h5import/Makefile.in
 ./tools/h5import/h5import.h
@@ -1047,20 +1046,16 @@
 ./tools/h5import/h5importtestutil.sh.in
 
 # testfiles for h5import
-./tools/h5import/testfiles/binfp64.conf
 ./tools/h5import/testfiles/binfp64.h5
-./tools/h5import/testfiles/binin16.conf
 ./tools/h5import/testfiles/binin16.h5
-./tools/h5import/testfiles/binin32.conf
 ./tools/h5import/testfiles/binin32.h5
-./tools/h5import/testfiles/binin8.conf
 ./tools/h5import/testfiles/binin8.h5
-./tools/h5import/testfiles/binin8w.conf
 ./tools/h5import/testfiles/binin8w.h5
-./tools/h5import/testfiles/binuin16.conf
 ./tools/h5import/testfiles/binuin16.h5
-./tools/h5import/testfiles/binuin32.conf
 ./tools/h5import/testfiles/binuin32.h5
+./tools/h5import/testfiles/tall_fp32.ddl
+./tools/h5import/testfiles/tall_i32.ddl
+./tools/h5import/testfiles/tintsattrs_u32.ddl
 ./tools/h5import/testfiles/textpfe.conf
 ./tools/h5import/testfiles/textpfe.h5
 ./tools/h5import/testfiles/textpfe64.txt
@@ -2066,6 +2061,7 @@
 ./tools/h5repack/testfiles/h5repack_nested_8bit_enum_deflated.h5
 ./tools/h5repack/testfiles/h5repack_nested_8bit_enum.h5
 ./tools/h5repack/testfiles/h5repack_nbit.h5
+./tools/h5repack/testfiles/h5repack_none.h5
 ./tools/h5repack/testfiles/h5repack_objs.h5
 ./tools/h5repack/testfiles/h5repack_refs.h5
 ./tools/h5repack/testfiles/h5repack_shuffle.h5
@@ -2076,6 +2072,7 @@
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
+./tools/h5repack/testfiles/plugin_zero.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/plugin_version_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
 ./tools/h5repack/testfiles/h5repack_filters.h5.tst

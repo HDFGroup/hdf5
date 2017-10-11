@@ -130,6 +130,17 @@ Bug Fixes since HDF5-1.8.19
 
     Library
     -------
+    - H5Zfilter_avail in H5Z.c
+
+      The public function checked for plugins, while the private
+      function did not.
+
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+
+      (ADB - 2017/10/10, HDFFV-10297)
+
     - Fix H5HL_offset_into()
 
       (1) Fix H5HL_offset_into() to return error when offset exceeds heap data
@@ -152,6 +163,18 @@ Bug Fixes since HDF5-1.8.19
 
     Tools
     -----
+    - h5repack
+
+      h5repack failed to copy a dataset with existing filter.
+
+      Reworked code for h5repack and h5diff code in tools library. Added
+      improved error handling, cleanup of resources and checks of calls.
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+
+      (ADB - 2017/10/10, HDFFV-10297)
+
     - h5repack
 
       h5repack always set the User Defined filter flag to H5Z_FLAG_MANDATORY.

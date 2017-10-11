@@ -92,7 +92,7 @@ GROUP "/" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, H5S_UNLIMITED ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 20, 10 )
+         CHUNKED ( 40, 20 )
          SIZE 3200 (1.000:1 COMPRESSION)
       }
       FILTERS {

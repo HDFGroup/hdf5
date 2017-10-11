@@ -170,6 +170,7 @@ hsize_t diff_datasetid( hid_t did1,
                         const char *obj2_name,
                         diff_opt_t *options)
 {
+    int        ret_value = 0;            /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     hid_t      sid1=-1;
     hid_t      sid2=-1;
     hid_t      f_tid1=-1;
@@ -211,30 +212,31 @@ hsize_t diff_datasetid( hid_t did1,
     int        i;
     unsigned int  vl_data = 0;         /*contains VL datatypes */
 
+    options->err_stat = 1;
     h5difftrace("diff_datasetid start\n");
     /* Get the dataspace handle */
     if((sid1 = H5Dget_space(did1)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
 
     /* Get rank */
     if((rank1 = H5Sget_simple_extent_ndims(sid1)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
 
     /* Get the dataspace handle */
     if((sid2 = H5Dget_space(did2)) < 0 )
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
 
     /* Get rank */
     if((rank2 = H5Sget_simple_extent_ndims(sid2)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
 
     /* Get dimensions */
     if(H5Sget_simple_extent_dims(sid1, dims1, maxdim1) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
 
     /* Get dimensions */
     if(H5Sget_simple_extent_dims(sid2, dims2, maxdim2) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
     h5diffdebug3("rank: %ld - %ld\n", rank1, rank2);
 
     /*-------------------------------------------------------------------------
@@ -244,25 +246,25 @@ hsize_t diff_datasetid( hid_t did1,
 
     /* Get the data type */
     if((f_tid1 = H5Dget_type(did1)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type failed");
 
     /* Get the data type */
     if((f_tid2 = H5Dget_type(did2)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type failed");
 
     /*-------------------------------------------------------------------------
     * get the storage layout type
     *-------------------------------------------------------------------------
     */
     if((dcpl1 = H5Dget_create_plist(did1)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist failed");
     if((dcpl2 = H5Dget_create_plist(did2)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist failed");
 
     if((stl1 = H5Pget_layout(dcpl1)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_layout failed");
     if((stl2 = H5Pget_layout(dcpl2)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_layout failed");
 
     /*-------------------------------------------------------------------------
     * check for empty datasets
@@ -297,10 +299,10 @@ hsize_t diff_datasetid( hid_t did1,
     */
     h5difftrace("check for memory type and sizes\n");
     if((m_tid1 = H5Tget_native_type(f_tid1, H5T_DIR_DEFAULT)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
 
     if((m_tid2 = H5Tget_native_type(f_tid2, H5T_DIR_DEFAULT)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
 
     m_size1 = H5Tget_size(m_tid1);
     m_size2 = H5Tget_size(m_tid2);
@@ -362,14 +364,14 @@ hsize_t diff_datasetid( hid_t did1,
             if (FAIL == match_up_memsize (f_tid1, f_tid2,
                                         &m_tid1, &m_tid2,
                                         &m_size1, &m_size2))
-                goto error;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "match_up_memsize failed");
             h5diffdebug3("m_size: %ld - %ld\n", m_size1, m_size2);
             dadims = dims1;
             dam_size = m_size1;
             dam_tid = m_tid1;
             danelmts = nelmts1;
             need = (size_t)(nelmts1 * m_size1);  /* bytes needed */
-         }
+        }
         else {
             h5diffdebug3("Array dims: %d - %d\n", dims1[0], dims2[0]);
             /* Compare the smallest array, but create the largest buffer */
@@ -407,10 +409,10 @@ hsize_t diff_datasetid( hid_t did1,
         if(buf1 != NULL && buf2 != NULL) {
             h5difftrace("buf1 != NULL && buf2 != NULL\n");
             if(H5Dread(did1, m_tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1) < 0)
-                goto error;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
             h5difftrace("H5Dread did2\n");
             if(H5Dread(did2, m_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2) < 0)
-                goto error;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
 
             /* array diff */
             nfound = diff_array(buf1, buf2, danelmts, (hsize_t)0, rank1, dadims,
@@ -421,6 +423,14 @@ hsize_t diff_datasetid( hid_t did1,
                 H5Dvlen_reclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
                 H5Dvlen_reclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
             } /* end if */
+            if(buf1 != NULL) {
+                HDfree(buf1);
+                buf1 = NULL;
+            }
+            if(buf2 != NULL) {
+                HDfree(buf2);
+                buf2 = NULL;
+            }
         } /* end if */
         else { /* possibly not enough memory, read/compare by hyperslabs */
             size_t        p_type_nbytes = dam_size; /*size of memory type */
@@ -462,9 +472,9 @@ hsize_t diff_datasetid( hid_t did1,
              * E.g., sm_space.
              */
             if((sm_buf1 = HDmalloc((size_t)sm_nbytes)) == NULL)
-                goto error;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDmalloc failed");
             if((sm_buf2 = HDmalloc((size_t)sm_nbytes)) == NULL)
-                goto error;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDmalloc failed");
 
             sm_nelmts = sm_nbytes / p_type_nbytes;
             sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
@@ -481,19 +491,19 @@ hsize_t diff_datasetid( hid_t did1,
                         hs_nelmts *= hs_size[i];
                     } /* end for */
                     if(H5Sselect_hyperslab(sid1, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
-                        goto error;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
                     if(H5Sselect_hyperslab(sid2, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
-                        goto error;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
                     if(H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) < 0)
-                        goto error;
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
                 } /* end if */
                 else
                     hs_nelmts = 1;
 
                 if(H5Dread(did1, m_tid1, sm_space, sid1, H5P_DEFAULT, sm_buf1) < 0)
-                    goto error;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
                 if(H5Dread(did2, m_tid2, sm_space, sid2, H5P_DEFAULT, sm_buf2) < 0)
-                    goto error;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
 
                 /* get array differences. in the case of hyperslab read, increment the number of differences
                 found in each hyperslab and pass the position at the beginning for printing */
@@ -515,6 +525,14 @@ hsize_t diff_datasetid( hid_t did1,
                         carry = 0;
                 } /* i */
             } /* elmtno */
+            if(sm_buf1 != NULL) {
+                HDfree(sm_buf1);
+                sm_buf1 = NULL;
+            }
+            if(sm_buf2 != NULL) {
+                HDfree(sm_buf2);
+                sm_buf2 = NULL;
+            }
 
             H5Sclose(sm_space);
         } /* hyperslab read */
@@ -525,40 +543,11 @@ hsize_t diff_datasetid( hid_t did1,
      * close
      *-------------------------------------------------------------------------
      */
-    h5difftrace("compare attributes?\n");
+    h5difftrace("reclaim any VL memory\n");
 
-    /* free */
-    if(buf1 != NULL) {
-        HDfree(buf1);
-        buf1 = NULL;
-    } /* end if */
-    if(buf2 != NULL) {
-        HDfree(buf2);
-        buf2 = NULL;
-    } /* end if */
-    if(sm_buf1 != NULL) {
-        HDfree(sm_buf1);
-        sm_buf1 = NULL;
-    } /* end if */
-    if(sm_buf2 != NULL) {
-        HDfree(sm_buf2);
-        sm_buf2 = NULL;
-    } /* end if */
+done:
 
-    H5E_BEGIN_TRY {
-        H5Sclose(sid1);
-        H5Sclose(sid2);
-        H5Tclose(f_tid1);
-        H5Tclose(f_tid2);
-        H5Tclose(m_tid1);
-        H5Tclose(m_tid2);
-    } H5E_END_TRY;
-    h5difftrace("diff_datasetid finish\n");
-
-    return nfound;
-
-error:
-    options->err_stat=1;
+    options->err_stat = ret_value;
 
     /* free */
     if(buf1 != NULL) {
@@ -600,7 +589,7 @@ error:
         H5Tclose(m_tid2);
         /* enable error reporting */
     } H5E_END_TRY;
-    h5difftrace("diff_datasetid errored\n");
+    h5diffdebug3("diff_datasetid return:%d with nfound:%d\n", ret_value, nfound);
 
     return nfound;
 }
