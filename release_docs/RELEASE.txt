@@ -213,6 +213,18 @@ Bug Fixes since HDF5-1.8.19
 
       (ADB - 2017/07/25, HDFFV-10246)
 
+    - h5import
+
+      h5import crashed trying to import data from a subset of a dataset.
+
+      Improved h5import by adding the SUBSET keyword. h5import understands
+      to use the Count times the Block as the size of the dimensions.
+      Added INPUT_B_ORDER keyword to old-style configuration files.
+      The import from h5dump function expects the binary files to use native
+      types (FILE '-b' option) in the binary file.
+
+      (ADB - 2017/06/15, HDFFV-10219)
+
 
     Fortran API
     -----------
