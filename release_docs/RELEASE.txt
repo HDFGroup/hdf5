@@ -64,11 +64,11 @@ New Features
     -----------------
     - Optimize parallel open/location of the HDF5 super-block
 
-      Previous releases of PHDF5 allow all parallel ranks to
-      read the starting elements in a file to validate and process
-      the HDF5 super-block.  As this is accomplished more or less as
-      a synchronous operation, a large number of processes will
-      likely experience a slowdown due to filesystem contention.
+      Previous releases of PHDF5 required all parallel ranks to
+      search for the HDF5 superblock signature when opening the
+      file. As this is accomplished more or less as a synchronous
+      operation, a large number of processes can experience a
+      slowdown in the file open due to filesystem contention.
 
       As a first step in improving the startup/file-open performance,
       we allow MPI rank 0 of the associated MPI communicator to locate
