@@ -481,6 +481,19 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 
         if (options->verbose)
             printf(FORMAT_OBJ_ATTR, "attr", name);
+
+        /*-------------------------------------------------------------------------
+         * close
+         *-------------------------------------------------------------------------
+         */
+        if (H5Tclose(ftype_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+        if (H5Tclose(wtype_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+        if (H5Sclose(space_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
+        if (H5Aclose(attr_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aclose failed");
     } /* u */
 
 done:
@@ -792,9 +805,9 @@ static int check_objects(const char* fname, pack_opt_t *options) {
 
 done:
     H5E_BEGIN_TRY {
-        H5Fclose(fid);
-        H5Sclose(sid);
         H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid);
     } H5E_END_TRY;
     if (travt)
         trav_table_free(travt);
