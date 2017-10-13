@@ -58,26 +58,30 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     /* check for the end of object list and number of objects */
     for (i = 0, n = 0; i < len; i++) {
         c = str[i];
-        if (c == ':')
+        if (c == ':') {
             end_obj = (int) i;
+            break;
+        }
         if (c == ',')
             n++;
     }
+    n++;
 
     /* Check for missing : */
     if (end_obj == -1) {
         /* apply to all objects */
         options->all_filter = 1;
         *is_glb = 1;
+        *n_objs = 1;
     }
+    else
+        *n_objs = n;
 
-    n++;
     obj_list = (obj_list_t *) HDmalloc(n * sizeof(obj_list_t));
     if (obj_list == NULL) {
         error_msg("could not allocate object list\n");
         return NULL;
     }
-    *n_objs = n;
 
     /* get object list */
     if (end_obj > 0)
@@ -89,6 +93,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                     sobj[k] = '\0';
                 else
                     sobj[k + 1] = '\0';
+
                 HDstrcpy(obj_list[n].obj, sobj);
                 HDmemset(sobj, 0, sizeof(sobj));
                 n++;
@@ -142,7 +147,6 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                             if (l == 2) {
                                 smask[l] = '\0';
                                 i = len - 1; /* end */
-                                (*n_objs)--; /* we counted an extra ',' */
                                 if (HDstrcmp(smask,"NN") == 0)
                                     filt->cd_values[j++] = H5_SZIP_NN_OPTION_MASK;
                                 else if (HDstrcmp(smask,"EC") == 0)
@@ -193,7 +197,6 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                             if (l == 2) {
                                 smask[l] = '\0';
                                 i = len - 1; /* end */
-                                (*n_objs)--; /* we counted an extra ',' */
                                 if (HDstrcmp(smask,"IN") == 0)
                                     filt->cd_values[j++] = H5Z_SO_INT;
                                 else if (HDstrcmp(smask, "DS") == H5Z_SO_FLOAT_DSCALE)
