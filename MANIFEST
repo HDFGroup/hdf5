@@ -1248,6 +1248,7 @@
 ./testpar/t_pflush1.c
 ./testpar/t_pflush2.c
 ./testpar/t_pmulti_dset.c
+./testpar/t_pread.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c
 ./testpar/t_pshutdown.c
