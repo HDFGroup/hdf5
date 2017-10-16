@@ -342,6 +342,7 @@ typedef enum H5VL_category_t {
  *      H5VL calls.
  */
 typedef struct H5VL_class_t {
+                                                    /* XXX: How do we identify unique VOL drivers?  */
     const char *name;                               /* Plugin name (MUST be unique!)                */
     unsigned int version;                           /* VOL driver version #                         */
                                                     /* XXX: Is this supposed to be a VOL driver

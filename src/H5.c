@@ -24,12 +24,13 @@
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5FLprivate.h"        /* Free lists                           */
+#include "H5FSprivate.h"        /* File free space                      */
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5SLprivate.h"        /* Skip lists                           */
 #include "H5Tprivate.h"         /* Datatypes                            */
-#include "H5FSprivate.h"        /* File free space                      */
+#include "H5VLprivate.h"        /* VOL drivers                          */
 
 /****************/
 /* Local Macros */
