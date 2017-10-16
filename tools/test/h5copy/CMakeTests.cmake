@@ -24,10 +24,14 @@
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_extlinks_trg.h5
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_ref.h5
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copytst.h5
+      ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/tudfilter.h5
+      ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/tudfilter2.h5
   )
 
   set (LIST_OTHER_TEST_FILES
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_misc1.out
+      ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/tudfilter.h5.txt
+      ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/tudfilter.h5_ERR.txt
   )
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
@@ -74,7 +78,7 @@
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY_F-${testname}-DIFF
-          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY_F-${testname}-DIFF PROPERTIES DEPENDS H5COPY_F-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -110,7 +114,7 @@
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY-${testname}-DIFF
-          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -160,7 +164,7 @@
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY-${testname}-DIFF
-          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -201,7 +205,7 @@
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY_SAME-${testname}-DIFF
-          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${testname}.out.h5 ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${testname}.out.h5 ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY_SAME-${testname}-DIFF PROPERTIES DEPENDS H5COPY_SAME-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -247,6 +251,108 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DEPENDS H5COPY-CMP-${testname}-clear-objects)
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_UD_TEST testname resultcode infile sparam srcname dparam dstname cmpfile)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5COPY_UD-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/${testname}.out.h5
+              testfiles/${infile}.out
+              testfiles/${infile}.out.err
+      )
+      if ("${resultcode}" STREQUAL "2")
+        add_test (
+            NAME H5COPY_UD-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5copy-shared>"
+                -D "TEST_ARGS:STRING=-v;-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${sparam};${srcname};${dparam};${dstname}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=./testfiles/${infile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=./testfiles/${infile}.txt"
+                -D "TEST_APPEND=EXIT CODE:"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      else ()
+        add_test (
+            NAME H5COPY_UD-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5copy-shared>"
+                -D "TEST_ARGS:STRING=-v;-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${sparam};${srcname};${dparam};${dstname}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=./testfiles/${infile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=./testfiles/${infile}.txt"
+                -D "TEST_APPEND=EXIT CODE:"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+        add_test (
+            NAME H5COPY_UD-${testname}-DIFF
+            COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${cmpfile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+        )
+        SET_TESTS_PROPERTIES(H5COPY_UD-${testname}-DIFF PROPERTIES DEPENDS H5COPY_UD-${testname})
+        if ("${resultcode}" STREQUAL "1")
+          set_tests_properties (H5COPY_UD-${testname}-DIFF PROPERTIES WILL_FAIL "true")
+        endif ()
+      endif ()
+      set_tests_properties (H5COPY_UD-${testname} PROPERTIES DEPENDS H5COPY_UD-${testname}-clear-objects)
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstname cmpfile)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5COPY_UD_ERR-${testname}-clearall-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/${testname}_ERR.out.h5
+              testfiles/${infile}_ERR.out
+              testfiles/${infile}_ERR.out.err
+      )
+      if ("${resultcode}" STREQUAL "2")
+        add_test (
+            NAME H5COPY_UD_ERR-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5copy-shared>"
+                -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;./testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=./testfiles/${infile}_ERR.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=./testfiles/${infile}_ERR.txt"
+                -D "TEST_MASK_ERROR=true"
+                -D "TEST_APPEND=EXIT CODE:"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      else ()
+        add_test (
+            NAME H5COPY_UD_ERR-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5copy-shared>"
+                -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;./testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=./testfiles/${infile}_ERR.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=./testfiles/${infile}_ERR.txt"
+                -D "TEST_MASK_ERROR=true"
+                -D "TEST_APPEND=EXIT CODE:"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
+      set_tests_properties (H5COPY_UD_ERR-${testname} PROPERTIES DEPENDS H5COPY_UD_ERR-${testname}-clearall-objects)
     endif ()
   endmacro ()
 
@@ -434,3 +540,11 @@
   else ()
     ADD_H5_TEST_SAME (samefile2 2 ${HDF_FILE1}.h5 /grp_dsets /grp_dsets -v -s /grp_dsets -d /grp_dsets_cp)
   endif ()
+
+##############################################################################
+###    P L U G I N  T E S T S
+##############################################################################
+if (BUILD_SHARED_LIBS)
+  ADD_H5_UD_TEST (h5copy_plugin_test 0 tudfilter.h5 -s /dynlibud -d /dynlibud tudfilter2.h5 )
+  ADD_H5_UD_TEST (h5copy_plugin_fail 2 tudfilter.h5 -s /dynlibud -d /dynlibud tudfilter2.h5)
+endif ()

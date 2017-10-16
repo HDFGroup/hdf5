@@ -31,7 +31,7 @@ hsize_t diff_dataset(hid_t file1_id,
                      hid_t file2_id,
                      const char *obj1_name,
                      const char *obj2_name,
-                     diff_opt_t *options)
+                     diff_opt_t *opts)
 {
     int     ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     hid_t   did1 = -1;
@@ -41,7 +41,7 @@ hsize_t diff_dataset(hid_t file1_id,
     hsize_t nfound = 0;
 
     h5difftrace("diff_dataset start\n");
-    options->err_stat = 1;
+    opts->err_stat = 1;
     /*-------------------------------------------------------------------------
      * open the handles
      *-------------------------------------------------------------------------
@@ -68,13 +68,16 @@ hsize_t diff_dataset(hid_t file1_id,
      * 2) the internal filters might be turned off
      *-------------------------------------------------------------------------
      */
-    if ((h5tools_canreadf((options->m_verbose ? obj1_name : NULL), dcpl1) == 1) &&
-            (h5tools_canreadf((options->m_verbose ? obj2_name : NULL), dcpl2) == 1))
-        nfound = diff_datasetid(did1, did2, obj1_name, obj2_name, options);
-    else
+    if ((ret_value = h5tools_canreadf((opts->m_verbose ? obj1_name : NULL), dcpl1) == 1) &&
+            (ret_value = h5tools_canreadf((opts->m_verbose ? obj2_name : NULL), dcpl2) == 1))
+        nfound = diff_datasetid(did1, did2, obj1_name, obj2_name, opts);
+    else if (ret_value < 0) {
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_canreadf failed");
+    }
+    else
+        opts->not_cmp = 1;
 
-    options->err_stat = 0;
+    opts->err_stat = 0;
 
 done:
     /* disable error reporting */
@@ -86,7 +89,7 @@ done:
         /* enable error reporting */
     } H5E_END_TRY;
 
-    h5difftrace("diff_dataset end\n");
+    h5diffdebug2("diff_dataset finish:%d\n", nfound);
     return nfound;
 }
 
@@ -145,7 +148,7 @@ hsize_t diff_datasetid(hid_t did1,
                        hid_t did2,
                        const char *obj1_name,
                        const char *obj2_name,
-                       diff_opt_t *options)
+                       diff_opt_t *opts)
 {
     int        ret_value = 0;            /* no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     hid_t      sid1 = -1;
@@ -189,7 +192,7 @@ hsize_t diff_datasetid(hid_t did1,
     int        i;
     unsigned int  vl_data = 0;          /*contains VL datatypes */
 
-    options->err_stat = 1;
+    opts->err_stat = 1;
     h5difftrace("diff_datasetid start\n");
     /* Get the dataspace handle */
     if((sid1 = H5Dget_space(did1)) < 0)
@@ -255,14 +258,14 @@ hsize_t diff_datasetid(hid_t did1,
 
     if(storage_size1 == 0 || storage_size2 == 0) {
         if(stl1 == H5D_VIRTUAL || stl2 == H5D_VIRTUAL) {
-            if((options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
+            if((opts->m_verbose||opts->m_list_not_cmp) && obj1_name && obj2_name)
                 parallel_print("Warning: <%s> or <%s> is a virtual dataset\n", obj1_name, obj2_name);
         }
         else {
-            if((options->m_verbose || options->m_list_not_cmp) && obj1_name && obj2_name)
+            if((opts->m_verbose || opts->m_list_not_cmp) && obj1_name && obj2_name)
                 parallel_print("Not comparable: <%s> or <%s> is an empty dataset\n", obj1_name, obj2_name);
             can_compare = 0;
-            options->not_cmp = 1;
+            opts->not_cmp = 1;
         }
     }
 
@@ -273,7 +276,7 @@ hsize_t diff_datasetid(hid_t did1,
     if (diff_can_type(f_tid1, f_tid2, rank1, rank2,
             dims1, dims2, maxdim1, maxdim2,
             obj1_name, obj2_name,
-            options, 0) != 1)
+            opts, 0) != 1)
         can_compare = 0;
 
     /*-------------------------------------------------------------------------
@@ -301,13 +304,13 @@ hsize_t diff_datasetid(hid_t did1,
         sign2 = H5Tget_sign(m_tid2);
         if(sign1 != sign2) {
             h5difftrace("sign1 != sign2\n");
-            if((options->m_verbose || options->m_list_not_cmp) && obj1_name && obj2_name) {
+            if((opts->m_verbose || opts->m_list_not_cmp) && obj1_name && obj2_name) {
                 parallel_print("Not comparable: <%s> has sign %s ", obj1_name, get_sign(sign1));
                 parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
             }
 
             can_compare = 0;
-            options->not_cmp = 1;
+            opts->not_cmp = 1;
         }
     }
 
@@ -401,7 +404,7 @@ hsize_t diff_datasetid(hid_t did1,
 
             /* array diff */
             nfound = diff_array(buf1, buf2, danelmts, (hsize_t)0, rank1, dadims,
-                options, name1, name2, dam_tid, did1, did2);
+                opts, name1, name2, dam_tid, did1, did2);
             h5diffdebug2("diff_array nfound:%d\n", nfound);
 
             /* reclaim any VL memory, if necessary */
@@ -496,7 +499,7 @@ hsize_t diff_datasetid(hid_t did1,
                 /* get array differences. in the case of hyperslab read, increment the number of differences
                 found in each hyperslab and pass the position at the beginning for printing */
                 nfound += diff_array(sm_buf1, sm_buf2, hs_nelmts, elmtno, rank1,
-                        dadims, options, name1, name2, dam_tid, did1, did2);
+                        dadims, opts, name1, name2, dam_tid, did1, did2);
 
                 /* reclaim any VL memory, if necessary */
                 if(vl_data) {
@@ -535,7 +538,7 @@ hsize_t diff_datasetid(hid_t did1,
 
 done:
 
-    options->err_stat = ret_value;
+    opts->err_stat = ret_value;
 
     /* free */
     if(buf1 != NULL) {
@@ -577,8 +580,8 @@ done:
         H5Tclose(m_tid2);
         /* enable error reporting */
     } H5E_END_TRY;
-    h5diffdebug3("diff_datasetid return:%d with nfound:%d\n", ret_value, nfound);
 
+    h5diffdebug3("diff_datasetid return:%d with nfound:%d\n", ret_value, nfound);
     return nfound;
 }
 
@@ -604,10 +607,10 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
                   hsize_t     *maxdim2,
                   const char  *obj1_name,
                   const char  *obj2_name,
-                  diff_opt_t  *options,
+                  diff_opt_t  *opts,
                   int         is_compound)
 {
-    int          ret_value = 0;            /* can_compare value, no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int          ret_value = 1;            /* can_compare value */
     H5T_class_t  tclass1;
     H5T_class_t  tclass2;
     int          maxdim_diff = 0;          /* maximum dimensions are different */
@@ -625,7 +628,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_class second object failed");
 
     if(tclass1 != tclass2) {
-        if((options->m_verbose || options->m_list_not_cmp) && obj1_name && obj2_name) {
+        if((opts->m_verbose || opts->m_list_not_cmp) && obj1_name && obj2_name) {
             if(is_compound) {
                 parallel_print("Not comparable: <%s> has a class %s and <%s> has a class %s\n",
                         obj1_name, get_class(tclass1),
@@ -637,7 +640,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
                         obj2_name, get_class(tclass2));
             }
         }
-        options->not_cmp = 1;
+        opts->not_cmp = 1;
         HGOTO_DONE(0);
     }
 
@@ -647,11 +650,11 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
      */
     switch (tclass1) {
         case H5T_TIME:
-            if((options->m_verbose || options->m_list_not_cmp) && obj1_name && obj2_name) {
+            if((opts->m_verbose || opts->m_list_not_cmp) && obj1_name && obj2_name) {
                 parallel_print("Not comparable: <%s> and <%s> are of class %s\n",
                         obj1_name, obj2_name, get_class(tclass2));
             } /* end if */
-            options->not_cmp = 1;
+            opts->not_cmp = 1;
             HGOTO_DONE(0);
 
         case H5T_INTEGER:
@@ -675,7 +678,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
      * check for equal file datatype; warning only
      *-------------------------------------------------------------------------
      */
-    if((H5Tequal(f_tid1, f_tid2) == 0) && (options->m_verbose) && obj1_name && obj2_name) {
+    if((H5Tequal(f_tid1, f_tid2) == 0) && (opts->m_verbose) && obj1_name && obj2_name) {
         H5T_class_t cl = H5Tget_class(f_tid1);
 
         parallel_print("Warning: different storage datatype\n");
@@ -694,7 +697,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
      *-------------------------------------------------------------------------
      */
     if(rank1 != rank2) {
-        if((options->m_verbose || options->m_list_not_cmp) && obj1_name && obj2_name) {
+        if((opts->m_verbose || opts->m_list_not_cmp) && obj1_name && obj2_name) {
             parallel_print("Not comparable: <%s> has rank %d, dimensions ", obj1_name, rank1);
             print_dimensions(rank1, dims1);
             parallel_print(", max dimensions ");
@@ -706,7 +709,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
             print_dimensions(rank2, maxdim2);
             parallel_print("\n");
         }
-        options->not_cmp = 1;
+        opts->not_cmp = 1;
         HGOTO_DONE(0);
     }
 
@@ -728,7 +731,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
      *-------------------------------------------------------------------------
      */
     if(dim_diff == 1) {
-        if((options->m_verbose || options->m_list_not_cmp) && obj1_name && obj2_name) {
+        if((opts->m_verbose || opts->m_list_not_cmp) && obj1_name && obj2_name) {
             parallel_print("Not comparable: <%s> has rank %d, dimensions ", obj1_name, rank1);
             print_dimensions(rank1, dims1);
             if(maxdim1 && maxdim2) {
@@ -742,7 +745,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
                 parallel_print("\n");
             }
         }
-        options->not_cmp = 1;
+        opts->not_cmp = 1;
         HGOTO_DONE(0);
     }
 
@@ -751,7 +754,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
      *-------------------------------------------------------------------------
      */
     if(maxdim1 && maxdim2 && maxdim_diff == 1 && obj1_name) {
-        if(options->m_verbose) {
+        if(opts->m_verbose) {
             parallel_print( "Warning: different maximum dimensions\n");
             parallel_print("<%s> has max dimensions ", obj1_name);
             print_dimensions(rank1, maxdim1);
@@ -773,12 +776,12 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
         nmembs2 = H5Tget_nmembers(f_tid2);
 
         if(nmembs1 != nmembs2) {
-            if((options->m_verbose || options->m_list_not_cmp) && obj1_name && obj2_name) {
+            if((opts->m_verbose || opts->m_list_not_cmp) && obj1_name && obj2_name) {
                 parallel_print("Not comparable: <%s> has %d members ", obj1_name, nmembs1);
                 parallel_print("<%s> has %d members ", obj2_name, nmembs2);
                 parallel_print("\n");
             }
-            options->not_cmp = 1;
+            opts->not_cmp = 1;
             HGOTO_DONE(0);
         }
 
@@ -788,8 +791,8 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
 
             if (diff_can_type(memb_type1, memb_type2, rank1, rank2,
                     dims1, dims2, maxdim1, maxdim2, obj1_name, obj2_name,
-                    options, 1) != 1) {
-                options->not_cmp = 1;
+                    opts, 1) != 1) {
+                opts->not_cmp = 1;
                 H5Tclose(memb_type1);
                 H5Tclose(memb_type2);
                 HGOTO_DONE(0);
@@ -799,7 +802,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
         }
     }
 done:
-    h5diffdebug2("diff_can_type end - %d\n", can_compare);
+    h5diffdebug2("diff_can_type end - %d\n", ret_value);
     return ret_value;
 }
 

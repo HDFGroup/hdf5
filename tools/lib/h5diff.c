@@ -27,9 +27,9 @@
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE int
-print_objname (diff_opt_t * options, hsize_t nfound)
+print_objname (diff_opt_t * opts, hsize_t nfound)
 {
-    return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
+    return ((opts->m_verbose || nfound) && !opts->m_quiet) ? 1 : 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -72,9 +72,9 @@ do_print_attrname (const char *attr, const char *path1, const char *path2)
  *-------------------------------------------------------------------------
  */
 static int
-print_warn(diff_opt_t *options)
+print_warn(diff_opt_t *opts)
 {
-    return ((options->m_verbose)) ? 1: 0;
+    return ((opts->m_verbose)) ? 1: 0;
 }
 
 
@@ -135,23 +135,23 @@ print_incoming_data(void)
  *           0 : Not valid
  *------------------------------------------------------------------------*/
 static int
-is_valid_options(diff_opt_t *options)
+is_valid_options(diff_opt_t *opts)
 {
     int ret_value = 1; /* init to valid */
 
     /*-----------------------------------------------
      * no -q(quiet) with -v (verbose) or -r (report) */
-    if(options->m_quiet && (options->m_verbose || options->m_report)) {
+    if(opts->m_quiet && (opts->m_verbose || opts->m_report)) {
         parallel_print("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
-        options->err_stat = 1;
+        opts->err_stat = 1;
         HGOTO_DONE(0);
     }
 
     /* -------------------------------------------------------
      * only allow --no-dangling-links along with --follow-symlinks */
-    if(options->no_dangle_links && !options->follow_links) {
+    if(opts->no_dangle_links && !opts->follow_links) {
         parallel_print("Error: --no-dangling-links must be used along with --follow-symlinks option.\n");
-        options->err_stat = 1;
+        opts->err_stat = 1;
         HGOTO_DONE(0);
     }
 
@@ -170,18 +170,18 @@ done:
  *           0 - not excluded path
  *------------------------------------------------------------------------*/
 static int
-is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *options)
+is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *opts)
 {
     struct exclude_path_list * exclude_path_ptr;
     int   ret_cmp;
     int   ret_value = 0;
 
     /* check if exclude path option is given */
-    if (!options->exclude_path)
+    if (!opts->exclude_path)
         HGOTO_DONE(0);
 
     /* assign to local exclude list pointer */
-    exclude_path_ptr = options->exclude;
+    exclude_path_ptr = opts->exclude;
 
     /* search objects in exclude list */
     while (NULL != exclude_path_ptr) {
@@ -232,9 +232,9 @@ done:
  * Purpose:  free exclude object list from diff options
  *------------------------------------------------------------------------*/
 static void
-free_exclude_path_list(diff_opt_t *options)
+free_exclude_path_list(diff_opt_t *opts)
 {
-    struct exclude_path_list *curr = options->exclude;
+    struct exclude_path_list *curr = opts->exclude;
     struct exclude_path_list *next;
 
     while (NULL != curr) {
@@ -260,7 +260,7 @@ free_exclude_path_list(diff_opt_t *options)
  *------------------------------------------------------------------------*/
 static void
 build_match_list (const char *objname1, trav_info_t *info1, const char *objname2, trav_info_t *info2,
-        trav_table_t ** table_out, diff_opt_t *options)
+        trav_table_t ** table_out, diff_opt_t *opts)
 {
     size_t   curr1 = 0;
     size_t   curr2 = 0;
@@ -306,7 +306,7 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
         /* criteria is string compare */
         cmp = HDstrcmp(path1_lp, path2_lp);
         if(cmp == 0) {
-            if(!is_exclude_path(path1_lp, type1_l, options)) {
+            if(!is_exclude_path(path1_lp, type1_l, opts)) {
                 infile[0] = 1;
                 infile[1] = 1;
                 trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
@@ -322,7 +322,7 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
             curr2++;
         } /* end if */
         else if(cmp < 0) {
-            if(!is_exclude_path(path1_lp, type1_l, options)) {
+            if(!is_exclude_path(path1_lp, type1_l, opts)) {
                 infile[0] = 1;
                 infile[1] = 0;
                 trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
@@ -330,7 +330,7 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
             curr1++;
         } /* end else-if */
         else {
-            if (!is_exclude_path(path2_lp, type2_l, options)) {
+            if (!is_exclude_path(path2_lp, type2_l, opts)) {
                 infile[0] = 0;
                 infile[1] = 1;
                 trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
@@ -346,7 +346,7 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
         path1_lp = (info1->paths[curr1].path) + path1_offset;
         type1_l = info1->paths[curr1].type;
 
-        if(!is_exclude_path(path1_lp, type1_l, options)) {
+        if(!is_exclude_path(path1_lp, type1_l, opts)) {
             trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
         }
         curr1++;
@@ -359,13 +359,13 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
         path2_lp = (info2->paths[curr2].path) + path2_offset;
         type2_l = info2->paths[curr2].type;
 
-        if (!is_exclude_path(path2_lp, type2_l, options)) {
+        if (!is_exclude_path(path2_lp, type2_l, opts)) {
             trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
         }
         curr2++;
     } /* end while */
 
-    free_exclude_path_list (options);
+    free_exclude_path_list (opts);
 
     *table_out = table;
     h5difftrace("build_match_list finish\n");
@@ -764,7 +764,7 @@ h5diff(const char *fname1,
                 if (l_ret1 != 0 ||  l_ret2 != 0) {
                     nfound++;
                     print_found(nfound);
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5tools_get_symlink_info error");
+                    HGOTO_DONE(0);
                 }
             }
         }
@@ -804,10 +804,10 @@ h5diff(const char *fname1,
             else {
                 if(opts->m_verbose)
                     parallel_print("obj2 <%s> is a dangling link.\n", obj2fullname);
-                if (l_ret1 != 0 ||  l_ret2 != 0) {
+                if (l_ret1 != 0 || l_ret2 != 0) {
                     nfound++;
                     print_found(nfound);
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5tools_get_symlink_info error");
+                    HGOTO_DONE(0);
                 }
             }
         }
@@ -842,7 +842,7 @@ h5diff(const char *fname1,
         /* if no danglink links */
         if (l_ret1 > 0 && l_ret2 > 0)
             if (h5tools_is_obj_same(file1_id, obj1fullname, file2_id, obj2fullname)!=0)
-                HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Same object");
+                HGOTO_DONE(0);
     }
 
     both_objs_grp = (obj1type == H5TRAV_TYPE_GROUP && obj2type == H5TRAV_TYPE_GROUP);
@@ -903,8 +903,7 @@ h5diff(const char *fname1,
         /*------------------------------------------------------
          * print the list
          */
-         if(opts->m_verbose)
-         {
+         if(opts->m_verbose) {
              unsigned u;
 
              parallel_print("\n");
@@ -927,7 +926,7 @@ h5diff(const char *fname1,
                         file2_id, obj2fullname, info2_lp,
                         match_list, opts);
 
-    opts->err_stat = 1; /* success status */
+    opts->err_stat = 0; /* success status */
 
 done:
 #ifdef H5_HAVE_PARALLEL
@@ -991,7 +990,7 @@ done:
 hsize_t
 diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                    hid_t file2_id, const char *grp2, trav_info_t *info2,
-                   trav_table_t *table, diff_opt_t *options)
+                   trav_table_t *table, diff_opt_t *opts)
 {
     hsize_t      nfound = 0;
     unsigned     i;
@@ -1023,17 +1022,17 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
      */
 
     /* not valid compare used when --exclude-path option is used */
-    if (!options->exclude_path) {
+    if (!opts->exclude_path) {
         /* number of different objects */
         if (info1->nused != info2->nused) {
-            options->contents = 0;
+            opts->contents = 0;
         }
     }
 
     /* objects in one file and not the other */
     for(i = 0; i < table->nobjs; i++) {
         if(table->objs[i].flags[0] != table->objs[i].flags[1]) {
-            options->contents = 0;
+            opts->contents = 0;
             break;
         }
     }
@@ -1073,6 +1072,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 HDstrcat(obj1_fullpath, table->objs[i].name);
             }
 #endif /* H5_HAVE_ASPRINTF */
+            h5diffdebug2("diff_match path1 - %s\n", obj1_fullpath);
 
             /* make full path for obj2 */
 #ifdef H5_HAVE_ASPRINTF
@@ -1089,6 +1089,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 HDstrcat(obj2_fullpath, table->objs[i].name);
             }
 #endif /* H5_HAVE_ASPRINTF */
+            h5diffdebug2("diff_match path2 - %s\n", obj2_fullpath);
 
             /* get index to figure out type of the object in file1 */
             while(info1->paths[idx1].path && (HDstrcmp(obj1_fullpath, info1->paths[idx1].path) != 0))
@@ -1102,11 +1103,11 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             argdata.type[1] = info2->paths[idx2].type;
             argdata.is_same_trgobj = table->objs[i].is_same_trgobj;
 
-            options->cmn_objs = 1;
+            opts->cmn_objs = 1;
             if(!g_Parallel) {
                 nfound += diff(file1_id, obj1_fullpath,
                                file2_id, obj2_fullpath,
-                               options, &argdata);
+                            opts, &argdata);
             } /* end if */
 #ifdef H5_HAVE_PARALLEL
             else {
@@ -1131,7 +1132,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 /* set args struct to pass */
                 HDstrcpy(args.name1, obj1_fullpath);
                 HDstrcpy(args.name2, obj2_fullpath);
-                args.options = *options;
+                args.opts = *opts;
                 args.argdata.type[0] = info1->paths[idx1].type;
                 args.argdata.type[1] = info2->paths[idx2].type;
                 args.argdata.is_same_trgobj = table->objs[i].is_same_trgobj;
@@ -1148,7 +1149,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                         workerTasks[Status.MPI_SOURCE - 1] = 1;
                         MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
                         nfound += nFoundbyWorker.nfound;
-                        options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                        opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                         busyTasks--;
                     } /* end if */
 
@@ -1165,7 +1166,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                             workerTasks[Status.MPI_SOURCE - 1] = 1;
                             MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                             nfound += nFoundbyWorker.nfound;
-                            options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                            opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                             busyTasks--;
                             havePrintToken = 1;
                         } /* end if */
@@ -1217,7 +1218,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                                 MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                                 havePrintToken = 1;
                                 nfound += nFoundbyWorker.nfound;
-                                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                                opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                                 /* send this task the work unit. */
                                 MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                             } /* end if */
@@ -1231,7 +1232,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                         if(Status.MPI_TAG == MPI_TAG_DONE) {
                             MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
                             nfound += nFoundbyWorker.nfound;
-                            options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                            opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                             MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                         } /* end if */
                         else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST) {
@@ -1248,7 +1249,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
                             MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                             nfound += nFoundbyWorker.nfound;
-                            options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                            opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                             MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                         } /* end else-if */
                         else {
@@ -1276,7 +1277,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             if(Status.MPI_TAG == MPI_TAG_DONE) {
                 MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
                 nfound += nFoundbyWorker.nfound;
-                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                 busyTasks--;
             } /* end if */
             else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST) {
@@ -1294,7 +1295,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
                     MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                     nfound += nFoundbyWorker.nfound;
-                    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                    opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                     busyTasks--;
                 } /* end if */
                 /* someone else must have it...wait for them to return it, then give it to the task that just asked for it. */
@@ -1311,7 +1312,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
                     MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                     nfound += nFoundbyWorker.nfound;
-                    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                    opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                     busyTasks--;
                     MPI_Send(NULL, 0, MPI_BYTE, source, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
                 } /* end else */
@@ -1319,7 +1320,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN) {
                 MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                 nfound += nFoundbyWorker.nfound;
-                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                 busyTasks--;
                 havePrintToken = 1;
             } /* end else-if */
@@ -1353,7 +1354,7 @@ out:
     /* free table */
     if (table)
         trav_table_free(table);
-    h5difftrace("diff_match finish\n");
+    h5diffdebug2("diff_match finish:%d\n", nfound);
 
     return nfound;
 }
@@ -1377,7 +1378,7 @@ diff(hid_t file1_id,
               const char *path1,
               hid_t file2_id,
               const char *path2,
-              diff_opt_t * options,
+              diff_opt_t * opts,
               diff_args_t *argdata)
 {
     int           ret_value = 0;
@@ -1400,14 +1401,14 @@ diff(hid_t file1_id,
     h5difftrace("diff start\n");
 
     /*init error status */
-    options->err_stat = 1;
+    opts->err_stat = 1;
 
     /*init link info struct */
     HDmemset(&linkinfo1, 0, sizeof(h5tool_link_info_t));
     HDmemset(&linkinfo2, 0, sizeof(h5tool_link_info_t));
 
     /* pass how to handle printing warnings to linkinfo option */
-    if(print_warn(options))
+    if(print_warn(opts))
         linkinfo1.opt.msg_mode = linkinfo2.opt.msg_mode = 1;
 
     /* for symbolic links, take care follow symlink and no dangling link
@@ -1421,14 +1422,14 @@ diff(hid_t file1_id,
          */
 
         /* target object1 - get type and name */
-        if ((ret_value = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, options->follow_links)) < 0)
+        if ((ret_value = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, opts->follow_links)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5tools_get_symlink_info failed");
 
         /* dangling link */
         if (ret_value == 0) {
-            if (options->no_dangle_links) {
+            if (opts->no_dangle_links) {
                 /* dangling link is error */
-                if(options->m_verbose)
+                if(opts->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", path1);
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "dangling link is error");
             }
@@ -1437,13 +1438,13 @@ diff(hid_t file1_id,
         }
 
         /* target object2 - get type and name */
-        if ((ret_value = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, options->follow_links)) < 0)
+        if ((ret_value = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, opts->follow_links)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5tools_get_symlink_info failed");
         /* dangling link */
         if (ret_value == 0) {
-            if (options->no_dangle_links) {
+            if (opts->no_dangle_links) {
                 /* dangling link is error */
-                if(options->m_verbose)
+                if(opts->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", path2);
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "dangling link is error");
             }
@@ -1453,12 +1454,12 @@ diff(hid_t file1_id,
 
         /* found dangling link */
         if (is_dangle_link1 || is_dangle_link2) {
-            options->err_stat = 0;
+            opts->err_stat = 0;
             HGOTO_DONE(0);
         }
 
         /* follow symbolic link option */
-        if (options->follow_links) {
+        if (opts->follow_links) {
             if (linkinfo1.linfo.type == H5L_TYPE_SOFT ||
                     linkinfo1.linfo.type == H5L_TYPE_EXTERNAL)
                 argdata->type[0] = (h5trav_type_t)linkinfo1.trg_type;
@@ -1469,16 +1470,16 @@ diff(hid_t file1_id,
     }
     /* if objects are not the same type */
     if (argdata->type[0] != argdata->type[1]) {
-        if (options->m_verbose||options->m_list_not_cmp) {
+        if (opts->m_verbose||opts->m_list_not_cmp) {
             parallel_print("Not comparable: <%s> is of type %s and <%s> is of type %s\n",
             path1, get_type(argdata->type[0]),
             path2, get_type(argdata->type[1]));
         }
-        options->not_cmp = 1;
+        opts->not_cmp = 1;
         /* TODO: will need to update non-comparable is different
-         * options->contents = 0;
+         * opts->contents = 0;
          */
-        options->err_stat = 0;
+        opts->err_stat = 0;
         HGOTO_DONE(0);
     }
     else /* now both object types are same */
@@ -1497,41 +1498,41 @@ diff(hid_t file1_id,
         is_hard_link = (object_type == H5TRAV_TYPE_DATASET ||
                         object_type == H5TRAV_TYPE_NAMED_DATATYPE ||
                         object_type == H5TRAV_TYPE_GROUP);
-        if (options->follow_links || is_hard_link) {
+        if (opts->follow_links || is_hard_link) {
             /* print information is only verbose option is used */
-            if(options->m_verbose || options->m_report) {
+            if(opts->m_verbose || opts->m_report) {
                 switch(object_type) {
                     case H5TRAV_TYPE_DATASET:
-                        do_print_objname("dataset", path1, path2, options);
+                        do_print_objname("dataset", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_NAMED_DATATYPE:
-                        do_print_objname("datatype", path1, path2, options);
+                        do_print_objname("datatype", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_GROUP:
-                        do_print_objname("group", path1, path2, options);
+                        do_print_objname("group", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_LINK:
-                        do_print_objname("link", path1, path2, options);
+                        do_print_objname("link", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_UDLINK:
                         if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
-                            do_print_objname("external link", path1, path2, options);
+                            do_print_objname("external link", path1, path2, opts);
                         else
-                            do_print_objname ("user defined link", path1, path2, options);
+                            do_print_objname ("user defined link", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_UNKNOWN:
                     default:
                         parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
                             path1, path2, get_type(object_type) );
-                        options->not_cmp = 1;
+                        opts->not_cmp = 1;
                         break;
                 } /* switch(type)*/
 
                 print_found(nfound);
-            } /* if(options->m_verbose || options->m_report) */
+            } /* if(opts->m_verbose || opts->m_report) */
 
             /* exact same, so comparison is done */
-            options->err_stat = 0;
+            opts->err_stat = 0;
             HGOTO_DONE(0);
         }
     }
@@ -1547,24 +1548,25 @@ diff(hid_t file1_id,
             if((dset2_id = H5Dopen2(file2_id, path2, H5P_DEFAULT)) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
             /* verbose (-v) and report (-r) mode */
-            if(options->m_verbose || options->m_report) {
-                do_print_objname("dataset", path1, path2, options);
-                nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+            if(opts->m_verbose || opts->m_report) {
+                do_print_objname("dataset", path1, path2, opts);
+                nfound = diff_dataset(file1_id, file2_id, path1, path2, opts);
                 print_found(nfound);
             }
             /* quiet mode (-q), just count differences */
-            else if(options->m_quiet) {
-                nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+            else if(opts->m_quiet) {
+                nfound = diff_dataset(file1_id, file2_id, path1, path2, opts);
             }
             /* the rest (-c, none, ...) */
             else {
-                nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+                nfound = diff_dataset(file1_id, file2_id, path1, path2, opts);
                 /* print info if difference found  */
                 if (nfound) {
-                    do_print_objname("dataset", path1, path2, options);
+                    do_print_objname("dataset", path1, path2, opts);
                     print_found(nfound);
                 }
             }
+            h5diffdebug2("diff after dataset:%d\n", nfound);
 
             /*---------------------------------------------------------
              * compare attributes
@@ -1573,7 +1575,7 @@ diff(hid_t file1_id,
              *---------------------------------------------------------
              */
             if(path1)
-                nfound += diff_attr(dset1_id, dset2_id, path1, path2, options);
+                nfound += diff_attr(dset1_id, dset2_id, path1, path2, opts);
 
 
             if(H5Dclose(dset1_id) < 0)
@@ -1598,11 +1600,11 @@ diff(hid_t file1_id,
             /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
             nfound = (ret_value > 0) ? 0 : 1;
 
-            if(print_objname(options,nfound))
-                do_print_objname("datatype", path1, path2, options);
+            if(print_objname(opts, nfound))
+                do_print_objname("datatype", path1, path2, opts);
 
             /* always print the number of differences found in verbose mode */
-            if(options->m_verbose)
+            if(opts->m_verbose)
                 print_found(nfound);
 
             /*-----------------------------------------------------------------
@@ -1612,7 +1614,7 @@ diff(hid_t file1_id,
              *-----------------------------------------------------------------
              */
             if(path1)
-                nfound += diff_attr(type1_id, type2_id, path1, path2, options);
+                nfound += diff_attr(type1_id, type2_id, path1, path2, opts);
 
             if(H5Tclose(type1_id) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
@@ -1625,11 +1627,11 @@ diff(hid_t file1_id,
         *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_GROUP:
-            if(print_objname(options, nfound))
-                do_print_objname("group", path1, path2, options);
+            if(print_objname(opts, nfound))
+                do_print_objname("group", path1, path2, opts);
 
             /* always print the number of differences found in verbose mode */
-            if(options->m_verbose)
+            if(opts->m_verbose)
                 print_found(nfound);
 
             if((grp1_id = H5Gopen2(file1_id, path1, H5P_DEFAULT)) < 0)
@@ -1644,7 +1646,7 @@ diff(hid_t file1_id,
              *-----------------------------------------------------------------
              */
             if(path1)
-                nfound += diff_attr(grp1_id, grp2_id, path1, path2, options);
+                nfound += diff_attr(grp1_id, grp2_id, path1, path2, opts);
 
             if(H5Gclose(grp1_id) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
@@ -1664,11 +1666,11 @@ diff(hid_t file1_id,
                 /* if the target link name is not same then the links are "different" */
                 nfound = (ret_value != 0) ? 1 : 0;
 
-                if(print_objname(options, nfound))
-                    do_print_objname("link", path1, path2, options);
+                if(print_objname(opts, nfound))
+                    do_print_objname("link", path1, path2, opts);
 
                 /* always print the number of differences found in verbose mode */
-                if(options->m_verbose)
+                if(opts->m_verbose)
                     print_found(nfound);
 
                 }
@@ -1695,8 +1697,8 @@ diff(hid_t file1_id,
                      */
                     nfound = (ret_value != 0) ? 1 : 0;
 
-                    if(print_objname(options, nfound))
-                        do_print_objname("external link", path1, path2, options);
+                    if(print_objname(opts, nfound))
+                        do_print_objname("external link", path1, path2, opts);
 
                 } /* end if */
                 else {
@@ -1713,26 +1715,26 @@ diff(hid_t file1_id,
                     else
                         nfound = 0;
 
-                    if (print_objname (options, nfound))
-                        do_print_objname ("user defined link", path1, path2, options);
+                    if (print_objname (opts, nfound))
+                        do_print_objname ("user defined link", path1, path2, opts);
                 } /* end else */
 
                 /* always print the number of differences found in verbose mode */
-                if(options->m_verbose)
+                if(opts->m_verbose)
                     print_found(nfound);
             }
             break;
 
         case H5TRAV_TYPE_UNKNOWN:
         default:
-            if(options->m_verbose)
+            if(opts->m_verbose)
                 parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
                     path1, path2, get_type(object_type) );
-            options->not_cmp = 1;
+            opts->not_cmp = 1;
             break;
      }
 
-    options->err_stat = 0;
+    opts->err_stat = 0;
 
 done:
     /*-----------------------------------
@@ -1740,25 +1742,25 @@ done:
      */
     /* both path1 and path2 are dangling links */
     if(is_dangle_link1 && is_dangle_link2) {
-        if(print_objname(options, nfound)) {
-            do_print_objname("dangling link", path1, path2, options);
+        if(print_objname(opts, nfound)) {
+            do_print_objname("dangling link", path1, path2, opts);
             print_found(nfound);
         }
     }
     /* path1 is dangling link */
     else if (is_dangle_link1) {
-        if(options->m_verbose)
+        if(opts->m_verbose)
            parallel_print("obj1 <%s> is a dangling link.\n", path1);
         nfound++;
-        if(print_objname(options, nfound))
+        if(print_objname(opts, nfound))
             print_found(nfound);
     }
     /* path2 is dangling link */
     else if (is_dangle_link2) {
-        if(options->m_verbose)
+        if(opts->m_verbose)
             parallel_print("obj2 <%s> is a dangling link.\n", path2);
         nfound++;
-        if(print_objname(options, nfound))
+        if(print_objname(opts, nfound))
             print_found(nfound);
     }
 
@@ -1780,7 +1782,7 @@ done:
         /* enable error reporting */
     } H5E_END_TRY;
 
-    h5difftrace("diff finish\n");
+    h5diffdebug2("diff finish:%d\n", nfound);
 
     return nfound;
 }
