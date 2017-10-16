@@ -642,8 +642,7 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
     HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-    if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL)
-    {
+    if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL) {
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
         HGOTO_DONE(dimension_break);
     }

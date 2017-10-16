@@ -1061,11 +1061,13 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             /* make full path for obj1 */
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            if(HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0)
+            if(HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0) {
                 HERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+            }
 #else /* H5_HAVE_ASPRINTF */
-            if((obj1_fullpath = (char*)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1)) == NULL)
+            if((obj1_fullpath = (char*)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1)) == NULL) {
                 HERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+            }
             else {
                 HDstrcpy(obj1_fullpath, grp1_path);
                 HDstrcat(obj1_fullpath, table->objs[i].name);
@@ -1075,11 +1077,13 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             /* make full path for obj2 */
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            if(HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name) < 0)
+            if(HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name) < 0) {
                 HERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+            }
 #else /* H5_HAVE_ASPRINTF */
-            if((obj2_fullpath = (char*)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1)) == NULL)
+            if((obj2_fullpath = (char*)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1)) == NULL) {
                 HERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+            }
             else {
                 HDstrcpy(obj2_fullpath, grp2_path);
                 HDstrcat(obj2_fullpath, table->objs[i].name);
