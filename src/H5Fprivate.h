@@ -476,7 +476,8 @@
 #define H5F_ACS_SDATA_BLOCK_SIZE_NAME           "sdata_block_size" /* Minimum "small data" allocation block size (when aggregating "small" raw data allocations) */
 #define H5F_ACS_GARBG_COLCT_REF_NAME            "gc_ref"        /* Garbage-collect references */
 #define H5F_ACS_FILE_DRV_NAME                   "driver-id/info" /* File driver ID & info */
-#define H5F_ACS_CLOSE_DEGREE_NAME		"close_degree"  /* File close degree */
+#define H5F_ACS_VOL_NAME                        "driver-id/info" /* VOL driver ID & info */
+#define H5F_ACS_CLOSE_DEGREE_NAME               "close_degree"  /* File close degree */
 #define H5F_ACS_FAMILY_OFFSET_NAME              "family_offset" /* Offset position in file for family file driver */
 #define H5F_ACS_FAMILY_NEWSIZE_NAME             "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
 #define H5F_ACS_FAMILY_TO_SEC2_NAME             "family_to_sec2" /* Whether to convert family to sec2 driver.  (private property only used by h5repart) */
@@ -484,7 +485,7 @@
 #define H5F_ACS_LATEST_FORMAT_NAME              "latest_format" /* 'Use latest format version' flag */
 #define H5F_ACS_WANT_POSIX_FD_NAME              "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address */
 #define H5F_ACS_METADATA_READ_ATTEMPTS_NAME     "metadata_read_attempts" /* # of metadata read attempts */
-#define H5F_ACS_OBJECT_FLUSH_CB_NAME     	"object_flush_cb" 	 /* Object flush callback */
+#define H5F_ACS_OBJECT_FLUSH_CB_NAME            "object_flush_cb" 	 /* Object flush callback */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME         "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) */
@@ -652,6 +653,7 @@ struct H5B_class_t;
 struct H5UC_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
+struct H5VL_class_t;
 struct H5P_genplist_t;
 
 /* Forward declarations for anonymous H5F objects */
