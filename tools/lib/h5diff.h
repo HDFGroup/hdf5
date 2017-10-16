@@ -38,7 +38,7 @@
 
 /*-------------------------------------------------------------------------
  * This is used to pass multiple args into diff().
- * Passing this instead of several each arg provides smoother extensibility 
+ * Passing this instead of several each arg provides smoother extensibility
  * through its members along with MPI code for ph5diff
  * as it doesn't require interface change.
  *------------------------------------------------------------------------*/
@@ -95,13 +95,13 @@ H5TOOLS_DLL hsize_t  h5diff(const char *fname1,
                 const char *fname2,
                 const char *objname1,
                 const char *objname2,
-                diff_opt_t *options);
+                diff_opt_t *opts);
 
 H5TOOLS_DLL hsize_t diff( hid_t      file1_id,
               const char *path1,
               hid_t      file2_id,
               const char *path2,
-              diff_opt_t *options,
+              diff_opt_t *opts,
               diff_args_t *argdata);
 
 #ifdef H5_HAVE_PARALLEL
@@ -125,18 +125,18 @@ hsize_t diff_dataset( hid_t file1_id,
                       hid_t file2_id,
                       const char *obj1_name,
                       const char *obj2_name,
-                      diff_opt_t *options);
+                      diff_opt_t *opts);
 
 hsize_t diff_datasetid( hid_t dset1_id,
                         hid_t dset2_id,
                         const char *obj1_name,
                         const char *obj2_name,
-                        diff_opt_t *options);
+                        diff_opt_t *opts);
 
 
 hsize_t diff_match( hid_t file1_id, const char *grp1, trav_info_t *info1,
                     hid_t file2_id, const char *grp2, trav_info_t *info2,
-                    trav_table_t *table, diff_opt_t *options );
+                    trav_table_t *table, diff_opt_t *opts );
 
 hsize_t diff_array( void *_mem1,
                     void *_mem2,
@@ -144,7 +144,7 @@ hsize_t diff_array( void *_mem1,
                     hsize_t hyper_start,
                     int rank,
                     hsize_t *dims,
-                    diff_opt_t *options,
+                    diff_opt_t *opts,
                     const char *name1,
                     const char *name2,
                     hid_t m_type,
@@ -162,7 +162,7 @@ int diff_can_type( hid_t       f_type1, /* file data type */
                    hsize_t     *maxdim2,
                    const char  *obj1_name,
                    const char  *obj2_name,
-                   diff_opt_t  *options,
+                   diff_opt_t  *opts,
                    int         is_compound);
 
 
@@ -170,7 +170,7 @@ hsize_t diff_attr(hid_t loc1_id,
                   hid_t loc2_id,
                   const char *path1,
                   const char *path2,
-                  diff_opt_t *options);
+                  diff_opt_t *opts);
 
 
 /*-------------------------------------------------------------------------
@@ -187,10 +187,10 @@ const char* get_class(H5T_class_t tclass);
 const char* get_sign(H5T_sign_t sign);
 void        print_dimensions (int rank, hsize_t *dims);
 herr_t      match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
-                              hid_t *m_tid1, hid_t *m_tid2, 
+                              hid_t *m_tid1, hid_t *m_tid2,
                               size_t *m_size1, size_t  *m_size2);
 /* in h5diff.c */
-int         print_objname(diff_opt_t *options, hsize_t nfound);
+int         print_objname(diff_opt_t *opts, hsize_t nfound);
 void        do_print_objname (const char *OBJ, const char *path1, const char *path2, diff_opt_t * opts);
 void        do_print_attrname (const char *attr, const char *path1, const char *path2);
 

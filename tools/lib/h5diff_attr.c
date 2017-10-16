@@ -137,7 +137,7 @@ static void table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *ta
  * Parameter:
  *  table_out [OUT] : return the list
  *------------------------------------------------------------------------*/
-static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t ** table_out,  diff_opt_t *options)
+static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t ** table_out,  diff_opt_t *opts)
 {
     int        ret_value = 0;     /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     H5O_info_t oinfo1, oinfo2;    /* Object info */
@@ -264,7 +264,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
     /*------------------------------------------------------
      * print the list
      */
-    if(options->m_verbose_level == 2) {
+    if(opts->m_verbose_level == 2) {
         /* if '-v2' is detected */
         parallel_print("   obj1   obj2\n");
         parallel_print(" --------------------------------------\n");
@@ -276,7 +276,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         } /* end for */
     }
 
-    if(options->m_verbose_level >= 1)
+    if(opts->m_verbose_level >= 1)
         parallel_print("Attributes status:  %d common, %d only in obj1, %d only in obj2\n",
                 table_lp->nattrs - table_lp->nattrs_only1 - table_lp->nattrs_only2,
                 table_lp->nattrs_only1, table_lp->nattrs_only2);
@@ -312,7 +312,7 @@ hsize_t diff_attr(hid_t loc1_id,
                   hid_t loc2_id,
                   const char *path1,
                   const char *path2,
-                  diff_opt_t *options)
+                  diff_opt_t *opts)
 {
     int        ret_value = 0;     /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     hid_t      attr1_id = -1;     /* attr ID */
@@ -349,16 +349,16 @@ hsize_t diff_attr(hid_t loc1_id,
     h5difftrace("diff_attr start\n");
 
     /* Initialize error status */
-    options->err_stat = 1;
+    opts->err_stat = 1;
 
-    if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, options) < 0)
+    if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, opts) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "build_match_list_attrs failed");
 
     /* if detect any unique extra attr */
     if(match_list_attrs->nattrs_only1 || match_list_attrs->nattrs_only2) {
         h5difftrace("diff_attr attributes only in one file\n");
         /* exit will be 1 */
-        options->contents = 0;
+        opts->contents = 0;
     }
 
     for(u = 0; u < (unsigned)match_list_attrs->nattrs; u++) {
@@ -387,10 +387,10 @@ hsize_t diff_attr(hid_t loc1_id,
 
             /* no compare if either one but not both are variable string type */
             if (vstrtype1 != vstrtype2) {
-                if((options->m_verbose || options->m_list_not_cmp))
+                if((opts->m_verbose || opts->m_list_not_cmp))
                     parallel_print("Not comparable: one of attribute <%s/%s> or <%s/%s> is of variable length type\n",
                             path1, name1, path2, name2);
-                options->not_cmp = 1;
+                opts->not_cmp = 1;
                 if (H5Tclose(ftype1_id) < 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose first attribute ftype failed");
                 if (H5Tclose(ftype2_id) < 0)
@@ -432,7 +432,7 @@ hsize_t diff_attr(hid_t loc1_id,
             /* pass dims1 and dims2 for maxdims as well since attribute's maxdims
             * are always same */
             if(diff_can_type(ftype1_id, ftype2_id, rank1, rank2, dims1, dims2,
-                    dims1, dims2, name1, name2, options, 0) != 1) {
+                    dims1, dims2, name1, name2, opts, 0) != 1) {
                 if(H5Tclose(ftype1_id) < 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose first attribute ftype failed");
                 if(H5Tclose(ftype2_id) < 0)
@@ -500,22 +500,22 @@ hsize_t diff_attr(hid_t loc1_id,
 
             /* always print name */
             /* verbose (-v) and report (-r) mode */
-            if(options->m_verbose || options->m_report) {
+            if(opts->m_verbose || opts->m_report) {
                 do_print_attrname("attribute", np1, np2);
 
                 nfound = diff_array(buf1, buf2, nelmts1, (hsize_t) 0, rank1,
-                        dims1, options, np1, np2, mtype1_id, attr1_id, attr2_id);
+                        dims1, opts, np1, np2, mtype1_id, attr1_id, attr2_id);
                 print_found(nfound);
             }
             /* quiet mode (-q), just count differences */
-            else if(options->m_quiet) {
+            else if(opts->m_quiet) {
                 nfound = diff_array(buf1, buf2, nelmts1, (hsize_t) 0, rank1,
-                        dims1, options, np1, np2, mtype1_id, attr1_id, attr2_id);
+                        dims1, opts, np1, np2, mtype1_id, attr1_id, attr2_id);
             }
             /* the rest (-c, none, ...) */
             else {
                 nfound = diff_array(buf1, buf2, nelmts1, (hsize_t) 0, rank1,
-                        dims1, options, np1, np2, mtype1_id, attr1_id, attr2_id);
+                        dims1, opts, np1, np2, mtype1_id, attr1_id, attr2_id);
 
                 /* print info if compatible and difference found */
                 if (nfound) {
@@ -562,7 +562,7 @@ hsize_t diff_attr(hid_t loc1_id,
         }
     } /* u */
 
-    options->err_stat = 0;
+    opts->err_stat = 0;
 
 done:
     H5E_BEGIN_TRY {

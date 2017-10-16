@@ -221,7 +221,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
     hid_t       ret_value = -1;        /* The identifier of the named dtype in the out file */
 
     if (H5Oget_info(type_in, &oinfo) < 0)
-        goto done;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info failed");
 
     if (*named_dt_head_p) {
         /* Stack already exists, search for the datatype */
@@ -238,7 +238,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
             if (travt->objs[i].type == H5TRAV_TYPE_NAMED_DATATYPE) {
                 /* Push onto the stack */
                 if (NULL == (dt = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
-                    goto done;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "buffer allocation failed failed");
                 dt->next = *named_dt_head_p;
                 *named_dt_head_p = dt;
 
@@ -259,7 +259,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
     if (!dt_ret) {
         /* Push the new datatype onto the stack */
         if (NULL == (dt_ret = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
-            goto done;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "buffer allocation failed failed");
         dt_ret->next = *named_dt_head_p;
         *named_dt_head_p = dt_ret;
 
@@ -276,9 +276,9 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
         else
             dt_ret->id_out = H5Tcopy(type_in);
         if (dt_ret->id_out < 0)
-            goto done;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type-H5Tcopy failed");
         if (H5Tcommit_anon(fidout, dt_ret->id_out, H5P_DEFAULT, H5P_DEFAULT) < 0)
-            goto done;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tcommit_anon failed");
     } /* end if */
 
     /* Set return value */
@@ -305,7 +305,7 @@ int named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err) {
     while (dt) {
         /* Pop the datatype off the stack and free it */
         if (H5Tclose(dt->id_out) < 0 && !ignore_err)
-            goto done;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
         dt = dt->next;
         HDfree(*named_dt_head_p);
         *named_dt_head_p = dt;

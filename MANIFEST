@@ -1433,6 +1433,7 @@
 ./tools/test/h5copy/Makefile.am
 ./tools/test/h5copy/h5copygentest.c
 ./tools/test/h5copy/testh5copy.sh.in
+./tools/test/h5copy/dynlib_copy.c
 
 
 ./tools/lib/Makefile.am
@@ -2523,6 +2524,10 @@
 ./tools/test/h5copy/testfiles/h5copy_misc1.out
 ./tools/test/h5copy/testfiles/h5copytst_new.h5
 ./tools/test/h5copy/testfiles/h5copytst_new.out.ls
+./tools/test/h5diff/testfiles/tudfilter.h5
+./tools/test/h5diff/testfiles/tudfilter2.h5
+./tools/test/h5diff/testfiles/tudfilter.h5.txt
+./tools/test/h5diff/testfiles/tudfilter.h5_ERR.txt
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_nested_p.ls
