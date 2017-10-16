@@ -1063,6 +1063,7 @@ esac
 case "`uname`" in
   CYGWIN*)
     AC_CHECK_HEADERS([io.h sys/timeb.h])
+    UNAME_CYGWIN="yes"
     ;;
   MINGW*)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
