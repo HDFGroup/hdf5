@@ -345,11 +345,11 @@ hsize_t diff_attr(hid_t loc1_id,
     hsize_t    nfound_total = 0;
     int       j;
 
-    /* Initialize error status */
-    options->err_stat = 1;
-
     table_attrs_t *match_list_attrs = NULL;
     h5difftrace("diff_attr start\n");
+
+    /* Initialize error status */
+    options->err_stat = 1;
 
     if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, options) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "build_match_list_attrs failed");
