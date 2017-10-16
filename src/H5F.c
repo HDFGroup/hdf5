@@ -540,6 +540,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     hbool_t     ci_write = FALSE;                   /* whether MDC CI write requested           */
     H5F_t       *new_file = NULL;                   /* file struct for new file                 */
     hid_t       dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library                     */
+    H5P_genplist_t      *plist;                     /* Property list pointer                    */
     H5VL_driver_prop_t  driver_prop;                /* Property for vol plugin ID & info        */
     H5VL_class_t        *vol_cls = NULL;            /* VOL Class structure for callback info    */
     H5VL_t              *vol_info = NULL;           /* VOL info struct                          */
@@ -565,6 +566,15 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
+    /* get the VOL info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if(H5P_peek(plist, H5F_ACS_VOL_DRV_NAME, &driver_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL driver info")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_prop.driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL driver ID")
 
     /* Open the file */
     if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
