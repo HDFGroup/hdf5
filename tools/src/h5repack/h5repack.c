@@ -332,7 +332,7 @@ int
 copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
         trav_table_t *travt, pack_opt_t *options)
 {
-    int         ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int         ret_value = 0;
     hid_t       attr_id = -1;  /* attr ID */
     hid_t       attr_out = -1; /* attr ID */
     hid_t       space_id = -1; /* space ID */
@@ -486,12 +486,14 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
          * close
          *-------------------------------------------------------------------------
          */
-        if (H5Tclose(ftype_id) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
-        if (H5Tclose(wtype_id) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+        if (H5Aclose(attr_out) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aclose failed");
         if (H5Sclose(space_id) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
+        if (H5Tclose(wtype_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+        if (H5Tclose(ftype_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
         if (H5Aclose(attr_id) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aclose failed");
     } /* u */
@@ -508,11 +510,11 @@ done:
             HDfree(buf);
         } /* end if */
 
-        H5Tclose(ftype_id);
-        H5Tclose(wtype_id);
-        H5Sclose(space_id);
-        H5Aclose(attr_id);
         H5Aclose(attr_out);
+        H5Sclose(space_id);
+        H5Tclose(wtype_id);
+        H5Tclose(ftype_id);
+        H5Aclose(attr_id);
     } H5E_END_TRY;
 
     return ret_value;
@@ -805,8 +807,8 @@ static int check_objects(const char* fname, pack_opt_t *options) {
 
 done:
     H5E_BEGIN_TRY {
-        H5Dclose(did);
         H5Sclose(sid);
+        H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
     if (travt)
