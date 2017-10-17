@@ -1939,7 +1939,6 @@ h5_get_dummy_vol_class(void)
      * can be registered.
      */
     vol_class->name = "dummy";
-    vol_class->category = H5VL_INTERNAL;
 
     return vol_class;
 

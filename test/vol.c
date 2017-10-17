@@ -28,9 +28,9 @@
  * functionality.
  */
 static const H5VL_class_t fake_vol_g = {
-    FAKE_VOL_NAME,                                  /* name         */
     0,                                              /* version      */
-    H5VL_INTERNAL,                                  /* category     */
+    999,                                            /* value        */
+    FAKE_VOL_NAME,                                  /* name         */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
     (size_t)0,                                      /* fapl size    */

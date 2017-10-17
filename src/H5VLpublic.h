@@ -325,11 +325,21 @@ typedef struct H5VL_async_class_t {
     herr_t (*wait)  (void **, H5ES_status_t *);
 } H5VL_async_class_t;
 
-/* VOL category (internal, external, etc.) */
+/* VOL category (internal, external, etc.)
+ * XXX: This is intended to replace the H5VL_class_value_t struct, which seems
+ *      difficult to manage. It's currently unused so I don't break struct
+ *      compatibility with existing VOLs.
+ */
 typedef enum H5VL_category_t {
     H5VL_INTERNAL,      /* Internal VOL driver */
     H5VL_EXTERNAL       /* External VOL driver (plugin) */
 } H5VL_category_t;
+
+/* enum value to identify the class of a VOL plugin (mostly for comparison purposes) */
+typedef enum H5VL_class_value_t {
+    H5_VOL_NATIVE = 0, /* This should be first */
+    H5_VOL_MAX_LIB_VALUE = 128 /* This should be last */
+} H5VL_class_value_t;
 
 /* Class information for each VOL driver */
 /* XXX: We should consider adding a UUID/GUID field to this struct
@@ -342,14 +352,18 @@ typedef enum H5VL_category_t {
  *      H5VL calls.
  */
 typedef struct H5VL_class_t {
-                                                    /* XXX: How do we identify unique VOL drivers?  */
-    const char *name;                               /* Plugin name (MUST be unique!)                */
-    unsigned int version;                           /* VOL driver version #                         */
-                                                    /* XXX: Is this supposed to be a VOL driver
+                                                    /* XXX: How do we identify unique VOL drivers?
+                                                     *      This is unclear, but for now we'll keep
+                                                     *      all the ID fields from the original VOL
+                                                     *      branch.
+                                                     */
+    unsigned int version;                           /* VOL driver version #
+                                                     * XXX: Is this supposed to be a VOL driver
                                                      *      version number or a VOL API version
                                                      *      number? Maybe we need both?
                                                      */
-    H5VL_category_t category;                       /* Class category                               */
+    H5VL_class_value_t value;                       /* value to identify plugin                     */
+    const char *name;                               /* Plugin name (MUST be unique!)                */
     herr_t  (*initialize)(hid_t vipl_id);           /* Plugin initialization callback               */
     herr_t  (*terminate)(hid_t vtpl_id);            /* Plugin termination callback                  */
     size_t  fapl_size;                              /* size of the vol info in the fapl property    */

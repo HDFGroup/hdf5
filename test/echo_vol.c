@@ -22,9 +22,9 @@
 /* The VOL class struct.
  */
 static const H5VL_class_t echo_vol_g = {
-    "echo_vol",                                     /* name         */
     0,                                              /* version      */
-    H5VL_EXTERNAL,                                  /* category     */
+    501,                                            /* value        */
+    "echo",                                         /* name         */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
     (size_t)0,                                      /* fapl size    */

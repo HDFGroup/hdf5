@@ -119,9 +119,9 @@ static herr_t H5VL_native_object_optional(void *obj, hid_t dxpl_id, void **req, 
 
 //static const H5VL_class_t echo_vol_g = {
 static H5VL_class_t H5VL_native_g = {
-    "native",                                       /* name         */
     0,                                              /* version      */
-    H5VL_EXTERNAL,                                  /* category     */
+    0,                                              /* category     */
+    "native",                                       /* name         */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
     (size_t)0,                                      /* fapl size    */
