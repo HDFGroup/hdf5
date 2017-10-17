@@ -99,11 +99,11 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     FILE *header = NULL;
     const char *fcn_name = "generate_test_file()";
     const char *failure_mssg = NULL;
-    const char *group_filename = NULL;
+    char *group_filename = NULL;
     char data_filename[FILENAME_BUF_SIZE];
     char reloc_data_filename[FILENAME_BUF_SIZE];
     char prolog_filename[FILENAME_BUF_SIZE];
-    int file_index;
+    int file_index = 0;
     int group_size;
     int group_rank;
     int local_failure = 0;
@@ -162,10 +162,11 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
          * is used to call into the h5_fixname function. No 
          * need to worry that we reassign it for each file!
          */
-        HDassert((group_filename = FILENAMES[file_index]));
+	group_filename = FILENAMES[file_index];
+        HDassert( group_filename );
 
         /* Assign the 'data_filename' */
-        if ( h5_fixname(group_filename, H5P_DEFAULT, data_filename,
+        if ( h5_fixname((const char *)group_filename, H5P_DEFAULT, data_filename,
                         sizeof(data_filename)) == NULL ) {
             pass = FALSE;
             failure_mssg = "h5_fixname(0) failed.\n";
@@ -174,7 +175,8 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
     if ( pass ) {
 
-        HDassert( (group_filename = FILENAMES[file_index+1]) );
+        group_filename = FILENAMES[file_index+1];
+        HDassert( group_filename );
 
         /* Assign the 'reloc_data_filename' */
         if ( h5_fixname(group_filename, H5P_DEFAULT, reloc_data_filename,
@@ -186,8 +188,8 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     }
 
     if ( pass ) {
-
-        HDassert( (group_filename = FILENAMES[file_index+2]) );
+        group_filename = FILENAMES[file_index+2];
+        HDassert( group_filename );
 
         /* Assign the 'prolog_filename' */
         if ( h5_fixname(group_filename, H5P_DEFAULT, prolog_filename,
