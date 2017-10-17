@@ -62,6 +62,31 @@ New Features
 
     Parallel Library:
     -----------------
+    - Optimize parallel open/location of the HDF5 super-block
+
+      Previous releases of PHDF5 required all parallel ranks to
+      search for the HDF5 superblock signature when opening the
+      file. As this is accomplished more or less as a synchronous
+      operation, a large number of processes can experience a
+      slowdown in the file open due to filesystem contention.
+
+      As a first step in improving the startup/file-open performance,
+      we allow MPI rank 0 of the associated MPI communicator to locate
+      the base offset of the super-block and then broadcast that result
+      to the remaining ranks in the parallel group.  Note that this
+      approach is utilized ONLY during file opens which employ the MPIO
+      file driver in HDF5 by previously having called H5Pset_fapl_mpio().
+
+      HDF5 parallel file operations which do not employ multiple ranks
+      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1) 
+      as opposed to MPI_COMM_WORLD, will not be affected by this
+      optimization.  Conversely, parallel file operations on subgroups
+      of MPI_COMM_WORLD are allowed to be run in parallel with each
+      subgroup operating as an independant collection of processes.
+
+      (RAW – 2017/10/10, HDFFV-10294)
+
+
     - Large MPI-IO transfers
 
       Previous releases of PHDF5 would fail when attempting to
@@ -132,7 +157,16 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
-    -
+    - H5Zfilter_avail in H5Z.c
+
+      The public function checked for plugins, while the private
+      function did not.
+
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+
+      (ADB - 2017/10/10, HDFFV-10297)
 
     Configuration
     -------------
@@ -156,6 +190,18 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5repack
+
+      h5repack failed to copy a dataset with existing filter.
+
+      Reworked code for h5repack and h5diff code in tools library. Added
+      improved error handling, cleanup of resources and checks of calls.
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+
+      (ADB - 2017/10/10, HDFFV-10297)
+
     - h5repack
 
       h5repack always set the User Defined filter flag to H5Z_FLAG_MANDATORY.
@@ -291,15 +337,20 @@ Supported Platforms
     Windows 7                     Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 2.2.1(0.289/5/3) gcc(4.9.3) compiler and gfortran)
-                                  (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Visual Studio 2015 w/ Intel Parallel Studio 2017 (cmake)
+                                  Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
+                                      gcc and gfortran compilers (GCC 5.4.0)
+                                      (cmake and autotools)
 
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
+                                      gcc and gfortran compilers (GCC 5.4.0)
+                                      (cmake and autotools)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
