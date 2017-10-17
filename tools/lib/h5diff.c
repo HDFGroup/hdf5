@@ -393,8 +393,7 @@ trav_grp_objs(const char *path, const H5O_info_t *oinfo,
  *           Track and extra checkings while visiting all symbolic-links.
  *------------------------------------------------------------------------*/
 static herr_t
-trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
-                               void *udata)
+trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
 {
     herr_t         ret_value = 0;
     trav_info_t   *tinfo = (trav_info_t *)udata;
@@ -414,7 +413,7 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
     switch(linfo->type) {
         case H5L_TYPE_SOFT:
             if((ret_value = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links)) < 0) {
-                HGOTO_DONE(ret_value);
+                HGOTO_DONE(FAIL);
             }
             else if (ret_value == 0) {
              /* no dangling link option given and detect dangling link */
@@ -437,13 +436,13 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
                          trav_grp_objs,trav_grp_symlinks, tinfo) < 0) {
                 parallel_print("Error: Could not get file contents\n");
                 opts->err_stat = 1;
-                HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Error: Could not get file contents");
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Error: Could not get file contents");
             }
             break;
 
         case H5L_TYPE_EXTERNAL:
             if ((ret_value = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links)) < 0) {
-                HGOTO_DONE(ret_value);
+                HGOTO_DONE(FAIL);
             }
             else if (ret_value == 0) {
             /* no dangling link option given and detect dangling link */
@@ -469,7 +468,7 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
                             trav_grp_objs,trav_grp_symlinks, tinfo) < 0) {
                 parallel_print("Error: Could not get file contents\n");
                 opts->err_stat = 1;
-                HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Error: Could not get file contents\n");
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Error: Could not get file contents\n");
             }
             break;
 
@@ -479,7 +478,7 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
         default:
             parallel_print("Error: Invalid link type\n");
             opts->err_stat = 1;
-            HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Error: Invalid link type");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Error: Invalid link type");
             break;
     } /* end of switch */
 
@@ -552,7 +551,7 @@ h5diff(const char *fname1,
         HGOTO_DONE(0);
 
     opts->cmn_objs = 1; /* eliminate warning */
-    opts->err_stat = 1; /* initialize error status to FAIL */
+    opts->err_stat = 0; /* initialize error status */
 
     /*-------------------------------------------------------------------------
     * open the files first; if they are not valid, no point in continuing
@@ -561,14 +560,14 @@ h5diff(const char *fname1,
     /* open file 1 */
     if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname1);
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "<%s>: unable to open file\n", fname1);
+        HGOTO_ERROR(1, H5E_tools_min_id_g, "<%s>: unable to open file\n", fname1);
     } /* end if */
 
 
     /* open file 2 */
     if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname2);
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "<%s>: unable to open file\n", fname2);
+        HGOTO_ERROR(1, H5E_tools_min_id_g, "<%s>: unable to open file\n", fname2);
     } /* end if */
 
     /*-------------------------------------------------------------------------
@@ -586,11 +585,11 @@ h5diff(const char *fname1,
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if(HDasprintf(&obj1fullname, "/%s", objname1) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
 #else /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
             if ((obj1fullname = (char*)HDmalloc(HDstrlen(objname1) + 2)) == NULL)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
 
             HDstrcpy(obj1fullname, "/");
             HDstrcat(obj1fullname, objname1);
@@ -604,11 +603,11 @@ h5diff(const char *fname1,
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if(HDasprintf(&obj2fullname, "/%s", objname2) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
 #else /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
             if ((obj2fullname = (char*)HDmalloc(HDstrlen(objname2) + 2)) == NULL)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
             HDstrcpy(obj2fullname, "/");
             HDstrcat(obj2fullname, objname2);
 #endif /* H5_HAVE_ASPRINTF */
@@ -627,14 +626,12 @@ h5diff(const char *fname1,
             /* check if link itself exist */
             if(H5Lexists(file1_id, obj1fullname, H5P_DEFAULT) <= 0) {
                 parallel_print ("Object <%s> could not be found in <%s>\n", obj1fullname, fname1);
-                opts->err_stat = 1;
-                HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Error: Object could not be found");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Object could not be found");
             }
             /* get info from link */
             if(H5Lget_info(file1_id, obj1fullname, &src_linfo1, H5P_DEFAULT) < 0) {
                 parallel_print("Unable to get link info from <%s>\n", obj1fullname);
-                H5TOOLS_INFO(H5E_tools_min_id_g, "Unable to get link info\n");
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lget_info failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Lget_info failed");
             }
 
             info1_lp = info1_obj;
@@ -650,8 +647,7 @@ h5diff(const char *fname1,
 
                 if(H5Oget_info_by_name(file1_id, obj1fullname, &oinfo1, H5P_DEFAULT) < 0) {
                     parallel_print("Error: Could not get file contents\n");
-                    opts->err_stat = 1;
-                    HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Error: Could not get file contents");
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Could not get file contents");
                 }
                 obj1type = (h5trav_type_t)oinfo1.type;
                 trav_info_add(info1_obj, obj1fullname, obj1type);
@@ -680,13 +676,12 @@ h5diff(const char *fname1,
             /* check if link itself exist */
             if(H5Lexists(file2_id, obj2fullname, H5P_DEFAULT) <= 0) {
                 parallel_print ("Object <%s> could not be found in <%s>\n", obj2fullname, fname2);
-                opts->err_stat = 1;
-                HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Error: Object could not be found");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Object could not be found");
             }
             /* get info from link */
             if(H5Lget_info(file2_id, obj2fullname, &src_linfo2, H5P_DEFAULT) < 0) {
                 parallel_print("Unable to get link info from <%s>\n", obj2fullname);
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lget_info failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Lget_info failed");
             }
 
             info2_lp = info2_obj;
@@ -702,8 +697,7 @@ h5diff(const char *fname1,
 
                 if(H5Oget_info_by_name(file2_id, obj2fullname, &oinfo2, H5P_DEFAULT) < 0) {
                     parallel_print("Error: Could not get file contents\n");
-                    opts->err_stat = 1;
-                    HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Error: Could not get file contents");
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Could not get file contents");
                 }
                 obj2type = (h5trav_type_t)oinfo2.type;
                 trav_info_add(info2_obj, obj2fullname, obj2type);
@@ -731,7 +725,7 @@ h5diff(const char *fname1,
         obj2type = H5TRAV_TYPE_GROUP;
     }
 
-
+    h5diffdebug2("get any symbolic links info - errstat:%d\n", opts->err_stat);
     /* get any symbolic links info */
     l_ret1 = H5tools_get_symlink_info(file1_id, obj1fullname, &trg_linfo1, opts->follow_links);
     l_ret2 = H5tools_get_symlink_info(file2_id, obj2fullname, &trg_linfo2, opts->follow_links);
@@ -755,8 +749,7 @@ h5diff(const char *fname1,
                 /* treat dangling link as error */
                 if(opts->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", obj1fullname);
-                opts->err_stat = 1;
-                HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "treat dangling link as error");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "treat dangling link as error");
             }
             else {
                 if(opts->m_verbose)
@@ -770,8 +763,7 @@ h5diff(const char *fname1,
         }
         else if(l_ret1 < 0) { /* fail */
             parallel_print ("Object <%s> could not be found in <%s>\n", obj1fullname, fname1);
-            opts->err_stat = 1;
-            HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Object could not be found");
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "Object could not be found");
         }
         else if(l_ret1 != 2) { /* symbolic link */
             obj1type = (h5trav_type_t)trg_linfo1.trg_type;
@@ -798,8 +790,7 @@ h5diff(const char *fname1,
                 /* treat dangling link as error */
                 if(opts->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", obj2fullname);
-                opts->err_stat = 1;
-                HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "treat dangling link as error");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "treat dangling link as error");
             }
             else {
                 if(opts->m_verbose)
@@ -813,8 +804,7 @@ h5diff(const char *fname1,
         }
         else if(l_ret2 < 0) { /* fail */
             parallel_print ("Object <%s> could not be found in <%s>\n", obj2fullname, fname2);
-            opts->err_stat = 1;
-            HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Object could not be found");
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "Object could not be found");
         }
         else if(l_ret2 != 2) {  /* symbolic link */
             obj2type = (h5trav_type_t)trg_linfo2.trg_type;
@@ -841,7 +831,7 @@ h5diff(const char *fname1,
         h5difftrace("h5diff NOT (opts->m_verbose || opts->m_report)\n");
         /* if no danglink links */
         if (l_ret1 > 0 && l_ret2 > 0)
-            if (h5tools_is_obj_same(file1_id, obj1fullname, file2_id, obj2fullname)!=0)
+            if (h5tools_is_obj_same(file1_id, obj1fullname, file2_id, obj2fullname) != 0)
                 HGOTO_DONE(0);
     }
 
@@ -858,8 +848,7 @@ h5diff(const char *fname1,
         if(h5trav_visit(file1_id, obj1fullname, TRUE, TRUE,
                         trav_grp_objs, trav_grp_symlinks, info1_grp) < 0) {
             parallel_print("Error: Could not get file contents\n");
-            opts->err_stat = 1;
-            HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Could not get file contents");
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "Could not get file contents");
         }
         info1_lp = info1_grp;
 
@@ -873,11 +862,11 @@ h5diff(const char *fname1,
         if(h5trav_visit(file2_id, obj2fullname, TRUE, TRUE,
                         trav_grp_objs, trav_grp_symlinks, info2_grp) < 0) {
             parallel_print("Error: Could not get file contents\n");
-            opts->err_stat = 1;
-            HGOTO_ERROR(opts->err_stat, H5E_tools_min_id_g, "Could not get file contents");
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "Could not get file contents");
        } /* end if */
         info2_lp = info2_grp;
     }
+    h5diffdebug2("groups traversed - errstat:%d\n", opts->err_stat);
 
 #ifdef H5_HAVE_PARALLEL
     if(g_Parallel) {
@@ -926,9 +915,9 @@ h5diff(const char *fname1,
                         file2_id, obj2fullname, info2_lp,
                         match_list, opts);
 
-    opts->err_stat = 0; /* success status */
-
 done:
+    opts->err_stat = opts->err_stat | ret_value;
+
 #ifdef H5_HAVE_PARALLEL
     if(g_Parallel)
         /* All done at this point, let tasks know that they won't be needed */
@@ -994,7 +983,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 {
     hsize_t      nfound = 0;
     unsigned     i;
-    int          ret_value = 0;
+    int          ret_value = opts->err_stat;
     const char  *grp1_path = "";
     const char  *grp2_path = "";
     char        *obj1_fullpath = NULL;
@@ -1056,16 +1045,17 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 #endif
 
     for(i = 0; i < table->nobjs; i++) {
+        h5diffdebug3("diff for common objects[%d] - errstat:%d\n", i, opts->err_stat);
         if(table->objs[i].flags[0] && table->objs[i].flags[1]) {
             /* make full path for obj1 */
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if(HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0) {
-                HERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+                HERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
             }
 #else /* H5_HAVE_ASPRINTF */
             if((obj1_fullpath = (char*)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1)) == NULL) {
-                HERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+                HERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
             }
             else {
                 HDstrcpy(obj1_fullpath, grp1_path);
@@ -1078,11 +1068,11 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if(HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name) < 0) {
-                HERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+                HERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
             }
 #else /* H5_HAVE_ASPRINTF */
             if((obj2_fullpath = (char*)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1)) == NULL) {
-                HERROR(FAIL, H5E_tools_min_id_g, "name buffer allocation failed");
+                HERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
             }
             else {
                 HDstrcpy(obj2_fullpath, grp2_path);
@@ -1267,7 +1257,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 HDfree(obj2_fullpath);
         } /* end if */
     } /* end for */
-    h5difftrace("done with for loop\n");
+    h5diffdebug2("done with for loop - errstat:%d\n", opts->err_stat);
 
 #ifdef H5_HAVE_PARALLEL
     if(g_Parallel) {
@@ -1351,7 +1341,9 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 #endif /* H5_HAVE_PARALLEL */
 
 out:
-    /* free table */
+    opts->err_stat = opts->err_stat | ret_value;
+
+/* free table */
     if (table)
         trav_table_free(table);
     h5diffdebug2("diff_match finish:%d\n", nfound);
@@ -1381,7 +1373,8 @@ diff(hid_t file1_id,
               diff_opt_t * opts,
               diff_args_t *argdata)
 {
-    int           ret_value = 0;
+    int           ret_value = opts->err_stat;
+    int           status = -1;
     hid_t         dset1_id = -1;
     hid_t         dset2_id = -1;
     hid_t         type1_id = -1;
@@ -1399,9 +1392,6 @@ diff(hid_t file1_id,
     h5tool_link_info_t linkinfo2;
 
     h5difftrace("diff start\n");
-
-    /*init error status */
-    opts->err_stat = 1;
 
     /*init link info struct */
     HDmemset(&linkinfo1, 0, sizeof(h5tool_link_info_t));
@@ -1422,26 +1412,26 @@ diff(hid_t file1_id,
          */
 
         /* target object1 - get type and name */
-        if ((ret_value = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, opts->follow_links)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5tools_get_symlink_info failed");
+        if ((status = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, opts->follow_links)) < 0)
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "H5tools_get_symlink_info failed");
 
         /* dangling link */
-        if (ret_value == 0) {
+        if (status == 0) {
             if (opts->no_dangle_links) {
                 /* dangling link is error */
                 if(opts->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", path1);
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "dangling link is error");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "dangling link is error");
             }
             else
                 is_dangle_link1 = TRUE;
         }
 
         /* target object2 - get type and name */
-        if ((ret_value = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, opts->follow_links)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5tools_get_symlink_info failed");
+        if ((status = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, opts->follow_links)) < 0)
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "H5tools_get_symlink_info failed");
         /* dangling link */
-        if (ret_value == 0) {
+        if (status == 0) {
             if (opts->no_dangle_links) {
                 /* dangling link is error */
                 if(opts->m_verbose)
@@ -1454,7 +1444,6 @@ diff(hid_t file1_id,
 
         /* found dangling link */
         if (is_dangle_link1 || is_dangle_link2) {
-            opts->err_stat = 0;
             HGOTO_DONE(0);
         }
 
@@ -1479,7 +1468,6 @@ diff(hid_t file1_id,
         /* TODO: will need to update non-comparable is different
          * opts->contents = 0;
          */
-        opts->err_stat = 0;
         HGOTO_DONE(0);
     }
     else /* now both object types are same */
@@ -1532,7 +1520,6 @@ diff(hid_t file1_id,
             } /* if(opts->m_verbose || opts->m_report) */
 
             /* exact same, so comparison is done */
-            opts->err_stat = 0;
             HGOTO_DONE(0);
         }
     }
@@ -1544,9 +1531,9 @@ diff(hid_t file1_id,
         */
         case H5TRAV_TYPE_DATASET:
             if((dset1_id = H5Dopen2(file1_id, path1, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Dopen2 failed");
             if((dset2_id = H5Dopen2(file2_id, path2, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Dopen2 failed");
             /* verbose (-v) and report (-r) mode */
             if(opts->m_verbose || opts->m_report) {
                 do_print_objname("dataset", path1, path2, opts);
@@ -1579,9 +1566,9 @@ diff(hid_t file1_id,
 
 
             if(H5Dclose(dset1_id) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Dclose failed");
             if(H5Dclose(dset2_id) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Dclose failed");
             break;
 
        /*----------------------------------------------------------------------
@@ -1590,15 +1577,15 @@ diff(hid_t file1_id,
         */
         case H5TRAV_TYPE_NAMED_DATATYPE:
             if((type1_id = H5Topen2(file1_id, path1, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Topen2 failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Topen2 failed");
             if((type2_id = H5Topen2(file2_id, path2, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Topen2 failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Topen2 failed");
 
-            if((ret_value = H5Tequal(type1_id, type2_id)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tequal failed");
+            if((status = H5Tequal(type1_id, type2_id)) < 0)
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tequal failed");
 
             /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
-            nfound = (ret_value > 0) ? 0 : 1;
+            nfound = (status > 0) ? 0 : 1;
 
             if(print_objname(opts, nfound))
                 do_print_objname("datatype", path1, path2, opts);
@@ -1617,9 +1604,9 @@ diff(hid_t file1_id,
                 nfound += diff_attr(type1_id, type2_id, path1, path2, opts);
 
             if(H5Tclose(type1_id) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose failed");
             if(H5Tclose(type2_id) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose failed");
             break;
 
        /*----------------------------------------------------------------------
@@ -1635,9 +1622,9 @@ diff(hid_t file1_id,
                 print_found(nfound);
 
             if((grp1_id = H5Gopen2(file1_id, path1, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Gclose failed");
             if((grp2_id = H5Gopen2(file2_id, path2, H5P_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Gclose failed");
 
             /*-----------------------------------------------------------------
              * compare attributes
@@ -1649,9 +1636,9 @@ diff(hid_t file1_id,
                 nfound += diff_attr(grp1_id, grp2_id, path1, path2, opts);
 
             if(H5Gclose(grp1_id) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Gclose failed");
             if(H5Gclose(grp2_id) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Gclose failed");
             break;
 
 
@@ -1661,10 +1648,10 @@ diff(hid_t file1_id,
         */
         case H5TRAV_TYPE_LINK:
             {
-                ret_value = HDstrcmp(linkinfo1.trg_path, linkinfo2.trg_path);
+                status = HDstrcmp(linkinfo1.trg_path, linkinfo2.trg_path);
 
                 /* if the target link name is not same then the links are "different" */
-                nfound = (ret_value != 0) ? 1 : 0;
+                nfound = (status != 0) ? 1 : 0;
 
                 if(print_objname(opts, nfound))
                     do_print_objname("link", path1, path2, opts);
@@ -1686,16 +1673,16 @@ diff(hid_t file1_id,
                 if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL) {
                     /* If the buffers are the same size, compare them */
                     if(linkinfo1.linfo.u.val_size == linkinfo2.linfo.u.val_size) {
-                        ret_value = HDmemcmp(linkinfo1.trg_path, linkinfo2.trg_path, linkinfo1.linfo.u.val_size);
+                        status = HDmemcmp(linkinfo1.trg_path, linkinfo2.trg_path, linkinfo1.linfo.u.val_size);
                     }
                     else
-                        ret_value = 1;
+                        status = 1;
 
                     /* if "linkinfo1.trg_path" != "linkinfo2.trg_path" then the links
                      * are "different" extlinkinfo#.path is combination string of
                      * file_name and obj_name
                      */
-                    nfound = (ret_value != 0) ? 1 : 0;
+                    nfound = (status != 0) ? 1 : 0;
 
                     if(print_objname(opts, nfound))
                         do_print_objname("external link", path1, path2, opts);
@@ -1734,9 +1721,9 @@ diff(hid_t file1_id,
             break;
      }
 
-    opts->err_stat = 0;
-
 done:
+    opts->err_stat = opts->err_stat | ret_value;
+
     /*-----------------------------------
      * handle dangling link(s)
      */
@@ -1782,7 +1769,7 @@ done:
         /* enable error reporting */
     } H5E_END_TRY;
 
-    h5diffdebug2("diff finish:%d\n", nfound);
+    h5diffdebug3("diff finish:%d - errstat:%d\n", nfound, opts->err_stat);
 
     return nfound;
 }

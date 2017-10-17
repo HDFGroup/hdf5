@@ -285,7 +285,7 @@ hsize_t diff_array(
     mcomp_t         members;
     H5T_class_t     type_class;
 
-    h5difftrace("diff_array start\n");
+    h5diffdebug2("diff_array start - errstat:%d\n", opts->err_stat);
     /* get the size. */
     size = H5Tget_size(m_type);
     type_class = H5Tget_class(m_type);
@@ -378,7 +378,7 @@ hsize_t diff_array(
         } /* i */
         close_member_types(&members);
     } /* switch */
-    h5diffdebug2("diff_array finish:%d\n", nfound);
+    h5diffdebug3("diff_array finish:%d - errstat:%d\n", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -447,13 +447,11 @@ static hsize_t diff_datum(
     hbool_t         iszero1;
     hbool_t         iszero2;
     hsize_t         nfound = 0;    /* differences found */
-    hsize_t         ret_value = 0;
+    hsize_t         ret_value = opts->err_stat;
     double          per;
     hbool_t         both_zero;
 
     h5difftrace("diff_datum start\n");
-    /* default error sttaus */
-    opts->err_stat = 1;
 
     type_size = H5Tget_size(m_type);
     type_class = H5Tget_class(m_type);
@@ -467,14 +465,14 @@ static hsize_t diff_datum(
             type_class != H5T_STRING &&
             type_class != H5T_VLEN &&
             HDmemcmp(mem1, mem2, type_size) == 0)
-        HGOTO_DONE(0);
+        HGOTO_DONE(opts->err_stat);
 
     switch (H5Tget_class(m_type)) {
     case H5T_NO_CLASS:
     case H5T_TIME:
     case H5T_NCLASSES:
     default:
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Invalid type class");
+        HGOTO_ERROR(1, H5E_tools_min_id_g, "Invalid type class");
         break;
 
     /*-------------------------------------------------------------------------
@@ -725,7 +723,8 @@ static hsize_t diff_datum(
         iszero1 = all_zero(_mem1, H5Tget_size(m_type));
         iszero2 = all_zero(_mem2, H5Tget_size(m_type));
         if (iszero1 != iszero2) {
-            HGOTO_DONE (1);
+            nfound++;
+            HGOTO_DONE (opts->err_stat);
         }
         else if (!iszero1 && !iszero2) {
             /*-------------------------------------------------------------------------
@@ -740,14 +739,22 @@ static hsize_t diff_datum(
                 hid_t region1_id = -1;
                 hid_t region2_id = -1;
 
-                if ((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem1)) < 0)
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference2 object 1 failed");
-                if ((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem2)) < 0)
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference2 object 2 failed");
-                if ((region1_id = H5Rget_region(container1_id, H5R_DATASET_REGION, _mem1)) < 0)
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rget_region object 1 failed");
-                if ((region2_id = H5Rget_region(container2_id, H5R_DATASET_REGION, _mem2)) < 0)
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rget_region object 2 failed");
+                if ((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem1)) < 0) {
+                    opts->err_stat = 1;
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rdereference2 object 1 failed");
+                }
+                if ((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem2)) < 0) {
+                    opts->err_stat = 1;
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rdereference2 object 2 failed");
+                }
+                if ((region1_id = H5Rget_region(container1_id, H5R_DATASET_REGION, _mem1)) < 0) {
+                    opts->err_stat = 1;
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rget_region object 1 failed");
+                }
+                if ((region2_id = H5Rget_region(container2_id, H5R_DATASET_REGION, _mem2)) < 0) {
+                    opts->err_stat = 1;
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rget_region object 2 failed");
+                }
 
                 nfound = diff_region(obj1_id, obj2_id, region1_id, region2_id, opts);
 
@@ -766,23 +773,31 @@ static hsize_t diff_datum(
                 H5O_type_t obj1_type;
                 H5O_type_t obj2_type;
 
-                if (H5Rget_obj_type2(container1_id, H5R_OBJECT, _mem1, &obj1_type) < 0)
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rget_obj_type2 object 1 failed");
-                if (H5Rget_obj_type2(container2_id, H5R_OBJECT, _mem2, &obj2_type) < 0)
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rget_obj_type2 object 2 failed");
+                if (H5Rget_obj_type2(container1_id, H5R_OBJECT, _mem1, &obj1_type) < 0) {
+                    opts->err_stat = 1;
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rget_obj_type2 object 1 failed");
+                }
+                if (H5Rget_obj_type2(container2_id, H5R_OBJECT, _mem2, &obj2_type) < 0) {
+                    opts->err_stat = 1;
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rget_obj_type2 object 2 failed");
+                }
 
                 /* check object type */
                 if (ret_value >= 0)
                     if (obj1_type != obj2_type) {
                         parallel_print("Different object types referenced: <%s> and <%s>", obj1, obj2);
                         opts->not_cmp = 1;
-                        HGOTO_DONE (0);
+                        HGOTO_DONE (opts->err_stat);
                     }
 
-                if ((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_OBJECT, _mem1)) < 0)
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference2 object 1 failed");
-                if ((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_OBJECT, _mem2)) < 0)
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference2 object 2 failed");
+                if ((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_OBJECT, _mem1)) < 0) {
+                    opts->err_stat = 1;
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rdereference2 object 1 failed");
+                }
+                if ((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_OBJECT, _mem2)) < 0) {
+                    opts->err_stat = 1;
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rdereference2 object 2 failed");
+                }
 
                 /* compare */
                 if (obj1_type == H5O_TYPE_DATASET)
@@ -839,7 +854,7 @@ static hsize_t diff_datum(
             char temp2_char;
 
             if(type_size != sizeof(char))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not char size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not char size");
             HDmemcpy(&temp1_char, mem1, sizeof(char));
             HDmemcpy(&temp2_char, mem2, sizeof(char));
             /* -d and !-p */
@@ -914,7 +929,7 @@ static hsize_t diff_datum(
             unsigned char temp2_uchar;
 
             if(type_size != sizeof(unsigned char))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not unsigned char size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned char size");
 
             HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
             HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
@@ -990,7 +1005,7 @@ static hsize_t diff_datum(
             short temp2_short;
 
             if(type_size != sizeof(short))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not short size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not short size");
 
             HDmemcpy(&temp1_short, mem1, sizeof(short));
             HDmemcpy(&temp2_short, mem2, sizeof(short));
@@ -1066,7 +1081,7 @@ static hsize_t diff_datum(
             unsigned short temp2_ushort;
 
             if(type_size != sizeof(unsigned short))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not unsigned short size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned short size");
 
             HDmemcpy(&temp1_ushort, mem1, sizeof(unsigned short));
             HDmemcpy(&temp2_ushort, mem2, sizeof(unsigned short));
@@ -1142,7 +1157,7 @@ static hsize_t diff_datum(
             int temp2_int;
 
             if(type_size != sizeof(int))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not int size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not int size");
 
             HDmemcpy(&temp1_int, mem1, sizeof(int));
             HDmemcpy(&temp2_int, mem2, sizeof(int));
@@ -1218,7 +1233,7 @@ static hsize_t diff_datum(
             unsigned int temp2_uint;
 
             if(type_size != sizeof(unsigned int))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not unsigned int size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned int size");
 
             HDmemcpy(&temp1_uint, mem1, sizeof(unsigned int));
             HDmemcpy(&temp2_uint, mem2, sizeof(unsigned int));
@@ -1294,7 +1309,7 @@ static hsize_t diff_datum(
             long temp2_long;
 
             if(type_size != sizeof(long))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not long size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not long size");
 
             HDmemcpy(&temp1_long, mem1, sizeof(long));
             HDmemcpy(&temp2_long, mem2, sizeof(long));
@@ -1370,7 +1385,7 @@ static hsize_t diff_datum(
             unsigned long temp2_ulong;
 
             if(type_size != sizeof(unsigned long))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not unsigned long size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned long size");
 
             HDmemcpy(&temp1_ulong, mem1, sizeof(unsigned long));
             HDmemcpy(&temp2_ulong, mem2, sizeof(unsigned long));
@@ -1454,7 +1469,7 @@ static hsize_t diff_datum(
             hbool_t isnan2 = FALSE;
 
             if(type_size != sizeof(float))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not float size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not float size");
 
             HDmemcpy(&temp1_float, mem1, sizeof(float));
             HDmemcpy(&temp2_float, mem2, sizeof(float));
@@ -1613,7 +1628,7 @@ static hsize_t diff_datum(
             hbool_t isnan2 = FALSE;
 
             if(type_size != sizeof(double))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not double size");
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not double size");
 
             HDmemcpy(&temp1_double, mem1, sizeof(double));
             HDmemcpy(&temp2_double, mem2, sizeof(double));
@@ -1771,8 +1786,9 @@ static hsize_t diff_datum(
             hbool_t     isnan1 = FALSE;
             hbool_t     isnan2 = FALSE;
 
-            if(type_size != sizeof(long double))
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Type size is not long double size");
+            if(type_size != sizeof(long double)) {
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not long double size");
+            }
 
             HDmemcpy(&temp1_double, mem1, sizeof(long double));
             HDmemcpy(&temp2_double, mem2, sizeof(long double));
@@ -1922,10 +1938,11 @@ static hsize_t diff_datum(
         break; /* H5T_FLOAT class */
 
     } /* switch */
-    opts->err_stat = 0;
 
 done:
-    h5diffdebug2("diff_datum finish:%d\n", nfound);
+    opts->err_stat = opts->err_stat | ret_value;
+
+    h5diffdebug3("diff_datum finish:%d - errstat:%d\n", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2003,7 +2020,7 @@ void print_points(int i, hsize_t *ptdata, int ndims) {
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, diff_opt_t *opts)
 
 {
-    hsize_t  ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    hsize_t  ret_value = 0;
     hssize_t nblocks1, npoints1;
     hssize_t nblocks2, npoints2;
     hsize_t  alloc_size;
@@ -2046,14 +2063,16 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
         HDassert(alloc_size == (hsize_t)((size_t )alloc_size)); /*check for overflow*/
 
         if((ptdata1 = (hsize_t *) HDmalloc((size_t )alloc_size)) == NULL) {
-            HERROR(H5E_tools_g, H5E_tools_min_id_g, "Buffer allocation failed");
+            opts->err_stat = 1;
+            H5TOOLS_INFO(H5E_tools_min_id_g, "Buffer allocation failed");
         }
         else {
             H5_CHECK_OVERFLOW(nblocks1, hssize_t, hsize_t);
             H5Sget_select_hyper_blocklist(region1_id, (hsize_t) 0, (hsize_t) nblocks1, ptdata1);
 
             if((ptdata2 = (hsize_t *) HDmalloc((size_t )alloc_size)) == NULL) {
-                HERROR(H5E_tools_g, H5E_tools_min_id_g, "Buffer allocation failed");
+                opts->err_stat = 1;
+                H5TOOLS_INFO(H5E_tools_min_id_g, "Buffer allocation failed");
             }
             else {
                 H5_CHECK_OVERFLOW(nblocks2, hssize_t, hsize_t);
@@ -2107,14 +2126,16 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
         HDassert(alloc_size == (hsize_t)((size_t )alloc_size)); /*check for overflow*/
 
         if((ptdata1 = (hsize_t *) HDmalloc((size_t )alloc_size)) == NULL) {
-            HERROR(H5E_tools_g, H5E_tools_min_id_g, "Buffer allocation failed");
+            opts->err_stat = 1;
+            H5TOOLS_INFO(H5E_tools_min_id_g, "Buffer allocation failed");
         }
         else {
             H5_CHECK_OVERFLOW(npoints1, hssize_t, hsize_t);
             H5Sget_select_elem_pointlist(region1_id, (hsize_t) 0, (hsize_t) npoints1, ptdata1);
 
             if((ptdata2 = (hsize_t *) HDmalloc((size_t )alloc_size)) == NULL) {
-                HERROR(H5E_tools_g, H5E_tools_min_id_g, "Buffer allocation failed");
+                opts->err_stat = 1;
+                H5TOOLS_INFO(H5E_tools_min_id_g, "Buffer allocation failed");
             }
             else {
                 H5_CHECK_OVERFLOW(npoints1, hssize_t, hsize_t);
@@ -4380,7 +4401,7 @@ static hbool_t equal_float(float value, float expected, diff_opt_t *opts) {
         return TRUE;
 
     if (opts->use_system_epsilon)
-        if ( ABS( (value-expected) ) < FLT_EPSILON)
+        if (ABS( (value-expected) ) < FLT_EPSILON)
             return TRUE;
 
     h5difftrace("equal_float finish\n");
