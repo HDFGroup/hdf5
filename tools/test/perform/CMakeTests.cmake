@@ -25,7 +25,7 @@ add_custom_target(zip_perf_files ALL COMMENT "Copying files needed by zip_perf t
 
 # Remove any output file left over from previous test run
 add_test (
-    NAME PERFORM_h5perform-clear-objects
+    NAME PERFORM_h5perform-clearall-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove
         chunk.h5
@@ -36,6 +36,20 @@ add_test (
         x-rowmaj-rd.dat
         x-rowmaj-wr.dat
         x-gnuplot
+        h5perf_serial.txt
+        h5perf_serial.txt.err
+        chunk.txt
+        chunk.txt.err
+        iopipe.txt
+        iopipe.txt.err
+        overhead.txt
+        overhead.txt.err
+        perf_meta.txt
+        perf_meta.txt.err
+        zip_perf-h.txt
+        zip_perf-h.txt.err
+        zip_perf.txt
+        zip_perf.txt.err
 )
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -53,6 +67,7 @@ else ()
   )
 endif ()
 set_tests_properties (PERFORM_h5perf_serial PROPERTIES TIMEOUT 1800)
+set_tests_properties (PERFORM_h5perf_serial PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
 
 if (HDF5_BUILD_PERFORM_STANDALONE)
   add_test (NAME PERFORM_h5perf_serial_alone COMMAND $<TARGET_FILE:h5perf_serial_alone>)
@@ -72,6 +87,7 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
+set_tests_properties (PERFORM_chunk PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_iopipe COMMAND $<TARGET_FILE:iopipe>)
@@ -87,6 +103,7 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
+set_tests_properties (PERFORM_iopipe PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_overhead COMMAND $<TARGET_FILE:overhead>)
@@ -102,6 +119,7 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
+set_tests_properties (PERFORM_overhead PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_perf_meta COMMAND $<TARGET_FILE:perf_meta>)
@@ -117,6 +135,7 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
+set_tests_properties (PERFORM_perf_meta PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_zip_perf_help COMMAND $<TARGET_FILE:zip_perf> "-h")
@@ -132,6 +151,8 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
+set_tests_properties (PERFORM_zip_perf_help PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
+
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_zip_perf COMMAND $<TARGET_FILE:zip_perf> tfilters.h5)
 else ()
@@ -147,6 +168,7 @@ else ()
   )
 endif ()
 set_tests_properties (PERFORM_zip_perf PROPERTIES DEPENDS PERFORM_zip_perf_help)
+set_tests_properties (PERFORM_zip_perf PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
 
 if (H5_HAVE_PARALLEL)
   add_test (NAME PERFORM_h5perf COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf>)

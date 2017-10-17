@@ -74,13 +74,21 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
-      if (${resultcode} STREQUAL "1")
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
+      add_test (
+          NAME H5LS-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${resultfile}.out
+              ${resultfile}.out.err
+      )
+      set_tests_properties (H5LS-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -92,6 +100,7 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS H5LS-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 

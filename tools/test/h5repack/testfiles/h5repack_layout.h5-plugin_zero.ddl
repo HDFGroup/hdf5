@@ -1,86 +1,90 @@
-HDF5 "out-deflate_limit.h5repack_layout.h5" {
+HDF5 "out-plugin_zero.h5repack_layout.h5" {
 GROUP "/" {
    DATASET "dset1" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 40, 20 )
-         SIZE 1150 (2.783:1 COMPRESSION)
+         CONTIGUOUS
+         SIZE 3200
+         OFFSET 2048
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         NONE
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
          VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
-         H5D_ALLOC_TIME_INCR
+         H5D_ALLOC_TIME_LATE
       }
    }
    DATASET "dset2" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 40, 20 )
-         SIZE 1150 (2.783:1 COMPRESSION)
+         CONTIGUOUS
+         SIZE 3200
+         OFFSET 5248
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         NONE
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
          VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
-         H5D_ALLOC_TIME_INCR
+         H5D_ALLOC_TIME_LATE
       }
    }
    DATASET "dset3" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 40, 20 )
-         SIZE 1150 (2.783:1 COMPRESSION)
+         CONTIGUOUS
+         SIZE 3200
+         OFFSET 8448
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         NONE
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
          VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
-         H5D_ALLOC_TIME_INCR
+         H5D_ALLOC_TIME_LATE
       }
    }
    DATASET "dset4" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 40, 20 )
-         SIZE 1150 (2.783:1 COMPRESSION)
+         CONTIGUOUS
+         SIZE 3200
+         OFFSET 13696
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         NONE
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
          VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
-         H5D_ALLOC_TIME_INCR
+         H5D_ALLOC_TIME_LATE
       }
    }
    DATASET "dset_chunk" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 40, 20 )
-         SIZE 1150 (2.783:1 COMPRESSION)
+         CHUNKED ( 20, 10 )
+         SIZE 3200
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         NONE
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
@@ -94,36 +98,37 @@ GROUP "/" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 40, 20 )
-         SIZE 1150 (2.783:1 COMPRESSION)
+         COMPACT
+         SIZE 3200
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         NONE
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
          VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
-         H5D_ALLOC_TIME_INCR
+         H5D_ALLOC_TIME_EARLY
       }
    }
    DATASET "dset_contiguous" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 40, 20 )
-         SIZE 1150 (2.783:1 COMPRESSION)
+         CONTIGUOUS
+         SIZE 3200
+         OFFSET 26184
       }
       FILTERS {
-         COMPRESSION DEFLATE { LEVEL 1 }
+         NONE
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
          VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
-         H5D_ALLOC_TIME_INCR
+         H5D_ALLOC_TIME_LATE
       }
    }
 }

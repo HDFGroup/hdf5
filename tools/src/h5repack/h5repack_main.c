@@ -221,10 +221,6 @@ static void usage(const char *prog) {
  * Purpose:     Shutdown MPI & HDF5 and call exit()
  *
  * Return:      Does not return
- *
- * Programmer:  Quincey Koziol
- *              Saturday, 31. January 2004
- *
  *-------------------------------------------------------------------------
  */
 static void leave(int ret)
@@ -239,11 +235,6 @@ static void leave(int ret)
  * Purpose: read comp and chunk options from a file
  *
  * Return: void, exit on error
- *
- * Programmer: pvn@ncsa.uiuc.edu
- *
- * Date: September, 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -425,7 +416,6 @@ set_sort_order(const char *form)
  * Function: parse_command_line
  *
  * Purpose: parse command line input
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -438,13 +428,13 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char) opt) {
 
-            /* -i for backward compability */
+            /* -i for backward compatibility */
             case 'i':
                 infile = opt_arg;
                 has_i_o = 1;
                 break;
 
-            /* -o for backward compability */
+            /* -o for backward compatibility */
             case 'o':
                 outfile = opt_arg;
                 has_i_o = 1;
@@ -674,13 +664,6 @@ done:
  * Return: Success: EXIT_SUCCESS(0)
  *
  * Failure: EXIT_FAILURE(1)
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 int main(int argc, const char **argv)
@@ -712,8 +695,10 @@ int main(int argc, const char **argv)
     }
 
     /* initialize options  */
-    h5repack_init(&options, 0, FALSE);
-
+    if (h5repack_init(&options, 0, FALSE) < 0) {
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 

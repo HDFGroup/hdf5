@@ -57,15 +57,15 @@ file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
 # TEST_REFERENCE should always be matched
 string (REGEX MATCH "${TEST_REFERENCE}" TEST_MATCH ${TEST_STREAM})
 string (COMPARE EQUAL "${TEST_REFERENCE}" "${TEST_MATCH}" TEST_RESULT)
-if (${TEST_RESULT} STREQUAL "0")
+if ("${TEST_RESULT}" STREQUAL "0")
   message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_REFERENCE}")
 endif ()
 
 string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
-if (${TEST_EXPECT} STREQUAL "1")
+if ("${TEST_EXPECT}" STREQUAL "1")
   # TEST_EXPECT (1) interperts TEST_FILTER as NOT to match
   string (LENGTH "${TEST_MATCH}" TEST_RESULT)
-  if (NOT ${TEST_RESULT} STREQUAL "0")
+  if (NOT "${TEST_RESULT}" STREQUAL "0")
     message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
   endif ()
 endif ()
