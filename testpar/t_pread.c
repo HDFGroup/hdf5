@@ -162,11 +162,11 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
          * is used to call into the h5_fixname function. No 
          * need to worry that we reassign it for each file!
          */
-	group_filename = FILENAMES[file_index];
+        group_filename = FILENAMES[file_index];
         HDassert( group_filename );
 
         /* Assign the 'data_filename' */
-        if ( h5_fixname((const char *)group_filename, H5P_DEFAULT, data_filename,
+        if ( h5_fixname(group_filename, H5P_DEFAULT, data_filename,
                         sizeof(data_filename)) == NULL ) {
             pass = FALSE;
             failure_mssg = "h5_fixname(0) failed.\n";
