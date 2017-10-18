@@ -47,6 +47,7 @@
       old_h5fc_ext2_sf.ddl
       old_h5fc_ext3_isf.ddl
       h5fc_v_err.ddl
+      h5fc_v_err.ddl.err
   )
   set (HDF5_REFERENCE_TEST_FILES
       h5fc_non_v3.h5
