@@ -32,6 +32,8 @@
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_misc1.out
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/tudfilter.h5.txt
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/tudfilter.h5_ERR.txt
+      ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_plugin_fail.out.h5.txt
+      ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_plugin_test.out.h5.txt
   )
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
@@ -80,7 +82,7 @@
           NAME H5COPY_F-${testname}-DIFF
           COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
-      SET_TESTS_PROPERTIES(H5COPY_F-${testname}-DIFF PROPERTIES DEPENDS H5COPY_F-${testname})
+      set_tests_properties (H5COPY_F-${testname}-DIFF PROPERTIES DEPENDS H5COPY_F-${testname})
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY_F-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
@@ -116,7 +118,7 @@
           NAME H5COPY-${testname}-DIFF
           COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
-      SET_TESTS_PROPERTIES(H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
+      set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
@@ -166,7 +168,7 @@
           NAME H5COPY-${testname}-DIFF
           COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
-      SET_TESTS_PROPERTIES(H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
+      set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
@@ -207,7 +209,7 @@
           NAME H5COPY_SAME-${testname}-DIFF
           COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${testname}.out.h5 ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
-      SET_TESTS_PROPERTIES(H5COPY_SAME-${testname}-DIFF PROPERTIES DEPENDS H5COPY_SAME-${testname})
+      set_tests_properties (H5COPY_SAME-${testname}-DIFF PROPERTIES DEPENDS H5COPY_SAME-${testname})
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY_SAME-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
@@ -295,16 +297,23 @@
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
-        add_test (
-            NAME H5COPY_UD-${testname}-DIFF
-            COMMAND $<TARGET_FILE:h5diff> -v ./testfiles/${cmpfile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
-        )
-        SET_TESTS_PROPERTIES(H5COPY_UD-${testname}-DIFF PROPERTIES DEPENDS H5COPY_UD-${testname})
-        if ("${resultcode}" STREQUAL "1")
-          set_tests_properties (H5COPY_UD-${testname}-DIFF PROPERTIES WILL_FAIL "true")
-        endif ()
       endif ()
       set_tests_properties (H5COPY_UD-${testname} PROPERTIES DEPENDS H5COPY_UD-${testname}-clear-objects)
+      add_test (
+          NAME H5COPY_UD-${testname}-DIFF
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
+              -D "TEST_ARGS:STRING=-v;./testfiles/${cmpfile};./testfiles/${testname}.out.h5;${srcname};${dstname}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=./testfiles/${testname}.out.h5.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=./testfiles/${testname}.out.h5.txt"
+              -D "TEST_APPEND=EXIT CODE:"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5COPY_UD-${testname}-DIFF PROPERTIES DEPENDS H5COPY_UD-${testname})
     endif ()
   endmacro ()
 
@@ -327,7 +336,7 @@
                 -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;./testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=./testfiles/${infile}_ERR.out"
-                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=./testfiles/${infile}_ERR.txt"
                 -D "TEST_MASK_ERROR=true"
                 -D "TEST_APPEND=EXIT CODE:"
@@ -353,6 +362,21 @@
         )
       endif ()
       set_tests_properties (H5COPY_UD_ERR-${testname} PROPERTIES DEPENDS H5COPY_UD_ERR-${testname}-clearall-objects)
+      add_test (
+          NAME H5COPY_UD_ERR-${testname}-DIFF
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
+              -D "TEST_ARGS:STRING=-v;./testfiles/${cmpfile};./testfiles/${testname}.out.h5;${srcname};${dstname}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=./testfiles/${testname}.out.h5.out"
+              -D "TEST_EXPECT=0"
+              -D "TEST_REFERENCE=./testfiles/${testname}.out.h5.txt"
+              -D "TEST_APPEND=EXIT CODE:"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5COPY_UD_ERR-${testname}-DIFF PROPERTIES DEPENDS H5COPY_UD_ERR-${testname})
     endif ()
   endmacro ()
 
@@ -546,5 +570,5 @@
 ##############################################################################
 if (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (h5copy_plugin_test 0 tudfilter.h5 -s /dynlibud -d /dynlibud tudfilter2.h5 )
-  ADD_H5_UD_TEST (h5copy_plugin_fail 2 tudfilter.h5 -s /dynlibud -d /dynlibud tudfilter2.h5)
+  ADD_H5_UD_ERR_TEST (h5copy_plugin_fail 2 tudfilter.h5 -s /dynlibud -d /dynlibud tudfilter2.h5)
 endif ()

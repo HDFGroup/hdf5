@@ -74,8 +74,10 @@ hsize_t diff_dataset(hid_t file1_id,
     else if (status < 0) {
         HGOTO_ERROR(1, H5E_tools_min_id_g, "h5tools_canreadf failed");
     }
-    else
+    else {
+        ret_value = 1;
         opts->not_cmp = 1;
+    }
 
 done:
     opts->err_stat = opts->err_stat | ret_value;
