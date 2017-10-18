@@ -413,6 +413,9 @@ typedef struct H5O_efl_t {
  *      and 'size' callbacks for places to change when updating this. */
 #define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_4
 
+/* Version # of encoded virtual dataset global heap blocks */
+#define H5O_LAYOUT_VDS_GH_ENC_VERS      0
+
 /* Forward declaration of structs used below */
 struct H5D_layout_ops_t;                /* Defined in H5Dpkg.h               */
 struct H5D_chunk_ops_t;                 /* Defined in H5Dpkg.h               */
