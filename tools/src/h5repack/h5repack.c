@@ -227,7 +227,6 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
         /* Stack already exists, search for the datatype */
         while (dt && dt->addr_in != oinfo.addr)
             dt = dt->next;
-
         dt_ret = dt;
     }
     else {
@@ -286,7 +285,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
 
     /* Increment the ref count on id_out, because the calling function will try to close it */
     if(H5Iinc_ref(ret_value) < 0)
-        ret_value = -1;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Iinc_ref failed");
 
 done:
     return ret_value;
@@ -426,7 +425,8 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 
             base_type = H5Tget_super(ftype_id);
             is_ref = (is_ref || (H5Tget_class(base_type) == H5T_REFERENCE));
-            H5Tclose(base_type);
+            if (H5Tclose(base_type) < 0)
+                H5TOOLS_INFO(H5E_tools_min_id_g, "H5Tclose base_type failed");
         }
 
         if (type_class == H5T_COMPOUND) {
@@ -435,7 +435,8 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
             for (j = 0; j < nmembers; j++) {
                 hid_t mtid = H5Tget_member_type(wtype_id, (unsigned)j);
                 H5T_class_t mtclass = H5Tget_class(mtid);
-                H5Tclose(mtid);
+                if (H5Tclose(mtid) < 0)
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Tclose mtid failed");
 
                 if (mtclass == H5T_REFERENCE) {
                     is_ref = 1;
@@ -486,17 +487,19 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
          * close
          *-------------------------------------------------------------------------
          */
-        if (H5Aclose(attr_out) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aclose failed");
         if (H5Sclose(space_id) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
+        space_id = -1;
         if (H5Tclose(wtype_id) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+        wtype_id = -1;
         if (H5Tclose(ftype_id) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+        ftype_id = -1;
         if (H5Aclose(attr_id) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aclose failed");
-    } /* u */
+        attr_id = -1;
+    } /* for u */
 
 done:
     H5E_BEGIN_TRY {

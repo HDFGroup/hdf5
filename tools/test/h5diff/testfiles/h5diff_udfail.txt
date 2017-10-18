@@ -1,16 +1,12 @@
 
 file1     file2
 ---------------------------------------
-    x      x    /
-    x      x    /dynlibud
+    x      x    /              
+    x      x    /dynlibud      
 
 group  : </> and </>
 0 differences found
 dataset: </dynlibud> and </dynlibud>
 0 differences found
---------------------------------
-Some objects are not comparable
---------------------------------
-Use -c for a list of objects without details of differences.
 Warning: dataset </dynlibud> cannot be read, user defined filter is not available
-EXIT CODE: 0
+EXIT CODE: 2

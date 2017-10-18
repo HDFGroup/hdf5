@@ -1175,6 +1175,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
                 if (H5Tclose(type_out) < 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                type_out = -1; /* named datatypes stack, named_dt_head, manages allocation */
 
                 break;
 
@@ -1205,6 +1206,18 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
     } /* end if */
 
 done:
+
+    /* Finalize (link) the stack of named datatypes (if any) first
+     * because of reference counting */
+    if (0 == ret_value && named_dt_head != NULL) {
+        if (named_datatype_free(&named_dt_head, 0) < 0)
+            H5TOOLS_INFO(H5E_tools_min_id_g, "named_datatype_free failed");
+    }
+    else
+        H5E_BEGIN_TRY {
+            named_datatype_free(&named_dt_head, 1);
+        } H5E_END_TRY;
+
     H5E_BEGIN_TRY
     {
         H5Gclose(grp_in);
@@ -1226,14 +1239,6 @@ done:
         HDfree(buf);
     if (hslab_buf != NULL)
         HDfree(hslab_buf);
-
-    /* Finalize (link) the stack of named datatypes (if any) */
-    if (0 == ret_value && named_dt_head != NULL)
-        named_datatype_free(&named_dt_head, 0);
-    else
-        H5E_BEGIN_TRY {
-            named_datatype_free(&named_dt_head, 1);
-        } H5E_END_TRY;
 
     return ret_value;
 }

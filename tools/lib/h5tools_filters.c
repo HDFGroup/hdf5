@@ -18,7 +18,7 @@
  * print a warning message
  *-------------------------------------------------------------------------
  */
-static void print_warning(const char *dname, const char *fname)
+static void print_filter_warning(const char *dname, const char *fname)
 {
     fprintf(stderr,
             "Warning: dataset <%s> cannot be read, %s filter is not available\n",
@@ -73,7 +73,7 @@ h5tools_canreadf(const char* name,     /* object name, serves also as boolean pr
             }
             else if (!udfilter_avail) {
                 if (name)
-                    print_warning(name, "user defined");
+                    print_filter_warning(name, "user defined");
                 ret_value = 0;
             }
             break;
@@ -85,7 +85,7 @@ h5tools_canreadf(const char* name,     /* object name, serves also as boolean pr
         case H5Z_FILTER_DEFLATE:
 #ifndef H5_HAVE_FILTER_DEFLATE
             if (name)
-                print_warning(name,"deflate");
+                print_filter_warning(name,"deflate");
             ret_value = 0;
 #endif
             break;
@@ -96,7 +96,7 @@ h5tools_canreadf(const char* name,     /* object name, serves also as boolean pr
         case H5Z_FILTER_SZIP:
 #ifndef H5_HAVE_FILTER_SZIP
             if (name)
-                print_warning(name,"SZIP");
+                print_filter_warning(name,"SZIP");
             ret_value = 0;
 #endif
             break;

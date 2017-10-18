@@ -2524,10 +2524,12 @@
 ./tools/test/h5copy/testfiles/h5copy_misc1.out
 ./tools/test/h5copy/testfiles/h5copytst_new.h5
 ./tools/test/h5copy/testfiles/h5copytst_new.out.ls
-./tools/test/h5diff/testfiles/tudfilter.h5
-./tools/test/h5diff/testfiles/tudfilter2.h5
-./tools/test/h5diff/testfiles/tudfilter.h5.txt
-./tools/test/h5diff/testfiles/tudfilter.h5_ERR.txt
+./tools/test/h5copy/testfiles/h5copy_plugin_fail.out.h5.txt
+./tools/test/h5copy/testfiles/h5copy_plugin_test.out.h5.txt
+./tools/test/h5copy/testfiles/tudfilter.h5
+./tools/test/h5copy/testfiles/tudfilter2.h5
+./tools/test/h5copy/testfiles/tudfilter.h5.txt
+./tools/test/h5copy/testfiles/tudfilter.h5_ERR.txt
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_nested_p.ls

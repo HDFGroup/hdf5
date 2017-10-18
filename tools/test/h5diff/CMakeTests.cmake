@@ -1655,7 +1655,7 @@ ADD_H5_TEST (h5diff_v3 0 -c ${FILEV1} ${FILEV2})
 ##############################################################################
 if (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (h5diff_plugin_test 0 h5diff_ud -v tudfilter.h5 tudfilter2.h5)
-  ADD_H5_UD_TEST (h5diff_plugin_fail 0 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)
+  ADD_H5_UD_TEST (h5diff_plugin_fail 2 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)
 endif ()
 
 # ##############################################################################
