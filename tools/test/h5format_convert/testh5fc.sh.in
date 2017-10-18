@@ -298,7 +298,6 @@ TOOLTEST_MASK_OUT() {
         nerrors="`expr $nerrors + 1`"
         test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
-    COMPARE_OUT $expect_err $actual_err
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
