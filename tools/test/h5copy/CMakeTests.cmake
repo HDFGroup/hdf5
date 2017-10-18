@@ -266,6 +266,8 @@
               testfiles/${testname}.out.h5
               testfiles/${infile}.out
               testfiles/${infile}.out.err
+              testfiles/${testname}.out.h5.out
+              testfiles/${testname}.out.h5.out.err
       )
       if ("${resultcode}" STREQUAL "2")
         add_test (
@@ -327,6 +329,8 @@
               testfiles/${testname}_ERR.out.h5
               testfiles/${infile}_ERR.out
               testfiles/${infile}_ERR.out.err
+              testfiles/${testname}_ERR.out.h5.out
+              testfiles/${testname}_ERR.out.h5.out.err
       )
       if ("${resultcode}" STREQUAL "2")
         add_test (
