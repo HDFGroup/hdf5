@@ -18,28 +18,32 @@
  * print a warning message
  *-------------------------------------------------------------------------
  */
-static void print_warning(const char *dname, const char *fname)
+static void print_filter_warning(const char *dname, const char *fname)
 {
     fprintf(stderr,
-            "warning: dataset <%s> cannot be read, %s filter is not available\n",
+            "Warning: dataset <%s> cannot be read, %s filter is not available\n",
             dname, fname);
 }
 
 /*-------------------------------------------------------------------------
  * Function: h5tools_canreadf
  *
- * Purpose: check if the dataset creation property list has filters that
- * are not registered in the current configuration
- * 1) the external filters GZIP and SZIP might not be available
- * 2) the internal filters might be turned off
+ * Purpose:  check if the dataset creation property list has filters that
+ *           are not registered in the current configuration
+ *               1) the external filters GZIP and SZIP might not be available
+ *               2) the internal filters might be turned off
  *
- * Return: 1, can read, 0, cannot, -1 error
+ * Return:
+ *           1 can read,
+ *           0 cannot,
+ *           -1 error
  *-------------------------------------------------------------------------
  */
-int h5tools_canreadf(const char* name, /* object name, serves also as boolean print */
+int
+h5tools_canreadf(const char* name,     /* object name, serves also as boolean print */
                      hid_t dcpl_id)    /* dataset creation property list */
 {
-    int ret_value = 1;  /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int ret_value = 1;
     int nfilters;       /* number of filters */
     H5Z_filter_t filtn; /* filter identification number */
     int i;              /* index */
@@ -69,7 +73,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
             }
             else if (!udfilter_avail) {
                 if (name)
-                    print_warning(name, "user defined");
+                    print_filter_warning(name, "user defined");
                 ret_value = 0;
             }
             break;
@@ -81,7 +85,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
         case H5Z_FILTER_DEFLATE:
 #ifndef H5_HAVE_FILTER_DEFLATE
             if (name)
-                print_warning(name,"deflate");
+                print_filter_warning(name,"deflate");
             ret_value = 0;
 #endif
             break;
@@ -92,7 +96,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
         case H5Z_FILTER_SZIP:
 #ifndef H5_HAVE_FILTER_SZIP
             if (name)
-                print_warning(name,"SZIP");
+                print_filter_warning(name,"SZIP");
             ret_value = 0;
 #endif
             break;
@@ -130,56 +134,58 @@ done:
 /*-------------------------------------------------------------------------
  * Function: h5tools_canwritef
  *
- * Purpose: check if the filter is available and can write data.
- * At this time, all filters that are available can write data,
- * except SZIP, which may be configured decoder-only.
+ * Purpose:  check if the filter is available and can write data.
  *
- * Return: 1, can write, 0, cannot, -1 error
+ * Return:   1 can write,
+ *           0 cannot,
+ *           -1 error
  *-------------------------------------------------------------------------
  */
 H5_ATTR_CONST int
-h5tools_can_encode(H5Z_filter_t filtn) {
+h5tools_can_encode(H5Z_filter_t filtn)
+{
+    int ret_value = 1;
+
     switch (filtn) {
     /* user defined filter     */
     default:
-            return 0;
-
+        HGOTO_DONE(0)
     case H5Z_FILTER_DEFLATE:
 #ifndef H5_HAVE_FILTER_DEFLATE
-            return 0;
+        HGOTO_DONE(0)
 #endif
             break;
 
     case H5Z_FILTER_SZIP:
 #ifndef H5_HAVE_FILTER_SZIP
-            return 0;
+        HGOTO_DONE(0)
 #else
-    {
+        {
             unsigned int filter_config_flags;
 
             if (H5Zget_filter_info(filtn, &filter_config_flags) < 0)
-                return -1;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Zget_filter_info failed");
             if ((filter_config_flags
                     & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 0) {
                 /* filter present but neither encode nor decode is supported (???) */
-                return -1;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "neither encode nor decode is supported");
             }
             else if ((filter_config_flags
                         & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == H5Z_FILTER_CONFIG_DECODE_ENABLED) {
                 /* decoder only: read but not write */
-                return 0;
+                HGOTO_DONE(0)
             }
             else if ((filter_config_flags
                         & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == H5Z_FILTER_CONFIG_ENCODE_ENABLED) {
                 /* encoder only: write but not read (???) */
-                return -1;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "encoder only: write but not read");
             }
             else if ((filter_config_flags
                         & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED))
                         == (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
-                return 1;
+                HGOTO_DONE(1)
             }
-    }
+        }
 #endif
             break;
 
@@ -196,6 +202,7 @@ h5tools_can_encode(H5Z_filter_t filtn) {
             break;
     }/*switch*/
 
-    return 1;
+done:
+    return ret_value;
 }
 
