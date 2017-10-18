@@ -123,6 +123,12 @@ New Features
 
       (BMR - 2017/10/17, HDFFV-10175)
 
+    - A document is added to the HDF5 C++ API Reference Manual to show the
+      mapping from a C API to C++ wrappers.  It can be found from the main
+      page of the C++ API Reference Manual.
+
+      (BMR - 2017/10/17, HDFFV-10151)
+
 
     High-Level APIs
     ---------------
@@ -223,7 +229,16 @@ Bug Fixes since HDF5-1.8.19
 
     C++ API
     -------
-    - None
+    - Marked the following functions deprecated because they were moved to
+      class H5Object:
+        H5Location::createAttribute()
+        H5Location::openAttribute()
+        H5Location::attrExists()
+        H5Location::removeAttr()
+        H5Location::renameAttr()
+        H5Location::getNumAttrs()
+
+      (BMR - 2017/10/17)
 
 
     High-Level APIs:
