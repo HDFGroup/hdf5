@@ -24,13 +24,10 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
@@ -56,9 +53,9 @@ const hsize_t SPACE1_DIM1 = 4;
 #if 0 // not used now
 static void *test_vlstr_alloc_custom(size_t size, void *info)
 {
-    void *ret_value=NULL;       // Pointer to return
+    void *ret_value=NULL;        // Pointer to return
     size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
-    size_t extra;               // Extra space needed
+    size_t extra;                // Extra space needed
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
@@ -92,7 +89,7 @@ static void test_vlstr_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
     size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
-    size_t extra;               // Extra space needed
+    size_t extra;                     // Extra space needed
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
@@ -349,7 +346,7 @@ static void test_vlstrings_special()
         dataset.read(rdata, vlst);
 
         // Check data read in.
-        hsize_t ii;             // counting variable
+        hsize_t ii; // counting variable
         for (ii=0; ii<SPACE1_DIM1; ii++)
             if(rdata[ii]!=NULL)
                 TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)ii,rdata[ii]);
@@ -359,14 +356,17 @@ static void test_vlstrings_special()
         dataset.read(rdata, vlst);
 
         // Compare data read in.
-        for (ii = 0; ii < SPACE1_DIM1; ii++) {
+        for (ii = 0; ii < SPACE1_DIM1; ii++)
+        {
             size_t wlen = HDstrlen(wdata[ii]);
             size_t rlen = HDstrlen(rdata[ii]);
-            if(wlen != rlen) {
+            if(wlen != rlen)
+            {
                 TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n", (int)ii, (unsigned)wlen, (int)ii, (unsigned)rlen);
                 continue;
             } // end if
-            if(HDstrcmp(wdata[ii],rdata[ii]) != 0) {
+            if(HDstrcmp(wdata[ii],rdata[ii]) != 0)
+            {
                 TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)ii, wdata[ii], (int)ii, rdata[ii]);
                 continue;
             } // end if
@@ -385,7 +385,7 @@ static void test_vlstrings_special()
         // Create the property list and set the fill value for the second
         // dataset.
         DSetCreatPropList dcpl;
-        char *fill = NULL;      // Fill value
+        char *fill = NULL;  // Fill value
         dcpl.setFillValue(vlst, &fill);
         dataset = file1.createDataSet("Dataset4", vlst, sid1, dcpl);
 
@@ -397,8 +397,8 @@ static void test_vlstrings_special()
 
         // Check data read in.
         for (ii=0; ii<SPACE1_DIM1; ii++)
-          if(rdata[ii]!=NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)ii,rdata[ii]);
+            if(rdata[ii]!=NULL)
+                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)ii,rdata[ii]);
 
         // Try to write nil strings to disk.
         dataset.write(wdata2, vlst);
@@ -408,8 +408,8 @@ static void test_vlstrings_special()
 
         // Check data read in.
         for (ii=0; ii<SPACE1_DIM1; ii++)
-          if(rdata[ii]!=NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)ii,rdata[ii]);
+            if(rdata[ii]!=NULL)
+                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)ii,rdata[ii]);
 
         // Close objects and file.
         dataset.close();
@@ -480,27 +480,45 @@ static void test_vlstring_type()
         vlst.close();
 
         // Try opening datatype again.
-        vlst = file1->openStrType(VLSTR_TYPE);
+        vlst = file1->openStrType(VLSTR_TYPE); // deprecated
+
+        // Close again and reopen with constructor.
+        vlst.close();
+        StrType vlst1(*file1, VLSTR_TYPE);
 
         // Close datatype and file.
-        vlst.close();
+        vlst1.close();
         file1->close();
         delete file1;
 
         // Open file.
         file1 = new H5File(FILENAME, H5F_ACC_RDWR);
 
-        // Open the variable-length string datatype just created
+        { // deprecated
+        // Open the variable-length string datatype just created.
         vlst = file1->openStrType(VLSTR_TYPE);
 
-        // Verify character set and padding
+        // Verify character set and padding.
         cset = vlst.getCset();
         verify_val(cset, H5T_CSET_ASCII, "StrType::getCset", __LINE__, __FILE__);
         pad = vlst.getStrpad();
         verify_val(pad, H5T_STR_NULLPAD, "StrType::getStrpad", __LINE__, __FILE__);
 
-        // Close datatype and file
+        // Close type to test new function.
         vlst.close();
+        } // deprecated
+
+        // Open the variable-length string datatype just created.
+        StrType vlst2(*file1, VLSTR_TYPE);
+
+        // Verify character set and padding.
+        cset = vlst2.getCset();
+        verify_val(cset, H5T_CSET_ASCII, "StrType::getCset", __LINE__, __FILE__);
+        pad = vlst2.getStrpad();
+        verify_val(pad, H5T_STR_NULLPAD, "StrType::getStrpad", __LINE__, __FILE__);
+
+        // Close datatype and file.
+        vlst2.close();
         file1->close();
 
         PASSED();
@@ -818,7 +836,7 @@ static void test_vlstring_array_attribute()
 
 /* Helper routine for test_vl_rewrite() */
 static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space,
-                                char *name, char *data)
+                              char *name, char *data)
 {
     DataSet dset;
     try {
@@ -836,7 +854,7 @@ static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space,
 
 /* Helper routine for test_vl_rewrite() */
 static void read_scalar_dset(H5File& file, DataType& type, DataSpace& space,
-                                char *name, char *data)
+                             char *name, char *data)
 {
     char *data_read;
     DataSet dset;
@@ -891,7 +909,7 @@ static void test_vl_rewrite()
 
         // Create in file 1.
         int i;
-        char name[256];         // Buffer for names & data
+        char name[256]; // Buffer for names & data
         for (i=0; i<REWRITE_NDATASETS; i++) {
             sprintf(name, "/set_%d", i);
             write_scalar_dset(file1, type, space, name, name);
@@ -986,8 +1004,6 @@ void test_vlstrings()
  *
  * Programmer:  Quincey Koziol
  *              September 10, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

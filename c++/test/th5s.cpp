@@ -556,7 +556,6 @@ static void test_h5s_compound_scalar_read()
  * Programmer:  Binh-Minh Ribler (using C version)
  *              Mar 2001
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -583,8 +582,6 @@ void test_h5s()
  *
  * Programmer:  Albert Cheng
  *              July 2, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

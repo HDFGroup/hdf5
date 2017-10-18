@@ -35,30 +35,30 @@ using namespace H5;
 
 #include "h5cpputil.h"  // C++ utilility header file
 
-const hsize_t F1_USERBLOCK_SIZE = (hsize_t)0;
-const size_t F1_OFFSET_SIZE = sizeof(haddr_t);
-const size_t F1_LENGTH_SIZE = sizeof(hsize_t);
-const unsigned F1_SYM_LEAF_K  = 4;
-const unsigned F1_SYM_INTERN_K = 16;
-const H5std_string    FILE1("tfile1.h5");
+const hsize_t   F1_USERBLOCK_SIZE = (hsize_t)0;
+const size_t    F1_OFFSET_SIZE = sizeof(haddr_t);
+const size_t    F1_LENGTH_SIZE = sizeof(hsize_t);
+const unsigned  F1_SYM_LEAF_K  = 4;
+const unsigned  F1_SYM_INTERN_K = 16;
+const H5std_string  FILE1("tfile1.h5");
 
-const hsize_t F2_USERBLOCK_SIZE = (hsize_t)512;
-const size_t F2_OFFSET_SIZE = 8;
-const size_t F2_LENGTH_SIZE = 8;
-const unsigned F2_SYM_LEAF_K  = 8;
-const unsigned F2_SYM_INTERN_K = 32;
-const unsigned F2_ISTORE = 64;
+const hsize_t   F2_USERBLOCK_SIZE = (hsize_t)512;
+const size_t    F2_OFFSET_SIZE = 8;
+const size_t    F2_LENGTH_SIZE = 8;
+const unsigned  F2_SYM_LEAF_K  = 8;
+const unsigned  F2_SYM_INTERN_K = 32;
+const unsigned  F2_ISTORE = 64;
 const H5std_string    FILE2("tfile2.h5");
 
-const hsize_t F3_USERBLOCK_SIZE = (hsize_t)0;
-const size_t F3_OFFSET_SIZE = F2_OFFSET_SIZE;
-const size_t F3_LENGTH_SIZE = F2_LENGTH_SIZE;
-const unsigned F3_SYM_LEAF_K  = F2_SYM_LEAF_K;
-const unsigned F3_SYM_INTERN_K = F2_SYM_INTERN_K;
+const hsize_t   F3_USERBLOCK_SIZE = (hsize_t)0;
+const size_t    F3_OFFSET_SIZE = F2_OFFSET_SIZE;
+const size_t    F3_LENGTH_SIZE = F2_LENGTH_SIZE;
+const unsigned  F3_SYM_LEAF_K  = F2_SYM_LEAF_K;
+const unsigned  F3_SYM_INTERN_K = F2_SYM_INTERN_K;
 const H5std_string    FILE3("tfile3.h5");
 
-const int KB =  1024;
-const H5std_string    FILE4("tfile4.h5");
+const int       KB =  1024;
+const H5std_string  FILE4("tfile4.h5");
 
 
 /*-------------------------------------------------------------------------
@@ -73,11 +73,11 @@ const H5std_string    FILE4("tfile4.h5");
  *
  * Modifications:
  *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *                     cases.  Since there are no operator<< for 'long long'
- *                     or int64 in VS C++ ostream, I casted the hsize_t values
- *                     passed to verify_val to 'long' as well.  If problems
- *                     arises later, this will have to be specificly handled
- *                     with a special routine.
+ *              cases.  Since there are no operator<< for 'long long'
+ *              or int64 in VS C++ ostream, I casted the hsize_t values
+ *              passed to verify_val to 'long' as well.  If problems
+ *              arises later, this will have to be specificly handled
+ *              with a special routine.
  *
  *-------------------------------------------------------------------------
  */
@@ -99,7 +99,7 @@ static void test_file_create()
         // Create file FILE1
         file1 = new H5File (FILE1, H5F_ACC_EXCL);
 
-        // try to create the same file with H5F_ACC_TRUNC. This should fail
+        // Try to create the same file with H5F_ACC_TRUNC. This should fail
         // because file1 is the same file and is currently open.
         try {
             H5File file2 (FILE1, H5F_ACC_TRUNC);  // should throw E
@@ -156,12 +156,12 @@ static void test_file_create()
         hsize_t ublock = tmpl1.getUserblock();
         verify_val((long)ublock, (long)F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
-        size_t  parm1, parm2;           // file-creation parameters
+        size_t  parm1, parm2;   // file-creation parameters
         tmpl1.getSizes( parm1, parm2);
         verify_val(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
         verify_val(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
-        unsigned  iparm1,iparm2;        // file-creation parameters
+        unsigned  iparm1,iparm2;    // file-creation parameters
         tmpl1.getSymk( iparm1, iparm2);
         verify_val(iparm1, F1_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
         verify_val(iparm2, F1_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
@@ -214,12 +214,12 @@ static void test_file_create()
         hsize_t ublock = tmpl1->getUserblock();
         verify_val((long)ublock, (long)F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
-        size_t  parm1, parm2;           // file-creation parameters
+        size_t parm1, parm2;    // file-creation parameters
         tmpl1->getSizes( parm1, parm2);
         verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
         verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
-        unsigned  iparm1,iparm2;        // file-creation parameters
+        unsigned iparm1,iparm2; // file-creation parameters
         tmpl1->getSymk( iparm1, iparm2);
         verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
         verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
@@ -280,11 +280,11 @@ static void test_file_create()
  *
  * Modifications:
  *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *                     cases.  Since there are no operator<< for 'long long'
- *                     or int64 in VS C++ ostream, I casted the hsize_t values
- *                     passed to verify_val to 'long' as well.  If problems
- *                     arises later, this will have to be specificly handled
- *                     with a special routine.
+ *              cases.  Since there are no operator<< for 'long long'
+ *              or int64 in VS C++ ostream, I casted the hsize_t values
+ *              passed to verify_val to 'long' as well.  If problems
+ *              arises later, this will have to be specificly handled
+ *              with a special routine.
  *
  *-------------------------------------------------------------------------
  */
@@ -305,13 +305,13 @@ static void test_file_open()
         hsize_t ublock = tmpl1.getUserblock();
         verify_val((long)ublock, (long)F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
-        size_t  parm1, parm2;           // file-creation parameters
-        tmpl1.getSizes( parm1, parm2);
+        size_t parm1, parm2;    // file-creation parameters
+        tmpl1.getSizes(parm1, parm2);
         verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
         verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
-        unsigned  iparm1,iparm2;       // file-creation parameters
-        tmpl1.getSymk( iparm1, iparm2);
+        unsigned iparm1,iparm2; // file-creation parameters
+        tmpl1.getSymk(iparm1, iparm2);
         verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
         verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
 
@@ -361,8 +361,6 @@ static void test_file_open()
  * Programmer:  Raymond Lu
  *              June, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_file_size()
@@ -370,7 +368,7 @@ static void test_file_size()
     // Output message about test being performed
     SUBTEST("File Size");
 
-    hid_t       fapl_id;
+    hid_t fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 
     try {
@@ -408,8 +406,10 @@ static void test_file_size()
         issue_fail_msg("test_file_size()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    // use C test utility routine to close property list.
-    H5Pclose(fapl_id);
+    // This fapl_id was returned from h5_fileaccess.
+    herr_t ret = H5Pclose(fapl_id);
+    if (ret < 0)
+        issue_fail_msg("test_file_size()", __LINE__, __FILE__, "H5Pclose failed");
 
 }   // test_file_size()
 
@@ -424,18 +424,16 @@ static void test_file_size()
  * Programmer:  Binh-Minh Ribler
  *              July, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-const int       RANK = 2;
-const int       NX = 4;
-const int       NY = 5;
-const H5std_string      GROUPNAME ("group");
-const H5std_string      DSETNAME ("dataset");
-const H5std_string      DATTRNAME ("dataset attribute");
-const H5std_string      FATTRNAME ("file attribute");
-const H5std_string      DTYPENAME ("compound");
+const int   RANK = 2;
+const int   NX = 4;
+const int   NY = 5;
+const H5std_string  GROUPNAME ("group");
+const H5std_string  DSETNAME ("dataset");
+const H5std_string  DATTRNAME ("dataset attribute");
+const H5std_string  FATTRNAME ("file attribute");
+const H5std_string  DTYPENAME ("compound");
 
 // Compound datatype
 typedef struct s1_t {
@@ -502,15 +500,14 @@ static void test_file_name()
     {
         issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-
 }   // test_file_name()
 
 
-const int       RANK1 = 1;
-const int       ATTR1_DIM1 = 3;
-const H5std_string      FILE5("tfattrs.h5");
-const H5std_string      FATTR1_NAME ("file attribute 1");
-const H5std_string      FATTR2_NAME ("file attribute 2");
+const int   RANK1 = 1;
+const int   ATTR1_DIM1 = 3;
+const H5std_string  FILE5("tfattrs.h5");
+const H5std_string  FATTR1_NAME ("file attribute 1");
+const H5std_string  FATTR2_NAME ("file attribute 2");
 int fattr_data[ATTR1_DIM1]={512,-234,98123}; // Test data for file attribute
 int dattr_data[ATTR1_DIM1]={256,-123,1000}; // Test data for dataset attribute
 
@@ -627,11 +624,12 @@ static void test_file_attribute()
         issue_fail_msg("test_file_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_file_attribute()
+
 
-const H5std_string      FILE6("tfile5.h5");
-const H5std_string      ROOTGROUP("/");
-const H5std_string      GROUP1("/G1");
-const H5std_string      SUBGROUP3("/G1/G3");
+const H5std_string  FILE6("tfile5.h5");
+const H5std_string  ROOTGROUP("/");
+const H5std_string  GROUP1("/G1");
+const H5std_string  SUBGROUP3("/G1/G3");
 
 /*-------------------------------------------------------------------------
  * Function:    test_libver_bounds_real
@@ -744,13 +742,13 @@ static void test_libver_bounds()
 
 
 /*-------------------------------------------------------------------------
- * Function:        test_commonfg
+ * Function:    test_commonfg
  *
- * Purpose      Verify that H5File works as a root group.
+ * Purpose:     Verify that H5File works as a root group.
  *
- * Return       None
+ * Return:      None
  *
- * Programmer   Binh-Minh Ribler (use C version)
+ * Programmer:  Binh-Minh Ribler (use C version)
  *              March, 2015
  *
  *-------------------------------------------------------------------------
@@ -811,13 +809,13 @@ const H5std_string        FILE7("tfile7.h5");
 /*-------------------------------------------------------------------------
  * Function:    test_file_info
  *
- * Purpose      Verify that various properties in a file creation property
+ * Purpose:     Verify that various properties in a file creation property
  *              lists are stored correctly in the file and can be retrieved
  *              when the file is re-opened.
  *
- * Return       None
+ * Return:      None
  *
- * Programmer   Binh-Minh Ribler
+ * Programmer:  Binh-Minh Ribler
  *              February, 2017
  *
  *-------------------------------------------------------------------------
@@ -862,7 +860,7 @@ static void test_file_info()
         fcpl.close();
 
         // Get the file's version information.
-        file7.getFileInfo(finfo); // there's no C test for H5Fget_info
+        file7.getFileInfo(finfo);   // there's no C test for H5Fget_info
 
         // Close the file.
         file7.close();
@@ -874,7 +872,7 @@ static void test_file_info()
         FileCreatPropList fcpl2 = file7.getCreatePlist();
 
         // Get the file's version information.
-        file7.getFileInfo(finfo); // there's no C test for H5Fget_info
+        file7.getFileInfo(finfo);   // there's no C test for H5Fget_info
 
         // Retrieve the property values & check them.
         hsize_t userblock = fcpl2.getUserblock();
@@ -905,14 +903,12 @@ static void test_file_info()
 /*-------------------------------------------------------------------------
  * Function:    test_file
  *
- * Purpose      Main file testing routine
+ * Purpose:     Main file testing routine
  *
- * Return       None
+ * Return:      None
  *
- * Programmer   Binh-Minh Ribler (use C version)
+ * Programmer:  Binh-Minh Ribler (use C version)
  *              January 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -936,13 +932,11 @@ void test_file()
 /*-------------------------------------------------------------------------
  * Function:    cleanup_file
  *
- * Purpose      Cleanup temporary test files
+ * Purpose:     Cleanup temporary test files
  *
- * Return       none
+ * Return:      none
  *
- * Programmer   (use C version)
- *
- * Modifications:
+ * Programmer:  (use C version)
  *
  *-------------------------------------------------------------------------
  */

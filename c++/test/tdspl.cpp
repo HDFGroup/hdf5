@@ -14,7 +14,7 @@
 /*****************************************************************************
    FILE
    tdspl.cpp - HDF5 C++ testing the dataset memory and transfer property
-                list functionality
+               list functionality
 
  ***************************************************************************/
 
@@ -23,13 +23,10 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 

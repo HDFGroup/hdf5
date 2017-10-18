@@ -96,7 +96,32 @@ New Features
 
     C++ API
     -------
-    - None
+    - The following C++ API wrappers have been added to the C++ Library:
+
+        // Creates a binary object description of this datatype.
+        void DataType::encode() - C API H5Tencode()
+
+        // Returns the decoded type from the binary object description.
+        DataType::decode() - C API H5Tdecode()
+        ArrayType::decode() - C API H5Tdecode()
+        CompType::decode() - C API H5Tdecode()
+        DataType::decode() - C API H5Tdecode()
+        EnumType::decode() - C API H5Tdecode()
+        FloatType::decode() - C API H5Tdecode()
+        IntType::decode() - C API H5Tdecode()
+        StrType::decode() - C API H5Tdecode()
+        VarLenType::decode() - C API H5Tdecode()
+
+        // Three overloaded functions to retrieve information about an object
+        H5Location::getObjectInfo() - H5Oget_info()/H5Oget_info_by_name()
+
+      (BMR - 2017/10/17, HDFFV-10175)
+
+    - New constructors to open existing datatypes added in ArrayType,
+      CompType, DataType, EnumType, FloatType, IntType, StrType, and
+      VarLenType.
+
+      (BMR - 2017/10/17, HDFFV-10175)
 
 
     High-Level APIs

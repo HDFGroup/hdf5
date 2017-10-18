@@ -24,17 +24,14 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
-#include "h5test.h"
-#include "H5Cpp.h"
+#include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
+#include "h5test.h"
 #include "h5cpputil.h"
 
 
@@ -51,8 +48,6 @@ using namespace H5;
  *
  * Programmer:  Binh-Minh Ribler (using C code segment for reporting tests)
  *              Friday, February 6, 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -140,8 +135,6 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
  * Programmer:  Binh-Minh Ribler (using C code segment for checking values)
  *              Friday, February 6, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
@@ -169,8 +162,6 @@ int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
  *
  * Programmer:  Binh-Minh Ribler
  *              May 2, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

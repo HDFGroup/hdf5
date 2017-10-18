@@ -22,13 +22,10 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
@@ -98,8 +95,6 @@ typedef struct {
  * Programmer:  Binh-Minh Ribler (using C version)
  *              January, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_classes()
@@ -136,8 +131,6 @@ static void test_classes()
  *
  * Programmer:  Binh-Minh Ribler (using C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -191,8 +184,6 @@ static void test_copy()
  *
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -312,8 +303,6 @@ static void test_query()
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 const char* filename1 = "dtypes1.h5";
@@ -388,8 +377,6 @@ static void test_transient ()
  *
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -545,14 +532,12 @@ static void test_named ()
 /*-------------------------------------------------------------------------
  * Function:    test_encode_decode
  *
- * Purpose      Test datatype encode/decode functionality.
+ * Purpose:     Test datatype encode/decode functionality.
  *
- * Return       None
+ * Return:      None
  *
- * Programmer   Binh-Minh Ribler (using C version)
+ * Programmer:  Binh-Minh Ribler (using C version)
  *              October, 2017
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -796,8 +781,6 @@ void test_types()
  *
  * Programmer:  Quincey Koziol
  *              September 10, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
