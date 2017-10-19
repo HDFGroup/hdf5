@@ -95,7 +95,8 @@ May, 2017 (1.8.19)
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::createAttribute
-///\brief       Deprecated - Creates an attribute for a group, dataset, or named datatype.
+///\brief       Deprecated - replaced by H5Object::createAttribute
+//  brief       Creates an attribute for a group, dataset, or named datatype.
 ///\param       name - IN: Name of the attribute
 ///\param       data_type - IN: Datatype for the attribute
 ///\param       data_space - IN: Dataspace for the attribute - only simple
@@ -134,7 +135,8 @@ Attribute H5Location::createAttribute(const char* name, const DataType& data_typ
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::createAttribute
-///\brief       Deprecated - This is an overloaded member function, provided for convenience.
+///\brief       Deprecated - replaced by H5Object::createAttribute
+//  brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes
 ///             a reference to an \c H5std_string for \a name.
 // Programmer   Binh-Minh Ribler - 2000
@@ -146,7 +148,8 @@ Attribute H5Location::createAttribute(const H5std_string& name, const DataType& 
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::openAttribute
-///\brief       Deprecated - Opens an attribute given its name.
+///\brief       Deprecated - replaced by H5Object::openAttribute
+//  brief       Opens an attribute given its name.
 ///\param       name - IN: Name of the attribute
 ///\return      Attribute instance
 ///\exception   H5::AttributeIException
@@ -169,9 +172,11 @@ Attribute H5Location::openAttribute(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::openAttribute
-///\brief       Deprecated - This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes
-///             a reference to an \c H5std_string for \a name.
+///\brief       Deprecated - replaced by H5Object::openAttribute
+//  brief       This is an overloaded member function, provided for convenience.
+//              It differs from the above function in that it takes
+//              a reference to an \c H5std_string for \a name.
+///\param       name - IN: Name of the attribute
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Location::openAttribute(const H5std_string& name) const
@@ -181,7 +186,8 @@ Attribute H5Location::openAttribute(const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::openAttribute
-///\brief       Deprecated - Opens an attribute given its index.
+///\brief       Deprecated - replaced by H5Object::openAttribute
+//  brief       Opens an attribute given its index.
 ///\param       idx - IN: Index of the attribute, a 0-based, non-negative integer
 ///\return      Attribute instance
 ///\exception   H5::AttributeIException
@@ -205,7 +211,7 @@ Attribute H5Location::openAttribute(const unsigned int idx) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::iterateAttrs
-///\brief       Deprecated - Iterates a user's function over all the attributes of an H5
+///\brief       Iterates a user's function over all the attributes of an H5
 ///             object, which may be a group, dataset or named datatype.
 ///\param       user_op - IN: User's function to operate on each attribute
 ///\param       _idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
@@ -250,7 +256,8 @@ int H5Location::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_d
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::attrExists
-///\brief       Deprecated - Checks whether the named attribute exists at this location.
+///\brief       Deprecated - replaced by H5Object::attrExists()
+//  brief       Checks whether the named attribute exists at this location.
 ///\param       name - IN: Name of the attribute to be queried
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2013
@@ -271,10 +278,12 @@ bool H5Location::attrExists(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::attrExists
-///\brief       Deprecated - This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes
-///             a reference to an \c H5std_string for \a name.
-// Programmer   Binh-Minh Ribler - 2000
+///\brief       Deprecated - replaced by H5Object::attrExists()
+//  brief       This is an overloaded member function, provided for convenience.
+//              It differs from the above function in that it takes
+//              a reference to an \c H5std_string for \a name.
+///\param       name - IN: Name of the attribute to be queried
+// Programmer   Binh-Minh Ribler - 2013
 //--------------------------------------------------------------------------
 bool H5Location::attrExists(const H5std_string& name) const
 {
@@ -283,7 +292,8 @@ bool H5Location::attrExists(const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::removeAttr
-///\brief       Deprecated - Removes the named attribute from this object.
+///\brief       Deprecated - replaced by H5Object::removeAttr()
+//  brief       Removes the named attribute from this object.
 ///\param       name - IN: Name of the attribute to be removed
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
@@ -297,9 +307,11 @@ void H5Location::removeAttr(const char* name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::removeAttr
-///\brief       Deprecated - This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes
-///             a reference to an \c H5std_string for \a name.
+///\brief       Deprecated - replaced by H5Object::removeAttr()
+//  brief       This is an overloaded member function, provided for convenience.
+//              It differs from the above function in that it takes
+//              a reference to an \c H5std_string for \a name.
+///\param       name - IN: Name of the attribute to be removed
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Location::removeAttr(const H5std_string& name) const
@@ -309,7 +321,8 @@ void H5Location::removeAttr(const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::renameAttr
-///\brief       Deprecated - Renames the named attribute from this object.
+///\brief       Deprecated - replaced by H5Object::renameAttr()
+//  brief       Renames the named attribute from this object.
 ///\param       oldname - IN: Name of the attribute to be renamed
 ///\param       newname - IN: New name ame of the attribute
 ///\exception   H5::AttributeIException
@@ -324,10 +337,13 @@ void H5Location::renameAttr(const char* oldname, const char* newname) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::renameAttr
-///\brief       Deprecated - This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes
-///             a reference to an \c H5std_string for the names.
-///
+///\brief       Deprecated - replaced by H5Object::renameAttr()
+//  brief       This is an overloaded member function, provided for convenience.
+//              It differs from the above function in that it takes
+//              a reference to an \c H5std_string for the names.
+//
+///\param       oldname - IN: Name of the attribute to be renamed
+///\param       newname - IN: New name ame of the attribute
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
@@ -338,8 +354,8 @@ void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& new
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getNumAttrs
-///\brief       Deprecated - Returns the number of attributes attached to
-///                          this HDF5 object.
+///\brief       Deprecated - replaced by H5Object::getNumAttrs()
+//  brief       Returns the number of attributes attached to this HDF5 object.
 ///\return      Number of attributes
 ///\exception   H5::AttributeIException
 // Programmer   Binh-Minh Ribler - 2000
@@ -348,18 +364,18 @@ void H5Location::renameAttr(const H5std_string& oldname, const H5std_string& new
 //--------------------------------------------------------------------------
 int H5Location::getNumAttrs() const
 {
-   H5O_info_t oinfo;    /* Object info */
+   H5O_info_t objinfo;    /* Object info */
 
-    if(H5Oget_info(getId(), &oinfo) < 0)
+    if(H5Oget_info(getId(), &objinfo) < 0)
         throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
     else
-        return(static_cast<int>(oinfo.num_attrs));
+        return(static_cast<int>(objinfo.num_attrs));
 }
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::nameExists
-///\brief       Checks if a link of a given name exists in a location
-///\param       name - IN: Searched name
+///\brief       Checks if a link of a given name exists in a location.
+///\param       name - IN: Searched name - \c char*
 ///\param       lapl - IN: Link access property list
 ///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - Nov, 2016
@@ -380,8 +396,8 @@ bool H5Location::nameExists(const char* name, const LinkAccPropList& lapl) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::nameExists
-///\brief       Checks if a link of a given name exists in a location
-///\param       name - IN: Searched name
+///\brief       Checks if a link of a given name exists in a location.
+///\param       name - IN: Searched name - \c H5std_string
 ///\param       lapl - IN: Link access property list
 ///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - Dec, 2016
@@ -430,6 +446,53 @@ H5std_string H5Location::getFileName() const
     }
     catch (LocationException& E) {
         throw FileIException(inMemFunc("getFileName"), E.getDetailMsg());
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjectInfo
+///\brief       Retrieve information about an object, specified by location.
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - Aug, 2017
+//--------------------------------------------------------------------------
+void H5Location::getObjectInfo(H5O_info_t *objinfo) const
+{
+    herr_t ret_value = H5Oget_info(getId(), objinfo);
+    if (ret_value < 0)
+    {
+        throw LocationException(inMemFunc("getObjectInfo"), "H5Oget_info failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjectInfo
+///\brief       Retrieve information about an object, specified by name.
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - Aug, 2017
+//--------------------------------------------------------------------------
+void H5Location::getObjectInfo(const char *name, H5O_info_t *objinfo,
+                        const LinkAccPropList& lapl) const
+{
+    herr_t ret_value = H5Oget_info_by_name(getId(), name, objinfo, lapl.getId());
+    if (ret_value < 0)
+    {
+        throw LocationException(inMemFunc("getObjectInfo"), "H5Oget_info_by_name failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjectInfo
+///\brief       Retrieve information about an object, specified by name.
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - Aug, 2017
+//--------------------------------------------------------------------------
+void H5Location::getObjectInfo(const H5std_string& name, H5O_info_t *objinfo,
+                        const LinkAccPropList& lapl) const
+{
+    herr_t ret_value = H5Oget_info_by_name(getId(), name.c_str(), objinfo, lapl.getId());
+    if (ret_value < 0)
+    {
+        throw LocationException(inMemFunc("getObjectInfo"), "H5Oget_info_by_name failed");
     }
 }
 
