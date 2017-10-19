@@ -4420,9 +4420,6 @@ int ull2float(unsigned long long ull_value, float *f_value)
 
     HDmemcpy(f_value, buf, dst_size);
 
-    if (buf)
-        HDfree(buf);
-
 done:
     H5E_BEGIN_TRY {
         H5Pclose(dxpl_id);
