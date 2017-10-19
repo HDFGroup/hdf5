@@ -205,8 +205,9 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                 opt_opt = l_opts[i].shortval;
 
                 if (l_opts[i].has_arg != no_arg) {
-                    if (arg[len] == '=')
+                    if (arg[len] == '=') {
                         opt_arg = &arg[len + 1];
+                    }
                     else if (l_opts[i].has_arg != optional_arg) {
                         if (opt_ind < (argc - 1))
                             if (argv[opt_ind + 1][0] != '-')
@@ -295,13 +296,16 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
             opt_ind++;
             /* we do have an extra argument, check if not last */
             if ( (opt_ind+1) < argc ) {
-                if ( argv[opt_ind][0] != '-' )
+                if ( argv[opt_ind][0] != '-' ) {
                     opt_arg = argv[opt_ind++];
-                else
+                }
+                else {
                     opt_arg = NULL;
+                }
             }
-            else
+            else {
                 opt_arg = NULL;
+            }
         }
         else {
             /* set up to look at next char in token, next time */
