@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.10.2-snap2], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.10.2-snap3], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -1063,6 +1063,7 @@ esac
 case "`uname`" in
   CYGWIN*)
     AC_CHECK_HEADERS([io.h sys/timeb.h])
+    UNAME_CYGWIN="yes"
     ;;
   MINGW*)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
