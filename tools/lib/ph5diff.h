@@ -32,7 +32,7 @@ struct diff_mpi_args
 {
     char  name1[256];
     char  name2[256];
-    diff_opt_t  options;
+    diff_opt_t  opts;
     diff_args_t argdata;  /* rest args */
 };
 

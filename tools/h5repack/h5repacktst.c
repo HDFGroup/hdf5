@@ -2652,9 +2652,9 @@ int make_all_filters(hid_t loc_id)
 
     /* close */
     if(H5Tclose(dtid) < 0)
-        return -1;
+        goto out;
     if(H5Dclose(dsid) < 0)
-        return -1;
+        goto out;
 
     if(H5Sclose(sid) < 0)
         goto out;
@@ -2666,6 +2666,8 @@ int make_all_filters(hid_t loc_id)
 out:
     H5E_BEGIN_TRY
     {
+        H5Tclose(dtid);
+        H5Dclose(dsid);
         H5Pclose(dcpl);
         H5Sclose(sid);
     } H5E_END_TRY;
