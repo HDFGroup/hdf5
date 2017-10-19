@@ -44,14 +44,10 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
-#include "h5test.h"     // C test header file
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 

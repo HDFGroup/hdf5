@@ -22,24 +22,21 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
 #include "h5cpputil.h"  // C++ utilility header file
 
 /* Number of elements in each test */
-#define NTESTELEM       100000
+#define NTESTELEM 100000
 
 typedef struct complex_t {
-    double                  re;
-    double                  im;
+    double re;
+    double im;
 } complex_t;
 
 
@@ -52,8 +49,6 @@ typedef struct complex_t {
  *
  * Programmer:  Binh-Minh Ribler (using C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -90,8 +85,6 @@ static void test_compound_1()
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_2()
@@ -103,11 +96,11 @@ static void test_compound_2()
         int e, d, c[4], b, a;
     } dst_typ_t;
 
-    src_typ_t     *s_ptr;
-    dst_typ_t     *d_ptr;
-    const int      nelmts = NTESTELEM;
-    const hsize_t  four = 4;
-    int            i;
+    src_typ_t *s_ptr;
+    dst_typ_t *d_ptr;
+    const int nelmts = NTESTELEM;
+    const hsize_t four = 4;
+    int i;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
     ArrayType *array_dt = NULL;
 
@@ -115,9 +108,9 @@ static void test_compound_2()
     SUBTEST("Compound Element Reordering");
     try {
         // Sizes should be the same, but be careful just in case
-        buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg = (unsigned char*)malloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char*)malloc(nelmts * sizeof(src_typ_t));
+        buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+        bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
+        orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
         for (i=0; i<nelmts; i++) {
             s_ptr = ((src_typ_t*)orig) + i;
             s_ptr->a    = i*8+0;
@@ -183,9 +176,9 @@ static void test_compound_2()
             }
         }
         // Release resources
-        free(buf);
-        free(bkg);
-        free(orig);
+        HDfree(buf);
+        HDfree(bkg);
+        HDfree(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -215,8 +208,6 @@ static void test_compound_2()
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_3()
@@ -228,11 +219,11 @@ static void test_compound_3()
         int a,    c[4],    e;
     } dst_typ_t;
 
-    src_typ_t     *s_ptr;
-    dst_typ_t     *d_ptr;
-    int            i;
-    const int      nelmts = NTESTELEM;
-    const hsize_t  four = 4;
+    src_typ_t *s_ptr;
+    dst_typ_t *d_ptr;
+    int i;
+    const int nelmts = NTESTELEM;
+    const hsize_t four = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
     ArrayType* array_dt = NULL;
 
@@ -240,9 +231,9 @@ static void test_compound_3()
     SUBTEST("Compound Datatype Subset Conversions");
     try {
         /* Initialize */
-        buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg = (unsigned char*)malloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char*)malloc(nelmts * sizeof(src_typ_t));
+        buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+        bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
+        orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
         for (i=0; i<nelmts; i++) {
             s_ptr = ((src_typ_t*)orig) + i;
             s_ptr->a    = i*8+0;
@@ -305,9 +296,9 @@ static void test_compound_3()
         } // for
 
         /* Release resources */
-        free(buf);
-        free(bkg);
-        free(orig);
+        HDfree(buf);
+        HDfree(bkg);
+        HDfree(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -337,8 +328,6 @@ static void test_compound_3()
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_4()
@@ -355,11 +344,11 @@ static void test_compound_4()
         int e;
     } dst_typ_t;
 
-    src_typ_t     *s_ptr;
-    dst_typ_t     *d_ptr;
-    int            i;
-    const int      nelmts = NTESTELEM;
-    const hsize_t  four = 4;
+    src_typ_t *s_ptr;
+    dst_typ_t *d_ptr;
+    int i;
+    const int nelmts = NTESTELEM;
+    const hsize_t four = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
     ArrayType* array_dt = NULL;
 
@@ -367,9 +356,9 @@ static void test_compound_4()
     SUBTEST("Compound Element Shrinking & Reordering");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg = (unsigned char*)malloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char*)malloc(nelmts * sizeof(src_typ_t));
+        buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+        bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
+        orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
         for (i=0; i<nelmts; i++) {
             s_ptr = ((src_typ_t*)orig) + i;
             s_ptr->a    = i*8+0;
@@ -378,7 +367,7 @@ static void test_compound_4()
             s_ptr->c[1] = i*8+3;
             s_ptr->c[2] = i*8+4;
             s_ptr->c[3] = i*8+5;
-            s_ptr->d        = (i*8+6) & 0x7fff;
+            s_ptr->d    = (i*8+6) & 0x7fff;
             s_ptr->e    = i*8+7;
         }
         memcpy(buf, orig, nelmts*sizeof(src_typ_t));
@@ -437,9 +426,9 @@ static void test_compound_4()
         } // for
 
         /* Release resources */
-        free(buf);
-        free(bkg);
-        free(orig);
+        HDfree(buf);
+        HDfree(bkg);
+        HDfree(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -470,8 +459,6 @@ static void test_compound_4()
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_5()
@@ -488,12 +475,12 @@ static void test_compound_5()
         int     coll_ids[4];
     } dst_typ_t;
 
-    hsize_t      dims[1] = {4};
-    src_typ_t  src[2] = {{"one", 102, {104, 105, 106, 107}},
-                          {"two", 202, {204, 205, 206, 207}}};
-    dst_typ_t  *dst;
-    void        *buf = calloc(2, sizeof(dst_typ_t));
-    void        *bkg = calloc(2, sizeof(dst_typ_t));
+    hsize_t dims[1] = {4};
+    src_typ_t src[2] = {{"one", 102, {104, 105, 106, 107}},
+                        {"two", 202, {204, 205, 206, 207}}};
+    dst_typ_t *dst;
+    void *buf = HDcalloc(2, sizeof(dst_typ_t));
+    void *bkg = HDcalloc(2, sizeof(dst_typ_t));
     ArrayType* array_dt = NULL;
 
     // Output message about test being performed
@@ -545,8 +532,8 @@ static void test_compound_5()
         { H5_FAILED(); }
 
         /* Free memory buffers */
-        free(buf);
-        free(bkg);
+        HDfree(buf);
+        HDfree(bkg);
         dst = NULL;
         PASSED();
     }   // end of try block
@@ -573,8 +560,6 @@ static void test_compound_5()
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_compound_6()
@@ -589,23 +574,23 @@ static void test_compound_6()
         long d;
     } dst_typ_t;
 
-    src_typ_t     *s_ptr;
-    dst_typ_t     *d_ptr;
-    int            i;
-    const int      nelmts = NTESTELEM;
+    src_typ_t *s_ptr;
+    dst_typ_t *d_ptr;
+    int i;
+    const int nelmts = NTESTELEM;
     unsigned char *buf=NULL, *orig=NULL, *bkg=NULL;
 
     // Output message about test being performed
     SUBTEST("Compound Element Growing");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg = (unsigned char*)malloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char*)malloc(nelmts * sizeof(src_typ_t));
+        buf = (unsigned char*)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
+        bkg = (unsigned char*)HDmalloc(nelmts * sizeof(dst_typ_t));
+        orig = (unsigned char*)HDmalloc(nelmts * sizeof(src_typ_t));
         for (i=0; i<nelmts; i++) {
             s_ptr = ((src_typ_t*)orig) + i;
-            s_ptr->b    = (i*8+1) & 0x7fff;
-            s_ptr->d    = (i*8+6) & 0x7fff;
+            s_ptr->b = (i*8+1) & 0x7fff;
+            s_ptr->d = (i*8+6) & 0x7fff;
         }
         memcpy(buf, orig, nelmts*sizeof(src_typ_t));
 
@@ -638,9 +623,9 @@ static void test_compound_6()
         } // for
 
         /* Release resources */
-        free(buf);
-        free(bkg);
-        free(orig);
+        HDfree(buf);
+        HDfree(bkg);
+        HDfree(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -664,8 +649,6 @@ static void test_compound_6()
  *
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -730,8 +713,6 @@ static void test_compound_7()
  *
  * Programmer:  Binh-Minh Ribler (use partial C version test_ooo_order)
  *              March, 2014
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -821,15 +802,12 @@ static void test_compound_set_size()
  * Programmer:  Binh-Minh Ribler
  *              January 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"
 void test_compound()
 {
     // Output message about test being performed
-    //MESSAGE("Testing Compound Data Type operations\n");
     MESSAGE(5, ("Testing Compound Data Type operations\n"));
 
     test_compound_1();  // various things about compound data types
@@ -849,8 +827,6 @@ void test_compound()
  * Purpose:     Cleanup temporary test files - nothing at this time.
  *
  * Return:      none
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

@@ -22,13 +22,10 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
@@ -60,8 +57,6 @@ const H5std_string      DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset in
  *
  * Programmer:  Binh-Minh Ribler
  *              Friday, March 4, 2014
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -159,8 +154,6 @@ static void test_get_objname()
  * Programmer:  Binh-Minh Ribler
  *              March 4, 2014
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_get_objname_ontypes()
@@ -244,8 +237,6 @@ static void test_get_objname_ontypes()
  * Programmer:  Binh-Minh Ribler
  *              Friday, March 4, 2014
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_get_objtype()
@@ -301,14 +292,12 @@ static void test_get_objtype()
 /*-------------------------------------------------------------------------
  * Function:    test_open_object_header
  *
- * Purpose      Test H5Location::openObjId function.
+ * Purpose:     Test H5Location::openObjId function.
  *
- * Return       None
+ * Return:      None
  *
- * Programmer   Binh-Minh Ribler (use C version)
+ * Programmer:  Binh-Minh Ribler (use C version)
  *              May 15, 2017
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -428,8 +417,6 @@ static void test_open_object_header()
  * Programmer:  Binh-Minh Ribler
  *              May 15, 2017
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_is_valid()
@@ -483,8 +470,6 @@ static void test_is_valid()
  * Programmer:  Binh-Minh Ribler
  *              Friday, Mar 4, 2014
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -509,8 +494,6 @@ void test_object()
  * Return:      none
  *
  * Programmer:  (use C version)
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

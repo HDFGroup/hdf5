@@ -1,4 +1,4 @@
-HDF5 version 1.8.20-snap7 currently under development
+HDF5 version 1.8.20-snap8 currently under development
 ================================================================================
 
 INTRODUCTION
@@ -96,7 +96,38 @@ New Features
 
     C++ API
     -------
-    - None
+    - The following C++ API wrappers have been added to the C++ Library:
+
+        // Creates a binary object description of this datatype.
+        void DataType::encode() - C API H5Tencode()
+
+        // Returns the decoded type from the binary object description.
+        DataType::decode() - C API H5Tdecode()
+        ArrayType::decode() - C API H5Tdecode()
+        CompType::decode() - C API H5Tdecode()
+        DataType::decode() - C API H5Tdecode()
+        EnumType::decode() - C API H5Tdecode()
+        FloatType::decode() - C API H5Tdecode()
+        IntType::decode() - C API H5Tdecode()
+        StrType::decode() - C API H5Tdecode()
+        VarLenType::decode() - C API H5Tdecode()
+
+        // Three overloaded functions to retrieve information about an object
+        H5Location::getObjectInfo() - H5Oget_info()/H5Oget_info_by_name()
+
+      (BMR - 2017/10/17, HDFFV-10175)
+
+    - New constructors to open existing datatypes added in ArrayType,
+      CompType, DataType, EnumType, FloatType, IntType, StrType, and
+      VarLenType.
+
+      (BMR - 2017/10/17, HDFFV-10175)
+
+    - A document is added to the HDF5 C++ API Reference Manual to show the
+      mapping from a C API to C++ wrappers.  It can be found from the main
+      page of the C++ API Reference Manual.
+
+      (BMR - 2017/10/17, HDFFV-10151)
 
 
     High-Level APIs
@@ -233,7 +264,16 @@ Bug Fixes since HDF5-1.8.19
 
     C++ API
     -------
-    - None
+    - Marked the following functions deprecated because they were moved to
+      class H5Object:
+        H5Location::createAttribute()
+        H5Location::openAttribute()
+        H5Location::attrExists()
+        H5Location::removeAttr()
+        H5Location::renameAttr()
+        H5Location::getNumAttrs()
+
+      (BMR - 2017/10/17)
 
 
     High-Level APIs:

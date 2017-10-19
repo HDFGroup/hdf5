@@ -23,13 +23,10 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
@@ -1290,6 +1287,14 @@ static void test_attr_dtype_shared()
         // Commit datatype to file
         dtype.commit(fid1, TYPE1_NAME);
 
+        // Retrieve and verify information about the type
+        H5O_info_t oinfo;
+        fid1.getObjectInfo(TYPE1_NAME, &oinfo);
+        if (oinfo.type != H5O_TYPE_NAMED_DATATYPE)
+            TestErrPrintf("Line %d: object type wrong!\n", __LINE__);
+        verify_val(oinfo.num_attrs, 0, "DataType::getObjinfo reference count", __LINE__, __FILE__);
+        verify_val((int)oinfo.rc, 1, "DataType::getObjinfo reference count", __LINE__, __FILE__);
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
@@ -1878,8 +1883,6 @@ void test_attr()
  *
  * Programmer:  Albert Cheng
  *              July 2, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

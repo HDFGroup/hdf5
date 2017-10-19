@@ -51,6 +51,15 @@ class H5_DLLCPP H5Location : public IdComponent {
         // Gets the name of the file, specified by this location.
         H5std_string getFileName() const;
 
+        // Retrieves information about an object at this location
+            // specified by location
+        void getObjectInfo(H5O_info_t *oinfo) const;
+            // specified by the object's name
+        void getObjectInfo(const char *name, H5O_info_t *oinfo,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getObjectInfo(const H5std_string& name, H5O_info_t *oinfo,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
         // Determines the number of attributes at this location.
         // - moved to H5Object (1.8.20)
         int getNumAttrs() const;    // Deprecated
