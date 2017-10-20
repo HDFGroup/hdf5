@@ -161,6 +161,17 @@ Bug Fixes since HDF5-1.8.19
 
     Library
     -------
+    - H5Zfilter_avail in H5Z.c
+
+      The public function checked for plugins, while the private
+      function did not.
+
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+
+      (ADB - 2017/10/10, HDFFV-10297)
+
     - Fix H5HL_offset_into()
 
       (1) Fix H5HL_offset_into() to return error when offset exceeds heap data
@@ -183,6 +194,18 @@ Bug Fixes since HDF5-1.8.19
 
     Tools
     -----
+    - h5repack
+
+      h5repack failed to copy a dataset with existing filter.
+
+      Reworked code for h5repack and h5diff code in tools library. Added
+      improved error handling, cleanup of resources and checks of calls.
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+
+      (ADB - 2017/10/10, HDFFV-10297)
+
     - h5repack
 
       h5repack always set the User Defined filter flag to H5Z_FLAG_MANDATORY.
@@ -220,6 +243,18 @@ Bug Fixes since HDF5-1.8.19
       NULL strings and setting the lengths to zero.
 
       (ADB - 2017/07/25, HDFFV-10246)
+
+    - h5import
+
+      h5import crashed trying to import data from a subset of a dataset.
+
+      Improved h5import by adding the SUBSET keyword. h5import understands
+      to use the Count times the Block as the size of the dimensions.
+      Added INPUT_B_ORDER keyword to old-style configuration files.
+      The import from h5dump function expects the binary files to use native
+      types (FILE '-b' option) in the binary file.
+
+      (ADB - 2017/06/15, HDFFV-10219)
 
 
     Fortran API

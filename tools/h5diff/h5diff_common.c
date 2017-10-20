@@ -52,7 +52,7 @@ static struct long_options l_opts[] = {
  *
  *-------------------------------------------------------------------------
  */
-static void check_options(diff_opt_t* options)
+static void check_options(diff_opt_t* opts)
 {
     /*--------------------------------------------------------------
      * check for mutually exclusive options
@@ -61,7 +61,7 @@ static void check_options(diff_opt_t* options)
     /* check between -d , -p, --use-system-epsilon.
      * These options are mutually exclusive.
      */
-    if ((options->d + options->p + options->use_system_epsilon) > 1) {
+    if ((opts->d + opts->p + opts->use_system_epsilon) > 1) {
         printf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
         printf("use no more than one.\n");
         printf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 Reference Manual'.\n", PROGRAMNAME);
@@ -84,27 +84,27 @@ void parse_command_line(int argc,
                         const char** fname2,
                         const char** objname1,
                         const char** objname2,
-                        diff_opt_t* options)
+                        diff_opt_t* opts)
 {
     int i;
     int opt;
     struct exclude_path_list *exclude_head, *exclude_prev, *exclude_node;
 
     /* process the command-line */
-    memset(options, 0, sizeof (diff_opt_t));
+    memset(opts, 0, sizeof (diff_opt_t));
 
     /* assume equal contents initially */
-    options->contents = 1;
+    opts->contents = 1;
 
     /* NaNs are handled by default */
-    options->do_nans = 1;
+    opts->do_nans = 1;
 
     /* not Listing objects that are not comparable */
-    options->m_list_not_cmp = 0;
+    opts->m_list_not_cmp = 0;
 
     /* initially no not-comparable. */
     /**this is bad in mixing option with results**/
-    options->not_cmp=0;
+    opts->not_cmp=0;
 
     /* init for exclude-path option */
     exclude_head = NULL;
@@ -125,7 +125,7 @@ void parse_command_line(int argc,
             h5diff_exit(EXIT_SUCCESS);
 
         case 'v':
-            options->m_verbose = 1;
+            opts->m_verbose = 1;
             /* This for loop is for handling style like
              * -v, -v1, --verbose, --verbose=1.
              */
@@ -135,11 +135,11 @@ void parse_command_line(int argc,
                  */
                 if (!strcmp (argv[i], "-v")) {  /* no arg */
                     opt_ind--;
-                    options->m_verbose_level = 0;
+                    opts->m_verbose_level = 0;
                     break;
                 }
                 else if (!strncmp (argv[i], "-v", (size_t)2)) {
-                    options->m_verbose_level = atoi(&argv[i][2]);
+                    opts->m_verbose_level = atoi(&argv[i][2]);
                     break;
                 }
 
@@ -147,11 +147,11 @@ void parse_command_line(int argc,
                  * long opt
                  */
                 if (!strcmp (argv[i], "--verbose")) {  /* no arg */
-                    options->m_verbose_level = 0;
+                    opts->m_verbose_level = 0;
                     break;
                 }
                 else if ( !strncmp (argv[i], "--verbose", (size_t)9) && argv[i][9]=='=') {
-                    options->m_verbose_level = atoi(&argv[i][10]);
+                    opts->m_verbose_level = atoi(&argv[i][10]);
                     break;
                 }
             }
@@ -159,19 +159,19 @@ void parse_command_line(int argc,
 
         case 'q':
             /* use quiet mode; supress the message "0 differences found" */
-            options->m_quiet = 1;
+            opts->m_quiet = 1;
             break;
 
         case 'r':
-            options->m_report = 1;
+            opts->m_report = 1;
             break;
 
         case 'l':
-            options->follow_links = TRUE;
+            opts->follow_links = TRUE;
             break;
 
         case 'x':
-            options->no_dangle_links = 1;
+            opts->no_dangle_links = 1;
             break;
 
         case 'S':
@@ -179,7 +179,7 @@ void parse_command_line(int argc,
             break;
 
         case 'E':
-            options->exclude_path = 1;
+            opts->exclude_path = 1;
 
             /* create linked list of excluding objects */
             if( (exclude_node = (struct exclude_path_list*) HDmalloc(sizeof(struct exclude_path_list))) == NULL) {
@@ -206,65 +206,64 @@ void parse_command_line(int argc,
             break;
 
         case 'd':
-            options->d=1;
+            opts->d=1;
 
             if (check_d_input(opt_arg) == - 1) {
                 printf("<-d %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            options->delta = atof(opt_arg);
+            opts->delta = atof(opt_arg);
 
             /* -d 0 is the same as default */
-            if (H5_DBL_ABS_EQUAL(options->delta, (double)0.0F))
-                options->d=0;
+            if (H5_DBL_ABS_EQUAL(opts->delta, (double)0.0F))
+                opts->d=0;
             break;
 
         case 'p':
-            options->p=1;
+            opts->p=1;
             if (check_p_input(opt_arg) == -1) {
                 printf("<-p %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            options->percent = atof(opt_arg);
+            opts->percent = atof(opt_arg);
 
             /* -p 0 is the same as default */
-            if (options->percent == 0)
-            options->p = 0;
-
+            if (H5_DBL_ABS_EQUAL(opts->percent, (double)0.0F))
+                opts->p = 0;
             break;
 
         case 'n':
-            options->n=1;
+            opts->n=1;
             if ( check_n_input(opt_arg) == -1) {
                 printf("<-n %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            options->count = HDstrtoull(opt_arg, NULL, 0);
+            opts->count = HDstrtoull(opt_arg, NULL, 0);
             break;
 
         case 'N':
-            options->do_nans = 0;
+            opts->do_nans = 0;
             break;
 
         case 'c':
-            options->m_list_not_cmp = 1;
+            opts->m_list_not_cmp = 1;
             break;
 
         case 'e':
-            options->use_system_epsilon = 1;
+            opts->use_system_epsilon = 1;
             break;
         }
     }
 
     /* check options */
-    check_options(options);
+    check_options(opts);
 
     /* if exclude-path option is used, keep the exclude path list */
-    if (options->exclude_path)
-        options->exclude = exclude_head;
+    if (opts->exclude_path)
+        opts->exclude = exclude_head;
 
     /* check for file names to be processed */
     if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL) {
@@ -301,23 +300,23 @@ void parse_command_line(int argc,
  *-------------------------------------------------------------------------
  */
 
- void  print_info(diff_opt_t* options)
+ void  print_info(diff_opt_t* opts)
  {
-     if (options->m_quiet || options->err_stat)
+     if (opts->m_quiet || opts->err_stat)
          return;
 
-     if (options->cmn_objs == 0) {
+     if (opts->cmn_objs == 0) {
          printf("No common objects found. Files are not comparable.\n");
-         if (!options->m_verbose)
+         if (!opts->m_verbose)
              printf("Use -v for a list of objects.\n");
      }
 
-     if (options->not_cmp == 1) {
-         if (options->m_list_not_cmp == 0) {
+     if (opts->not_cmp == 1) {
+         if (opts->m_list_not_cmp == 0) {
              printf("--------------------------------\n");
              printf("Some objects are not comparable\n");
              printf("--------------------------------\n");
-             if (options->m_verbose)
+             if (opts->m_verbose)
                  printf("Use -c for a list of objects without details of differences.\n");
              else
                  printf("Use -c for a list of objects.\n");
