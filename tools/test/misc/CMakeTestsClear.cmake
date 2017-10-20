@@ -55,6 +55,36 @@
 ##############################################################################
 ##############################################################################
 
+  # Need special dependencies for tests that use the same reference file
+  # This is an issue on Windows
+  macro (ADD_H5_USAGE testname resultfile resultcode)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5CLEAR_USAGE-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+                  testfiles/${testname}.out
+                  testfiles/${testname}.out.err
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5CLEAR_USAGE-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
+      add_test (
+          NAME H5CLEAR_USAGE-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5CLEAR_USAGE-${testname} PROPERTIES DEPENDS H5CLEAR_USAGE-${testname}-clear-objects)
+      set (last_test "H5CLEAR_USAGE-${testname}")
+    endif ()
+  endmacro ()
+
   macro (ADD_H5_CMP testname resultfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -212,10 +242,10 @@ endif()
 # "h5clear -m -s junk.h5"                   (valid 2 options, nonexisting file)
 # "h5clear -m orig_h5clear_sec2_v2.h5"      (valid 1 option, existing file, no cache image)
 # "h5clear -s -m orig_h5clear_sec2_v0.h5"   (valid 2 options, existing file, no cache image)
-  ADD_H5_CMP (h5clr_usage_h h5clear_usage 0 "-h")
-  ADD_H5_CMP (h5clr_usage h5clear_usage 1 "")
-  ADD_H5_CMP (h5clr_usage_junk h5clear_usage 1 "" junk.h5)
-  ADD_H5_CMP (h5clr_usage_none h5clear_usage 1 "" orig_h5clear_sec2_v3.h5)
+  ADD_H5_USAGE (h5clr_usage_h h5clear_usage 0 "-h")
+  ADD_H5_USAGE (h5clr_usage h5clear_usage 1 "")
+  ADD_H5_USAGE (h5clr_usage_junk h5clear_usage 1 "" junk.h5)
+  ADD_H5_USAGE (h5clr_usage_none h5clear_usage 1 "" orig_h5clear_sec2_v3.h5)
   ADD_H5_CMP (h5clr_missing_file_m h5clear_missing_file 1 "-m")
   ADD_H5_CMP (h5clr_open_fail_s h5clear_open_fail 1 "-s" junk.h5)
   ADD_H5_CMP (h5clr_missing_file_ms h5clear_missing_file 1 "-m" "-s")
