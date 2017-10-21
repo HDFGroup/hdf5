@@ -1188,7 +1188,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     hbool_t             use_file_locking;   /*read from env var             */
     hbool_t      ci_load = FALSE;       /* whether MDC ci load requested */
     hbool_t      ci_write = FALSE;      /* whether MDC CI write requested */
-    hbool_t             ci_swmr_fail = FALSE;   /* set w/ SWMR + cache image */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1321,6 +1320,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         if(drvr->lock)
             set_flag = TRUE;
     } /* end else */
+
+    /* Check to see if both SWMR and cache image are requested.  Fail if so */
+    if(H5C_cache_image_status(file, &ci_load, &ci_write) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get MDC cache image status")
+    if((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
+        HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, NULL, "can't have both SWMR and cache image")
 
     /* Retain the name the file was opened with */
     file->open_name = H5MM_xstrdup(name);
@@ -1493,26 +1498,14 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         } /* end else */
     } /* end if set_flag */
 
-   /* Check to see if both SWMR and cache image are requested.  Fail if so */
-   if(H5C_cache_image_status(file, &ci_load, &ci_write) < 0)
-       HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get MDC cache image status")
-   if((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE))) {
-       ci_swmr_fail = TRUE;
-       HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, NULL, "can't have both SWMR and cache image")
-   }
-
     /* Success */
     ret_value = file;
 
 done:
-    if(ci_swmr_fail) {
-        if(H5F_try_close(file, NULL) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
-    }
-    else if((NULL == ret_value) && file) {
+    if((NULL == ret_value) && file)
         if(H5F__dest(file, meta_dxpl_id, raw_dxpl_id, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
-    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
 
