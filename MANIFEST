@@ -1357,6 +1357,7 @@
 ./tools/test/h5format_convert/testfiles/h5fc_v_n_all.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_bt1.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_err.ddl
+./tools/test/h5format_convert/testfiles/h5fc_v_err.ddl.err
 ./tools/test/h5format_convert/testfiles/h5fc_v_non_chunked.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_d_file.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_ndata_bt1.ddl
@@ -1436,6 +1437,7 @@
 ./tools/test/h5copy/Makefile.am
 ./tools/test/h5copy/h5copygentest.c
 ./tools/test/h5copy/testh5copy.sh.in
+./tools/test/h5copy/dynlib_copy.c
 
 
 ./tools/lib/Makefile.am
@@ -2526,6 +2528,12 @@
 ./tools/test/h5copy/testfiles/h5copy_misc1.out
 ./tools/test/h5copy/testfiles/h5copytst_new.h5
 ./tools/test/h5copy/testfiles/h5copytst_new.out.ls
+./tools/test/h5copy/testfiles/h5copy_plugin_fail_ERR.out.h5.txt
+./tools/test/h5copy/testfiles/h5copy_plugin_test.out.h5.txt
+./tools/test/h5copy/testfiles/tudfilter.h5
+./tools/test/h5copy/testfiles/tudfilter2.h5
+./tools/test/h5copy/testfiles/tudfilter.h5.txt
+./tools/test/h5copy/testfiles/tudfilter.h5_ERR.txt
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_nested_p.ls
