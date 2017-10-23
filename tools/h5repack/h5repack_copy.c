@@ -1047,7 +1047,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                  *-------------------------------------------------------------------------
                  */
                 else {
-                    hid_t pid;
+                    hid_t pid = -1;
 
                     /* create property to pass copy options */
                     if ((pid = H5Pcreate(H5P_OBJECT_COPY)) < 0)
@@ -1385,51 +1385,51 @@ void
 print_user_block(const char *filename, hid_t fid)
 {
     int     ret_value = 0;
-    int     fh;   /* file handle  */
-    hsize_t ub_size; /* user block size */
-    hsize_t size; /* size read */
-    hid_t   fcpl; /* file creation property list ID for HDF5 file */
+    hid_t   fh = -1;   /* file handle  */
+    hsize_t ub_size;   /* user block size */
+    hsize_t size;      /* size read */
+    hid_t   fcpl = -1; /* file creation property list ID for HDF5 file */
     int     i;
 
     /* get user block size */
-    if(( fcpl = H5Fget_create_plist(fid)) < 0) {
+    if ((fcpl = H5Fget_create_plist(fid)) < 0) {
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Fget_create_plist failed to retrieve file creation property list");
     }
 
-    if(H5Pget_userblock(fcpl, &ub_size) < 0) {
+    if (H5Pget_userblock(fcpl, &ub_size) < 0) {
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Pget_userblock failed to retrieve userblock size");
     }
 
-    if(H5Pclose(fcpl) < 0) {
+    if (H5Pclose(fcpl) < 0) {
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Pclose failed to close property list");
     }
 
     /* open file */
-    if((fh = HDopen(filename, O_RDONLY, 0)) < 0) {
+    if ((fh = HDopen(filename, O_RDONLY)) < 0) {
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "HDopen failed to open file <%s>", filename);
     }
 
     size = ub_size;
 
     /* read file */
-    while(size > 0) {
+    while (size > 0) {
         ssize_t nread; /* # of bytes read */
         char rbuf[USERBLOCK_XFER_SIZE]; /* buffer for reading */
 
         /* read buffer */
-        if(size > USERBLOCK_XFER_SIZE)
+        if (size > USERBLOCK_XFER_SIZE)
             nread = HDread(fh, rbuf, (size_t)USERBLOCK_XFER_SIZE);
         else
             nread = HDread(fh, rbuf, (size_t)size);
 
-        for(i = 0; i < nread; i++) {
+        for (i = 0; i < nread; i++) {
 
             printf("%c ", rbuf[i]);
 
         }
         printf("\n");
 
-        if(nread < 0) {
+        if (nread < 0) {
             HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "nread < 0");
         }
 
@@ -1438,7 +1438,7 @@ print_user_block(const char *filename, hid_t fid)
     }
 
 done:
-    if(fh > 0)
+    if (fh > 0)
         HDclose(fh);
 
     return;

@@ -189,7 +189,7 @@ hsize_t diff_datasetid(hid_t did1,
     void       *buf2 = NULL;
     void       *sm_buf1 = NULL;
     void       *sm_buf2 = NULL;
-    hid_t      sm_space;                /*stripmine data space */
+    hid_t      sm_space = -1;           /*stripmine data space */
     size_t     need;                    /* bytes needed for malloc */
     int        i;
     unsigned int  vl_data = 0;          /*contains VL datatypes */
