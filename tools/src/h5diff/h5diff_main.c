@@ -78,7 +78,7 @@ int main(int argc, const char *argv[])
     const char *objname1  = NULL;
     const char *objname2  = NULL;
     hsize_t    nfound=0;
-    diff_opt_t options;
+    diff_opt_t opts;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -98,7 +98,7 @@ int main(int argc, const char *argv[])
     * process the command-line
     *-------------------------------------------------------------------------
     */
-    parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+    parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
 
     if (enable_error_stack) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
@@ -110,9 +110,9 @@ int main(int argc, const char *argv[])
     *-------------------------------------------------------------------------
     */
 
-    nfound = h5diff(fname1, fname2, objname1, objname2, &options);
+    nfound = h5diff(fname1, fname2, objname1, objname2, &opts);
 
-    print_info(&options);
+    print_info(&opts);
 
    /*-------------------------------------------------------------------------
     * exit code
@@ -123,11 +123,11 @@ int main(int argc, const char *argv[])
     ret = (nfound == 0 ? 0 : 1);
 
     /* if graph difference return 1 for differences  */
-    if (options.contents == 0)
+    if (opts.contents == 0)
         ret = 1;
 
     /* and return 2 for error */
-    if (options.err_stat)
+    if (opts.err_stat)
         ret = 2;
 
     h5diff_exit(ret);
