@@ -482,8 +482,7 @@ search_obj(table_t *table, haddr_t objno)
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen,
-    void *op_data)
+find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen, void *op_data)
 {
     find_objs_t *info = (find_objs_t*)op_data;
     herr_t ret_value = 0;
@@ -496,7 +495,7 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
 
         case H5O_TYPE_DATASET:
             if(NULL == already_seen) {
-                hid_t dset;
+                hid_t dset = -1;
 
                 /* Add the dataset to the list of objects */
                 add_obj(info->dset_table, oinfo->addr, name, TRUE);

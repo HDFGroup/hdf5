@@ -23,10 +23,10 @@
 #include "H5private.h"
 
 /* global variables */
-hid_t H5tools_ERR_STACK_g = 0;
-hid_t H5tools_ERR_CLS_g = -1;
-hid_t H5E_tools_g = -1;
-hid_t H5E_tools_min_id_g = -1;
+hid_t       H5tools_ERR_STACK_g = 0;
+hid_t       H5tools_ERR_CLS_g = -1;
+hid_t       H5E_tools_g = -1;
+hid_t       H5E_tools_min_id_g = -1;
 int         compound_data;
 FILE       *rawattrstream = NULL;      /* should initialize to stdout but gcc moans about it */
 FILE       *rawdatastream = NULL;      /* should initialize to stdout but gcc moans about it */
@@ -77,18 +77,13 @@ typedef enum {
 #define NUM_DRIVERS     (sizeof(drivernames) / sizeof(drivernames[0]))
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose:     Initialize the H5 Tools library
- * Description:
- *      This should be called before any other h5tools function is called.
- *      Effect of any h5tools function called before this has been called is
- *      undetermined.
- * Return:
- *      None
- * Programmer:
- *      Albert Cheng, 2000-10-31
- * Modifications:
+ * Function: h5tools_init
+ *
+ * Purpose:  This should be called before any other h5tools function is called.
+ *           Effect of any h5tools function called before this has been called is
+ *           undetermined.
+ *
+ * Return    None
  *-------------------------------------------------------------------------
  */
 void
@@ -121,19 +116,14 @@ h5tools_init(void)
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose: Close the H5 Tools library
- * Description:
- *      Close or release resources such as files opened by the library. This
- *      should be called after all other h5tools functions have been called.
- *      Effect of any h5tools function called after this has been called is
- *      undetermined.
- * Return:
- *      None
- * Programmer:
- *      Albert Cheng, 2000-10-31
- * Modifications:
+ * Function: h5tools_close
+ *
+ * Purpose:  Close or release resources such as files opened by the library. This
+ *           should be called after all other h5tools functions have been called.
+ *           Effect of any h5tools function called after this has been called is
+ *           undetermined.
+ *
+ * Return:   None
  *-------------------------------------------------------------------------
  */
 void
@@ -193,19 +183,13 @@ h5tools_close(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_set_data_output_file
+ * Function: h5tools_set_data_output_file
  *
- * Purpose:     Open fname as the output file for dataset raw data.
- *      Set rawdatastream as its file stream.
+ * Purpose:  Open fname as the output file for dataset raw data.
+ *           Set rawdatastream as its file stream.
  *
- * Return:      0 -- succeeded
- *      negative -- failed
- *
- * Programmer:  Albert Cheng, 2000/09/30
- *
- * Modifications:
- *  pvn June, 1, 2006. Add a switch for binary output
- *
+ * Return:   0 -- succeeded
+ *           negative -- failed
  *-------------------------------------------------------------------------
  */
 int
@@ -247,14 +231,13 @@ h5tools_set_data_output_file(const char *fname, int is_bin)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_set_attr_output_file
+ * Function: h5tools_set_attr_output_file
  *
- * Purpose:     Open fname as the output file for attribute raw data.
- *      Set rawattrstream as its file stream.
+ * Purpose:  Open fname as the output file for attribute raw data.
+ *           Set rawattrstream as its file stream.
  *
- * Return:      0 -- succeeded
- *      negative -- failed
- *
+ * Return:   0 -- succeeded
+ *           negative -- failed
  *-------------------------------------------------------------------------
  */
 int
@@ -296,13 +279,13 @@ h5tools_set_attr_output_file(const char *fname, int is_bin)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_set_input_file
+ * Function: h5tools_set_input_file
  *
- * Purpose:     Open fname as the input file for raw input.
- *      Set rawinstream as its file stream.
+ * Purpose:  Open fname as the input file for raw input.
+ *           Set rawinstream as its file stream.
  *
- * Return:      0 -- succeeded
- *      negative -- failed
+ * Return:   0 -- succeeded
+ *           negative -- failed
  *
  *-------------------------------------------------------------------------
  */
@@ -344,13 +327,13 @@ h5tools_set_input_file(const char *fname, int is_bin)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_set_output_file
+ * Function: h5tools_set_output_file
  *
- * Purpose:     Open fname as the output file for raw output.
- *      Set rawoutstream as its file stream.
+ * Purpose:  Open fname as the output file for raw output.
+ *           Set rawoutstream as its file stream.
  *
- * Return:      0 -- succeeded
- *      negative -- failed
+ * Return:   0 -- succeeded
+ *           negative -- failed
  *
  *-------------------------------------------------------------------------
  */
@@ -392,14 +375,13 @@ h5tools_set_output_file(const char *fname, int is_bin)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_set_error_file
+ * Function: h5tools_set_error_file
  *
- * Purpose:     Open fname as the error output file for dataset raw error.
- *      Set rawerrorstream as its file stream.
+ * Purpose:  Open fname as the error output file for dataset raw error.
+ *           Set rawerrorstream as its file stream.
  *
- * Return:      0 -- succeeded
- *      negative -- failed
- *
+ * Return:   0 -- succeeded
+ *           negative -- failed
  *-------------------------------------------------------------------------
  */
 int
@@ -441,33 +423,28 @@ h5tools_set_error_file(const char *fname, int is_bin)
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Private
- * Chapter:     H5Tools Library
- * Purpose: Get a FAPL for a driver
- * Description:
- *      Get a FAPL for a given VFL driver name.
- * Return:
- *      None
- * Programmer:
- *      Quincey Koziol, 2004-02-04
- * Modifications:
- *      Pedro Vicente Nunes, Thursday, July 27, 2006
- *   Added error return conditions for the H5Pset_fapl calls
+ * Function: h5tools_get_fapl
+ *
+ * Purpose:  Get a FAPL for a given VFL driver name.
+ *
+ * Return:   positive - succeeded
+ *           negative - failed
  *-------------------------------------------------------------------------
  */
 static hid_t
 h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 {
-    hid_t new_fapl; /* Copy of file access property list passed in, or new property list */
+    hid_t       new_fapl = -1; /* Copy of file access property list passed in, or new property list */
+    int         ret_value = SUCCEED;
 
     /* Make a copy of the FAPL, for the file open call to use, eventually */
     if (fapl == H5P_DEFAULT) {
         if ((new_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
     } /* end if */
     else {
         if ((new_fapl = H5Pcopy(fapl)) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcopy failed");
     } /* end else */
 
     /* Determine which driver the user wants to open the file with. Try
@@ -475,7 +452,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
     if (!HDstrcmp(driver, drivernames[SEC2_IDX])) {
         /* SEC2 driver */
         if (H5Pset_fapl_sec2(new_fapl) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_sec2 failed");
 
         if (drivernum)
             *drivernum = SEC2_IDX;
@@ -487,7 +464,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
          * is the member size.
          */
         if (H5Pset_fapl_family(new_fapl, (hsize_t) 0, H5P_DEFAULT) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_family failed");
 
         if (drivernum)
             *drivernum = FAMILY_IDX;
@@ -495,7 +472,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
     else if (!HDstrcmp(driver, drivernames[SPLIT_IDX])) {
         /* SPLIT Driver */
         if (H5Pset_fapl_split(new_fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_split failed");
 
         if (drivernum)
             *drivernum = SPLIT_IDX;
@@ -503,7 +480,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
     else if (!HDstrcmp(driver, drivernames[MULTI_IDX])) {
         /* MULTI Driver */
         if (H5Pset_fapl_multi(new_fapl, NULL, NULL, NULL, NULL, TRUE) < 0)
-        goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_multi failed");
 
         if(drivernum)
         *drivernum = MULTI_IDX;
@@ -519,29 +496,28 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 
         if(mpi_initialized && !mpi_finalized) {
             if(H5Pset_fapl_mpio(new_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
-                goto error;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_mpio failed");
             if(drivernum)
                 *drivernum = MPIO_IDX;
         } /* end if */
     }
 #endif /* H5_HAVE_PARALLEL */
     else
-        goto error;
+        ret_value = -1;
+
+done:
+    if((new_fapl != H5P_DEFAULT) && (ret_value < 0)) {
+        H5Pclose(new_fapl);
+        new_fapl = -1;
+    }
 
     return(new_fapl);
-
-error:
-    if(new_fapl != H5P_DEFAULT)
-        H5Pclose(new_fapl);
-    return -1;
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose:     Open a file with various VFL drivers.
- * Description:
- *      Loop through the various types of VFL drivers trying to open FNAME.
+ * Function: h5tools_fopen
+ *
+ * Purpose:  Loop through the various types of VFL drivers trying to open FNAME.
  *      If the HDF5 library is version 1.2 or less, then we have only the SEC2
  *      driver to try out. If the HDF5 library is greater than version 1.2,
  *      then we have the FAMILY, SPLIT, and MULTI drivers to play with.
@@ -549,6 +525,7 @@ error:
  *      If DRIVER is non-NULL, then it will try to open the file with that
  *      driver first. We assume that the user knows what they are doing so, if
  *      we fail, then we won't try other file drivers.
+ *
  * Return:
  *      On success, returns a file id for the opened file. If DRIVERNAME is
  *      non-null then the first DRIVERNAME_SIZE-1 characters of the driver
@@ -556,38 +533,6 @@ error:
  *
  *      Otherwise, the function returns FAIL. If DRIVERNAME is non-null then
  *      the first byte is set to the null terminator.
- * Programmer:
- *      Lost in the mists of time.
- * Modifications:
- *      Robb Matzke, 2000-06-23
- *      We only have to initialize driver[] on the first call, thereby
- *      preventing memory leaks from repeated calls to H5Pcreate().
- *
- *      Robb Matzke, 2000-06-23
- *      Added DRIVERNAME_SIZE arg to prevent overflows when writing to
- *      DRIVERNAME.
- *
- *      Robb Matzke, 2000-06-23
- *      Added test to prevent coredump when the file could not be opened by
- *      any driver.
- *
- *      Robb Matzke, 2000-06-23
- *      Changed name from H5ToolsFopen() so it jives better with the names we
- *      already have at the top of this source file.
- *
- *      Thomas Radke, 2000-09-12
- *      Added Stream VFD to the driver[] array.
- *
- *      Bill Wendling, 2001-01-10
- *      Changed macro behavior so that if we have a version other than 1.2.x
- *      (i.e., > 1.2), then we do the drivers check.
- *
- *      Bill Wendling, 2001-07-30
- *      Added DRIVER parameter so that the user can specify "try this driver"
- *      instead of the default behaviour. If it fails to open the file with
- *      that driver, this will fail completely (i.e., we won't try the other
- *      drivers). We're assuming the user knows what they're doing. How UNIX
- *      of us.
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -652,18 +597,13 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose:     Count the number of columns in a string.
- * Description:
- *      Count the number of columns in a string. This is the number of
- *      characters in the string not counting line-control characters.
- * Return:
- *      On success, returns the width of the string. Otherwise this function
- *      returns 0.
- * Programmer:
- *       Robb Matzke, Tuesday, April 27, 1999
- * Modifications:
+ * Function: h5tools_count_ncols
+ *
+ * Purpose:  Count the number of columns in a string. This is the number of
+ *           characters in the string not counting line-control characters.
+ *
+ * Return:   success - returns the width of the string.
+ *           failure - 0.
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE static size_t
@@ -681,20 +621,17 @@ h5tools_count_ncols(const char *s)
 /*-------------------------------------------------------------------------
  * Function: h5tools_detect_vlen
  *
- * Purpose: Recursive check for any variable length data in given type.
+ * Purpose:  Recursive check for any variable length data in given type.
  *
- * Return:
- *    TRUE : type conatains any variable length data
- *    FALSE : type doesn't contain any variable length data
- *    Negative value: error occur
- *
- * Programmer: Jonathan Kim  March 18, 2011
+ * Return:   TRUE : type conatains any variable length data
+ *           FALSE : type doesn't contain any variable length data
+ *           Negative value: error occur
  *-------------------------------------------------------------------------
  */
 htri_t
 h5tools_detect_vlen(hid_t tid)
 {
-    htri_t ret;
+    htri_t ret = FALSE;
 
     /* recursive detect any vlen data values in type (compound, array ...) */
     ret = H5Tdetect_class(tid, H5T_VLEN);
@@ -713,20 +650,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function: h5tools_detect_vlen_str
  *
- * Purpose: Recursive check for variable length string of a datatype.
+ * Purpose:  Recursive check for variable length string of a datatype.
  *
- * Return:
- *    TRUE : type conatains any variable length string
- *    FALSE : type doesn't contain any variable length string
- *    Negative value: error occur
- *
+ * Return:   TRUE : type conatains any variable length string
+ *           FALSE : type doesn't contain any variable length string
+ *           Negative value: error occur
  *-------------------------------------------------------------------------
  */
 htri_t
 h5tools_detect_vlen_str(hid_t tid)
 {
     H5T_class_t tclass = -1;
-    htri_t ret = FALSE;
+    htri_t      ret = FALSE;
 
     ret = H5Tis_variable_str(tid);
     if((ret == TRUE) || (ret < 0))
@@ -774,25 +709,13 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose:     Emit a simple prefix to STREAM.
- * Description:
- *      If /ctx->need_prefix/ is set then terminate the current line (if
- *      applicable), calculate the prefix string, and display it at the start
- *      of a line.
- * Return:
- *      None
- * Programmer:
- *      Robb Matzke, Monday, April 26, 1999
- * Modifications:
- *      Robb Matzke, 1999-09-29
- * If a new prefix is printed then the current element number is set back
- * to zero.
- *      pvn, 2004-07-08
- * Added support for printing array indices:
- *  the indentation is printed before the prefix (printed one indentation
- *  level before)
+ * Function: h5tools_simple_prefix
+ *
+ * Purpose:  If /ctx->need_prefix/ is set then terminate the current line (if
+ *           applicable), calculate the prefix string, and display it at the start
+ *           of a line.
+ *
+ * Return:   None
  *-------------------------------------------------------------------------
  */
 void
@@ -800,7 +723,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
                       h5tools_context_t *ctx, hsize_t elmtno, int secnum)
 {
     h5tools_str_t prefix;
-    h5tools_str_t str; /*temporary for indentation */
+    h5tools_str_t str;          /*temporary for indentation */
     size_t templength = 0;
     unsigned u, indentlevel = 0;
 
@@ -871,15 +794,13 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose:     Emit a simple prefix to STREAM.
- * Description:
- *      If /ctx->need_prefix/ is set then terminate the current line (if
- *      applicable), calculate the prefix string, and display it at the start
- *      of a line. Calls region specific function.
- * Return:
- *      None
+ * Function: h5tools_region_simple_prefix
+ *
+ * Purpose:  If /ctx->need_prefix/ is set then terminate the current line (if
+ *           applicable), calculate the prefix string, and display it at the start
+ *           of a line. Calls region specific function.
+ *
+ * Return:   None
  *-------------------------------------------------------------------------
  */
 void
@@ -887,7 +808,7 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
         h5tools_context_t *ctx, hsize_t elmtno, hsize_t *ptdata, int secnum)
 {
     h5tools_str_t prefix;
-    h5tools_str_t str; /*temporary for indentation */
+    h5tools_str_t str;       /*temporary for indentation */
     size_t templength = 0;
     unsigned u, indentlevel = 0;
 
@@ -958,28 +879,26 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose:     Render an element to output STREAM.
- * Description:
- *      Prints the string buffer to the output STREAM. The string is
- *      printed according to the format described in INFO. The CTX struct
- *      contains context information shared between calls to this function.
+ * Function: h5tools_render_element
  *
- * Return:
- *      False if a dimension end is reached, otherwise true
+ * Purpose:  Prints the string buffer to the output STREAM. The string is
+ *           printed according to the format described in INFO. The CTX struct
+ *           contains context information shared between calls to this function.
+ *
+ * Return:   False if a dimension end is reached
+ *           True otherwise
  *
  * In/Out:
- *      h5tools_context_t *ctx
- *      h5tools_str_t *buffer
- *      hsize_t *curr_pos
+ *           h5tools_context_t *ctx
+ *           h5tools_str_t *buffer
+ *           hsize_t *curr_pos
  *
  * Parameters Description:
- *      h5tools_str_t *buffer is the string into which to render
- *      hsize_t curr_pos is the total data element position
- *      size_t ncols
- *      hsize_t local_elmt_counter is the local element loop counter
- *      hsize_t elmt_count is the data element loop counter
+ *           h5tools_str_t *buffer is the string into which to render
+ *           hsize_t curr_pos is the total data element position
+ *           size_t ncols
+ *           hsize_t local_elmt_counter is the local element loop counter
+ *           hsize_t elmt_count is the data element loop counter
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -988,10 +907,10 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
         size_t ncols, hsize_t local_elmt_counter, hsize_t elmt_counter)
 {
     hbool_t  dimension_break = TRUE;
-    char    *s;
-    char    *section; /*a section of output  */
-    int      secnum; /*section sequence number */
-    int      multiline; /*datum was multiline  */
+    char    *s = NULL;
+    char    *section = NULL; /* a section of output */
+    int      secnum;         /* section sequence number */
+    int      multiline;      /* datum was multiline */
 
     if (stream == NULL)
         return dimension_break;
@@ -1114,29 +1033,28 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose:     Render a region element to output STREAM.
- * Description:
- *      Prints the string buffer to the output STREAM. The string is
- *      printed according to the format described in INFO. The CTX struct
- *      contains context information shared between calls to this function.
+ * Function: h5tools_render_region_element
+ *
+ * Purpose:  Prints the string buffer to the output STREAM. The string is
+ *           printed according to the format described in INFO. The CTX struct
+ *           contains context information shared between calls to this function.
  *
  * Return:
- *      False if a dimension end is reached, otherwise true
+ *           False if a dimension end is reached
+ *           True otherwise
  *
  * In/Out:
- *      h5tools_context_t *ctx
- *      h5tools_str_t *buffer
- *      hsize_t *curr_pos
+ *           h5tools_context_t *ctx
+ *           h5tools_str_t *buffer
+ *           hsize_t *curr_pos
  *
  * Parameters Description:
- *      h5tools_str_t *buffer is the string into which to render
- *      hsize_t curr_pos is the total data element position
- *      size_t ncols
- *      hsize_t *ptdata
- *      hsize_t local_elmt_counter is the local element loop counter
- *      hsize_t elmt_count is the data element loop counter
+ *           h5tools_str_t *buffer is the string into which to render
+ *           hsize_t curr_pos is the total data element position
+ *           size_t ncols
+ *           hsize_t *ptdata
+ *           hsize_t local_elmt_counter is the local element loop counter
+ *           hsize_t elmt_count is the data element loop counter
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1145,10 +1063,10 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
         size_t ncols, hsize_t *ptdata, hsize_t local_elmt_counter, hsize_t elmt_counter)
 {
     hbool_t  dimension_break = TRUE;
-    char    *s;
-    char    *section; /*a section of output  */
-    int      secnum; /*section sequence number */
-    int      multiline; /*datum was multiline  */
+    char    *s = NULL;
+    char    *section = NULL; /* a section of output */
+    int      secnum;         /* section sequence number */
+    int      multiline;      /* datum was multiline */
 
     s = h5tools_str_fmt(buffer, (size_t)0, "%s");
 
@@ -1270,11 +1188,11 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    init_acc_pos
+ * Function: init_acc_pos
  *
- * Purpose:     initialize accumulator and matrix position
+ * Purpose:  initialize accumulator and matrix position
  *
- * Return:      void
+ * Return:   void
  *-------------------------------------------------------------------------
  */
 void
@@ -1295,10 +1213,10 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
 /*-------------------------------------------------------------------------
  * Function: render_bin_output
  *
- * Purpose: Write one element of memory buffer to a binary file stream
+ * Purpose:  Write one element of memory buffer to a binary file stream
  *
- * Return: Success:    SUCCEED
- *         Failure:    FAIL
+ * Return:   Success:    SUCCEED
+ *           Failure:    FAIL
  *-------------------------------------------------------------------------
  */
 int
@@ -1344,7 +1262,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             {
                 unsigned int    i;
                 H5T_str_t       pad;
-                char           *s;
+                char           *s = NULL;
                 unsigned char   tempuchar;
 
                 pad = H5Tget_strpad(tid);
@@ -1372,7 +1290,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             break;
         case H5T_COMPOUND:
             {
-                int snmembs;
+                int      snmembs;
                 unsigned nmembs;
 
                 if((snmembs = H5Tget_nmembers(tid)) < 0)
@@ -1384,7 +1302,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
 
                     mem = ((unsigned char*)_mem) + block_index * size;
                     for (j = 0; j < nmembs; j++) {
-                        hid_t    memb;
+                        hid_t    memb = -1;
                         size_t   offset;
 
                         offset = H5Tget_member_offset(tid, j);
@@ -1404,7 +1322,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             {
                 int     k, ndims;
                 hsize_t dims[H5S_MAX_RANK], temp_nelmts, nelmts;
-                hid_t   memb;
+                hid_t   memb = -1;
 
                 /* get the array's base datatype for each element */
                 memb = H5Tget_super(tid);
@@ -1437,7 +1355,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
         case H5T_VLEN:
             {
                 hsize_t      nelmts;
-                hid_t        memb;
+                hid_t        memb = -1;
 
                 /* get the VL sequences's base datatype for each element */
                 memb = H5Tget_super(tid);
@@ -1462,7 +1380,8 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     /* if (H5Tequal(tid, H5T_STD_REF_DSETREG)) */
                     if (region_output) {
                         /* region data */
-                        hid_t   region_id, region_space;
+                        hid_t   region_id = -1;
+                        hid_t   region_space = -1;
                         H5S_sel_type region_type;
 
                         for (block_index = 0; block_index < block_nelmts; block_index++) {
@@ -1512,15 +1431,13 @@ CATCH
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose: Print the data values from a dataset referenced by region blocks.
+ * Function: render_bin_output_region_data_blocks
  *
- * Description:
- *      This is a special case subfunction to print the data in a region reference of type blocks.
+ * Purpose:  Print the data values from a dataset referenced by region blocks.
+ *           This is a special case subfunction to print the data in a region reference of type blocks.
  *
- * Return:
- *      The function returns FAIL if there was an error, otherwise SUCEED
+ * Return:   FAIL if there was an error
+ *           SUCCEED otherwise
  *
  *-------------------------------------------------------------------------
  */
@@ -1609,16 +1526,13 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose: Print some values from a dataset referenced by region blocks.
+ * Function: render_bin_output_region_blocks
  *
- * Description:
- *      This is a special case subfunction to dump a region reference using blocks.
+ * Purpose:  Print some values from a dataset referenced by region blocks.
+ *           This is a special case subfunction to dump a region reference using blocks.
  *
- * Return:
- *      The function returns False if ERROR, otherwise True
- *
+ * Return:   False if ERROR
+ *           True otherwise
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1629,7 +1543,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     hssize_t     snblocks;
     hsize_t      nblocks;
     hsize_t      alloc_size;
-    hsize_t     *ptdata;
+    hsize_t     *ptdata = NULL;
     int          sndims;
     unsigned     ndims;
     hid_t        dtype = -1;
@@ -1675,8 +1589,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
+ * Function:     H5Tools Library
  * Purpose: Print the data values from a dataset referenced by region points.
  *
  * Description:
@@ -1736,16 +1649,13 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
 }
 
 /*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose: Print some values from a dataset referenced by region points.
+ * Function: render_bin_output_region_points
  *
- * Description:
- *      This is a special case subfunction to dump a region reference using points.
+ * Purpose:  Print some values from a dataset referenced by region points.
+ *           This is a special case subfunction to dump a region reference using points.
  *
- * Return:
- *      The function returns False if the last dimension has been reached, otherwise True
- *
+ * Return:   False if the last dimension has been reached
+ *           True otherwise
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -1791,11 +1701,12 @@ CATCH
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_is_zero
+ * Function: h5tools_is_zero
  *
- * Purpose: Determines if memory is initialized to all zero bytes.
+ * Purpose:  Determines if memory is initialized to all zero bytes.
  *
- * Return:  TRUE if all bytes are zero; FALSE otherwise
+ * Return:   TRUE if all bytes are zero
+ *           FALSE otherwise
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE hbool_t
@@ -1811,23 +1722,20 @@ h5tools_is_zero(const void *_mem, size_t size)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_is_obj_same
+ * Function: h5tools_is_obj_same
  *
- * Purpose: Check if two given object IDs or link names point to the same object.
+ * Purpose:  Check if two given object IDs or link names point to the same object.
  *
  * Parameters:
- *             hid_t loc_id1: location of the first object
- *             char *name1:   link name of the first object.
- *                             Use "." or NULL if loc_id1 is the object to be compared.
- *             hid_t loc_id2: location of the second object
- *             char *name1:   link name of the first object.
- *                             Use "." or NULL if loc_id2 is the object to be compared.
+ *           hid_t loc_id1: location of the first object
+ *           char *name1:   link name of the first object.
+ *                          Use "." or NULL if loc_id1 is the object to be compared.
+ *           hid_t loc_id2: location of the second object
+ *           char *name1:   link name of the first object.
+ *                          Use "." or NULL if loc_id2 is the object to be compared.
  *
- * Return:  TRUE if it is the same object; FALSE otherwise.
- *
- * Programmer: Peter Cao
- *             4/27/2011
-  *
+ * Return:   TRUE if it is the same object
+ *           FALSE otherwise.
  *-------------------------------------------------------------------------
  */
 hbool_t

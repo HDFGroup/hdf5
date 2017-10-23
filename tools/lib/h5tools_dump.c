@@ -2888,7 +2888,7 @@ void
 h5tools_print_fill_value(h5tools_str_t *buffer/*in,out*/, const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/, hid_t dcpl, hid_t type_id, hid_t obj_id)
 {
     size_t            size;
-    hid_t             n_type;
+    hid_t             n_type = -1;
     void             *buf = NULL;
 
     n_type = H5Tget_native_type(type_id, H5T_DIR_DEFAULT);
@@ -3638,7 +3638,8 @@ h5tools_dump_attribute(FILE *stream, const h5tool_format_t *info,
         error_msg("unable to open attribute \"%s\"\n", attr_name);
     }
     else {
-        hid_t type, space;
+        hid_t type = -1;
+        hid_t space = -1;
 
         ctx->indent_level++;
 
@@ -3857,9 +3858,9 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
     H5S_class_t space_type;
     int         ndims;
     int         i;
-    hid_t       space;
-    hid_t       type;
-    hid_t       p_type;
+    hid_t       space = -1;
+    hid_t       type = -1;
+    hid_t       p_type = -1;
     hsize_t     size[64];
     hsize_t     alloc_size;
     hsize_t     nelmts = 1;
