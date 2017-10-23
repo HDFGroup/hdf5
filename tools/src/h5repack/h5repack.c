@@ -707,9 +707,9 @@ done:
  */
 static int check_objects(const char* fname, pack_opt_t *options) {
     int           ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t         fid;
-    hid_t         did;
-    hid_t         sid;
+    hid_t         fid = -1;
+    hid_t         did = -1;
+    hid_t         sid = -1;
     unsigned int  i;
     unsigned int  uf;
     trav_table_t *travt = NULL;
@@ -810,9 +810,12 @@ static int check_objects(const char* fname, pack_opt_t *options) {
 
 done:
     H5E_BEGIN_TRY {
-        H5Sclose(sid);
-        H5Dclose(did);
-        H5Fclose(fid);
+        if (sid > -1)
+            H5Sclose(sid);
+        if (did > -1)
+            H5Dclose(did);
+        if (fid > -1)
+            H5Fclose(fid);
     } H5E_END_TRY;
     if (travt)
         trav_table_free(travt);
