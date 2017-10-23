@@ -145,7 +145,7 @@ int do_copy_refobjs(hid_t fidin,
                      *-------------------------------------------------------------------------
                      */
                     if(H5Tequal(mtype_id, H5T_STD_REF_OBJ)) {
-                        hid_t            refobj_id;
+                        hid_t            refobj_id = -1;
                         hobj_ref_t       *refbuf = NULL; /* buffer for object references */
                         hobj_ref_t       *buf = NULL;
                         const char*      refname;
@@ -221,7 +221,7 @@ int do_copy_refobjs(hid_t fidin,
                      *-------------------------------------------------------------------------
                      */
                     else if(H5Tequal(mtype_id, H5T_STD_REF_DSETREG)) {
-                        hid_t            refobj_id;
+                        hid_t            refobj_id = -1;
                         hdset_reg_ref_t  *refbuf = NULL; /* input buffer for region references */
                         hdset_reg_ref_t  *buf = NULL;    /* output buffer */
                         const char*      refname;
@@ -260,7 +260,7 @@ int do_copy_refobjs(hid_t fidin,
                                  * in the second traversal of the file
                                  */
                                 if((refname = MapIdToName(refobj_id, travt)) != NULL) {
-                                    hid_t region_id;    /* region id of the referenced dataset */
+                                    hid_t region_id = -1;    /* region id of the referenced dataset */
 
                                     if((region_id = H5Rget_region(dset_in, H5R_DATASET_REGION, &buf[u])) < 0)
                                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Rget_region failed");
@@ -481,18 +481,16 @@ static int copy_refs_attr(hid_t loc_in,
         is_ref = (type_class == H5T_REFERENCE);
 
         if(type_class == H5T_VLEN ) {
-            hid_t base_type;
+            hid_t base_type = H5Tget_super(ftype_id);
 
-            base_type = H5Tget_super(ftype_id);
             is_ref_vlen = (H5Tget_class(base_type) == H5T_REFERENCE);
             msize = H5Tget_size(base_type);
             if (H5Tclose(base_type) < 0)
                 H5TOOLS_INFO(H5E_tools_min_id_g, "H5Tclose base_type failed");
         }
         else if(type_class == H5T_ARRAY ) {
-            hid_t base_type;
+            hid_t base_type = H5Tget_super(ftype_id);
 
-            base_type = H5Tget_super(ftype_id);
             is_ref_array = (H5Tget_class(base_type) == H5T_REFERENCE);
             msize = H5Tget_size(base_type);
             if (H5Tclose(base_type) < 0)
@@ -573,9 +571,8 @@ static int copy_refs_attr(hid_t loc_in,
             unsigned  array_rank = 0;
             hsize_t   array_size = 1;
             hsize_t array_dims[H5S_MAX_RANK];
-            hid_t base_type;
+            hid_t base_type = H5Tget_super(ftype_id);
 
-            base_type = H5Tget_super(ftype_id);
             msize = H5Tget_size(base_type);
             if (H5Tclose(base_type) < 0)
                 H5TOOLS_INFO(H5E_tools_min_id_g, "H5Tclose base_type failed");
