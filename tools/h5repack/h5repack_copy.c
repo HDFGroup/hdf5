@@ -877,7 +877,12 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                     if (TRUE == H5Tdetect_class(wtype_id, H5T_VLEN))
                                         if (H5Dvlen_reclaim(wtype_id, f_space_id, H5P_DEFAULT, buf) < 0)
                                             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dvlen_reclaim failed");
-                                }
+                                    /* free */
+                                    if (buf != NULL) {
+                                        HDfree(buf);
+                                        buf = NULL;
+                                    }
+                                 }
                                 else { /* possibly not enough memory, read/write by hyperslabs */
                                     size_t p_type_nbytes = msize; /*size of memory type */
                                     hsize_t p_nelmts = nelmts; /*total elements */
