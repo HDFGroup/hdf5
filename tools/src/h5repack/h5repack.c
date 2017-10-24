@@ -374,7 +374,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
         if ((is_named = H5Tcommitted(ftype_id)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tcommitted failed");
         if (is_named && travt) {
-            hid_t fidout;
+            hid_t fidout = -1;
 
             /* Create out file id */
             if ((fidout = H5Iget_file_id(loc_out)) < 0)
@@ -707,9 +707,9 @@ done:
  */
 static int check_objects(const char* fname, pack_opt_t *options) {
     int           ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t         fid;
-    hid_t         did;
-    hid_t         sid;
+    hid_t         fid = -1;
+    hid_t         did = -1;
+    hid_t         sid = -1;
     unsigned int  i;
     unsigned int  uf;
     trav_table_t *travt = NULL;
