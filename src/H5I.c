@@ -717,58 +717,54 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I_register
+ * Function:    H5I_register
  *
- * Purpose:	Registers an OBJECT in a TYPE and returns an ID for it.
- *		This routine does _not_ check for unique-ness of the objects,
- *		if you register an object twice, you will get two different
- *		IDs for it.  This routine does make certain that each ID in a
- *		type is unique.  IDs are created by getting a unique number
- *		for the type the ID is in and incorporating the type into
- *		the ID which is returned to the user.
+ * Purpose:     Registers an OBJECT in a TYPE and returns an ID for it.
+ *              This routine does _not_ check for unique-ness of the objects,
+ *              if you register an object twice, you will get two different
+ *              IDs for it.  This routine does make certain that each ID in a
+ *              type is unique.  IDs are created by getting a unique number
+ *              for the type the ID is in and incorporating the type into
+ *              the ID which is returned to the user.
  *
- * Return:	Success:	New object id.
- *		Failure:	Negative
- *
- * Programmer:	Unknown
+ * Return:      Success:    New object id
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 {
-    H5I_id_type_t	*type_ptr;	/*ptr to the type		*/
-    H5I_id_info_t	*id_ptr;	/*ptr to the new ID information */
-    hid_t		new_id;		/*new ID			*/
-    hid_t		ret_value = SUCCEED; /*return value		*/
+    H5I_id_type_t   *type_ptr = NULL;       /* ptr to the type                  */
+    H5I_id_info_t   *id_ptr = NULL;         /* ptr to the new ID information    */
+    hid_t           new_id = -1;            /* new ID                           */
+    hid_t           ret_value = SUCCEED;    /* return value                     */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    if(type <= H5I_BADID || type >= H5I_next_type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+    if (type <= H5I_BADID || type >= H5I_next_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
     type_ptr = H5I_id_type_list_g[type];
-    if(NULL == type_ptr || type_ptr->init_count <= 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
-    if(NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
+    if ((NULL == type_ptr) || (type_ptr->init_count <= 0))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
+    if (NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
         HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    /* Create the struct & it's ID */
+    /* Create the struct & its ID */
     new_id = H5I_MAKE(type, type_ptr->nextid);
     id_ptr->id = new_id;
-    id_ptr->count = 1; /*initial reference count*/
+    id_ptr->count = 1; /* initial reference count */
     id_ptr->app_count = !!app_ref;
     id_ptr->obj_ptr = object;
 
     /* Insert into the type */
-    if(H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
+    if (H5SL_insert(type_ptr->ids, id_ptr, &id_ptr->id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't insert ID node into skip list")
     type_ptr->id_count++;
     type_ptr->nextid++;
 
-    /*
-     * Sanity check for the 'nextid' getting too large and wrapping around.
-     */
+    /* Sanity check for the 'nextid' getting too large and wrapping around */
     HDassert(type_ptr->nextid <= ID_MASK);
 
     /* Set return value */
