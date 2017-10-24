@@ -444,68 +444,81 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    hbool_t      ci_load = FALSE;       /* whether MDC ci load requested */
-    hbool_t      ci_write = FALSE;      /* whether MDC CI write requested */
-    H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
-    hid_t	 ret_value;	        /*return value			*/
+    hbool_t         ci_load = FALSE;        /* whether MDC ci load requested            */
+    hbool_t         ci_write = FALSE;       /* whether MDC CI write requested           */
+    H5F_t          *new_file = NULL;        /*file struct for new file	                */
+
+    H5P_genplist_t *plist;                  /* Property list pointer                    */
+    H5VL_class_t   *vol_cls = NULL;         /* VOL Class structure for callback info    */
+    H5VL_t         *vol_info = NULL;        /* VOL info struct                          */
+    H5VL_driver_prop_t  driver_prop;        /* Property for vol driver ID & info        */
+
+    hid_t   dxpl_id = H5AC_ind_read_dxpl_id;/* dxpl used by library                     */
+    hid_t   ret_value;	                    /* return value                             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Check/fix arguments */
-    if(!filename || !*filename)
+    if (!filename || !*filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+
     /* In this routine, we only accept the following flags:
      *          H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_SWMR_WRITE
      */
-    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE))
+    if (flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
+
     /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
-    if((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
+    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
 
     /* Check file creation property list */
-    if(H5P_DEFAULT == fcpl_id)
+    if (H5P_DEFAULT == fcpl_id)
         fcpl_id = H5P_FILE_CREATE_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
+        if (TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
+    if (H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /*
-     * Adjust bit flags by turning on the creation bit and making sure that
+    /* get the VOL info from the fapl */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (H5P_peek(plist, H5F_ACS_VOL_DRV_NAME, &driver_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol driver info")
+    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_prop.driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    /* Adjust bit flags by turning on the creation bit and making sure that
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
-    if (0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
+    if (0 == (flags & (H5F_ACC_EXCL | H5F_ACC_TRUNC)))
         flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
-    /*
-     * Create a new file or truncate an existing file.
-     */
-    if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
+    /* Create a new file or truncate an existing file. */
+    if (NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
    /* Check to see if both SWMR and cache image are requested.  Fail if so */
-   if(H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0)
+   if (H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0)
        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
-   if((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
+   if ((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
        HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and cache image")
 
     /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
 done:
-    if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
+    if (ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
     FUNC_LEAVE_API(ret_value)
