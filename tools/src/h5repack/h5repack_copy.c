@@ -920,7 +920,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                     if(H5Dread(dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
                                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
                                     if(H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
+                                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dwrite failed");
 
                                     /* Check if we have VL data in the dataset's
                                      * datatype that must be reclaimed */
@@ -1011,7 +1011,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                         if(H5Dread(dset_in, wtype_id, hslab_space, f_space_id, H5P_DEFAULT, hslab_buf) < 0)
                                             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
                                         if(H5Dwrite(dset_out, wtype_id,  hslab_space, f_space_id, H5P_DEFAULT, hslab_buf) < 0)
-                                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
+                                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dwrite failed");
 
                                         /* reclaim any VL memory, if necessary */
                                         if (vl_data)
