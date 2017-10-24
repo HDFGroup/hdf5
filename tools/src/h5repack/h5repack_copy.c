@@ -1440,7 +1440,7 @@ void
 print_user_block(const char *filename, hid_t fid)
 {
     int     ret_value = 0;
-    hid_t   fh = -1;   /* file handle  */
+    int t   fh = -1;   /* file handle */
     hsize_t ub_size;   /* user block size */
     hsize_t size;      /* size read */
     hid_t   fcpl = -1; /* file creation property list ID for HDF5 file */
