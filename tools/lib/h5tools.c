@@ -623,9 +623,9 @@ h5tools_count_ncols(const char *s)
  *
  * Purpose:  Recursive check for any variable length data in given type.
  *
- * Return:   TRUE : type conatains any variable length data
+ * Return:   TRUE : type contains any variable length data
  *           FALSE : type doesn't contain any variable length data
- *           Negative value: error occur
+ *           Negative value: failed
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -652,9 +652,9 @@ done:
  *
  * Purpose:  Recursive check for variable length string of a datatype.
  *
- * Return:   TRUE : type conatains any variable length string
+ * Return:   TRUE : type contains any variable length string
  *           FALSE : type doesn't contain any variable length string
- *           Negative value: error occur
+ *           Negative value: failed
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1652,7 +1652,7 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
  * Function: render_bin_output_region_points
  *
  * Purpose:  Print some values from a dataset referenced by region points.
- *           This is a special case subfunction to dump a region reference using points.
+ *           This is a special case function to dump a region reference using points.
  *
  * Return:   False if the last dimension has been reached
  *           True otherwise
