@@ -203,6 +203,7 @@ Bug Fixes since HDF5-1.8.19
       Modified H5Zfilter_avail and private function, H5Z_filter_avail.
       Moved check for plugin from public to private function. Updated
       H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+      Note that the output display of h5repack has changed.
 
       (ADB - 2017/10/10, HDFFV-10297)
 
