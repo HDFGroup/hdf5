@@ -55,6 +55,8 @@
 ##############################################################################
 ##############################################################################
 
+  # Need special dependencies for tests that use the same reference file
+  # This is an issue on Windows
   macro (ADD_H5_CMP testname resultfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -64,6 +66,9 @@
                   testfiles/${testname}.out
                   testfiles/${testname}.out.err
       )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
       add_test (
           NAME H5CLEAR_CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
@@ -76,6 +81,7 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS H5CLEAR_CMP-${testname}-clear-objects)
+      set (last_test "H5CLEAR_CMP-${testname}")
     endif ()
   endmacro ()
 

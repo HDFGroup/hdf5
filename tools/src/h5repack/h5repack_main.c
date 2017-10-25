@@ -428,13 +428,13 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char) opt) {
 
-            /* -i for backward compability */
+            /* -i for backward compatibility */
             case 'i':
                 infile = opt_arg;
                 has_i_o = 1;
                 break;
 
-            /* -o for backward compability */
+            /* -o for backward compatibility */
             case 'o':
                 outfile = opt_arg;
                 has_i_o = 1;
@@ -695,8 +695,10 @@ int main(int argc, const char **argv)
     }
 
     /* initialize options  */
-    h5repack_init(&options, 0, FALSE);
-
+    if (h5repack_init(&options, 0, FALSE) < 0) {
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 

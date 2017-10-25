@@ -275,12 +275,12 @@
       endif ()
       add_test (
           NAME H5REPACK-${testname}
-          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK-${testname} PROPERTIES DEPENDS H5REPACK-${testname}-clear-objects)
       add_test (
           NAME H5REPACK-${testname}_DFF
-          COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES DEPENDS H5REPACK-${testname})
     endif ()
@@ -1377,11 +1377,7 @@
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,0,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
   # check for no parameters
-  set (TESTRETVAL 255)
-  if (WIN32)
-    set (TESTRETVAL -1)
-  endif ()
-  ADD_H5_UD_TEST (plugin_zero ${TESTRETVAL} h5repack_layout.h5 -v -f UD=250,0,0)
+  ADD_H5_UD_TEST (plugin_zero 0 h5repack_layout.h5 -v -f UD=250,0,0)
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver

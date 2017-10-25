@@ -598,25 +598,17 @@ done:
 htri_t
 H5Zfilter_avail(H5Z_filter_t id)
 {
-    htri_t ret_value=FALSE;     /* Return value */
+    htri_t ret_value = FALSE;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "Zf", id);
 
     /* Check args */
-    if(id<0 || id>H5Z_FILTER_MAX)
+    if (id < 0 || id > H5Z_FILTER_MAX)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number")
 
-    if((ret_value = H5Z_filter_avail(id)) < 0)
+    if ((ret_value = H5Z_filter_avail(id)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
-    else if(ret_value == FALSE) {
-        H5PL_key_t key;
-        const H5Z_class2_t *filter_info;
-
-        key.id = (int)id;
-        if(NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, key)))
-        	ret_value = TRUE;
-    } /* end else if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -634,15 +626,24 @@ done:
 htri_t
 H5Z_filter_avail(H5Z_filter_t id)
 {
-    size_t i;                   /* Local index variable */
-    htri_t ret_value = FALSE;   /* Return value */
+    H5PL_key_t          key;                /* Key for finding a plugin     */
+    const H5Z_class2_t *filter_info;        /* Filter information           */
+    size_t              i;                  /* Local index variable         */
+    htri_t              ret_value = FALSE;  /* Return value                 */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Is the filter already registered? */
-    for(i = 0; i < H5Z_table_used_g; i++)
-        if(H5Z_table_g[i].id == id)
+    for (i = 0; i < H5Z_table_used_g; i++)
+        if (H5Z_table_g[i].id == id)
+            HGOTO_DONE(TRUE)
+
+    key.id = (int)id;
+    if (NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, key))) {
+        if (H5Z_register(filter_info) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register loaded filter")
         HGOTO_DONE(TRUE)
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1137,11 +1138,11 @@ H5Z_find(H5Z_filter_t id)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Get the index in the global table */
-    if((idx=H5Z_find_idx(id))<0)
-        HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, NULL, "required filter is not registered")
+    if ((idx = H5Z_find_idx(id)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, NULL, "required filter %d is not registered", id)
 
     /* Set return value */
-    ret_value=H5Z_table_g+idx;
+    ret_value = H5Z_table_g + idx;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

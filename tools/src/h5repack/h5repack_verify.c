@@ -39,22 +39,22 @@ static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *fil
 int
 h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options)
 {
-    int          ret_value = 0;     /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int          ret_value  = 0;    /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     hid_t        fidin      = -1;   /* file ID for input file*/
     hid_t        fidout     = -1;   /* file ID for output file*/
     hid_t        did        = -1;   /* dataset ID */
     hid_t        pid        = -1;   /* dataset creation property list ID */
     hid_t        sid        = -1;   /* space ID */
     hid_t        tid        = -1;   /* type ID */
+    int          ok         = 1;    /* step results */
     unsigned int i;
     trav_table_t *travt = NULL;
-    int          ok = 1;
-    hid_t       fcpl_in     = -1;   /* file creation property for input file */
-    hid_t       fcpl_out    = -1;   /* file creation property for output file */
+    hid_t        fcpl_in     = -1;   /* file creation property for input file */
+    hid_t        fcpl_out    = -1;   /* file creation property for output file */
     H5F_fspace_strategy_t in_strategy, out_strategy;    /* file space handling strategy for in/output file */
-    hbool_t     in_persist, out_persist;        /* free-space persist status for in/output file */
-    hsize_t    in_threshold, out_threshold;        /* free-space section threshold for in/output file */
-    hsize_t    in_pagesize, out_pagesize;        /* file space page size for input/output file */
+    hbool_t      in_persist, out_persist;         /* free-space persist status for in/output file */
+    hsize_t      in_threshold, out_threshold;     /* free-space section threshold for in/output file */
+    hsize_t      in_pagesize, out_pagesize;       /* file space page size for input/output file */
 
     /* open the output file */
     if((fidout = H5Fopen(out_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
@@ -84,7 +84,6 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
         if(verify_filters(pid, tid, obj->nfilters, obj->filter) <= 0)
             ok = 0;
 
-
        /*-------------------------------------------------------------------------
         * layout check
         *-------------------------------------------------------------------------
@@ -104,9 +103,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
         if (H5Tclose(tid) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
-
     }
-
 
    /*-------------------------------------------------------------------------
     * check for the "all" objects option
@@ -163,7 +160,6 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
                         ok = 0;
                 }
 
-
                /*-------------------------------------------------------------------------
                 * close
                 *-------------------------------------------------------------------------
@@ -177,11 +173,11 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
                 if (H5Tclose(tid) < 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
             } /* if */
-
         } /* i */
 
         /* free table */
         trav_table_free(travt);
+        travt = NULL;
     }
 
    /*-------------------------------------------------------------------------
@@ -190,39 +186,33 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
     */
 
     /* open the input file */
-    if((fidin = H5Fopen(in_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
+    if((fidin = H5Fopen(in_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fopen failed on file <%s>", in_fname);
 
     /* Get file creation property list for input file */
-    if((fcpl_in = H5Fget_create_plist(fidin)) < 0) {
+    if((fcpl_in = H5Fget_create_plist(fidin)) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fget_create_plist failed to retrieve file creation property list");
-    }
 
     /* Get file space info for input file */
-    if(H5Pget_file_space_strategy(fcpl_in, &in_strategy, &in_persist, &in_threshold) < 0) {
+    if(H5Pget_file_space_strategy(fcpl_in, &in_strategy, &in_persist, &in_threshold) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_file_space_strategy failed to retrieve file space strategy & threshold");
-    }
 
     /* Get file space page size for input file */
-    if(H5Pget_file_space_page_size(fcpl_in, &in_pagesize) < 0) {
+    if(H5Pget_file_space_page_size(fcpl_in, &in_pagesize) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_file_space_page_size failed to retrieve file space page size");
-    }
 
     /* Output file is already opened */
     /* Get file creation property list for output file */
-    if((fcpl_out = H5Fget_create_plist(fidout)) < 0) {
+    if((fcpl_out = H5Fget_create_plist(fidout)) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fget_create_plist failed to retrieve file creation property list");
-    }
 
     /* Get file space info for output file */
-    if(H5Pget_file_space_strategy(fcpl_out, &out_strategy, &out_persist, &out_threshold) < 0) {
+    if(H5Pget_file_space_strategy(fcpl_out, &out_strategy, &out_persist, &out_threshold) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_file_space_strategy failed to retrieve file space strategy & threshold");
-    }
 
     /* Get file space page size for output file */
-    if(H5Pget_file_space_page_size(fcpl_out, &out_pagesize) < 0) {
+    if(H5Pget_file_space_page_size(fcpl_out, &out_pagesize) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_file_space_page_size failed to retrieve file space page size");
-    }
 
     /*
      * If -S option is set, the file space handling strategy should be set as specified.
@@ -230,14 +220,12 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * the same as the input file's strategy.
      */
     if(options->fs_strategy) {
-        if(out_strategy != (options->fs_strategy == (H5F_fspace_strategy_t)-1 ? 0 : options->fs_strategy)) {
+        if(out_strategy != (options->fs_strategy == (H5F_fspace_strategy_t)-1 ? 0 : options->fs_strategy))
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
-        }
     }
     else {
-        if(out_strategy != in_strategy) {
+        if(out_strategy != in_strategy)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space strategy not set as unexpected");
-        }
     }
 
     /*
@@ -246,14 +234,12 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * the same as the input file's free-space persist status
      */
     if(options->fs_persist) {
-        if(out_persist != (hbool_t)(options->fs_persist == (-1) ? FALSE : options->fs_persist)) {
+        if(out_persist != (hbool_t)(options->fs_persist == (-1) ? FALSE : options->fs_persist))
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "free-space persist status not set as unexpected");
-        }
     }
     else {
-        if(out_persist != in_persist) {
+        if(out_persist != in_persist)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "free-space persist status not set as unexpected");
-        }
     }
 
     /*
@@ -262,14 +248,12 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * input file's threshold size.
      */
     if(options->fs_threshold) {
-        if(out_threshold != (hsize_t)(options->fs_threshold == (-1) ? 0 : options->fs_threshold)) {
+        if(out_threshold != (hsize_t)(options->fs_threshold == (-1) ? 0 : options->fs_threshold))
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "threshold not set as unexpected");
-        }
     }
     else {
-        if(out_threshold != in_threshold) {
+        if(out_threshold != in_threshold)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "threshold not set as unexpected");
-        }
     }
 
     /*
@@ -278,27 +262,16 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * the same as the input file's file space page size.
      */
     if(options->fs_pagesize) {
-        if(out_pagesize != (hsize_t)(options->fs_pagesize == (-1) ? 0 : options->fs_pagesize)) {
+        if(out_pagesize != (hsize_t)(options->fs_pagesize == (-1) ? 0 : options->fs_pagesize))
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space page size not set as unexpected");
-        }
     }
     else { /* "-G" is not set */
-        if(out_pagesize != in_pagesize) {
+        if(out_pagesize != in_pagesize)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file space page size not set as unexpected");
-        }
+
     }
 
-    /* Closing */
-    if (H5Pclose(fcpl_in) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
-    if (H5Pclose(fcpl_out) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
-    if (H5Fclose(fidin) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fclose failed");
-    if (H5Fclose(fidout) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fclose failed");
-
-    return ok;
+    ret_value = ok;
 
 done:
     H5E_BEGIN_TRY {
@@ -307,6 +280,7 @@ done:
         H5Pclose(pid);
         H5Sclose(sid);
         H5Dclose(did);
+        H5Tclose(tid);
         H5Fclose(fidin);
         H5Fclose(fidout);
         if (travt)
@@ -319,13 +293,15 @@ done:
 /*-------------------------------------------------------------------------
  * Function: verify_layout
  *
- * Purpose: verify which layout is present in the property list DCPL_ID
+ * Purpose:  verify which layout is present in the property list DCPL_ID
+ *           H5D_COMPACT     = 0
+ *           H5D_CONTIGUOUS  = 1
+ *           H5D_CHUNKED     = 2
  *
- *  H5D_COMPACT      = 0
- *  H5D_CONTIGUOUS  = 1
- *  H5D_CHUNKED    = 2
- *
- * Return: 1 has, 0 does not, -1 error
+ * Return:
+ *           1 has,
+ *           0 does not,
+ *          -1 error
  *-------------------------------------------------------------------------
  */
 
@@ -342,7 +318,7 @@ int verify_layout(hid_t pid, pack_info_t *obj)
         return -1;
 
     /* a non chunked layout was requested on a filtered object */
-    if (nfilters && obj->layout!=H5D_CHUNKED)
+    if (nfilters && obj->layout != H5D_CHUNKED)
         return 0;
 
     /* get layout */
@@ -353,11 +329,11 @@ int verify_layout(hid_t pid, pack_info_t *obj)
         return 0;
 
     if (layout==H5D_CHUNKED) {
-        if ((rank = H5Pget_chunk(pid,NELMTS(chsize),chsize/*out*/)) < 0)
+        if ((rank = H5Pget_chunk(pid, NELMTS(chsize), chsize/*out*/)) < 0)
             return -1;
         if (obj->chunk.rank != rank)
             return 0;
-        for ( i=0; i<rank; i++)
+        for (i = 0; i < rank; i++)
             if (chsize[i] != obj->chunk.chunk_lengths[i])
                 return 0;
     }
@@ -368,50 +344,40 @@ int verify_layout(hid_t pid, pack_info_t *obj)
 /*-------------------------------------------------------------------------
  * Function: h5repack_cmp_pl
  *
- * Purpose: compare 2 files for identical property lists of all objects
+ * Purpose:  compare 2 files for identical property lists of all objects
  *
- * Return: 1=identical, 0=not identical, -1=error
+ * Return:
+ *           1 = identical,
+ *           0 = not identical,
+ *          -1 = error
  *-------------------------------------------------------------------------
  */
 
 int h5repack_cmp_pl(const char *fname1, const char *fname2)
 {
-    int           ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t         fid1=-1;         /* file ID */
-    hid_t         fid2=-1;         /* file ID */
-    hid_t         dset1=-1;        /* dataset ID */
-    hid_t         dset2=-1;        /* dataset ID */
-    hid_t         gid=-1;          /* group ID */
-    hid_t         dcpl1=-1;        /* dataset creation property list ID */
-    hid_t         dcpl2=-1;        /* dataset creation property list ID */
-    hid_t         gcplid=-1;       /* group creation property list */
-    unsigned      crt_order_flag1; /* group creation order flag */
-    unsigned      crt_order_flag2; /* group creation order flag */
-    trav_table_t  *trav=NULL;
-    int           ret=1;
+    int           ret_value = 1;    /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    hid_t         fid1 =-1;         /* file ID */
+    hid_t         fid2 =-1;         /* file ID */
+    hid_t         dset1 =-1;        /* dataset ID */
+    hid_t         dset2 =-1;        /* dataset ID */
+    hid_t         gid =-1;          /* group ID */
+    hid_t         dcpl1 =-1;        /* dataset creation property list ID */
+    hid_t         dcpl2 =-1;        /* dataset creation property list ID */
+    hid_t         gcplid =-1;       /* group creation property list */
+    unsigned      crt_order_flag1;  /* group creation order flag */
+    unsigned      crt_order_flag2;  /* group creation order flag */
+    trav_table_t  *trav = NULL;
     unsigned int  i;
 
    /*-------------------------------------------------------------------------
     * open the files
     *-------------------------------------------------------------------------
     */
-
-    /* disable error reporting */
-    H5E_BEGIN_TRY
-    {
-
-        /* Open the files */
-        if ((fid1 = H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT)) < 0 ) {
-            error_msg("<%s>: %s\n", fname1, H5FOPENERROR );
-            return -1;
-        }
-        if ((fid2 = H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT)) < 0 ) {
-            error_msg("<%s>: %s\n", fname2, H5FOPENERROR );
-            H5Fclose(fid1);
-            return -1;
-        }
-        /* enable error reporting */
-    } H5E_END_TRY;
+    /* Open the files */
+    if ((fid1 = H5Fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_fopen failed <%s>: %s", fname1, H5FOPENERROR);
+    if ((fid2 = H5Fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_fopen failed <%s>: %s", fname2, H5FOPENERROR);
 
    /*-------------------------------------------------------------------------
     * get file table list of objects
@@ -452,9 +418,8 @@ int h5repack_cmp_pl(const char *fname1, const char *fname2)
             if (H5Gclose(gid) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
 
-            if (crt_order_flag1 != crt_order_flag2) {
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "property lists failed for <%s> are different", trav->objs[i].name);
-            }
+            if (crt_order_flag1 != crt_order_flag2)
+                HGOTO_ERROR(0, H5E_tools_min_id_g, "property lists failed for <%s> are different", trav->objs[i].name);
         }
         else if(trav->objs[i].type == H5TRAV_TYPE_DATASET) {
             if((dset1 = H5Dopen2(fid1, trav->objs[i].name, H5P_DEFAULT)) < 0)
@@ -470,12 +435,11 @@ int h5repack_cmp_pl(const char *fname1, const char *fname2)
             * compare the property lists
             *-------------------------------------------------------------------------
             */
-            if((ret = H5Pequal(dcpl1, dcpl2)) < 0)
+            if((ret_value = H5Pequal(dcpl1, dcpl2)) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pequal failed");
 
-            if(ret == 0) {
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "property lists failed for <%s> are different",trav->objs[i].name);
-            }
+            if(ret_value == 0)
+                HGOTO_ERROR(0, H5E_tools_min_id_g, "property lists failed for <%s> are different", trav->objs[i].name);
 
            /*-------------------------------------------------------------------------
             * close
@@ -490,29 +454,8 @@ int h5repack_cmp_pl(const char *fname1, const char *fname2)
             if(H5Dclose(dset2) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
         } /*if*/
-    } /*i*/
+    } /*for*/
 
-   /*-------------------------------------------------------------------------
-    * free
-    *-------------------------------------------------------------------------
-    */
-
-    trav_table_free(trav);
-
-   /*-------------------------------------------------------------------------
-    * close
-    *-------------------------------------------------------------------------
-    */
-
-    H5Fclose(fid1);
-    H5Fclose(fid2);
-
-    return ret;
-
-/*-------------------------------------------------------------------------
-* error
-*-------------------------------------------------------------------------
-*/
 done:
     H5E_BEGIN_TRY
     {
@@ -524,7 +467,8 @@ done:
         H5Fclose(fid2);
         H5Pclose(gcplid);
         H5Gclose(gid);
-        trav_table_free(trav);
+        if(trav)
+            trav_table_free(trav);
     } H5E_END_TRY;
 
     return ret_value;
@@ -534,14 +478,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function: verify_filters
  *
- * Purpose: verify if all requested filters in the array FILTER obtained
- *  from user input are present in the property list PID obtained from
- *  the output file
+ * Purpose:  verify if all requested filters in the array FILTER obtained
+ *           from user input are present in the property list PID obtained from
+ *           the output file
  *
  * Return:
- *  1 match
- *  0 do not match
- * -1 error
+ *           1 match
+ *           0 do not match
+ *          -1 error
  *-------------------------------------------------------------------------
  */
 
@@ -583,6 +527,8 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
             cd_values, sizeof(f_name), f_name, NULL);
 
         /* filter ID */
+        if (filtn < 0)
+            return -1;
         if (filtn != filter[i].filtn)
             return 0;
 
@@ -657,4 +603,3 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
 
     return 1;
 }
-

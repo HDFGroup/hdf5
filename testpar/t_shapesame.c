@@ -2229,7 +2229,7 @@ contig_hs_dr_pio_test__run_test(const int test_num,
 
 #define CONTIG_HS_DR_PIO_TEST__DEBUG 0
 
-void
+static void
 contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 {
     int         express_test;
