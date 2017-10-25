@@ -322,7 +322,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
       Note, h5repack output display has changed to clarify the individual
       steps of the repack process. The output indicates if an operation
       applies to all objects. Lines with notation and no information
-      has removed.
+      have been removed.
 
       (ADB - 2017/10/10, HDFFV-10297)
 
