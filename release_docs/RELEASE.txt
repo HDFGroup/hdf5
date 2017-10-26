@@ -143,7 +143,7 @@ New Features
       fulfill the original user request without encountering API
       errors.
 
-      (RAW – 2017/09/20, HDFFV-8839)
+      (RAW - 2017/09/20, HDFFV-8839)
 
     Fortran Library:
     ----------------
@@ -223,7 +223,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
           block size.
       (2) Fix other places in the library that call this routine to detect
           error routine.
-        
+
       (HDFFV-10216, VC, 2017/08/30)
 
     - Fixes for paged aggregation
@@ -247,7 +247,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       The function H5VM_power2up() returns the next power of 2
       for n. When n exceeds 2^63, it overflows and becomes 0 causing
-      the infinite looping. 
+      the infinite looping.
 
       The fix ensures that the function checks for n >= 2^63
       and returns 0.
@@ -319,6 +319,10 @@ Bug Fixes since HDF5-1.10.0-patch1 release
       Modified H5Zfilter_avail and private function, H5Z_filter_avail.
       Moved check for plugin from public to private function. Updated
       H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+      Note, h5repack output display has changed to clarify the individual
+      steps of the repack process. The output indicates if an operation
+      applies to all objects. Lines with notation and no information
+      have been removed.
 
       (ADB - 2017/10/10, HDFFV-10297)
 
@@ -343,7 +347,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
     - h5repack
 
-      Add tests to h5repack.sh.in to verify options added for paged 
+      Add tests to h5repack.sh.in to verify options added for paged
       aggregation work as expected.
 
       (VC, 2017/08/03)
@@ -457,15 +461,20 @@ Supported Platforms
     Windows 7                     Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 2.2.1(0.289/5/3) gcc(4.9.3) compiler and gfortran)
-                                  (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Visual Studio 2015 w/ Intel Parallel Studio 2017 (cmake)
+                                  Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
+                                      gcc and gfortran compilers (GCC 5.4.0)
+                                      (cmake and autotools)
 
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
+                                      gcc and gfortran compilers (GCC 5.4.0)
+                                      (cmake and autotools)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
