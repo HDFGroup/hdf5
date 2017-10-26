@@ -209,13 +209,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLreplace(const char *plugin_path, unsigned int index)
+H5PLreplace(const char *search_path, unsigned int index)
 {
     unsigned    num_paths;              /* Current number of stored paths */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "*sIu", plugin_path, index);
+    H5TRACE2("e", "*sIu", search_path, index);
 
     /* Check args */
     if (NULL == search_path)
