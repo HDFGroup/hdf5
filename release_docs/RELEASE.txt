@@ -143,7 +143,7 @@ New Features
       of MPI_COMM_WORLD are allowed to be run in parallel with each
       subgroup operating as an independant collection of processes.
 
-      (RAW – 2017/10/10, HDFFV-10294)
+      (RAW - 2017/10/10, HDFFV-10294)
 
     - Large MPI-IO transfers
 
@@ -167,7 +167,7 @@ New Features
       fulfill the original user request without encountering API
       errors.
 
-      (RAW – 2017/07/11, HDFFV-8839)
+      (RAW - 2017/09/20, HDFFV-8839)
 
     Fortran Library:
     ----------------
@@ -247,7 +247,7 @@ Bug Fixes since HDF5-1.10.1 release
           block size.
       (2) Fix other places in the library that call this routine to detect
           error routine.
-        
+
       (HDFFV-10216, VC, 2017/08/30)
 
     - Fixes for paged aggregation
@@ -271,7 +271,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       The function H5VM_power2up() returns the next power of 2
       for n. When n exceeds 2^63, it overflows and becomes 0 causing
-      the infinite looping. 
+      the infinite looping.
 
       The fix ensures that the function checks for n >= 2^63
       and returns 0.
@@ -342,6 +342,10 @@ Bug Fixes since HDF5-1.10.1 release
       Modified H5Zfilter_avail and private function, H5Z_filter_avail.
       Moved check for plugin from public to private function. Updated
       H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+      Note, h5repack output display has changed to clarify the individual
+      steps of the repack process. The output indicates if an operation
+      applies to all objects. Lines with notation and no information
+      have been removed.
 
       (ADB - 2017/10/10, HDFFV-10297)
 
@@ -366,7 +370,7 @@ Bug Fixes since HDF5-1.10.1 release
 
     - h5repack
 
-      Add tests to h5repack.sh.in to verify options added for paged 
+      Add tests to h5repack.sh.in to verify options added for paged
       aggregation work as expected.
 
       (VC, 2017/08/03)
