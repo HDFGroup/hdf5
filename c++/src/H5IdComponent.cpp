@@ -174,7 +174,7 @@ H5I_type_t IdComponent::getHDFObjType() const
 ///             \li \c H5I_DATASPACE
 ///             \li \c H5I_DATASET
 ///             \li \c H5I_ATTR
-///             \li \c H5I_REFERENCE
+///             \li \c H5I_REFERENCE (DEPRECATED)
 ///             \li \c H5I_VFL
 ///             \li \c H5I_GENPROP_CLS
 ///             \li \c H5I_GENPROP_LST
@@ -227,7 +227,7 @@ bool IdComponent::isValid(hid_t an_id)
 ///             \li \c H5I_DATASPACE
 ///             \li \c H5I_DATASET
 ///             \li \c H5I_ATTR
-///             \li \c H5I_REFERENCE
+///             \li \c H5I_REFERENCE (DEPRECATED)
 ///             \li \c H5I_VFL
 ///             \li \c H5I_GENPROP_CLS
 ///             \li \c H5I_GENPROP_LST
@@ -368,8 +368,10 @@ IdComponent::IdComponent()
 // Exception:   H5::IdComponentException
 // Description:
 //              This function is protected so that the user applications can
-//              only have access to its code via allowable classes, namely,
-//              Attribute and H5Location subclasses.
+//              only have access to its code via H5Location subclasses.
+//      September 2017
+//              This function should be moved to H5Location now that Attribute
+//              inherits from H5Location.
 // Programmer   Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
 H5std_string IdComponent::p_get_file_name() const

@@ -2229,7 +2229,7 @@ contig_hs_dr_pio_test__run_test(const int test_num,
 
 #define CONTIG_HS_DR_PIO_TEST__DEBUG 0
 
-void
+static void
 contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 {
     int         express_test;
@@ -5074,7 +5074,6 @@ int main(int argc, char **argv)
     TestInit(argv[0], usage, parse_options);
 
     /* Shape Same tests using contigous hyperslab */
-#if 1
     AddTest("sscontig1", sscontig1, NULL,
 	"Cntg hslab, ind IO, cntg dsets", PARATESTFILE);
     AddTest("sscontig2", sscontig2, NULL,
@@ -5083,7 +5082,6 @@ int main(int argc, char **argv)
 	"Cntg hslab, ind IO, chnk dsets", PARATESTFILE);
     AddTest("sscontig4", sscontig4, NULL,
 	"Cntg hslab, col IO, chnk dsets", PARATESTFILE);
-#endif
 
     /* Shape Same tests using checker board hyperslab */
     AddTest("sschecker1", sschecker1, NULL,

@@ -918,14 +918,13 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-
-  ## Disable fortran shared libraries on Mac. (MAM - 03/30/11)
-
+  ## tell libtool to do the right thing with COMMON symbols, this fixes
+  ## corrupt values with COMMON and EQUIVALENCE when building shared
+  ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
   case "`uname`" in
     Darwin*)
-    H5_FORTRAN_SHARED="no"
-    CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
-      ;;
+    H5_LDFLAGS="$H5_LDFLAGS -Wl,-commons,use_dylibs"
+    ;;
   esac
 
   ## Report results of check(s)
@@ -3340,6 +3339,27 @@ else
   STATIC_SHARED="none"
 fi
 
+if test "X$HDF_FORTRAN" = "Xyes"; then
+
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
+  ### on Linux (other OSs have not been tested).
+  ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
+  ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
+  case "`uname`" in
+    Linux*)
+
+    fortran_linux_linker_option="-Wl,"
+    if test "X$FC_BASENAME" = "Xnagfor"; then
+       fortran_linux_linker_option="-Wl,-Wl,,"
+    fi
+
+    ## Set the correct linker option for use in h5fc.in markup
+    AC_SUBST([fortran_linux_linker_option])
+    ;;
+  esac
+
+fi
+
 ## ----------------------------------------------------------------------
 ## Set a macro if shared library is enabled.
 ##
@@ -3355,6 +3375,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
+                 test/test_filenotclosed.sh
                  test/testswmr.sh
                  test/test_plugin.sh
                  test/test_usecases.sh
@@ -3474,13 +3495,33 @@ AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
 AC_OUTPUT
 
 chmod 755 tools/src/misc/h5cc
+if test "X$HDF_CXX" = "Xyes"; then
+  chmod 755 c++/src/h5c++
+fi
+
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
-fi
+  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler
+  ## on OS X, which is needed when building shared libraries on OS X.  This script
+  ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
+  case "`uname`" in
+    Darwin*)
+      cat libtool | awk '/wl=\"/{c++;if(c==3){sub("wl=\"\"","wl=\"-Wl,\"");c=0}}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      ;;
+  esac
 
-if test "X$HDF_CXX" = "Xyes"; then
-  chmod 755 c++/src/h5c++
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
+  ### on Linux (other OSs have not been tested).
+  ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
+  ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
+  case "`uname`" in
+    Linux*)
+      if test "X$FC_BASENAME" = "Xnagfor"; then
+         cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      fi
+      ;;
+  esac
 fi
 
 ## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic

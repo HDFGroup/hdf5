@@ -47,10 +47,12 @@ set (H5P_TESTS
     t_cache
     t_pflush1
     t_pflush2
+    t_pread
     t_pshutdown
     t_prestart
     t_init_term
     t_shapesame
+    t_filters_parallel
 )
 
 foreach (testp ${H5P_TESTS})

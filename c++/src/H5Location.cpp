@@ -93,7 +93,7 @@ bool H5Location::exists(const char* name, const LinkAccPropList& lapl) const
         return false;
     else // Raise exception when H5Lexists returns a negative value
     {
-        throwException("exists", "H5Lexists failed");
+        throw LocationException(inMemFunc("exists"), "H5Lexists failed");
     }
 }
 
@@ -118,7 +118,7 @@ bool H5Location::exists(const H5std_string& name, const LinkAccPropList& lapl) c
 ///             which can be either of these values:
 ///             \li \c H5F_SCOPE_GLOBAL - Flushes the entire virtual file
 ///             \li \c H5F_SCOPE_LOCAL - Flushes only the specified file
-///\exception   H5::Exception
+///\exception   H5::LocationException
 ///\par Description
 ///             This location is used to identify the file to be flushed.
 // Programmer   Binh-Minh Ribler - 2012
@@ -137,7 +137,8 @@ void H5Location::flush(H5F_scope_t scope) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getFileName
-///\brief       Gets the name of the file, in which this HDF5 object belongs.
+///\brief       Gets the name of the file, in which an HDF5 object at this
+///             location belongs.
 ///\return      File name
 ///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - Jul, 2004
@@ -147,8 +148,8 @@ H5std_string H5Location::getFileName() const
     try {
       return(p_get_file_name());
     }
-    catch (LocationException& E) {
-        throw FileIException(inMemFunc("getFileName"), E.getDetailMsg());
+    catch (IdComponentException& E) {
+        throw LocationException(inMemFunc("getFileName"), E.getDetailMsg());
     }
 }
 
@@ -495,7 +496,7 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
     hid_t temp_id = H5Rdereference2(loc_id, plist_id, ref_type, ref);
     if (temp_id < 0)
     {
-        throw ReferenceException(inMemFunc(from_func), "H5Rdereference failed");
+        throw ReferenceException(inMemFunc(from_func), "H5Rdereference2 failed");
     }
 
     return(temp_id);
@@ -717,19 +718,21 @@ DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
 //   ***Updated: after HDFFV-9920, methods in classes H5Location and Group
 //   use throwException to distinguish the FileIException and GroupIException.
 //   CommonFG is no longer used in the library.  Aug 18, 2016 -BMR
+//   H5Location::throwException is changed to throw LocationException for any
+//   subclass that is not H5File or Group.  Aug 14, 2017 -BMR
 //   ***Note: following the changes in HDFFV-9920, some of the methods could
 //   throw different exceptions, but for backward-compatibility, throwException
 //   is kept in those methods as well. Sep 17, 2016 -BMR
+//
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::createGroup
-///\brief       Creates a new group at this location which can be a file
-///             or another group.
+///\brief       Creates a new group at this location.
 ///\param       name  - IN: Name of the group to create
 ///\param       size_hint - IN: Indicates the number of bytes to reserve for
 ///             the names that will appear in the group
 ///\return      Group instance
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///\par Description
 ///             The optional \a size_hint specifies how much file space to
 ///             reserve for storing the names that will appear in this new
@@ -793,7 +796,7 @@ Group H5Location::createGroup(const H5std_string& name, size_t size_hint) const
 ///             or another group.
 ///\param       name  - IN: Name of the group to open
 ///\return      Group instance
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group H5Location::openGroup(const char* name) const
@@ -834,7 +837,7 @@ Group H5Location::openGroup(const H5std_string& name) const
 ///\param       data_space - IN: Dataspace for the dataset
 ///\param       create_plist - IN: Creation properly list for the dataset
 ///\return      DataSet instance
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSet H5Location::createDataSet(const char* name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist) const
@@ -874,7 +877,7 @@ DataSet H5Location::createDataSet(const H5std_string& name, const DataType& data
 ///\brief       Opens an existing dataset at this location.
 ///\param       name  - IN: Name of the dataset to open
 ///\return      DataSet instance
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSet H5Location::openDataSet(const char* name) const
@@ -915,7 +918,7 @@ DataSet H5Location::openDataSet(const H5std_string& name) const
 ///\param       curr_name - IN: Name of the existing object if link is a hard
 ///             link; can be anything for the soft link
 ///\param       new_name - IN: New name for the object
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///\par Description
 ///             Note that both names are interpreted relative to the
 ///             specified location.
@@ -968,7 +971,7 @@ void H5Location::link(H5L_type_t link_type, const H5std_string& curr_name, const
 // Function:    H5Location::unlink
 ///\brief       Removes the specified name at this location.
 ///\param       name  - IN: Name of the object to be removed
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //      2007: QAK modified to use H5L APIs - BMR
@@ -997,7 +1000,7 @@ void H5Location::unlink(const H5std_string& name) const
 ///\brief       Renames an object at this location.
 ///\param       src - IN: Object's original name
 ///\param       dst - IN: Object's new name
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///\note
 ///             Exercise care in moving groups as it is possible to render
 ///             data in a file inaccessible with H5Location::move. Please refer
@@ -1033,7 +1036,7 @@ void H5Location::move(const H5std_string& src, const H5std_string& dst) const
 ///\param       name  - IN: Name of the object
 ///\param       follow_link - IN: Link flag
 ///\param       statbuf - OUT: Buffer to return information about the object
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///\par Description
 ///             For more information, please refer to the C layer Reference
 ///             Manual at:
@@ -1093,7 +1096,7 @@ void H5Location::getObjinfo(const H5std_string& name, H5G_stat_t& statbuf) const
 ///\param       name  - IN: Symbolic link to the object
 ///\param       size - IN: Maximum number of characters of value to be returned
 ///\return      Name of the object
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5std_string H5Location::getLinkval(const char* name, size_t size) const
@@ -1219,7 +1222,7 @@ void H5Location::mount(const H5std_string& name, const H5File& child, const Prop
 // Function:    H5Location::unmount
 ///\brief       Unmounts the specified file.
 ///\param       name  - IN: Name of the file to unmount
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Location::unmount(const char* name) const
@@ -1255,7 +1258,7 @@ void H5Location::unmount(const H5std_string& name) const
 ///\return      The return value of the first operator that returns non-zero,
 ///             or zero if all members were processed with no operator
 ///             returning non-zero.
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Location::iterateElems(const char* name, int *idx, H5G_iterate_t op , void* op_data)
@@ -1283,9 +1286,9 @@ int H5Location::iterateElems(const H5std_string& name, int *idx, H5G_iterate_t o
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getNumObjs
-///\brief       Returns the number of objects in this group.
-///\return      Number of objects
-///\exception   H5::FileIException or H5::GroupIException
+///\brief       Deprecated - moved to H5::Group in 1.10.2.
+///\return      Deprecated
+///\exception   Deprecated
 // Programmer   Binh-Minh Ribler - January, 2003
 //--------------------------------------------------------------------------
 hsize_t H5Location::getNumObjs() const
@@ -1304,7 +1307,7 @@ hsize_t H5Location::getNumObjs() const
 ///             object's index.
 ///\param       idx  -     IN: Transient index of the object
 ///\return      Object name
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///\par Description
 ///             The value of idx can be any nonnegative number less than the
 ///             total number of objects in the group, which is returned by
@@ -1346,7 +1349,7 @@ H5std_string H5Location::getObjnameByIdx(hsize_t idx) const
 ///\param       name - IN/OUT: Retrieved name of the object
 ///\param       size -     IN: Length to retrieve
 ///\return      Actual size of the object name or 0, if object has no name
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///\par Description
 ///             The value of idx can be any nonnegative number less than the
 ///             total number of objects in the group, which is returned by
@@ -1402,7 +1405,7 @@ ssize_t H5Location::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size
 ///             \li \c H5O_TYPE_NAMED_DATATYPE
 ///             Refer to the C API documentation for more details:
 ///             http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API
 ///             - object type is not one of the valid values above
@@ -1443,7 +1446,7 @@ H5O_type_t H5Location::childObjType(const char* objname) const
 ///\brief       Returns the type of an object in this group, given the
 ///             object's name.
 ///\param       objname - IN: Name of the object (H5std_string&)
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - April, 2014
 //--------------------------------------------------------------------------
 H5O_type_t H5Location::childObjType(const H5std_string& objname) const
@@ -1468,7 +1471,7 @@ H5O_type_t H5Location::childObjType(const H5std_string& objname) const
 ///             \li \c H5O_TYPE_NAMED_DATATYPE
 ///             Refer to the C API documentation for more details:
 ///             http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API
 ///             - object type is not one of the valid values above
@@ -1519,7 +1522,7 @@ H5O_type_t H5Location::childObjType(hsize_t index, H5_index_t index_type, H5_ite
 ///\return      Object version, which can have the following values:
 ///             \li \c H5O_VERSION_1
 ///             \li \c H5O_VERSION_2
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API
 ///             - version number is not one of the valid values above
@@ -1553,7 +1556,7 @@ unsigned H5Location::childObjVersion(const char* objname) const
 ///\brief       Returns the type of an object in this group, given the
 ///             object's name.
 ///\param       objname - IN: Name of the object (H5std_string&)
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - April, 2014
 //--------------------------------------------------------------------------
 unsigned H5Location::childObjVersion(const H5std_string& objname) const
@@ -1571,7 +1574,7 @@ unsigned H5Location::childObjVersion(const H5std_string& objname) const
 ///             object's index.
 ///\param       idx - IN: Transient index of the object
 ///\return      Object type
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - January, 2003
 //--------------------------------------------------------------------------
 H5G_obj_t H5Location::getObjTypeByIdx(hsize_t idx) const
@@ -1591,7 +1594,7 @@ H5G_obj_t H5Location::getObjTypeByIdx(hsize_t idx) const
 ///\param       idx       - IN: Transient index of the object
 ///\param       type_name - OUT: Object type in text
 ///\return      Object type
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - May, 2010
 // Modification
 //              Modified to use the other function. -BMR, 2016/03/07
@@ -1609,7 +1612,7 @@ H5G_obj_t H5Location::getObjTypeByIdx(hsize_t idx, char* type_name) const
 ///\param       idx       - IN: Transient index of the object
 ///\param       type_name - OUT: Object type in text
 ///\return      Object type
-///\exception   H5::FileIException or H5::GroupIException
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // Programmer   Binh-Minh Ribler - January, 2003
 //--------------------------------------------------------------------------
 H5G_obj_t H5Location::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const
@@ -1642,10 +1645,15 @@ H5G_obj_t H5Location::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) cons
 ///\param       msg       - Message describing the failure
 ///\exception   H5::GroupIException
 // Programmer   Binh-Minh Ribler - 2000
+// Modification
+//      August 2017 - BMR
+//              Keep Group::throwException and H5File::throwException to
+//              maintain backward compatibility.  For other subclasses, throw
+//              LocationException.
 //--------------------------------------------------------------------------
 void H5Location::throwException(const H5std_string& func_name, const H5std_string& msg) const
 {
-    throwException(func_name, msg);
+    throw LocationException(inMemFunc(func_name.c_str()), msg);
 }
 
 //--------------------------------------------------------------------------

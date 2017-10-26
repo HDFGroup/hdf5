@@ -1373,9 +1373,9 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
     /* User block must be any power of 2 equal to 512 or greater (512, 1024, 2048, etc.) */
 
     /* Open files */
-    if ((infid = HDopen(infile, O_RDONLY, 0)) < 0)
+    if ((infid = HDopen(infile, O_RDONLY)) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDopen failed input file <%s>", infile);
-    if ((outfid = HDopen(outfile, O_WRONLY, 0644)) < 0)
+    if ((outfid = HDopen(outfile, O_WRONLY)) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDopen failed output file <%s>", outfile);
 
     /* Copy the userblock from the input file to the output file */

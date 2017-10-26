@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class DSetMemXferPropList
     \brief Class DSetCreatPropList inherits from PropList and provides
     wrappers for the HDF5 dataset memory and transfer property list.
-
-    Inheritance: ObjCreatPropList -> PropList -> IdComponent
 */
+//  Inheritance: PropList -> IdComponent
 class H5_DLLCPP DSetMemXferPropList : public PropList {
    public:
         ///\brief Default dataset memory and transfer property list.

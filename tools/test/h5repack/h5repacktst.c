@@ -3711,7 +3711,7 @@ make_userblock(void)
         ub[u] = (char)('a' + (char)(u % 26));
 
     /* Re-open HDF5 file, as "plain" file */
-    if((fd = HDopen(FNAME16, O_WRONLY, 0644)) < 0)
+    if((fd = HDopen(FNAME16, O_WRONLY)) < 0)
         goto out;
 
     /* Write userblock data */
@@ -3775,7 +3775,7 @@ verify_userblock( const char* filename)
 
 
     /* Re-open HDF5 file, as "plain" file */
-    if((fd = HDopen(filename, O_RDONLY, 0)) < 0)
+    if((fd = HDopen(filename, O_RDONLY)) < 0)
         goto out;
 
     /* Read userblock data */
@@ -3824,7 +3824,7 @@ make_userblock_file(void)
         ub[u] = (char)('a' + (char)(u % 26));
 
     /* open file */
-    if((fd = HDopen(FNAME_UB,O_WRONLY|O_CREAT|O_TRUNC, 0644 )) < 0)
+    if((fd = HDopen(FNAME_UB, O_WRONLY|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
         goto out;
 
     /* write userblock data */

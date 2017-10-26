@@ -714,11 +714,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         if(H5T_get_class(type_info.mem_type, TRUE) == H5T_REFERENCE &&
                 H5T_get_ref_type(type_info.mem_type) == H5R_DATASET_REGION)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet")
-
-        /* Can't write to chunked datasets with filters, in parallel */
-        if(dataset->shared->layout.type == H5D_CHUNKED &&
-                dataset->shared->dcpl_cache.pline.nused > 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel")
     } /* end if */
     else {
         /* Collective access is not permissible without a MPI based VFD */
@@ -1195,7 +1190,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
 
         /* Check if we can set direct MPI-IO read/write functions */
-        if((opt = H5D__mpio_opt_possible(io_info, file_space, mem_space, type_info, fm, dx_plist)) < 0)
+        if((opt = H5D__mpio_opt_possible(io_info, file_space, mem_space, type_info, dx_plist)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
 
         /* Check if we can use the optimized parallel I/O routines */
@@ -1207,6 +1202,67 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             io_info->io_ops.single_write = H5D__mpio_select_write;
         } /* end if */
         else {
+            /* Check if there are any filters in the pipeline. If there are,
+             * we cannot break to independent I/O if this is a write operation;
+             * otherwise there will be metadata inconsistencies in the file.
+             */
+            if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dset->shared->dcpl_cache.pline.nused > 0) {
+                H5D_mpio_no_collective_cause_t  cause;
+                uint32_t                        local_no_collective_cause;
+                uint32_t                        global_no_collective_cause;
+                hbool_t                         local_error_message_previously_written = FALSE;
+                hbool_t                         global_error_message_previously_written = FALSE;
+                size_t                          index;
+                char                            local_no_collective_cause_string[256] = "";
+                char                            global_no_collective_cause_string[256] = "";
+                const char                     *cause_strings[] = { "independent I/O was requested",
+                                                                    "datatype conversions were required",
+                                                                    "data transforms needed to be applied",
+                                                                    "optimized MPI types flag wasn't set",
+                                                                    "one of the dataspaces was neither simple nor scalar",
+                                                                    "dataset was not contiguous or chunked" };
+
+                if (H5P_get(dx_plist, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, &local_no_collective_cause) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get local no collective cause value")
+                if (H5P_get(dx_plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &global_no_collective_cause) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get global no collective cause value")
+
+                /* Append each of the "reason for breaking collective I/O" error messages to the
+                 * local and global no collective cause strings */
+                for (cause = 1, index = 0; cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE; cause <<= 1, index++) {
+                    size_t cause_strlen = strlen(cause_strings[index]);
+
+                    if (cause & local_no_collective_cause) {
+                        /* Check if there were any previous error messages included. If so, prepend a semicolon
+                         * to separate the messages.
+                         */
+                        if (local_error_message_previously_written) strncat(local_no_collective_cause_string, "; ", 2);
+
+                        strncat(local_no_collective_cause_string, cause_strings[index], cause_strlen);
+
+                        local_error_message_previously_written = TRUE;
+                    } /* end if */
+
+                    if (cause & global_no_collective_cause) {
+                        /* Check if there were any previous error messages included. If so, prepend a semicolon
+                         * to separate the messages.
+                         */
+                        if (global_error_message_previously_written) strncat(global_no_collective_cause_string, "; ", 2);
+
+                        strncat(global_no_collective_cause_string, cause_strings[index], cause_strlen);
+
+                        global_error_message_previously_written = TRUE;
+                    } /* end if */
+                } /* end for */
+
+                HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL, "Can't perform independent write with filters in pipeline.\n"
+                                                              "    The following caused a break from collective I/O:\n"
+                                                              "        Local causes: %s\n"
+                                                              "        Global causes: %s",
+                                                              local_no_collective_cause_string,
+                                                              global_no_collective_cause_string);
+            } /* end if */
+
             /* If we won't be doing collective I/O, but the user asked for
              * collective I/O, change the request to use independent I/O, but
              * mark it so that we remember to revert the change.

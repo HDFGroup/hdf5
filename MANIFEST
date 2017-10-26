@@ -392,6 +392,7 @@
 ./c++/src/H5VarLenType.h
 ./c++/src/Makefile.am
 ./c++/src/RM_stylesheet.css
+./c++/src/C2Cppfunction_map.mht
 ./c++/src/cpp_doc_config
 ./c++/src/h5c++.in
 ./c++/src/footer.html
@@ -799,8 +800,11 @@
 ./src/H5PBpkg.h
 ./src/H5PBprivate.h
 ./src/H5PL.c
+./src/H5PLint.c
 ./src/H5PLmodule.h
+./src/H5PLpath.c
 ./src/H5PLpkg.h
+./src/H5PLplugin_cache.c
 ./src/H5PLprivate.h
 ./src/H5PLpublic.h
 ./src/H5PLextern.h
@@ -957,6 +961,7 @@
 ./test/filespace_1_8.h5
 ./test/filespace_1_6.h5
 ./test/freespace.c
+./test/filenotclosed.c
 ./test/file_image.c
 ./test/file_image_core_test.h5
 ./test/fill_old.h5
@@ -1059,6 +1064,7 @@
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
+./test/test_filenotclosed.sh.in
 ./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
@@ -1231,11 +1237,14 @@
 ./testpar/t_file.c
 ./testpar/t_file_image.c
 ./testpar/t_filter_read.c
+./testpar/t_filters_parallel.c
+./testpar/t_filters_parallel.h
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
 ./testpar/t_pflush1.c
 ./testpar/t_pflush2.c
+./testpar/t_pread.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c
 ./testpar/t_pshutdown.c
