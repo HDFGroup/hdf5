@@ -230,7 +230,7 @@ typedef struct H5AC_proxy_entry_t {
                                         /* (Note that this currently duplicates some cache functionality) */
 } H5AC_proxy_entry_t;
 
-
+/* Name of property for ring info in DXPL */
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
 /* Dataset transfer property lists for metadata calls */
@@ -247,7 +247,6 @@ H5_DLLVAR hid_t H5AC_noio_dxpl_id;
 H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 
 /* Default cache configuration. */
-
 #define H5AC__DEFAULT_METADATA_WRITE_STRATEGY   \
                                 H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED
 

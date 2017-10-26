@@ -121,6 +121,30 @@ New Features
 
     Parallel Library:
     -----------------
+    - Optimize parallel open/location of the HDF5 super-block
+
+      Previous releases of PHDF5 required all parallel ranks to
+      search for the HDF5 superblock signature when opening the
+      file. As this is accomplished more or less as a synchronous
+      operation, a large number of processes can experience a
+      slowdown in the file open due to filesystem contention.
+
+      As a first step in improving the startup/file-open performance,
+      we allow MPI rank 0 of the associated MPI communicator to locate
+      the base offset of the super-block and then broadcast that result
+      to the remaining ranks in the parallel group.  Note that this
+      approach is utilized ONLY during file opens which employ the MPIO
+      file driver in HDF5 by previously having called H5Pset_fapl_mpio().
+
+      HDF5 parallel file operations which do not employ multiple ranks
+      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1) 
+      as opposed to MPI_COMM_WORLD, will not be affected by this
+      optimization.  Conversely, parallel file operations on subgroups
+      of MPI_COMM_WORLD are allowed to be run in parallel with each
+      subgroup operating as an independant collection of processes.
+
+      (RAW - 2017/10/10, HDFFV-10294)
+
     - Large MPI-IO transfers
 
       Previous releases of PHDF5 would fail when attempting to
@@ -201,7 +225,7 @@ Support for new platforms, languages and compilers.
 =======================================
     -
 
-Bug Fixes since HDF5-1.10.0-patch1 release
+Bug Fixes since HDF5-1.10.1 release
 ==================================
 
     Library
@@ -294,7 +318,6 @@ Bug Fixes since HDF5-1.10.0-patch1 release
 
       Too many commands for POST_BUILD step caused command line to be
       too big on windows.
-
       Changed foreach of copy command to use a custom command with the
       use of the HDFTEST_COPY_FILE macro.
 

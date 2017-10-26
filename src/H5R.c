@@ -105,7 +105,7 @@ H5R__init_package(void)
 
     /* Initialize the atom group for the file IDs */
     if(H5I_register_type(H5I_REFERENCE_CLS) < 0)
-	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Mark "top" of interface as initialized, too */
     H5R_top_package_initialize_s = TRUE;
@@ -141,10 +141,10 @@ H5R_top_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5R_top_package_initialize_s) {
-	if(H5I_nmembers(H5I_REFERENCE) > 0) {
-	    (void)H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
+        if(H5I_nmembers(H5I_REFERENCE) > 0) {
+            (void)H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
             n++; /*H5I*/
-	} /* end if */
+	    } /* end if */
 
         /* Mark closed */
         if(0 == n)
@@ -741,7 +741,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
 
     /* Atomize */
-    if((ret_value = H5I_register (H5I_DATASPACE, space, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
 done:

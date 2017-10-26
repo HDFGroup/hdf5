@@ -115,6 +115,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5MF_init_merge_flags

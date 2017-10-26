@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class CompType
     \brief CompType is a derivative of a DataType and operates on HDF5
     compound datatypes.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP CompType : public DataType {
    public:
         // Default constructor
@@ -43,6 +42,10 @@ class H5_DLLCPP CompType : public DataType {
         // Constructors that open a compound datatype, given a location.
         CompType(const H5Location& loc, const char* name);
         CompType(const H5Location& loc, const H5std_string& name);
+
+        // Returns a CompType object via DataType* by decoding the binary
+        // object description of this type.
+        virtual DataType* decode() const;
 
         // Returns the type class of the specified member of this compound
         // datatype.  It provides to the user a way of knowing what type

@@ -495,6 +495,15 @@
 #   define H5_POSIX_MAX_IO_BYTES        SSIZET_MAX
 #endif
 
+/* POSIX I/O mode used as the third parameter to open/_open
+ * when creating a new file (O_CREAT is set).
+ */
+#if defined(H5_HAVE_WIN32_API)
+#   define H5_POSIX_CREATE_MODE_RW      (_S_IREAD | _S_IWRITE)
+#else
+#   define H5_POSIX_CREATE_MODE_RW      0666
+#endif
+
 /*
  * A macro to portably increment enumerated types.
  */
@@ -1117,11 +1126,7 @@ typedef off_t               h5_stat_size_t;
     #define HDnanosleep(N, O)    nanosleep(N, O)
 #endif /* HDnanosleep */
 #ifndef HDopen
-    #ifdef _O_BINARY
-        #define HDopen(S,F,M)    open(S,F|_O_BINARY,M)
-    #else
-        #define HDopen(S,F,M)    open(S,F,M)
-    #endif
+    #define HDopen(F,...)    open(F,__VA_ARGS__)
 #endif /* HDopen */
 #ifndef HDopendir
     #define HDopendir(S)    opendir(S)

@@ -451,9 +451,9 @@ H5I_nmembers(H5I_type_t type)
     FUNC_ENTER_NOAPI(FAIL)
 
     if(type <= H5I_BADID || type >= H5I_next_type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
     if(NULL == (type_ptr = H5I_id_type_list_g[type]) || type_ptr->init_count <= 0)
-	HGOTO_DONE(0);
+        HGOTO_DONE(0);
 
     /* Set return value */
     H5_CHECKED_ASSIGN(ret_value, int64_t, type_ptr->id_count, uint64_t);

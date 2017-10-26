@@ -172,7 +172,7 @@ is_sparse(void)
     int		fd;
     h5_stat_t	sb;
 
-    if ((fd=HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0) return 0;
+    if ((fd = HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0) return 0;
     if (HDlseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
     if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
     if (HDclose(fd) < 0) return 0;
@@ -210,7 +210,7 @@ supports_big(void)
     int		fd = -1;
     fsizes_t    fsize = NO_FILE;
 
-    if((fd=HDopen("y.h5", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0)
+    if((fd=HDopen("y.h5", O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
         goto error;
 
     /* Write a few byte at the beginning */
@@ -293,7 +293,7 @@ enough_room(hid_t fapl)
     /* Create files */
     for (i=0; i<NELMTS(fd); i++) {
         HDsnprintf(name, sizeof(name), filename, i);
-        if ((fd[i]=HDopen(name, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0) {
+        if ((fd[i]=HDopen(name, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
             goto done;
         }
         if ((off_t)size != HDlseek(fd[i], (off_t)size, SEEK_SET)) {

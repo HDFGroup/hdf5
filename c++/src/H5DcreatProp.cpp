@@ -159,7 +159,7 @@ int DSetCreatPropList::getChunk(int max_ndims, hsize_t* dim) const
 ///\exception   H5::PropListIException
 ///\par Description
 ///             For information on valid layout types, please refer to
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetLayout
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetLayout
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setLayout(H5D_layout_t layout) const
@@ -235,7 +235,7 @@ void DSetCreatPropList::setDeflate(int level) const
 ///             H5Z_FILTER_SZIP, for a dataset.  For more information about
 ///             SZIP and usage, please refer to the C layer Reference
 ///             Manual at:
-/// http://hdfgroup.org/HDF5/doc/RM_H5P.html#Property-SetSzip
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSzip
 // Programmer   Binh-Minh Ribler - Jan, 2007
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setSzip(unsigned int options_mask, unsigned int pixels_per_block) const
@@ -257,7 +257,7 @@ void DSetCreatPropList::setSzip(unsigned int options_mask, unsigned int pixels_p
 ///             H5Z_FILTER_NBIT, for a dataset.  For more information about
 ///             Nbit compression, please refer to the C layer Reference
 ///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-setNbit
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-setNbit
 // Programmer   Binh-Minh Ribler - Apr, 2016
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setNbit() const
@@ -285,7 +285,7 @@ void DSetCreatPropList::setNbit() const
 ///\par
 ///             For information on setting fill value, please refer to the
 ///             C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFillValue
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFillValue
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setFillValue(const DataType& fvalue_type, const void* value) const
@@ -536,7 +536,7 @@ bool DSetCreatPropList::allFiltersAvail() const
 ///\par Description
 ///             Please refer to the Reference Manual of \c H5Pset_shuffle for
 ///             details.
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetShuffle
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetShuffle
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setShuffle() const

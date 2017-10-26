@@ -38,7 +38,7 @@ case $(uname) in
 esac
 PLUGIN_LIBDIR1=testdir1
 PLUGIN_LIBDIR2=testdir2
-CP="cp -p"	# Use -p to preserve mode,ownership,timestamps
+CP="cp -p"    # Use -p to preserve mode,ownership,timestamps
 RM="rm -rf"
 
 # Print a line-line message left justified in a field of 70 characters
@@ -84,6 +84,19 @@ $ENVCMD $TEST_BIN
 if [ $? != 0 ]; then
     nerrors=`expr $nerrors + 1`
 fi
+
+############################################
+# HDFFV-9655 test for relative path disabled
+# setup plugin path relative to test
+# actual executable is in the .libs folder
+#ENVCMD="env HDF5_PLUGIN_PATH=@/../${PLUGIN_LIBDIR1}:@/../${PLUGIN_LIBDIR2}"
+#
+# Run the test
+#$ENVCMD $TEST_BIN
+#if [ $? != 0 ]; then
+#    nerrors=`expr $nerrors + 1`
+#fi
+#############################################
 
 # print results
 if test $nerrors -ne 0 ; then

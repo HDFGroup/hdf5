@@ -972,7 +972,7 @@ SUBROUTINE test_vds(total_error)
 
      ! Get source file name
      CALL H5Pget_virtual_filename_f(dcpl, INT(i-1, size_t), SRC_FILE_LEN_EXACT, error, nsize)
-     CALL check("H5Pget_virtual_count_f", error, total_error)
+     CALL check("H5Pget_virtual_filename_f", error, total_error)
 
      IF(nsize.NE.LEN(SRC_FILE_LEN_EXACT))THEN
         PRINT*,"virtual filenname size is incorrect"

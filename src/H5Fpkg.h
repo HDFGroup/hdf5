@@ -309,16 +309,16 @@ struct H5F_file_t {
     H5UC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
 
     /* File space allocation information */
-    H5F_fspace_strategy_t fs_strategy;      /* File space handling strategy	*/
+    H5F_fspace_strategy_t fs_strategy; /* File space handling strategy	*/
     hsize_t     fs_threshold;	/* Free space section threshold 	*/
-    hbool_t fs_persist;                     /* Free-space persist or not */
+    hbool_t     fs_persist;     /* Free-space persist or not */
     hbool_t     use_tmp_space;  /* Whether temp. file space allocation is allowed */
     haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */
-    hbool_t point_of_no_return;             /* flag to indicate that we can't go back and delete a freespace header when it's used up */
+    hbool_t     point_of_no_return; /* Flag to indicate that we can't go back and delete a freespace header when it's used up */
 
     H5F_fs_state_t fs_state[H5F_MEM_PAGE_NTYPES];   /* State of free space manager for each type */
-    haddr_t fs_addr[H5F_MEM_PAGE_NTYPES];           /* Address of free space manager info for each type */
-    H5FS_t *fs_man[H5F_MEM_PAGE_NTYPES];            /* Free space manager for each file space type */
+    haddr_t fs_addr[H5F_MEM_PAGE_NTYPES];   /* Address of free space manager info for each type */
+    H5FS_t *fs_man[H5F_MEM_PAGE_NTYPES];    /* Free space manager for each file space type */
     hbool_t first_alloc_dealloc;            /* TRUE iff free space managers   */
                                             /* are persistant and have not    */
                                             /* been used accessed for either  */
@@ -333,25 +333,25 @@ struct H5F_file_t {
                                             /* HADDR_UNDEF if no cache image. */
 
     /* Free-space aggregation info */
-    unsigned fs_aggr_merge[H5FD_MEM_NTYPES];    /* Flags for whether free space can merge with aggregator(s) */
-    H5FD_mem_t fs_type_map[H5FD_MEM_NTYPES];    /* Mapping of "real" file space type into tracked type */
-    H5F_blk_aggr_t meta_aggr;   	        /* Metadata aggregation info (if aggregating metadata allocations) */
-    H5F_blk_aggr_t sdata_aggr;                  /* "Small data" aggregation info (if aggregating "small data" allocations) */
+    unsigned fs_aggr_merge[H5FD_MEM_NTYPES]; /* Flags for whether free space can merge with aggregator(s) */
+    H5FD_mem_t fs_type_map[H5FD_MEM_NTYPES]; /* Mapping of "real" file space type into tracked type */
+    H5F_blk_aggr_t meta_aggr;   	    /* Metadata aggregation info (if aggregating metadata allocations) */
+    H5F_blk_aggr_t sdata_aggr;              /* "Small data" aggregation info (if aggregating "small data" allocations) */
 
     /* Paged aggregation info */
-    hsize_t fs_page_size;                           /* File space page size */
-    size_t pgend_meta_thres;                        /* Do not track page end meta section <= this threshold */
+    hsize_t fs_page_size;                   /* File space page size */
+    size_t pgend_meta_thres;                /* Do not track page end meta section <= this threshold */
 
     /* Metadata accumulator information */
-    H5F_meta_accum_t accum;     /* Metadata accumulator info           	*/
+    H5F_meta_accum_t accum;                 /* Metadata accumulator info */
 
     /* Metadata retry info */
-    unsigned 		read_attempts;	/* The # of reads to try when reading metadata with checksum */
-    unsigned		retries_nbins;		/* # of bins for each retries[] */
+    unsigned 		read_attempts;	    /* The # of reads to try when reading metadata with checksum */
+    unsigned		retries_nbins;	    /* # of bins for each retries[] */
     uint32_t		*retries[H5AC_NTYPES];  /* Track # of read retries for metdata items with checksum */
 
     /* Object flush info */
-    H5F_object_flush_t 	object_flush;		/* Information for object flush callback */
+    H5F_object_flush_t 	object_flush;	    /* Information for object flush callback */
 };
 
 /*

@@ -124,6 +124,27 @@ CompType::CompType(const H5Location& loc, const H5std_string& dtype_name) : Data
 }
 
 //--------------------------------------------------------------------------
+// Function:    CompType::decode
+///\brief       Returns a CompType object via DataType* by decoding the
+///             binary object description of this datatype.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* CompType::decode() const
+{
+    hid_t encoded_cmptype_id = H5I_INVALID_HID;
+    try {
+        encoded_cmptype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    CompType *encoded_cmptype = new CompType;
+    encoded_cmptype->p_setId(encoded_cmptype_id);
+    return(encoded_cmptype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    CompType::getNmembers
 ///\brief       Returns the number of members in this compound datatype.
 ///\return      Number of members
@@ -195,7 +216,6 @@ int CompType::getMemberIndex(const H5std_string& name) const
 ///             respect to the beginning of the compound data type datum.
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      Byte offset
-///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 // Description
 ///             Members are stored in no particular order with numbers 0

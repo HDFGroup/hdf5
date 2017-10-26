@@ -155,8 +155,8 @@ done:
 herr_t
 H5MF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, FILE *stream, int indent, int fwidth)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
     H5F_mem_page_t type;                /* Memory type for iteration */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
