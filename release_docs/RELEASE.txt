@@ -84,7 +84,7 @@ New Features
       of MPI_COMM_WORLD are allowed to be run in parallel with each
       subgroup operating as an independant collection of processes.
 
-      (RAW – 2017/10/10, HDFFV-10294)
+      (RAW - 2017/10/10, HDFFV-10294)
 
 
     - Large MPI-IO transfers
@@ -109,7 +109,7 @@ New Features
       fulfill the original user request without encountering API
       errors.
 
-      (RAW – 2017/07/11, HDFFV-8839)
+      (RAW - 2017/07/11, HDFFV-8839)
 
     Fortran Library:
     ----------------
