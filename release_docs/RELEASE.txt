@@ -178,7 +178,7 @@ Bug Fixes since HDF5-1.8.19
           block size.
       (2) Fix other places in the library that call this routine to detect
           error routine.
-        
+
       (HDFFV-10216, VC, 2017/09/05)
 
 
@@ -203,6 +203,10 @@ Bug Fixes since HDF5-1.8.19
       Modified H5Zfilter_avail and private function, H5Z_filter_avail.
       Moved check for plugin from public to private function. Updated
       H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+      Note, h5repack output display has changed to clarify the individual
+      steps of the repack process. The output indicates if an operation
+      applies to all objects. Lines with notation and no information
+      have been removed.
 
       (ADB - 2017/10/10, HDFFV-10297)
 
