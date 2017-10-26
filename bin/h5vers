@@ -198,7 +198,7 @@ my $H5_JAVA = $file;
 $H5_JAVA =~ s/[^\/]*$/..\/java\/src\/hdf\/hdf5lib\/H5.java/;
 die "unable to read file: $H5_JAVA\n" unless -r $file;
 my $TESTH5_JAVA = $file;
-$TESTH5_JAVA =~ s/[^\/]*$/..\/java\/test\/TestH5.java/; 
+$TESTH5_JAVA =~ s/[^\/]*$/..\/java\/test\/TestH5.java/;
 die "unable to read file: $TESTH5_JAVA\n" unless -r $file;
 my $REPACK_LAYOUT_PLUGIN_VERSION = $file;
 $REPACK_LAYOUT_PLUGIN_VERSION =~ s/[^\/]*$/..\/tools\/test\/h5repack\/testfiles\/h5repack_layout.h5-plugin_version_test.ddl/;
