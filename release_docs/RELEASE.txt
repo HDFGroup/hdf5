@@ -143,7 +143,7 @@ New Features
       fulfill the original user request without encountering API
       errors.
 
-      (RAW – 2017/09/20, HDFFV-8839)
+      (RAW - 2017/09/20, HDFFV-8839)
 
     Fortran Library:
     ----------------
