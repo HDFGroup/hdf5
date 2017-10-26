@@ -78,13 +78,13 @@ New Features
       file driver in HDF5 by previously having called H5Pset_fapl_mpio().
 
       HDF5 parallel file operations which do not employ multiple ranks
-      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1) 
+      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1)
       as opposed to MPI_COMM_WORLD, will not be affected by this
       optimization.  Conversely, parallel file operations on subgroups
       of MPI_COMM_WORLD are allowed to be run in parallel with each
       subgroup operating as an independant collection of processes.
 
-      (RAW – 2017/10/10, HDFFV-10294)
+      (RAW - 2017/10/10, HDFFV-10294)
 
 
     - Large MPI-IO transfers
@@ -109,7 +109,7 @@ New Features
       fulfill the original user request without encountering API
       errors.
 
-      (RAW – 2017/07/11, HDFFV-8839)
+      (RAW - 2017/07/11, HDFFV-8839)
 
     Fortran Library:
     ----------------
@@ -199,6 +199,10 @@ Bug Fixes since HDF5-1.10.1 release
       Modified H5Zfilter_avail and private function, H5Z_filter_avail.
       Moved check for plugin from public to private function. Updated
       H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+      Note, h5repack output display has changed to clarify the individual
+      steps of the repack process. The output indicates if an operation
+      applies to all objects. Lines with notation and no information
+      have been removed.
 
       (ADB - 2017/10/10, HDFFV-10297)
 
