@@ -37,8 +37,8 @@ cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.8.20")
-set (CTEST_SOURCE_VERSEXT "-snap8")
+set (CTEST_SOURCE_VERSION "1.8.21")
+set (CTEST_SOURCE_VERSEXT "-snap0")
 
 ##############################################################################
 # handle input parameters to script.
