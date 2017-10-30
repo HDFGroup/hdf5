@@ -90,6 +90,17 @@ MODULE H5D
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
 
+  ! Derived data type matching the C structure for H5Dread_multi and
+  ! H5Dwrite_multi
+	 	 
+  TYPE, BIND(C) :: H5D_rw_multi_t
+    INTEGER(HID_T) :: dset_id
+    INTEGER(HID_T) :: dset_space_id
+    INTEGER(HID_T) :: mem_type_id
+    INTEGER(HID_T) :: mem_space_id
+    TYPE(C_PTR)    :: buf
+  END TYPE H5D_rw_multi_t
+
   PRIVATE h5dread_vl_integer, h5dread_vl_real, h5dread_vl_string
   PRIVATE h5dwrite_vl_integer, h5dwrite_vl_real, h5dwrite_vl_string
   PRIVATE h5dwrite_reference_obj, h5dwrite_reference_dsetreg, h5dwrite_char_scalar, h5dwrite_ptr
@@ -1878,6 +1889,101 @@ CONTAINS
 
   END SUBROUTINE H5Dvlen_reclaim_f
 
+!****s* H5D/H5Dread_multi_f
+!
+! NAME
+!  H5Dread_multi_f
+!
+! PURPOSE
+!  Reads data from a file to memory buffers for multiple datasets
+!
+! INPUTS
+!  file_id - file or group id for the location of datasets.
+!  dxpl_id - dataset transfer property.
+!  count   - the number of accessing datasets.
+!
+! OUTPUTS
+!  info    - the array of dataset information and read buffer.
+! AUTHOR
+!  M. Scot Breitenfeld
+!  March 25, 2014
+!
+! SOURCE
+  SUBROUTINE H5Dread_multi_f(dxpl_id, count, info, hdferr)      
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+
+    INTEGER(HID_T),       INTENT(IN)                      :: dxpl_id
+    INTEGER(SIZE_T),      INTENT(IN)                      :: count
+    TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(1:count) :: info
+    INTEGER,              INTENT(OUT)                     :: hdferr
+!*****
+
+    INTERFACE
+       INTEGER FUNCTION H5Dread_multi_c(dxpl_id, count, info)
+     !  INTEGER FUNCTION H5Dread_multi(dxpl_id, count, info) BIND(C, NAME='H5Dread_multi')
+         USE H5GLOBAL
+         IMPORT :: SIZE_T
+         IMPORT :: HID_T
+         IMPORT :: H5D_rw_multi_t
+         INTEGER(HID_T)                 :: dxpl_id
+         INTEGER(SIZE_T)                :: count
+         TYPE(H5D_rw_multi_t), DIMENSION(1:count) :: info
+       END FUNCTION H5Dread_multi_c
+    !   END FUNCTION H5Dread_multi
+    END INTERFACE
+    hdferr = H5Dread_multi_c(dxpl_id, count, info)
+!    hdferr = H5Dread_multi(dxpl_id, count, info)
+
+  END SUBROUTINE H5Dread_multi_f
+            
+!****s* H5D/H5Dwrite_multi_f
+!
+! NAME
+!  H5Dwrite_multi_f
+!
+! PURPOSE
+!  Writes data in memory to a file for multiple datasets
+!
+! INPUTS
+!  file_id - file or group id for the location of datasets,
+!  count   - the number of accessing datasets.
+!  dxpl_id - dataset transfer property.
+!
+! OUTPUTS
+!  Info    - the array of dataset information and write buffer.
+! AUTHOR
+!  M. Scot Breitenfeld
+!  March 25, 2014
+!
+! SOURCE
+  SUBROUTINE H5Dwrite_multi_f(dxpl_id, count, info, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+
+    INTEGER(HID_T),       INTENT(IN)                     :: dxpl_id
+    INTEGER(SIZE_T),      INTENT(IN)                     :: count
+    TYPE(H5D_rw_multi_t), INTENT(IN), DIMENSION(1:count) :: info
+    INTEGER,              INTENT(OUT)                    :: hdferr
+!*****
+
+    INTERFACE
+!       INTEGER FUNCTION H5Dwrite_multi(dxpl_id, count, info) BIND(C, NAME='H5Dwrite_multi')
+       INTEGER FUNCTION H5Dwrite_multi_c(dxpl_id, count, info)
+         IMPORT :: SIZE_T
+         IMPORT :: HID_T
+         IMPORT :: H5D_rw_multi_t
+         INTEGER(HID_T)                 :: dxpl_id
+         INTEGER(SIZE_T)                :: count
+         TYPE(H5D_rw_multi_t), DIMENSION(1:count) :: info
+       END FUNCTION H5Dwrite_multi_c
+!       END FUNCTION H5Dwrite_multi
+    END INTERFACE
+
+    hdferr = H5Dwrite_multi_c(dxpl_id, count, info)
+!    hdferr = H5Dwrite_multi(dxpl_id, count, info)
+
+  END SUBROUTINE H5Dwrite_multi_f
 
 END MODULE H5D
 
