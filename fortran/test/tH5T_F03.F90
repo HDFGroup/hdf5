@@ -3530,7 +3530,7 @@ SUBROUTINE multiple_dset_rw(total_error)
   CALL h5tset_size_f(strtype, INT(sdim,size_t), error)  
   CALL check("h5tset_size_f", error, total_error)
   CALL h5tinsert_f(info_md(4)%mem_type_id, "chr", &
-       H5OFFSETOF(C_LOC(wbuf_derived(1)),C_LOC(wbuf_derived(1)%c)), strtype, error)
+       H5OFFSETOF(C_LOC(wbuf_derived(1)),C_LOC(wbuf_derived(1)%c(1:1))), strtype, error)
   CALL check("h5tinsert_f", error, total_error)
 
   dims(1) = ddim

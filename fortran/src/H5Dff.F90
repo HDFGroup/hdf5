@@ -1909,8 +1909,7 @@ CONTAINS
 !  March 25, 2014
 !
 ! SOURCE
-  SUBROUTINE H5Dread_multi_f(dxpl_id, count, info, hdferr)      
-    USE, INTRINSIC :: ISO_C_BINDING
+  SUBROUTINE H5Dread_multi_f(dxpl_id, count, info, hdferr)
     IMPLICIT NONE
 
     INTEGER(HID_T),       INTENT(IN)                      :: dxpl_id
@@ -1922,10 +1921,10 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5Dread_multi_c(dxpl_id, count, info)
      !  INTEGER FUNCTION H5Dread_multi(dxpl_id, count, info) BIND(C, NAME='H5Dread_multi')
-         USE H5GLOBAL
          IMPORT :: SIZE_T
          IMPORT :: HID_T
          IMPORT :: H5D_rw_multi_t
+         IMPLICIT NONE
          INTEGER(HID_T)                 :: dxpl_id
          INTEGER(SIZE_T)                :: count
          TYPE(H5D_rw_multi_t), DIMENSION(1:count) :: info
@@ -1958,7 +1957,6 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE H5Dwrite_multi_f(dxpl_id, count, info, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
 
     INTEGER(HID_T),       INTENT(IN)                     :: dxpl_id
@@ -1973,6 +1971,7 @@ CONTAINS
          IMPORT :: SIZE_T
          IMPORT :: HID_T
          IMPORT :: H5D_rw_multi_t
+         IMPLICIT NONE
          INTEGER(HID_T)                 :: dxpl_id
          INTEGER(SIZE_T)                :: count
          TYPE(H5D_rw_multi_t), DIMENSION(1:count) :: info
