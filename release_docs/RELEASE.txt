@@ -156,7 +156,9 @@ Bug Fixes since HDF5-1.8.19
 
     Configuration
     -------------
-    - None
+    - Fixed Fortran linker flags when using the NAG Fortran compiler (autotools). 
+
+      (HDFFV-10037, MSB, 2017/10/21)	
 
 
     Library
