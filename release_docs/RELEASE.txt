@@ -166,7 +166,7 @@ Bug Fixes since HDF5-1.10.1 release
       Moved check for plugin from public to private function. Updated
       H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
 
-      (ADB - 2017/10/10, HDFFV-10297)
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
 
     Configuration
     -------------
@@ -204,7 +204,7 @@ Bug Fixes since HDF5-1.10.1 release
       applies to all objects. Lines with notation and no information
       have been removed.
 
-      (ADB - 2017/10/10, HDFFV-10297)
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
 
     - h5repack
 
