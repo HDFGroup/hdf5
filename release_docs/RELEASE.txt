@@ -137,7 +137,7 @@ New Features
       file driver in HDF5 by previously having called H5Pset_fapl_mpio().
 
       HDF5 parallel file operations which do not employ multiple ranks
-      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1) 
+      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1)
       as opposed to MPI_COMM_WORLD, will not be affected by this
       optimization.  Conversely, parallel file operations on subgroups
       of MPI_COMM_WORLD are allowed to be run in parallel with each
@@ -239,7 +239,7 @@ Bug Fixes since HDF5-1.10.1 release
       Moved check for plugin from public to private function. Updated
       H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
 
-      (ADB - 2017/10/10, HDFFV-10297)
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
 
     - Fix H5HL_offset_into()
 
@@ -347,7 +347,7 @@ Bug Fixes since HDF5-1.10.1 release
       applies to all objects. Lines with notation and no information
       have been removed.
 
-      (ADB - 2017/10/10, HDFFV-10297)
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
 
     - h5repack
 
