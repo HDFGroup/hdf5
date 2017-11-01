@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_F90 C CXX Fortran)
 
 if (H5_HAVE_PARALLEL)
-  set (LINK_LIBS ${LINK_LIBS} MPI::MPI_Fortran)
   if (MPI_Fortran_LINK_FLAGS)
     set (CMAKE_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
   endif ()
