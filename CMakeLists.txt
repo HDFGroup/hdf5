@@ -624,7 +624,6 @@ set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MOD
 option (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 if (HDF5_ENABLE_PARALLEL)
   find_package(MPI REQUIRED)
-  INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_PATH})
   if (MPI_C_FOUND)
     set (H5_HAVE_PARALLEL 1)
     # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
