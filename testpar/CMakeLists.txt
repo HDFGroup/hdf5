@@ -53,6 +53,8 @@ set (H5P_TESTS
     t_init_term
     t_shapesame
     t_filters_parallel
+    t_ph5_vds
+    t_pvdsunl
 )
 
 foreach (testp ${H5P_TESTS})

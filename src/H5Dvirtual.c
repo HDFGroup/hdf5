@@ -877,7 +877,9 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_srcdset_t *source_dset, hid_t dxpl_id)
 {
     H5F_t       *src_file = NULL;       /* Source file */
+#ifdef NOT_USED
     hbool_t     src_file_open = FALSE;  /* Whether we have opened and need to close src_file */
+#endif
     H5G_loc_t   src_root_loc;           /* Object location of source file root group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -893,10 +895,20 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
         /* Open the source file */
-        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
-            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
+        if(NULL == (src_file = H5F_open(source_dset->file_name,
+                       H5F_INTENT(vdset->oloc.file) &
+                       (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ),
+                       H5P_FILE_CREATE_DEFAULT,
+                       vdset->shared->layout.storage.u.virt.source_fapl,
+                       dxpl_id)))
+            /* Quick hack until proper support for H5Fopen
+             *  with missing file is implemented
+             */
+            H5E_clear_stack(NULL);
+#ifdef NOT_USED
         else
             src_file_open = TRUE;
+#endif
     } /* end if */
     else
         /* Source file is ".", use the virtual dataset's file */
@@ -930,11 +942,12 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     } /* end if */
 
 done:
+#ifdef NOT_USED
     /* Close source file */
     if(src_file_open)
         if(H5F_try_close(src_file, NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
-
+#endif
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_open_source_dset() */
 
@@ -2579,7 +2592,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     storage = &io_info->dset->shared->layout.storage.u.virt;
     HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
-#ifdef H5_HAVE_PARALLEL
+#if defined(H5_HAVE_PARALLEL) && defined(H5_DISABLE_THIS_CHECK)
     /* Parallel reads are not supported (yet) */
     if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel reads not supported on virtual datasets")
