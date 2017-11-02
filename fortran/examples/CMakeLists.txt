@@ -81,7 +81,7 @@ foreach (example ${F2003_examples})
   set_target_properties (f03_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran03
-      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
   if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_executable (f03_ex_${example}-shared ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
