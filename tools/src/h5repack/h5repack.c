@@ -221,13 +221,12 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
     hid_t       ret_value = -1;        /* The identifier of the named dtype in the out file */
 
     if (H5Oget_info(type_in, &oinfo) < 0)
-        goto done;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info failed");
 
     if (*named_dt_head_p) {
         /* Stack already exists, search for the datatype */
         while (dt && dt->addr_in != oinfo.addr)
             dt = dt->next;
-
         dt_ret = dt;
     }
     else {
@@ -238,7 +237,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
             if (travt->objs[i].type == H5TRAV_TYPE_NAMED_DATATYPE) {
                 /* Push onto the stack */
                 if (NULL == (dt = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
-                    goto done;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "buffer allocation failed failed");
                 dt->next = *named_dt_head_p;
                 *named_dt_head_p = dt;
 
@@ -259,7 +258,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
     if (!dt_ret) {
         /* Push the new datatype onto the stack */
         if (NULL == (dt_ret = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
-            goto done;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "buffer allocation failed failed");
         dt_ret->next = *named_dt_head_p;
         *named_dt_head_p = dt_ret;
 
@@ -276,9 +275,9 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
         else
             dt_ret->id_out = H5Tcopy(type_in);
         if (dt_ret->id_out < 0)
-            goto done;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type-H5Tcopy failed");
         if (H5Tcommit_anon(fidout, dt_ret->id_out, H5P_DEFAULT, H5P_DEFAULT) < 0)
-            goto done;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tcommit_anon failed");
     } /* end if */
 
     /* Set return value */
@@ -286,7 +285,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
 
     /* Increment the ref count on id_out, because the calling function will try to close it */
     if(H5Iinc_ref(ret_value) < 0)
-        ret_value = -1;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Iinc_ref failed");
 
 done:
     return ret_value;
@@ -305,7 +304,7 @@ int named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err) {
     while (dt) {
         /* Pop the datatype off the stack and free it */
         if (H5Tclose(dt->id_out) < 0 && !ignore_err)
-            goto done;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
         dt = dt->next;
         HDfree(*named_dt_head_p);
         *named_dt_head_p = dt;
@@ -332,7 +331,7 @@ int
 copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
         trav_table_t *travt, pack_opt_t *options)
 {
-    int         ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int         ret_value = 0;
     hid_t       attr_id = -1;  /* attr ID */
     hid_t       attr_out = -1; /* attr ID */
     hid_t       space_id = -1; /* space ID */
@@ -375,7 +374,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
         if ((is_named = H5Tcommitted(ftype_id)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tcommitted failed");
         if (is_named && travt) {
-            hid_t fidout;
+            hid_t fidout = -1;
 
             /* Create out file id */
             if ((fidout = H5Iget_file_id(loc_out)) < 0)
@@ -426,7 +425,8 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 
             base_type = H5Tget_super(ftype_id);
             is_ref = (is_ref || (H5Tget_class(base_type) == H5T_REFERENCE));
-            H5Tclose(base_type);
+            if (H5Tclose(base_type) < 0)
+                H5TOOLS_INFO(H5E_tools_min_id_g, "H5Tclose base_type failed");
         }
 
         if (type_class == H5T_COMPOUND) {
@@ -435,7 +435,8 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
             for (j = 0; j < nmembers; j++) {
                 hid_t mtid = H5Tget_member_type(wtype_id, (unsigned)j);
                 H5T_class_t mtclass = H5Tget_class(mtid);
-                H5Tclose(mtid);
+                if (H5Tclose(mtid) < 0)
+                    H5TOOLS_INFO(H5E_tools_min_id_g, "H5Tclose mtid failed");
 
                 if (mtclass == H5T_REFERENCE) {
                     is_ref = 1;
@@ -481,7 +482,24 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 
         if (options->verbose)
             printf(FORMAT_OBJ_ATTR, "attr", name);
-    } /* u */
+
+        /*-------------------------------------------------------------------------
+         * close
+         *-------------------------------------------------------------------------
+         */
+        if (H5Sclose(space_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
+        space_id = -1;
+        if (H5Tclose(wtype_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+        wtype_id = -1;
+        if (H5Tclose(ftype_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+        ftype_id = -1;
+        if (H5Aclose(attr_id) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aclose failed");
+        attr_id = -1;
+    } /* for u */
 
 done:
     H5E_BEGIN_TRY {
@@ -495,11 +513,11 @@ done:
             HDfree(buf);
         } /* end if */
 
-        H5Tclose(ftype_id);
-        H5Tclose(wtype_id);
-        H5Sclose(space_id);
-        H5Aclose(attr_id);
         H5Aclose(attr_out);
+        H5Sclose(space_id);
+        H5Tclose(wtype_id);
+        H5Tclose(ftype_id);
+        H5Aclose(attr_id);
     } H5E_END_TRY;
 
     return ret_value;
@@ -689,9 +707,9 @@ done:
  */
 static int check_objects(const char* fname, pack_opt_t *options) {
     int           ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t         fid;
-    hid_t         did;
-    hid_t         sid;
+    hid_t         fid = -1;
+    hid_t         did = -1;
+    hid_t         sid = -1;
     unsigned int  i;
     unsigned int  uf;
     trav_table_t *travt = NULL;
@@ -792,9 +810,9 @@ static int check_objects(const char* fname, pack_opt_t *options) {
 
 done:
     H5E_BEGIN_TRY {
-        H5Fclose(fid);
         H5Sclose(sid);
         H5Dclose(did);
+        H5Fclose(fid);
     } H5E_END_TRY;
     if (travt)
         trav_table_free(travt);

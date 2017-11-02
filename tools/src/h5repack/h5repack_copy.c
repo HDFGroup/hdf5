@@ -78,23 +78,21 @@ static herr_t walk_error_callback(H5_ATTR_UNUSED unsigned n, const H5E_error2_t 
  *
  * Return:   0, ok,
  *          -1 no
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: October, 23, 2003
- *
  *-------------------------------------------------------------------------
  */
 
 int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 {
-    int           ret_value = 0;          /* no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t         fidin;
+    int           ret_value = 0;
+    hid_t         fidin = -1;
     hid_t         fidout = -1;
-    trav_table_t  *travt = NULL;
-    hsize_t       ub_size = 0;            /* size of user block */
+    hid_t         fcpl_in = -1;  /* file creation property list ID for input file */
+    hid_t         grp_in = -1;   /* group ID */
+    hid_t         gcpl_in = -1;  /* group creation property list */
     hid_t         fcpl = H5P_DEFAULT;     /* file creation property list ID */
     hid_t         fapl = H5P_DEFAULT;     /* file access property list ID */
+    trav_table_t *travt = NULL;
+    hsize_t       ub_size = 0;            /* size of user block */
     H5F_fspace_strategy_t set_strategy;   /* Strategy to be set in outupt file */
     hbool_t       set_persist;            /* Persist free-space status to be set in output file */
     hsize_t       set_threshold;          /* Free-space section threshold to be set in output file */
@@ -114,10 +112,6 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 
     /* get user block size and file space strategy/persist/threshold */
     {
-        hid_t fcpl_in; /* file creation property list ID for input file */
-        hid_t grp_in = -1;   /* group ID */
-        hid_t gcpl_in = -1;  /* group creation property list */
-
         if ((fcpl_in = H5Fget_create_plist(fidin)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fget_create_plist failed to retrieve file creation property list");
 
@@ -343,42 +337,26 @@ print_user_block(fnamein, fidin);
     /* init table */
     trav_table_init(&travt);
 
-    /* get the list of objects in the file */
-    if (h5trav_gettable(fidin, travt) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5trav_gettable failed");
+    if (travt) {
+        /* get the list of objects in the file */
+        if (h5trav_gettable(fidin, travt) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5trav_gettable failed");
 
-    /*-------------------------------------------------------------------------
-     * do the copy
-     *-------------------------------------------------------------------------
-     */
-    if (do_copy_objects(fidin, fidout, travt, options) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "do_copy_objects from <%s> could not copy data to <%s>", fnamein, fnameout);
+        /*-------------------------------------------------------------------------
+        * do the copy
+        *-------------------------------------------------------------------------
+        */
+        if (do_copy_objects(fidin, fidout, travt, options) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "do_copy_objects from <%s> could not copy data to <%s>", fnamein, fnameout);
 
-    /*-------------------------------------------------------------------------
-     * do the copy of referenced objects
-     * and create hard links
-     *-------------------------------------------------------------------------
-     */
-    if (do_copy_refobjs(fidin, fidout, travt, options) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "do_copy_refobjs from <%s> could not copy data to <%s>", fnamein, fnameout);
-
-    /*-------------------------------------------------------------------------
-     * close
-     *-------------------------------------------------------------------------
-     */
-
-    if (fapl > 0)
-        H5Pclose(fapl);
-
-    if (fcpl > 0)
-        H5Pclose(fcpl);
-
-    H5Fclose(fidin);
-    H5Fclose(fidout);
-
-    /* free table */
-    trav_table_free(travt);
-    travt = NULL;
+        /*-------------------------------------------------------------------------
+        * do the copy of referenced objects
+        * and create hard links
+        *-------------------------------------------------------------------------
+        */
+        if (do_copy_refobjs(fidin, fidout, travt, options) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "do_copy_refobjs from <%s> could not copy data to <%s>", fnamein, fnameout);
+    }
 
     /*-------------------------------------------------------------------------
      * write only the input file user block if there is no user block file input
@@ -389,17 +367,15 @@ print_user_block(fnamein, fidin);
         if (copy_user_block(fnamein, fnameout, ub_size) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not copy user block. Exiting...");
 
-    return 0;
-
-    /*-------------------------------------------------------------------------
-     * out
-     *-------------------------------------------------------------------------
-     */
-
 done:
     H5E_BEGIN_TRY {
+        H5Pclose(fcpl_in);
+        H5Pclose(gcpl_in);
         H5Pclose(fapl);
         H5Pclose(fcpl);
+        H5Gclose(grp_in);
+        H5Fclose(fidin);
+        H5Fclose(fidout);
         H5Fclose(fidin);
         H5Fclose(fidout);
     } H5E_END_TRY;
@@ -416,7 +392,7 @@ done:
  *          The size of hyperslab is limitted by H5TOOLS_BUFSIZE.
  *          Return the hyperslab dimentions and size in byte.
  *
- * Return: 0 - SUCCEED, -1 FAILED
+ * Return:  0 - SUCCEED, -1 FAILED
  *
  * Parameters:
  *   dcpl_id : [IN] dataset creation property.
@@ -426,8 +402,6 @@ done:
  *   dims_hslab[] : [OUT] calculated hyperslab dimentions
  *   * hslab_nbytes_p : [OUT] total byte of the hyperslab
  *
- * Programmer: Jonathan Kim
- * Date: Feburary, 2012
  * Update:
  *   The hyperslab calucation would be depend on if the dataset is chunked
  *   or not.
@@ -441,25 +415,23 @@ done:
  *      the boundary would be dataset's dims.
  *
  *   The calulation starts from the last dimention (h5dump dims output).
- *
- * Note:
- *   Added for JIRA HDFFV-7862.
  *-----------------------------------------*/
 
-int Get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
+int
+Get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
         size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p)
 {
-    int     ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int     ret_value = 0;
     int     k;
     H5D_layout_t dset_layout;
     int     rank_chunk;
     hsize_t dims_chunk[H5S_MAX_RANK];
     hsize_t size_chunk = 1;
-    hsize_t nchunk_fit; /* number of chunks that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
-    hsize_t ndatum_fit; /* number of dataum that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
+    hsize_t nchunk_fit;                   /* number of chunks that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
+    hsize_t ndatum_fit;                   /* number of dataum that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
     hsize_t chunk_dims_map[H5S_MAX_RANK]; /* mapped chunk dimentions */
-    hsize_t hs_dims_map[H5S_MAX_RANK]; /* mapped hyperslab dimentions */
-    hsize_t hslab_nbytes; /* size of hyperslab in byte */
+    hsize_t hs_dims_map[H5S_MAX_RANK];    /* mapped hyperslab dimentions */
+    hsize_t hslab_nbytes;                 /* size of hyperslab in byte */
 
     /* init to set as size of a data element */
     hslab_nbytes = size_datum;
@@ -572,24 +544,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function: do_copy_objects
  *
- * Purpose: duplicate all HDF5 objects in the file
+ * Purpose:  duplicate all HDF5 objects in the file
  *
- * Return: 0, ok, -1 no
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: October, 23, 2003
- *
- * Modifications:
- *
- *  July 2004:     Introduced the extra EC or NN option for SZIP
- *
- *  December 2004: Added a check for H5Dcreate; if the dataset cannot be created
- *                  with the requested filter, use the input one
- *
- *  October 2006:  Read/write using the file type by default.
- *
- *  October 2006:  Read by hyperslabs for big datasets.
+ * Return:   0, ok, -1 no
  *
  *  A threshold of H5TOOLS_MALLOCSIZE (128 MB) is the limit upon which I/O hyperslab is done
  *  i.e., if the memory needed to read a dataset is greater than this limit,
@@ -630,31 +587,6 @@ done:
  *  in (2) is that, when using the strip mine size, it assures that the "remaining" part
  *  of the dataset that does not fill an entire strip mine is processed.
  *
- *  November 2006:  Use H5Ocopy in the copy of objects. The logic for using
- *   H5Ocopy or not is if a change of filters or layout is requested by the user
- *   then use read/write else use H5Ocopy.
- *
- * May, 1, 2008: Add a printing of the compression ratio of old size / new size
- *
- * Feburary 2012:  improve Read/Write by hyperslabs for big datasets.
- * Programmer: Jonathan Kim
- *
- *  A threshold of H5TOOLS_MALLOCSIZE is the limit upon which I/O hyperslab is done
- *  i.e., if the memory needed to read a dataset is greater than this limit,
- *  then hyperslab I/O is done instead of one operation I/O
- *  For each dataset, the memory needed is calculated according to
- *
- *  memory needed = number of elements * size of each element
- *
- *  if the memory needed is lower than H5TOOLS_MALLOCSIZE, then the following operations
- *  are done
- *
- *  H5Dread( input_dataset )
- *  H5Dwrite( output_dataset )
- *
- *  with all elements in the datasets selected. If the memory needed is greater than
- *  H5TOOLS_MALLOCSIZE, then the following operations are done instead:
- *
  *  1. figure out a hyperslab (dimentions) and size  (refer to Get_hyperslab()).
  *  2. Calculate the hyperslab selections as the selection is moving forward.
  *     Selection would be same as the hyperslab except for the remaining edge portion
@@ -666,7 +598,7 @@ done:
 int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
         pack_opt_t *options) /* repack options */
 {
-    int   ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int   ret_value = 0;
     hid_t grp_in = -1;   /* group ID */
     hid_t grp_out = -1;  /* group ID */
     hid_t dset_in = -1;  /* read dataset ID */
@@ -988,13 +920,18 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                     if(H5Dread(dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
                                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
                                     if(H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
+                                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dwrite failed");
 
                                     /* Check if we have VL data in the dataset's
                                      * datatype that must be reclaimed */
                                     if (TRUE == H5Tdetect_class(wtype_id, H5T_VLEN))
                                         if (H5Dvlen_reclaim(wtype_id, f_space_id, H5P_DEFAULT, buf) < 0)
                                             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dvlen_reclaim failed");
+                                    /* free */
+                                    if (buf != NULL) {
+                                        HDfree(buf);
+                                        buf = NULL;
+                                    }
                                 }
                                 else { /* possibly not enough memory, read/write by hyperslabs */
                                     size_t p_type_nbytes = msize; /*size of memory type */
@@ -1074,7 +1011,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                         if(H5Dread(dset_in, wtype_id, hslab_space, f_space_id, H5P_DEFAULT, hslab_buf) < 0)
                                             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
                                         if(H5Dwrite(dset_out, wtype_id,  hslab_space, f_space_id, H5P_DEFAULT, hslab_buf) < 0)
-                                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
+                                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dwrite failed");
 
                                         /* reclaim any VL memory, if necessary */
                                         if (vl_data)
@@ -1165,7 +1102,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                  *-------------------------------------------------------------------------
                  */
                 else {
-                    hid_t pid;
+                    hid_t pid = -1;
 
                     /* create property to pass copy options */
                     if ((pid = H5Pcreate(H5P_OBJECT_COPY)) < 0)
@@ -1243,6 +1180,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
                 if (H5Tclose(type_out) < 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                type_out = -1; /* named datatypes stack, named_dt_head, manages allocation */
 
                 break;
 
@@ -1273,6 +1211,18 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
     } /* end if */
 
 done:
+
+    /* Finalize (link) the stack of named datatypes (if any) first
+     * because of reference counting */
+    if (0 == ret_value && named_dt_head != NULL) {
+        if (named_datatype_free(&named_dt_head, 0) < 0)
+            H5TOOLS_INFO(H5E_tools_min_id_g, "named_datatype_free failed");
+    }
+    else
+        H5E_BEGIN_TRY {
+            named_datatype_free(&named_dt_head, 1);
+        } H5E_END_TRY;
+
     H5E_BEGIN_TRY
     {
         H5Gclose(grp_in);
@@ -1295,14 +1245,6 @@ done:
     if (hslab_buf != NULL)
         HDfree(hslab_buf);
 
-    /* Finalize (link) the stack of named datatypes (if any) */
-    if (0 == ret_value && named_dt_head != NULL)
-        named_datatype_free(&named_dt_head, 0);
-    else
-        H5E_BEGIN_TRY {
-            named_datatype_free(&named_dt_head, 1);
-        } H5E_END_TRY;
-
     return ret_value;
 }
 
@@ -1310,10 +1252,10 @@ done:
  * Function: print_dataset_info
  *
  * Purpose: print name, filters, percentage compression of a dataset
- *
  *-------------------------------------------------------------------------
  */
-static void print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
+static void
+print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
 {
     char     strfilter[255];
 #if defined (PRINT_DEBUG )
@@ -1325,7 +1267,7 @@ static void print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int p
     unsigned cd_values[20];  /* filter client data values */
     size_t   cd_nelmts;      /* filter client number of values */
     char     f_objname[256]; /* filter objname */
-    int     i;
+    int      i;
 
     HDstrcpy(strfilter, "\0");
 
@@ -1417,19 +1359,15 @@ static void print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int p
 /*-------------------------------------------------------------------------
  * Function: copy_user_block
  *
- * Purpose: copy user block from one file to another
+ * Purpose:  copy user block from one file to another
  *
- * Return: 0, ok, -1 no
- *
- * Programmer: Peter Cao
- *
- * Date: October, 25, 2007
- *
+ * Return:   0, ok, -1 no
  *-------------------------------------------------------------------------
  */
-static int copy_user_block(const char *infile, const char *outfile, hsize_t size)
+static int
+copy_user_block(const char *infile, const char *outfile, hsize_t size)
 {
-    int ret_value = 0;           /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    int ret_value = 0;
     int infid = -1, outfid = -1; /* File descriptors */
 
     /* User block must be any power of 2 equal to 512 or greater (512, 1024, 2048, etc.) */
@@ -1491,66 +1429,62 @@ done:
 /*-------------------------------------------------------------------------
  * Function: print_user_block
  *
- * Purpose: print user block
+ * Purpose:  print user block
  *
- * Return: 0, ok, -1 no
- *
- * Programmer: Pedro Vicente
- *
- * Date: August, 20, 2008
- *
+ * Return:   0, ok, -1 no
  *-------------------------------------------------------------------------
  */
 #if defined (H5REPACK_DEBUG_USER_BLOCK)
 static
-void print_user_block(const char *filename, hid_t fid)
+void
+print_user_block(const char *filename, hid_t fid)
 {
-    int     ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    int     fh;   /* file handle  */
-    hsize_t ub_size; /* user block size */
-    hsize_t size; /* size read */
-    hid_t   fcpl; /* file creation property list ID for HDF5 file */
+    int     ret_value = 0;
+    int     fh = -1;   /* file handle */
+    hsize_t ub_size;   /* user block size */
+    hsize_t size;      /* size read */
+    hid_t   fcpl = -1; /* file creation property list ID for HDF5 file */
     int     i;
 
     /* get user block size */
-    if(( fcpl = H5Fget_create_plist(fid)) < 0) {
+    if ((fcpl = H5Fget_create_plist(fid)) < 0) {
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Fget_create_plist failed to retrieve file creation property list");
     }
 
-    if(H5Pget_userblock(fcpl, &ub_size) < 0) {
+    if (H5Pget_userblock(fcpl, &ub_size) < 0) {
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Pget_userblock failed to retrieve userblock size");
     }
 
-    if(H5Pclose(fcpl) < 0) {
+    if (H5Pclose(fcpl) < 0) {
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Pclose failed to close property list");
     }
 
     /* open file */
-    if((fh = HDopen(filename, O_RDONLY)) < 0) {
+    if ((fh = HDopen(filename, O_RDONLY)) < 0) {
         HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "HDopen failed to open file <%s>", filename);
     }
 
     size = ub_size;
 
     /* read file */
-    while(size > 0) {
+    while (size > 0) {
         ssize_t nread; /* # of bytes read */
         char rbuf[USERBLOCK_XFER_SIZE]; /* buffer for reading */
 
         /* read buffer */
-        if(size > USERBLOCK_XFER_SIZE)
+        if (size > USERBLOCK_XFER_SIZE)
             nread = HDread(fh, rbuf, (size_t)USERBLOCK_XFER_SIZE);
         else
             nread = HDread(fh, rbuf, (size_t)size);
 
-        for(i = 0; i < nread; i++) {
+        for (i = 0; i < nread; i++) {
 
             printf("%c ", rbuf[i]);
 
         }
         printf("\n");
 
-        if(nread < 0) {
+        if (nread < 0) {
             HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "nread < 0");
         }
 
@@ -1559,7 +1493,7 @@ void print_user_block(const char *filename, hid_t fid)
     }
 
 done:
-    if(fh > 0)
+    if (fh > 0)
         HDclose(fh);
 
     return;
