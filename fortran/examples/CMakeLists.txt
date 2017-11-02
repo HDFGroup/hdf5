@@ -81,7 +81,7 @@ foreach (example ${F2003_examples})
   set_target_properties (f03_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran03
-      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
   if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_executable (f03_ex_${example}-shared ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
@@ -107,7 +107,6 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   target_link_libraries (f90_ex_ph5example
       ${HDF5_F90_LIB_TARGET}
       ${HDF5_LIB_TARGET}
-      ${MPI_Fortran_LIBRARIES}
   )
   target_include_directories (f90_ex_ph5example PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
   set_target_properties (f90_ex_ph5example PROPERTIES
@@ -122,7 +121,6 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
     target_link_libraries (f90_ex_ph5example-shared
         ${HDF5_F90_LIBSH_TARGET}
         ${HDF5_LIBSH_TARGET}
-        ${MPI_Fortran_LIBRARIES}
     )
     target_include_directories (f90_ex_ph5example-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
     set_target_properties (f90_ex_ph5example-shared PROPERTIES
