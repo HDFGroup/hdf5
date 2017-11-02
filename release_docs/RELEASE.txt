@@ -300,13 +300,13 @@ They are built with the configure process unless specified otherwise.
     Linux 2.6.32-573.22.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (platypus/mayll)              Version 4.4.7 20120313
-                                     Versions 4.9.3, 5.2.0, 6.2.0
+                                     Versions 4.9.3, 5.3.0, 6.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
                                       Version 16.10-0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
-                                     Version 17.0.0.098 Build 20160721
+                                     Version 17.0.0.196 Build 20160721
                                   MPICH 3.1.4 compiled with GCC 4.9.3
                                   OpenMPI 2.0.1 compiled with GCC 4.9.3
 
@@ -349,10 +349,6 @@ They are built with the configure process unless specified otherwise.
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
-    Mac OS X Mt. Lion 10.8.5      Apple LLVM version 5.1 (clang-503.0.40)
-    64-bit                        gfortran GNU Fortran (GCC) 4.8.2
-    (swallow/kite)                Intel icc/icpc/ifort version 15.0.3
-
     Mac OS X Mavericks 10.9.5     Apple LLVM version 6.0 (clang-600.0.57)
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
     (wren/quail)                  Intel icc/icpc/ifort version 15.0.3
@@ -361,9 +357,13 @@ They are built with the configure process unless specified otherwise.
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X El Capitan 10.11.4   Apple LLVM version 7.3.0 (clang-703.0.29)
+    Mac OS X El Capitan 10.11.6   Apple LLVM version 7.3.0 (clang-703.0.29)
     64-bit                        gfortran GNU Fortran (GCC) 5.2.0
     (VM osx1011dev/osx1011test)   Intel icc/icpc/ifort version 16.0.2
+
+    Mac OS Sierra 10.12.6         Apple LLVM version 8.1 (clang-802.0.42)
+    64-bit                        gfortran GNU Fortran (GCC) 7.1.0
+    (kite)                        Intel icc/icpc/ifort version 17.0.2
 
 
 Tested Configuration Features Summary
@@ -389,9 +389,10 @@ Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
-Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
 Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     y
 Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
+Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
+Mac OS Sierra 10.12.6 64-bit            n        y/y    n        y    y     y
 AIX 6.1 32- and 64-bit                  n        y/n    n        y    y     y
 CentOS 6.7 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 6.7 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
@@ -410,9 +411,10 @@ Windows 7 Cygwin                           n       n         n         y
 Windows 7 x64 Cygwin                       n       n         n         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
-Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
 Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
 Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
+Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
+Mac OS Sierra 10.12.6 64-bit               y       n         y         y
 AIX 6.1 32- and 64-bit                     y       n         n         y
 CentOS 6.7 Linux 2.6.32 x86_64 GNU         y       y         y         y
 CentOS 6.7 Linux 2.6.32 x86_64 Intel       y       y         y         y
@@ -462,6 +464,12 @@ Known Problems
     With autotools on CYGWIN this results in build errors, and we have not
     found a solution that satisfies both.  Therefore the dynamically loaded
     plugin tests have been disabled on CYGWIN.
+
+    Mac OS X 10.13 added additional subdirectory structure in .libs for shared
+    libraries.  Consequently "make check" will fail testing java and dynamically 
+    loaded plugin test libraries attempting to copy files from the previous 
+    locations in .libs directories.  This will be addressed in the next release
+    when support for the Mac OS X 10.13 platform is added.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
