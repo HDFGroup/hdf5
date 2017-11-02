@@ -62,8 +62,8 @@ endif()
 #-- Adding test for parallel_test_F03
 if (HDF5_ENABLE_F2003)
   add_executable (parallel_test_F03
-      ptest_F03.f90
-      multidsetrw_F03.f90
+      ptest_F03.F90
+      multidsetrw_F03.F90
   )
   TARGET_NAMING (parallel_test_F03 ${LIB_TYPE})
   TARGET_FORTRAN_PROPERTIES (parallel_test_F03 " " " ")
