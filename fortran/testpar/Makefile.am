@@ -41,7 +41,7 @@ CHECK_CLEANFILES+=parf[12].h5
 
 # Test source files
 parallel_test_SOURCES=ptest.f90 hyper.f90 mdset.f90
-parallel_test_F03_SOURCES=ptest_F03.f90 multidsetrw_F03.f90
+parallel_test_F03_SOURCES=ptest_F03.F90 multidsetrw_F03.F90
 
 # The tests depend on several libraries.
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
