@@ -156,9 +156,31 @@ Bug Fixes since HDF5-1.8.19
 
     Configuration
     -------------
+    - cmake MPI
+
+      CMake implementation for MPI was problematic and would create incorrect
+      MPI library references in the hdf5 libraries.
+
+      Reworked the CMake MPI code to properly create CMake targets.Also merged
+      the latest CMake FindMPI.cmake changes to the local copy. This is necessary
+      until HDF changes the CMake minimum to 3.9 or greater.
+
+      (ADB - 2017/11/02, HDFFV-10321)
+
+
     - Fixed Fortran linker flags when using the NAG Fortran compiler (autotools). 
 
       (HDFFV-10037, MSB, 2017/10/21)	
+
+    - cmake
+
+      Too many commands for POST_BUILD step caused command line to be
+      too big on windows.
+
+      Changed foreach of copy command to use a custom command with the
+      use of the HDFTEST_COPY_FILE macro.
+
+      (ADB - 2017/07/12, HDFFV-10254)
 
 
     Library
