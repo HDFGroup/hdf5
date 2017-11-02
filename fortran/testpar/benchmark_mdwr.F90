@@ -87,7 +87,7 @@ CONTAINS
     ENDIF
 
     CALL MPI_Gather(timer, 1, MPI_DOUBLE_PRECISION, rtimers, 1, MPI_DOUBLE_PRECISION, &
-         destrank_default, comm_default)
+         destrank_default, comm_default, error)
 
     IF(rank == destrank_default)THEN
         DO i = 1, nprocs
