@@ -199,11 +199,12 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   REAL*8 t_write,t_read
   CHARACTER(LEN=5) :: ichr5
 
-  dimsf = (/250000_hsize_t,INT(mpi_size*8, hsize_t)/)
+  dimsf = (/25000_hsize_t,INT(mpi_size*8, hsize_t)/)
 
   IF(mpi_rank.EQ.0)THEN
 
-     WRITE(*,'(A,I0,/)') "TOTAL DATASETS SIZE (MB): ", dimsf(1)*dimsf(2)*ndsets*storage_size(INT(1))/8/1048576
+     WRITE(*,'(/,A,I0)') "TOTAL DATASETS SIZE (MB): ", dimsf(1)*dimsf(2)*ndsets*storage_size(INT(1))/8/1048576
+     WRITE(*,*) "Multi-dataset API: ", multi
 
      CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error)
      CALL H5Pset_libver_bounds_f(plist_id, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
@@ -433,7 +434,7 @@ PROGRAM parallel_test_F03
   LOGICAL, DIMENSION(1:2) :: do_chunk = (/.FALSE.,.TRUE./)
   !CHARACTER(LEN=10), DIMENSION(1:2) :: chr_chunk =(/"contiguous", "chunk     "/)
   LOGICAL multi
-  INTEGER(SIZE_T):: ndsets
+  INTEGER(SIZE_T):: ndsets,max_ndsets
   CHARACTER(len=32) :: arg
 
   !
@@ -446,7 +447,7 @@ PROGRAM parallel_test_F03
   CALL mpi_comm_size( MPI_COMM_WORLD, mpi_size, mpierror )
   IF (mpierror .NE. MPI_SUCCESS) WRITE(*,*) "MPI_COMM_SIZE  *FAILED* Process = ", mpi_rank
 
-  ndsets = 6
+  max_ndsets = 9
   multi = .FALSE.
   j = 1
   DO i = 1, command_argument_count()
@@ -461,7 +462,7 @@ PROGRAM parallel_test_F03
            CALL MPI_Abort(MPI_COMM_WORLD, -1, hdferror)
         ENDIF
            
-        READ(arg,'(I10)') ndsets
+        READ(arg,'(I10)') max_ndsets
         j = j + 1
      CASE ('-m', '--m')
         multi=.TRUE.
@@ -473,7 +474,7 @@ PROGRAM parallel_test_F03
   END DO
 
   IF(mpi_rank.EQ.0)THEN
-     WRITE(*,'(A,I0)') 'Number of Datasets: ', ndsets
+     WRITE(*,'(A,I0)') 'Max. Number of Datasets, 2^max: ', max_ndsets
      WRITE(*,'(A,L1)') 'Use Multi-Dataset API: ', multi
   ENDIF
   
@@ -484,9 +485,14 @@ PROGRAM parallel_test_F03
   !
   ! test write/read multiple hyperslab datasets
   !
-  multi=.FALSE.
-  multi=.TRUE.
-  CALL pmultiple_dset_hyper_rw(do_collective(2), do_chunk(1), mpi_size, mpi_rank, ndsets, multi)
+  DO i = 1, max_ndsets
+     ndsets = 2**(i-1)
+     multi=.TRUE.
+     CALL pmultiple_dset_hyper_rw(do_collective(2), do_chunk(1), mpi_size, mpi_rank, ndsets, multi)
+     multi=.FALSE.
+     CALL pmultiple_dset_hyper_rw(do_collective(2), do_chunk(1), mpi_size, mpi_rank, ndsets, multi)
+  ENDDO
+
   !
   ! close HDF5 interface
   !
