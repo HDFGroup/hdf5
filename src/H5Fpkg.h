@@ -234,6 +234,9 @@ typedef struct H5F_super_t {
     H5G_entry_t *root_ent;      /* Root group symbol table entry              */
 } H5F_super_t;
 
+/* Forward declaration for head and tail pointer */
+struct H5MF_freedspace_t;
+
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen(). That is, set of
@@ -332,6 +335,8 @@ struct H5F_file_t {
                                             /* for metadata cache image, or   */
                                             /* HADDR_UNDEF if no cache image. */
     hsize_t deferred_free_space;            /* Amount of space freed but not yet returned to the freespace manager */
+    struct H5MF_freedspace_t *freedspace_head;
+    struct H5MF_freedspace_t *freedspace_tail;
 
     /* Free-space aggregation info */
     unsigned fs_aggr_merge[H5FD_MEM_NTYPES]; /* Flags for whether free space can merge with aggregator(s) */

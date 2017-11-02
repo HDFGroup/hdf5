@@ -58,7 +58,8 @@ TEST_PROG= testhdf5 \
            twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_cross_platform\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf vds file_image unregister cache_logging cork swmr
+           freespace mf vds file_image unregister cache_logging cork swmr cache_mem_alloc
+
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -132,7 +133,7 @@ libdynlib4.la: $(libdynlib4_la_OBJECTS) $(libdynlib4_la_DEPENDENCIES) $(EXTRA_li
 #	$(RM) $(DESTDIR)$(dyndir)/*dynlib*
 endif
 
-libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c
+libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c swmr_cache_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)

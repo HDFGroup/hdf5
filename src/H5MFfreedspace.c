@@ -121,6 +121,8 @@ H5MF__freedspace_new(H5MF_freedspace_ctx_t *ctx)
     fs->alloc_type  = ctx->alloc_type;
     fs->addr        = ctx->addr;
     fs->size        = ctx->size;
+    fs->timestamp   = H5_now_usec();
+    fs->next        = NULL;
 
     /* Allocate a temporary address for the freedspace entry */
     if(HADDR_UNDEF == (fs_addr = H5MF_alloc_tmp(ctx->f, 1)))
@@ -177,8 +179,18 @@ H5MF__freedspace_create_cb(H5AC_info_t *entry, void *_ctx)
     if((type_id = H5AC_get_entry_type(entry)) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, H5_ITER_ERROR, "unable to get entry type")
 
+    /* Don't create dependency for the freed entry */
+    if (entry->addr == ctx->addr) 
+        goto done;
+
+    if (ctx->fs && ctx->alloc_type == H5FD_MEM_DRAW && (type_id == H5FD_MEM_BTREE ||
+                type_id == H5FD_MEM_OHDR) && entry->ring <= ctx->ring) {
+
+            if(H5AC_create_flush_dependency(ctx->fs, entry) < 0)
+               HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, H5_ITER_ERROR, "can't create flush dependency")
+    }
     /* Don't create flush dependency on clean entries or cache-internal ones */
-    if(type_id != H5AC_FREEDSPACE_ID && type_id != H5AC_PROXY_ENTRY_ID
+    else if(type_id != H5AC_FREEDSPACE_ID && type_id != H5AC_PROXY_ENTRY_ID
             && type_id != H5AC_EPOCH_MARKER_ID && type_id != H5AC_PREFETCHED_ENTRY_ID
             && entry->is_dirty) {
 
@@ -238,18 +250,22 @@ H5MF__freedspace_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type,
         unsigned status = 0;    /* Cache entry status for address being freed */
 
         /* Check cache status of address being freed */
-        if(H5AC_get_entry_status(f, addr, &status) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "unable to get entry status")
+        if(alloc_type != H5FD_MEM_DRAW)
+            if(H5AC_get_entry_status(f, addr, &status) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "unable to get entry status")
 
         /* If the entry is in the cache, attempt to create a freedspace entry for it */
-        if((status & H5AC_ES__IN_CACHE) != 0) {
+        if(alloc_type == H5FD_MEM_DRAW || (status & H5AC_ES__IN_CACHE) != 0) {
             H5MF_freedspace_ctx_t fs_ctx;       /* Context for cache iteration */
 
             /* Create a freed space ctx */
             fs_ctx.f           = f;
             fs_ctx.dxpl_id     = dxpl_id;
-            if(H5AC_get_entry_ring(f, addr, &fs_ctx.ring) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get ring of entry")
+            if(alloc_type == H5FD_MEM_DRAW)
+                fs_ctx.ring     = H5AC_RING_USER;
+            else
+                if(H5AC_get_entry_ring(f, addr, &fs_ctx.ring) < 0)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get ring of entry")
             fs_ctx.alloc_type  = alloc_type;
             fs_ctx.addr        = addr;
             fs_ctx.size        = size;
@@ -289,6 +305,121 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__freedspace_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF__freedspace_push
+ *
+ * Purpose:     Push a freedspace entry to the "holding tank" 
+ *                                          (singly-linked list)
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Houjun Tang
+ *              August 18, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MF__freedspace_push(H5MF_freedspace_t **head, H5MF_freedspace_t **tail, H5MF_freedspace_t *freedspace)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(freedspace);
+
+    if (*head == NULL) {
+        /* Add the first node */
+        *head = freedspace;
+        *tail = freedspace;
+    }
+    else {
+        /* Append to the linked list */
+        (*tail)->next    = freedspace;
+        *tail            = freedspace;
+        freedspace->next = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5MF__freedspace_push() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF__freedspace_dequeue_time_limit
+ *
+ * Purpose:     Dequeue the oldest entry that has been in the queue for 
+ *              more than time_limit (2 delta t) time from the freedspace 
+ *              queue.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Houjun Tang
+ *              August 22, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MF__freedspace_dequeue_time_limit(H5MF_freedspace_t **head, H5MF_freedspace_t **tail, H5MF_freedspace_t **freedspace, uint64_t time_limit)
+{
+    uint64_t now_time, entry_time;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(freedspace);
+
+    now_time = H5_now_usec();
+
+    if (*head == NULL) {
+        *freedspace = NULL;
+    }
+    else {
+        entry_time = (*head)->timestamp;
+        /* Only dequeue when the entry has been in the queue longer than time limit (2 deltat) */
+        if (now_time - entry_time > (uint64_t)time_limit) {
+            *freedspace = *head;
+            if (NULL != (*head)->next) {
+                *head = (*head)->next;
+            }
+            else {
+                /* queue is empty now */
+                *head = NULL;
+                *tail = NULL;
+            }
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5MF__freedspace_dequeue() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF__freedspace_queue_is_empty
+ *
+ * Purpose:     Check if the freedspace queue is empty
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Houjun Tang
+ *              August 22, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MF__freedspace_queue_is_empty(H5MF_freedspace_t *head, hbool_t *is_empty)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(is_empty);
+
+    if (head == NULL) 
+        *is_empty = TRUE;
+    else 
+        *is_empty = FALSE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5MF__freedspace_queue_is_empty() */
 
 
 /*-------------------------------------------------------------------------

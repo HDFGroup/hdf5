@@ -1689,6 +1689,11 @@ typedef struct H5C_cache_entry_t {
     int32_t			flushes;
     int32_t			pins;
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
+
+    /* Full SWMR timestamp-ordered queue fields */
+    uint64_t                    ts;
+    struct H5C_cache_entry_t   *ts_prev;
+    struct H5C_cache_entry_t   *ts_next;
 } H5C_cache_entry_t;
 
 

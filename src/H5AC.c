@@ -142,7 +142,7 @@ static const H5AC_class_t *const H5AC_class_s[] = {
     H5AC_EPOCH_MARKER,          /* (27) epoch marker - always internal to cache */
     H5AC_PROXY_ENTRY,           /* (28) cache entry proxy               */
     H5AC_PREFETCHED_ENTRY,  	/* (29) prefetched entry - always internal to cache */
-    H5AC_FREEDSPACE             /* (30) FULLSWMR freedspace            */
+    H5AC_FREEDSPACE,            /* (30) FULLSWMR freedspace            */
 };
 
 

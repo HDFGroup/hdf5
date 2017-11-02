@@ -175,7 +175,11 @@ typedef struct H5MF_freedspace_t {
     hid_t      dxpl_id;                 /* DXPL for free operation */
     H5FD_mem_t alloc_type;              /* File type for space */
     haddr_t    addr;                    /* Address of freed space */
-    hsize_t     size;                   /* Size of freed space */
+    hsize_t    size;                    /* Size of freed space */
+
+    time_t    timestamp;      /* Use H5_now() */
+    struct H5MF_freedspace_t *next;
+
 } H5MF_freedspace_t;
 
 
@@ -225,7 +229,11 @@ H5_DLL herr_t H5MF_aggr_query(const H5F_t *f, const H5F_blk_aggr_t *aggr,
 H5_DLL herr_t H5MF__freedspace_create(H5F_t *f, hid_t dxpl_id,
     H5FD_mem_t alloc_type, haddr_t addr, hsize_t siz, H5MF_freedspace_t** fs);
 H5_DLL herr_t H5MF__xfree_freedspace(H5MF_freedspace_t *freedspace);
+H5_DLL herr_t H5MF__xfree_real(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr, hsize_t size);
 H5_DLL herr_t H5MF__freedspace_dest(H5MF_freedspace_t *pentry);
+H5_DLL herr_t H5MF__freedspace_push(H5MF_freedspace_t **head, H5MF_freedspace_t **tail, H5MF_freedspace_t *freedspace);
+H5_DLL herr_t H5MF__freedspace_dequeue_time_limit(H5MF_freedspace_t **head, H5MF_freedspace_t **tail, H5MF_freedspace_t **freedspace, uint64_t time_limit);
+H5_DLL herr_t H5MF__freedspace_queue_is_empty(H5MF_freedspace_t *head, hbool_t *is_empty);
 
 /* Testing routines */
 #ifdef H5MF_TESTING

@@ -253,6 +253,7 @@ set (H5_TESTS
     cache_logging
     cork
     swmr
+    cache_mem_alloc
 )
 
 foreach (test ${H5_TESTS})

@@ -719,6 +719,9 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
     /* Insert the deserialized entry into the cache.  */
     H5C__INSERT_IN_INDEX(cache_ptr, ds_entry_ptr, FAIL)
 
+    /* FULLSWMR TODO add to timestamp list */
+    /* H5C__INSERT_IN_TS_LIST(cache_ptr, ds_entry_ptr, NULL); */
+
     HDassert(!ds_entry_ptr->in_slist);
     if(ds_entry_ptr->is_dirty)
         H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, ds_entry_ptr, FAIL)
@@ -3141,6 +3144,9 @@ H5C__reconstruct_cache_contents(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr)
 
 	/* Insert the prefetched entry in the index */
 	H5C__INSERT_IN_INDEX(cache_ptr, pf_entry_ptr, FAIL)
+
+        /* FULLSWMR TODO add to timestamp list */
+        /* H5C__INSERT_IN_TS_LIST(cache_ptr, pf_entry_ptr, NULL); */
 
 	/* If dirty, insert the entry into the slist. */
 	if(pf_entry_ptr->is_dirty)

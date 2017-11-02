@@ -56,7 +56,7 @@ const char *FILENAME[] = {
     "swmr1",        /* 1 */
     "swmr2",        /* 2 */
     "swmr3",        /* 3 */
-    "swmr4",        /* 3 */
+    "swmr4",        /* 4 */
     NULL
 };
 
@@ -6398,7 +6398,6 @@ error:
 
     return -1;
 } /* end test_swmr_deltat_file_create() */
-
 
 /****************************************************************
 **

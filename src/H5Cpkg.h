@@ -1318,6 +1318,27 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #endif /* H5C_DO_SANITY_CHECKS */
 
+#define H5C__INSERT_IN_TS_LIST(cache_ptr, entry_ptr, fail_val)               \
+{                                                                            \
+    H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)                    \
+                                                   \
+    H5C__IL_DLL_APPEND((entry_ptr), (cache_ptr)->ts_head,                    \
+                       (cache_ptr)->ts_tail, (cache_ptr)->il_len,            \
+                       (cache_ptr)->il_size, fail_val)                       \
+    H5C__POST_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)                   \
+}
+
+    /* H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)                            \ */
+
+#define H5C__DELETE_FROM_TS_LIST(cache_ptr, entry_ptr, fail_val)             \
+{                                                                            \
+    H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)                              \
+    H5C__IL_DLL_REMOVE((entry_ptr), (cache_ptr)->ts_head,                    \
+                       (cache_ptr)->ts_tail, (cache_ptr)->il_len,            \
+                       (cache_ptr)->il_size, fail_val)                       \
+    H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr)                             \
+}
+
 
 #define H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, fail_val)                 \
 {                                                                            \
@@ -3721,6 +3742,18 @@ typedef struct H5C_tag_info_t {
  *
  *              This field is NULL if the index is empty.
  *
+ * ts_head:	Pointer to the head of the doubly linked list of entries in
+ *              the timestamp list.  Note that cache entries on this list are 
+ *		linked by their ts_next and ts_prev fields.
+ *
+ *              This field is NULL if the timestamp list is empty.
+ *
+ * ts_tail:	Pointer to the tail of the doubly linked list of entries in
+ *              the timestamp list.  Note that cache entries on this list are 
+ *              linked by their ts_next and ts_prev fields.
+ *
+ *              This field is NULL if the timestamp list is empty.
+ **
  *
  * With the addition of the take ownership flag, it is possible that 
  * an entry may be removed from the cache as the result of the flush of 
@@ -4899,6 +4932,11 @@ struct H5C_t {
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     char			prefix[H5C__PREFIX_LEN];
+
+    /* Full SWMR timestampe-ordered queue fields */
+    H5C_cache_entry_t          *ts_head;
+    H5C_cache_entry_t          *ts_tail;
+
 };
 
 /* Define typedef for tagged cache entry iteration callbacks */
@@ -4922,6 +4960,7 @@ H5_DLL herr_t H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id,
 /* General routines */
 H5_DLL herr_t H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id,
     H5C_cache_entry_t *entry_ptr, unsigned flags);
+H5_DLL herr_t H5C__flush_by_timestamp(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5C__generate_cache_image(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr);
 H5_DLL herr_t H5C__load_cache_image(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry_ptr);

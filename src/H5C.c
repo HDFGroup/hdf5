@@ -1402,12 +1402,17 @@ H5C_insert_entry(H5F_t *             f,
     if((H5P_get(dxpl, H5AC_RING_NAME, &ring)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to query ring value")
 
+    /* FULLSWMR: should invoked H5C__flush_by_timestamp() when the SWMR-reader flag is set 
+     * on the file, before the entry is looked up in the cache
+     */
+    if (H5C__flush_by_timestamp(f, dxpl_id, flags) < 0) 
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "fail to flush by timestamp")
+
     entry_ptr = (H5C_cache_entry_t *)thing;
 
     /* verify that the new entry isn't already in the hash table -- scream
      * and die if it is.
      */
-
     H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
 
     if(test_entry_ptr != NULL) {
@@ -1504,6 +1509,13 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->tl_prev  = NULL;
     entry_ptr->tag_info = NULL;
 
+    /* FULLSWMR: timestamp on current entry, when it's loaded from file */
+    entry_ptr->ts = H5_now_usec();
+    entry_ptr->ts_prev = NULL;
+    entry_ptr->ts_next = NULL;
+
+    /* TODO, add to linked list*/
+
     /* Apply tag to newly inserted entry */
     if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot tag metadata entry")
@@ -1572,6 +1584,10 @@ H5C_insert_entry(H5F_t *             f,
     } /* end if */
 
     H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
+
+    /* FULLSWMR TODO add to timestamp list */
+    /* H5C__INSERT_IN_TS_LIST(cache_ptr, entry_ptr, NULL); */
+
 
     /* New entries are presumed to be dirty */
     HDassert(entry_ptr->is_dirty);
@@ -2442,6 +2458,13 @@ H5C_protect(H5F_t *		f,
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
+    /* FULLSWMR TODO: should invoked H5C__flush_by_timestamp() when the SWMR-reader flag is set 
+     * on the file, before the entry being protected is looked up in the cache
+     */
+    if (H5C__flush_by_timestamp(f, dxpl_id, flags) < 0) {
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "fail to flush by timestamp")
+    }
+
     /* first check to see if the target is in cache */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, NULL)
 
@@ -2674,6 +2697,9 @@ H5C_protect(H5F_t *		f,
 
             H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, NULL)
         }
+
+        /* FULLSWMR TODO add to timestamp list */
+        /* H5C__INSERT_IN_TS_LIST(cache_ptr, entry_ptr, NULL); */
 
         /* insert the entry in the data structures used by the replacement
          * policy.  We are just going to take it out again when we update
@@ -6384,6 +6410,9 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
          */
         H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
 
+        /* FULLSWMR TODO: remove entry from timestamp list*/
+        /* H5C__DELETE_FROM_TS_LIST(cache_ptr, entry_ptr, FAIL); */
+
         if(entry_ptr->in_slist && del_from_slist_on_destroy)
             H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)
 
@@ -6609,6 +6638,53 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__flush_single_entry() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C__flush_by_timestamp
+ *
+ * Purpose:     Check the current time and work through the timestamp queue,
+ *              evicting entries that are older than Delta t.
+ *
+ * Return:      Non-negative on success/Negative on failure or if there was
+ *		an attempt to flush a protected item.
+ *
+ * Programmer:  Houjun Tang 
+ *              10/30/17
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C__flush_by_timestamp(H5F_t *f, hid_t dxpl_id, unsigned flags)
+{
+    herr_t ret_value = SUCCEED;
+    H5C_cache_entry_t *entry_ptr;
+    uint64_t now_time;
+    unsigned delta_t;
+
+    FUNC_ENTER_PACKAGE
+
+    /* check the current time and work through the timestamp queue, 
+     */
+    now_time = H5_now_usec();
+    delta_t  = f->shared->swmr_deltat;
+
+    entry_ptr = f->shared->cache->ts_head;
+    while (entry_ptr != NULL) {
+
+        /* evicting entries that are older than Delta t */ 
+        if (entry_ptr->ts > now_time - (uint64_t)(delta_t)) {
+            if (H5C__flush_single_entry(f, dxpl_id, entry_ptr, flags) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush single entry failed")
+            
+        }
+        entry_ptr = entry_ptr->ts_next;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__flush_by_timestamp() */
 
 
 /*-------------------------------------------------------------------------
@@ -6997,6 +7073,15 @@ H5C_load_entry(H5F_t *              f,
     entry->tl_next  = NULL;
     entry->tl_prev  = NULL;
     entry->tag_info = NULL;
+
+    /* FULLSWMR: timestamp on current entry, when it's loaded from file */
+    entry->ts = H5_now_usec();
+    entry->ts_prev = NULL;
+    entry->ts_next = NULL;
+
+    /* TODO */
+    /* if (entry->ts_head == NULL) { */
+    /* } */
 
     H5C__RESET_CACHE_ENTRY_STATS(entry);
 
@@ -8031,7 +8116,7 @@ H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry)
 
         /* If the parent has a 'notify' callback, send a 'child entry cleaned' notice */
         if(entry->flush_dep_parent[i]->type->notify &&
-                (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, entry->flush_dep_parent[i]) < 0)
+                (entry->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, entry->flush_dep_parent[i], entry->addr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag reset")
     } /* end for */
 
@@ -8938,6 +9023,9 @@ H5C_remove_entry(void *_entry)
      */
 
     H5C__DELETE_FROM_INDEX(cache, entry, FAIL)
+
+    /* FULLSWMR TODO: remove entry from timestamp list*/
+    /* H5C__DELETE_FROM_TS_LIST(cache, entry, FAIL); */
 
 #ifdef H5_HAVE_PARALLEL
     /* Check for collective read access flag */

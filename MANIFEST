@@ -929,6 +929,7 @@
 ./test/cache_image.c
 ./test/cache_logging.c
 ./test/cache_tagging.c
+./test/cache_mem_alloc.c
 ./test/cmpd_dset.c
 ./test/cork.c
 ./test/corrupt_stab_msg.h5
@@ -1055,6 +1056,8 @@
 ./test/swmr_sparse_writer.c
 ./test/swmr_start_write.c
 ./test/swmr_writer.c
+./test/swmr_cache_common.c
+./test/swmr_cache_common.h
 ./test/tarray.c
 ./test/tarrold.h5
 ./test/tattr.c
