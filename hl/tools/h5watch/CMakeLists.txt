@@ -5,7 +5,7 @@ PROJECT (HDF5_HL_TOOLS_H5WATCH)
 # Define Sources
 #-----------------------------------------------------------------------------
 set (H5WATCH_SOURCES
-    ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/h5watch
+    ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/h5watch.c
 )
 
 #-- Add h5watch program
