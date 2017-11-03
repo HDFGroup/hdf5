@@ -145,6 +145,7 @@ New Features
 
       (RAW - 2017/10/10, HDFFV-10294)
 
+
     - Large MPI-IO transfers
 
       Previous releases of PHDF5 would fail when attempting to
@@ -167,7 +168,7 @@ New Features
       fulfill the original user request without encountering API
       errors.
 
-      (RAW - 2017/09/20, HDFFV-8839)
+      (RAW - 2017/09/10, HDFFV-8839)
 
     Fortran Library:
     ----------------
