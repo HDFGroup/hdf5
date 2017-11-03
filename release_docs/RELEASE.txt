@@ -197,7 +197,8 @@ Bug Fixes since HDF5-1.10.1 release
 
     Fortran
     --------
-    -
+    - Fixed compilation errors when using Intel 18 Fortran compilers
+      (MSB - 2017/11/3, HDFFV-10322)
 
     Tools
     -----
