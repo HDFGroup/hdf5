@@ -3109,6 +3109,12 @@
 ./config/cmake_ext_mod/NSIS.template.in
 ./config/cmake_ext_mod/runTest.cmake
 ./config/cmake_ext_mod/version.plist.in
+./config/cmake_ext_mod/FindMPI/fortranparam_mpi.f90.in
+./config/cmake_ext_mod/FindMPI/libver_mpi.c
+./config/cmake_ext_mod/FindMPI/libver_mpi.f90.in
+./config/cmake_ext_mod/FindMPI/mpiver.f90.in
+./config/cmake_ext_mod/FindMPI/test_mpi.c
+./config/cmake_ext_mod/FindMPI/test_mpi.f90.in
 
 # CMake-specific User Files
 ./config/cmake/UserMacros/Windows_MT.cmake
