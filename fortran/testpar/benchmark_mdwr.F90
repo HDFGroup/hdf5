@@ -151,8 +151,30 @@ CONTAINS
      CHARACTER(*) :: prefix
      TYPE(timer_statinfo) :: stats
 
-     WRITE(*,'(A,4(A,1X,F6.3))') TRIM(prefix)," timer seconds mean =",stats%mean, &
+     INTEGER, SAVE :: ik = 1
+     INTEGER, SAVE :: it = 1
+     INTEGER, DIMENSION(1:10) :: nd = (/1,2,4,8,16,32,64,128,256,512/)
+
+     WRITE(*,'(A,4(A,1X,F6.3))') TRIM(prefix(7:))," timer seconds mean =",stats%mean, &
           ", min =", stats%min, ", max =", stats%max, ", std =", stats%std
+
+     OPEN(12, file=prefix(1:6)//".dgnu", FORM='FORMATTED')
+     IF(it.EQ.1.AND.ik.EQ.1) WRITE(12,'(A)') "#  nd   MD.T_W  MD.T_R  MD.F_W  MD.F_R"
+     IF(ik.EQ.4)THEN
+        WRITE(12,"(1X,F6.3)") stats%mean
+     ELSE IF(ik.EQ.1)THEN
+        WRITE(12,"(I0,1X,F6.3)", ADVANCE='NO') nd(it), stats%mean
+     ELSE
+        WRITE(12,"(1X,F6.3)", ADVANCE='NO') stats%mean
+     ENDIF
+     IF(ik.EQ.4)THEN
+        ik = 1
+        it = it + 1
+     !   IF(nd.EQ.128) close(12)
+     ELSE
+        ik = ik + 1
+     ENDIF
+     
 
    END SUBROUTINE timer_printstats
 
@@ -198,6 +220,7 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   logical :: multi
   REAL*8 t_write,t_read
   CHARACTER(LEN=5) :: ichr5
+  CHARACTER(LEN=6) :: ichr6
 
   dimsf = (/25000_hsize_t,INT(mpi_size*8, hsize_t)/)
 
@@ -348,9 +371,10 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   ENDIF
 
   WRITE(ichr5,'(I5.5)') ndsets
+  WRITE(ichr6,'(I6.6)') mpi_size
 
-  CALL timer_collectprintstats(t_write,"write."//ichr5)
-  CALL timer_collectprintstats(t_read,"read."//ichr5)
+  CALL timer_collectprintstats(t_write,ichr6//"write."//ichr5)
+  CALL timer_collectprintstats(t_read,ichr6//"read."//ichr5)
 
   DO i = 1, ndsets
      ! Close all the datasets
@@ -447,7 +471,7 @@ PROGRAM parallel_test_F03
   CALL mpi_comm_size( MPI_COMM_WORLD, mpi_size, mpierror )
   IF (mpierror .NE. MPI_SUCCESS) WRITE(*,*) "MPI_COMM_SIZE  *FAILED* Process = ", mpi_rank
 
-  max_ndsets = 9
+  max_ndsets = 8
   multi = .FALSE.
   j = 1
   DO i = 1, command_argument_count()
