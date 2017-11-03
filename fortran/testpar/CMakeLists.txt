@@ -4,7 +4,7 @@ PROJECT (HDF5_FORTRAN_TESTPAR C CXX Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${MPI_Fortran_INCLUDE_PATH} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
+set (TESTPAR_INCLUDES ${MPI_Fortran_INCLUDE_DIRS} ${CMAKE_Fortran_MODULE_DIRECTORY}/static ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 
 #-----------------------------------------------------------------------------
 # Add Tests
@@ -27,7 +27,7 @@ target_link_libraries (parallel_test
 if (WIN32 AND MSVC)
   target_link_libraries (parallel_test "ws2_32.lib")
 endif ()
-target_include_directories (parallel_test PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+target_include_directories (parallel_test PRIVATE ${TESTPAR_INCLUDES})
 set_target_properties (parallel_test PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties (parallel_test PROPERTIES FOLDER test/fortran)
 
