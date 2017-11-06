@@ -225,7 +225,7 @@ Bug Fixes since HDF5-1.10.1 release
       Added another parameter to the 'UD=' option to set the flag by default
       to '0' or H5Z_FLAG_MANDATORY, the other choice is '1' or H5Z_FLAG_OPTIONAL.
 
-      (ADB - 2017/08/31, HDFFV-10276)
+      (ADB - 2017/08/31, HDFFV-10269)
 
     - h5ls
 
