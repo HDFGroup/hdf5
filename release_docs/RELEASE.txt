@@ -168,9 +168,9 @@ Bug Fixes since HDF5-1.8.19
       (ADB - 2017/11/02, HDFFV-10321)
 
 
-    - Fixed Fortran linker flags when using the NAG Fortran compiler (autotools). 
+    - Fixed Fortran linker flags when using the NAG Fortran compiler (autotools).
 
-      (HDFFV-10037, MSB, 2017/10/21)	
+      (HDFFV-10037, MSB, 2017/10/21)
 
     - cmake
 
@@ -241,7 +241,7 @@ Bug Fixes since HDF5-1.8.19
       Added another parameter to the 'UD=' option to set the flag by default
       to '0' or H5Z_FLAG_MANDATORY, the other choice is '1' or H5Z_FLAG_OPTIONAL.
 
-      (ADB - 2017/08/31, HDFFV-10276)
+      (ADB - 2017/08/31, HDFFV-10269)
 
     - h5ls
 
@@ -488,8 +488,8 @@ Known Problems
     plugin tests have been disabled on CYGWIN.
 
     Mac OS X 10.13 added additional subdirectory structure in .libs for shared
-    libraries.  Consequently "make check" will fail testing java and dynamically 
-    loaded plugin test libraries attempting to copy files from the previous 
+    libraries.  Consequently "make check" will fail testing java and dynamically
+    loaded plugin test libraries attempting to copy files from the previous
     locations in .libs directories.  This will be addressed in the next release
     when support for the Mac OS X 10.13 platform is added.
 
