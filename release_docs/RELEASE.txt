@@ -335,6 +335,17 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2017/07/12, HDFFV-10254)
 
+    - cmake test execution environment
+
+      The parallel HDF5 test: 't_pread' assumed the use of autotools
+      and the directory structure associated with that testing approach.
+      Modified the test code to check whether the 'h5jam' utility can be
+      found in the same directory as the test executable (which is
+      preferred directory structure utilized by cmake) and if found
+      will invoke the tool directly rather than utilizing a relative path.
+
+      (RAW - 2017/11/03, HDFFV-10318)
+
     Performance
     -------------
     -
