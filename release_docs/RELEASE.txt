@@ -196,6 +196,13 @@ Bug Fixes since HDF5-1.8.19
 
       (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
 
+    - Fix H5Sencode bug when num points selected is >2^32
+
+      Modified to fail if the 32 bit limit is exceeded when encoding either
+      offsets or counts in the selection.
+
+      (HDFFV-10323, VC, 2017/09/07)
+
     - Fix H5HL_offset_into()
 
       (1) Fix H5HL_offset_into() to return error when offset exceeds heap data
