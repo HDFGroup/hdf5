@@ -24,6 +24,9 @@
 #ifndef _H5Oprivate_H
 #define _H5Oprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5O_t H5O_t;
+
 /* Include the public header file for this API */
 #include "H5Opublic.h"          /* Object header functions              */
 
@@ -44,7 +47,6 @@
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_mesg_t H5O_mesg_t;
-typedef struct H5O_t H5O_t;
 
 /* Values used to create the shared message & attribute heaps */
 /* (Note that these parameters have been tuned so that the resulting heap ID
