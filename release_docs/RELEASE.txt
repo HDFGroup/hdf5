@@ -287,6 +287,16 @@ Bug Fixes since HDF5-1.10.1 release
 
       (HDFFV-7853, VC, 2017/07/05)
 
+    - Refactored the testpar/t_bigio.c test to include ALARM macros
+
+      Changed the test to include the ALARM_ON and ALARM_OFF macros which
+      are intended to prevent nightly test hangs that have been observed
+      with this particular parallel test example.  The code was also modified to
+      simplify status reporting (only from MPI rank 0) and additional
+      status checking added.
+
+      (RAW - 2017/11/08, HDFFV-10301)
+
     Configuration
     -------------
     - cmake MPI
