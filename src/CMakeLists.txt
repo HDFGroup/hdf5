@@ -532,6 +532,7 @@ IDE_GENERATED_PROPERTIES ("H5PL" "${H5PL_HDRS}" "${H5PL_SOURCES}" )
 set (H5R_SOURCES
     ${HDF5_SRC_DIR}/H5R.c
     ${HDF5_SRC_DIR}/H5Rdeprec.c
+    ${HDF5_SRC_DIR}/H5Rint.c
 )
 set (H5R_HDRS
     ${HDF5_SRC_DIR}/H5Rpkg.h

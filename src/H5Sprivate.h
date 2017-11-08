@@ -17,6 +17,9 @@
 #ifndef _H5Sprivate_H
 #define _H5Sprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5S_t H5S_t;
+
 /* Include package's public header */
 #include "H5Spublic.h"
 
@@ -44,7 +47,6 @@
 #define H5S_GET_SEQ_LIST_SORTED         0x0001
 
 /* Forward references of package typedefs */
-typedef struct H5S_t H5S_t;
 typedef struct H5S_extent_t H5S_extent_t;
 typedef struct H5S_pnt_node_t H5S_pnt_node_t;
 typedef struct H5S_hyper_span_t H5S_hyper_span_t;

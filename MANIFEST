@@ -810,6 +810,7 @@
 ./src/H5PLextern.h
 ./src/H5R.c
 ./src/H5Rdeprec.c
+./src/H5Rint.c
 ./src/H5Rmodule.h
 ./src/H5Rpkg.h
 ./src/H5Rprivate.h
