@@ -13,7 +13,7 @@
 srcdir=@srcdir@
 TOP_BUILDDIR=@top_builddir@
 
-# Determine backward compatibility options enabled
+# Determine if backward compatibility options enabled
 DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
 
 EXIT_SUCCESS=0
@@ -23,21 +23,21 @@ nerrors=0
 verbose=yes
 exit_code=$EXIT_SUCCESS
 
-TEST_NAME=plugin
+TEST_NAME=filter_plugin
 TEST_BIN=`pwd`/$TEST_NAME
 FROM_DIR=`pwd`/.libs
 case $(uname) in
     CYGWIN* )
-        PLUGIN_LIB1="$FROM_DIR/cygdynlib1* $FROM_DIR/cygdynlib3*"
-        PLUGIN_LIB2="$FROM_DIR/cygdynlib2* $FROM_DIR/cygdynlib4*"
+        PLUGINS_FOR_DIR1="$FROM_DIR/cygfilter_plugin1* $FROM_DIR/cygfilter_plugin3*"
+        PLUGINS_FOR_DIR2="$FROM_DIR/cygfilter_plugin2* $FROM_DIR/cygfilter_plugin4*"
         ;;
     *)
-        PLUGIN_LIB1="$FROM_DIR/libdynlib1.* $FROM_DIR/libdynlib3.*"
-        PLUGIN_LIB2="$FROM_DIR/libdynlib2.* $FROM_DIR/libdynlib4.*"
+        PLUGINS_FOR_DIR1="$FROM_DIR/libfilter_plugin1* $FROM_DIR/libfilter_plugin3*"
+        PLUGINS_FOR_DIR2="$FROM_DIR/libfilter_plugin2* $FROM_DIR/libfilter_plugin4*"
         ;;
 esac
-PLUGIN_LIBDIR1=testdir1
-PLUGIN_LIBDIR2=testdir2
+PLUGIN_DIR1=filter_plugin_dir1
+PLUGIN_DIR2=filter_plugin_dir2
 CP="cp -p"    # Use -p to preserve mode,ownership,timestamps
 RM="rm -rf"
 
@@ -50,34 +50,34 @@ TESTING() {
 }
 
 # Main Body
-# Create test directories if not exists yet.
-test -d $PLUGIN_LIBDIR1 || mkdir -p $PLUGIN_LIBDIR1
+# Create test directories if necessary.
+test -d $PLUGIN_DIR1 || mkdir -p $PLUGIN_DIR1
 if [ $? != 0 ]; then
-    echo "Failed to create test directory($PLUGIN_LIBDIR1)"
+    echo "Failed to create filter plugin test directory ($PLUGIN_DIR1)"
     exit $EXIT_FAILURE
 fi
 
-test -d $PLUGIN_LIBDIR2 || mkdir -p $PLUGIN_LIBDIR2
+test -d $PLUGIN_DIR2 || mkdir -p $PLUGIN_DIR2
 if [ $? != 0 ]; then
-    echo "Failed to create test directory($PLUGIN_LIBDIR2)"
+    echo "Failed to create filter plugin test directory ($PLUGIN_DIR2)"
     exit $EXIT_FAILURE
 fi
 
-# copy plugin library for test
-$CP $PLUGIN_LIB1 $PLUGIN_LIBDIR1
+# Copy plugins for the tests.
+$CP $PLUGINS_FOR_DIR1 $PLUGIN_DIR1
 if [ $? != 0 ]; then
-    echo "Failed to copy plugin library ($PLUGIN_LIB1) for test."
+    echo "Failed to copy filter plugins ($PLUGINS_FOR_DIR1) to test directory."
     exit $EXIT_FAILURE
 fi
 
-$CP $PLUGIN_LIB2 $PLUGIN_LIBDIR2
+$CP $PLUGINS_FOR_DIR2 $PLUGIN_DIR2
 if [ $? != 0 ]; then
-    echo "Failed to copy plugin library ($PLUGIN_LIB2) for test."
+    echo "Failed to copy filter plugins ($PLUGINS_FOR_DIR2) to test directory."
     exit $EXIT_FAILURE
 fi
 
 # setup plugin path
-ENVCMD="env HDF5_PLUGIN_PATH=${PLUGIN_LIBDIR1}:${PLUGIN_LIBDIR2}"
+ENVCMD="env HDF5_PLUGIN_PATH=${PLUGIN_DIR1}:${PLUGIN_DIR2}"
 
 # Run the test
 $ENVCMD $TEST_BIN
@@ -87,9 +87,9 @@ fi
 
 ############################################
 # HDFFV-9655 test for relative path disabled
-# setup plugin path relative to test
+# setup filter plugin path relative to test
 # actual executable is in the .libs folder
-#ENVCMD="env HDF5_PLUGIN_PATH=@/../${PLUGIN_LIBDIR1}:@/../${PLUGIN_LIBDIR2}"
+#ENVCMD="env HDF5_PLUGIN_PATH=@/../${PLUGIN_DIR1}:@/../${PLUGIN_DIR2}"
 #
 # Run the test
 #$ENVCMD $TEST_BIN
@@ -103,11 +103,11 @@ if test $nerrors -ne 0 ; then
     echo "$nerrors errors encountered"
     exit_code=$EXIT_FAILURE
 else
-    echo "All Plugin API tests passed."
+    echo "All filter plugin tests passed."
     exit_code=$EXIT_SUCCESS
 fi
 
 # Clean up temporary files/directories and leave
-$RM $PLUGIN_LIBDIR1 $PLUGIN_LIBDIR2
+$RM $PLUGIN_DIR1 $PLUGIN_DIR2
 
 exit $exit_code

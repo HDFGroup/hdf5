@@ -39,9 +39,6 @@ if HAVE_SHARED_CONDITIONAL
   noinst_LTLIBRARIES=libdynlibls.la
   libdynlibls_la_SOURCES=dynlib_ls.c
   libdynlibls_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
-
-  libdynlibls.la: $(libdynlibls_la_OBJECTS) $(libdynlibls_la_DEPENDENCIES) $(EXTRA_libdynlibls_la_DEPENDENCIES)
-	$(AM_V_CCLD)$(libdynlibls_la_LINK) $(am_libdynlibls_la_rpath) $(libdynlibls_la_OBJECTS) $(libdynlibls_la_LIBADD)
 endif
 
 
