@@ -5720,7 +5720,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         H5D_rdcc_ent_t *ent = NULL;    /* Cache entry */
         unsigned idx;                   /* Index of chunk in cache, if present */
         unsigned u;                     /* Counter */
-        H5D_shared_t *shared_fo = udata->cpy_info->shared_fo;
+        H5D_shared_t *shared_fo = (H5D_shared_t *)udata->cpy_info->shared_fo;
 
         /* See if the written chunk is in the chunk cache */
         if(shared_fo && shared_fo->cache.chunk.nslots > 0) {

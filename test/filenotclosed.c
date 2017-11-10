@@ -19,8 +19,8 @@
 
 #include "h5test.h"
 
-#define FILENAME    "filenotclosed"
-#define DATASET     "dset"
+#define FILENAME        "filenotclosed"
+#define DATASET_NAME    "dset"
 
 /*-------------------------------------------------------------------------
  * Function:    catch_signal
@@ -114,7 +114,7 @@ main(void)
         TEST_ERROR
 
     /* Create the dataset */
-    if((did = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     /* Write to the dataset */

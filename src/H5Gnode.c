@@ -640,7 +640,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     while(lt < rt) {
         idx = (int)((lt + rt) / 2);
         if((s = (const char *)H5HL_offset_into(udata->common.heap, sn->entry[idx].name_off)) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table name")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to get symbol table name")
 
         /* Check if symbol is already present */
         if(0 == (cmp = HDstrcmp(udata->common.name, s)))
@@ -802,8 +802,8 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             const char *s;          /* Pointer to string in local heap */
 
             idx = (lt + rt) / 2;
-            if((s = H5HL_offset_into(udata->common.heap, sn->entry[idx].name_off)) == NULL)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table name")
+            if((s = (const char *)H5HL_offset_into(udata->common.heap, sn->entry[idx].name_off)) == NULL)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to get symbol table name")
             cmp = HDstrcmp(udata->common.name, s);
             if(cmp < 0)
                 rt = idx;
