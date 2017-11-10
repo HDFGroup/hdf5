@@ -50,11 +50,6 @@ if HAVE_SHARED_CONDITIONAL
   libdynlibvers_la_SOURCES=dynlib_vrpk.c
   libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
-
-  libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES)
-	$(AM_V_CCLD)$(libdynlibadd_la_LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) 
-  libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES)
-	$(AM_V_CCLD)$(libdynlibvers_la_LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) 
 endif
 
 

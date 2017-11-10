@@ -77,10 +77,10 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* File ID class */
 static const H5I_class_t H5I_FILE_CLS[1] = {{
-    H5I_FILE,			/* ID class value */
-    0,				/* Class flags */
-    0,				/* # of reserved IDs for class */
-    (H5I_free_t)H5F_close	/* Callback routine for closing objects of this class */
+    H5I_FILE,            /* ID class value */
+    0,                   /* Class flags */
+    0,                   /* # of reserved IDs for class */
+    (H5I_free_t)H5F_close    /* Callback routine for closing objects of this class */
 }};
 
 
@@ -114,27 +114,22 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_term_package
+ * Function: H5F_term_package
  *
- * Purpose:	Terminate this interface: free all memory and reset global
- *		variables to their initial values.  Release all ID groups
- *		associated with this interface.
+ * Purpose:  Terminate this interface: free all memory and reset global
+ *           variables to their initial values.  Release all ID groups
+ *           associated with this interface.
  *
- * Return:	Success:	Positive if anything was done that might
- *				have affected other interfaces; zero
- *				otherwise.
- *
- *		Failure:        Never fails.
- *
- * Programmer:	Robb Matzke
- *              Friday, February 19, 1999
- *
+ * Return:   Success:   Positive if anything was done that might
+ *                      have affected other interfaces;
+ *                      zero otherwise.
+ *           Failure:   Never fails.
  *-------------------------------------------------------------------------
  */
 int
 H5F_term_package(void)
 {
-    int	n = 0;
+    int    n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -142,7 +137,7 @@ H5F_term_package(void)
         if(H5I_nmembers(H5I_FILE) > 0) {
             (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
             n++; /*H5I*/
-	} /* end if */
+        } /* end if */
         else {
             /* Make certain we've cleaned up all the shared file objects */
             H5F_sfile_assert_num(0);
@@ -161,18 +156,14 @@ H5F_term_package(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fget_create_plist
+ * Function: H5Fget_create_plist
  *
- * Purpose:	Get an atom for a copy of the file-creation property list for
- *		this file. This function returns an atom with a copy of the
- *		properties used to create a file.
+ * Purpose:  Get an atom for a copy of the file-creation property list for
+ *           this file. This function returns an atom with a copy of the
+ *           properties used to create a file.
  *
- * Return:	Success:	template ID
- *
- *		Failure:	FAIL
- *
- * Programmer:	Unknown
- *
+ * Return:   Success:    template ID
+ *           Failure:    FAIL
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -201,24 +192,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fget_access_plist
+ * Function: H5Fget_access_plist
  *
- * Purpose:	Returns a copy of the file access property list of the
- *		specified file.
+ * Purpose:  Returns a copy of the file access property list of the
+ *           specified file.
  *
  *              NOTE: Make sure that, if you are going to overwrite
  *              information in the copied property list that was
  *              previously opened and assigned to the property list, then
  *              you must close it before overwriting the values.
  *
- * Return:	Success:	Object ID for a copy of the file access
- *				property list.
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Wednesday, February 18, 1998
- *
+ * Return:   Success:    Object ID for a copy of the file access
+ *                       property list.
+ *           Failure:    FAIL
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -244,23 +230,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fget_obj_count
+ * Function: H5Fget_obj_count
  *
- * Purpose:	Public function returning the number of opened object IDs
- *		(files, datasets, groups and datatypes) in the same file.
+ * Purpose:  Public function returning the number of opened object IDs
+ *           (files, datasets, groups and datatypes) in the same file.
  *
- * Return:	Non-negative on success; negative on failure.
- *
- * Programmer:	Raymond Lu
- *		Wednesday, Dec 5, 2001
- *
+ * Return:   Non-negative on success; negative on failure.
  *-------------------------------------------------------------------------
  */
 ssize_t
 H5Fget_obj_count(hid_t file_id, unsigned types)
 {
     H5F_t    *f = NULL;         /* File to query */
-    size_t  obj_count = 0;      /* Number of opened objects */
+    size_t   obj_count = 0;     /* Number of opened objects */
     ssize_t  ret_value;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -285,21 +267,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fget_object_ids
+ * Function: H5Fget_object_ids
  *
- * Purpose:	Public function to return a list of opened object IDs.
+ * Purpose:  Public function to return a list of opened object IDs.
  *
- * Return:	Non-negative on success; negative on failure.
- *
- * Programmer:  Raymond Lu
- *              Wednesday, Dec 5, 2001
- *
- * Modification:
- *              Raymond Lu
- *              24 September 2008
- *              Changed the return value to ssize_t and MAX_OBJTS to size_t to
- *              accommadate potential large number of objects.
- *
+ * Return:   Non-negative on success; negative on failure.
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -340,10 +312,6 @@ done:
  *
  * Return:      Success:        non-negative value.
  *              Failure:        negative.
- *
- * Programmer:  Raymond Lu
- *              Sep. 16, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -373,23 +341,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fis_hdf5
+ * Function: H5Fis_hdf5
  *
- * Purpose:	Check the file signature to detect an HDF5 file.
+ * Purpose:  Check the file signature to detect an HDF5 file.
  *
- * Bugs:	This function is not robust: it only uses the default file
- *		driver when attempting to open the file when in fact it
- *		should use all known file drivers.
+ * Bugs:     This function is not robust: it only uses the default file
+ *           driver when attempting to open the file when in fact it
+ *           should use all known file drivers.
  *
- * Return:	Success:	TRUE/FALSE
- *
- *		Failure:	Negative
- *
- * Programmer:	Unknown
- *
- * Modifications:
- *		Robb Matzke, 1999-08-02
- *		Rewritten to use the virtual file layer.
+ * Return:   Success:    TRUE/FALSE
+ *           Failure:    Negative
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -415,30 +376,26 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fcreate
+ * Function:    H5Fcreate
  *
- * Purpose:	This is the primary function for creating HDF5 files . The
- *		flags parameter determines whether an existing file will be
- *		overwritten or not.  All newly created files are opened for
- *		both reading and writing.  All flags may be combined with the
- *		bit-wise OR operator (`|') to change the behavior of the file
- *		create call.
+ * Purpose:    This is the primary function for creating HDF5 files . The
+ *        flags parameter determines whether an existing file will be
+ *        overwritten or not.  All newly created files are opened for
+ *        both reading and writing.  All flags may be combined with the
+ *        bit-wise OR operator (`|') to change the behavior of the file
+ *        create call.
  *
- *		The more complex behaviors of a file's creation and access
- *		are controlled through the file-creation and file-access
- *		property lists.  The value of H5P_DEFAULT for a template
- *		value indicates that the library should use the default
- *		values for the appropriate template.
+ *        The more complex behaviors of a file's creation and access
+ *        are controlled through the file-creation and file-access
+ *        property lists.  The value of H5P_DEFAULT for a template
+ *        value indicates that the library should use the default
+ *        values for the appropriate template.
  *
- * See also:	H5Fpublic.h for the list of supported flags. H5Ppublic.h for
- * 		the list of file creation and file access properties.
+ * See also:    H5Fpublic.h for the list of supported flags. H5Ppublic.h for
+ *         the list of file creation and file access properties.
  *
- * Return:	Success:	A file ID
- *
- *		Failure:	FAIL
- *
- * Programmer:	Unknown
- *
+ * Return:    Success:    A file ID
+ *            Failure:    FAIL
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -609,25 +566,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fflush
+ * Function: H5Fflush
  *
- * Purpose:	Flushes all outstanding buffers of a file to disk but does
- *		not remove them from the cache.  The OBJECT_ID can be a file,
- *		dataset, group, attribute, or named data type.
+ * Purpose:  Flushes all outstanding buffers of a file to disk but does
+ *           not remove them from the cache.  The OBJECT_ID can be a file,
+ *           dataset, group, attribute, or named data type.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, August  6, 1998
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Fflush(hid_t object_id, H5F_scope_t scope)
 {
-    H5F_t	*f = NULL;              /* File to flush */
-    H5O_loc_t	*oloc = NULL;           /* Object location for ID */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5F_t      *f = NULL;              /* File to flush */
+    H5O_loc_t  *oloc = NULL;           /* Object location for ID */
+    herr_t      ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iFs", object_id, scope);
@@ -640,7 +593,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 
         case H5I_GROUP:
             {
-                H5G_t	*grp;
+                H5G_t    *grp;
 
                 if(NULL == (grp = (H5G_t *)H5I_object(object_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
@@ -650,7 +603,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 
         case H5I_DATATYPE:
             {
-                H5T_t	*type;
+                H5T_t    *type;
 
                 if(NULL == (type = (H5T_t *)H5I_object(object_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid type identifier")
@@ -660,7 +613,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 
         case H5I_DATASET:
             {
-                H5D_t	*dset;
+                H5D_t    *dset;
 
                 if(NULL == (dset = (H5D_t *)H5I_object(object_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
@@ -670,7 +623,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 
         case H5I_ATTR:
             {
-                H5A_t	*attr;
+                H5A_t    *attr;
 
                 if(NULL == (attr = (H5A_t *)H5I_object(object_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
@@ -704,7 +657,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 
     /* Flush the file */
     /*
-     * Nothing to do if the file is read only.	This determination is
+     * Nothing to do if the file is read only.    This determination is
      * made at the shared open(2) flags level, implying that opening a
      * file twice, once for read-only and once for read-write, and then
      * calling H5Fflush() with the read-only handle, still causes data
@@ -730,24 +683,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fclose
+ * Function: H5Fclose
  *
- * Purpose:	This function closes the file specified by FILE_ID by
- *		flushing all data to storage, and terminating access to the
- *		file through FILE_ID.  If objects (e.g., datasets, groups,
- *		etc.) are open in the file then the underlying storage is not
- *		closed until those objects are closed; however, all data for
- *		the file and the open objects is flushed.
+ * Purpose:  This function closes the file specified by FILE_ID by
+ *        flushing all data to storage, and terminating access to the
+ *        file through FILE_ID.  If objects (e.g., datasets, groups,
+ *        etc.) are open in the file then the underlying storage is not
+ *        closed until those objects are closed; however, all data for
+ *        the file and the open objects is flushed.
  *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Saturday, February 20, 1999
- *
- * Modifications:
- *
+ * Return:   Success:    Non-negative
+ *           Failure:    Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -755,7 +701,7 @@ H5Fclose(hid_t file_id)
 {
     H5F_t       *f = NULL;
     int         nref;
-    herr_t	ret_value = SUCCEED;
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
@@ -791,29 +737,24 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Freopen
+ * Function: H5Freopen
  *
- * Purpose:	Reopen a file.  The new file handle which is returned points
- *		to the same file as the specified file handle.  Both handles
- *		share caches and other information.  The only difference
- *		between the handles is that the new handle is not mounted
- *		anywhere and no files are mounted on it.
+ * Purpose:  Reopen a file.  The new file handle which is returned points
+ *        to the same file as the specified file handle.  Both handles
+ *        share caches and other information.  The only difference
+ *        between the handles is that the new handle is not mounted
+ *        anywhere and no files are mounted on it.
  *
- * Return:	Success:	New file ID
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Friday, October 16, 1998
- *
+ * Return:   Success:    New file ID
+ *           Failure:    FAIL
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Freopen(hid_t file_id)
 {
-    H5F_t	*old_file = NULL;
-    H5F_t	*new_file = NULL;
-    hid_t	ret_value;
+    H5F_t    *old_file = NULL;
+    H5F_t    *new_file = NULL;
+    hid_t    ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", file_id);
@@ -847,16 +788,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fget_intent
+ * Function: H5Fget_intent
  *
- * Purpose:	Public API to retrieve the file's 'intent' flags passed
- *              during H5Fopen()
+ * Purpose:  Public API to retrieve the file's 'intent' flags passed
+ *           during H5Fopen()
  *
- * Return:	Non-negative on success/negative on failure
- *
- * Programmer:	James Laird
- *		August 23, 2006
- *
+ * Return:   Non-negative on success/negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -869,7 +806,7 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags)
 
     /* If no intent flags were passed in, exit quietly */
     if(intent_flags) {
-        H5F_t * file;           /* Pointer to file structure */
+        H5F_t *file;           /* Pointer to file structure */
 
         /* Get the internal file structure */
         if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -907,18 +844,13 @@ done:
  *
  * Return:      Success:        Amount of free space for type
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
- *              Oct  6, 2003
- *
  *-------------------------------------------------------------------------
  */
 hssize_t
 H5Fget_freespace(hid_t file_id)
 {
     H5F_t      *file;           /* File object for file ID */
-    hsize_t	tot_space;	/* Amount of free space in the file */
+    hsize_t     tot_space;      /* Amount of free space in the file */
     hssize_t    ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -944,15 +876,10 @@ done:
  *
  * Purpose:     Retrieves the file size of the HDF5 file. This function
  *              is called after an existing file is opened in order
- *		to learn the true size of the underlying file.
+ *        to learn the true size of the underlying file.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  David Pitt
- *              david.pitt@bigpond.com
- *              Apr 27, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -991,42 +918,38 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_file_image
  *
- * Purpose:     If a buffer is provided (via the buf_ptr argument) and is 
- *		big enough (size in buf_len argument), load *buf_ptr with
- *		an image of the open file whose ID is provided in the 
- *		file_id parameter, and return the number of bytes copied
- *		to the buffer.
+ * Purpose:     If a buffer is provided (via the buf_ptr argument) and is
+ *        big enough (size in buf_len argument), load *buf_ptr with
+ *        an image of the open file whose ID is provided in the
+ *        file_id parameter, and return the number of bytes copied
+ *        to the buffer.
  *
- *		If the buffer exists, but is too small to contain an image
- *		of the indicated file, return a negative number.
+ *        If the buffer exists, but is too small to contain an image
+ *        of the indicated file, return a negative number.
  *
- *		Finally, if no buffer is provided, return the size of the 
- *		buffer needed.  This value is simply the eoa of the target 
- *		file.
+ *        Finally, if no buffer is provided, return the size of the
+ *        buffer needed.  This value is simply the eoa of the target
+ *        file.
  *
- *		Note that any user block is skipped.
+ *        Note that any user block is skipped.
  *
- *		Also note that the function may not be used on files 
- *		opened with either the split/multi file driver or the
- *		family file driver.
+ *        Also note that the function may not be used on files
+ *        opened with either the split/multi file driver or the
+ *        family file driver.
  *
- *		In the former case, the sparse address space makes the 
- *		get file image operation impractical, due to the size of
- *		the image typically required.
+ *        In the former case, the sparse address space makes the
+ *        get file image operation impractical, due to the size of
+ *        the image typically required.
  *
- *		In the case of the family file driver, the problem is
- *		the driver message in the super block, which will prevent
- *		the image being opened with any driver other than the
- *		family file driver -- which negates the purpose of the 
- *		operation.  This can be fixed, but no resources for 
- *		this now.
+ *        In the case of the family file driver, the problem is
+ *        the driver message in the super block, which will prevent
+ *        the image being opened with any driver other than the
+ *        family file driver -- which negates the purpose of the
+ *        operation.  This can be fixed, but no resources for
+ *        this now.
  *
  * Return:      Success:        Bytes copied / number of bytes needed.
  *              Failure:        negative value
- *
- * Programmer:  John Mainzer
- *              11/15/11
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1052,21 +975,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Fget_mdc_config
+ * Function: H5Fget_mdc_config
  *
- * Purpose:     Retrieves the current automatic cache resize configuration
- *		from the metadata cache, and return it in *config_ptr.
+ * Purpose:  Retrieves the current automatic cache resize configuration
+ *        from the metadata cache, and return it in *config_ptr.
  *
- *		Note that the version field of *config_Ptr must be correctly
- *		filled in by the caller.  This allows us to adapt for
- *		obsolete versions of the structure.
+ *        Note that the version field of *config_Ptr must be correctly
+ *        filled in by the caller.  This allows us to adapt for
+ *        obsolete versions of the structure.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              3/24/05
- *
+ * Return:   Success:        SUCCEED
+ *           Failure:        FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1097,15 +1016,11 @@ done:
  * Function:    H5Fset_mdc_config
  *
  * Purpose:     Sets the current metadata cache automatic resize
- *		configuration, using the contents of the instance of
- *		H5AC_cache_config_t pointed to by config_ptr.
+ *        configuration, using the contents of the instance of
+ *        H5AC_cache_config_t pointed to by config_ptr.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              3/24/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1134,16 +1049,12 @@ done:
  * Function:    H5Fget_mdc_hit_rate
  *
  * Purpose:     Retrieves the current hit rate from the metadata cache.
- *		This rate is the overall hit rate since the last time
- *		the hit rate statistics were reset either manually or
- *		automatically.
+ *        This rate is the overall hit rate since the last time
+ *        the hit rate statistics were reset either manually or
+ *        automatically.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              3/24/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1175,17 +1086,13 @@ done:
  * Function:    H5Fget_mdc_size
  *
  * Purpose:     Retrieves the maximum size, minimum clean size, current
- *		size, and current number of entries from the metadata
- *		cache associated with the specified file.  If any of
- *		the ptr parameters are NULL, the associated datum is
- *		not returned.
+ *        size, and current number of entries from the metadata
+ *        cache associated with the specified file.  If any of
+ *        the ptr parameters are NULL, the associated datum is
+ *        not returned.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              3/24/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1221,20 +1128,16 @@ done:
  * Function:    H5Freset_mdc_hit_rate_stats
  *
  * Purpose:     Reset the hit rate statistic whose current value can
- *		be obtained via the H5Fget_mdc_hit_rate() call.  Note
- *		that this statistic will also be reset once per epoch
- *		by the automatic cache resize code if it is enabled.
+ *        be obtained via the H5Fget_mdc_hit_rate() call.  Note
+ *        that this statistic will also be reset once per epoch
+ *        by the automatic cache resize code if it is enabled.
  *
- *		It is probably a bad idea to call this function unless
- *		you are controlling cache size from your program instead
- *		of using our cache size control code.
+ *        It is probably a bad idea to call this function unless
+ *        you are controlling cache size from your program instead
+ *        of using our cache size control code.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              3/24/05
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1270,15 +1173,11 @@ done:
  *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
  *              is unchanged and the function returns a negative value.
  *
- * Note:	This routine returns the name that was used to open the file,
- *		not the actual name after resolving symlinks, etc.
+ * Note:        This routine returns the name that was used to open the file,
+ *              not the actual name after resolving symlinks, etc.
  *
  * Return:      Success:        The length of the file name
  *              Failure:        Negative
- *
- * Programmer:  Raymond Lu
- *              June 29, 2004
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1328,17 +1227,13 @@ done:
  * Function:    H5Fget_info2
  *
  * Purpose:     Gets general information about the file, including:
- *		1. Get storage size for superblock extension if there is one.
+ *              1. Get storage size for superblock extension if there is one.
  *              2. Get the amount of btree and heap storage for entries
  *                 in the SOHM table if there is one.
- *		3. The amount of free space tracked in the file.
+ *              3. The amount of free space tracked in the file.
  *
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
- *
- * Programmer:  Vailin Choi
- *              July 11, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1405,18 +1300,15 @@ done:
  *
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
- *
- * Programmer:  Vailin Choi; October 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info)
 {
-    H5F_t    	*file;           	/* File object for file ID */
-    unsigned 	i, j;			/* Local index variable */
-    size_t	tot_size;		/* Size of each retries[i] */
-    herr_t   	ret_value = SUCCEED;   	/* Return value */
+    H5F_t        *file;           /* File object for file ID */
+    unsigned     i, j;            /* Local index variable */
+    size_t       tot_size;        /* Size of each retries[i] */
+    herr_t       ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", file_id, info);
@@ -1436,8 +1328,8 @@ H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info)
     HDmemset(info->retries, 0, sizeof(info->retries));
 
     /* Return if there are no bins -- no retries */
-    if(!info->nbins) 
-	HGOTO_DONE(SUCCEED);
+    if(!info->nbins)
+        HGOTO_DONE(SUCCEED);
 
     /* Calculate size for each retries[i] */
     tot_size = info->nbins * sizeof(uint32_t);
@@ -1496,18 +1388,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Fget_free_sections
+ * Function: H5Fget_free_sections
  *
- * Purpose:     To get free-space section information for free-space manager with
- *		TYPE that is associated with file FILE_ID.
- *		If SECT_INFO is null, this routine returns the total # of free-space
- *		sections.
+ * Purpose:  To get free-space section information for free-space manager with
+ *           TYPE that is associated with file FILE_ID.
+ *           If SECT_INFO is null, this routine returns the total # of free-space
+ *           sections.
  *
- * Return:      Success:        non-negative, the total # of free space sections
- *              Failure:        negative
- *
- * Programmer:  Vailin Choi; July 1st, 2009
- *
+ * Return:   Success:        non-negative, the total # of free space sections
+ *           Failure:        negative
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1544,9 +1433,6 @@ done:
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
- *
- * Programmer:  Neil Fortner; December 30, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1573,37 +1459,33 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fstart_swmr_write
+ * Function:    H5Fstart_swmr_write
  *
- * Purpose:	To enable SWMR writing mode for the file
- *		1) Refresh opened objects: part 1
- *		2) Flush & reset accumulator
- *		3) Mark the file in SWMR writing mode
- *	 	4) Set metadata read attempts and retries info
- *		5) Disable accumulator
- *		6) Evict all cache entries except the superblock
- *		7) Refresh opened objects (part 2)
- *		8) Unlock the file
+ * Purpose:    To enable SWMR writing mode for the file
+ *        1) Refresh opened objects: part 1
+ *        2) Flush & reset accumulator
+ *        3) Mark the file in SWMR writing mode
+ *         4) Set metadata read attempts and retries info
+ *        5) Disable accumulator
+ *        6) Evict all cache entries except the superblock
+ *        7) Refresh opened objects (part 2)
+ *        8) Unlock the file
  *
- *		Pre-conditions:
- *		1) The file being opened has v3 superblock
- *		2) The file is opened with H5F_ACC_RDWR
- *		3) The file is not already marked for SWMR writing
- *		4) Current implementaion for opened objects:
- *		   --only allow datasets and groups without attributes
- *		   --disallow named datatype with/without attributes
- *		   --disallow opened attributes attached to objects
- *		NOTE: Currently, only opened groups and datasets are allowed
- *	      	when enabling SWMR via H5Fstart_swmr_write().
- *	      	Will later implement a different approach--
- *	      	set up flush dependency/proxy even for file opened without
- *	      	SWMR to resolve issues with opened objects.
- *	
- * Return:	Non-negative on success/negative on failure
+ *        Pre-conditions:
+ *        1) The file being opened has v3 superblock
+ *        2) The file is opened with H5F_ACC_RDWR
+ *        3) The file is not already marked for SWMR writing
+ *        4) Current implementaion for opened objects:
+ *           --only allow datasets and groups without attributes
+ *           --disallow named datatype with/without attributes
+ *           --disallow opened attributes attached to objects
+ *        NOTE: Currently, only opened groups and datasets are allowed
+ *              when enabling SWMR via H5Fstart_swmr_write().
+ *              Will later implement a different approach--
+ *              set up flush dependency/proxy even for file opened without
+ *              SWMR to resolve issues with opened objects.
  *
- * Programmer:	
- *	Vailin Choi; Feb 2014
- *
+ * Return:    Non-negative on success/negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1612,16 +1494,16 @@ H5Fstart_swmr_write(hid_t file_id)
     hbool_t ci_load = FALSE;    /* whether MDC ci load requested */
     hbool_t ci_write = FALSE;   /* whether MDC CI write requested */
     H5F_t *file = NULL;         /* File info */
-    size_t grp_dset_count=0; 	/* # of open objects: groups & datasets */
-    size_t nt_attr_count=0; 	/* # of opened named datatypes  + opened attributes */
-    hid_t *obj_ids=NULL;	/* List of ids */
-    H5G_loc_t *obj_glocs=NULL;	/* Group location of the object */
-    H5O_loc_t *obj_olocs=NULL;	/* Object location */
-    H5G_name_t *obj_paths=NULL;	/* Group hierarchy path */
-    size_t u;               	/* Local index variable */
-    hbool_t setup = FALSE;	/* Boolean flag to indicate whether SWMR setting is enabled */
+    size_t grp_dset_count=0;    /* # of open objects: groups & datasets */
+    size_t nt_attr_count=0;     /* # of opened named datatypes  + opened attributes */
+    hid_t *obj_ids=NULL;        /* List of ids */
+    H5G_loc_t *obj_glocs=NULL;  /* Group location of the object */
+    H5O_loc_t *obj_olocs=NULL;  /* Object location */
+    H5G_name_t *obj_paths=NULL; /* Group hierarchy path */
+    size_t u;                   /* Local index variable */
+    hbool_t setup = FALSE;      /* Boolean flag to indicate whether SWMR setting is enabled */
     H5F_io_info2_t fio_info;    /* I/O info for operation */
-    herr_t ret_value = SUCCEED;	/* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
@@ -1670,18 +1552,18 @@ H5Fstart_swmr_write(hid_t file_id)
 
     if(grp_dset_count) {
         /* Allocate space for group and object locations */
-	if((obj_ids = (hid_t *) H5MM_malloc(grp_dset_count * sizeof(hid_t))) == NULL)
-	    HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for hid_t")
-	if((obj_glocs = (H5G_loc_t *) H5MM_malloc(grp_dset_count * sizeof(H5G_loc_t))) == NULL)
-	    HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_loc_t")
-	if((obj_olocs = (H5O_loc_t *) H5MM_malloc(grp_dset_count * sizeof(H5O_loc_t))) == NULL)
-	    HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5O_loc_t")
-	if((obj_paths = (H5G_name_t *) H5MM_malloc(grp_dset_count * sizeof(H5G_name_t))) == NULL)
-	    HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_name_t")
+    if((obj_ids = (hid_t *) H5MM_malloc(grp_dset_count * sizeof(hid_t))) == NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for hid_t")
+    if((obj_glocs = (H5G_loc_t *) H5MM_malloc(grp_dset_count * sizeof(H5G_loc_t))) == NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_loc_t")
+    if((obj_olocs = (H5O_loc_t *) H5MM_malloc(grp_dset_count * sizeof(H5O_loc_t))) == NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5O_loc_t")
+    if((obj_paths = (H5G_name_t *) H5MM_malloc(grp_dset_count * sizeof(H5G_name_t))) == NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_name_t")
 
         /* Get the list of opened object ids (groups & datasets) */
-	if(H5F_get_obj_ids(file, H5F_OBJ_GROUP|H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE, &grp_dset_count) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed")
+    if(H5F_get_obj_ids(file, H5F_OBJ_GROUP|H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE, &grp_dset_count) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed")
 
         /* Refresh opened objects (groups, datasets) in the file */
         for(u = 0; u < grp_dset_count; u++) {
@@ -1809,14 +1691,13 @@ done:
  *                  - Logging must have been set up via the fapl.
  *
  * Return:      Non-negative on success/Negative on errors
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Fstart_mdc_logging(hid_t file_id)
 {
-    H5F_t *file;                /* File info */
-    herr_t ret_value = SUCCEED;	/* Return value */
+    H5F_t *file;                   /* File info */
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
@@ -1842,14 +1723,13 @@ done:
  *                  - Logging must have been set up via the fapl.
  *
  * Return:      Non-negative on success/Negative on errors
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Fstop_mdc_logging(hid_t file_id)
 {
-    H5F_t *file;                /* File info */
-    herr_t ret_value = SUCCEED;	/* Return value */
+    H5F_t *file;                   /* File info */
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
@@ -1875,15 +1755,14 @@ done:
  *              log messages are being recorded at this time.
  *
  * Return:      Non-negative on success/Negative on errors
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
                           hbool_t *is_currently_logging)
 {
-    H5F_t *file;                /* File info */
-    herr_t ret_value = SUCCEED;	/* Return value */
+    H5F_t *file;                   /* File info */
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*b*b", file_id, is_enabled, is_currently_logging);
@@ -1907,9 +1786,6 @@ done:
  * Purpose:    Enable switching the "latest format" flag while a file is open.
  *
  * Return:     Non-negative on success/Negative on failure
- *
- * Programmer: Quincey Koziol
- *             Monday, September 21, 2015
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1943,17 +1819,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fformat_convert_super (Internal)
+ * Function: H5Fformat_convert_super (Internal)
  *
- * Purpose:	Downgrade the superblock version to v2 and
- *		downgrade persistent file space to non-persistent
- *		for 1.8 library.
+ * Purpose:  Downgrade the superblock version to v2 and
+ *           downgrade persistent file space to non-persistent
+ *           for 1.8 library.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi
- *              Jan 2016
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1965,8 +1837,8 @@ H5Fformat_convert(hid_t fid)
     H5TRACE1("e", "i", fid);
 
     if(H5I_FILE == H5I_get_type(fid)) {
-        H5F_t	*f;                     /* File to flush */
-        hbool_t	mark_dirty = FALSE;
+        H5F_t    *f;                     /* File to flush */
+        hbool_t   mark_dirty = FALSE;
 
         /* Get file object */
         if(NULL == (f = (H5F_t *)H5I_object(fid)))
@@ -1980,9 +1852,9 @@ H5Fformat_convert(hid_t fid)
 
         /* Check for persistent freespace manager, which needs to be downgraded */
         if(!(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
-             f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
-             f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
-             f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
+                f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
+                f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
+                f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
             /* Check to remove free-space manager info message from superblock extension */
             if(H5F_addr_defined(f->shared->sblock->ext_addr))
                 if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_FSINFO_ID) < 0)
@@ -2023,9 +1895,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2059,9 +1928,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2103,9 +1969,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Vailin Choi; March 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t

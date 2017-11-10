@@ -98,7 +98,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
         H5PB.c \
         H5PL.c H5PLint.c H5PLpath.c H5PLplugin_cache.c \
-        H5R.c H5Rdeprec.c \
+        H5R.c H5Rint.c H5Rdeprec.c \
         H5UC.c \
         H5RS.c \
         H5S.c H5Sall.c H5Sdbg.c H5Shyper.c H5Snone.c H5Spoint.c \

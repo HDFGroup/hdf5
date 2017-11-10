@@ -1,4 +1,4 @@
-#
+
 # Copyright by The HDF Group.
 # All rights reserved.
 #
@@ -520,7 +520,7 @@ set (test_CLEANFILES
     multi_file-r.h5
     multi_file-s.h5
     core_file
-    plugin.h5
+    filter_plugin.h5
     new_move_a.h5
     new_move_b.h5
     ntypes.h5
@@ -1014,7 +1014,7 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 ##############################################################################
-###    P L U G I N  T E S T S
+###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
 if (WIN32)
   set (CMAKE_SEP "\;")
@@ -1024,9 +1024,9 @@ else ()
   set (BIN_REL_PATH "../")
 endif ()
 
-add_test (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:plugin>)
-set_tests_properties (H5PLUGIN-plugin PROPERTIES
-    ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+add_test (NAME H5PLUGIN-filter_plugin COMMAND $<TARGET_FILE:filter_plugin>)
+set_tests_properties (H5PLUGIN-filter_plugin PROPERTIES
+    ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2;srcdir=${HDF5_TEST_BINARY_DIR}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
 )
 
