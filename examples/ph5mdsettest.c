@@ -5292,8 +5292,6 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
     else // CONTIG
         crp_plist1= H5P_DEFAULT;
 
-
-
    for (j=0; j<ndsets; j++)
    {
     /* Dset name */
@@ -5316,7 +5314,7 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
     if (sel_mode == SEL_HYPER_1BLOCK) {
         /* each process takes a block */
         slab_set_1d(dims, start, stride, count, block, BYROW);
-        #if 1 // JK_DBG
+        #if 0 // JK_DBG
         printf("%s P%d > start[]=%lu, count[]=%lu, stride[]=%lu, total datapoints=%lu\n", __FUNCTION__, mpi_rank, 
     	    (unsigned long)start[0], 
             (unsigned long)count[0], 
@@ -5475,16 +5473,16 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
         timersub(&tv2, &tv1, &tv_sub);
         time_f = timeval2float(&tv_sub);
        #ifndef TEST_NO_MPI
-        if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD))
-            printf("Error: MPI_Allreduce MAX\n");
+        if (MPI_SUCCESS != MPI_Reduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD))
+            printf("Error: MPI_Reduce MAX\n");
 
-        if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD))
-            printf("Error: MPI_Allreduce MIN\n");
+        if (MPI_SUCCESS != MPI_Reduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, 0, MPI_COMM_WORLD))
+            printf("Error: MPI_Reduce MIN\n");
        #endif
 
         /* Display raw data write time */
-        if(mpi_rank == (mpi_size-1)) {
-            printf("%s:%d p%d> H5Dwrite_multi DONE Elapsed time: %fsec (MIN) - %fsec (MAX)\n", __FUNCTION__, __LINE__, mpi_rank, timemin_f, timemax_f);
+        if(mpi_rank == 0) {
+            printf("H5Dwrite_multi DONE Elapsed time: %fsec (MIN) - %fsec (MAX)\n", timemin_f, timemax_f);
         }
         fflush(stdout);
     }
@@ -5524,16 +5522,16 @@ void phdf5Write_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t 
     timersub(&tv2, &tv1, &tv_sub);
     time_f = timeval2float(&tv_sub);
     #ifndef TEST_NO_MPI
-    if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD))
-        printf("Error: MPI_Allreduce MAX\n");
+    if (MPI_SUCCESS != MPI_Reduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD))
+        printf("Error: MPI_Reduce MAX\n");
 
-    if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD))
-        printf("Error: MPI_Allreduce MIN\n");
+    if (MPI_SUCCESS != MPI_Reduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, 0, MPI_COMM_WORLD))
+        printf("Error: MPI_Reduce MIN\n");
     #endif
 
     #if 1 // JK_DBG
-    if(mpi_rank == (mpi_size-1)) {
-        printf("%s:%d p%d> H5Fclose DONE Elapsed time: %f (MIN) - %f (MAX)\n", __FUNCTION__, __LINE__, mpi_rank, timemin_f, timemax_f);
+    if(mpi_rank == 0) {
+      printf("H5Fclose DONE Elapsed time: %f (MIN) - %f (MAX)\n", timemin_f, timemax_f);
     }
     fflush(stdout);
     #endif
@@ -5914,19 +5912,18 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
         gettimeofday (&tv2, NULL);
         timersub(&tv2, &tv1, &tv_sub);
         time_f = timeval2float(&tv_sub);
-	  printf("LKDJFLDJ\n");
        #ifndef TEST_NO_MPI
-        if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD))
-            printf("Error: MPI_Allreduce MAX\n");
-        if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD))
-            printf("Error: MPI_Allreduce MIN\n");
+        if (MPI_SUCCESS != MPI_Reduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD))
+            printf("Error: MPI_Reduce MAX\n");
+        if (MPI_SUCCESS != MPI_Reduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, 0, MPI_COMM_WORLD))
+            printf("Error: MPI_Reduce MIN\n");
        #endif
 
         /* Display raw data read time */
-        if(mpi_rank == (mpi_size-1)) {
-            printf("JKDBG %s:%d p%d> H5Dread_multi DONE Elapsed time: %fsec (MIN) - %fsec (MAX)\n", __FUNCTION__, __LINE__, mpi_rank, timemin_f, timemax_f);
+        if(mpi_rank == 0) {
+            printf("H5Dread_multi DONE Elapsed time: %fsec (MIN) - %fsec (MAX)\n", timemin_f, timemax_f);
         }
-        fflush(stdout);
+	fflush(stdout);
     }
 
     // Verify Read buffers with Write buffers
@@ -5970,15 +5967,15 @@ void phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t c
     timersub(&tv2, &tv1, &tv_sub);
     time_f = timeval2float(&tv_sub);
     #ifndef TEST_NO_MPI
-    if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, MPI_COMM_WORLD))
-        printf("Error: MPI_Allreduce MAX\n");
-    if (MPI_SUCCESS != MPI_Allreduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, MPI_COMM_WORLD))
-        printf("Error: MPI_Allreduce MIN\n");
+    if (MPI_SUCCESS != MPI_Reduce (&time_f, &timemax_f, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD))
+        printf("Error: MPI_Reduce MAX\n");
+    if (MPI_SUCCESS != MPI_Reduce (&time_f, &timemin_f, 1, MPI_FLOAT, MPI_MIN, 0, MPI_COMM_WORLD))
+        printf("Error: MPI_Reduce MIN\n");
     #endif
 
     #if 1 // JK_DBG
-    if(mpi_rank == (mpi_size-1)) {
-        printf("JKDBG %s:%d p%d> H5Fclose DONE Elapsed time: %f (MIN) - %f (MAX)\n", __FUNCTION__, __LINE__, mpi_rank, timemin_f, timemax_f);
+    if(mpi_rank == 0) {
+        printf("H5Fclose DONE Elapsed time: %f (MIN) - %f (MAX)\n", timemin_f, timemax_f);
     }
     fflush(stdout);
     #endif
@@ -6250,7 +6247,6 @@ main(int argc, char **argv)
     if (doread) {
         if(doCOLL) {
 	        MPI_BANNER("testing PHDF5 dataset CollectiveIO read Eg0");
-
             if(TEST_TYPE) {
             /*
              * This section is for multi-dset feature tests
