@@ -1342,14 +1342,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get page buffer size")
     if(page_buf_size) {
-#ifdef H5_HAVE_PARALLEL
-        /* Collective metadata writes are not supported with page buffering */
-        if(file->coll_md_write)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "collective metadata writes are not supported with page buffering")
+        /* Check if VFD is compatible with page buffering */
+        if(!H5F_HAS_FEATURE(file, H5FD_FEAT_PAGE_BUFFER_COMPATIBLE))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "page buffering is disabled for VFD")
 
-        /* Temporary: fail file create when page buffering feature is enabled for parallel */
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "page buffering is disabled for parallel")
-#endif /* H5_HAVE_PARALLEL */
         /* Query for other page buffer cache properties */
         if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &page_buf_min_meta_perc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum metadata fraction of page buffer")

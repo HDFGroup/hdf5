@@ -115,6 +115,7 @@ test_split_comm_access(void)
     VRFY((mrc==MPI_SUCCESS), "final MPI_Barrier succeeded");
 }
 
+#ifdef PB_OUT
 void
 test_page_buffer_access(void)
 {
@@ -406,6 +407,66 @@ test_page_buffer_access(void)
     data = NULL;
     MPI_Barrier(MPI_COMM_WORLD);
 }
+#else /* PB_OUT */
+void
+test_page_buffer_disabled(void)
+{
+    hid_t file_id = -1;          /* File ID */
+    hid_t fcpl, fapl, fapl2;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    size_t page_count = 0;
+    int i, num_elements = 200;
+    haddr_t raw_addr, meta_addr;
+    H5F_t *f = NULL;
+    herr_t ret;			/* generic return value */
+    const char *filename;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    filename = (const char *)GetTestParameters();
+
+    if (VERBOSE_MED)
+	printf("Page Buffer Disabled in Parallel %s\n", filename);
+
+    fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    VRFY((fapl >= 0), "create_faccess_plist succeeded");
+    fapl2 = H5Pcopy(fapl);
+    VRFY((fapl2 >= 0), "H5Pcopy");
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    VRFY((fcpl >= 0), "H5Pcreate");
+
+    ret = H5Pset_page_buffer_size(fapl, sizeof(int)*100000, 0, 0);
+    VRFY((ret == 0), "H5Pset_page_buffer_size");
+
+    /* This should fail because page buffering is not supported in parallel */
+    H5E_BEGIN_TRY {
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
+    } H5E_END_TRY;
+    VRFY((file_id < 0), "H5Fcreate incorrectly succeeded");
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* Create a file to attempt opening */
+    ret = create_file(filename, fcpl, fapl2, H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
+    VRFY((ret == 0), "create_file");
+
+    /* This should fail because page buffering is not supported in parallel */
+    H5E_BEGIN_TRY {
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+    } H5E_END_TRY;
+    VRFY((file_id < 0), "H5Fopen incorrectly succeeded");
+
+    ret = H5Pclose(fapl);
+    VRFY((ret>=0), "H5Pclose");
+    ret = H5Pclose(fapl2);
+    VRFY((ret>=0), "H5Pclose");
+    ret = H5Pclose(fcpl);
+    VRFY((ret>=0), "H5Pclose");
+
+    MPI_Barrier(MPI_COMM_WORLD);
+}
+#endif /* PB_OUT */
 
 static int
 create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_strategy)

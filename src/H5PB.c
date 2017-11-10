@@ -704,7 +704,6 @@ H5PB_read(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
     haddr_t search_addr;                /* Address of current page */
     hsize_t num_touched_pages;          /* Number of pages accessed */
     size_t access_size;
-    hbool_t bypass_pb = FALSE;          /* Whether to bypass page buffering */
     hsize_t i;                          /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -712,32 +711,17 @@ H5PB_read(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
 
     /* Sanity checks */
     HDassert(fio_info);
+    HDassert(fio_info->f);
+    HDassert(H5F_HAS_FEATURE(fio_info->f, H5FD_FEAT_PAGE_BUFFER_COMPATIBLE));
 
     /* Get pointer to page buffer info for this file */
     page_buf = fio_info->f->shared->page_buf;
 
-#ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(fio_info->f, H5FD_FEAT_HAS_MPI)) {
-#if 1
-        bypass_pb = TRUE;
-#else
-        /* MSC - why this stopped working ? */
-        int mpi_size;
-
-        if((mpi_size = H5F_mpi_get_size(fio_info->f)) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size")
-        if(1 != mpi_size)
-            bypass_pb = TRUE;
-#endif
-    } /* end if */
-#endif
-
     /* If page buffering is disabled, or the I/O size is larger than that of a
-     * single page, or if this is a parallel raw data access, bypass page
-     * buffering.
+     * single page, bypass page buffering.
      */
-    if(NULL == page_buf || size >= page_buf->page_size ||
-           (bypass_pb && H5FD_MEM_DRAW == type)) {
+    if(NULL == page_buf || size >= page_buf->page_size) {
+        /* Pass I/O down to next layer */
         if(H5F__accum_read(fio_info, type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "read through metadata accumulator failed")
 
@@ -749,21 +733,18 @@ H5PB_read(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
                 page_buf->bypasses[0] ++;
         } /* end if */
 
-        /* If page buffering is disabled, or if this is a large metadata access, 
-         * or if this is parallel raw data access, we are done here
+        /* If page buffering is disabled, or if this is a large metadata access,
+         * we are done here
          */
-        if(NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type) ||
-                (bypass_pb && H5FD_MEM_DRAW == type))
+        if(NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type))
             HGOTO_DONE(SUCCEED)
     } /* end if */
 
     /* Update statistics */
-    if(page_buf) {
-        if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
-            page_buf->accesses[1]++;
-        else
-            page_buf->accesses[0]++;
-    } /* end if */
+    if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
+        page_buf->accesses[1]++;
+    else
+        page_buf->accesses[0]++;
 
     /* Calculate the aligned address of the first page */
     first_page_addr = (addr / page_buf->page_size) * page_buf->page_size;
@@ -794,7 +775,8 @@ H5PB_read(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
     fdio_info.raw_dxpl = fio_info->raw_dxpl;
 
     /* Copy raw data from dirty pages into the read buffer if the read
-       request spans pages in the page buffer*/
+     * request spans pages in the page buffer
+     */
     if(H5FD_MEM_DRAW == type && size >= page_buf->page_size) {
         H5SL_node_t *node;
 
@@ -861,7 +843,8 @@ H5PB_read(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
     } /* end if */
     else {
         /* A raw data access could span 1 or 2 PB entries at this point so
-           we need to handle that */
+         * we need to handle that
+         */
         HDassert(1 == num_touched_pages || 2 == num_touched_pages);
         for(i = 0 ; i < num_touched_pages; i++) {
             haddr_t buf_offset;
@@ -935,7 +918,7 @@ H5PB_read(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 
                 /* If the entire page falls outside the EOA, then fail */
-                if(search_addr > eoa)
+                if(H5F_addr_gt(search_addr, eoa))
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_BADVALUE, FAIL, "reading an entire page that is outside the file EOA")
 
                 /* Adjust the read size to not go beyond the EOA */
@@ -1003,7 +986,6 @@ H5PB_write(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
     haddr_t search_addr;                /* Address of current page */
     hsize_t num_touched_pages;          /* Number of pages accessed */
     size_t access_size;
-    hbool_t bypass_pb = FALSE;          /* Whether to bypass page buffering */
     hsize_t i;                          /* Local index variable */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
@@ -1012,31 +994,16 @@ H5PB_write(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
     /* Sanity checks */
     HDassert(fio_info);
     HDassert(fio_info->f);
+    HDassert(H5F_HAS_FEATURE(fio_info->f, H5FD_FEAT_PAGE_BUFFER_COMPATIBLE));
 
     /* Get pointer to page buffer info for this file */
     page_buf = fio_info->f->shared->page_buf;
 
-#ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(fio_info->f, H5FD_FEAT_HAS_MPI)) {
-#if 1
-        bypass_pb = TRUE;
-#else
-        /* MSC - why this stopped working ? */
-        int mpi_size;
-
-        if((mpi_size = H5F_mpi_get_size(fio_info->f)) < 0)
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size")
-        if(1 != mpi_size)
-            bypass_pb = TRUE;
-#endif
-    } /* end if */
-#endif
-
     /* If page buffering is disabled, or the I/O size is larger than that of a
-     * single page, or if this is a parallel raw data access, bypass page
-     * buffering.
+     * single page, bypass page buffering.
      */
-    if(NULL == page_buf || size >= page_buf->page_size || bypass_pb) {
+    if(NULL == page_buf || size >= page_buf->page_size) {
+        /* Pass I/O down to next layer */
         if(H5F__accum_write(fio_info, type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "write through metadata accumulator failed")
 
@@ -1048,29 +1015,18 @@ H5PB_write(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
                 page_buf->bypasses[0]++;
         } /* end if */
 
-        /* If page buffering is disabled, or if this is a large metadata access, 
-         * or if this is a parallel raw data access, we are done here
+        /* If page buffering is disabled, or if this is a large metadata access,
+         * we are done here
          */
-        if(NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type) ||
-                (bypass_pb && H5FD_MEM_DRAW == type))
+        if(NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type))
             HGOTO_DONE(SUCCEED)
-
-#ifdef H5_HAVE_PARALLEL
-        if(bypass_pb) {
-            if(H5PB_update_entry(page_buf, addr, size, buf) > 0)
-                HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTUPDATE, FAIL, "failed to update PB with metadata cache")
-            HGOTO_DONE(SUCCEED)
-        } /* end if */
-#endif
     } /* end if */
 
     /* Update statistics */
-    if(page_buf) {
-        if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
-            page_buf->accesses[1]++;
-        else
-            page_buf->accesses[0]++;
-    } /* end if */
+    if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
+        page_buf->accesses[1]++;
+    else
+        page_buf->accesses[0]++;
 
     /* Calculate the aligned address of the first page */
     first_page_addr = (addr / page_buf->page_size) * page_buf->page_size;
@@ -1276,14 +1232,11 @@ H5PB_write(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 
                     /* If the entire page falls outside the EOA, then fail */
-                    if(search_addr > eoa)
+                    if(H5F_addr_gt(search_addr, eoa))
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_BADVALUE, FAIL, "writing to a page that is outside the file EOA")
 
-                    /* Retrieve the 'eof' for the file - The MPI-VFD EOF
-                     * returned will most likely be HADDR_UNDEF, so skip
-                     * that check.
-                     */
-                    if(!H5F_HAS_FEATURE(fio_info->f, H5FD_FEAT_HAS_MPI))
+                    /* Retrieve the 'eof' for the file, if the VFD is compatible */
+                    if(H5F_HAS_FEATURE(fio_info->f, H5FD_FEAT_PAGE_BUFFER_COMPATIBLE))
                         if(HADDR_UNDEF == (eof = H5FD_get_eof(fio_info->f->shared->lf, H5FD_MEM_DEFAULT)))
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eof request failed")
 
@@ -1291,7 +1244,7 @@ H5PB_write(const H5F_io_info2_t *fio_info, H5FD_mem_t type, haddr_t addr,
                     if(search_addr + page_size > eoa)
                         page_size = (size_t)(eoa - search_addr);
 
-                    if(search_addr < eof) {
+                    if(H5F_addr_lt(search_addr, eof)) {
                         if(H5FD_read(&fdio_info, type, search_addr, page_size, new_page_buf) < 0)
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "driver read request failed")
 

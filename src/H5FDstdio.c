@@ -205,6 +205,8 @@ static const H5FD_class_t H5FD_stdio_g = {
     H5FD_stdio_get_handle,      /* get_handle   */
     H5FD_stdio_read,            /* read         */
     H5FD_stdio_write,           /* write        */
+    NULL,                       /* select_read  */
+    NULL,                       /* select_write */
     H5FD_stdio_flush,           /* flush        */
     H5FD_stdio_truncate,        /* truncate     */
     H5FD_stdio_lock,            /* lock         */
@@ -560,6 +562,7 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long /*OUT*/ *flags)
         *flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes    */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default VFD      */
+        *flags |= H5FD_FEAT_PAGE_BUFFER_COMPATIBLE; /* OK to use page buffer for faster I/O                             */
     }
 
     return 0;

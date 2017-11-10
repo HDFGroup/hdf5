@@ -134,6 +134,8 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_get_handle,                     /*get_handle            */
     H5FD_family_read,				/*read			*/
     H5FD_family_write,				/*write			*/
+    NULL,                                       /*select_read           */
+    NULL,                                       /*select_write          */
     H5FD_family_flush,				/*flush			*/
     H5FD_family_truncate,			/*truncate		*/
     H5FD_family_lock,                           /*lock                  */
@@ -883,6 +885,7 @@ H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes. */
         *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_PAGE_BUFFER_COMPATIBLE; /* OK to use page buffer for faster I/O                             */
 
         /* Check for flags that are set by h5repart */
         if(file && file->repart_members)

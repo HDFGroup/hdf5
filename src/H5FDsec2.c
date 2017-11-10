@@ -167,6 +167,8 @@ static const H5FD_class_t H5FD_sec2_g = {
     H5FD_sec2_get_handle,       /* get_handle           */
     H5FD_sec2_read,             /* read                 */
     H5FD_sec2_write,            /* write                */
+    NULL,                       /* select_read          */
+    NULL,                       /* select_write         */
     NULL,                       /* flush                */
     H5FD_sec2_truncate,         /* truncate             */
     H5FD_sec2_lock,             /* lock                 */
@@ -530,6 +532,7 @@ H5FD_sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE;    /* get_handle callback returns a POSIX file descriptor              */
         *flags |= H5FD_FEAT_SUPPORTS_SWMR_IO;       /* VFD supports the single-writer/multiple-readers (SWMR) pattern   */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default VFD      */
+        *flags |= H5FD_FEAT_PAGE_BUFFER_COMPATIBLE; /* OK to use page buffer for faster I/O                             */
 
         /* Check for flags that are set by h5repart */
         if(file && file->fam_to_sec2)

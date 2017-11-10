@@ -120,7 +120,8 @@ test_sec2(void)
                         | H5FD_FEAT_AGGREGATE_SMALLDATA
                         | H5FD_FEAT_POSIX_COMPAT_HANDLE
                         | H5FD_FEAT_SUPPORTS_SWMR_IO
-                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
+                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE
+                        | H5FD_FEAT_PAGE_BUFFER_COMPATIBLE))
         TEST_ERROR
 
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
@@ -259,7 +260,8 @@ test_core(void)
                         | H5FD_FEAT_DATA_SIEVE
                         | H5FD_FEAT_AGGREGATE_SMALLDATA
                         | H5FD_FEAT_ALLOW_FILE_IMAGE 
-                        | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
+                        | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS
+                        | H5FD_FEAT_PAGE_BUFFER_COMPATIBLE))
         TEST_ERROR
 
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
@@ -877,7 +879,8 @@ test_family(void)
     if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
                         | H5FD_FEAT_ACCUMULATE_METADATA
                         | H5FD_FEAT_DATA_SIEVE
-                        | H5FD_FEAT_AGGREGATE_SMALLDATA))
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_PAGE_BUFFER_COMPATIBLE))
         TEST_ERROR
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -1235,7 +1238,8 @@ test_multi(void)
     if(driver_flags != (H5FD_FEAT_DATA_SIEVE
                         | H5FD_FEAT_AGGREGATE_SMALLDATA
                         | H5FD_FEAT_USE_ALLOC_SIZE
-                        | H5FD_FEAT_PAGED_AGGR))
+                        | H5FD_FEAT_PAGED_AGGR
+                        | H5FD_FEAT_PAGE_BUFFER_COMPATIBLE))
         TEST_ERROR
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -1606,7 +1610,8 @@ test_log(void)
                         | H5FD_FEAT_AGGREGATE_SMALLDATA
                         | H5FD_FEAT_POSIX_COMPAT_HANDLE
                         | H5FD_FEAT_SUPPORTS_SWMR_IO
-                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
+                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE
+                        | H5FD_FEAT_PAGE_BUFFER_COMPATIBLE))
         TEST_ERROR
 
     /* Create the test file */
@@ -1711,7 +1716,8 @@ test_stdio(void)
                         | H5FD_FEAT_ACCUMULATE_METADATA
                         | H5FD_FEAT_DATA_SIEVE
                         | H5FD_FEAT_AGGREGATE_SMALLDATA
-                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
+                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE
+                        | H5FD_FEAT_PAGE_BUFFER_COMPATIBLE))
         TEST_ERROR
 
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)

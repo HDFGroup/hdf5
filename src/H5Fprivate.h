@@ -814,6 +814,14 @@ H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
 H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, const void *buf);
 
+/* Functions that operate on selections of elements wrt super block */
+H5_DLL herr_t H5F_select_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, void *buf/*out*/);
+H5_DLL herr_t H5F_select_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, const void *buf);
+
 /* Functions that flush or evict */
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id);
 H5_DLL herr_t H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id);

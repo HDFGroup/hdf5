@@ -1465,6 +1465,148 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FDselect_read
+ *
+ * Purpose:	Reads FILE_SPACE selection of ELMT_SIZE elements from FILE,
+ *		at address ADDR according to the data transfer property list
+ *		DXPL_ID (which may be the constant H5P_DEFAULT). The result is
+ *		written into the MEM_SPACE selection in buffer BUF.
+ *
+ * Return:	Success:	Non-negative. The read result is written into
+ *				the BUF buffer which should be allocated by
+ *				the caller.
+ *		Failure:	Negative. The contents of BUF is undefined.
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, November  4, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDselect_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, void *buf/*out*/)
+{
+    H5FD_io_info_t fdio_info;           /* File driver I/O object */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if(H5I_DATASPACE != H5I_get_type(file_space))
+        HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, FAIL, "file dataspace ID not valid")
+    if(H5I_DATASPACE != H5I_get_type(mem_space))
+        HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, FAIL, "file dataspace ID not valid")
+    if(0 == elmt_size)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "element size invalid: %zu", elmt_size)
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    if(!buf)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer")
+
+    /* Set up the file driver I/O info object */
+    fdio_info.file = file;
+    if(H5FD_MEM_DRAW == type) {
+        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
+
+    /* Do the real work */
+    /* (Note compensating for base address addition in internal routine) */
+    if(H5FD_select_read(&fdio_info, type, file_space, mem_space, elmt_size, addr - file->base_addr, buf) < 0)
+	HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDselect_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDselect_write
+ *
+ * Purpose:	Writes FILE_SPACE selection of ELMT_SIZE element to FILE,
+ *		at address ADDR according to the data transfer property list
+ *		DXPL_ID (which may be the constant H5P_DEFAULT). The bytes to
+ *		be written come from the MEM_SPACE selection in buffer BUF.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, November  4, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDselect_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, const void *buf)
+{
+    H5FD_io_info_t fdio_info;           /* File driver I/O object */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if(H5I_DATASPACE != H5I_get_type(file_space))
+        HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, FAIL, "file dataspace ID not valid")
+    if(H5I_DATASPACE != H5I_get_type(mem_space))
+        HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, FAIL, "file dataspace ID not valid")
+    if(0 == elmt_size)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "element size invalid: %zu", elmt_size)
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    if(!buf)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer")
+
+    /* Set up the file driver I/O info object */
+    fdio_info.file = file;
+    if(H5FD_MEM_DRAW == type) {
+        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
+
+    /* The real work */
+    /* (Note compensating for base address addition in internal routine) */
+    if(H5FD_select_write(&fdio_info, type, file_space, mem_space, elmt_size, addr - file->base_addr, buf) < 0)
+	HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDselect_write() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FDflush
  *
  * Purpose:	Notify driver to flush all cached data.  If the driver has no

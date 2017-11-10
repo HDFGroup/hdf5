@@ -167,6 +167,8 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD_direct_get_handle,                     /*get_handle            */
     H5FD_direct_read,        /*read      */
     H5FD_direct_write,        /*write      */
+    NULL,                       /* select_read          */
+    NULL,                       /* select_write         */
     NULL,          /*flush      */
     H5FD_direct_truncate,      	/*truncate    */
     H5FD_direct_lock,          	/*lock                  */
@@ -699,6 +701,7 @@ H5FD_direct_query(const H5FD_t H5_ATTR_UNUSED * _f, unsigned long *flags /* out 
         *flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes    */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default VFD      */
+        *flags |= H5FD_FEAT_PAGE_BUFFER_COMPATIBLE; /* OK to use page buffer for faster I/O                             */
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)

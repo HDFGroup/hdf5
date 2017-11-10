@@ -38,6 +38,7 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5PBprivate.h"	/* Page Buffer				*/
+#include "H5Sprivate.h"		/* Dataspaces 				*/
 
 
 /****************/
@@ -128,9 +129,17 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
     } /* end else */
 
-    /* Pass through page buffer layer */
-    if(H5PB_read(&fio_info, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through page buffer failed")
+    /* Check for using the page buffer */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_PAGE_BUFFER_COMPATIBLE)) {
+        /* Pass through page buffer layer */
+        if(H5PB_read(&fio_info, map_type, addr, size, buf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through page buffer failed")
+    } /* end if */
+    else {
+        /* Pass I/O down to next layer */
+        if(H5F__accum_read(&fio_info, map_type, addr, size, buf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through metadata accumulator failed")
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -190,9 +199,168 @@ H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
     } /* end else */
 
-    /* Pass through page buffer layer */
-    if(H5PB_write(&fio_info, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through page buffer failed")
+    /* Check for using the page buffer */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_PAGE_BUFFER_COMPATIBLE)) {
+        /* Pass through page buffer layer */
+        if(H5PB_write(&fio_info, map_type, addr, size, buf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through page buffer failed")
+    } /* end if */
+    else {
+        /* Pass I/O down to next layer */
+        if(H5F__accum_write(&fio_info, map_type, addr, size, buf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through metadata accumulator failed")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_block_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_select_read
+ *
+ * Purpose:	Reads selected data from a file/server/etc into a buffer.
+ *		The address is relative to the base address for the file.
+ *		The file and memory selection determine the elements to read
+ *		from the file, and the elmt_size is the size of each element
+ *		in bytes.  The address in the file and the buffer in memory
+ *		are assumed to point at the multidimensional array in the
+ *		file and memory spaces, respectively.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		Nov  8 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_select_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, void *buf/*out*/)
+{
+    H5FD_io_info_t fdio_info;   /* File driver I/O info */
+    H5FD_mem_t  map_type;       /* Mapped memory type */
+    H5S_t *fspace;              /* File dataspace */
+    hsize_t npoints;            /* # of elements in dataspace */
+    hssize_t snpoints;          /* # of elements in dataspace (signed) */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(buf);
+
+    /* Check for attempting I/O on 'temporary' file address */
+    if(NULL == (fspace = (H5S_t *)H5I_object_verify(file_space, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "file dataspace ID not valid")
+    if((snpoints = H5S_GET_EXTENT_NPOINTS(fspace)) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't retrieve # of elements for file dataspace")
+    npoints = (hsize_t)snpoints;
+    if(H5F_addr_le(f->shared->tmp_addr, (addr + (npoints * elmt_size))))
+        HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
+
+    /* Treat global heap as raw data */
+    map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
+
+    /* Set up the I/O info object */
+    fdio_info.file = f->shared->lf;
+    if(H5FD_MEM_DRAW == type) {
+        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
+
+    /* Pass I/O down to next layer */
+    if(H5FD_select_read(&fdio_info, map_type, file_space, mem_space, elmt_size, addr, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "selection read failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_select_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_select_write
+ *
+ * Purpose:	Writes selected data from memory to a file/server/etc.
+ *		The address is relative to the base address for the file.
+ *		The file and memory selection determine the elements to read
+ *		from the file, and the elmt_size is the size of each element
+ *		in bytes.  The address in the file and the buffer in memory
+ *		are assumed to point at the multidimensional array in the
+ *		file and memory spaces, respectively.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		Nov  8 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_select_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, const void *buf)
+{
+    H5FD_io_info_t fdio_info;   /* File driver I/O info */
+    H5FD_mem_t  map_type;       /* Mapped memory type */
+    H5S_t *fspace;              /* File dataspace */
+    hsize_t npoints;            /* # of elements in dataspace */
+    hssize_t snpoints;          /* # of elements in dataspace (signed) */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(buf);
+
+    /* Check for attempting I/O on 'temporary' file address */
+    if(NULL == (fspace = (H5S_t *)H5I_object_verify(file_space, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "file dataspace ID not valid")
+    if((snpoints = H5S_GET_EXTENT_NPOINTS(fspace)) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't retrieve # of elements for file dataspace")
+    npoints = (hsize_t)snpoints;
+    if(H5F_addr_le(f->shared->tmp_addr, (addr + (npoints * elmt_size))))
+        HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
+
+    /* Treat global heap as raw data */
+    map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
+
+    /* Set up the I/O info object */
+    fdio_info.file = f->shared->lf;
+    if(H5FD_MEM_DRAW == type) {
+        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
+
+    /* Pass I/O down to next layer */
+    if(H5FD_select_write(&fdio_info, map_type, file_space, mem_space, elmt_size, addr, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "selection write failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

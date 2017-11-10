@@ -36,6 +36,10 @@
 #include "H5private.h"
 #include "testphdf5.h"
 
+#define H5S_FRIEND	        /*suppress error about including H5Spkg	  */
+#define H5S_TESTING
+#include "H5Spkg.h"		/* Dataspaces				*/
+
 
 static void coll_write_test(int chunk_factor);
 static void coll_read_test(int chunk_factor);

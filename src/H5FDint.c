@@ -313,6 +313,136 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_select_read
+ *
+ * Purpose:	Private version of H5FDselect_read()
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, November  4, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_select_read(H5FD_io_info_t *fdio_info, H5FD_mem_t type,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, void *buf/*out*/)
+{
+    H5FD_t      *file;
+    H5P_genplist_t *io_dxpl;
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(fdio_info);
+    file = fdio_info->file;
+    HDassert(file && file->cls);
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(fdio_info->meta_dxpl), H5P_CLS_DATASET_XFER_g));
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(fdio_info->raw_dxpl), H5P_CLS_DATASET_XFER_g));
+    HDassert(buf);
+
+    /* Set up proper DXPL for I/O */
+    if(H5FD_MEM_DRAW == type)
+        io_dxpl = fdio_info->raw_dxpl;
+    else
+        io_dxpl = fdio_info->meta_dxpl;
+
+    /* Sanity check the dxpl type against the mem type */
+#ifdef H5_DEBUG_BUILD
+    {
+        H5FD_dxpl_type_t dxpl_type;    /* Property indicating the type of the internal dxpl */
+
+        /* get the dxpl type */
+        if(H5P_get(io_dxpl, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't retrieve dxpl type")
+
+        /* we shouldn't be here if the dxpl is labeled with NO I/O */
+        HDassert(H5FD_NOIO_DXPL != dxpl_type);
+
+        if(H5FD_MEM_DRAW == type)
+            HDassert(H5FD_RAWDATA_DXPL == dxpl_type);
+        else
+            HDassert(H5FD_METADATA_DXPL == dxpl_type);
+    }
+#endif /* H5_DEBUG_BUILD */
+
+    /* Dispatch to driver */
+    if((file->cls->select_read)(file, type, H5P_PLIST_ID(io_dxpl), file_space, mem_space, elmt_size, addr + file->base_addr, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_select_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_select_write
+ *
+ * Purpose:	Private version of H5FDselect_write()
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, November  4, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_select_write(const H5FD_io_info_t *fdio_info, H5FD_mem_t type,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, const void *buf)
+{
+    H5FD_t      *file;
+    H5P_genplist_t *io_dxpl;
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(fdio_info);
+    file = fdio_info->file;
+    HDassert(file && file->cls);
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(fdio_info->meta_dxpl), H5P_CLS_DATASET_XFER_g));
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(fdio_info->raw_dxpl), H5P_CLS_DATASET_XFER_g));
+    HDassert(buf);
+
+    /* Set up proper DXPL for I/O */
+    if(H5FD_MEM_DRAW == type)
+        io_dxpl = fdio_info->raw_dxpl;
+    else
+        io_dxpl = fdio_info->meta_dxpl;
+
+    /* Sanity check the dxpl type against the mem type */
+#ifdef H5_DEBUG_BUILD
+    {
+        H5FD_dxpl_type_t dxpl_type;    /* Property indicating the type of the internal dxpl */
+
+        /* get the dxpl type */
+        if(H5P_get(io_dxpl, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't retrieve dxpl type")
+
+        /* we shouldn't be here if the dxpl is labeled with NO I/O */
+        HDassert(H5FD_NOIO_DXPL != dxpl_type);
+
+        if(H5FD_MEM_DRAW == type)
+            HDassert(H5FD_RAWDATA_DXPL == dxpl_type);
+        else
+            HDassert(H5FD_METADATA_DXPL == dxpl_type);
+    }
+#endif /* H5_DEBUG_BUILD */
+
+    /* Dispatch to driver */
+    if((file->cls->select_write)(file, type, H5P_PLIST_ID(io_dxpl), file_space, mem_space, elmt_size, addr + file->base_addr, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_select_write() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_set_eoa
  *
  * Purpose:	Private version of H5FDset_eoa()

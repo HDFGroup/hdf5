@@ -352,6 +352,9 @@ int main(int argc, char **argv)
 #ifdef PB_OUT /* temporary: disable page buffering when parallel */
     AddTest("page_buffer", test_page_buffer_access, NULL,
             "page buffer usage in parallel", PARATESTFILE);
+#else /* PB_OUT */  /* temporary: test that page buffering is disabled when parallel */
+    AddTest("page_buffer", test_page_buffer_disabled, NULL,
+            "page buffer disabled in parallel", PARATESTFILE);
 #endif
 
     AddTest("props", test_file_properties, NULL,

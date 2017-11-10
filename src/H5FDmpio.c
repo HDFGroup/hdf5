@@ -125,6 +125,8 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     H5FD_mpio_get_handle,                       /*get_handle            */
     H5FD_mpio_read,				/*read			*/
     H5FD_mpio_write,				/*write			*/
+    NULL,                                       /*select_read           */
+    NULL,                                       /*select_write          */
     H5FD_mpio_flush,				/*flush			*/
     H5FD_mpio_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */

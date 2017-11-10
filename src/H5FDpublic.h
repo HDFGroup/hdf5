@@ -257,6 +257,15 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * the canonical HDF5 file format.
      */
 #define H5FD_FEAT_DEFAULT_VFD_COMPATIBLE        0x00008000
+    /*
+     * Defining H5FD_FEAT_PAGE_BUFFER_COMPATIBLE for a VFL driver
+     * means that the driver is compatible with the page buffering feature.
+     * Generally, this means that the VFD is OK with the library buffering
+     * some / all reads and write operations internally, before writing out
+     * data to the VFD.  
+     * This is specifically not compatible with the MPI-IO driver.
+     */
+#define H5FD_FEAT_PAGE_BUFFER_COMPATIBLE        0x00010000
 
 
 /* Forward declaration */
@@ -296,6 +305,12 @@ typedef struct H5FD_class_t {
                     haddr_t addr, size_t size, void *buffer);
     herr_t  (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
                      haddr_t addr, size_t size, const void *buffer);
+    herr_t  (*select_read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
+                    hid_t file_space, hid_t mem_space, size_t elmt_size,
+                    haddr_t addr, void *buffer);
+    herr_t  (*select_write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
+                    hid_t file_space, hid_t mem_space, size_t elmt_size,
+                    haddr_t addr, const void *buffer);
     herr_t  (*flush)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t  (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t  (*lock)(H5FD_t *file, hbool_t rw);
@@ -379,6 +394,12 @@ H5_DLL herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                        haddr_t addr, size_t size, void *buf/*out*/);
 H5_DLL herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                         haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t H5FDselect_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, void *buf/*out*/);
+H5_DLL herr_t H5FDselect_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+    hid_t file_space, hid_t mem_space, size_t elmt_size,
+    haddr_t addr, const void *buf);
 H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FDlock(H5FD_t *file, hbool_t rw);

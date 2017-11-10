@@ -171,6 +171,8 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_get_handle,                      /*get_handle            */
     H5FD_multi_read,				/*read			*/
     H5FD_multi_write,				/*write			*/
+    NULL,                                       /*select_read           */
+    NULL,                                       /*select_write          */
     H5FD_multi_flush,				/*flush			*/
     H5FD_multi_truncate,			/*truncate		*/
     H5FD_multi_lock,                            /*lock                  */
@@ -1194,6 +1196,7 @@ H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations */
         *flags |= H5FD_FEAT_USE_ALLOC_SIZE;     /* OK just pass the allocation size to the alloc callback */
         *flags |= H5FD_FEAT_PAGED_AGGR;         /* OK special file space mapping for paged aggregation */
+        *flags |= H5FD_FEAT_PAGE_BUFFER_COMPATIBLE; /* OK to use page buffer for faster I/O                             */
     } /* end if */
 
     return(0);

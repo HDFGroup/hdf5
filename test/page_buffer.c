@@ -50,10 +50,6 @@ static unsigned test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
 static unsigned test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr);
-#ifdef H5_HAVE_PARALLEL
-static unsigned verify_page_buffering_disabled(hid_t orig_fapl, 
-    const char *env_h5_drvr);
-#endif /* H5_HAVE_PARALLEL */
 
 const char *FILENAME[] = {
     "filepaged",
@@ -2009,121 +2005,6 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    verify_page_buffering_disabled()
- *
- * Purpose:     This function should only be called in parallel 
- *              builds.
- *
- *              At present, page buffering should be disabled in parallel
- *              builds.  Verify this.
- *
- * Return:      0 if test is sucessful
- *              1 if test fails
- *
- * Programmer:  John Mainzer
- *              03/21/17
- *              
- * Changes:     None.
- *
- *-------------------------------------------------------------------------
- */
-
-#ifdef H5_HAVE_PARALLEL
-static unsigned
-verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
-{
-    char filename[FILENAME_LEN]; /* Filename to use */
-    hid_t file_id = -1;          /* File ID */
-    hid_t fcpl = -1;
-    hid_t fapl = -1;
-
-    TESTING("Page Buffering Disabled");
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
-
-
-    /* first, try to create a file with page buffering enabled */
-
-    if((fapl = H5Pcopy(orig_fapl)) < 0)
-        TEST_ERROR
-
-    if(set_multi_split(env_h5_drvr, fapl, 4096)  != 0)
-        TEST_ERROR;
-
-    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
-
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
-
-    if(H5Pset_file_space_page_size(fcpl, 4096) < 0)
-        FAIL_STACK_ERROR;
-
-    if(H5Pset_page_buffer_size(fapl, 4096*8, 0, 0) < 0)
-        FAIL_STACK_ERROR;
-
-    /* try to create  the file -- should fail */
-    H5E_BEGIN_TRY {
-        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
-    } H5E_END_TRY;
-
-    if(file_id >= 0)
-        TEST_ERROR;
-
-    /* now, create a file, close it, and then try to open it with page 
-     * buffering enabled.
-     */
-    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
-
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
-
-    if(H5Pset_file_space_page_size(fcpl, 4096) < 0)
-        FAIL_STACK_ERROR;
-
-    /* create the file */
-    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
-
-    /* close the file */
-    if(H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
-
-    /* try to open the file using the fapl prepared above which enables 
-     * page buffering.  Should fail.
-     */
-    H5E_BEGIN_TRY {
-        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl);
-    } H5E_END_TRY;
-
-    if(file_id >= 0)
-        TEST_ERROR;
-
-    if(H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
-
-    if(H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
-
-    PASSED()
-
-    return 0;
-
-error:
-
-    H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
-    } H5E_END_TRY;
-
-    return 1;
-
-} /* verify_page_buffering_disabled() */
-#endif /* H5_HAVE_PARALLEL */
-
-
-/*-------------------------------------------------------------------------
  * Function:    main()
  *
  * Purpose:     Main function for the page buffer tests.
@@ -2167,20 +2048,11 @@ main(void)
         PUTS_ERROR("Can't get VFD-dependent fapl")
     } /* end if */
 
-#ifdef H5_HAVE_PARALLEL 
-
-    HDputs("Page Buffering is disabled for parallel.");
-    nerrors += verify_page_buffering_disabled(fapl, env_h5_drvr);
-
-#else /* H5_HAVE_PARALLEL */
-
     nerrors += test_args(fapl, env_h5_drvr);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr);
     nerrors += test_lru_processing(fapl, env_h5_drvr);
     nerrors += test_min_threshold(fapl, env_h5_drvr);
     nerrors += test_stats_collection(fapl, env_h5_drvr);
-
-#endif /* H5_HAVE_PARALLEL */
 
     h5_clean_files(FILENAME, fapl);
 
