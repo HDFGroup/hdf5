@@ -110,10 +110,10 @@ if HAVE_SHARED_CONDITIONAL
   libfilter_plugin2_dsets_la_SOURCES=filter_plugin2_dsets.c
   libfilter_plugin3_dsets_la_SOURCES=filter_plugin3_dsets.c
   libfilter_plugin4_groups_la_SOURCES=filter_plugin4_groups.c
-  libfilter_plugin1_dsets_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
-  libfilter_plugin2_dsets_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
-  libfilter_plugin3_dsets_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
-  libfilter_plugin4_groups_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin1_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin2_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin3_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin4_groups_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 else
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la
