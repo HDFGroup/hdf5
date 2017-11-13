@@ -274,10 +274,8 @@ main(int argc, const char *argv[])
         goto done;
     }
 
-    status = H5Pclose(plist);
-    HDassert(status >= 0);
-    status = H5Fclose(ifile);
-    HDassert(status >= 0);
+    H5Pclose(plist);
+    H5Fclose(ifile);
 
     if (usize == 0) {
   /* no user block to remove: message? */

@@ -64,7 +64,7 @@ gen_newgrat_file(const char *fname)
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
 	goto error;
 
-     /* Create dataset */
+     /* Create file */
     if((fid = H5Fcreate(NEWGRAT_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
 

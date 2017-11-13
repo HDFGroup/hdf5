@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.8.20-snap8], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.8.21-snap0], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
 
@@ -3048,7 +3048,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   case "`uname`" in
     Linux*)
       if test "X$FC_BASENAME" = "Xnagfor"; then
-         cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+        cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
   esac

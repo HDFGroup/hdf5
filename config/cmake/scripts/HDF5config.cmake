@@ -21,13 +21,13 @@ cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
 #     ctest -S HDF518config.cmake,OPTION=VALUE -C Release -VV -O test.log
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
-#            Unix    * Unix Makefiles
+#            Unix      * Unix Makefiles
 #            VS2017    * Visual Studio 15 2017
-#            VS201764 * Visual Studio 15 2017 Win64
+#            VS201764  * Visual Studio 15 2017 Win64
 #            VS2015    * Visual Studio 14 2015
-#            VS201564 * Visual Studio 14 2015 Win64
+#            VS201564  * Visual Studio 14 2015 Win64
 #            VS2013    * Visual Studio 12 2013
-#            VS201364 * Visual Studio 12 2013 Win64
+#            VS201364  * Visual Studio 12 2013 Win64
 #
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
@@ -37,15 +37,15 @@ cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.8.20")
-set (CTEST_SOURCE_VERSEXT "-snap8")
+set (CTEST_SOURCE_VERSION "1.8.21")
+set (CTEST_SOURCE_VERSEXT "-snap0")
 
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
 #INSTALLDIR - HDF5-1.8 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.8.16
+#CTEST_SOURCE_NAME - name of source folder; HDF5-1.8.20
 #STATIC_ONLY - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
 #NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
@@ -199,7 +199,7 @@ set (MODEL "Experimental")
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
-set (REPOSITORY_BRANCH "hdf5_1_8_19")
+set (REPOSITORY_BRANCH "hdf5_1_8_20")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")

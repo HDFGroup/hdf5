@@ -331,13 +331,24 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
       set_tests_properties (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5DIFF-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/${resultfile}.out
+              testfiles/${resultfile}.out.err
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5DIFF-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
       add_test (
           NAME H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -350,6 +361,7 @@
               -D "TEST_APPEND=EXIT CODE:"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+      set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS H5DIFF-${resultfile}-clear-objects)
     endif ()
     if (H5_HAVE_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
@@ -361,13 +373,24 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DIFF_ERR-${resultfile} COMMAND $<TARGET_FILE:h5diff> --enable-error-stack ${ARGN})
       set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5DIFF_ERR-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/${resultfile}_ERR.out
+              testfiles/${resultfile}_ERR.out.err
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5DIFF_ERR-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
       add_test (
           NAME H5DIFF_ERR-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -381,9 +404,7 @@
               -D "TEST_APPEND=EXIT CODE:"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif ()
-    if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (H5DIFF_ERR-${resultfile} PROPERTIES DEPENDS H5DIFF_ERR-${resultfile}-clear-objects)
     endif ()
     set (last_test "H5DIFF_ERR-${resultfile}")
   endmacro ()
@@ -391,19 +412,30 @@
   macro (ADD_PH5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME PH5DIFF-${resultfile} COMMAND $<TARGET_FILE:ph5diff> ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} ${ARGN})
+      add_test (NAME PH5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
       set_tests_properties (PH5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
-      if (NOT ${resultcode} STREQUAL "0")
+      if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (PH5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME PH5DIFF-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              PAR/testfiles/${resultfile}.out
+              PAR/testfiles/${resultfile}.out.err
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (PH5DIFF-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
       add_test (
           NAME PH5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=${MPIEXEC};${MPIEXEC_PREFLAGS};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_POSTFLAGS};$<TARGET_FILE:ph5diff>"
+              -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS}"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -415,9 +447,7 @@
               -D "TEST_SORT_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
+      set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS PH5DIFF-${resultfile}-clear-objects)
       set (last_test "PH5DIFF-${resultfile}")
     endif ()
   endmacro ()
@@ -426,17 +456,17 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
-          NAME H5DIFF_UD-${testname}-clearall-objects
+          NAME H5DIFF_UD-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               testfiles/${resultfile}.out
               testfiles/${resultfile}.out.err
       )
-      if (${resultcode} STREQUAL "2")
+      if ("${resultcode}" STREQUAL "2")
         add_test (
             NAME H5DIFF_UD-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}.out"
@@ -451,7 +481,7 @@
         add_test (
             NAME H5DIFF_UD-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}.out"
@@ -463,7 +493,7 @@
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
       endif ()
-      set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DEPENDS H5DIFF_UD-${testname}-clearall-objects)
+      set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DEPENDS H5DIFF_UD-${testname}-clear-objects)
     endif ()
   endmacro ()
 
@@ -477,11 +507,11 @@
               testfiles/${resultfile}_ERR.out
               testfiles/${resultfile}_ERR.out.err
       )
-      if (${resultcode} STREQUAL "2")
+      if ("${resultcode}" STREQUAL "2")
         add_test (
             NAME H5DIFF_UD_ERR-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=--enable-error-stack;${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}_ERR.out"
@@ -497,7 +527,7 @@
         add_test (
             NAME H5DIFF_UD_ERR-${testname}
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff-shared>"
                 -D "TEST_ARGS:STRING=--enable-error-stack;${ARGN}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}_ERR.out"
@@ -1554,8 +1584,10 @@ ADD_H5_TEST (h5diff_801 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-ADD_H5_UD_TEST (h5diff_plugin_test 0 h5diff_ud -v tudfilter.h5 tudfilter2.h5)
-ADD_H5_UD_TEST (h5diff_plugin_fail 2 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)
+if (BUILD_SHARED_LIBS)
+  ADD_H5_UD_TEST (h5diff_plugin_test 0 h5diff_ud -v tudfilter.h5 tudfilter2.h5)
+  ADD_H5_UD_TEST (h5diff_plugin_fail 2 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)
+endif ()
 
 # ##############################################################################
 # # END

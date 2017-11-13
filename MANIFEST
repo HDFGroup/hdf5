@@ -1022,7 +1022,6 @@
 
 ./tools/h5dump/Makefile.am
 ./tools/h5dump/Makefile.in
-./tools/h5dump/dynlib_dump.c
 ./tools/h5dump/h5dump.c
 ./tools/h5dump/h5dump.h
 ./tools/h5dump/h5dump_defines.h
@@ -1031,13 +1030,13 @@
 ./tools/h5dump/h5dump_ddl.h
 ./tools/h5dump/h5dump_xml.c
 ./tools/h5dump/h5dump_xml.h
+./tools/h5dump/dynlib_dump.c
 ./tools/h5dump/h5dumpgentest.c
 ./tools/h5dump/h5dump_plugin.sh.in
 ./tools/h5dump/testh5dump.sh.in
 ./tools/h5dump/testh5dumppbits.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
 ./tools/h5dump/binread.c
-
 
 ./tools/h5import/Makefile.am
 ./tools/h5import/Makefile.in
@@ -1047,20 +1046,16 @@
 ./tools/h5import/h5importtestutil.sh.in
 
 # testfiles for h5import
-./tools/h5import/testfiles/binfp64.conf
 ./tools/h5import/testfiles/binfp64.h5
-./tools/h5import/testfiles/binin16.conf
 ./tools/h5import/testfiles/binin16.h5
-./tools/h5import/testfiles/binin32.conf
 ./tools/h5import/testfiles/binin32.h5
-./tools/h5import/testfiles/binin8.conf
 ./tools/h5import/testfiles/binin8.h5
-./tools/h5import/testfiles/binin8w.conf
 ./tools/h5import/testfiles/binin8w.h5
-./tools/h5import/testfiles/binuin16.conf
 ./tools/h5import/testfiles/binuin16.h5
-./tools/h5import/testfiles/binuin32.conf
 ./tools/h5import/testfiles/binuin32.h5
+./tools/h5import/testfiles/tall_fp32.ddl
+./tools/h5import/testfiles/tall_i32.ddl
+./tools/h5import/testfiles/tintsattrs_u32.ddl
 ./tools/h5import/testfiles/textpfe.conf
 ./tools/h5import/testfiles/textpfe.h5
 ./tools/h5import/testfiles/textpfe64.txt
@@ -1100,11 +1095,11 @@
 # h5diff sources
 ./tools/h5diff/Makefile.am
 ./tools/h5diff/Makefile.in
-./tools/h5diff/dynlib_diff.c
 ./tools/h5diff/h5diff_common.c
 ./tools/h5diff/h5diff_common.h
 ./tools/h5diff/h5diff_main.c
 ./tools/h5diff/ph5diff_main.c
+./tools/h5diff/dynlib_diff.c
 ./tools/h5diff/h5diffgentest.c
 ./tools/h5diff/h5diff_plugin.sh.in
 ./tools/h5diff/testh5diff.sh.in
@@ -1113,10 +1108,6 @@
 # h5repack sources
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
-./tools/h5repack/dynlib_rpk.c
-./tools/h5repack/dynlib_vrpk.c
-./tools/h5repack/h5repack.sh.in
-./tools/h5repack/h5repack_plugin.sh.in
 ./tools/h5repack/h5repack.c
 ./tools/h5repack/h5repack.h
 ./tools/h5repack/h5repack_copy.c
@@ -1126,6 +1117,10 @@
 ./tools/h5repack/h5repack_opttable.c
 ./tools/h5repack/h5repack_parse.c
 ./tools/h5repack/h5repack_verify.c
+./tools/h5repack/dynlib_rpk.c
+./tools/h5repack/dynlib_vrpk.c
+./tools/h5repack/h5repack.sh.in
+./tools/h5repack/h5repack_plugin.sh.in
 ./tools/h5repack/h5repacktst.c
 ./tools/h5repack/testh5repack_detect_szip.c
 
@@ -1138,11 +1133,12 @@
 ./tools/h5ls/testh5ls.sh.in
 
 # h5copy sources
-./tools/h5copy/testh5copy.sh.in
+./tools/h5copy/Makefile.am
 ./tools/h5copy/Makefile.in
 ./tools/h5copy/h5copy.c
 ./tools/h5copy/h5copygentest.c
-./tools/h5copy/Makefile.am
+./tools/h5copy/testh5copy.sh.in
+./tools/h5copy/dynlib_copy.c
 
 
 ./tools/lib/Makefile.am
@@ -2066,6 +2062,7 @@
 ./tools/h5repack/testfiles/h5repack_nested_8bit_enum_deflated.h5
 ./tools/h5repack/testfiles/h5repack_nested_8bit_enum.h5
 ./tools/h5repack/testfiles/h5repack_nbit.h5
+./tools/h5repack/testfiles/h5repack_none.h5
 ./tools/h5repack/testfiles/h5repack_objs.h5
 ./tools/h5repack/testfiles/h5repack_refs.h5
 ./tools/h5repack/testfiles/h5repack_shuffle.h5
@@ -2076,15 +2073,16 @@
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
+./tools/h5repack/testfiles/plugin_zero.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/plugin_version_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
-./tools/h5repack/testfiles/h5repack_filters.h5.tst
 ./tools/h5repack/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
+./tools/h5repack/testfiles/h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
-./tools/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
+./tools/h5repack/testfiles/h5repack_layout.h5-plugin_zero.ddl
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c
@@ -2117,6 +2115,12 @@
 ./tools/h5copy/testfiles/h5copy_extlinks_trg.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_src.out.ls
 ./tools/h5copy/testfiles/h5copy_misc1.out
+./tools/h5copy/testfiles/h5copy_plugin_fail_ERR.out.h5.txt
+./tools/h5copy/testfiles/h5copy_plugin_test.out.h5.txt
+./tools/h5copy/testfiles/tudfilter.h5
+./tools/h5copy/testfiles/tudfilter2.h5
+./tools/h5copy/testfiles/tudfilter.h5.txt
+./tools/h5copy/testfiles/tudfilter.h5_ERR.txt
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_nested_p.ls
@@ -2351,6 +2355,12 @@
 ./config/cmake_ext_mod/NSIS.template.in
 ./config/cmake_ext_mod/runTest.cmake
 ./config/cmake_ext_mod/version.plist.in
+./config/cmake_ext_mod/FindMPI/fortranparam_mpi.f90.in
+./config/cmake_ext_mod/FindMPI/libver_mpi.c
+./config/cmake_ext_mod/FindMPI/libver_mpi.f90.in
+./config/cmake_ext_mod/FindMPI/mpiver.f90.in
+./config/cmake_ext_mod/FindMPI/test_mpi.c
+./config/cmake_ext_mod/FindMPI/test_mpi.f90.in
 
 # CMake-specific User Files
 ./config/cmake/UserMacros/Windows_MT.cmake

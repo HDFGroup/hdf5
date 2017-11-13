@@ -1,4 +1,4 @@
-HDF5 version 1.8.20-snap8 currently under development
+HDF5 version 1.8.21-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
@@ -156,18 +156,48 @@ Bug Fixes since HDF5-1.8.19
 
     Configuration
     -------------
-    - None
+    - cmake MPI
+
+      CMake implementation for MPI was problematic and would create incorrect
+      MPI library references in the hdf5 libraries.
+
+      Reworked the CMake MPI code to properly create CMake targets.Also merged
+      the latest CMake FindMPI.cmake changes to the local copy. This is necessary
+      until HDF changes the CMake minimum to 3.9 or greater.
+
+      (ADB - 2017/11/02, HDFFV-10321)
+
+    - cmake
+
+      Too many commands for POST_BUILD step caused command line to be
+      too big on windows.
+
+      Changed foreach of copy command to use a custom command with the
+      use of the HDFTEST_COPY_FILE macro.
+
+      (ADB - 2017/07/12, HDFFV-10254)
 
 
     Library
     -------
+    - H5Zfilter_avail in H5Z.c
+
+      The public function checked for plugins, while the private
+      function did not.
+
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
+
     - Fix H5HL_offset_into()
 
       (1) Fix H5HL_offset_into() to return error when offset exceeds heap data
           block size.
       (2) Fix other places in the library that call this routine to detect
           error routine.
-        
+
       (HDFFV-10216, VC, 2017/09/05)
 
 
@@ -185,12 +215,28 @@ Bug Fixes since HDF5-1.8.19
     -----
     - h5repack
 
+      h5repack failed to copy a dataset with existing filter.
+
+      Reworked code for h5repack and h5diff code in tools library. Added
+      improved error handling, cleanup of resources and checks of calls.
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+      Note, h5repack output display has changed to clarify the individual
+      steps of the repack process. The output indicates if an operation
+      applies to all objects. Lines with notation and no information
+      have been removed.
+
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
+
+    - h5repack
+
       h5repack always set the User Defined filter flag to H5Z_FLAG_MANDATORY.
 
       Added another parameter to the 'UD=' option to set the flag by default
       to '0' or H5Z_FLAG_MANDATORY, the other choice is '1' or H5Z_FLAG_OPTIONAL.
 
-      (ADB - 2017/08/31, HDFFV-10276)
+      (ADB - 2017/08/31, HDFFV-10269)
 
     - h5ls
 
@@ -220,6 +266,18 @@ Bug Fixes since HDF5-1.8.19
       NULL strings and setting the lengths to zero.
 
       (ADB - 2017/07/25, HDFFV-10246)
+
+    - h5import
+
+      h5import crashed trying to import data from a subset of a dataset.
+
+      Improved h5import by adding the SUBSET keyword. h5import understands
+      to use the Count times the Block as the size of the dimensions.
+      Added INPUT_B_ORDER keyword to old-style configuration files.
+      The import from h5dump function expects the binary files to use native
+      types (FILE '-b' option) in the binary file.
+
+      (ADB - 2017/06/15, HDFFV-10219)
 
 
     Fortran API

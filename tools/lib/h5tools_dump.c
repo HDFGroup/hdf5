@@ -12,15 +12,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Thursday, July 23, 1998
- *
  * Purpose: A library for displaying the values of a dataset in a human
  *  readable format.
  */
-
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "h5tools.h"
 #include "h5tools_dump.h"
@@ -29,72 +23,72 @@
 #include "H5private.h"
 
 h5tool_format_t h5tools_dataformat = {
-0, /*raw */
+    0,          /*raw */
 
-"", /*fmt_raw */
-"%d", /*fmt_int */
-"%u", /*fmt_uint */
-"%hhd", /*fmt_schar */
-"%u", /*fmt_uchar */
-"%d", /*fmt_short */
-"%u", /*fmt_ushort */
-"%ld", /*fmt_long */
-"%lu", /*fmt_ulong */
-NULL, /*fmt_llong */
-NULL, /*fmt_ullong */
-"%g", /*fmt_double */
-"%g", /*fmt_float */
+    "",         /*fmt_raw */
+    "%d",       /*fmt_int */
+    "%u",       /*fmt_uint */
+    "%hhd",     /*fmt_schar */
+    "%u",       /*fmt_uchar */
+    "%d",       /*fmt_short */
+    "%u",       /*fmt_ushort */
+    "%ld",      /*fmt_long */
+    "%lu",      /*fmt_ulong */
+    NULL,       /*fmt_llong */
+    NULL,       /*fmt_ullong */
+    "%g",       /*fmt_double */
+    "%g",       /*fmt_float */
 
-0, /*ascii */
-0, /*str_locale */
-0, /*str_repeat */
+    0,          /*ascii */
+    0,          /*str_locale */
+    0,          /*str_repeat */
 
-"[ ", /*arr_pre */
-",", /*arr_sep */
-" ]", /*arr_suf */
-1, /*arr_linebreak */
+    "[ ",       /*arr_pre */
+    ",",        /*arr_sep */
+    " ]",       /*arr_suf */
+    1,          /*arr_linebreak */
 
-"", /*cmpd_name */
-",\n", /*cmpd_sep */
-"{", /*cmpd_pre */
-"}", /*cmpd_suf */
-"\n", /*cmpd_end */
+    "",         /*cmpd_name */
+    ",\n",      /*cmpd_sep */
+    "{",        /*cmpd_pre */
+    "}",        /*cmpd_suf */
+    "\n",       /*cmpd_end */
 
-", ", /*vlen_sep */
-"(", /*vlen_pre */
-")", /*vlen_suf */
-"", /*vlen_end */
+    ", ",       /*vlen_sep */
+    "(",        /*vlen_pre */
+    ")",        /*vlen_suf */
+    "",         /*vlen_end */
 
-"%s", /*elmt_fmt */
-",", /*elmt_suf1 */
-" ", /*elmt_suf2 */
+    "%s",       /*elmt_fmt */
+    ",",        /*elmt_suf1 */
+    " ",        /*elmt_suf2 */
 
-"", /*idx_n_fmt */
-"", /*idx_sep */
-"", /*idx_fmt */
+    "",         /*idx_n_fmt */
+    "",         /*idx_sep */
+    "",         /*idx_fmt */
 
-80, /*line_ncols *//*standard default columns */
-0, /*line_per_line */
-"", /*line_pre */
-"%s", /*line_1st */
-"%s", /*line_cont */
-"", /*line_suf */
-"", /*line_sep */
-1, /*line_multi_new */
-"   ", /*line_indent */
+    80,         /*line_ncols *//*standard default columns */
+    0,          /*line_per_line */
+    "",         /*line_pre */
+    "%s",       /*line_1st */
+    "%s",       /*line_cont */
+    "",         /*line_suf */
+    "",         /*line_sep */
+    1,          /*line_multi_new */
+    "   ",      /*line_indent */
 
-1, /*skip_first */
+    1,          /*skip_first */
 
-1, /*obj_hidefileno */
-" "H5_PRINTF_HADDR_FMT, /*obj_format */
+    1,          /*obj_hidefileno */
+    " "H5_PRINTF_HADDR_FMT, /*obj_format */
 
-1, /*dset_hidefileno */
-"DATASET %s ", /*dset_format */
-"%s", /*dset_blockformat_pre */
-"%s", /*dset_ptformat_pre */
-"%s", /*dset_ptformat */
-1, /*array indices */
-1 /*escape non printable characters */
+    1,          /*dset_hidefileno */
+    "DATASET %s ", /*dset_format */
+    "%s",       /*dset_blockformat_pre */
+    "%s",       /*dset_ptformat_pre */
+    "%s",       /*dset_ptformat */
+    1,          /*array indices */
+    1           /*escape non printable characters */
 };
 
 const h5tools_dump_header_t h5tools_standardformat = {
@@ -631,8 +625,7 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
     HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-    if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL)
-    {
+    if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL) {
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
         HGOTO_DONE(dimension_break);
     }
@@ -1896,9 +1889,8 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         obj = search_obj(h5dump_type_table, oinfo.addr);
 
         if(obj) {
-            if(!obj->recorded) {
+            if(!obj->recorded)
                 h5tools_str_append(buffer,"\"/#"H5_PRINTF_HADDR_FMT"\"", obj->objno);
-            }
             else
                 h5tools_str_append(buffer, "\"%s\"", obj->objname);
         }
@@ -1915,121 +1907,86 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
     switch (type_class) {
     case H5T_INTEGER:
-        if (H5Tequal(type, H5T_STD_I8BE) == TRUE) {
+        if (H5Tequal(type, H5T_STD_I8BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_I8BE");
-        }
-        else if (H5Tequal(type, H5T_STD_I8LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_I8LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_I8LE");
-        }
-        else if (H5Tequal(type, H5T_STD_I16BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_I16BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_I16BE");
-        }
-        else if (H5Tequal(type, H5T_STD_I16LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_I16LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_I16LE");
-        }
-        else if (H5Tequal(type, H5T_STD_I32BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_I32BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_I32BE");
-        }
-        else if (H5Tequal(type, H5T_STD_I32LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_I32LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_I32LE");
-        }
-        else if (H5Tequal(type, H5T_STD_I64BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_I64BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_I64BE");
-        }
-        else if (H5Tequal(type, H5T_STD_I64LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_I64LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_I64LE");
-        }
-        else if (H5Tequal(type, H5T_STD_U8BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_U8BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_U8BE");
-        }
-        else if (H5Tequal(type, H5T_STD_U8LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_U8LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_U8LE");
-        }
-        else if (H5Tequal(type, H5T_STD_U16BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_U16BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_U16BE");
-        }
-        else if (H5Tequal(type, H5T_STD_U16LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_U16LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_U16LE");
-        }
-        else if (H5Tequal(type, H5T_STD_U32BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_U32BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_U32BE");
-        }
-        else if (H5Tequal(type, H5T_STD_U32LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_U32LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_U32LE");
-        }
-        else if (H5Tequal(type, H5T_STD_U64BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_U64BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_U64BE");
-        }
-        else if (H5Tequal(type, H5T_STD_U64LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_U64LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_U64LE");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_SCHAR) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_SCHAR) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_SCHAR");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_UCHAR) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_UCHAR) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_UCHAR");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_SHORT) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_SHORT) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_SHORT");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_USHORT) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_USHORT) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_USHORT");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_INT) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_INT) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_INT");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_UINT) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_UINT) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_UINT");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_LONG) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_LONG) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_LONG");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_ULONG) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_ULONG) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_ULONG");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_LLONG) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_LLONG) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_LLONG");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_ULLONG) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_ULLONG) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_ULLONG");
-        }
         else {
 
             /* byte order */
             if (H5Tget_size(type) > 1) {
                 order = H5Tget_order(type);
-                if (H5T_ORDER_LE == order) {
+                if (H5T_ORDER_LE == order)
                     order_s = " little-endian";
-                }
-                else if (H5T_ORDER_BE == order) {
+                else if (H5T_ORDER_BE == order)
                     order_s = " big-endian";
-                }
-                else if (H5T_ORDER_VAX == order) {
+                else if (H5T_ORDER_VAX == order)
                     order_s = " mixed-endian";
-                }
-                else {
+                else
                     order_s = " unknown-byte-order";
-                }
             }
-            else {
+            else
                 order_s = "";
-            }
 
             /* sign */
             if ((sign = H5Tget_sign(type)) >= 0) {
-                if (H5T_SGN_NONE == sign) {
+                if (H5T_SGN_NONE == sign)
                     sign_s = " unsigned";
-                }
-                else if (H5T_SGN_2 == sign) {
+                else if (H5T_SGN_2 == sign)
                     sign_s = "";
-                }
-                else {
+                else
                     sign_s = " unknown-sign";
-                }
             }
-            else {
+            else
                 sign_s = " unknown-sign";
-            }
 
             /* print size, order, and sign  */
             h5tools_str_append(buffer, "%lu-bit%s%s integer",
@@ -2038,56 +1995,42 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         break;
 
     case H5T_FLOAT:
-        if (H5Tequal(type, H5T_IEEE_F32BE) == TRUE) {
+        if (H5Tequal(type, H5T_IEEE_F32BE) == TRUE)
             h5tools_str_append(buffer, "H5T_IEEE_F32BE");
-        }
-        else if (H5Tequal(type, H5T_IEEE_F32LE) == TRUE) {
+        else if (H5Tequal(type, H5T_IEEE_F32LE) == TRUE)
             h5tools_str_append(buffer, "H5T_IEEE_F32LE");
-        }
-        else if (H5Tequal(type, H5T_IEEE_F64BE) == TRUE) {
+        else if (H5Tequal(type, H5T_IEEE_F64BE) == TRUE)
             h5tools_str_append(buffer, "H5T_IEEE_F64BE");
-        }
-        else if (H5Tequal(type, H5T_IEEE_F64LE) == TRUE) {
+        else if (H5Tequal(type, H5T_IEEE_F64LE) == TRUE)
             h5tools_str_append(buffer, "H5T_IEEE_F64LE");
-        }
-        else if (H5Tequal(type, H5T_VAX_F32) == TRUE) {
+        else if (H5Tequal(type, H5T_VAX_F32) == TRUE)
             h5tools_str_append(buffer, "H5T_VAX_F32");
-        }
-        else if (H5Tequal(type, H5T_VAX_F64) == TRUE) {
+        else if (H5Tequal(type, H5T_VAX_F64) == TRUE)
             h5tools_str_append(buffer, "H5T_VAX_F64");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_FLOAT) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_FLOAT) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_FLOAT");
-        }
-        else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_DOUBLE");
 #if H5_SIZEOF_LONG_DOUBLE !=0
-        }
-        else if (H5Tequal(type, H5T_NATIVE_LDOUBLE) == TRUE) {
+        else if (H5Tequal(type, H5T_NATIVE_LDOUBLE) == TRUE)
             h5tools_str_append(buffer, "H5T_NATIVE_LDOUBLE");
 #endif
-        }
         else {
 
             /* byte order */
             if (H5Tget_size(type) > 1) {
                 order = H5Tget_order(type);
-                if (H5T_ORDER_LE == order) {
+                if (H5T_ORDER_LE == order)
                     order_s = " little-endian";
-                }
-                else if (H5T_ORDER_BE == order) {
+                else if (H5T_ORDER_BE == order)
                     order_s = " big-endian";
-                }
-                else if (H5T_ORDER_VAX == order) {
+                else if (H5T_ORDER_VAX == order)
                     order_s = " mixed-endian";
-                }
-                else {
+                else
                     order_s = " unknown-byte-order";
-                }
             }
-            else {
+            else
                 order_s = "";
-            }
 
             /* print size and byte order */
             h5tools_str_append(buffer, "%lu-bit%s floating-point",
@@ -2294,33 +2237,24 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         break;
 
     case H5T_BITFIELD:
-        if (H5Tequal(type, H5T_STD_B8BE) == TRUE) {
+        if (H5Tequal(type, H5T_STD_B8BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_B8BE");
-        }
-        else if (H5Tequal(type, H5T_STD_B8LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_B8LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_B8LE");
-        }
-        else if (H5Tequal(type, H5T_STD_B16BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_B16BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_B16BE");
-        }
-        else if (H5Tequal(type, H5T_STD_B16LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_B16LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_B16LE");
-        }
-        else if (H5Tequal(type, H5T_STD_B32BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_B32BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_B32BE");
-        }
-        else if (H5Tequal(type, H5T_STD_B32LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_B32LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_B32LE");
-        }
-        else if (H5Tequal(type, H5T_STD_B64BE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_B64BE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_B64BE");
-        }
-        else if (H5Tequal(type, H5T_STD_B64LE) == TRUE) {
+        else if (H5Tequal(type, H5T_STD_B64LE) == TRUE)
             h5tools_str_append(buffer, "H5T_STD_B64LE");
-        }
-        else {
+        else
             h5tools_str_append(buffer, "undefined bitfield");
-        }
         break;
 
     case H5T_OPAQUE:
@@ -2860,7 +2794,7 @@ void
 h5tools_print_fill_value(h5tools_str_t *buffer/*in,out*/, const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/, hid_t dcpl, hid_t type_id, hid_t obj_id)
 {
     size_t            size;
-    hid_t             n_type;
+    hid_t             n_type = -1;
     void             *buf = NULL;
 
     n_type = H5Tget_native_type(type_id, H5T_DIR_DEFAULT);
@@ -3501,7 +3435,8 @@ h5tools_dump_attribute(FILE *stream, const h5tool_format_t *info,
         error_msg("unable to open attribute \"%s\"\n", attr_name);
     }
     else {
-        hid_t type, space;
+        hid_t type = -1;
+        hid_t space = -1;
 
         ctx->indent_level++;
 
@@ -3720,9 +3655,9 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
     H5S_class_t space_type;
     int         ndims;
     int         i;
-    hid_t       space;
-    hid_t       type;
-    hid_t       p_type;
+    hid_t       space = -1;
+    hid_t       type = -1;
+    hid_t       p_type = -1;
     hsize_t     size[64];
     hsize_t     alloc_size;
     hsize_t     nelmts = 1;

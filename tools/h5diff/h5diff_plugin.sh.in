@@ -161,12 +161,27 @@ if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
     h5haveexitcode=no
 fi
 
+
+# Print a $* message left justified in a field of 70 characters
+#
+MESSAGE() {
+   SPACES="                                                               "
+   echo "$* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
 #
 TESTING() {
-   SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+    SPACES="                                                               "
+    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Verifying".
+#
+VERIFY() {
+    MESSAGE "Verifying $*"
 }
 
 # Source in the output filter function definitions.
