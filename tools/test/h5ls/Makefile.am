@@ -38,7 +38,7 @@ if HAVE_SHARED_CONDITIONAL
   # Build it as shared library if configure is enabled for shared library.
   noinst_LTLIBRARIES=libdynlibls.la
   libdynlibls_la_SOURCES=dynlib_ls.c
-  libdynlibls_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libdynlibls_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 endif
 
 
