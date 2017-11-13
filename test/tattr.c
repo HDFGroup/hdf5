@@ -10595,10 +10595,10 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
 static void
 test_attr_bug9(hid_t fcpl, hid_t fapl)
 {
-    hid_t   fid;            /* File ID */
-    hid_t   gid;            /* Group ID */
-    hid_t   aid;            /* Attribute ID */
-    hid_t   sid;            /* Dataspace ID */
+    hid_t   fid = -1;       /* File ID */
+    hid_t   gid = -1;       /* Group ID */
+    hid_t   aid = -1;       /* Attribute ID */
+    hid_t   sid = -1;       /* Dataspace ID */
     hsize_t dims[1] = {32768}; /* Attribute dimensions */
     int create_link;        /* Whether to create a soft link */
     unsigned max_compact;   /* Setting from fcpl */
