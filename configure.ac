@@ -99,6 +99,7 @@ AC_CONFIG_COMMANDS([pubconf], [
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 AC_SUBST([JNIFLAGS])
+AC_SUBST([AR_FLAGS])
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
@@ -139,6 +140,7 @@ JNIFLAGS="${JNIFLAGS}"
 JAVACFLAGS="${JAVACFLAGS}"
 JAVAFLAGS="${JAVAFLAGS}"
 LDFLAGS="${LDFLAGS}"
+AR_FLAGS="${AR_FLAGS}"
 
 ## Configure may need to alter any of the *FLAGS variables in order for
 ## various checks to work correctly. Save the user's value here so it
