@@ -48,8 +48,8 @@ if HAVE_SHARED_CONDITIONAL
   noinst_LTLIBRARIES=libdynlibadd.la libdynlibvers.la
   libdynlibadd_la_SOURCES=dynlib_rpk.c
   libdynlibvers_la_SOURCES=dynlib_vrpk.c
-  libdynlibadd_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
-  libdynlibvers_la_LDFLAGS = -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libdynlibadd_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libdynlibvers_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 endif
 
 
