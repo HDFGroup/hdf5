@@ -170,6 +170,18 @@ Bug Fixes since HDF5-1.10.1 release
 
     Configuration
     -------------
+    - cmake
+
+      The hdf5 library used shared szip and zlib, which needlessly required
+      applications to link with the same szip and zlib libraries.
+
+      Changed the target_link_libraries commands to use the static libs.
+      Removed improper link duplication of szip and zlib.
+      Adjusted the link dependencies and the link interface values of
+      the target_link_libraries commands.
+
+      (ADB - 2017/11/14, HDFFV-10329)
+
     - cmake MPI
 
       CMake implementation for MPI was problematic and would create incorrect
