@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5O.c
- *			Aug  5 1997
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:     H5O.c
  *
- * Purpose:		Object header routines.
+ * Purpose:     Public object header routines
  *
  *-------------------------------------------------------------------------
  */
