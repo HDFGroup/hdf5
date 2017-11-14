@@ -186,6 +186,14 @@ Bug Fixes since HDF5-1.8.19
 
     Library
     -------
+    - Fix rare object header corruption bug
+
+      In certain cases, such as when converting large attributes to dense
+      storage, an error could occur which would either fail an assertion or
+      cause file corruption. Fixed and added test.
+
+      (NAF - 2017/11/14, HDFFV-10274)
+
     - H5Zfilter_avail in H5Z.c
 
       The public function checked for plugins, while the private
