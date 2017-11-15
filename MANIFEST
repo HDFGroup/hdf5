@@ -754,6 +754,7 @@
 ./src/H5Oflush.c
 ./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
+./src/H5Oint.c
 ./src/H5Olayout.c
 ./src/H5Olinfo.c
 ./src/H5Olink.c
