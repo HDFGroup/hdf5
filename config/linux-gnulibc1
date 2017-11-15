@@ -30,11 +30,6 @@ if test -z "$CC"; then
     fi
 fi
 
-# Set flags for gnu ar (apparently via libtool, so AR_FLAGS, not ARFLAGS)
-# If you don't do this, you will get warnings about the 'u' in
-# automake's default 'cru' args.
-AR_FLAGS=crD
-
 # Figure out GNU C compiler flags
 . $srcdir/config/gnu-flags
 
