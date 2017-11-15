@@ -454,6 +454,7 @@ set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5Oflush.c
     ${HDF5_SRC_DIR}/H5Ofsinfo.c
     ${HDF5_SRC_DIR}/H5Oginfo.c
+    ${HDF5_SRC_DIR}/H5Oint.c
     ${HDF5_SRC_DIR}/H5Olayout.c
     ${HDF5_SRC_DIR}/H5Olinfo.c
     ${HDF5_SRC_DIR}/H5Olink.c
