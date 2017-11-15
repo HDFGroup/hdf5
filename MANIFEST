@@ -879,6 +879,8 @@
 ./src/H5VL.c
 ./src/H5VLint.c
 ./src/H5VLmodule.h
+./src/H5VLnative.c
+./src/H5VLnative.h
 ./src/H5VLpkg.h
 ./src/H5VLprivate.h
 ./src/H5VLpublic.h
@@ -946,6 +948,7 @@
 ./test/dtypes.c
 ./test/dtransform.c
 ./test/earray.c
+./test/echo_vol.c
 ./test/efc.c
 ./test/enc_dec_plist.c
 ./test/enc_dec_plist_cross_platform.c
@@ -1035,7 +1038,6 @@
 ./test/noencoder.h5
 ./test/none.h5
 ./test/ntypes.c
-./test/null_vol.c
 ./test/ohdr.c
 ./test/objcopy.c
 ./test/page_buffer.c
