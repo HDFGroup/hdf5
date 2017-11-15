@@ -115,14 +115,17 @@ void parse_command_line(int argc,
         default:
             usage();
             h5diff_exit(EXIT_FAILURE);
+            break;
 
         case 'h':
             usage();
             h5diff_exit(EXIT_SUCCESS);
+            break;
 
         case 'V':
             print_version(h5tools_getprogname());
             h5diff_exit(EXIT_SUCCESS);
+            break;
 
         case 'v':
             opts->m_verbose = 1;
