@@ -2087,7 +2087,7 @@ test_get_filter_info(void)
 #ifdef H5_HAVE_FILTER_SZIP
     if(H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0) TEST_ERROR
 
-    if(SZ_encoder_enabled()) {
+    if(H5Z_SZIP->encoder_present) {
         if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
                 ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
             TEST_ERROR
