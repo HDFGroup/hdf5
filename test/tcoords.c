@@ -669,22 +669,22 @@ static void test_multiple_ends(hid_t file, hbool_t is_chunked)
 void test_coords(void)
 {
     hid_t   fid;
+    hbool_t is_chunk[2] = {TRUE, FALSE};
     int     i;
-    hbool_t is_chunk;
     herr_t  ret;                 /* Generic error return */
 
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
-    for(i=0, is_chunk=FALSE; i<2; i++, is_chunk++) {
+    for (i = 0; i < 2; i++) {
         /* Test H5Sselect_elements with selection of one block of data */
-        test_singleEnd_selElements(fid, is_chunk);
+        test_singleEnd_selElements(fid, is_chunk[i]);
 
         /* Test H5Sselect_hyperslab with selection of one block of data */
-        test_singleEnd_selHyperslab(fid, is_chunk);
+        test_singleEnd_selHyperslab(fid, is_chunk[i]);
 
         /* Test H5Sselect_hyperslab with selection of multiple blocks of data */
-        test_multiple_ends(fid, is_chunk);
+        test_multiple_ends(fid, is_chunk[i]);
     }
 
     ret = H5Fclose(fid);
