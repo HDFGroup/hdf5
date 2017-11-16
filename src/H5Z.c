@@ -386,6 +386,7 @@ H5Z_unregister(H5Z_filter_t filter_id)
     size_t       filter_index;          /* Local index variable for filter */
     H5Z_object_t object;
     herr_t       ret_value = SUCCEED;   /* Return value */
+    H5Z_class2_t *old_cls = NULL;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -423,7 +424,7 @@ H5Z_unregister(H5Z_filter_t filter_id)
         HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed")
 
     /* deallocate plugin info name */
-    H5Z_class2_t *old_cls = (H5Z_class2_t *)(H5Z_table_g+filter_index);
+    old_cls = (H5Z_class2_t *)(H5Z_table_g+filter_index);
     if (old_cls->name)
         old_cls->name = (char *)H5MM_xfree(old_cls->name);
     /* Remove filter from table */
