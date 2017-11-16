@@ -342,19 +342,38 @@ H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const v
 
         /* Check if the filter IDs match */
         if (info->id == id) {
+            H5Z_class2_t *plugin_copy = NULL;
 
             /* Store the plugin in the cache */
             if (H5PL__add_plugin(type, id, handle))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
 
+            /* allocate local copy of plugin info */
+            if (NULL == (plugin_copy = (H5Z_class2_t *)H5MM_calloc(sizeof(H5Z_class2_t))))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for plugin info")
+            /* Set the plugin info to return */
+            *plugin_info = (const void *)info;
+
+            plugin_copy->version = info->version;
+            plugin_copy->id = info->id;
+            plugin_copy->encoder_present = info->encoder_present;
+            plugin_copy->decoder_present = info->decoder_present;
+            plugin_copy->can_apply = info->can_apply;
+            plugin_copy->set_local = info->set_local;
+            plugin_copy->filter = info->filter;
+            /* copy the user's string into the property */
+            if(NULL == (plugin_copy->name = (char *)H5MM_xstrdup(info->name)))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "can't allocate memory for plugin info name")
+
             /* Set output parameters */
             *success = TRUE;
-            *plugin_info = (const void *)info;
         }
     }
 
 done:
     if (!success && handle)
+        if (*plugin_info) {
+            *plugin_info = (H5Z_class2_t *)H5MM_xfree(*plugin_info);
         if (H5PL__close(handle) < 0)
             HDONE_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
 
