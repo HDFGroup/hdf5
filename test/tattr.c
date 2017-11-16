@@ -10578,6 +10578,102 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_bug9(): Test basic H5A (attribute) code.
+**      (Really tests object header code).
+**      Tests adding several large attributes to an object until
+**      they convert to dense storage.  The total size of all
+**      attributes is larger than 64K, causing the internal
+**      object header code to, after merging the deleted
+**      messages in to a NULL message, shrink the object header
+**      chunk.  Do this twice: once with only attributes in the
+**      object header chunk and once with a (small) soft link in
+**      the chunk as well.  In both cases, the shrunk chunk will
+**      initally be too small and a new NULL message must be
+**      created.
+**
+****************************************************************/
+static void
+test_attr_bug9(hid_t fcpl, hid_t fapl)
+{
+    hid_t   fid = -1;       /* File ID */
+    hid_t   gid = -1;       /* Group ID */
+    hid_t   aid = -1;       /* Attribute ID */
+    hid_t   sid = -1;       /* Dataspace ID */
+    hsize_t dims[1] = {32768}; /* Attribute dimensions */
+    int create_link;        /* Whether to create a soft link */
+    unsigned max_compact;   /* Setting from fcpl */
+    unsigned min_dense;     /* Setting from fcpl */
+    char aname[11];         /* Attribute name */
+    unsigned i;             /* Local index variable */
+    herr_t  ret;            /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing that attributes can always be added to named datatypes\n"));
+
+    /* Create dataspace */
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Obtain attribute phase change settings */
+    ret = H5Pget_attr_phase_change(fcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Run with and without the soft link */
+    for(create_link = 0; create_link < 2; create_link++) {
+        /* Create file */
+        fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+        CHECK(fid, FAIL, "H5Fcreate");
+
+        /* Create second group */
+        gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(gid, FAIL, "H5Gcreate2");
+
+        /* Close second group */
+        ret = H5Gclose(gid);
+        CHECK(ret, FAIL, "H5Gclose");
+
+        /* Open root group */
+        gid = H5Gopen2(fid, "/", H5P_DEFAULT);
+        CHECK(gid, FAIL, "H5Gopen2");
+
+        /* Create enough attributes to cause a change to dense storage */
+        for(i = 0; i < max_compact + 1; i++) {
+            /* Create attribute */
+            snprintf(aname, sizeof(aname), "%u", i);
+            aid = H5Acreate2(gid, aname, H5T_NATIVE_CHAR, sid, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(aid, FAIL, "H5Acreate2");
+
+            /* Close attribute */
+            ret = H5Aclose(aid);
+            CHECK(ret, FAIL, "H5Aclose");
+
+            /* Create enough soft links that exactly one goes into chunk 1 if
+             * requested */
+            if(i == 0 && create_link) {
+                ret = H5Lcreate_soft("b", gid, "a", H5P_DEFAULT, H5P_DEFAULT);
+                CHECK(ret, FAIL, "H5Lcreate_soft");
+                ret = H5Lcreate_soft("d", gid, "c", H5P_DEFAULT, H5P_DEFAULT);
+                CHECK(ret, FAIL, "H5Lcreate_soft");
+                ret = H5Lcreate_soft("f", gid, "e", H5P_DEFAULT, H5P_DEFAULT);
+                CHECK(ret, FAIL, "H5Lcreate_soft");
+            } /* end if */
+        } /* end for */
+
+        /* Close IDs */
+        ret = H5Gclose(gid);
+        CHECK(ret, FAIL, "H5Gclose");
+
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+    } /* end for */
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_attr_bug9() */
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 **
 ****************************************************************/
@@ -10724,6 +10820,7 @@ test_attr(void)
                 test_attr_bug6(my_fcpl, my_fapl);               /* Test reading empty attribute */
                 test_attr_bug7(my_fcpl, my_fapl);               /* Test creating and deleting large attributes in ohdr chunk 0 */
                 test_attr_bug8(my_fcpl, my_fapl);               /* Test attribute expanding object header with undecoded messages */
+                test_attr_bug9(my_fcpl, my_fapl);               /* Test large attributes converting to dense storage */
             } /* end for */
         } /* end if */
         else {
@@ -10752,6 +10849,7 @@ test_attr(void)
              * header format and in fact fails if used with the old format, due
              * to the attributes being larger than 64K */
             test_attr_bug8(fcpl, my_fapl);                      /* Test attribute expanding object header with undecoded messages */
+            test_attr_bug9(fcpl, my_fapl);                      /* Test large attributes converting to dense storage */
         } /* end else */
     } /* end for */
 
