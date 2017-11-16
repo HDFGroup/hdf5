@@ -280,18 +280,34 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
 
             H5PL_get_plugin_info_t      get_plugin_info_function;
             const H5Z_class2_t          *filter_info;
+            H5Z_class2_t                *plugin_copy = NULL;
 
             /* Get the "get plugin info" function from the plugin. */
             if (NULL == (get_plugin_info_function = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC((H5PL_cache_g[u]).handle, "H5PLget_plugin_info")))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
 
             /* Call the "get plugin info" function */
             if (NULL == (filter_info = (const H5Z_class2_t *)(*get_plugin_info_function)()))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
+
+            if (NULL == (plugin_copy = (H5Z_class2_t *)H5MM_calloc(sizeof(H5Z_class2_t))))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for plugin info")
+            /* Set the plugin info to return */
+            *plugin_info = plugin_copy;
+
+            plugin_copy->version = filter_info->version;
+            plugin_copy->id = filter_info->id;
+            plugin_copy->encoder_present = filter_info->encoder_present;
+            plugin_copy->decoder_present = filter_info->decoder_present;
+            plugin_copy->can_apply = filter_info->can_apply;
+            plugin_copy->set_local = filter_info->set_local;
+            plugin_copy->filter = filter_info->filter;
+            /* copy the user's string into the property */
+            if(NULL == (plugin_copy->name = (char *)H5MM_xstrdup(filter_info->name)))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "can't allocate memory for plugin info name")
 
             /* Set output parameters */
             *found = TRUE;
-            *plugin_info = filter_info;
 
             /* No need to continue processing */
             break;
@@ -301,6 +317,10 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
     } /* end for */
 
 done:
+    /* unallocate local copy of plugin info on failure */
+    if (FAIL == ret_value && *plugin_info) {
+        *plugin_info = (H5Z_class2_t *)H5MM_xfree(*plugin_info);
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__find_plugin_in_cache() */
 #pragma GCC diagnostic pop
