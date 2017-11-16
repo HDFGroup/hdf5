@@ -231,6 +231,25 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - filter plugin handling in H5PL.c and H5Z.c
+
+      It was discovered that the dynamic loading process used by
+      filter plugins had issues with memory allocation and library
+      dependencies.
+
+      CMake build process changed to use LINK INTERFACE keywords, which
+      allowed HDF5 C library to make dependent libraries private. The
+      filter plugin libraries no longer require dependent libraries
+      (such as szip or zlib) to be available.
+             (ADB - 2017/11/16, HDFFV-10328)
+
+      The H5Z_class2_t structure returned by the filter plugins are
+      now dynamically allocated in H5Zregister function. Access to
+      the functions in the filter library now always use the dynamic
+      library API.
+
+      (ADB - 2017/11/16, HDFFV-10329)
+
     - Fix rare object header corruption bug
 
       In certain cases, such as when converting large attributes to dense
