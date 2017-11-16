@@ -378,31 +378,29 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fcreate
  *
- * Purpose:    This is the primary function for creating HDF5 files . The
- *        flags parameter determines whether an existing file will be
- *        overwritten or not.  All newly created files are opened for
- *        both reading and writing.  All flags may be combined with the
- *        bit-wise OR operator (`|') to change the behavior of the file
- *        create call.
+ * Purpose:     This is the primary function for creating HDF5 files . The
+ *              flags parameter determines whether an existing file will be
+ *              overwritten or not.  All newly created files are opened for
+ *              both reading and writing.  All flags may be combined with the
+ *              bit-wise OR operator (`|') to change the behavior of the file
+ *              create call.
  *
- *        The more complex behaviors of a file's creation and access
- *        are controlled through the file-creation and file-access
- *        property lists.  The value of H5P_DEFAULT for a template
- *        value indicates that the library should use the default
- *        values for the appropriate template.
+ *              The more complex behaviors of a file's creation and access
+ *              are controlled through the file-creation and file-access
+ *              property lists.  The value of H5P_DEFAULT for a template
+ *              value indicates that the library should use the default
+ *              values for the appropriate template.
  *
  * See also:    H5Fpublic.h for the list of supported flags. H5Ppublic.h for
- *         the list of file creation and file access properties.
+ *              the list of file creation and file access properties.
  *
- * Return:    Success:    A file ID
- *            Failure:    FAIL
+ * Return:      Success:    A file ID
+ *              Failure:    FAIL
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    hbool_t         ci_load = FALSE;        /* whether MDC ci load requested            */
-    hbool_t         ci_write = FALSE;       /* whether MDC CI write requested           */
     H5F_t          *new_file = NULL;        /*file struct for new file	                */
 
     H5P_genplist_t *plist;                  /* Property list pointer                    */
@@ -461,12 +459,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if (NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
-   /* Check to see if both SWMR and cache image are requested.  Fail if so */
-   if (H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0)
-       HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
-   if ((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
-       HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and cache image")
-
     /* Get an atom for the file */
     if ((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
@@ -506,8 +498,6 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    hbool_t     ci_load = FALSE;                    /* whether MDC ci load requested            */
-    hbool_t     ci_write = FALSE;                   /* whether MDC CI write requested           */
     H5F_t       *new_file = NULL;                   /* file struct for new file                 */
     hid_t       dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library                     */
     H5P_genplist_t      *plist;                     /* Property list pointer                    */
@@ -734,6 +724,39 @@ H5Fclose(hid_t file_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclose() */
+
+#if 0
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_close_file
+ *
+ * Purpose:     Called when the ref count reaches zero on the file ID
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_close_file(void *_file)
+{
+    H5VL_object_t *file = (H5VL_object_t *)_file;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Close the file through the VOL*/
+    if((ret_value = H5VL_file_close(file->vol_obj, file->vol_info->vol_cls,
+                                    H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+
+    /* free file */
+    if(H5VL_free_object(file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_close_file() */
+#endif
 
 
 /*-------------------------------------------------------------------------
