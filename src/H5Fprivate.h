@@ -18,6 +18,9 @@
 #ifndef _H5Fprivate_H
 #define _H5Fprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5F_t H5F_t;
+
 /* Include package's public header */
 #include "H5Fpublic.h"
 
@@ -659,7 +662,6 @@ struct H5P_genplist_t;
 /* Forward declarations for anonymous H5F objects */
 
 /* Main file structures */
-typedef struct H5F_t H5F_t;
 typedef struct H5F_file_t H5F_file_t;
 
 /* Block aggregation structure */

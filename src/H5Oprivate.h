@@ -26,6 +26,7 @@
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5O_t H5O_t;
+typedef struct H5O_fill_t H5O_fill_t;
 
 /* Include the public header file for this API */
 #include "H5Opublic.h"          /* Object header functions              */
@@ -308,7 +309,7 @@ typedef struct H5O_linfo_t {
  * message if it's shared.
  */
 
-typedef struct H5O_fill_t {
+struct H5O_fill_t {
     H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
 
     unsigned	        version;	/* Encoding version number           */
@@ -318,7 +319,7 @@ typedef struct H5O_fill_t {
     H5D_alloc_time_t	alloc_time;	/* time to allocate space	     */
     H5D_fill_time_t	fill_time;	/* time to write fill value	     */
     hbool_t		fill_defined;   /* whether fill value is defined     */
-} H5O_fill_t;
+};
 
 /*
  * Link message.
