@@ -372,7 +372,7 @@ H5PL__open(const char *path, H5PL_type_t type, int id, hbool_t *success, const v
 
 done:
     if (!success && handle)
-        if (*plugin_info) {
+        if (*plugin_info)
             *plugin_info = (H5Z_class2_t *)H5MM_xfree(*plugin_info);
         if (H5PL__close(handle) < 0)
             HDONE_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
