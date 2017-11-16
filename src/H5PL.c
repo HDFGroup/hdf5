@@ -986,6 +986,9 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, const void **info)
 
                 if (NULL == (plugin_copy = (H5Z_class2_t *)H5MM_calloc(sizeof(H5Z_class2_t))))
                     HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for plugin info")
+                /* Set the plugin info to return */
+                *info = (const void *)plugin_copy;
+
                 plugin_copy->version = plugin_info->version;
                 plugin_copy->id = plugin_info->id;
                 plugin_copy->encoder_present = plugin_info->encoder_present;
@@ -997,15 +1000,16 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, const void **info)
                 if(NULL == (plugin_copy->name = (char *)H5MM_xstrdup(plugin_info->name)))
                     HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "can't allocate memory for plugin info name")
 
-                /* Set the plugin info to return */
-                *info = (const void *)plugin_copy;
-
                 HGOTO_DONE(TRUE)
             } /* end if */
         } /* end for */
     } /* end if */
 
 done:
+    /* unallocate local copy of plugin info on failure */
+    if (FAIL == ret_value && *info) {
+        *info = (H5Z_class2_t *)H5MM_xfree(*info);
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__search_table() */
 
