@@ -401,7 +401,6 @@ option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
 if (BUILD_SHARED_LIBS)
   set (H5_ENABLE_SHARED_LIB YES)
-  set (LINK_SHARED_LIBS ${LINK_LIBS})
 endif ()
 set (H5_ENABLE_STATIC_LIB YES)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -576,6 +575,8 @@ include (UserMacros.cmake)
 #-----------------------------------------------------------------------------
 # Include filter (zlib, szip, etc.) macros
 #-----------------------------------------------------------------------------
+set (LINK_COMP_LIBS)
+set (LINK_COMP_SHARED_LIBS)
 include (CMakeFilters.cmake)
 
 #-----------------------------------------------------------------------------
