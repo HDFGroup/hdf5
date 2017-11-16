@@ -671,8 +671,7 @@ done:
  *
  * Return:   Non-negative on success/Negative on failure
  *
- * Notes:
- *           The chunk dimensions are used to create a dataspace, instead
+ * Notes:    The chunk dimensions are used to create a dataspace, instead
  *           of passing in the dataset's dataspace, since the chunk
  *           dimensions are what the I/O filter will actually see
  *-------------------------------------------------------------------------
@@ -754,8 +753,7 @@ done:
  *
  * Return:   Non-negative on success/Negative on failure
  *
- * Notes:
- *           The chunk dimensions are used to create a dataspace, instead
+ * Notes:    The chunk dimensions are used to create a dataspace, instead
  *           of passing in the dataset's dataspace, since the chunk
  *           dimensions are what the I/O filter will actually see
  *-------------------------------------------------------------------------
@@ -835,8 +833,7 @@ done:
  * Return:   Non-negative on success
  *           Negative on failure
  *
- * Notes:
- *           The chunk dimensions are used to create a dataspace, instead
+ * Notes:    The chunk dimensions are used to create a dataspace, instead
  *           of passing in the dataset's dataspace, since the chunk
  *           dimensions are what the I/O filter will actually see
  *-------------------------------------------------------------------------
@@ -867,8 +864,7 @@ done:
  * Return:   Non-negative on success
  *           Negative on failure
  *
- * Notes:
- *           The chunk dimensions are used to create a dataspace, instead
+ * Notes:    The chunk dimensions are used to create a dataspace, instead
  *           of passing in the dataset's dataspace, since the chunk
  *           dimensions are what the I/O filter will actually see
  *-------------------------------------------------------------------------
@@ -928,8 +924,7 @@ done:
  * Return:   Non-negative on success
  *           Negative on failure
  *
- * Notes:
- *           This callback will almost certainly not do anything
+ * Notes:    This callback will almost certainly not do anything
  *           useful, other than to make certain that the filter will
  *           accept opaque data.
  *-------------------------------------------------------------------------
@@ -963,7 +958,7 @@ done:
  */
 herr_t
 H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
-    size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
+        size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
     size_t      idx;                    /* Index of filter in pipeline */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -982,7 +977,7 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
 
     /* Check if the filter was not already in the pipeline */
     if (idx > pline->nused)
-    HGOTO_ERROR (H5E_PLINE, H5E_NOTFOUND, FAIL, "filter not in pipeline")
+        HGOTO_ERROR (H5E_PLINE, H5E_NOTFOUND, FAIL, "filter not in pipeline")
 
     /* Change parameters for filter */
     pline->filter[idx].flags = flags;
@@ -990,7 +985,7 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
 
     /* Free any existing parameters */
     if (pline->filter[idx].cd_values != NULL && pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
-    H5MM_xfree(pline->filter[idx].cd_values);
+        H5MM_xfree(pline->filter[idx].cd_values);
 
     /* Set parameters */
     if (cd_nelmts > 0) {
@@ -1006,8 +1001,8 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
             pline->filter[idx].cd_values = pline->filter[idx]._cd_values;
 
         /* Copy client data values */
-    for (i = 0; i < cd_nelmts; i++)
-        pline->filter[idx].cd_values[i] = cd_values[i];
+        for (i = 0; i < cd_nelmts; i++)
+            pline->filter[idx].cd_values[i] = cd_values[i];
     } /* end if */
     else
        pline->filter[idx].cd_values = NULL;
@@ -1028,7 +1023,7 @@ done:
  */
 herr_t
 H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
-    size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
+        size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
     size_t    idx;
     herr_t    ret_value = SUCCEED;       /* Return value */
@@ -1135,8 +1130,8 @@ H5Z_find_idx(H5Z_filter_t id)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     for (i = 0; i < H5Z_table_used_g; i++)
-    if (H5Z_table_g[i].id == id)
-        HGOTO_DONE ((int)i)
+        if (H5Z_table_g[i].id == id)
+            HGOTO_DONE ((int)i)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1156,14 +1151,14 @@ done:
 H5Z_class2_t *
 H5Z_find(H5Z_filter_t id)
 {
-    int    idx;                            /* Filter index in global table */
+    int           idx;                     /* Filter index in global table */
     H5Z_class2_t *ret_value = NULL;        /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Get the index in the global table */
     if ((idx = H5Z_find_idx(id)) < 0)
-        HGOTO_ERROR (H5E_PLINE, H5E_NOTFOUND, NULL, "required filter is not registered")
+        HGOTO_ERROR (H5E_PLINE, H5E_NOTFOUND, NULL, "required filter %d is not registered", id)
 
     /* Set return value */
     ret_value = H5Z_table_g+idx;
@@ -1237,7 +1232,6 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
              */
             if ((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
                 hbool_t issue_error = FALSE;
-
                 H5Z_class2_t    *filter_info;
 
                 /* Try loading the filter */
@@ -1306,13 +1300,13 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                 continue; /*filter excluded*/
             }
             if ((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
-                    /* Check if filter is optional -- If it isn't, then error */
+                /* Check if filter is optional -- If it isn't, then error */
                 if ((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) == 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "required filter is not registered")
 
-                    failed |= (unsigned)1 << idx;
-                    H5E_clear_stack (NULL);
-                    continue; /*filter excluded*/
+                failed |= (unsigned)1 << idx;
+                H5E_clear_stack (NULL);
+                continue; /*filter excluded*/
             }
             fclass = &H5Z_table_g[fclass_idx];
 #ifdef H5Z_DEBUG
@@ -1363,13 +1357,13 @@ done:
 H5Z_filter_info_t *
 H5Z_filter_info(const H5O_pline_t *pline, H5Z_filter_t filter)
 {
-    size_t    idx;                    /* Index of filter in pipeline */
-    H5Z_filter_info_t *ret_value;     /* Return value */
+    size_t             idx;                     /* Index of filter in pipeline */
+    H5Z_filter_info_t *ret_value = NULL;        /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     HDassert (pline);
-    HDassert (filter>=0 && filter<=H5Z_FILTER_MAX);
+    HDassert (filter >= 0 && filter <= H5Z_FILTER_MAX);
 
     /* Locate the filter in the pipeline */
     for (idx = 0; idx < pline->nused; idx++)
@@ -1585,7 +1579,7 @@ herr_t
 H5Z_get_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
 {
     H5Z_class2_t *fclass;
-    herr_t ret_value = SUCCEED;
+    herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
