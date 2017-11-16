@@ -324,7 +324,7 @@ H5Z_register (const H5Z_class2_t *cls)
     } /* end if */
     /* Filter already registered */
     else {
-        H5Z_class2_t *old_cls = (H5Z_class2_t *)(H5Z_table_g+i)
+        H5Z_class2_t *old_cls = (H5Z_class2_t *)(H5Z_table_g+i);
         /* deallocate plugin info name */
         if (old_cls->name)
             old_cls->name = (char *)H5MM_xfree(old_cls->name);
