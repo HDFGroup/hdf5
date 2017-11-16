@@ -2200,16 +2200,17 @@ H5O_alloc_shrink_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno)
         oh->nmesgs++;
 
         /* Initialize new null message to make the chunk large enough */
-        oh->mesg[oh->nmesgs].type = H5O_MSG_NULL;
-        oh->mesg[oh->nmesgs].dirty = TRUE;
-        oh->mesg[oh->nmesgs].native = NULL;
-        oh->mesg[oh->nmesgs].raw = old_image + new_size + sizeof_msghdr - sizeof_chksum;
-        oh->mesg[oh->nmesgs].raw_size = MAX(H5O_ALIGN_OH(oh, min_chunk_size - total_msg_size),
+        curr_msg = &oh->mesg[oh->nmesgs - 1];
+        curr_msg->type = H5O_MSG_NULL;
+        curr_msg->dirty = TRUE;
+        curr_msg->native = NULL;
+        curr_msg->raw = old_image + new_size + sizeof_msghdr - sizeof_chksum;
+        curr_msg->raw_size = MAX(H5O_ALIGN_OH(oh, min_chunk_size - total_msg_size),
             sizeof_msghdr) - sizeof_msghdr;
-        oh->mesg[oh->nmesgs].chunkno = chunkno;
+        curr_msg->chunkno = chunkno;
 
         /* update the new chunk size */
-        new_size += oh->mesg[oh->nmesgs].raw_size + sizeof_msghdr;
+        new_size += curr_msg->raw_size + sizeof_msghdr;
     } /* end if */
 
     /* Check for changing the chunk #0 data size enough to need adjusting the flags */
