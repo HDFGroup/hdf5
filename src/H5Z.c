@@ -1219,12 +1219,12 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
              */
             if ((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
                 hbool_t issue_error = FALSE;
-                H5Z_class2_t    *filter_info;
+                const H5Z_class2_t    *filter_info;
 
                 /* Try loading the filter */
                 if (NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)(pline->filter[idx].id)))) {
                     /* Register the filter we loaded */
-                    if (H5Z_register(filter_info < 0)
+                    if (H5Z_register(filter_info) < 0)
                         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
 
                     /* Search in the table of registered filters again to find the dynamic filter just loaded and registered */
@@ -1235,7 +1235,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                     issue_error = TRUE;
 
                 /* Check for error */
-                if(issue_error) {
+                if (issue_error) {
                     /* Print out the filter name to give more info.  But the name is optional for
                      * the filter */
                     if (pline->filter[idx].name)
@@ -1269,9 +1269,8 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                 failed |= (unsigned)1 << idx;
                 H5E_clear_stack (NULL);
             }
-            else {
+            else
                 *nbytes = new_nbytes;
-            }
         }
     }
     else if (pline) { /* Write */
