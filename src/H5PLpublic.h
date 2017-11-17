@@ -30,9 +30,9 @@
 
 /* Plugin type used by the plugin library */
 typedef enum H5PL_type_t {
-    H5PL_TYPE_ERROR         = -1,   /* Error                    */
-    H5PL_TYPE_FILTER        = 0,    /* Filter                   */
-    H5PL_TYPE_NONE          = 1     /* This must be last!       */
+    H5PL_TYPE_ERROR         = -1,   /* Error                */
+    H5PL_TYPE_FILTER        =  0,   /* Filter               */
+    H5PL_TYPE_NONE          =  1    /* This must be last!   */
 } H5PL_type_t;
 
 /* Common dynamic plugin type flags used by the set/get_loading_state functions */

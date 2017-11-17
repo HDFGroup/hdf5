@@ -53,7 +53,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #004: (file name) line (number) in H5Z_pipeline(): required filter 'bogus' is not registered
     major: Data filters
     minor: Read failed
-  #005: (file name) line (number) in H5PL_load(): required dynamically loaded plugin filter '305' is not available
+  #005: (file name) line (number) in H5PL_load(): filter plugins disabled
     major: Plugin for dynamically loaded library
     minor: Unable to load metadata into cache
 
