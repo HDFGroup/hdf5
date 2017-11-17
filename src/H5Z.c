@@ -123,7 +123,6 @@ int
 H5Z_term_package(void)
 {
     int        n = 0;
-    size_t     i;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -131,6 +130,7 @@ H5Z_term_package(void)
 #ifdef H5Z_DEBUG
         char comment[16], bandwidth[32];
         int dir, nprint = 0;
+        size_t i;
 
         if(H5DEBUG(Z)) {
             for(i = 0; i < H5Z_table_used_g; i++) {
@@ -179,12 +179,6 @@ H5Z_term_package(void)
             } /* end for */
         } /* end if */
 #endif /* H5Z_DEBUG */
-        for (i = 0; i < H5Z_table_used_g; i++) {
-            H5Z_class2_t *cls = (H5Z_class2_t *)(H5Z_table_g+i);
-            /* deallocate plugin info name */
-            if (cls->name)
-                cls->name = (char *)H5MM_xfree(cls->name);
-        }
         /* Free the table of filters */
         if(H5Z_table_g) {
             H5Z_table_g = (H5Z_class2_t *)H5MM_xfree(H5Z_table_g);
@@ -325,20 +319,14 @@ H5Z_register (const H5Z_class2_t *cls)
         /* Initialize */
         i = H5Z_table_used_g++;
         HDmemcpy (H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
-        H5Z_table_g[i].name = (char *)H5MM_xstrdup(cls->name);
 #ifdef H5Z_DEBUG
         HDmemset (H5Z_stat_table_g+i, 0, sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
     } /* end if */
     /* Filter already registered */
     else {
-        H5Z_class2_t *old_cls = (H5Z_class2_t *)(H5Z_table_g+i);
-        /* deallocate plugin info name */
-        if (old_cls->name)
-            old_cls->name = (char *)H5MM_xfree(old_cls->name);
         /* Replace old contents */
-        HDmemcpy (old_cls, cls, sizeof(H5Z_class2_t));
-        old_cls->name = (char *)H5MM_xstrdup(cls->name);
+        HDmemcpy (H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
     } /* end else */
 
 done:
@@ -394,7 +382,6 @@ H5Z_unregister(H5Z_filter_t filter_id)
     size_t       filter_index;          /* Local index variable for filter */
     H5Z_object_t object;
     herr_t       ret_value = SUCCEED;   /* Return value */
-    H5Z_class2_t *old_cls = NULL;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -431,10 +418,6 @@ H5Z_unregister(H5Z_filter_t filter_id)
     if (H5I_iterate(H5I_FILE, H5Z__flush_file_cb, NULL, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed")
 
-    /* deallocate plugin info name */
-    old_cls = (H5Z_class2_t *)(H5Z_table_g+filter_index);
-    if (old_cls->name)
-        old_cls->name = (char *)H5MM_xfree(old_cls->name);
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
     HDmemmove (&H5Z_table_g[filter_index], &H5Z_table_g[filter_index+1], sizeof(H5Z_class2_t)*((H5Z_table_used_g-1)-filter_index));
@@ -658,11 +641,7 @@ H5Z_filter_avail(H5Z_filter_t id)
             HGOTO_DONE (TRUE)
 
     if (NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)id))) {
-        herr_t status = H5Z_register(filter_info);
-        if (filter_info->name)
-            filter_info->name = (char *)H5MM_xfree(filter_info->name);
-        filter_info = (H5Z_class2_t *)H5MM_xfree(filter_info);
-        if (status < 0)
+        if (H5Z_register (filter_info) < 0)
             HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register loaded filter")
         HGOTO_DONE (TRUE)
     }
@@ -1245,11 +1224,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                 /* Try loading the filter */
                 if (NULL != (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)(pline->filter[idx].id)))) {
                     /* Register the filter we loaded */
-                    herr_t status = H5Z_register(filter_info);
-                    if (filter_info->name)
-                        filter_info->name = (char *)H5MM_xfree(filter_info->name);
-                    filter_info = (H5Z_class2_t *)H5MM_xfree(filter_info);
-                    if (status < 0)
+                    if (H5Z_register(filter_info < 0)
                         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
 
                     /* Search in the table of registered filters again to find the dynamic filter just loaded and registered */
