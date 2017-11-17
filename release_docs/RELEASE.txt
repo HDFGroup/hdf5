@@ -157,6 +157,17 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - filter plugin handling in H5PL.c and H5Z.c
+
+      It was discovered that the dynamic loading process used by
+      filter plugins had issues with library dependencies.
+
+      CMake build process changed to use LINK INTERFACE keywords, which
+      allowed HDF5 C library to make dependent libraries private. The
+      filter plugin libraries no longer require dependent libraries
+      (such as szip or zlib) to be available.
+             (ADB - 2017/11/16, HDFFV-10328)
+
     - H5Zfilter_avail in H5Z.c
 
       The public function checked for plugins, while the private
