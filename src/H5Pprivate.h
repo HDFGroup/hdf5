@@ -143,6 +143,10 @@ H5_DLLVAR const struct H5P_libclass_t H5P_CLS_FACC[1];  /* File access */
 /* Library Private Prototypes */
 /******************************/
 
+/* Forward declaration of structs used below */
+struct H5O_fill_t;
+struct H5T_t;
+
 /* Package initialization routine */
 H5_DLL herr_t H5P_init(void);
 

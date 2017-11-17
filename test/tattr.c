@@ -163,21 +163,21 @@ static herr_t attr_op1(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
 static void
 test_attr_basic_write(hid_t fapl)
 {
-    hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset;    /* Dataset ID            */
-    hid_t        group;        /* Group ID                */
-    hid_t        sid1,sid2;    /* Dataspace ID            */
-    hid_t        attr, attr2;        /* Attribute ID        */
-    hsize_t             attr_size;  /* storage size for attribute       */
-    ssize_t             attr_name_size; /* size of attribute name       */
-    char                *attr_name=NULL;    /* name of attribute        */
-    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t        dims2[] = {ATTR1_DIM1};
-    hsize_t        dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
-    int       read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
-    int         i;
-    hid_t        ret_id;        /* Generic hid_t return value    */
-    herr_t        ret;        /* Generic return value        */
+    hid_t        fid1;        /* HDF5 File IDs */
+    hid_t        dataset;     /* Dataset ID */
+    hid_t        group;       /* Group ID */
+    hid_t        sid1,sid2;   /* Dataspace ID */
+    hid_t        attr, attr2; /* Attribute ID */
+    hsize_t      attr_size;   /* storage size for attribute */
+    ssize_t      attr_name_size;     /* size of attribute name */
+    char         *attr_name=NULL;    /* name of attribute */
+    hsize_t      dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t      dims2[] = {ATTR1_DIM1};
+    hsize_t      dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
+    int          read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
+    int          i;
+    hid_t        ret_id;        /* Generic hid_t return value */
+    herr_t       ret;           /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Scalar Attribute Writing Functions\n"));
@@ -402,15 +402,15 @@ test_attr_basic_write(hid_t fapl)
 static void
 test_attr_basic_read(hid_t fapl)
 {
-    hid_t    fid1;        /* HDF5 File IDs        */
-    hid_t    dataset;    /* Dataset ID            */
-    hid_t    group;            /* Group ID            */
-    hid_t    attr;            /* Attribute ID            */
-    H5O_info_t  oinfo;          /* Object info                  */
+    hid_t       fid1;        /* HDF5 File IDs        */
+    hid_t       dataset;     /* Dataset ID            */
+    hid_t       group;       /* Group ID            */
+    hid_t       attr;        /* Attribute ID            */
+    H5O_info_t  oinfo;       /* Object info                  */
     int         read_data1[ATTR1_DIM1] = {0}; /* Buffer for reading 1st attribute */
     int         read_data2[ATTR2_DIM1][ATTR2_DIM2] = {{0}}; /* Buffer for reading 2nd attribute */
-    int         i, j;           /* Local index variables        */
-    herr_t    ret;        /* Generic return value        */
+    int         i, j;       /* Local index variables        */
+    herr_t      ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -500,7 +500,7 @@ test_attr_flush(hid_t fapl)
         set;            /* Dataset ID */
     double wdata=3.14159F;       /* Data to write */
     double rdata;       /* Data read in */
-    herr_t ret;        /* Generic return value        */
+    herr_t ret;         /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Flushing\n"));
@@ -563,12 +563,12 @@ test_attr_plist(hid_t fapl)
     hid_t        fid1;           /* HDF5 File IDs        */
     hid_t        dataset;        /* Dataset ID            */
     hid_t        sid1,sid2;      /* Dataspace ID            */
-    hid_t        attr;            /* Attribute ID        */
-    hid_t               plist;          /* Property list ID             */
-    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t        dims2[] = {ATTR1_DIM1};
-    H5T_cset_t          cset;           /* Character set for attributes */
-    herr_t        ret;            /* Generic return value        */
+    hid_t        attr;           /* Attribute ID        */
+    hid_t        plist;          /* Property list ID             */
+    hsize_t      dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t      dims2[] = {ATTR1_DIM1};
+    H5T_cset_t   cset;           /* Character set for attributes */
+    herr_t       ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Property Lists\n"));
@@ -675,14 +675,14 @@ static void
 test_attr_compound_write(hid_t fapl)
 {
     hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset;    /* Dataset ID            */
-    hid_t       tid1;       /* Attribute datatype ID */
-    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hid_t        dataset;     /* Dataset ID            */
+    hid_t        tid1;        /* Attribute datatype ID */
+    hid_t        sid1,sid2;   /* Dataspace ID            */
     hid_t        attr;        /* Attribute ID            */
-    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t        dims2[] = {ATTR4_DIM1,ATTR4_DIM2};
+    hsize_t      dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t      dims2[] = {ATTR4_DIM1,ATTR4_DIM2};
     hid_t        ret_id;        /* Generic hid_t return value    */
-    herr_t        ret;        /* Generic return value        */
+    herr_t       ret;           /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Multiple Attribute Functions\n"));
@@ -762,11 +762,11 @@ test_attr_compound_write(hid_t fapl)
 static void
 test_attr_compound_read(hid_t fapl)
 {
-    hid_t   fid1;    /* HDF5 File ID        */
+    hid_t   fid1;       /* HDF5 File ID        */
     hid_t   dataset;    /* Dataset ID        */
     hid_t   space;      /* Attribute dataspace  */
     hid_t   type;       /* Attribute datatype   */
-    hid_t   attr;    /* Attribute ID         */
+    hid_t   attr;       /* Attribute ID         */
     char    attr_name[ATTR_NAME_LEN]; /* Buffer for attribute names */
     int     rank;       /* Attribute rank */
     hsize_t dims[ATTR_MAX_DIMS];    /* Attribute dimensions */
@@ -781,7 +781,7 @@ test_attr_compound_read(hid_t fapl)
     ssize_t  name_len;  /* Length of attribute name */
     H5O_info_t oinfo;   /* Object info */
     int     i, j;       /* Local index variables */
-    herr_t  ret;    /* Generic return value    */
+    herr_t  ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -830,7 +830,7 @@ test_attr_compound_read(hid_t fapl)
                 HDstrcmp(fieldname, ATTR4_FIELDNAME3)))
             TestErrPrintf("invalid field name for field #%d: %s\n", i, fieldname);
         H5free_memory(fieldname);
-      } /* end for */
+    } /* end for */
     offset = H5Tget_member_offset(type, 0);
     VERIFY(offset, attr4_field1_off, "H5Tget_member_offset");
     offset = H5Tget_member_offset(type, 1);
@@ -878,7 +878,7 @@ test_attr_compound_read(hid_t fapl)
                 printf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n", __LINE__, i, j, attr_data4[i][j].i, i, j, read_data4[i][j].i);
                 printf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n", __LINE__, i, j, attr_data4[i][j].d, i, j, read_data4[i][j].d);
                 TestErrPrintf("%d: attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n", __LINE__, i, j, attr_data4[i][j].c, i, j, read_data4[i][j].c);
-             } /* end if */
+            } /* end if */
 
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
@@ -913,12 +913,12 @@ static void
 test_attr_scalar_write(hid_t fapl)
 {
     hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset;    /* Dataset ID            */
-    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hid_t        dataset;     /* Dataset ID            */
+    hid_t        sid1,sid2;   /* Dataspace ID            */
     hid_t        attr;        /* Attribute ID            */
-    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t      dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hid_t        ret_id;        /* Generic hid_t return value    */
-    herr_t        ret;        /* Generic return value        */
+    herr_t       ret;           /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -979,13 +979,13 @@ static void
 test_attr_scalar_read(hid_t fapl)
 {
     hid_t    fid1;        /* HDF5 File IDs        */
-    hid_t    dataset;    /* Dataset ID            */
-    hid_t    sid;            /* Dataspace ID            */
-    hid_t    attr;            /* Attribute ID            */
+    hid_t    dataset;     /* Dataset ID            */
+    hid_t    sid;         /* Dataspace ID            */
+    hid_t    attr;        /* Attribute ID            */
     H5S_class_t stype;          /* Dataspace class              */
-    float       rdata = 0.0F;    /* Buffer for reading 1st attribute */
+    float       rdata = 0.0F;   /* Buffer for reading 1st attribute */
     H5O_info_t  oinfo;          /* Object info                  */
-    herr_t    ret;        /* Generic return value        */
+    herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Scalar Attribute Reading Functions\n"));
@@ -1013,8 +1013,8 @@ test_attr_scalar_read(hid_t fapl)
 
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if(!H5_FLT_ABS_EQUAL(rdata, attr_data5))
-    printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
-        "H5Aread", (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
+        printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
+                "H5Aread", (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
 
     /* Get the attribute's dataspace */
     sid = H5Aget_space(attr);
@@ -1051,15 +1051,15 @@ static void
 test_attr_mult_write(hid_t fapl)
 {
     hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset;    /* Dataset ID            */
-    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hid_t        dataset;     /* Dataset ID            */
+    hid_t        sid1,sid2;   /* Dataspace ID            */
     hid_t        attr;        /* Attribute ID            */
-    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t        dims2[] = {ATTR1_DIM1};
-    hsize_t        dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
-    hsize_t        dims4[] = {ATTR3_DIM1,ATTR3_DIM2,ATTR3_DIM3};
+    hsize_t      dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t      dims2[] = {ATTR1_DIM1};
+    hsize_t      dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
+    hsize_t      dims4[] = {ATTR3_DIM1,ATTR3_DIM2,ATTR3_DIM3};
     hid_t        ret_id;        /* Generic hid_t return value    */
-    herr_t        ret;        /* Generic return value        */
+    herr_t       ret;           /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Multiple Attribute Functions\n"));
@@ -1170,11 +1170,11 @@ test_attr_mult_write(hid_t fapl)
 static void
 test_attr_mult_read(hid_t fapl)
 {
-    hid_t   fid1;    /* HDF5 File ID        */
+    hid_t   fid1;       /* HDF5 File ID        */
     hid_t   dataset;    /* Dataset ID        */
     hid_t   space;      /* Attribute dataspace  */
     hid_t   type;       /* Attribute datatype   */
-    hid_t   attr;    /* Attribute ID        */
+    hid_t   attr;       /* Attribute ID        */
     char    attr_name[ATTR_NAME_LEN]; /* Buffer for attribute names */
     char    temp_name[ATTR_NAME_LEN]; /* Buffer for mangling attribute names */
     int     rank;       /* Attribute rank */
@@ -1185,10 +1185,10 @@ test_attr_mult_read(hid_t fapl)
     int     read_data1[ATTR1_DIM1] = {0}; /* Buffer for reading 1st attribute */
     int     read_data2[ATTR2_DIM1][ATTR2_DIM2] = {{0}}; /* Buffer for reading 2nd attribute */
     double  read_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {{{0}}}; /* Buffer for reading 3rd attribute */
-    ssize_t  name_len;  /* Length of attribute name */
+    ssize_t name_len;   /* Length of attribute name */
     H5O_info_t oinfo;   /* Object info */
     int     i, j, k;    /* Local index values */
-    herr_t  ret;    /* Generic return value */
+    herr_t  ret;        /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -1432,12 +1432,12 @@ attr_op1(hid_t H5_ATTR_UNUSED loc_id, const char *name, const H5A_info_t H5_ATTR
 static void
 test_attr_iterate(hid_t fapl)
 {
-    hid_t   file;    /* HDF5 File ID         */
+    hid_t   file;       /* HDF5 File ID         */
     hid_t   dataset;    /* Dataset ID            */
-    hid_t   sid;    /* Dataspace ID            */
+    hid_t   sid;        /* Dataspace ID            */
     int     count;      /* operator data for the iterator */
     H5O_info_t oinfo;   /* Object info                  */
-    herr_t  ret;    /* Generic return value        */
+    herr_t  ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -1504,13 +1504,13 @@ test_attr_iterate(hid_t fapl)
 static void
 test_attr_delete(hid_t fapl)
 {
-    hid_t   fid1;    /* HDF5 File ID         */
+    hid_t   fid1;       /* HDF5 File ID         */
     hid_t   dataset;    /* Dataset ID            */
     hid_t   attr;       /* Attribute ID            */
     char    attr_name[ATTR_NAME_LEN]; /* Buffer for attribute names */
     ssize_t name_len;   /* Length of attribute name     */
     H5O_info_t oinfo;   /* Object info                  */
-    herr_t  ret;    /* Generic return value        */
+    herr_t  ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -1635,7 +1635,7 @@ test_attr_dtype_shared(hid_t fapl)
     H5O_info_t oinfo;           /* Object's information */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
-    herr_t  ret;        /* Generic return value        */
+    herr_t  ret;                /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Shared Datatypes with Attributes\n"));
@@ -1802,17 +1802,17 @@ test_attr_dtype_shared(hid_t fapl)
 static void
 test_attr_duplicate_ids(hid_t fapl)
 {
-    hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset;    /* Dataset ID            */
-    hid_t        gid1, gid2;    /* Group ID            */
+    hid_t        fid1;         /* HDF5 File IDs        */
+    hid_t        dataset;      /* Dataset ID            */
+    hid_t        gid1, gid2;   /* Group ID            */
     hid_t        sid1,sid2;    /* Dataspace ID            */
-    hid_t        attr, attr2;        /* Attribute ID        */
-    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t        dims2[] = {ATTR1_DIM1};
-    int                 read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
-    int                 rewrite_data[ATTR1_DIM1]={1234, -423, 9907256}; /* Test data for rewrite */
-    int                 i;
-    herr_t        ret;        /* Generic return value        */
+    hid_t        attr, attr2;  /* Attribute ID        */
+    hsize_t      dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t      dims2[] = {ATTR1_DIM1};
+    int          read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
+    int          rewrite_data[ATTR1_DIM1]={1234, -423, 9907256}; /* Test data for rewrite */
+    int          i;
+    herr_t       ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing operations with two ID handles\n"));
@@ -1830,7 +1830,7 @@ test_attr_duplicate_ids(hid_t fapl)
 
     /* Create a dataset */
     dataset = H5Dcreate2(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT,
-        H5P_DEFAULT, H5P_DEFAULT);
+            H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Create dataspace for attribute */
@@ -2047,12 +2047,12 @@ test_attr_duplicate_ids(hid_t fapl)
 static int
 test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
 {
-    char    attrname[NAME_BUF_SIZE];        /* Name of attribute */
-    hid_t    attr;            /* Attribute ID    */
+    char        attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    hid_t       attr;           /* Attribute ID    */
     unsigned    value;          /* Attribute value */
     unsigned    u;              /* Local index variable */
     int         old_nerrs;      /* Number of errors when entering this check */
-    herr_t    ret;        /* Generic return value    */
+    herr_t      ret;            /* Generic return value    */
 
     /* Retrieve the current # of reported errors */
     old_nerrs = GetTestNumErrs();
@@ -2117,19 +2117,19 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
 static void
 test_attr_dense_create(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;        /* HDF5 File ID            */
-    hid_t    dataset;    /* Dataset ID            */
-    hid_t    sid;            /* Dataspace ID            */
+    hid_t    fid;             /* HDF5 File ID            */
+    hid_t    dataset;         /* Dataset ID            */
+    hid_t    sid;             /* Dataspace ID            */
     hid_t    attr;            /* Attribute ID            */
     hid_t    dcpl;            /* Dataset creation property list ID */
-    char    attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    char     attrname[NAME_BUF_SIZE];        /* Name of attribute */
     unsigned    max_compact;    /* Maximum # of attributes to store compactly */
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
-    htri_t    is_dense;    /* Are attributes stored densely? */
+    htri_t      is_dense;       /* Are attributes stored densely? */
     unsigned    u;              /* Local index variable */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
-    herr_t    ret;        /* Generic return value        */
+    herr_t      ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dense Attribute Storage Creation\n"));
@@ -2248,19 +2248,19 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
 static void
 test_attr_dense_open(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;        /* HDF5 File ID            */
-    hid_t    dataset;    /* Dataset ID            */
-    hid_t    sid;            /* Dataspace ID            */
+    hid_t    fid;             /* HDF5 File ID            */
+    hid_t    dataset;         /* Dataset ID            */
+    hid_t    sid;             /* Dataspace ID            */
     hid_t    attr;            /* Attribute ID            */
     hid_t    dcpl;            /* Dataset creation property list ID */
-    char    attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    char     attrname[NAME_BUF_SIZE];        /* Name of attribute */
     unsigned    max_compact;    /* Maximum # of attributes to store compactly */
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
-    htri_t    is_dense;    /* Are attributes stored densely? */
+    htri_t      is_dense;       /* Are attributes stored densely? */
     unsigned    u;              /* Local index variable */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
-    herr_t    ret;        /* Generic return value        */
+    herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Opening Attributes in Dense Storage\n"));
@@ -2387,20 +2387,20 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
 static void
 test_attr_dense_delete(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;        /* HDF5 File ID            */
-    hid_t    dataset;    /* Dataset ID            */
-    hid_t    sid;            /* Dataspace ID            */
-    hid_t    attr;            /* Attribute ID            */
-    hid_t    dcpl;            /* Dataset creation property list ID */
-    char    attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    hid_t    fid;               /* HDF5 File ID            */
+    hid_t    dataset;           /* Dataset ID            */
+    hid_t    sid;               /* Dataspace ID            */
+    hid_t    attr;              /* Attribute ID            */
+    hid_t    dcpl;              /* Dataset creation property list ID */
+    char     attrname[NAME_BUF_SIZE];        /* Name of attribute */
     unsigned    max_compact;    /* Maximum # of attributes to store compactly */
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
-    htri_t    is_dense;    /* Are attributes stored densely? */
+    htri_t      is_dense;       /* Are attributes stored densely? */
     unsigned    u;              /* Local index variable */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
     H5O_info_t  oinfo;          /* Object info                  */
-    herr_t    ret;        /* Generic return value        */
+    herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deleting Attributes in Dense Storage\n"));
@@ -2565,21 +2565,21 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
 static void
 test_attr_dense_rename(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;        /* HDF5 File ID            */
-    hid_t    dataset;    /* Dataset ID            */
-    hid_t    sid;            /* Dataspace ID            */
-    hid_t    attr;            /* Attribute ID            */
-    hid_t    dcpl;            /* Dataset creation property list ID */
-    char    attrname[NAME_BUF_SIZE];        /* Name of attribute */
-    char    new_attrname[NAME_BUF_SIZE];    /* New name of attribute */
+    hid_t    fid;               /* HDF5 File ID            */
+    hid_t    dataset;           /* Dataset ID            */
+    hid_t    sid;               /* Dataspace ID            */
+    hid_t    attr;              /* Attribute ID            */
+    hid_t    dcpl;              /* Dataset creation property list ID */
+    char     attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    char     new_attrname[NAME_BUF_SIZE];    /* New name of attribute */
     unsigned    max_compact;    /* Maximum # of attributes to store compactly */
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
-    htri_t    is_dense;    /* Are attributes stored densely? */
+    htri_t    is_dense;         /* Are attributes stored densely? */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
     H5O_info_t  oinfo;          /* Object info */
     unsigned    u;              /* Local index variable */
-    herr_t    ret;        /* Generic return value        */
+    herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Renaming Attributes in Dense Storage\n"));
@@ -2724,21 +2724,21 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
 static void
 test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;        /* HDF5 File ID            */
-    hid_t    dataset;    /* Dataset ID            */
-    hid_t    sid;            /* Dataspace ID            */
+    hid_t    fid;             /* HDF5 File ID            */
+    hid_t    dataset;         /* Dataset ID            */
+    hid_t    sid;             /* Dataspace ID            */
     hid_t    attr;            /* Attribute ID            */
     hid_t    dcpl;            /* Dataset creation property list ID */
-    char    attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    char     attrname[NAME_BUF_SIZE];        /* Name of attribute */
     unsigned    max_compact;    /* Maximum # of attributes to store compactly */
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
-    htri_t    is_dense;    /* Are attributes stored densely? */
+    htri_t    is_dense;         /* Are attributes stored densely? */
     size_t      mesg_count;     /* # of shared messages */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
     H5O_info_t  oinfo;          /* Object info */
     unsigned    u;              /* Local index variable */
-    herr_t    ret;        /* Generic return value        */
+    herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Unlinking Object with Attributes in Dense Storage\n"));
@@ -2856,17 +2856,17 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
 {
     hid_t    fid;        /* HDF5 File ID            */
     hid_t    dataset;    /* Dataset ID            */
-    hid_t    sid;            /* Dataspace ID            */
+    hid_t    sid;             /* Dataspace ID            */
     hid_t    attr;            /* Attribute ID            */
     hid_t    dcpl;            /* Dataset creation property list ID */
-    char    attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    char     attrname[NAME_BUF_SIZE];        /* Name of attribute */
     unsigned    max_compact, rmax_compact;      /* Maximum # of attributes to store compactly */
     unsigned    min_dense, rmin_dense;          /* Minimum # of attributes to store "densely" */
-    htri_t    is_dense;    /* Are attributes stored densely? */
+    htri_t      is_dense;       /* Are attributes stored densely? */
     unsigned    u;              /* Local index variable */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
-    herr_t    ret;        /* Generic return value        */
+    herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Phase Change Limits For Attributes in Dense Storage\n"));
@@ -3019,13 +3019,13 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
 static void
 test_attr_dense_dup_ids(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid;        /* HDF5 File ID            */
-    hid_t    dataset;    /* Dataset ID            */
+    hid_t    fid;           /* HDF5 File ID            */
+    hid_t    dataset;       /* Dataset ID            */
     hid_t    gid1, gid2;    /* Group ID            */
-    hid_t    sid, sid2;    /* Dataspace ID            */
+    hid_t    sid, sid2;     /* Dataspace ID            */
     hid_t    attr, attr2, add_attr;    /* Attribute ID            */
     hid_t    dcpl;            /* Dataset creation property list ID */
-    char    attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    char     attrname[NAME_BUF_SIZE];        /* Name of attribute */
     hsize_t    dims[] = {ATTR1_DIM1};
     int         read_data1[ATTR1_DIM1]={0}; /* Buffer for reading attribute */
     int         rewrite_data[ATTR1_DIM1]={1234, -423, 9907256}; /* Test data for rewrite */
@@ -3033,9 +3033,9 @@ test_attr_dense_dup_ids(hid_t fcpl, hid_t fapl)
     unsigned    read_scalar;    /* variable for reading attribute*/
     unsigned    max_compact;    /* Maximum # of attributes to store compactly */
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
-    htri_t    is_dense;    /* Are attributes stored densely? */
+    htri_t      is_dense;       /* Are attributes stored densely? */
     unsigned    u, i;           /* Local index variable */
-    herr_t    ret;        /* Generic return value        */
+    herr_t      ret;            /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing operations with two IDs for Dense Storage\n"));
