@@ -638,7 +638,6 @@ CONTAINS
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
 !*****
-    INTEGER :: error_1
     INTERFACE
        INTEGER FUNCTION h5close_types_c(p_types, P_TYPES_LEN, &
             f_types, F_TYPES_LEN, &
@@ -653,10 +652,9 @@ CONTAINS
          INTEGER(HID_T), DIMENSION(I_TYPES_LEN) :: i_types
        END FUNCTION h5close_types_c
     END INTERFACE
-    error_1 = h5close_types_c(predef_types, PREDEF_TYPES_LEN, &
+    error = h5close_types_c(predef_types, PREDEF_TYPES_LEN, &
          floating_types, FLOATING_TYPES_LEN, &
          integer_types, INTEGER_TYPES_LEN )
-    error = error_1
 
   END SUBROUTINE h5close_f
 
