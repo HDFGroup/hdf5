@@ -340,8 +340,9 @@ H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success,
         {
             const H5Z_class2_t *filter_info;
 
-        /* Check if the filter IDs match */
-        if (info->id == id) {
+            /* Get the plugin info */
+            if (NULL == (filter_info = (const H5Z_class2_t *)(*get_plugin_info)()))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
 
             /* If the filter IDs match, we're done. Set the output parameters. */
             if (filter_info->id == key.id) {
@@ -349,9 +350,7 @@ H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success,
                 *success = TRUE;
             }
 
-            /* Set output parameters */
-            *success = TRUE;
-            *plugin_info = (const void *)info;
+            break;
         }
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
@@ -365,7 +364,7 @@ H5PL__open(const char *path, H5PL_type_t type, H5PL_key_t key, hbool_t *success,
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
 
 done:
-    if (!success && handle)
+    if (!(*success) && handle)
         if (H5PL__close(handle) < 0)
             HDONE_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
 
