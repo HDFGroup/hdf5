@@ -231,6 +231,17 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - filter plugin handling in H5PL.c and H5Z.c
+
+      It was discovered that the dynamic loading process used by
+      filter plugins had issues with library dependencies.
+
+      CMake build process changed to use LINK INTERFACE keywords, which
+      allowed HDF5 C library to make dependent libraries private. The
+      filter plugin libraries no longer require dependent libraries
+      (such as szip or zlib) to be available.
+             (ADB - 2017/11/16, HDFFV-10328)
+
     - Fix rare object header corruption bug
 
       In certain cases, such as when converting large attributes to dense
@@ -307,6 +318,18 @@ Bug Fixes since HDF5-1.10.1 release
 
     Configuration
     -------------
+    - cmake
+
+      The hdf5 library used shared szip and zlib, which needlessly required
+      applications to link with the same szip and zlib libraries.
+
+      Changed the target_link_libraries commands to use the static libs.
+      Removed improper link duplication of szip and zlib.
+      Adjusted the link dependencies and the link interface values of
+      the target_link_libraries commands.
+
+      (ADB - 2017/11/14, HDFFV-10329)
+
     - cmake MPI
 
       CMake implementation for MPI was problematic and would create incorrect
@@ -348,6 +371,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       Too many commands for POST_BUILD step caused command line to be
       too big on windows.
+
       Changed foreach of copy command to use a custom command with the
       use of the HDFTEST_COPY_FILE macro.
 
