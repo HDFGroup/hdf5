@@ -23,6 +23,9 @@
 /* Library Private Macros */
 /**************************/
 
+#define H5_REQUEST_NULL         NULL
+#define H5_EVENT_STACK_NULL     ((hid_t)-1)
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -56,6 +59,12 @@ typedef struct H5VL_driver_prop_t {
 
 H5_DLL herr_t H5VL_init(void);
 H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
+H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
+
+H5_DLL herr_t H5VL_file_close(void *file, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req);
+
+/* XXX: Try to put this in H5Fprivate.h */
+H5_DLL herr_t H5F_close_file(void *file);
 
 #endif /* _H5VLprivate_H */
 

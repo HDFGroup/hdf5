@@ -697,35 +697,34 @@ H5Fclose(hid_t file_id)
     H5TRACE1("e", "i", file_id);
 
     /* Check/fix arguments. */
-    if(H5I_FILE != H5I_get_type(file_id))
+    if (H5I_FILE != H5I_get_type(file_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
      * This is only necessary to replicate previous behaviour, and could be
-     * disabled by an option/property to improve performance. */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+     * disabled by an option/property to improve performance.
+     */
+    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
-        if((nref = H5I_get_ref(file_id, FALSE)) < 0)
+    if ((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
+        if ((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
-        if(nref == 1)
-            if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
+        if (nref == 1)
+            if (H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    } /* end if */
+    }
 
-    /*
-     * Decrement reference count on atom.  When it reaches zero the file will
+    /* Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    if(H5I_dec_app_ref(file_id) < 0)
+    if (H5I_dec_app_ref(file_id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclose() */
 
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_close_file
@@ -756,7 +755,6 @@ H5F_close_file(void *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_close_file() */
-#endif
 
 
 /*-------------------------------------------------------------------------

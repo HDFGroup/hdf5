@@ -31,6 +31,7 @@
 
 #include "H5private.h"          /* Generic Functions                                */
 #include "H5Eprivate.h"         /* Error handling                                   */
+#include "H5FLprivate.h"        /* Free lists                                       */
 #include "H5Iprivate.h"         /* IDs                                              */
 #include "H5MMprivate.h"        /* Memory management                                */
 #include "H5Pprivate.h"         /* Property lists                                   */
@@ -78,6 +79,12 @@ static const H5I_class_t H5I_VOL_CLS[1] = {{
     (H5I_free_t)H5VL_free_cls   /* Callback routine for closing objects of this class */
 }};
 
+/* Declare a free list to manage the H5VL_t struct */
+H5FL_DEFINE(H5VL_t);
+
+/* Declare a free list to manage the H5VL_object_t struct */
+H5FL_DEFINE(H5VL_object_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_init
@@ -124,7 +131,7 @@ H5VL__init_package(void)
 
     /* Initialize the atom group for the VL IDs */
     if(H5I_register_type(H5I_VOL_CLS) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize interface")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -196,7 +203,7 @@ H5VL_free_cls(H5VL_class_t *cls)
      * terminate operation - JTH
      */
     if(cls->terminate && cls->terminate(H5P_DEFAULT) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL plugin did not terminate cleanly")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL driver did not terminate cleanly");
 
     /* XXX: We'll leak memory if the name string was dynamically allocated. */
     H5MM_free(cls);
@@ -233,12 +240,12 @@ H5VL_register(const void *_cls, size_t size, hbool_t app_ref)
 
     /* Copy the class structure so the caller can reuse or free it */
     if(NULL == (saved = (H5VL_class_t *)H5MM_calloc(size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for vol plugin class struct")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for vol plugin class struct");
     HDmemcpy(saved, cls, size);
 
     /* Create the new class ID */
     if((ret_value = H5I_register(H5I_VOL, saved, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register vol plugin ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register vol plugin ID");
 
 done:
     if(ret_value < 0)
@@ -247,4 +254,67 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_free_object
+ *
+ * Purpose:     Wrapper to register an object ID with a VOL aux struct
+ *              and increment ref count on VOL plugin ID
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_free_object(H5VL_object_t *obj)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(SUCCEED)
+
+    /* Check arguments */
+    HDassert(obj);
+
+    obj->vol_info->nrefs --;
+    if (0 == obj->vol_info->nrefs) {
+        if (H5I_dec_ref(obj->vol_info->vol_id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL driver");
+        obj->vol_info = H5FL_FREE(H5VL_t, obj->vol_info);
+    }
+
+    obj = H5FL_FREE(H5VL_object_t, obj);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_free_object() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_file_close
+ *
+ * Purpose:     Closes a file through the VOL
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_file_close(void *file, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(file);
+    HDassert(vol_cls);
+
+    if (NULL == vol_cls->file_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file close' method");
+    if ((ret_value = (vol_cls->file_cls.close)(file, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_file_close() */
 
