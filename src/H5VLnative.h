@@ -17,8 +17,8 @@
  * Purpose:	The public header file for the native VOL driver.
  */
 
-#ifndef H5VLnative_H
-#define H5VLnative_H
+#ifndef _H5VLnative_H
+#define _H5VLnative_H
 
 /* Initializer function for native VOL driver */
 #define H5VL_NATIVE             (H5VL_native_init())
@@ -40,4 +40,4 @@ H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
 }
 #endif
 
-#endif
+#endif /* _H5VLnative_H */

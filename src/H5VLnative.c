@@ -272,6 +272,35 @@ H5VL__native_term(void)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__native_term() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_fapl_native
+ *
+ * Purpose:     Modify the file access property list to use the H5VL_NATIVE
+ *              driver defined in this source file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_fapl_native(hid_t fapl_id)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t          ret_value;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", fapl_id);
+
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+    ret_value = H5P_set_vol(plist, H5VL_NATIVE_g, NULL);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_fapl_native() */
+
 #if 0
 
 /*---------------------------------------------------------------------------
@@ -447,38 +476,6 @@ H5VL_native_unregister(hid_t obj_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL_native_unregister */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_fapl_native
- *
- * Purpose:	Modify the file access property list to use the H5VL_NATIVE
- *		plugin defined in this source file.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_fapl_native(hid_t fapl_id)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t          ret_value;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", fapl_id);
-
-    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
-    ret_value = H5P_set_vol(plist, H5VL_NATIVE_g, NULL);
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_fapl_native() */
 
 
 /*-------------------------------------------------------------------------

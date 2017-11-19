@@ -20,6 +20,7 @@
  */
 
 #include "h5test.h"
+#include "H5VLnative.h"
 
 
 #define FAKE_VOL_NAME   "fake"
@@ -108,7 +109,7 @@ static const H5VL_class_t fake_vol_g = {
  * Function:    test_vol_registration()
  *
  * Purpose:     Tests if we can load, register, and close a simple
- *              VOL plugin.
+ *              VOL driver.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -117,20 +118,32 @@ static const H5VL_class_t fake_vol_g = {
 static herr_t
 test_vol_registration(void)
 {
+    htri_t is_registered;
     hid_t vol_id = -1;
+
+    TESTING("VOL registration");
+
+    /* The test/fake VOL driver should not be registered at the start of the test */
+    if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
+        FAIL_STACK_ERROR;
+    if (is_registered > 0)
+        FAIL_PUTS_ERROR("native VOL driver is inappropriately registered");
 
     /* Load a VOL interface */
     if ((vol_id = H5VLregister(&fake_vol_g)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
-    /* Is the VOL interface registered? */
-    if (H5VLis_registered(FAKE_VOL_NAME) < 0)
-        FAIL_STACK_ERROR
+    /* The test/fake VOL driver should be registered now */
+    if ((is_registered = H5VLis_registered(FAKE_VOL_NAME)) < 0)
+        FAIL_STACK_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("native VOL driver is un-registered");
 
     /* Close the VOL interface */
     if (H5VLclose(vol_id) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
+    PASSED();
     return SUCCEED;
 
 error:
@@ -140,6 +153,37 @@ error:
     return FAIL;
 
 } /* end test_vol_registration() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_native_vol_init()
+ *
+ * Purpose:     Tests if the native VOL driver gets initialized.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_native_vol_init(void)
+{
+    htri_t is_registered;
+
+    TESTING("Native VOL driver initialization");
+
+    /* The native VOL driver should always be registered */
+    if ((is_registered = H5VLis_registered(H5VL_NATIVE_NAME)) < 0)
+        FAIL_STACK_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("native VOL driver is un-registered");
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* end test_native_vol_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -161,6 +205,7 @@ main(void)
     HDputs("Testing basic Virtual Object Layer (VOL) functionality.");
 
     nerrors += test_vol_registration() < 0      ? 1 : 0;
+    nerrors += test_native_vol_init() < 0      ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n",
