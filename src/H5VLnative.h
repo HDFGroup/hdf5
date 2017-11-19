@@ -25,7 +25,7 @@
 
 /* Characteristics of the native VOL driver */
 #define H5VL_NATIVE_NAME        "native"
-#define H5VL_NATIVE_VALUE       0
+#define H5VL_NATIVE_VALUE       H5_VOL_NATIVE   /* enum value */
 #define H5VL_NATIVE_VERSION     0
 
 

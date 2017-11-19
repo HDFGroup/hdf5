@@ -29,7 +29,7 @@
  */
 static const H5VL_class_t fake_vol_g = {
     0,                                              /* version      */
-    999,                                            /* value        */
+    (H5VL_class_value_t)999,                        /* value        */
     FAKE_VOL_NAME,                                  /* name         */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
@@ -160,7 +160,7 @@ main(void)
 
     HDputs("Testing basic Virtual Object Layer (VOL) functionality.");
 
-//    nerrors += test_vol_registration() < 0      ? 1 : 0;
+    nerrors += test_vol_registration() < 0      ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n",
