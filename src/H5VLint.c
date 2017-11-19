@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The Virtual Object Layer as described in documentation.
+ * Purpose:     The Virtual Object Layer as described in documentation.
  *              The pupose is to provide an abstraction on how to access the
  *              underlying HDF5 container, whether in a local file with
  *              a specific file format, or remotely on other machines, etc...
@@ -130,8 +130,8 @@ H5VL__init_package(void)
     FUNC_ENTER_PACKAGE
 
     /* Initialize the atom group for the VL IDs */
-    if(H5I_register_type(H5I_VOL_CLS) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize interface");
+    if (H5I_register_type(H5I_VOL_CLS) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize H5VL interface");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -143,8 +143,8 @@ done:
  *
  * Purpose:     Terminate various H5VL objects
  *
- * Return:      Success:    Non-negative
- *
+ * Return:      Success:    Positive if anything was done that might
+ *                          affect other interfaces; zero otherwise.
  *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
@@ -156,8 +156,8 @@ H5VL_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_PKG_INIT_VAR) {
-        if(H5I_nmembers(H5I_VOL) > 0) {
+    if (H5_PKG_INIT_VAR) {
+        if (H5I_nmembers(H5I_VOL) > 0) {
             (void)H5I_clear_type(H5I_VOL, FALSE, FALSE);
             n++;
         }
@@ -166,10 +166,10 @@ H5VL_term_package(void)
             n += (H5I_dec_type_ref(H5I_VOL) > 0);
 
             /* Mark interface as closed */
-            if(0 == n)
+            if (0 == n)
                 H5_PKG_INIT_VAR = FALSE;
         }
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5VL_term_package() */
@@ -183,9 +183,7 @@ H5VL_term_package(void)
  *              virtual object layer object identifiers
  *              (c.f.: H5VL_init_interface).
  *
- * Return:      Success:    Non-negative
- *
- *              Failure:    Negative
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -202,7 +200,7 @@ H5VL_free_cls(H5VL_class_t *cls)
     /* XXX: Need to retrieve the VOL termination property list for the
      * terminate operation - JTH
      */
-    if(cls->terminate && cls->terminate(H5P_DEFAULT) < 0)
+    if (cls->terminate && cls->terminate(H5P_DEFAULT) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL driver did not terminate cleanly");
 
     /* XXX: We'll leak memory if the name string was dynamically allocated. */
@@ -216,10 +214,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL_register
  *
- * Purpose:     Registers a new vol plugin as a member of the virtual object
+ * Purpose:     Registers a new vol driver as a member of the virtual object
  *              layer class.
  *
- * Return:      Success:    A vol plugin ID which is good until the
+ * Return:      Success:    A vol driver ID which is good until the
  *                          library is closed or the driver is unregistered.
  *
  *              Failure:    A negative value.
@@ -239,17 +237,17 @@ H5VL_register(const void *_cls, size_t size, hbool_t app_ref)
     HDassert(cls);
 
     /* Copy the class structure so the caller can reuse or free it */
-    if(NULL == (saved = (H5VL_class_t *)H5MM_calloc(size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for vol plugin class struct");
+    if (NULL == (saved = (H5VL_class_t *)H5MM_calloc(size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for vol driver class struct");
     HDmemcpy(saved, cls, size);
 
     /* Create the new class ID */
-    if((ret_value = H5I_register(H5I_VOL, saved, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register vol plugin ID");
+    if ((ret_value = H5I_register(H5I_VOL, saved, app_ref)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register vol driver ID");
 
 done:
-    if(ret_value < 0)
-        if(saved)
+    if (ret_value < 0)
+        if (saved)
             H5MM_xfree(saved);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -260,7 +258,7 @@ done:
  * Function:    H5VL_free_object
  *
  * Purpose:     Wrapper to register an object ID with a VOL aux struct
- *              and increment ref count on VOL plugin ID
+ *              and increment ref count on VOL driver ID
  *
  * Return:      SUCCEED/FAIL
  *
@@ -310,7 +308,7 @@ H5VL_file_close(void *file, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **r
     HDassert(vol_cls);
 
     if (NULL == vol_cls->file_cls.close)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file close' method");
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL driver has no `file close' method");
     if ((ret_value = (vol_cls->file_cls.close)(file, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed");
 

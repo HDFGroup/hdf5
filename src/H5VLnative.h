@@ -14,16 +14,17 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
- *              January, 2012
- *
- * Purpose:	The public header file for the Native VOL plugin.
+ * Purpose:	The public header file for the native VOL driver.
  */
+
 #ifndef H5VLnative_H
 #define H5VLnative_H
 
-#define H5VL_NATIVE	(H5VL_native_init())
-#define HDF5_VOL_NATIVE_VERSION_1	1	/* Version number of Native VOL plugin */
+/* Initializer function for native VOL driver */
+#define H5VL_NATIVE                 (H5VL_native_init())
+
+/* Version number of native VOL driver */
+#define HDF5_VOL_NATIVE_VERSION_1	1
 
 #ifdef __cplusplus
 extern "C" {

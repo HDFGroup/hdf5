@@ -28,27 +28,27 @@
 #define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Apkg.h"             /* Attribute pkg                        */
-#include "H5Dpkg.h"             /* Dataset pkg                          */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File pkg                             */
-#include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5HGprivate.h"	/* Global Heaps				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Lpkg.h"             /* links headers			*/
-#include "H5MFprivate.h"	/* File memory management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Rpkg.h"		/* References   			*/
-#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
-#include "H5Tpkg.h"		/* Datatypes				*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
-#include "H5VLnative.h"         /* Native VOL plugin			*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Apkg.h"             /* Attributes                               */
+#include "H5Dpkg.h"             /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fpkg.h"             /* Files                                    */
+#include "H5Gpkg.h"             /* Groups                                   */
+#include "H5HGprivate.h"        /* Global Heaps                             */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Lpkg.h"             /* Links                                    */
+#include "H5MFprivate.h"        /* File memory management                   */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Opkg.h"             /* Object headers                           */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5Rpkg.h"             /* References                               */
+#include "H5SMprivate.h"        /* Shared Object Header Messages            */
+#include "H5Tpkg.h"             /* Datatypes                                */
+#include "H5VLprivate.h"        /* VOL drivers                              */
+#include "H5VLnative.h"         /* Native VOL driver                        */
 
 /*
- * The vol identification number.
+ * The VOL driver identification number.
  */
 static hid_t H5VL_NATIVE_g = 0;
 
@@ -117,10 +117,10 @@ static herr_t H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5
 static herr_t H5VL_native_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_object_optional(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 
-//static const H5VL_class_t echo_vol_g = {
+/* Native VOL driver class struct */
 static H5VL_class_t H5VL_native_g = {
     0,                                              /* version      */
-    0,                                              /* category     */
+    0,                                              /* value        */
     "native",                                       /* name         */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
@@ -216,8 +216,8 @@ H5VL__init_package(void)
 
     FUNC_ENTER_STATIC
 
-    if(H5VL_native_init() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize Native VOL")
+    if (H5VL_native_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize native VOL driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
