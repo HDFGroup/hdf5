@@ -21,10 +21,13 @@
 #define H5VLnative_H
 
 /* Initializer function for native VOL driver */
-#define H5VL_NATIVE                 (H5VL_native_init())
+#define H5VL_NATIVE             (H5VL_native_init())
 
-/* Version number of native VOL driver */
-#define HDF5_VOL_NATIVE_VERSION_1	1
+/* Characteristics of the native VOL driver */
+#define H5VL_NATIVE_NAME        "native"
+#define H5VL_NATIVE_VALUE       0
+#define H5VL_NATIVE_VERSION     0
+
 
 #ifdef __cplusplus
 extern "C" {

@@ -1970,6 +1970,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 
 /* Macros for defining package initialization routines */
 #ifdef H5_MY_PKG
+
 #define H5_PKG_INIT_VAR                 H5_PACKAGE_INIT_VAR(H5_MY_PKG)
 #define H5_PKG_INIT_FUNC                H5_PACKAGE_INIT_FUNC(H5_MY_PKG)
 #define H5_PACKAGE_YES_INIT(err)                                              \
@@ -1986,9 +1987,12 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     if(!H5_PKG_INIT_VAR && !H5_TERM_GLOBAL)                                   \
         H5_PKG_INIT_VAR = TRUE;
 #define H5_PACKAGE_INIT(pkg_init, err)  H5_GLUE3(H5_PACKAGE_, pkg_init, _INIT)(err)
+
 #else /* H5_MY_PKG */
+
 #define H5_PKG_INIT_VAR                 (TRUE)
 #define H5_PACKAGE_INIT(pkg_init, err)
+
 #endif /* H5_MY_PKG */
 
 

@@ -119,9 +119,9 @@ static herr_t H5VL_native_object_optional(void *obj, hid_t dxpl_id, void **req, 
 
 /* Native VOL driver class struct */
 static H5VL_class_t H5VL_native_g = {
-    0,                                              /* version      */
-    0,                                              /* value        */
-    "native",                                       /* name         */
+    H5VL_NATIVE_VERSION,                            /* version      */
+    H5VL_NATIVE_VALUE,                              /* value        */
+    H5VL_NATIVE_NAME,                               /* name         */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */
     (size_t)0,                                      /* fapl size    */
@@ -194,21 +194,16 @@ static H5VL_class_t H5VL_native_g = {
     NULL                                            /* optional     */
 };
 
-#if 0
 
-/*--------------------------------------------------------------------------
-NAME
-   H5VL_native_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5VL_native_init_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5VL_native_init currently).
-
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__init_package
+ *
+ * Purpose:     Initializes any interface-specific data or routines.
+ *
+ * Return:      SUCCEED/FAILURE
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5VL__init_package(void)
 {
@@ -222,20 +217,16 @@ H5VL__init_package(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__init_package() */
-#endif
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_init
+ * Function:    H5VL_native_init
  *
- * Purpose:	Initialize this vol plugin by registering the driver with the
- *		library.
+ * Purpose:     Initialize this VOL driver by registering it with the
+ *              library.
  *
- * Return:	Success:	The ID for the native plugin.
- *		Failure:	Negative.
- *
- * Programmer:	Mohamad Chaarawi
- *              January, 2012
+ * Return:      Success:    The ID for the native driver
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -246,11 +237,11 @@ H5VL_native_init(void)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Register the Native VOL, if it isn't already */
-    if(NULL == H5I_object_verify(H5VL_NATIVE_g, H5I_VOL)) {
-        if((H5VL_NATIVE_g = H5VL_register((const H5VL_class_t *)&H5VL_native_g, 
+    /* Register the native VOL driver, if it isn't already */
+    if (NULL == H5I_object_verify(H5VL_NATIVE_g, H5I_VOL)) {
+        if ((H5VL_NATIVE_g = H5VL_register((const H5VL_class_t *)&H5VL_native_g, 
                                           sizeof(H5VL_class_t), TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't create ID for native plugin")
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't create ID for native VOL driver")
     }
 
     /* Set return value */
