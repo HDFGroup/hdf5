@@ -2214,15 +2214,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_file_close
+ * Function:    H5VL_native_file_close
  *
- * Purpose:	Closes a file.
+ * Purpose:     Closes a file.
  *
- * Return:	Success:	0
- *		Failure:	-1, file not closed.
- *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ * Return:      SUCCEED/FAIL (the file will not be closed on failure)
  *
  *-------------------------------------------------------------------------
  */
@@ -2236,27 +2232,29 @@ H5VL_native_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(f->id_exists);  /* This routine should only be called when a file ID's ref count drops to zero */
+    /* This routine should only be called when a file ID's ref count drops to zero */
+    HDassert(f->id_exists);
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
      * This is only necessary to replicate previous behaviour, and could be
-     * disabled by an option/property to improve performance. */
-    if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
+     * disabled by an option/property to improve performance.
+     */
+    if ((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
         /* get the file ID corresponding to the H5F_t struct */
-        if((file_id = H5I_get_id(f, H5I_FILE)) < 0)
+        if ((file_id = H5I_get_id(f, H5I_FILE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom")
         /* get the number of references outstanding for this file ID */
-        if((nref = H5I_get_ref(file_id, FALSE)) < 0)
+        if ((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
-        if(nref == 1)
-            if(H5F_flush(f, dxpl_id, FALSE) < 0)
+        if (nref == 1)
+            if (H5F_flush(f, dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
     /* close the file */
-    if(H5F_close(f) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")
+    if (H5F_close(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
