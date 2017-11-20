@@ -72,101 +72,101 @@ CONTAINS
     INTEGER, INTENT(OUT) :: error
 !*****
     !
-    ! H5F flags
+    ! H5F flags declaration
     !
     INTEGER, PARAMETER :: H5F_FLAGS_LEN = 19
-    INTEGER :: H5F_flags(H5F_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5F_FLAGS_LEN) :: H5F_flags
     !
-    ! H5generic flags
+    ! H5generic flags declaration
     !
     INTEGER, PARAMETER :: H5generic_FLAGS_LEN = 9
-    INTEGER :: H5generic_flags(H5generic_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5generic_FLAGS_LEN) :: H5generic_flags
 
     INTEGER, PARAMETER :: H5generic_haddr_FLAGS_LEN = 1
-    INTEGER(HADDR_T) :: H5generic_haddr_flags(H5generic_haddr_FLAGS_LEN)
+    INTEGER(HADDR_T), DIMENSION(1:H5generic_haddr_FLAGS_LEN) :: H5generic_haddr_flags
     !
-    ! H5G flags
+    ! H5G flags declaration
     !
     INTEGER, PARAMETER :: H5G_FLAGS_LEN = 12
-    INTEGER :: H5G_flags(H5G_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5G_FLAGS_LEN) :: H5G_flags
     !
-    ! H5D flags
+    ! H5D flags declaration
     !
     INTEGER, PARAMETER :: H5D_FLAGS_LEN = 29
-    INTEGER :: H5D_flags(H5D_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5D_FLAGS_LEN) :: H5D_flags
     INTEGER, PARAMETER :: H5D_SIZE_FLAGS_LEN = 2
-    INTEGER(SIZE_T) :: H5D_size_flags(H5D_SIZE_FLAGS_LEN)
+    INTEGER(SIZE_T), DIMENSION(1:H5D_SIZE_FLAGS_LEN) :: H5D_size_flags
     !
-    ! H5E flags
+    ! H5E flags declaration
     !
     INTEGER, PARAMETER :: H5E_FLAGS_LEN = 4
-    INTEGER :: H5E_flags(H5E_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5E_FLAGS_LEN) :: H5E_flags
     INTEGER, PARAMETER :: H5E_HID_FLAGS_LEN = 1
-    INTEGER(HID_T) :: H5E_hid_flags(H5E_HID_FLAGS_LEN)
+    INTEGER(HID_T), DIMENSION(1:H5E_HID_FLAGS_LEN) :: H5E_hid_flags
     !
-    ! H5FD flags
+    ! H5FD flags declaration
     !
     INTEGER, PARAMETER :: H5FD_FLAGS_LEN = 11
-    INTEGER :: H5FD_flags(H5FD_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5FD_FLAGS_LEN) :: H5FD_flags
     !
-    ! H5FD file drivers flags 
+    ! H5FD file drivers flags declaration 
     !
     INTEGER, PARAMETER :: H5FD_HID_FLAGS_LEN = 7
-    INTEGER(HID_T) :: H5FD_hid_flags(H5FD_HID_FLAGS_LEN)
+    INTEGER(HID_T), DIMENSION(1:H5FD_HID_FLAGS_LEN) :: H5FD_hid_flags
     !
-    ! H5I flags
+    ! H5I flags declaration
     !
     INTEGER, PARAMETER :: H5I_FLAGS_LEN = 7
-    INTEGER :: H5I_flags(H5I_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5I_FLAGS_LEN) :: H5I_flags
     !
-    ! H5L flags
+    ! H5L flags declaration
     !
     INTEGER, PARAMETER :: H5L_FLAGS_LEN = 6
-    INTEGER :: H5L_flags(H5L_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5L_FLAGS_LEN) :: H5L_flags
     !
-    ! H5O flags
+    ! H5O flags declaration
     !
     INTEGER, PARAMETER :: H5O_FLAGS_LEN = 27
-    INTEGER :: H5o_flags(H5O_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5O_FLAGS_LEN) :: H5o_flags
     !
-    ! H5P flags
+    ! H5P flags declaration
     !
     INTEGER, PARAMETER :: H5P_FLAGS_LEN = 18
-    INTEGER(HID_T) H5P_flags(H5P_FLAGS_LEN)
+    INTEGER(HID_T), DIMENSION(1:H5P_FLAGS_LEN) :: H5P_flags
     !
-    ! H5P integers flags
+    ! H5P integers flags declaration
     !
     INTEGER, PARAMETER :: H5P_FLAGS_INT_LEN = 2
-    INTEGER :: H5P_flags_int(H5P_FLAGS_INT_LEN)
+    INTEGER, DIMENSION(1:H5P_FLAGS_INT_LEN) :: H5P_flags_int
     !
-    ! H5R flags
+    ! H5R flags declaration
     !
     INTEGER, PARAMETER :: H5R_FLAGS_LEN = 2
-    INTEGER :: H5R_flags(H5R_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5R_FLAGS_LEN) :: H5R_flags
     !
-    ! H5S flags
+    ! H5S flags declaration
     !
     INTEGER, PARAMETER :: H5S_FLAGS_LEN = 18
-    INTEGER :: H5S_flags(H5S_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5S_FLAGS_LEN) :: H5S_flags
     INTEGER, PARAMETER :: H5S_HSIZE_FLAGS_LEN = 1
-    INTEGER(HSIZE_T) H5S_hsize_flags(H5S_HSIZE_FLAGS_LEN)
+    INTEGER(HSIZE_T), DIMENSION(1:H5S_HSIZE_FLAGS_LEN) :: H5S_hsize_flags
     INTEGER, PARAMETER :: H5S_HID_FLAGS_LEN = 1
-    INTEGER(HSIZE_T) H5S_hid_flags(H5S_HID_FLAGS_LEN)
+    INTEGER(HSIZE_T), DIMENSION(1:H5S_HID_FLAGS_LEN) :: H5S_hid_flags
     !
-    ! H5T flags
+    ! H5T flags declaration
     !
     INTEGER, PARAMETER :: H5T_FLAGS_LEN = 35
-    INTEGER :: H5T_flags(H5T_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5T_FLAGS_LEN) :: H5T_flags
     !
-    ! H5Z flags
+    ! H5Z flags declaration
     !
     INTEGER, PARAMETER :: H5Z_FLAGS_LEN = 20
-    INTEGER :: H5Z_flags(H5Z_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5Z_FLAGS_LEN) :: H5Z_flags
     !
-    ! H5 Library flags
+    ! H5 Library flags declaration
     !
     INTEGER, PARAMETER :: H5LIB_FLAGS_LEN =  2
-    INTEGER :: H5LIB_flags(H5LIB_FLAGS_LEN)
+    INTEGER, DIMENSION(1:H5LIB_FLAGS_LEN) :: H5LIB_flags
 
     INTERFACE
        INTEGER FUNCTION h5init_types_c(p_types, f_types, i_types) &
@@ -174,9 +174,9 @@ CONTAINS
          IMPORT :: HID_T
          IMPORT :: PREDEF_TYPES_LEN, FLOATING_TYPES_LEN, INTEGER_TYPES_LEN
          IMPLICIT NONE
-         INTEGER(HID_T), DIMENSION(PREDEF_TYPES_LEN) :: p_types
-         INTEGER(HID_T), DIMENSION(FLOATING_TYPES_LEN) :: f_types
-         INTEGER(HID_T), DIMENSION(INTEGER_TYPES_LEN) :: i_types
+         INTEGER(HID_T), DIMENSION(1:PREDEF_TYPES_LEN) :: p_types
+         INTEGER(HID_T), DIMENSION(1:FLOATING_TYPES_LEN) :: f_types
+         INTEGER(HID_T), DIMENSION(1:INTEGER_TYPES_LEN) :: i_types
        END FUNCTION h5init_types_c
     END INTERFACE
     INTERFACE
@@ -211,27 +211,27 @@ CONTAINS
               H5R_FLAGS_LEN, H5S_FLAGS_LEN, H5S_HID_FLAGS_LEN, H5S_HSIZE_FLAGS_LEN, &
               H5T_FLAGS_LEN, H5Z_FLAGS_LEN, H5generic_FLAGS_LEN, H5generic_haddr_FLAGS_LEN
          IMPLICIT NONE
-         INTEGER i_H5D_flags(H5D_FLAGS_LEN)
-         INTEGER(SIZE_T) i_H5D_size_flags(H5D_SIZE_FLAGS_LEN)
-         INTEGER i_H5E_flags(H5E_FLAGS_LEN)
-         INTEGER(HID_T) i_H5E_hid_flags(H5E_HID_FLAGS_LEN)
-         INTEGER i_H5F_flags(H5F_FLAGS_LEN)
-         INTEGER i_H5G_flags(H5G_FLAGS_LEN)
-         INTEGER i_H5FD_flags(H5FD_FLAGS_LEN)
-         INTEGER(HID_T) i_H5FD_hid_flags(H5FD_HID_FLAGS_LEN)
-         INTEGER i_H5I_flags(H5I_FLAGS_LEN)
-         INTEGER i_H5L_flags(H5L_FLAGS_LEN)
-         INTEGER i_H5O_flags(H5O_FLAGS_LEN)
-         INTEGER(HID_T) i_H5P_flags(H5P_FLAGS_LEN)
-         INTEGER i_H5P_flags_int(H5P_FLAGS_INT_LEN)
-         INTEGER i_H5R_flags(H5R_FLAGS_LEN)
-         INTEGER i_H5S_flags(H5S_FLAGS_LEN)
-         INTEGER(HID_T) i_H5S_hid_flags(H5S_HID_FLAGS_LEN)
-         INTEGER(HSIZE_T) i_H5S_hsize_flags(H5S_HSIZE_FLAGS_LEN)
-         INTEGER i_H5T_flags(H5T_FLAGS_LEN)
-         INTEGER i_H5Z_flags(H5Z_FLAGS_LEN)
-         INTEGER i_H5generic_flags(H5generic_FLAGS_LEN)
-         INTEGER(HADDR_T) i_H5generic_haddr_flags(H5generic_haddr_FLAGS_LEN)
+         INTEGER, DIMENSION(1:H5D_FLAGS_LEN) :: i_H5D_flags
+         INTEGER(SIZE_T), DIMENSION(1:H5D_SIZE_FLAGS_LEN) :: i_H5D_size_flags
+         INTEGER, DIMENSION(1:H5E_FLAGS_LEN) :: i_H5E_flags
+         INTEGER(HID_T), DIMENSION(1:H5E_HID_FLAGS_LEN) :: i_H5E_hid_flags
+         INTEGER, DIMENSION(1:H5F_FLAGS_LEN) :: i_H5F_flags
+         INTEGER, DIMENSION(1:H5G_FLAGS_LEN) :: i_H5G_flags
+         INTEGER, DIMENSION(1:H5FD_FLAGS_LEN) :: i_H5FD_flags
+         INTEGER(HID_T), DIMENSION(1:H5FD_HID_FLAGS_LEN) :: i_H5FD_hid_flags
+         INTEGER, DIMENSION(1:H5I_FLAGS_LEN) :: i_H5I_flags
+         INTEGER, DIMENSION(1:H5L_FLAGS_LEN) :: i_H5L_flags
+         INTEGER, DIMENSION(1:H5O_FLAGS_LEN) :: i_H5O_flags
+         INTEGER(HID_T), DIMENSION(1:H5P_FLAGS_LEN) :: i_H5P_flags
+         INTEGER, DIMENSION(1:H5P_FLAGS_INT_LEN) :: i_H5P_flags_int
+         INTEGER, DIMENSION(1:H5R_FLAGS_LEN) :: i_H5R_flags
+         INTEGER, DIMENSION(1:H5S_FLAGS_LEN) :: i_H5S_flags
+         INTEGER(HID_T), DIMENSION(1:H5S_HID_FLAGS_LEN) :: i_H5S_hid_flags
+         INTEGER(HSIZE_T), DIMENSION(1:H5S_HSIZE_FLAGS_LEN) :: i_H5S_hsize_flags
+         INTEGER, DIMENSION(1:H5T_FLAGS_LEN) :: i_H5T_flags
+         INTEGER, DIMENSION(1:H5Z_FLAGS_LEN) :: i_H5Z_flags
+         INTEGER, DIMENSION(1:H5generic_FLAGS_LEN) :: i_H5generic_flags
+         INTEGER(HADDR_T), DIMENSION(1:H5generic_haddr_FLAGS_LEN) :: i_H5generic_haddr_flags
        END FUNCTION h5init_flags_c
     END INTERFACE
     INTERFACE
@@ -239,7 +239,7 @@ CONTAINS
             BIND(C,NAME='h5init1_flags_c')
          IMPORT :: H5LIB_FLAGS_LEN
          IMPLICIT NONE
-         INTEGER i_H5LIB_flags(H5LIB_FLAGS_LEN)
+         INTEGER, DIMENSION(1:H5LIB_FLAGS_LEN) :: i_H5LIB_flags
        END FUNCTION h5init1_flags_c
     END INTERFACE
 
@@ -644,12 +644,12 @@ CONTAINS
             i_types, I_TYPES_LEN ) &
             BIND(C,NAME='h5close_types_c')
          IMPORT :: HID_T
-         INTEGER P_TYPES_LEN
-         INTEGER F_TYPES_LEN
-         INTEGER I_TYPES_LEN
-         INTEGER(HID_T), DIMENSION(P_TYPES_LEN) :: p_types
-         INTEGER(HID_T), DIMENSION(F_TYPES_LEN) :: f_types
-         INTEGER(HID_T), DIMENSION(I_TYPES_LEN) :: i_types
+         INTEGER :: P_TYPES_LEN
+         INTEGER :: F_TYPES_LEN
+         INTEGER :: I_TYPES_LEN
+         INTEGER(HID_T), DIMENSION(1:P_TYPES_LEN) :: p_types
+         INTEGER(HID_T), DIMENSION(1:F_TYPES_LEN) :: f_types
+         INTEGER(HID_T), DIMENSION(1:I_TYPES_LEN) :: i_types
        END FUNCTION h5close_types_c
     END INTERFACE
     error = h5close_types_c(predef_types, PREDEF_TYPES_LEN, &
