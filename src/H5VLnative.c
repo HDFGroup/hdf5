@@ -301,17 +301,16 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_native() */
 
-#if 0
 
 /*---------------------------------------------------------------------------
- * Function:	H5VL_native_get_file
+ * Function:    H5VL_native_get_file
  *
- * Purpose:	utility routine to get file object
+ * Purpose:     Utility routine to get file struct for an object via the
+ *              native VOL driver.
  *
- * Returns:     Non-negative on success or negative on failure
- *
- * Programmer:  Mohamad Chaarawi
- *              June, 2012
+ * Returns:     SUCCESS:    A pointer to the H5F_t struct for the file
+ *                          associated with the object.
+ *              FAILURE:    NULL
  *
  *---------------------------------------------------------------------------
  */
@@ -370,31 +369,30 @@ H5VL_native_get_file(void *obj, H5I_type_t type)
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
-    } /* end switch */
+    }
 
-    if(!ret_value) {
-	if(!oloc)
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "object is not assocated with a file")
-	ret_value = oloc->file;
-    } /* end if */
-    if(!ret_value)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "object is not associated with a file")
+    if (!ret_value) {
+        if (!oloc)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "object is not assocated with a file")
+        ret_value = oloc->file;
+    }
+    if (!ret_value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "object is not associated with a file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL_native_get_file */
 
+#if 0
 
 /*---------------------------------------------------------------------------
- * Function:	H5VL_native_register
+ * Function:    H5VL_native_register
  *
- * Purpose:	utility routine to register an ID with the native VOL plugin 
- *              as an auxilary object
+ * Purpose:     Utility routine to register an ID with the native VOL driver
+ *              as an auxilary object.
  *
- * Returns:     Non-negative on success or negative on failure
- *
- * Programmer:  Mohamad Chaarawi
- *              June, 2012
+ * Returns:     Success:    An ID for the object
+ *              Failure:    FAIL
  *
  *---------------------------------------------------------------------------
  */
@@ -408,13 +406,14 @@ H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
     HDassert(obj);
 
     /* make sure this is from the internal Native plugin not from the API */
-    if(type == H5I_DATATYPE)
+    if (type == H5I_DATATYPE)
         HDassert(((H5T_t *)obj)->vol_obj == NULL);
 
     /* Get an atom for the object */
     if ((ret_value = H5VL_object_register(obj, type, H5VL_NATIVE_g, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
+/* XXX: Unclear why this is disabled */
 #if 0
     else {
         H5VL_t *vol_info = NULL;        /* VOL info struct */
@@ -442,18 +441,16 @@ H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL_native_register */
+} /* end H5VL_native_register() */
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5VL_native_unregister
+ * Function:    H5VL_native_unregister
  *
- * Purpose:	utility routine to decrement ref count on Native VOL plugin
+ * Purpose:     Utility routine to decrement ref count on Native VOL driver
+ *              objects.
  *
- * Returns:     Non-negative on success or negative on failure
- *
- * Programmer:  Mohamad Chaarawi
- *              August, 2014
+ * Returns:     SUCCEED/FAIL
  *
  *---------------------------------------------------------------------------
  */
@@ -470,12 +467,12 @@ H5VL_native_unregister(hid_t obj_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid ID")
 
     /* free object */
-    if(H5VL_free_object(obj) < 0)
+    if (H5VL_free_object(obj) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL_native_unregister */
+} /* end H5VL_native_unregister() */
 
 
 /*-------------------------------------------------------------------------

@@ -66,5 +66,8 @@ H5_DLL herr_t H5VL_file_close(void *file, const H5VL_class_t *vol_cls, hid_t dxp
 /* XXX: Try to put this in H5Fprivate.h */
 H5_DLL herr_t H5F_close_file(void *file);
 
+/* XXX: These belong in a private native driver header, not here... */
+H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);
+H5_DLL herr_t H5VL_native_unregister(hid_t obj_id);
 #endif /* _H5VLprivate_H */
 
