@@ -50,7 +50,6 @@ MODULE H5GLOBAL
   END ENUM
   INTEGER, PARAMETER :: ENUM_T = KIND(enum_dtype)
   
-
   ! Definitions for reference datatypes.
   ! If you change the value of these parameters, do not forget to change corresponding
   ! values in the H5f90.h file.
@@ -85,9 +84,9 @@ MODULE H5GLOBAL
 
   ! These arrays need to be global because they are used in 
   ! both h5open_f and in h5close_f
-  INTEGER(HID_T), DIMENSION(PREDEF_TYPES_LEN)   :: predef_types
-  INTEGER(HID_T), DIMENSION(FLOATING_TYPES_LEN) :: floating_types
-  INTEGER(HID_T), DIMENSION(INTEGER_TYPES_LEN)  :: integer_types
+  INTEGER(HID_T), DIMENSION(1:PREDEF_TYPES_LEN)   :: predef_types
+  INTEGER(HID_T), DIMENSION(1:FLOATING_TYPES_LEN) :: floating_types
+  INTEGER(HID_T), DIMENSION(1:INTEGER_TYPES_LEN)  :: integer_types
   !
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_FLOAT
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_DOUBLE
@@ -410,7 +409,7 @@ MODULE H5GLOBAL
   INTEGER :: H5T_DIR_ASCEND_F
   INTEGER :: H5T_DIR_DESCEND_F
   !
-  ! H5Z flags
+  ! H5Z flags declaration
   !
   INTEGER :: H5Z_FILTER_ERROR_F
   INTEGER :: H5Z_FILTER_NONE_F
@@ -433,7 +432,7 @@ MODULE H5GLOBAL
   INTEGER :: H5Z_SO_INT_F
   INTEGER :: H5Z_SO_INT_MINBITS_DEFAULT_F
   !
-  ! H5 Library flags
+  ! H5 Library flags declaration
   !
   INTEGER :: H5_SZIP_EC_OM_F
   INTEGER :: H5_SZIP_NN_OM_F
