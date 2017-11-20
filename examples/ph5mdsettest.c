@@ -6233,7 +6233,7 @@ main(int argc, char **argv)
     }
 
     /* show test file names */
-    if (mpi_rank == 0){
+    if (mpi_rank == 0  && TEST_TYPE == 1){
 	    n = sizeof(testfiles)/sizeof(testfiles[0]);
     	printf("Parallel test files are:\n");
 	    for (i=0; i<n; i++){
