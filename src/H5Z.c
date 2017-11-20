@@ -318,7 +318,7 @@ H5Z_register (const H5Z_class2_t *cls)
     /* Filter already registered */
     else {
         /* Replace old contents */
-        HDmemcpy (old_cls, cls, sizeof(H5Z_class2_t));
+        HDmemcpy (H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
     } /* end else */
 
 done:
