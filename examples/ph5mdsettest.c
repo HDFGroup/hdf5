@@ -123,8 +123,8 @@ typedef enum multi_mode_t {
 
 /* Constants definitions */
 /* Use even number which can be divided by 2 processes */
-#define SPACE1_DIM1 12 
-#define SPACE1_DIM2 8
+#define SPACE1_DIM1 128 
+#define SPACE1_DIM2 32
 
 #define SPACE1_RANK	2
 
@@ -6173,9 +6173,11 @@ parse_options(int argc, char **argv)
 	if ((env=getenv(PARAPREFIX))==NULL){
 	    env = env_default;
 	}
-    if(fname_g[0]==0)
-        sprintf(fname_g,"mdset_perf.h5",*argv);
-    	mkfilenames(env);
+	if(fname_g[0]==0)
+	  sprintf(fname_g,"mdset_perf.h5",*argv);
+	if(TEST_TYPE == 1) {
+	  mkfilenames(env);
+	}
     }
     return(0);
 }
