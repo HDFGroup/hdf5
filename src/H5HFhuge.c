@@ -345,8 +345,12 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
 
     /* Check for I/O pipeline filter on heap */
     if(hdr->filter_len > 0) {
-        H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+        H5Z_cb_t filter_cb;                 /* Filter callback structure */
         size_t nbytes;                      /* Number of bytes used */
+
+        /* Initialize the filter callback struct */
+        filter_cb.op_data = NULL;
+        filter_cb.func = NULL;          /* no callback function when failed */
 
         /* Allocate buffer to perform I/O filtering on */
         write_size = obj_size;
@@ -773,9 +777,13 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
     /* Check for I/O pipeline filter on heap */
     if(hdr->filter_len > 0) {
-        H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+        H5Z_cb_t filter_cb;                 /* Filter callback structure */
         size_t read_size;                   /* Object's size in the file */
         size_t nbytes;                      /* Number of bytes used */
+
+        /* Initialize the filter callback struct */
+        filter_cb.op_data = NULL;
+        filter_cb.func = NULL;          /* no callback function when failed */
 
         /* De-filter the object */
         read_size = nbytes = obj_size;
