@@ -57,9 +57,19 @@ typedef struct H5VL_driver_prop_t {
 /* Library Private Prototypes */
 /******************************/
 
+/* XXX: These names should all be verbs */
 H5_DLL herr_t H5VL_init(void);
-H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
+H5_DLL hid_t H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_ref);
 H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
+H5_DLL hid_t H5VL_register(const void *cls, size_t size, hbool_t app_ref);
+H5_DLL hid_t H5VL_object_register(void *obj, H5I_type_t obj_type, hid_t driver_id, hbool_t app_ref);
+H5_DLL ssize_t H5VL_get_driver_name(hid_t id, char *name/*out*/, size_t size);
+H5_DLL H5VL_object_t *H5VL_get_object(hid_t id);
+H5_DLL void *H5VL_object(hid_t id);
+H5_DLL void *H5VL_object_verify(hid_t id, H5I_type_t obj_type);
+H5_DLL void *H5VL_driver_object(H5VL_object_t *obj);
+
+H5_DLL herr_t H5VL_datatype_get(void *dt, const H5VL_class_t *vol_cls, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, ...);
 
 H5_DLL herr_t H5VL_file_close(void *file, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req);
 
