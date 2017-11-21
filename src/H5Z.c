@@ -752,6 +752,7 @@ static herr_t
 H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
 {
     hid_t   space_id = -1;            /* ID for dataspace describing chunk */
+    H5O_layout_t *dcpl_layout = NULL; /* Dataset's layout information */
     herr_t  ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -761,19 +762,22 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
 
     /* Check if the property list is non-default */
     if (dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
-        H5P_genplist_t     *dc_plist;       /* Dataset creation property list object */
-        H5O_layout_t        dcpl_layout;    /* Dataset's layout information */
+        H5P_genplist_t     *dc_plist;           /* Dataset creation property list object */
+
+        /* Get memory for the layout */
+        if (NULL == (dcpl_layout = (H5O_layout_t *)H5MM_calloc(sizeof(H5O_layout_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate dcpl layout buffer")
 
         /* Get dataset creation property list object */
         if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
             HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
 
         /* Peek at the layout information */
-        if (H5P_peek(dc_plist, H5D_CRT_LAYOUT_NAME, &dcpl_layout) < 0)
+        if (H5P_peek(dc_plist, H5D_CRT_LAYOUT_NAME, dcpl_layout) < 0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve layout")
 
         /* Check if the dataset is chunked */
-        if (H5D_CHUNKED == dcpl_layout.type) {
+        if (H5D_CHUNKED == dcpl_layout->type) {
             H5O_pline_t     dcpl_pline;     /* Object's I/O pipeline information */
 
             /* Get I/O pipeline information */
@@ -787,27 +791,30 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
                 size_t  u;               /* Local index variable */
 
                 /* Create a dataspace for a chunk & set the extent */
-                for (u = 0; u < dcpl_layout.u.chunk.ndims; u++)
-                    chunk_dims[u] = dcpl_layout.u.chunk.dim[u];
-                if (NULL == (space = H5S_create_simple(dcpl_layout.u.chunk.ndims, chunk_dims, NULL)))
+                for (u = 0; u < dcpl_layout->u.chunk.ndims; u++)
+                    chunk_dims[u] = dcpl_layout->u.chunk.dim[u];
+                if (NULL == (space = H5S_create_simple(dcpl_layout->u.chunk.ndims, chunk_dims, NULL)))
                     HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
                 /* Get ID for dataspace to pass to filter routines */
                 if ((space_id = H5I_register(H5I_DATASPACE, space, FALSE)) < 0) {
-                    (void)H5S_close (space);
+                    (void)H5S_close(space);
                     HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
-                } /* end if */
+                }
 
                 /* Make the callbacks */
                 if (H5Z_prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, prelude_type) < 0)
                     HGOTO_ERROR (H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
-            } /* end if */
-        } /* end if */
-    } /* end if */
+            }
+        }
+    }
 
 done:
     if (space_id > 0 && H5I_dec_ref(space_id) < 0)
         HDONE_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace")
+
+    if (dcpl_layout)
+        dcpl_layout = (H5O_layout_t *)H5MM_xfree(dcpl_layout);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_prepare_prelude_callback_dcpl() */
