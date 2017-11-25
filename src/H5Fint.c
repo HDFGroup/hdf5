@@ -21,20 +21,20 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Aprivate.h"		/* Attributes				*/
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5Gprivate.h"		/* Groups				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MFprivate.h"	/* File memory management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
-#include "H5Tprivate.h"		/* Datatypes				*/
+#include "H5private.h"         /* Generic Functions */
+#include "H5Aprivate.h"        /* Attributes */
+#include "H5ACprivate.h"       /* Metadata cache */
+#include "H5Dprivate.h"        /* Datasets */
+#include "H5Eprivate.h"        /* Error handling */
+#include "H5Fpkg.h"            /* File access */
+#include "H5FDprivate.h"       /* File drivers */
+#include "H5Gprivate.h"        /* Groups */
+#include "H5Iprivate.h"        /* IDs */
+#include "H5MFprivate.h"       /* File memory management */
+#include "H5MMprivate.h"       /* Memory management */
+#include "H5Pprivate.h"        /* Property lists */
+#include "H5SMprivate.h"       /* Shared Object Header Messages */
+#include "H5Tprivate.h"        /* Datatypes */
 
 
 /****************/
@@ -100,26 +100,19 @@ H5FL_DEFINE(H5F_file_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_access_plist
+ * Function: H5F_get_access_plist
  *
- * Purpose:	Returns a copy of the file access property list of the
- *		specified file.
+ * Purpose:  Returns a copy of the file access property list of the
+ *           specified file.
  *
  *              NOTE: Make sure that, if you are going to overwrite
  *              information in the copied property list that was
  *              previously opened and assigned to the property list, then
  *              you must close it before overwriting the values.
  *
- * Return:	Success:	Object ID for a copy of the file access
- *				property list.
- *
- *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, May 25, 2005
- *
- * Modifications:
- *
+ * Return:   Success:    Object ID for a copy of the file access
+ *                        property list.
+ *           Failure:    FAIL
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -129,8 +122,9 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5P_genplist_t *old_plist;              /* Old property list */
     H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
     hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
-    unsigned    efc_size = 0;
-    hid_t	ret_value = SUCCEED;        /* Return value */
+    unsigned   efc_size = 0;
+    hbool_t    latest_format = FALSE;       /* Always use the latest format? */
+    hid_t      ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -141,7 +135,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
     if((ret_value = H5P_copy_plist(old_plist, app_ref)) < 0)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
     if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(ret_value)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
@@ -221,16 +215,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_get_obj_count
+ * Function: H5F_get_obj_count
  *
- * Purpose:	Private function return the number of opened object IDs
- *		(files, datasets, groups, datatypes) in the same file.
+ * Purpose:  Private function return the number of opened object IDs
+ *           (files, datasets, groups, datatypes) in the same file.
  *
  * Return:      SUCCEED on success, FAIL on failure.
- *
- * Programmer:  Raymond Lu
- *              Wednesday, Dec 5, 2001
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -258,10 +248,6 @@ done:
  * Purpose:     Private function to return a list of opened object IDs.
  *
  * Return:      Non-negative on success; can't fail.
- *
- * Programmer:  Raymond Lu
- *              Wednesday, Dec 5, 2001
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -284,16 +270,13 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5F_get_objects
+ * Function: H5F_get_objects
  *
- * Purpose:	This function is called by H5F_get_obj_count or
- *		H5F_get_obj_ids to get number of object IDs and/or a
- *		list of opened object IDs (in return value).
- * Return:	Non-negative on success; Can't fail.
+ * Purpose:  This function is called by H5F_get_obj_count or
+ *           H5F_get_obj_ids to get number of object IDs and/or a
+ *           list of opened object IDs (in return value).
  *
- * Programmer:  Raymond Lu
- *              Wednesday, Dec 5, 2001
- *
+ * Return:   Non-negative on success; Can't fail.
  *---------------------------------------------------------------------------
  */
 herr_t
@@ -312,7 +295,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_
     olist.obj_id_list  = (max_nobjs==0 ? NULL : obj_id_list);
     olist.obj_id_count = &obj_id_count;
     olist.list_index   = 0;
-    olist.max_nobjs   = max_nobjs;
+    olist.max_nobjs    = max_nobjs;
 
     /* Determine if we are searching for local or global objects */
     if(types & H5F_OBJ_LOCAL) {
@@ -336,37 +319,37 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_
      * or the caller wants to get the list of IDs and the list isn't full,
      * search through dataset IDs to count number of datasets, and put their
      * IDs on the object list */
-    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) { 
+    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) {
         if (types & H5F_OBJ_DATASET) {
             olist.obj_type = H5I_DATASET;
             if(H5I_iterate(H5I_DATASET, H5F_get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(2)")
         } /* end if */
-    } 
+    }
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
      * search through group IDs to count number of groups, and put their
      * IDs on the object list */
-    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) { 
+    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) {
         if(types & H5F_OBJ_GROUP) {
             olist.obj_type = H5I_GROUP;
             if(H5I_iterate(H5I_GROUP, H5F_get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(3)")
         } /* end if */
-    } 
+    }
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
      * search through datatype IDs to count number of named datatypes, and put their
      * IDs on the object list */
-    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) { 
+    if(!olist.max_nobjs || (olist.max_nobjs && olist.list_index<olist.max_nobjs)) {
         if(types & H5F_OBJ_DATATYPE) {
             olist.obj_type = H5I_DATATYPE;
             if(H5I_iterate(H5I_DATATYPE, H5F_get_objects_cb, &olist, app_ref) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(4)")
         } /* end if */
-    } 
+    }
 
     /* If the caller just wants to count the number of objects (OLIST.MAX_NOBJS is zero),
      * or the caller wants to get the list of IDs and the list isn't full,
@@ -379,7 +362,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id_
                 HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(5)")
         } /* end if */
     }
- 
+
     /* Set the number of objects currently open */
     *obj_id_count_ptr = obj_id_count;
 
@@ -389,18 +372,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_objects_cb
+ * Function: H5F_get_objects_cb
  *
- * Purpose:	H5F_get_objects' callback function.  It verifies if an
- * 		object is in the file, and either count it or put its ID
- *		on the list.
+ * Purpose:  H5F_get_objects' callback function.  It verifies if an
+ *           object is in the file, and either count it or put its ID
+ *           on the list.
  *
- * Return:      H5_ITER_STOP if the array of object IDs is filled up.
- *              H5_ITER_CONT otherwise.
- *
- * Programmer:  Raymond Lu
- *              Wednesday, Dec 5, 2001
- *
+ * Return:   H5_ITER_STOP if the array of object IDs is filled up.
+ *           H5_ITER_CONT otherwise.
  *-------------------------------------------------------------------------
  */
 static int
@@ -418,77 +397,79 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     /* Count file IDs */
     if(olist->obj_type == H5I_FILE) {
         if((olist->file_info.local &&
-                        (!olist->file_info.ptr.file || (olist->file_info.ptr.file && (H5F_t*)obj_ptr == olist->file_info.ptr.file) ))
-                ||  (!olist->file_info.local &&
-                        ( !olist->file_info.ptr.shared || (olist->file_info.ptr.shared && ((H5F_t*)obj_ptr)->shared == olist->file_info.ptr.shared) ))) {
+                (!olist->file_info.ptr.file ||
+                (olist->file_info.ptr.file && (H5F_t*)obj_ptr == olist->file_info.ptr.file))) ||
+                (!olist->file_info.local &&
+                (!olist->file_info.ptr.shared ||
+                (olist->file_info.ptr.shared && ((H5F_t*)obj_ptr)->shared == olist->file_info.ptr.shared)))) {
             add_obj = TRUE;
-	} /* end if */
+        } /* end if */
     } /* end if */
     else { /* either count opened object IDs or put the IDs on the list */
         H5O_loc_t *oloc;        /* Group entry info for object */
 
-    	switch(olist->obj_type) {
-	    case H5I_ATTR:
-	        oloc = H5A_oloc((H5A_t *)obj_ptr);
-                break;
+        switch(olist->obj_type) {
+        case H5I_ATTR:
+            oloc = H5A_oloc((H5A_t *)obj_ptr);
+            break;
 
-	    case H5I_GROUP:
-	        oloc = H5G_oloc((H5G_t *)obj_ptr);
-                break;
+        case H5I_GROUP:
+            oloc = H5G_oloc((H5G_t *)obj_ptr);
+            break;
 
-	    case H5I_DATASET:
-	        oloc = H5D_oloc((H5D_t *)obj_ptr);
-		break;
+        case H5I_DATASET:
+            oloc = H5D_oloc((H5D_t *)obj_ptr);
+            break;
 
-	    case H5I_DATATYPE:
-                if(H5T_is_named((H5T_t*)obj_ptr)==TRUE)
-                    oloc = H5T_oloc((H5T_t*)obj_ptr);
-                else
-                    oloc = NULL;
-		break;
+        case H5I_DATATYPE:
+            if(H5T_is_named((H5T_t*)obj_ptr)==TRUE)
+                oloc = H5T_oloc((H5T_t*)obj_ptr);
+            else
+                oloc = NULL;
+            break;
 
-	    case H5I_UNINIT:
-	    case H5I_BADID:
-	    case H5I_FILE:
-	    case H5I_DATASPACE:
-	    case H5I_REFERENCE:
-	    case H5I_VFL:
-	    case H5I_GENPROP_CLS:
-	    case H5I_GENPROP_LST:
-	    case H5I_ERROR_CLASS:
-	    case H5I_ERROR_MSG:
-	    case H5I_ERROR_STACK:
-	    case H5I_NTYPES:
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown data object")
-	} /* end switch */
+        } /* end switch */
 
         if((olist->file_info.local &&
-                    ( (!olist->file_info.ptr.file && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE)
-                            || (!olist->file_info.ptr.file && olist->obj_type != H5I_DATATYPE)
-                            || (oloc && oloc->file == olist->file_info.ptr.file)))
-                || (!olist->file_info.local &&
-                    ((!olist->file_info.ptr.shared && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE)
-                            || (!olist->file_info.ptr.shared && olist->obj_type != H5I_DATATYPE)
-                            || (oloc && oloc->file && oloc->file->shared == olist->file_info.ptr.shared)))) {
+                    ((!olist->file_info.ptr.file && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE) ||
+                    (!olist->file_info.ptr.file && olist->obj_type != H5I_DATATYPE) ||
+                    (oloc && oloc->file == olist->file_info.ptr.file))) ||
+                    (!olist->file_info.local &&
+                    ((!olist->file_info.ptr.shared && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE) ||
+                    (!olist->file_info.ptr.shared && olist->obj_type != H5I_DATATYPE) ||
+                    (oloc && oloc->file && oloc->file->shared == olist->file_info.ptr.shared)))) {
             add_obj = TRUE;
-    	} /* end if */
+        } /* end if */
     } /* end else */
 
     if(add_obj) {
         /* Add the object's ID to the ID list, if appropriate */
         if(olist->obj_id_list) {
             olist->obj_id_list[olist->list_index] = obj_id;
-	    olist->list_index++;
-	} /* end if */
+            olist->list_index++;
+        } /* end if */
 
         /* Increment the number of open objects */
-	if(olist->obj_id_count)
+        if(olist->obj_id_count)
             (*olist->obj_id_count)++;
 
         /* Check if we've filled up the array.  Return H5_ITER_STOP only if
          * we have filled up the array. Otherwise return H5_ITER_CONT(RET_VALUE is
-         * preset to H5_ITER_CONT) because H5I_iterate needs the return value of 
+         * preset to H5_ITER_CONT) because H5I_iterate needs the return value of
          * H5_ITER_CONT to continue the iteration. */
         if(olist->max_nobjs > 0 && olist->list_index >= olist->max_nobjs)
             HGOTO_DONE(H5_ITER_STOP)  /* Indicate that the iterator should stop */
@@ -500,35 +481,31 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__is_hdf5
+ * Function: H5F__is_hdf5
  *
- * Purpose:	Check the file signature to detect an HDF5 file.
+ * Purpose:  Check the file signature to detect an HDF5 file.
  *
- * Bugs:	This function is not robust: it only uses the default file
- *		driver when attempting to open the file when in fact it
- *		should use all known file drivers.
+ * Bugs:     This function is not robust: it only uses the default file
+ *           driver when attempting to open the file when in fact it
+ *           should use all known file drivers.
  *
- * Return:	Success:	TRUE/FALSE
- *
- *		Failure:	Negative
- *
- * Programmer:	Unknown
- *
+ * Return:   Success:    TRUE/FALSE
+ * *         Failure:    Negative
  *-------------------------------------------------------------------------
  */
 htri_t
 H5F__is_hdf5(const char *name, hid_t meta_dxpl_id, hid_t raw_dxpl_id)
 {
-    H5FD_t	*file = NULL;           /* Low-level file struct */
-    H5FD_io_info_t fdio_info;           /* File driver I/O info */
-    haddr_t     sig_addr;               /* Addess of hdf5 file signature */
-    htri_t	ret_value = FAIL;       /* Return value */
+    H5FD_t    *file = NULL;            /* Low-level file struct */
+    H5FD_io_info_t fdio_info;          /* File driver I/O info */
+    haddr_t    sig_addr;               /* Addess of hdf5 file signature */
+    htri_t     ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Open the file at the virtual file layer */
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
-	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
+    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* Set up the file driver info */
     fdio_info.file = file;
@@ -553,31 +530,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_new
+ * Function: H5F_new
  *
- * Purpose:	Creates a new file object and initializes it.  The
- *		H5Fopen and H5Fcreate functions then fill in various
- *		fields.	 If SHARED is a non-null pointer then the shared info
- *		to which it points has the reference count incremented.
- *		Otherwise a new, empty shared info struct is created and
- *		initialized with the specified file access property list.
+ * Purpose:  Creates a new file object and initializes it.  The
+ *           H5Fopen and H5Fcreate functions then fill in various fields.
+ *           If SHARED is a non-null pointer then the shared info
+ *           to which it points has the reference count incremented.
+ *           Otherwise a new, empty shared info struct is created and
+ *           initialized with the specified file access property list.
  *
- * Errors:
- *
- * Return:	Success:	Ptr to a new file struct.
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 18 1997
- *
+ * Return:   Success:    Ptr to a new file struct.
+ *           Failure:    NULL
  *-------------------------------------------------------------------------
  */
 H5F_t *
 H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
-    H5F_t	*f = NULL, *ret_value = NULL;
+    H5F_t    *f = NULL, *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -591,7 +560,8 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
     } /* end if */
     else {
         H5P_genplist_t *plist;          /* Property list */
-        unsigned        efc_size;       /* External file cache size */
+        unsigned efc_size;              /* External file cache size */
+        hbool_t latest_format;          /* Always use the latest format?    */
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
@@ -648,7 +618,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space page size")
         HDassert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
 
-        /* Temporary for multi/split drivers: fail file creation 
+        /* Temporary for multi/split drivers: fail file creation
              when persisting free-space or using paged aggregation strategy */
         if(H5F_HAS_FEATURE(f, H5FD_FEAT_PAGED_AGGR))
             if(f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE || f->shared->fs_persist)
@@ -700,6 +670,10 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
 #endif /* H5_HAVE_PARALLEL */
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
+
+        /* File format version high bound does not allow the generation of metadata cache image */
+        if(f->shared->mdc_initCacheImageCfg.generate_image && f->shared->high_bound < H5F_LIBVER_V110)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "file format version out of bound for cache image")
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -821,25 +795,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__dest
+ * Function: H5F__dest
  *
- * Purpose:	Destroys a file structure.  This function flushes the cache
- *		but doesn't do any other cleanup other than freeing memory
- *		for the file struct.  The shared info for the file is freed
- *		only when its reference count reaches zero.
+ * Purpose:  Destroys a file structure.  This function flushes the cache
+ *           but doesn't do any other cleanup other than freeing memory
+ *           for the file struct.  The shared info for the file is freed
+ *           only when its reference count reaches zero.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 18 1997
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
 {
-    herr_t	   ret_value = SUCCEED;         /* Return value */
+    herr_t       ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -861,7 +830,7 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
                 HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 1)")
 
         /* Notify the metadata cache that the file is about to be closed.
-         * This allows the cache to set up for creating a metadata cache 
+         * This allows the cache to set up for creating a metadata cache
          * image if this has been requested.
          */
         if(H5AC_prep_for_file_close(f, meta_dxpl_id) < 0)
@@ -878,7 +847,7 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
                 HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 2)")
 
         /* With the shutdown modifications, the contents of the metadata cache
-         * should be clean at this point, with the possible exception of the 
+         * should be clean at this point, with the possible exception of the
          * the superblock and superblock extension.
          *
          * Verify this.
@@ -904,10 +873,10 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
         /* Release objects that depend on the superblock being initialized */
         if(f->shared->sblock) {
             /* Shutdown file free space manager(s) */
-            /* (We should release the free space information now (before 
-             *      truncating the file and before the metadata cache is shut 
-             *      down) since the free space manager is holding some data 
-             *      structures in memory and also because releasing free space 
+            /* (We should release the free space information now (before
+             *      truncating the file and before the metadata cache is shut
+             *      down) since the free space manager is holding some data
+             *      structures in memory and also because releasing free space
              *      can shrink the file's 'eoa' value)
              *
              * Update 11/1/16:
@@ -933,7 +902,7 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
                  * free space manager may dirty some data structures again.
                  */
                 if(flush) {
-		    /* Clear status_flags */
+                    /* Clear status_flags */
                     f->shared->sblock->status_flags &= (uint8_t)(~H5F_SUPER_WRITE_ACCESS);
                     f->shared->sblock->status_flags &= (uint8_t)(~H5F_SUPER_SWMR_WRITE_ACCESS);
 
@@ -942,8 +911,8 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
                         /* Push error, but keep going*/
                         HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
-                    /* Release any space allocated to space aggregators, 
-                     * so that the eoa value corresponds to the end of the 
+                    /* Release any space allocated to space aggregators,
+                     * so that the eoa value corresponds to the end of the
                      * space written to in the file.
                      *
                      * At most, this should change the superblock or the
@@ -962,11 +931,11 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
                      * extension should be dirty.
                      */
                     HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
-		} /* end if */
+                } /* end if */
             } /* end if */
 
             /* if it exists, unpin the driver information block cache entry,
-             * since we're about to destroy the cache 
+             * since we're about to destroy the cache
              */
             if(f->shared->drvinfo)
                 if(H5AC_unpin_entry(f->shared->drvinfo) < 0)
@@ -986,7 +955,7 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
          * Verify this.
          */
         HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
- 
+
         /* Remove shared file struct from list of open files */
         if(H5F_sfile_remove(f->shared) < 0)
             /* Push error, but keep going*/
@@ -1062,7 +1031,8 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
         /* Destroy shared file struct */
         f->shared = (H5F_file_t *)H5FL_FREE(H5F_file_t, f->shared);
 
-    } else if(f->shared->nrefs > 0) {
+    }
+    else if(f->shared->nrefs > 0) {
         /*
          * There are other references to the shared part of the file.
          * Only decrement the reference count.
@@ -1084,42 +1054,42 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_open
+ * Function:    H5F_open
  *
- * Purpose:	Opens (or creates) a file.  This function understands the
- *		following flags which are similar in nature to the Posix
- *		open(2) flags.
+ * Purpose:    Opens (or creates) a file.  This function understands the
+ *        following flags which are similar in nature to the Posix
+ *        open(2) flags.
  *
- *		H5F_ACC_RDWR:	Open with read/write access. If the file is
- *				currently open for read-only access then it
- *				will be reopened. Absence of this flag
- *				implies read-only access.
+ *        H5F_ACC_RDWR:    Open with read/write access. If the file is
+ *                currently open for read-only access then it
+ *                will be reopened. Absence of this flag
+ *                implies read-only access.
  *
- *		H5F_ACC_CREAT:	Create a new file if it doesn't exist yet.
- *				The permissions are 0666 bit-wise AND with
- *				the current umask.  H5F_ACC_WRITE must also
- *				be specified.
+ *        H5F_ACC_CREAT:    Create a new file if it doesn't exist yet.
+ *                The permissions are 0666 bit-wise AND with
+ *                the current umask.  H5F_ACC_WRITE must also
+ *                be specified.
  *
- *		H5F_ACC_EXCL:	This flag causes H5F_open() to fail if the
- *				file already exists.
+ *        H5F_ACC_EXCL:    This flag causes H5F_open() to fail if the
+ *                file already exists.
  *
- *		H5F_ACC_TRUNC:	The file is truncated and a new HDF5 superblock
- *				is written.  This operation will fail if the
- *				file is already open.
+ *        H5F_ACC_TRUNC:    The file is truncated and a new HDF5 superblock
+ *                is written.  This operation will fail if the
+ *                file is already open.
  *
- *		Unlinking the file name from the group directed graph while
- *		the file is opened causes the file to continue to exist but
- *		one will not be able to upgrade the file from read-only
- *		access to read-write access by reopening it. Disk resources
- *		for the file are released when all handles to the file are
- *		closed. NOTE: This paragraph probably only applies to Unix;
- *		deleting the file name in other OS's has undefined results.
+ *        Unlinking the file name from the group directed graph while
+ *        the file is opened causes the file to continue to exist but
+ *        one will not be able to upgrade the file from read-only
+ *        access to read-write access by reopening it. Disk resources
+ *        for the file are released when all handles to the file are
+ *        closed. NOTE: This paragraph probably only applies to Unix;
+ *        deleting the file name in other OS's has undefined results.
  *
- *		The CREATE_PARMS argument is optional.	A null pointer will
- *		cause the default file creation parameters to be used.
+ *        The CREATE_PARMS argument is optional.    A null pointer will
+ *        cause the default file creation parameters to be used.
  *
- *		The ACCESS_PARMS argument is optional.  A null pointer will
- *		cause the default file access parameters to be used.
+ *        The ACCESS_PARMS argument is optional.  A null pointer will
+ *        cause the default file access parameters to be used.
  *
  * The following two tables show results of file opens for single and concurrent access:
  *
@@ -1152,12 +1122,8 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
  *        s: the open succeeds with flags combination from both the first and second opens
  *
  *
- * Return:	Success:	A new file pointer.
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Tuesday, September 23, 1997
- *
+ * Return:    Success:    A new file pointer.
+ *        Failure:    NULL
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -1176,11 +1142,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     unsigned            page_buf_min_meta_perc;
     unsigned            page_buf_min_raw_perc;
     hbool_t             set_flag = FALSE;   /*set the status_flags in the superblock */
-    hbool_t             clear = FALSE;      /*clear the status_flags 	    */
+    hbool_t             clear = FALSE;      /*clear the status_flags         */
     hbool_t             evict_on_close;     /* evict on close value from plist  */
     H5F_t              *ret_value = NULL;   /*actual return value           */
     char               *lock_env_var = NULL;/*env var pointer               */
     hbool_t             use_file_locking;   /*read from env var             */
+    hbool_t      ci_load = FALSE;       /* whether MDC ci load requested */
+    hbool_t      ci_write = FALSE;      /* whether MDC CI write requested */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1203,7 +1171,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
         use_file_locking = FALSE;
     else
-        use_file_locking = TRUE;    
+        use_file_locking = TRUE;
 
     /*
      * Opening a file is a two step process. First we try to open the
@@ -1292,8 +1260,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         /* Place an advisory lock on the file */
         if(use_file_locking)
             if(H5FD_lock(lf, (hbool_t)((flags & H5F_ACC_RDWR) ? TRUE : FALSE)) < 0) {
-                /* Locking failed - Closing will remove the lock */                
-                if(H5FD_close(lf) < 0) 
+                /* Locking failed - Closing will remove the lock */
+                if(H5FD_close(lf) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to lock the file")
             } /* end if */
@@ -1304,7 +1272,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
              * returned is NULL, H5FD_close() will never be called via H5F_dest()
              * so we have to close lf here before heading to the error handling.
              */
-            if(H5FD_close(lf) < 0) 
+            if(H5FD_close(lf) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to initialize file structure")
         } /* end if */
@@ -1313,6 +1281,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         if(drvr->lock)
             set_flag = TRUE;
     } /* end else */
+
+    /* Check to see if both SWMR and cache image are requested.  Fail if so */
+    if(H5C_cache_image_status(file, &ci_load, &ci_write) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get MDC cache image status")
+    if((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
+        HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, NULL, "can't have both SWMR and cache image")
 
     /* Retain the name the file was opened with */
     file->open_name = H5MM_xstrdup(name);
@@ -1462,7 +1436,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock extension")
 
             /* Remove the file lock for SWMR_WRITE */
-            if(use_file_locking && (H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)) { 
+            if(use_file_locking && (H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)) {
                 if(H5FD_unlock(file->shared->lf) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to unlock the file")
             } /* end if */
@@ -1470,11 +1444,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         else { /* H5F_ACC_RDONLY: check consistency of status_flags */
             /* Skip check of status_flags for file with < superblock version 3 */
             if(file->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3) {
-                if(H5F_INTENT(file) & H5F_ACC_SWMR_READ) { 
-                    if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS && 
+                if(H5F_INTENT(file) & H5F_ACC_SWMR_READ) {
+                    if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS &&
                             !(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
-                            || 
-                            (!(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) && 
+                            ||
+                            (!(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
                             file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
                         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is not already open for SWMR writing")
                 } /* end if */
@@ -1492,21 +1466,17 @@ done:
     if((NULL == ret_value) && file)
         if(H5F__dest(file, meta_dxpl_id, raw_dxpl_id, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_flush_phase1
+ * Function: H5F_flush_phase1
  *
- * Purpose:	First phase of flushing cached data.
+ * Purpose:  First phase of flushing cached data.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
- *		Jan  1 2017
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1539,16 +1509,11 @@ H5F__flush_phase1(H5F_t *f, hid_t meta_dxpl_id)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__flush_phase2
+ * Function: H5F__flush_phase2
  *
- * Purpose:	Second phase of flushing cached data.
+ * Purpose:  Second phase of flushing cached data.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
- *		Jan  1 2017
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1606,16 +1571,11 @@ H5F__flush_phase2(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closi
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__flush
+ * Function: H5F__flush
  *
- * Purpose:	Flushes cached data.
+ * Purpose:  Flushes cached data.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug 29 1997
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1643,33 +1603,29 @@ H5F__flush(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_close
+ * Function:    H5F_close
  *
- * Purpose:	Closes a file or causes the close operation to be pended.
- *		This function is called two ways: from the API it gets called
- *		by H5Fclose->H5I_dec_ref->H5F_close when H5I_dec_ref()
- *		decrements the file ID reference count to zero.  The file ID
- *		is removed from the H5I_FILE group by H5I_dec_ref() just
- *		before H5F_close() is called. If there are open object
- *		headers then the close is pended by moving the file to the
- *		H5I_FILE_CLOSING ID group (the f->closing contains the ID
- *		assigned to file).
+ * Purpose:    Closes a file or causes the close operation to be pended.
+ *        This function is called two ways: from the API it gets called
+ *        by H5Fclose->H5I_dec_ref->H5F_close when H5I_dec_ref()
+ *        decrements the file ID reference count to zero.  The file ID
+ *        is removed from the H5I_FILE group by H5I_dec_ref() just
+ *        before H5F_close() is called. If there are open object
+ *        headers then the close is pended by moving the file to the
+ *        H5I_FILE_CLOSING ID group (the f->closing contains the ID
+ *        assigned to file).
  *
- *		This function is also called directly from H5O_close() when
- *		the last object header is closed for the file and the file
- *		has a pending close.
+ *        This function is also called directly from H5O_close() when
+ *        the last object header is closed for the file and the file
+ *        has a pending close.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Tuesday, September 23, 1997
- *
+ * Return:    Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_close(H5F_t *f)
 {
-    herr_t	        ret_value = SUCCEED;    /* Return value */
+    herr_t            ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1708,18 +1664,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_try_close
+ * Function: H5F_try_close
  *
- * Purpose:	Attempts to close a file due to one of several actions:
+ * Purpose:  Attempts to close a file due to one of several actions:
  *                      - The reference count on the file ID dropped to zero
  *                      - The last open object was closed in the file
  *                      - The file was unmounted
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, July 19, 2005
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1727,7 +1679,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
 {
     unsigned            nopen_files = 0;        /* Number of open files in file/mount hierarchy */
     unsigned            nopen_objs = 0;         /* Number of open objects in file/mount hierarchy */
-    herr_t	        ret_value = SUCCEED;    /* Return value */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1758,12 +1710,12 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
     /*
      * Close file according to close degree:
      *
-     *  H5F_CLOSE_WEAK:	if there are still objects open, wait until
-     *			they are all closed.
-     *  H5F_CLOSE_SEMI:	if there are still objects open, return fail;
-     *			otherwise, close file.
-     *  H5F_CLOSE_STRONG:	if there are still objects open, close them
-     *			first, then close file.
+     *  H5F_CLOSE_WEAK:    if there are still objects open, wait until
+     *            they are all closed.
+     *  H5F_CLOSE_SEMI:    if there are still objects open, return fail;
+     *            otherwise, close file.
+     *  H5F_CLOSE_STRONG:    if there are still objects open, close them
+     *            first, then close file.
      */
     switch(f->shared->fc_degree) {
         case H5F_CLOSE_WEAK:
@@ -1885,16 +1837,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_id
+ * Function: H5F_get_id
  *
- * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
- *              appropriate.
+ * Purpose:  Get the file ID, incrementing it, or "resurrecting" it as
+ *           appropriate.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		Oct 29, 2003
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1909,8 +1857,9 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
     if(file->file_id == -1) {
         /* Get an atom for the file */
         if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
-	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
-    } else {
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+    }
+    else {
         /* Increment reference count on atom. */
         if(H5I_inc_ref(file->file_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
@@ -1924,18 +1873,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_incr_nopen_objs
+ * Function: H5F_incr_nopen_objs
  *
- * Purpose:	Increment the number of open objects for a file.
+ * Purpose:  Increment the number of open objects for a file.
  *
- * Return:	Success:	The number of open objects, after the increment
- *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Mar  6 2007
- *
+ * Return:   Success:    The number of open objects, after the increment
+ *           Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -1951,18 +1894,12 @@ H5F_incr_nopen_objs(H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_decr_nopen_objs
+ * Function: H5F_decr_nopen_objs
  *
- * Purpose:	Decrement the number of open objects for a file.
+ * Purpose:  Decrement the number of open objects for a file.
  *
- * Return:	Success:	The number of open objects, after the decrement
- *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Mar  6 2007
- *
+ * Return:   Success:    The number of open objects, after the decrement
+ *           Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -1978,18 +1915,14 @@ H5F_decr_nopen_objs(H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_build_actual_name
+ * Function: H5F_build_actual_name
  *
- * Purpose:	Retrieve the name of a file, after following symlinks, etc.
+ * Purpose:  Retrieve the name of a file, after following symlinks, etc.
  *
- * Note:	Currently only working for "POSIX I/O compatible" VFDs
+ * Note:     Currently only working for "POSIX I/O compatible" VFDs
  *
- * Return:	Success:        0
- *		Failure:	-1
- *
- * Programmer:	Quincey Koziol
- *		November 25, 2009
- *
+ * Return:   Success:        0
+ *           Failure:    -1
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2104,17 +2037,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_addr_encode_len
+ * Function: H5F_addr_encode_len
  *
- * Purpose:	Encodes an address into the buffer pointed to by *PP and
- *		then increments the pointer to the first byte after the
- *		address.  An undefined value is stored as all 1's.
+ * Purpose:  Encodes an address into the buffer pointed to by *PP and
+ *           then increments the pointer to the first byte after the
+ *           address.  An undefined value is stored as all 1's.
  *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
+ * Return:   void
  *-------------------------------------------------------------------------
  */
 void
@@ -2129,15 +2058,15 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp/*in,out*/, haddr_t addr)
     HDassert(pp && *pp);
 
     if(H5F_addr_defined(addr)) {
-	for(u = 0; u < addr_len; u++) {
-	    *(*pp)++ = (uint8_t)(addr & 0xff);
-	    addr >>= 8;
-	} /* end for */
-	HDassert("overflow" && 0 == addr);
+        for(u = 0; u < addr_len; u++) {
+            *(*pp)++ = (uint8_t)(addr & 0xff);
+            addr >>= 8;
+        } /* end for */
+        HDassert("overflow" && 0 == addr);
     } /* end if */
     else {
-	for(u = 0; u < addr_len; u++)
-	    *(*pp)++ = 0xff;
+        for(u = 0; u < addr_len; u++)
+            *(*pp)++ = 0xff;
     } /* end else */
 
     FUNC_LEAVE_NOAPI_VOID
@@ -2145,17 +2074,13 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp/*in,out*/, haddr_t addr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_addr_encode
+ * Function: H5F_addr_encode
  *
- * Purpose:	Encodes an address into the buffer pointed to by *PP and
- *		then increments the pointer to the first byte after the
- *		address.  An undefined value is stored as all 1's.
+ * Purpose:  Encodes an address into the buffer pointed to by *PP and
+ *           then increments the pointer to the first byte after the
+ *           address.  An undefined value is stored as all 1's.
  *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
+ * Return:   void
  *-------------------------------------------------------------------------
  */
 void
@@ -2173,27 +2098,23 @@ H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_addr_decode_len
+ * Function: H5F_addr_decode_len
  *
- * Purpose:	Decodes an address from the buffer pointed to by *PP and
- *		updates the pointer to point to the next byte after the
- *		address.
+ * Purpose:  Decodes an address from the buffer pointed to by *PP and
+ *           updates the pointer to point to the next byte after the
+ *           address.
  *
- *		If the value read is all 1's then the address is returned
- *		with an undefined value.
+ *           If the value read is all 1's then the address is returned
+ *           with an undefined value.
  *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
+ * Return:   void
  *-------------------------------------------------------------------------
  */
 void
 H5F_addr_decode_len(size_t addr_len, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*out*/)
 {
-    hbool_t	    all_zero = TRUE;    /* True if address was all zeroes */
-    unsigned	    u;          /* Local index variable */
+    hbool_t        all_zero = TRUE;    /* True if address was all zeroes */
+    unsigned       u;                  /* Local index variable */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -2207,27 +2128,27 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp/*in,out*/, haddr_t *addr
 
     /* Decode bytes from address */
     for(u = 0; u < addr_len; u++) {
-        uint8_t	    c;          /* Local decoded byte */
+        uint8_t        c;          /* Local decoded byte */
 
         /* Get decoded byte (and advance pointer) */
-	c = *(*pp)++;
+        c = *(*pp)++;
 
         /* Check for non-undefined address byte value */
-	if(c != 0xff)
+        if(c != 0xff)
             all_zero = FALSE;
 
-	if(u < sizeof(*addr_p)) {
-            haddr_t	    tmp = c;    /* Local copy of address, for casting */
+        if(u < sizeof(*addr_p)) {
+            haddr_t        tmp = c;    /* Local copy of address, for casting */
 
             /* Shift decoded byte to correct position */
-	    tmp <<= (u * 8);	/*use tmp to get casting right */
+            tmp <<= (u * 8);    /*use tmp to get casting right */
 
             /* Merge into already decoded bytes */
-	    *addr_p |= tmp;
-	} /* end if */
+            *addr_p |= tmp;
+        } /* end if */
         else
             if(!all_zero)
-                HDassert(0 == **pp);	/*overflow */
+                HDassert(0 == **pp);    /*overflow */
     } /* end for */
 
     /* If 'all_zero' is still TRUE, the address was entirely composed of '0xff'
@@ -2241,20 +2162,16 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp/*in,out*/, haddr_t *addr
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_addr_decode
+ * Function: H5F_addr_decode
  *
- * Purpose:	Decodes an address from the buffer pointed to by *PP and
- *		updates the pointer to point to the next byte after the
- *		address.
+ * Purpose:  Decodes an address from the buffer pointed to by *PP and
+ *           updates the pointer to point to the next byte after the
+ *           address.
  *
- *		If the value read is all 1's then the address is returned
- *		with an undefined value.
+ *           If the value read is all 1's then the address is returned
+ *           with an undefined value.
  *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
+ * Return:   void
  *-------------------------------------------------------------------------
  */
 void
@@ -2278,10 +2195,6 @@ H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*o
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              7/19/11
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2308,10 +2221,6 @@ H5F_set_grp_btree_shared(H5F_t *f, H5UC_t *rc)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              7/20/11
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2337,10 +2246,6 @@ H5F_set_sohm_addr(H5F_t *f, haddr_t addr)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              7/20/11
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2366,10 +2271,6 @@ H5F_set_sohm_vers(H5F_t *f, unsigned vers)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              7/20/11
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2395,10 +2296,6 @@ H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              7/20/11
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2424,10 +2321,6 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
  *
  * Return:      Success:        Bytes copied / number of bytes needed.
  *              Failure:        negative value
- *
- * Programmer:  John Mainzer
- *              11/15/11
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -2468,20 +2361,20 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t meta_dxpl_i
     if(HDstrcmp(fd_ptr->cls->name, "multi") == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not supported for multi file driver.")
 
-    /* While the family file driver is conceptually fully compatible 
+    /* While the family file driver is conceptually fully compatible
      * with the get file image operation, it sets a file driver message
      * in the super block that prevents the image being opened with any
      * driver other than the family file driver.  Needless to say, this
      * rather defeats the purpose of the get file image operation.
      *
-     * While this problem is quire solvable, the required time and 
+     * While this problem is quire solvable, the required time and
      * resources are lacking at present.  Hence, for now, we don't
-     * allow the get file image operation to be perfomed on files 
+     * allow the get file image operation to be perfomed on files
      * opened with the family file driver.
      *
-     * Observe that the following test only looks at the top level 
+     * Observe that the following test only looks at the top level
      * driver, and fails if there is some other driver sitting on to
-     * of the family file driver.  
+     * of the family file driver.
      *
      * I don't think this can happen at present, but that may change
      * in the future.
@@ -2500,7 +2393,7 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t meta_dxpl_i
     /* test to see if a buffer was provided -- if not, we are done */
     if(buf_ptr != NULL) {
         H5FD_io_info_t fdio_info;       /* File driver I/O info */
-        size_t	space_needed;		/* size of file image */
+        size_t    space_needed;        /* size of file image */
         hsize_t tmp;
         size_t tmp_size;
 
@@ -2531,34 +2424,31 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t meta_dxpl_i
         HDmemset((uint8_t *)(buf_ptr) + tmp, 0, tmp_size);
 
     } /* end if */
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_file_image() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_track_metadata_read_retries
+ * Function: H5F_track_metadata_read_retries
  *
- * Purpose:     To track the # of a "retries" (log10) for a metadata item.
- *		This routine should be used only when:
- *		  "retries" > 0
- *		  f->shared->read_attempts > 1 (does not have retry when 1)
- *		  f->shared->retries_nbins > 0 (calculated based on f->shared->read_attempts)
+ * Purpose:  To track the # of a "retries" (log10) for a metadata item.
+ *           This routine should be used only when:
+ *           "retries" > 0
+ *           f->shared->read_attempts > 1 (does not have retry when 1)
+ *           f->shared->retries_nbins > 0 (calculated based on f->shared->read_attempts)
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  Vailin Choi; October 2013
- *
+ * Return:   Success:        SUCCEED
+ *           Failure:        FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries)
 {
-    unsigned log_ind;			/* Index to the array of retries based on log10 of retries */
-    double tmp;                         /* Temporary value, to keep compiler quiet */
-    herr_t ret_value = SUCCEED; 	/* Return value */
+    unsigned log_ind;            /* Index to the array of retries based on log10 of retries */
+    double tmp;                  /* Temporary value, to keep compiler quiet */
+    herr_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2589,23 +2479,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_set_retries
+ * Function: H5F_set_retries
  *
- * Purpose:     To initialize data structures for read retries:
- *		--zero out "retries"
- *		--set up "retries_nbins" based on read_attempts
+ * Purpose:  To initialize data structures for read retries:
+ *           --zero out "retries"
+ *           --set up "retries_nbins" based on read_attempts
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  Vailin Choi; November 2013
- *
+ * Return:   Success:        SUCCEED
+ *           Failure:        FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_set_retries(H5F_t *f)
 {
-    double tmp;				/* Temporary variable */
+    double tmp;                /* Temporary variable */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -2635,9 +2522,6 @@ H5F_set_retries(H5F_t *f)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Vailin Choi; October 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2661,15 +2545,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__set_base_addr
+ * Function: H5F__set_base_addr
  *
- * Purpose:	Quick and dirty routine to set the file's 'base_addr' value
+ * Purpose:  Quick and dirty routine to set the file's 'base_addr' value
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		July 19, 2013
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2684,7 +2564,7 @@ H5F__set_base_addr(const H5F_t *f, haddr_t addr)
 
     /* Dispatch to driver */
     if(H5FD_set_base_addr(f->shared->lf, addr) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_base_addr request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_base_addr request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2692,15 +2572,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__set_eoa
+ * Function: H5F__set_eoa
  *
- * Purpose:	Quick and dirty routine to set the file's 'eoa' value
+ * Purpose:  Quick and dirty routine to set the file's 'eoa' value
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		July 19, 2013
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2715,7 +2591,7 @@ H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr)
 
     /* Dispatch to driver */
     if(H5FD_set_eoa(f->shared->lf, type, addr) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_eoa request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_eoa request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2723,15 +2599,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__set_paged_aggr
+ * Function: H5F__set_paged_aggr
  *
- * Purpose:	Quick and dirty routine to set the file's paged_aggr mode
+ * Purpose:  Quick and dirty routine to set the file's paged_aggr mode
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		June 19, 2015
- *
+ * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2762,10 +2634,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              2/10/16
- *
  *-------------------------------------------------------------------------
  */
 void

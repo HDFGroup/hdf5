@@ -24,6 +24,9 @@
 #ifndef _H5Oprivate_H
 #define _H5Oprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5O_t H5O_t;
+
 /* Include the public header file for this API */
 #include "H5Opublic.h"          /* Object header functions              */
 
@@ -44,7 +47,6 @@
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_mesg_t H5O_mesg_t;
-typedef struct H5O_t H5O_t;
 
 /* Values used to create the shared message & attribute heaps */
 /* (Note that these parameters have been tuned so that the resulting heap ID
@@ -174,6 +176,7 @@ typedef struct H5O_copy_t {
     H5SL_t  *dst_dt_list;               /* Skip list to hold committed datatypes in dest file */
     hbool_t dst_dt_list_complete;       /* Whether the destination datatype list is complete (i.e. not only populated with "suggestions" from H5Padd_merge_committed_dtype_path) */
     H5O_t   *oh_dst;                    /* The destination object header */
+    H5F_t   *file_dst;                  /* The destination file pointer */
     void    *shared_fo;                 /* The shared pointer for the object */
     H5O_mcdt_search_cb_t mcdt_cb;	/* The callback to invoke before searching the global list of committed datatypes at destination */
     void *mcdt_ud;			/* User data passed to callback */
@@ -881,6 +884,9 @@ H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_l
 H5_DLL haddr_t H5O_get_oh_addr(const H5O_t *oh);
 H5_DLL herr_t H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype);
 H5_DLL H5AC_proxy_entry_t *H5O_get_proxy(const H5O_t *oh);
+H5_DLL herr_t H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
+    hid_t dxpl_id);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,

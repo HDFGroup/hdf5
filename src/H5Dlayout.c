@@ -46,6 +46,11 @@
 /* Package Variables */
 /*********************/
 
+const unsigned H5O_layout_ver_bounds[] = {
+    H5O_LAYOUT_VERSION_1,       /* H5F_LIBVER_EARLIEST */
+    H5O_LAYOUT_VERSION_3,       /* H5F_LIBVER_V18 */
+    H5O_LAYOUT_VERSION_LATEST   /* H5F_LIBVER_LATEST */
+};
 
 /*****************************/
 /* Library Private Variables */
@@ -56,12 +61,6 @@
 /* Local Variables */
 /*******************/
 
-/* Format version bounds for layout */
-static const unsigned H5O_layout_ver_bounds[] = {
-    H5O_LAYOUT_VERSION_1,   /* H5F_LIBVER_EARLIEST */
-    H5O_LAYOUT_VERSION_3,   /* H5F_LIBVER_V18 */
-    H5O_LAYOUT_VERSION_LATEST   /* H5F_LIBVER_LATEST */
-};
 
 
 

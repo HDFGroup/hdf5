@@ -11,11 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer: Quincey Koziol <koziol@hdfgroup.org>
- *             Thursday, September 13, 2007
- *
- * Purpose:     This file contains declarations which are visible
+/* Purpose:     This file contains declarations which are visible
  *              only within the H5R package. Source files outside the
  *              H5R package should include H5Rprivate.h instead.
  */
@@ -30,7 +26,6 @@
 #include "H5Rprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5Fprivate.h"         /* File access				*/
 
 /**************************/
 /* Package Private Macros */
@@ -50,13 +45,6 @@
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-
-/* General functions */
-H5_DLL herr_t H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
-    const void *_ref, H5O_type_t *obj_type);
-H5_DLL hid_t H5R_dereference(H5F_t *file, hid_t dapl_id, hid_t dxpl_id, H5R_type_t ref_type,
-    const void *_ref, hbool_t app_ref);
-
 
 #endif /* _H5Rpkg_H */
 

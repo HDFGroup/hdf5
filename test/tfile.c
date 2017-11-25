@@ -175,39 +175,28 @@ const char *FILESPACE_NAME[] = {
  */
 #define FILE8			"tfile8.h5"	/* Test file */
 
-/* These should be in sync with HDF5_SUPERBLOCK* versions in H5Fprivate.h */
-#define SUPERBLOCK_VERSION_DEF     0 
-#define SUPERBLOCK_VERSION_1       1    
-#define SUPERBLOCK_VERSION_2       2     
+/* See HDF5_SUPERBLOCK* versions in H5Fprivate.h */
 #define SUPERBLOCK_VERSION_3       3      
-#define SUPERBLOCK_VERSION_LATEST  SUPERBLOCK_VERSION_3 
 
-/* These should be in sync with HDF5_superblock_ver_bounds[] in H5Fsuper.c */
-const unsigned superblock_ver_bounds[] = {
-    SUPERBLOCK_VERSION_DEF,     /* H5F_LIBVER_EARLIEST */
-    SUPERBLOCK_VERSION_2,       /* H5F_LIBVER_V18 */
-    SUPERBLOCK_VERSION_LATEST   /* H5F_LIBVER_LATEST */
-};
-
-/* These should be in sync with H5O* versions in H5Opkg.h */
+/* See H5O* versions in H5Opkg.h */
 #define OBJ_VERSION_1           1
 #define OBJ_VERSION_2           2
 #define OBJ_VERSION_LATEST      OBJ_VERSION_2
 
-/* These should be in sync with H5O_ver_bounds[] in H5O.c */
+/* These should be in sync with H5O_obj_ver_bounds[] in H5O.c */
 const unsigned obj_ver_bounds[] = {
     OBJ_VERSION_1,      /* H5F_LIBVER_EARLIEST */
     OBJ_VERSION_2,      /* H5F_LIBVER_V18 */
     OBJ_VERSION_LATEST  /* H5F_LIBVER_LATEST */
 };
 
-/* These should be in sync with H5O_LAYOUT* versions in H5Oprivate.h */
+/* See H5O_LAYOUT* versions in H5Oprivate.h */
+/* The library defines LAYOUT_VERSION_3 as the default--see H5Pdcpl.c */
 #define LAYOUT_VERSION_1    1
-#define LAYOUT_VERSION_2    2
 #define LAYOUT_VERSION_3    3
 #define LAYOUT_VERSION_4    4
-#define LAYOUT_VERSION_DEFAULT LAYOUT_VERSION_3	/* The library defines the default + H5Pdcpl.c */
-#define LAYOUT_VERSION_LATEST LAYOUT_VERSION_4
+#define LAYOUT_VERSION_DEFAULT  LAYOUT_VERSION_3	
+#define LAYOUT_VERSION_LATEST   LAYOUT_VERSION_4
 
 /* These should be in sync with H5O_layout_ver_bounds[] in H5Dlayout.c */
 const unsigned layout_ver_bounds[] = {
@@ -216,23 +205,24 @@ const unsigned layout_ver_bounds[] = {
     LAYOUT_VERSION_LATEST   /* H5F_LIBVER_LATEST */
 };
 
-/* These should be in sync with H5O_PLINE* versions in H5Oprivate.h */
+/* See H5O_PLINE* versions in H5Oprivate.h */
 #define PLINE_VERSION_1     1
 #define PLINE_VERSION_2     2
 #define PLINE_VERSION_LATEST H5O_PLINE_VERSION_2
 
 /* These should be in sync with H5O_pline_ver_bounds[] in H5Opline.c */
 const unsigned pline_ver_bounds[] = {
-    PLINE_VERSION_1,         	/* H5F_LIBVER_EARLIEST */
-    PLINE_VERSION_2,		/* H5F_LIBVER_V18 */
-    PLINE_VERSION_LATEST    	/* H5F_LIBVER_LATEST */
+    PLINE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
+    PLINE_VERSION_2,        /* H5F_LIBVER_V18 */
+    PLINE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
 };
 
-/* These should be in sync with H5O_FILL* versions in H5Oprivate.h */
+/* See H5O_FILL* versions in H5Oprivate.h */
+/* FILL_VERSION_2 is the default--see H5Pdcpl.c */
 #define FILL_VERSION_1      1
 #define FILL_VERSION_2      2
 #define FILL_VERSION_3      3
-#define FILL_VERSION_DEFAULT FILL_VERSION_2 	/* I define it but it is the default in H5Pdcpl.c */
+#define FILL_VERSION_DEFAULT FILL_VERSION_2 	
 #define FILL_VERSION_LATEST H5O_FILL_VERSION_3
 
 /* These should be in sync with H5O_fill_ver_bounds[] in H5Ofill.c */
@@ -248,7 +238,7 @@ const unsigned fill_ver_bounds[] = {
 #define DSETB		"DSETB"
 #define DSETC		"DSETC"
 
-/* These should be in sync with H5O_SDSPACE* versions in H5Spkg.h */
+/* See H5O_SDSPACE* versions in H5Spkg.h */
 #define SDSPACE_VERSION_1    	1
 #define SDSPACE_VERSION_2    	2
 #define SDSPACE_VERSION_LATEST	SDSPACE_VERSION_2 
@@ -260,7 +250,7 @@ const unsigned sdspace_ver_bounds[] = {
     SDSPACE_VERSION_LATEST 	/* H5F_LIBVER_LATEST */
 };
 
-/* These should be in sync with H5O_DTYPE* versions in H5Tpkg.h */
+/* See H5O_DTYPE* versions in H5Tpkg.h */
 #define DTYPE_VERSION_1     1
 #define DTYPE_VERSION_2     2
 #define DTYPE_VERSION_3     3
@@ -273,7 +263,7 @@ const unsigned dtype_ver_bounds[] = {
     DTYPE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
 };
 
-/* These should be in sync with H5O_ATTR* versions in H5Apkg.h */
+/* See H5O_ATTR* versions in H5Apkg.h */
 #define ATTR_VERSION_1      1
 #define ATTR_VERSION_2      2
 #define ATTR_VERSION_3      3
@@ -5130,7 +5120,7 @@ test_libver_bounds_attributes(hid_t fapl)
     if(low == H5F_LIBVER_EARLIEST)
         VERIFY(attr->shared->version, ATTR_VERSION_2, "attr_ver_bounds");
     else
-        VERIFY(attr->shared->version, attr_ver_bounds[low], "dtype_ver_bounds");
+        VERIFY(attr->shared->version, attr_ver_bounds[low], "attr_ver_bounds");
 
     /* Close the attribute */
     ret = H5Aclose(aid);
@@ -5145,7 +5135,7 @@ test_libver_bounds_attributes(hid_t fapl)
     CHECK(attr, NULL, "H5I_object");
 
     /* Verify attribute version */
-    VERIFY(attr->shared->version, attr_ver_bounds[low], "dtype_ver_bounds");
+    VERIFY(attr->shared->version, attr_ver_bounds[low], "attr_ver_bounds");
 
     /* Close the attribute */
     ret = H5Aclose(aid);
@@ -5169,11 +5159,15 @@ test_libver_bounds_attributes(hid_t fapl)
     if(low == H5F_LIBVER_EARLIEST)
         VERIFY(attr->shared->version, ATTR_VERSION_3, "attr_ver_bounds");
     else
-        VERIFY(attr->shared->version, attr_ver_bounds[low], "dtype_ver_bounds");
+        VERIFY(attr->shared->version, attr_ver_bounds[low], "attr_ver_bounds");
 
     /* Close the attribute */
     ret = H5Aclose(aid);
     CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close the attribute creation property list */
+    ret = H5Pclose(attr_cpl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     /* Close the group */
     ret = H5Gclose(gid);
@@ -5185,7 +5179,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Close the datatype */
     ret = H5Tclose(tid);
-    CHECK(ret, FAIL, "H5Sclose");
+    CHECK(ret, FAIL, "H5Tclose");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -5229,7 +5223,7 @@ test_libver_bounds_attributes(hid_t fapl)
     if(low == H5F_LIBVER_EARLIEST)
         VERIFY(attr->shared->version, ATTR_VERSION_2, "attr_ver_bounds");
     else
-        VERIFY(attr->shared->version, attr_ver_bounds[low], "dtype_ver_bounds");
+        VERIFY(attr->shared->version, attr_ver_bounds[low], "attr_ver_bounds");
 
     /* Close the attribute */
     ret = H5Aclose(aid);
@@ -5245,13 +5239,13 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Close the datatype */
     ret = H5Tclose(tid);
-    CHECK(ret, FAIL, "H5Sclose");
+    CHECK(ret, FAIL, "H5Tclose");
 
     /* Close the file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Create a copy of the file pccess roperty list */
+    /* Create a copy of the file access property list */
     new_fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(new_fapl, FAIL, "H5Pcreate");
 
@@ -5284,7 +5278,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
                 /* Open the group */
                 gid = H5Gopen2(fid, GRP_NAME, H5P_DEFAULT);
-                CHECK(did, FAIL, "H5Dcreate2");
+                CHECK(gid, FAIL, "H5Dcreate2");
 
                 /* Create an attribute to the group */
                 aid = H5Acreate2(gid, "attr1", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
@@ -5610,7 +5604,7 @@ test_libver_bounds_dataspace(hid_t fapl)
     hid_t did, did_null, did_compact, did_contig;   /* Dataset IDs */
     hid_t sid, sid_null, sid_compact, sid_contig;   /* Dataspace IDs */
     hid_t dcpl, dcpl_compact, dcpl_contig;          /* Dataset creation property lists */
-    H5S_t *space, *space_null, *space_compact, *space_contig;   /* Internal dataspace pointers */
+    H5S_t *space, *space_null;              /* Internal dataspace pointers */
     H5F_t *f;                               /* Internal file pointer */
     H5F_libver_t low, high;                 /* File format bounds */
     hsize_t dims[1] = {1};                  /* Dimension sizes */
@@ -5713,6 +5707,9 @@ test_libver_bounds_dataspace(hid_t fapl)
     /* Verify the dataspace version for the three datasets */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
         for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+            hid_t tmp_sid, tmp_sid_compact, tmp_sid_contig;             /* Dataspace IDs */
+            H5S_t *tmp_space, *tmp_space_compact, *tmp_space_contig;    /* Internal dataspace pointers */
+
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -5736,34 +5733,34 @@ test_libver_bounds_dataspace(hid_t fapl)
                 CHECK(did, FAIL, "H5Dcreate2");
 
                 /* Get the internal dataspace pointer for the chunked dataset */
-                sid = H5Dget_space(did);
-                CHECK(sid, FAIL, "H5Dget_space");
-                space = (H5S_t *)H5I_object(sid);
-                CHECK(space, NULL, "H5I_object");
+                tmp_sid = H5Dget_space(did);
+                CHECK(tmp_sid, FAIL, "H5Dget_space");
+                tmp_space = (H5S_t *)H5I_object(tmp_sid);
+                CHECK(tmp_space, NULL, "H5I_object");
 
                 /* Create the compact dataset */
                 did_compact = H5Dcreate2(fid, DSETB, H5T_NATIVE_INT, sid_compact, H5P_DEFAULT, dcpl_compact, H5P_DEFAULT);
                 CHECK(did_compact, FAIL, "H5Dcreate2");
 
                 /* Get the internal dataspace pointer for the compact dataset */
-                sid_compact = H5Dget_space(did_compact);
-                CHECK(sid_compact, FAIL, "H5Dget_space");
-                space_compact = (H5S_t *)H5I_object(sid_compact);
-                CHECK(space_compact, NULL, "H5I_object");
+                tmp_sid_compact = H5Dget_space(did_compact);
+                CHECK(tmp_sid_compact, FAIL, "H5Dget_space");
+                tmp_space_compact = (H5S_t *)H5I_object(tmp_sid_compact);
+                CHECK(tmp_space_compact, NULL, "H5I_object");
 
                 /* Create the contiguous dataset */
                 did_contig = H5Dcreate2(fid, DSETC, H5T_NATIVE_INT, sid_contig, H5P_DEFAULT, dcpl_contig, H5P_DEFAULT);
                 CHECK(did_contig, FAIL, "H5Dcreate2");
 
                 /* Get the internal dataspace pointer for the contiguous dataset */
-                sid_contig = H5Dget_space(did_contig);
-                CHECK(sid_contig, FAIL, "H5Dget_space");
-                space_contig = (H5S_t *)H5I_object(sid_contig);
-                CHECK(space_contig, NULL, "H5I_object");
+                tmp_sid_contig = H5Dget_space(did_contig);
+                CHECK(tmp_sid_contig, FAIL, "H5Dget_space");
+                tmp_space_contig = (H5S_t *)H5I_object(tmp_sid_contig);
+                CHECK(tmp_space_contig, NULL, "H5I_object");
 
-                VERIFY(space->extent.version, sdspace_ver_bounds[f->shared->low_bound], "sdspace_ver_bounds");
-                VERIFY(space_compact->extent.version, sdspace_ver_bounds[f->shared->low_bound], "sdspace_ver_bounds");
-                VERIFY(space_contig->extent.version, sdspace_ver_bounds[f->shared->low_bound], "sdspace_ver_bounds");
+                VERIFY(tmp_space->extent.version, sdspace_ver_bounds[f->shared->low_bound], "sdspace_ver_bounds");
+                VERIFY(tmp_space_compact->extent.version, sdspace_ver_bounds[f->shared->low_bound], "sdspace_ver_bounds");
+                VERIFY(tmp_space_contig->extent.version, sdspace_ver_bounds[f->shared->low_bound], "sdspace_ver_bounds");
 
                 /* Close the three datasets */
                 ret = H5Dclose(did);
@@ -5772,6 +5769,13 @@ test_libver_bounds_dataspace(hid_t fapl)
                 CHECK(ret, FAIL, "H5Dclose");
                 ret = H5Dclose(did_contig);
                 CHECK(ret, FAIL, "H5Dclose");
+
+                ret = H5Sclose(tmp_sid);
+                CHECK(ret, FAIL, "H5Sclose");
+                ret = H5Sclose(tmp_sid_compact);
+                CHECK(ret, FAIL, "H5Sclose");
+                ret = H5Sclose(tmp_sid_contig);
+                CHECK(ret, FAIL, "H5Sclose");
 
                 /* Delete the three datasets */
                 ret = H5Ldelete(fid, DSETA, H5P_DEFAULT);
@@ -5853,7 +5857,7 @@ test_libver_bounds_dataset(hid_t fapl)
     did = H5Dcreate2(fid, DSETA, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(did, FAIL, "H5Dcreate");
 
-    /* Get the internal file pionter */
+    /* Get the internal dataset pointer */
     dset = (H5D_t *)H5I_object(did);
     CHECK(dset, NULL, "H5I_object");
 
@@ -5885,7 +5889,7 @@ test_libver_bounds_dataset(hid_t fapl)
     ret = H5Pset_chunk(dcpl, 2, fix_chunks2);
     CHECK(ret, FAIL, "H5Pset_chunk");
     ret = H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
-    CHECK(ret, FAIL, "H5Pset_chunk");
+    CHECK(ret, FAIL, "H5Pset_chunk_opts");
 
     H5E_BEGIN_TRY {
         did = H5Dcreate2(fid, DSETB, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
@@ -5991,15 +5995,15 @@ test_libver_bounds_dataset(hid_t fapl)
         } /* end for */
     } /* end for */
 
-    /* CLose the file access property list */
+    /* Close the file access property list */
     ret = H5Pclose(new_fapl);
     CHECK(ret, FAIL, "H5Pclose");
 
-    /* CLose the dataspace */
+    /* Close the dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
 
-    /* CLose the dataset creation property list */
+    /* Close the dataset creation property list */
     ret = H5Pclose(dcpl);
     CHECK(ret, FAIL, "H5Pclose");
 
@@ -6067,7 +6071,7 @@ test_libver_bounds_obj(hid_t fapl)
     CHECK(ret, FAIL, "H5Oget_info");
 
     /* Verify object header version */
-    VERIFY(oinfo.hdr.version, obj_ver_bounds[low], "H5Oget_info");
+    VERIFY(oinfo.hdr.version, obj_ver_bounds[low], "obj_ver_bounds");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -6118,7 +6122,7 @@ test_libver_bounds_obj(hid_t fapl)
                 CHECK(ret, FAIL, "H5Oget_info");
 
                 /* Verify object header version */
-                VERIFY(oinfo.hdr.version, obj_ver_bounds[f->shared->low_bound], "H5Oget_info_by_name");
+                VERIFY(oinfo.hdr.version, obj_ver_bounds[f->shared->low_bound], "obj_ver_bounds");
 
                 /* Close the group */
                 ret = H5Gclose(gid);
@@ -6354,6 +6358,10 @@ test_libver_bounds_super(hid_t fapl)
     test_libver_bounds_super_open(fapl, fcpl, TRUE);
     test_libver_bounds_super_open(fapl, fcpl, FALSE);
 
+    /* Close fcpl */
+    ret = H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
     /* Create fcpl with non-default v1-btree K value enabled */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
     CHECK(fcpl, FAIL, "H5Pcreate");
@@ -6369,6 +6377,7 @@ test_libver_bounds_super(hid_t fapl)
     test_libver_bounds_super_open(fapl, fcpl, TRUE);
     test_libver_bounds_super_open(fapl, fcpl, FALSE);
 
+    /* Close fcpl */
     ret = H5Pclose(fcpl);
     CHECK(ret, FAIL, "H5Pclose");
 
@@ -6388,6 +6397,7 @@ test_libver_bounds_super(hid_t fapl)
     test_libver_bounds_super_open(fapl, fcpl, TRUE);
     test_libver_bounds_super_open(fapl, fcpl, FALSE);
 
+    /* Close fcpl */
     ret = H5Pclose(fcpl);
     CHECK(ret, FAIL, "H5Pclose");
 
@@ -6405,6 +6415,7 @@ test_libver_bounds_super(hid_t fapl)
     test_libver_bounds_super_open(fapl, fcpl, TRUE);
     test_libver_bounds_super_open(fapl, fcpl, FALSE);
 
+    /* Close fcpl */
     ret = H5Pclose(fcpl);
     CHECK(ret, FAIL, "H5Pclose");
 

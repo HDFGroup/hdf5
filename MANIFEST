@@ -753,6 +753,7 @@
 ./src/H5Oflush.c
 ./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
+./src/H5Oint.c
 ./src/H5Olayout.c
 ./src/H5Olinfo.c
 ./src/H5Olink.c
@@ -810,6 +811,7 @@
 ./src/H5PLextern.h
 ./src/H5R.c
 ./src/H5Rdeprec.c
+./src/H5Rint.c
 ./src/H5Rmodule.h
 ./src/H5Rpkg.h
 ./src/H5Rprivate.h
@@ -936,10 +938,6 @@
 ./test/dt_arith.c
 ./test/dtypes.c
 ./test/dtransform.c
-./test/dynlib1.c
-./test/dynlib2.c
-./test/dynlib3.c
-./test/dynlib4.c
 ./test/earray.c
 ./test/efc.c
 ./test/enc_dec_plist.c
@@ -967,6 +965,11 @@
 ./test/fill_old.h5
 ./test/fillval.c
 ./test/filter_fail.c
+./test/filter_plugin.c
+./test/filter_plugin1_dsets.c
+./test/filter_plugin2_dsets.c
+./test/filter_plugin3_dsets.c
+./test/filter_plugin4_groups.c
 ./test/flush1.c
 ./test/flush2.c
 ./test/flushrefresh.c
@@ -1030,7 +1033,6 @@
 ./test/page_buffer.c
 ./test/paged_nopersist.h5
 ./test/paged_persist.h5
-./test/plugin.c
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
@@ -1065,12 +1067,12 @@
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
 ./test/test_filenotclosed.sh.in
+./test/test_filter_plugin.sh.in
 ./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
-./test/test_plugin.sh.in
 ./test/test_usecases.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh.in
@@ -1355,6 +1357,7 @@
 ./tools/test/h5format_convert/testfiles/h5fc_v_n_all.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_bt1.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_err.ddl
+./tools/test/h5format_convert/testfiles/h5fc_v_err.ddl.err
 ./tools/test/h5format_convert/testfiles/h5fc_v_non_chunked.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_d_file.ddl
 ./tools/test/h5format_convert/testfiles/h5fc_v_ndata_bt1.ddl
@@ -1434,6 +1437,7 @@
 ./tools/test/h5copy/Makefile.am
 ./tools/test/h5copy/h5copygentest.c
 ./tools/test/h5copy/testh5copy.sh.in
+./tools/test/h5copy/dynlib_copy.c
 
 
 ./tools/lib/Makefile.am
@@ -2524,6 +2528,12 @@
 ./tools/test/h5copy/testfiles/h5copy_misc1.out
 ./tools/test/h5copy/testfiles/h5copytst_new.h5
 ./tools/test/h5copy/testfiles/h5copytst_new.out.ls
+./tools/test/h5copy/testfiles/h5copy_plugin_fail_ERR.out.h5.txt
+./tools/test/h5copy/testfiles/h5copy_plugin_test.out.h5.txt
+./tools/test/h5copy/testfiles/tudfilter.h5
+./tools/test/h5copy/testfiles/tudfilter2.h5
+./tools/test/h5copy/testfiles/tudfilter.h5.txt
+./tools/test/h5copy/testfiles/tudfilter.h5_ERR.txt
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_nested_p.ls
@@ -3099,6 +3109,12 @@
 ./config/cmake_ext_mod/NSIS.template.in
 ./config/cmake_ext_mod/runTest.cmake
 ./config/cmake_ext_mod/version.plist.in
+./config/cmake_ext_mod/FindMPI/fortranparam_mpi.f90.in
+./config/cmake_ext_mod/FindMPI/libver_mpi.c
+./config/cmake_ext_mod/FindMPI/libver_mpi.f90.in
+./config/cmake_ext_mod/FindMPI/mpiver.f90.in
+./config/cmake_ext_mod/FindMPI/test_mpi.c
+./config/cmake_ext_mod/FindMPI/test_mpi.f90.in
 
 # CMake-specific User Files
 ./config/cmake/UserMacros/Windows_MT.cmake

@@ -310,14 +310,12 @@
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
-#define H5F_USE_LATEST_FLAGS(F,FL)  ((F)->shared->latest_flags & (FL))
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    ((F)->shared->store_msg_crt_idx = (FL))
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (((F)->shared->grp_btree_shared = (RC)) ? SUCCEED : FAIL)
 #define H5F_USE_TMP_SPACE(F)    ((F)->shared->fs.use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
-#define H5F_SET_LATEST_FLAGS(F, FL)  ((F)->shared->latest_flags = (FL))
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
@@ -369,7 +367,6 @@
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
 #define H5F_SIEVE_BUF_SIZE(F)   (H5F_sieve_buf_size(F))
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
-#define H5F_USE_LATEST_FLAGS(F,FL) (H5F_use_latest_flags(F,FL))
 #define H5F_STORE_MSG_CRT_IDX(F) (H5F_store_msg_crt_idx(F))
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    (H5F_set_store_msg_crt_idx((F), (FL)))
 #define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))

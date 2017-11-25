@@ -833,6 +833,10 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
             hbool_t     rw = ((rw_flags & H5AC__READ_ONLY_FLAG) == 0);
             H5O_mdci_t  mdci_msg;
 
+            /* Message exists but file format version high bound does not allow it */
+            if(f->shared->high_bound < H5F_LIBVER_V110)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file format version out of bound for metadata cache image")
+
             /* if the metadata cache image superblock extension message exists,
              * read its contents and pass the data on to the metadata cache.
              * Given this data, the cache will load and decode the metadata

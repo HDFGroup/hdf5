@@ -641,6 +641,14 @@ H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg
 H5_DLL herr_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     hsize_t *nattrs);
 
+H5_DLLVAR const unsigned H5O_obj_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_layout_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_attr_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_dtype_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_fill_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_pline_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_sdspace_ver_bounds[H5F_LIBVER_NBOUNDS];
+
 /* Testing functions */
 #ifdef H5O_TESTING
 H5_DLL htri_t H5O_is_attr_empty_test(hid_t oid);

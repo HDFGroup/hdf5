@@ -99,6 +99,7 @@ AC_CONFIG_COMMANDS([pubconf], [
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 AC_SUBST([JNIFLAGS])
+AC_SUBST([AR_FLAGS])
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
@@ -139,6 +140,7 @@ JNIFLAGS="${JNIFLAGS}"
 JAVACFLAGS="${JAVACFLAGS}"
 JAVAFLAGS="${JAVAFLAGS}"
 LDFLAGS="${LDFLAGS}"
+AR_FLAGS="${AR_FLAGS}"
 
 ## Configure may need to alter any of the *FLAGS variables in order for
 ## various checks to work correctly. Save the user's value here so it
@@ -757,11 +759,16 @@ fi
 ## Check which archiving tool to use. This needs to be done before
 ## the AM_PROG_LIBTOOL macro.
 ##
-
 if test -z "$AR"; then
   AC_CHECK_PROGS([AR], [ar xar], [:], [$PATH])
 fi
 AC_SUBST([AR])
+
+# Set the default ar flags to cr
+# The Automake default is to use cru and the 'u' causes ar
+# to emit warnings on some platforms.
+AR_FLAGS=cr
+
 
 ## Export the AR macro so that it will be placed in the libtool file
 ## correctly.
@@ -3369,17 +3376,17 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
                  src/Makefile
                  test/Makefile
+                 test/H5srcdir_str.h
                  test/testcheck_version.sh
                  test/testerror.sh
                  test/testflushrefresh.sh
-                 test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
-                 test/test_filenotclosed.sh
                  test/testswmr.sh
-                 test/test_plugin.sh
-                 test/test_usecases.sh
                  test/testvdsswmr.sh
+                 test/test_filenotclosed.sh
+                 test/test_filter_plugin.sh
+                 test/test_usecases.sh
                  testpar/Makefile
                  tools/Makefile
                  tools/lib/Makefile
@@ -3518,7 +3525,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   case "`uname`" in
     Linux*)
       if test "X$FC_BASENAME" = "Xnagfor"; then
-         cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+         cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
   esac

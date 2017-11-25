@@ -57,6 +57,12 @@ static htri_t H5S_is_simple(const H5S_t *sdim);
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
+/* Format version bounds for dataspace */
+const unsigned H5O_sdspace_ver_bounds[] = {
+    H5O_SDSPACE_VERSION_1,      /* H5F_LIBVER_EARLIEST */
+    H5O_SDSPACE_VERSION_2,      /* H5F_LIBVER_V18 */
+    H5O_SDSPACE_VERSION_LATEST  /* H5F_LIBVER_LATEST */
+};
 
 /*****************************/
 /* Library Private Variables */
@@ -84,12 +90,6 @@ static const H5I_class_t H5I_DATASPACE_CLS[1] = {{
     (H5I_free_t)H5S_close	/* Callback routine for closing objects of this class */
 }};
 
-/* Format version bounds for dataspace */
-static const unsigned H5O_sdspace_ver_bounds[] = {
-    H5O_SDSPACE_VERSION_1,      /* H5F_LIBVER_EARLIEST */
-    H5O_SDSPACE_VERSION_2,      /* H5F_LIBVER_V18 */
-    H5O_SDSPACE_VERSION_LATEST  /* H5F_LIBVER_LATEST */
-};
 
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5S_top_package_initialize_s = FALSE;
