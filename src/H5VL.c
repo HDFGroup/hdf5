@@ -55,7 +55,7 @@
 typedef struct {
     const char *name;           /* The name of the VOL driver to check */
     hid_t found_id;             /* The library ID if we found a match */
-} H5VL_get_plugin_ud_t;
+} H5VL_get_driver_ud_t;
 
 /********************/
 /* Local Prototypes */
@@ -75,7 +75,7 @@ typedef struct {
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL__get_plugin_cb
+ * Function:    H5VL__get_driver_cb
  *
  * Purpose:     Callback routine to search through registered VOLs
  *
@@ -87,9 +87,9 @@ typedef struct {
  *-------------------------------------------------------------------------
  */
 static int
-H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
+H5VL__get_driver_cb(void *obj, hid_t id, void *_op_data)
 {
-    H5VL_get_plugin_ud_t *op_data = (H5VL_get_plugin_ud_t *)_op_data; /* User data for callback */
+    H5VL_get_driver_ud_t *op_data = (H5VL_get_driver_ud_t *)_op_data; /* User data for callback */
     H5VL_class_t *cls = (H5VL_class_t *)obj;
     int ret_value = H5_ITER_CONT;     /* Callback return value */
 
@@ -101,13 +101,13 @@ H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__get_plugin_cb() */
+} /* end H5VL__get_driver_cb() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLregister
  *
- * Purpose:     Registers a new vol plugin as a member of the virtual object
+ * Purpose:     Registers a new vol driver as a member of the virtual object
  *              layer class.
  *
  * Return:      Success:    A vol driver ID which is good until the
@@ -121,7 +121,7 @@ H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
 hid_t
 H5VLregister(const H5VL_class_t *cls)
 {
-    H5VL_get_plugin_ud_t op_data;
+    H5VL_get_driver_ud_t op_data;
     hid_t ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(FAIL)
@@ -139,8 +139,8 @@ H5VLregister(const H5VL_class_t *cls)
     op_data.found_id = H5I_INVALID_HID;
     op_data.name = cls->name;
 
-    /* check if plugin is already registered */
-    if(H5I_iterate(H5I_VOL, H5VL__get_plugin_cb, &op_data, TRUE) < 0)
+    /* check if driver is already registered */
+    if(H5I_iterate(H5I_VOL, H5VL__get_driver_cb, &op_data, TRUE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VOL IDs")
 
     /* XXX: Does this need to be an error? Users probably don't care as long
@@ -161,11 +161,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLregister_by_name
  *
- * Purpose:     Registers a new vol plugin as a member of the virtual object
+ * Purpose:     Registers a new vol driver as a member of the virtual object
  *              layer class.
  *
- * Return:      Success:    A vol plugin ID which is good until the
- *                          library is closed or the plugin is
+ * Return:      Success:    A vol driver ID which is good until the
+ *                          library is closed or the driver is
  *                          unregistered.
  *
  *              Failure:    A negative value.
@@ -190,10 +190,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLunregister
  *
- * Purpose:     Removes a vol plugin ID from the library. This in no way affects
+ * Purpose:     Removes a vol driver ID from the library. This in no way affects
  *              file access property lists which have been defined to use
- *              this vol plugin or files which are already opened under with
- *              this plugin.
+ *              this vol driver or files which are already opened under with
+ *              this driver.
  *
  * Return:      Success:    Non-negative
  *
@@ -212,11 +212,11 @@ H5VLunregister(hid_t vol_id)
 
     /* Check arguments */
     if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(vol_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol plugin")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol driver")
 
     /* The H5VL_class_t struct will be freed by this function */
     if(H5I_dec_app_ref(vol_id) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to unregister vol plugin")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to unregister vol driver")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -226,7 +226,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLinitialize
  *
- * Purpose:     Calls the plugin-specific callback to initialize the plugin.
+ * Purpose:     Calls the driver-specific callback to initialize the driver.
  *
  * Return:      Success:    Non-negative
  *
@@ -235,14 +235,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLinitialize(hid_t plugin_id, hid_t vipl_id)
+H5VLinitialize(hid_t driver_id, hid_t vipl_id)
 {
+    H5VL_class_t *cls = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", plugin_id, vipl_id);
+    H5TRACE2("e", "ii", driver_id, vipl_id);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    /* Check args */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if (cls->initialize && cls->initialize(vipl_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL driver did not initialize")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -252,7 +258,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLterminate
  *
- * Purpose:     Calls the plugin-specific callback to terminate the plugin.
+ * Purpose:     Calls the driver-specific callback to terminate the driver.
  *
  * Return:      Success:    Non-negative
  *
@@ -261,14 +267,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLterminate(hid_t plugin_id, hid_t vtpl_id)
+H5VLterminate(hid_t driver_id, hid_t vtpl_id)
 {
+    H5VL_class_t *cls = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", plugin_id, vtpl_id);
+    H5TRACE2("e", "ii", driver_id, vtpl_id);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    /* Check args */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if (cls->terminate && cls->terminate(vtpl_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL driver did not terminate cleanly")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -291,7 +303,7 @@ done:
 htri_t
 H5VLis_registered(const char *name)
 {
-    H5VL_get_plugin_ud_t op_data;
+    H5VL_get_driver_ud_t op_data;
     htri_t ret_value = FALSE;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -301,7 +313,7 @@ H5VLis_registered(const char *name)
     op_data.name = name;
 
     /* Check arguments */
-    if(H5I_iterate(H5I_VOL, H5VL__get_plugin_cb, &op_data, TRUE) < 0)
+    if(H5I_iterate(H5I_VOL, H5VL__get_driver_cb, &op_data, TRUE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "can't iterate over VOL ids")
 
     if(op_data.found_id != H5I_INVALID_HID)
@@ -313,19 +325,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLget_plugin_name
+ * Function:    H5VLget_driver_name
  *
- * Purpose:     Returns the plugin name for the VOL associated with the
+ * Purpose:     Returns the driver name for the VOL associated with the
  *              object or file ID
  *
- * Return:      Success:        The length of the plugin name
+ * Return:      Success:        The length of the driver name
  *
  *              Failure:        Negative
  *
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5VLget_plugin_name(hid_t obj_id, char *name/*out*/, size_t size)
+H5VLget_driver_name(hid_t obj_id, char *name/*out*/, size_t size)
 {
     ssize_t    ret_value;
 
@@ -336,13 +348,13 @@ H5VLget_plugin_name(hid_t obj_id, char *name/*out*/, size_t size)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLget_plugin_name() */
+} /* end H5VLget_driver_name() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLclose
  *
- * Purpose:     Closes the specified VOL plugin.  The VOL ID will no longer
+ * Purpose:     Closes the specified VOL driver.  The VOL ID will no longer
  *              be valid for accessing the VOL.
  *
  * Return:      Success:    Non-negative
@@ -361,10 +373,10 @@ H5VLclose(hid_t vol_id)
 
     /* Check args */
     if(NULL == H5I_object_verify(vol_id, H5I_VOL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
 
     if(H5I_dec_app_ref(vol_id) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close VOL plugin ID")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close VOL driver ID")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -384,14 +396,18 @@ done:
  *---------------------------------------------------------------------------
  */
 hid_t
-H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t plugin_id)
+H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t driver_id)
 {
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "*xIti", obj, obj_type, plugin_id);
+    H5TRACE3("i", "*xIti", obj, obj_type, driver_id);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object to register")
+
+    if ((ret_value = H5VL_object_register(obj, obj_type, driver_id, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -438,12 +454,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_cancel(void **req, hid_t plugin_id, H5ES_status_t *status)
+H5VLrequest_cancel(void **req, hid_t driver_id, H5ES_status_t *status)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "**xi*Es", req, plugin_id, status);
+    H5TRACE3("e", "**xi*Es", req, driver_id, status);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -464,12 +480,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_test(void **req, hid_t plugin_id, H5ES_status_t *status)
+H5VLrequest_test(void **req, hid_t driver_id, H5ES_status_t *status)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "**xi*Es", req, plugin_id, status);
+    H5TRACE3("e", "**xi*Es", req, driver_id, status);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -490,12 +506,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_wait(void **req, hid_t plugin_id, H5ES_status_t *status)
+H5VLrequest_wait(void **req, hid_t driver_id, H5ES_status_t *status)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "**xi*Es", req, plugin_id, status);
+    H5TRACE3("e", "**xi*Es", req, driver_id, status);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -516,13 +532,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
+H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, plugin_id, name, acpl_id,
+    H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, driver_id, name, acpl_id,
              aapl_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
@@ -544,13 +560,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
+H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
               hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, plugin_id, name, aapl_id,
+    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, driver_id, name, aapl_id,
              dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
@@ -571,7 +587,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5VLattr_read(void *attr, hid_t plugin_id, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req)
+herr_t H5VLattr_read(void *attr, hid_t driver_id, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
@@ -595,7 +611,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5VLattr_write(void *attr, hid_t plugin_id, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req)
+herr_t H5VLattr_write(void *attr, hid_t driver_id, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
@@ -620,13 +636,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_get(void *obj, hid_t plugin_id, H5VL_attr_get_t get_type,
+H5VLattr_get(void *obj, hid_t driver_id, H5VL_attr_get_t get_type,
              hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xiVai**xx", obj, plugin_id, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVai**xx", obj, driver_id, get_type, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -638,7 +654,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLattr_specific
  *
- * Purpose:     Performs a plugin-specific operation on an attribute
+ * Purpose:     Performs a driver-specific operation on an attribute
  *
  * Return:      Success:    Non-negative
  *
@@ -647,13 +663,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
+H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id,
                   H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xxiVbi**xx", obj, loc_params, plugin_id, specific_type,
+    H5TRACE7("e", "*xxiVbi**xx", obj, loc_params, driver_id, specific_type,
              dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -666,7 +682,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLattr_optional
  *
- * Purpose:     Performs an optional plugin-specific operation on an attribute
+ * Purpose:     Performs an optional driver-specific operation on an attribute
  *
  * Return:      Success:    Non-negative
  *
@@ -675,12 +691,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
+H5VLattr_optional(void *obj, hid_t driver_id, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, driver_id, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -701,12 +717,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_close(void *attr, hid_t plugin_id, hid_t dxpl_id, void **req)
+H5VLattr_close(void *attr, hid_t driver_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*xii**x", attr, plugin_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", attr, driver_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -727,13 +743,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
+H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
                     hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, plugin_id, name, dcpl_id,
+    H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, driver_id, name, dcpl_id,
              dapl_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
@@ -755,13 +771,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
+H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
                   hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
 
     FUNC_ENTER_API(NULL)
-    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, plugin_id, name, dapl_id,
+    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, driver_id, name, dapl_id,
              dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
@@ -783,13 +799,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_read(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id,
+H5VLdataset_read(void *dset, hid_t driver_id, hid_t mem_type_id, hid_t mem_space_id,
                   hid_t file_space_id, hid_t plist_id, void *buf, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "*xiiiii*x**x", dset, plugin_id, mem_type_id, mem_space_id,
+    H5TRACE8("e", "*xiiiii*x**x", dset, driver_id, mem_type_id, mem_space_id,
              file_space_id, plist_id, buf, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -811,13 +827,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_write(void *dset, hid_t plugin_id, hid_t mem_type_id, hid_t mem_space_id,
+H5VLdataset_write(void *dset, hid_t driver_id, hid_t mem_type_id, hid_t mem_space_id,
                    hid_t file_space_id, hid_t plist_id, const void *buf, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "*xiiiii*x**x", dset, plugin_id, mem_type_id, mem_space_id,
+    H5TRACE8("e", "*xiiiii*x**x", dset, driver_id, mem_type_id, mem_space_id,
              file_space_id, plist_id, buf, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -839,13 +855,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_get(void *dset, hid_t plugin_id, H5VL_dataset_get_t get_type,
+H5VLdataset_get(void *dset, hid_t driver_id, H5VL_dataset_get_t get_type,
                 hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xiVci**xx", dset, plugin_id, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVci**xx", dset, driver_id, get_type, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -857,7 +873,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLdataset_specific
  *
- * Purpose:     Performs a plugin-specific operation on a dataset
+ * Purpose:     Performs a driver-specific operation on a dataset
  *
  * Return:      Success:    Non-negative
  *
@@ -866,13 +882,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_specific(void *obj, hid_t plugin_id, H5VL_dataset_specific_t specific_type,
+H5VLdataset_specific(void *obj, hid_t driver_id, H5VL_dataset_specific_t specific_type,
                       hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xiVdi**xx", obj, plugin_id, specific_type, dxpl_id, req,
+    H5TRACE6("e", "*xiVdi**xx", obj, driver_id, specific_type, dxpl_id, req,
              arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -885,7 +901,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLdataset_optional
  *
- * Purpose:     Performs an optional plugin-specific operation on a dataset
+ * Purpose:     Performs an optional driver-specific operation on a dataset
  *
  * Return:      Success:    Non-negative
  *
@@ -894,12 +910,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
+H5VLdataset_optional(void *obj, hid_t driver_id, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, driver_id, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -920,12 +936,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_close(void *dset, hid_t plugin_id, hid_t dxpl_id, void **req)
+H5VLdataset_close(void *dset, hid_t driver_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*xii**x", dset, plugin_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", dset, driver_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -999,13 +1015,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_get(void *file, hid_t plugin_id, H5VL_file_get_t get_type,
+H5VLfile_get(void *file, hid_t driver_id, H5VL_file_get_t get_type,
              hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xiVgi**xx", file, plugin_id, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVgi**xx", file, driver_id, get_type, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1017,7 +1033,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLfile_specific
  *
- * Purpose:     Performs a plugin-specific operation on a file
+ * Purpose:     Performs a driver-specific operation on a file
  *
  * Return:      Success:    Non-negative
  *
@@ -1026,13 +1042,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_specific(void *file, hid_t plugin_id, H5VL_file_specific_t specific_type,
+H5VLfile_specific(void *file, hid_t driver_id, H5VL_file_specific_t specific_type,
                   hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xiVhi**xx", file, plugin_id, specific_type, dxpl_id, req,
+    H5TRACE6("e", "*xiVhi**xx", file, driver_id, specific_type, dxpl_id, req,
              arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -1045,7 +1061,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLfile_optional
  *
- * Purpose:     Performs an optional plugin-specific operation on a file
+ * Purpose:     Performs an optional driver-specific operation on a file
  *
  * Return:      Success:    Non-negative
  *
@@ -1054,12 +1070,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_optional(void *file, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
+H5VLfile_optional(void *file, hid_t driver_id, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xii**xx", file, plugin_id, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", file, driver_id, dxpl_id, req, arguments);
 
 
 done:
@@ -1079,12 +1095,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_close(void *file, hid_t plugin_id, hid_t dxpl_id, void **req)
+H5VLfile_close(void *file, hid_t driver_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*xii**x", file, plugin_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", file, driver_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1105,13 +1121,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
+H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
                  hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
 
     FUNC_ENTER_API(NULL)
-    H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, plugin_id, name, gcpl_id,
+    H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, driver_id, name, gcpl_id,
              gapl_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
@@ -1133,13 +1149,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
+H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
                 hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
 
     FUNC_ENTER_API(NULL)
-    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, plugin_id, name, gapl_id,
+    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, driver_id, name, gapl_id,
              dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
@@ -1161,13 +1177,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_get(void *obj, hid_t plugin_id, H5VL_group_get_t get_type,
+H5VLgroup_get(void *obj, hid_t driver_id, H5VL_group_get_t get_type,
               hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xiVii**xx", obj, plugin_id, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVii**xx", obj, driver_id, get_type, dxpl_id, req, arguments);
 
 
 done:
@@ -1178,7 +1194,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLgroup_specific
  *
- * Purpose:     Performs a plugin-specific operation on a group
+ * Purpose:     Performs a driver-specific operation on a group
  *
  * Return:      Success:    Non-negative
  *
@@ -1187,13 +1203,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_specific(void *obj, hid_t plugin_id, H5VL_group_specific_t specific_type,
+H5VLgroup_specific(void *obj, hid_t driver_id, H5VL_group_specific_t specific_type,
                       hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xiVji**xx", obj, plugin_id, specific_type, dxpl_id, req,
+    H5TRACE6("e", "*xiVji**xx", obj, driver_id, specific_type, dxpl_id, req,
              arguments);
 
 
@@ -1205,7 +1221,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLgroup_optional
  *
- * Purpose:     Performs an optional plugin-specific operation on a group
+ * Purpose:     Performs an optional driver-specific operation on a group
  *
  * Return:      Success:    Non-negative
  *
@@ -1214,12 +1230,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
+H5VLgroup_optional(void *obj, hid_t driver_id, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, driver_id, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1240,12 +1256,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_close(void *grp, hid_t plugin_id, hid_t dxpl_id, void **req)
+H5VLgroup_close(void *grp, hid_t driver_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*xii**x", grp, plugin_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", grp, driver_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1267,12 +1283,12 @@ done:
  */
 herr_t
 H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params,
-                 hid_t plugin_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+                 hid_t driver_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "Vk*xxiiii**x", create_type, obj, loc_params, plugin_id, lcpl_id,
+    H5TRACE8("e", "Vk*xxiiii**x", create_type, obj, loc_params, driver_id, lcpl_id,
              lapl_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -1295,14 +1311,14 @@ done:
  */
 herr_t
 H5VLlink_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-              H5VL_loc_params_t loc_params2, hid_t plugin_id,
+              H5VL_loc_params_t loc_params2, hid_t driver_id,
               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE9("e", "*xx*xxiiii**x", src_obj, loc_params1, dst_obj, loc_params2,
-             plugin_id, lcpl_id, lapl_id, dxpl_id, req);
+             driver_id, lcpl_id, lapl_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1324,14 +1340,14 @@ done:
  */
 herr_t
 H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-              H5VL_loc_params_t loc_params2, hid_t plugin_id,
+              H5VL_loc_params_t loc_params2, hid_t driver_id,
               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE9("e", "*xx*xxiiii**x", src_obj, loc_params1, dst_obj, loc_params2,
-             plugin_id, lcpl_id, lapl_id, dxpl_id, req);
+             driver_id, lcpl_id, lapl_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1352,13 +1368,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_link_get_t get_type,
+H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, H5VL_link_get_t get_type,
               hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xxiVli**xx", obj, loc_params, plugin_id, get_type, dxpl_id, req,
+    H5TRACE7("e", "*xxiVli**xx", obj, loc_params, driver_id, get_type, dxpl_id, req,
              arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -1371,7 +1387,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLlink_specific
  *
- * Purpose:     Performs a plugin-specific operation on a link
+ * Purpose:     Performs a driver-specific operation on a link
  *
  * Return:      Success:    Non-negative
  *
@@ -1380,13 +1396,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
+H5VLlink_specific(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id,
                   H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xxiVmi**xx", obj, loc_params, plugin_id, specific_type,
+    H5TRACE7("e", "*xxiVmi**xx", obj, loc_params, driver_id, specific_type,
              dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -1399,7 +1415,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLlink_optional
  *
- * Purpose:     Performs an optional plugin-specific operation on a link
+ * Purpose:     Performs an optional driver-specific operation on a link
  *
  * Return:      Success:    Non-negative
  *
@@ -1408,12 +1424,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
+H5VLlink_optional(void *obj, hid_t driver_id, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, driver_id, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1434,13 +1450,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLobject_open(void *obj, H5VL_loc_params_t params, hid_t plugin_id, H5I_type_t *opened_type,
+H5VLobject_open(void *obj, H5VL_loc_params_t params, hid_t driver_id, H5I_type_t *opened_type,
                 hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
 
     FUNC_ENTER_API(NULL)
-    H5TRACE6("*x", "*xxi*Iti**x", obj, params, plugin_id, opened_type, dxpl_id, req);
+    H5TRACE6("*x", "*xxi*Iti**x", obj, params, driver_id, opened_type, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
 
@@ -1461,15 +1477,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, hid_t plugin_id1, const char *src_name,
-                void *dst_obj, H5VL_loc_params_t loc_params2, hid_t plugin_id2, const char *dst_name,
+H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, hid_t driver_id1, const char *src_name,
+                void *dst_obj, H5VL_loc_params_t loc_params2, hid_t driver_id2, const char *dst_name,
                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE12("e", "*xxi*s*xxi*siii**x", src_obj, loc_params1, plugin_id1,
-             src_name, dst_obj, loc_params2, plugin_id2, dst_name, ocpypl_id,
+    H5TRACE12("e", "*xxi*s*xxi*siii**x", src_obj, loc_params1, driver_id1,
+             src_name, dst_obj, loc_params2, driver_id2, dst_name, ocpypl_id,
              lcpl_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -1491,13 +1507,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, H5VL_object_get_t get_type,
+H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, H5VL_object_get_t get_type,
                hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xxiVni**xx", obj, loc_params, plugin_id, get_type, dxpl_id, req,
+    H5TRACE7("e", "*xxiVni**xx", obj, loc_params, driver_id, get_type, dxpl_id, req,
              arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -1510,7 +1526,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLobject_specific
  *
- * Purpose:     Performs a plugin-specific operation on an object
+ * Purpose:     Performs a driver-specific operation on an object
  *
  * Return:      Success:    Non-negative
  *
@@ -1519,13 +1535,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id,
+H5VLobject_specific(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id,
                     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*xxiVoi**xx", obj, loc_params, plugin_id, specific_type,
+    H5TRACE7("e", "*xxiVoi**xx", obj, loc_params, driver_id, specific_type,
              dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -1538,7 +1554,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLobject_optional
  *
- * Purpose:     Performs an optional plugin-specific operation on an object
+ * Purpose:     Performs an optional driver-specific operation on an object
  *
  * Return:      Success:    Non-negative
  *
@@ -1547,12 +1563,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
+H5VLobject_optional(void *obj, hid_t driver_id, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, driver_id, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1573,13 +1589,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
+H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
                      hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
 
     FUNC_ENTER_API(NULL)
-    H5TRACE10("*x", "*xxi*siiiii**x", obj, loc_params, plugin_id, name, type_id,
+    H5TRACE10("*x", "*xxi*siiiii**x", obj, loc_params, driver_id, name, type_id,
              lcpl_id, tcpl_id, tapl_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
@@ -1601,13 +1617,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const char *name,
+H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
                    hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL;
 
     FUNC_ENTER_API(NULL)
-    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, plugin_id, name, tapl_id,
+    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, driver_id, name, tapl_id,
              dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
@@ -1620,7 +1636,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLdatatype_specific
  *
- * Purpose:     Performs a plugin-specific operation on a datatype
+ * Purpose:     Performs a driver-specific operation on a datatype
  *
  * Return:      Success:    Non-negative
  *
@@ -1629,13 +1645,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_specific(void *obj, hid_t plugin_id, H5VL_datatype_specific_t specific_type,
+H5VLdatatype_specific(void *obj, hid_t driver_id, H5VL_datatype_specific_t specific_type,
                       hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xiVfi**xx", obj, plugin_id, specific_type, dxpl_id, req,
+    H5TRACE6("e", "*xiVfi**xx", obj, driver_id, specific_type, dxpl_id, req,
              arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
@@ -1648,7 +1664,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLdatatype_optional
  *
- * Purpose:     Performs an optional plugin-specific operation on a datatype
+ * Purpose:     Performs an optional driver-specific operation on a datatype
  *
  * Return:      Success:    Non-negative
  *
@@ -1657,12 +1673,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_optional(void *obj, hid_t plugin_id, hid_t dxpl_id, void **req, va_list arguments)
+H5VLdatatype_optional(void *obj, hid_t driver_id, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xii**xx", obj, plugin_id, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xii**xx", obj, driver_id, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1683,13 +1699,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_get(void *obj, hid_t plugin_id, H5VL_datatype_get_t get_type,
+H5VLdatatype_get(void *obj, hid_t driver_id, H5VL_datatype_get_t get_type,
                  hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*xiVei**xx", obj, plugin_id, get_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*xiVei**xx", obj, driver_id, get_type, dxpl_id, req, arguments);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
@@ -1710,12 +1726,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_close(void *dt, hid_t plugin_id, hid_t dxpl_id, void **req)
+H5VLdatatype_close(void *dt, hid_t driver_id, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*xii**x", dt, plugin_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", dt, driver_id, dxpl_id, req);
 
     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
 
