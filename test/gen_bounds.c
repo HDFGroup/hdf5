@@ -161,7 +161,7 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return 1;
-}
+} /* gen_earliest_latest */
 
 /***********************************************************************
  * gen_earliest_v18() creates file "bounds_earliest_v18.h5"
@@ -258,7 +258,7 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return 1;
-}
+} /* gen_earliest_v18 */
 
 /***********************************************************************
  * gen_latest_latest() creates file "bounds_latest_latest.h5"
@@ -273,8 +273,6 @@ error:
 int gen_latest_latest()
 {
     hid_t fid = -1;     /* File ID */
-    hid_t fapl = -1;    /* File access property list ID */
-    hid_t fcpl = -1;    /* File creation property list ID */
     hid_t dcpl = -1;    /* Dataset creation property list ID */
     hid_t space = -1;   /* Dataspace ID */
     hid_t dset = -1;    /* Dataset ID */
@@ -283,22 +281,8 @@ int gen_latest_latest()
     float buf[DIM1][DIM2];          /* Buffer for writing data */
     int i, j;
 
-    /* Create file creation property list */
-    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        goto error;
-
-    /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        goto error;
-
     /* Create file with H5F_ACC_SWMR_WRITE, triggers version 3 superblock */
-    if((fid = H5Fcreate(FILENAME_L_L, H5F_ACC_SWMR_WRITE, fcpl, fapl)) <0)
-        goto error;
-
-    /* Close file property lists */
-    if(H5Pclose(fapl) < 0)
-        goto error;
-    if(H5Pclose(fcpl) < 0)
+    if((fid = H5Fcreate(FILENAME_L_L, H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT)) <0)
         goto error;
 
     /*
@@ -349,12 +333,10 @@ error:
         H5Dclose(dset);
         H5Sclose(space);
         H5Pclose(dcpl);
-        H5Pclose(fcpl);
-        H5Pclose(fapl);
         H5Fclose(fid);
     } H5E_END_TRY;
     return 1;
-}
+} /* gen_latest_latest */
 
 /***********************************************************************
  * gen_v18_latest() creates file "bounds_v18_latest.h5"
@@ -451,7 +433,7 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return 1;
-}
+} /* gen_v18_latest */
 
 /***********************************************************************
  * gen_v18_v18() creates file "bounds_v18_v18.h5"
@@ -541,7 +523,7 @@ int gen_v18_v18()
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         goto error;
 
-    /* Set the "use the latest version of the format" bounds
+    /* Set the "use the v18/latest version of the format" bounds
        for creating a layout version 4 object in the file */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)
         goto error;
@@ -594,7 +576,7 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return 1;
-}
+} /* gen_v18_v18 */
 
 int main(void)
 {
