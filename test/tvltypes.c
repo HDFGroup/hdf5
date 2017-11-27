@@ -1015,9 +1015,9 @@ test_vltypes_compound_vlen_vlen(void)
 
     /* Allocate and initialize VL data to write */
     wdata = (s1 *)HDmalloc(sizeof(s1) * SPACE3_DIM1);
-    CHECK(wdata, NULL, "HDmalloc");
+    CHECK_PTR(wdata, "HDmalloc");
     rdata = (s1 *)HDmalloc(sizeof(s1) * SPACE3_DIM1);
-    CHECK(rdata, NULL, "HDmalloc");
+    CHECK_PTR(rdata, "HDmalloc");
     for(i = 0; i < SPACE3_DIM1; i++) {
         wdata[i].i = (int)(i * 10);
         wdata[i].f = (float)(i * 20) / 3.0F;
@@ -2503,7 +2503,7 @@ test_vltypes_fill_value(void)
 
     /* Allocate space for the buffer to read data */
     rbuf = (dtype1_struct *)HDmalloc(SPACE4_DIM_LARGE * sizeof(dtype1_struct));
-    CHECK(rbuf, NULL, "HDmalloc");
+    CHECK_PTR(rbuf, "HDmalloc");
 
 
     /* Create the small & large dataspaces to use */

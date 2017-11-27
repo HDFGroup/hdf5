@@ -187,7 +187,7 @@ test_chksum_large(void)
 
     /* Allocate the buffer */
     large_buf = (uint8_t *)HDmalloc((size_t)BUF_LEN);
-    CHECK(large_buf, NULL, "HDmalloc");
+    CHECK_PTR(large_buf, "HDmalloc");
 
     /* Initialize buffer w/known data */
     for(u = 0; u < BUF_LEN; u++)

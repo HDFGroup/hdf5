@@ -159,7 +159,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
 
         /* Keep a copy of the dataset names around for later */
         lnames[i] = HDstrdup(name);
-        CHECK(lnames[i], NULL, "strdup");
+        CHECK_PTR(lnames[i], "strdup");
 
         ret = H5Dclose(dataset);
         CHECK(ret, FAIL, "H5Dclose");
@@ -170,13 +170,13 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(ret, FAIL, "H5Gcreate2");
 
     lnames[NDATASETS] = HDstrdup("grp");
-    CHECK(lnames[NDATASETS], NULL, "strdup");
+    CHECK_PTR(lnames[NDATASETS], "strdup");
 
     ret = H5Tcommit2(file, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
 
     lnames[NDATASETS + 1] = HDstrdup("dtype");
-    CHECK(lnames[NDATASETS], NULL, "strdup");
+    CHECK_PTR(lnames[NDATASETS], "strdup");
 
     /* Close everything up */
     ret = H5Tclose(datatype);
@@ -412,7 +412,7 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
 
         /* Keep a copy of the attribute names around for later */
         anames[i] = HDstrdup(name);
-        CHECK(anames[i], NULL, "strdup");
+        CHECK_PTR(anames[i], "strdup");
 
         ret = H5Aclose(attribute);
         CHECK(ret, FAIL, "H5Aclose");
@@ -596,7 +596,7 @@ test_iter_group_large(hid_t fapl)
 
     /* Allocate & initialize array */
     names = (iter_info *)HDcalloc(sizeof(iter_info), (ITER_NGROUPS + 2));
-    CHECK(names, NULL, "HDcalloc");
+    CHECK_PTR(names, "HDcalloc");
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
@@ -733,7 +733,7 @@ static void test_grp_memb_funcs(hid_t fapl)
 
         /* Keep a copy of the dataset names around for later */
         dnames[i] = HDstrdup(name);
-        CHECK(dnames[i], NULL, "strdup");
+        CHECK_PTR(dnames[i], "strdup");
 
         ret = H5Dclose(dataset);
         CHECK(ret, FAIL, "H5Dclose");
@@ -744,13 +744,13 @@ static void test_grp_memb_funcs(hid_t fapl)
     CHECK(ret, FAIL, "H5Gcreate2");
 
     dnames[NDATASETS] = HDstrdup("grp");
-    CHECK(dnames[NDATASETS], NULL, "strdup");
+    CHECK_PTR(dnames[NDATASETS], "strdup");
 
     ret = H5Tcommit2(file, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
 
     dnames[NDATASETS + 1] = HDstrdup("dtype");
-    CHECK(dnames[NDATASETS], NULL, "strdup");
+    CHECK_PTR(dnames[NDATASETS], "strdup");
 
     /* Close everything up */
     ret = H5Tclose(datatype);
@@ -797,7 +797,7 @@ static void test_grp_memb_funcs(hid_t fapl)
 
         /* Keep a copy of the dataset names around for later */
         obj_names[i] = HDstrdup(dataset_name);
-        CHECK(obj_names[i], NULL, "strdup");
+        CHECK_PTR(obj_names[i], "strdup");
 
         ret = H5Oget_info_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Oget_info_by_idx");

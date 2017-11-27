@@ -679,7 +679,7 @@ test_array_compound_atomic(void)
 
     /* Check the 1st field's name */
     mname = H5Tget_member_name(tid2, 0);
-    CHECK(mname, NULL, "H5Tget_member_name");
+    CHECK_PTR(mname, "H5Tget_member_name");
     if(HDstrcmp(mname, "i") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
@@ -698,7 +698,7 @@ test_array_compound_atomic(void)
 
     /* Check the 2nd field's name */
     mname = H5Tget_member_name(tid2, 1);
-    CHECK(mname, NULL, "H5Tget_member_name");
+    CHECK_PTR(mname, "H5Tget_member_name");
     if(HDstrcmp(mname, "f") != 0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     H5free_memory(mname);
@@ -897,7 +897,7 @@ test_array_compound_array(void)
 
     /* Check the 1st field's name */
     mname=H5Tget_member_name(tid2,0);
-    CHECK(mname, NULL, "H5Tget_member_name");
+    CHECK_PTR(mname, "H5Tget_member_name");
     if(HDstrcmp(mname,"i")!=0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
     H5free_memory(mname);
@@ -916,7 +916,7 @@ test_array_compound_array(void)
 
     /* Check the 2nd field's name */
     mname=H5Tget_member_name(tid2,1);
-    CHECK(mname, NULL, "H5Tget_member_name");
+    CHECK_PTR(mname, "H5Tget_member_name");
     if(HDstrcmp(mname,"f")!=0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
     H5free_memory(mname);
@@ -1604,7 +1604,7 @@ test_array_bkg(void)
     /* Initialize the data */
     /* ------------------- */
     dtsinfo = (CmpDTSinfo *)HDmalloc(sizeof(CmpDTSinfo));
-    CHECK(dtsinfo, NULL, "HDmalloc");
+    CHECK_PTR(dtsinfo, "HDmalloc");
     HDmemset(dtsinfo, 0, sizeof(CmpDTSinfo));
     for (i = 0; i < LENGTH; i++) {
         for (j = 0; j < ALEN; j++) {
@@ -1927,7 +1927,7 @@ test_compat(void)
 
         /* Check the 1st field's name */
         mname=H5Tget_member_name(tid1,0);
-        CHECK(mname, NULL, "H5Tget_member_name");
+        CHECK_PTR(mname, "H5Tget_member_name");
         if(HDstrcmp(mname,"i")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         H5free_memory(mname);
@@ -1946,7 +1946,7 @@ test_compat(void)
 
         /* Check the 2nd field's name */
         mname=H5Tget_member_name(tid1,1);
-        CHECK(mname, NULL, "H5Tget_member_name");
+        CHECK_PTR(mname, "H5Tget_member_name");
         if(HDstrcmp(mname,"f")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         H5free_memory(mname);
@@ -1965,7 +1965,7 @@ test_compat(void)
 
         /* Check the 3rd field's name */
         mname=H5Tget_member_name(tid1,2);
-        CHECK(mname, NULL, "H5Tget_member_name");
+        CHECK_PTR(mname, "H5Tget_member_name");
         if(HDstrcmp(mname,"l")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         H5free_memory(mname);
@@ -2009,7 +2009,7 @@ test_compat(void)
 
         /* Check the 1st field's name */
         mname=H5Tget_member_name(tid1,0);
-        CHECK(mname, NULL, "H5Tget_member_name");
+        CHECK_PTR(mname, "H5Tget_member_name");
         if(mname && HDstrcmp(mname,"i")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         if(mname) H5free_memory(mname);
@@ -2028,7 +2028,7 @@ test_compat(void)
 
         /* Check the 2nd field's name */
         mname=H5Tget_member_name(tid1,1);
-        CHECK(mname, NULL, "H5Tget_member_name");
+        CHECK_PTR(mname, "H5Tget_member_name");
         if(mname && HDstrcmp(mname,"f")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         if(mname) H5free_memory(mname);
@@ -2073,7 +2073,7 @@ test_compat(void)
 
         /* Check the 3rd field's name */
         mname=H5Tget_member_name(tid1,2);
-        CHECK(mname, NULL, "H5Tget_member_name");
+        CHECK_PTR(mname, "H5Tget_member_name");
         if(mname && HDstrcmp(mname,"l")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         if(mname) H5free_memory(mname);
@@ -2118,7 +2118,7 @@ test_compat(void)
 
         /* Check the 4th field's name */
         mname=H5Tget_member_name(tid1,3);
-        CHECK(mname, NULL, "H5Tget_member_name");
+        CHECK_PTR(mname, "H5Tget_member_name");
         if(mname && HDstrcmp(mname,"d")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         if(mname) H5free_memory(mname);

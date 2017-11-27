@@ -57,7 +57,7 @@ static int basic_id_test(void)
             testPtr = H5Iobject_verify((hid_t)100, (H5I_type_t) 0);
 	H5E_END_TRY
 
-	VERIFY(testPtr, NULL, "H5Iobject_verify");
+	CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
 	if(testPtr != NULL)
 		goto out;
 
@@ -65,7 +65,7 @@ static int basic_id_test(void)
             testPtr = H5Iobject_verify((hid_t)700, (H5I_type_t) 700);
 	H5E_END_TRY
 
-	VERIFY(testPtr, NULL, "H5Iobject_verify");
+	CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
 	if(testPtr != NULL)
 		goto out;
 
@@ -118,7 +118,7 @@ static int basic_id_test(void)
 		testPtr = (int*) H5Iremove_verify(arrayID, (H5I_type_t) 0);
 	H5E_END_TRY
 
-	VERIFY(testPtr, NULL, "H5Iremove_verify");
+	CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
 	if(testPtr != NULL)
 		goto out;
 
@@ -126,14 +126,14 @@ static int basic_id_test(void)
 		testPtr = (int*) H5Iremove_verify(arrayID, (H5I_type_t) ((int) myType-1));
 	H5E_END_TRY
 
-	VERIFY(testPtr, NULL, "H5Iremove_verify");
+	CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
 	if(testPtr != NULL)
 		goto out;
 
 		/* Remove an ID and make sure we can't access it */
 	testPtr = (int*) H5Iremove_verify(arrayID, myType);
 
-	CHECK(testPtr, NULL, "H5Iremove_verify");
+	CHECK_PTR(testPtr, "H5Iremove_verify");
 	if(testPtr == NULL)
 		goto out;
 
@@ -141,7 +141,7 @@ static int basic_id_test(void)
 		testPtr = (int*) H5Iobject_verify(arrayID, myType);
 	H5E_END_TRY
 
-	VERIFY(testPtr, NULL, "H5Iobject_verify");
+	CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
 	if(testPtr != NULL)
 		goto out;
 
@@ -263,7 +263,7 @@ static int id_predefined_test(void )
 		testPtr = H5Isearch(H5I_GENPROP_LST, (H5I_search_func_t) test_search_func, testObj);
 	H5E_END_TRY
 
-	VERIFY(testPtr, NULL, "H5Isearch");
+	CHECK_PTR_NULL(testPtr, "H5Isearch");
 	if(testPtr != NULL)
 		goto out;
 
@@ -301,7 +301,7 @@ static int id_predefined_test(void )
 		testPtr = H5Iremove_verify(typeID, H5I_DATATYPE);
 	H5E_END_TRY
 
-	VERIFY(testPtr, NULL, "H5Iremove_verify");
+	CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
 	if(testPtr != NULL)
 		goto out;
 
@@ -309,7 +309,7 @@ static int id_predefined_test(void )
 		testPtr = H5Iobject_verify(typeID, H5I_DATATYPE);
 	H5E_END_TRY
 
-	VERIFY(testPtr, NULL, "H5Iobject_verify");
+	CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
 	if(testPtr != NULL)
 		goto out;
 

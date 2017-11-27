@@ -783,9 +783,9 @@ test_h5o_link(void)
     /* Allocate memory buffers */
     /* (These are treated as 2-D buffers) */
     wdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
-    CHECK(wdata, NULL, "HDmalloc");
+    CHECK_PTR(wdata, "HDmalloc");
     rdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
-    CHECK(rdata, NULL, "HDmalloc");
+    CHECK_PTR(rdata, "HDmalloc");
 
     /* Initialize the raw data */
     for(i = n = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)

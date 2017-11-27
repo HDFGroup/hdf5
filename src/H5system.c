@@ -977,7 +977,7 @@ Wround(double arg)
 float
 Wroundf(float arg)
 {
-    return arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F);
+    return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
 }
 
 #endif /* H5_HAVE_WIN32_API */
