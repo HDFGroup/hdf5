@@ -86,11 +86,11 @@
 #define CHECK_PTR_EQ(ret, val, where) {                                             \
    if (VERBOSE_HI) {                                                                \
       print_func("   Call to routine: %15s at line %4d in %s returned %p\n",        \
-                 (where), (int)__LINE__, __FILE__, (ret));                          \
+                 (where), (int)__LINE__, __FILE__, (const void *)(ret));            \
    }                                                                                \
    if (ret != val) {                                                                \
       TestErrPrintf ("*** UNEXPECTED RETURN from %s: returned value of %p is not equal to %p line %4d in %s\n",  \
-                  (where), (void *)(ret), (void *)(val), (int)__LINE__, __FILE__);  \
+                  (where), (const void *)(ret), (const void *)(val), (int)__LINE__, __FILE__); \
       H5Eprint2(H5E_DEFAULT, stdout);                                               \
    }                                                                                \
 }
