@@ -214,12 +214,12 @@ tar2cmakezip()
     fi
 
     # step 2: add batch file for building CMake on window
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2012-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2012-64.bat $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-32.bat $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-64.bat $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-32.bat $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-64.bat $cmziptmpdir
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpdir
@@ -445,6 +445,12 @@ fi
 bin/chkmanifest || fail=yes
 if [ "X$fail" = "Xyes" ]; then
     if [ $check = yes ]; then
+        echo ""
+        echo "Note!  If you are running bin/release in a development branch"
+        echo "later than v 1.8 the MANIFEST check is expected to fail when"
+        echo "autogen.sh has not been run successfully. Either run autogen.sh " 
+        echo "with /usr/hdf/bin/AUTOTOOLS at the beginning of PATH or add the"
+        echo "--nocheck argument to the bin/release command."
         exit 1
     else
 	echo "Continuing anyway..."

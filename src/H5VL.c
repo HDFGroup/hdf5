@@ -130,8 +130,6 @@ H5VLregister(const H5VL_class_t *cls)
     /* Check arguments */
     if(!cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "VOL driver class pointer cannot be NULL")
-    if(cls->category != H5VL_INTERNAL && cls->category != H5VL_EXTERNAL)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL driver class category must be set correctly")
     if(!cls->name)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL driver class name cannot be the NULL pointer");
     /* XXX: Should probably come up with a max length so we can use strnlen()? */

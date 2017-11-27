@@ -665,10 +665,10 @@ error:
 int
 main(void)
 {
-    hid_t		file = -1;
+    hid_t       file = -1;
     hid_t       fapl = -1;
     hid_t       estack_id = -1;
-    char		filename[1024];
+    char        filename[1024];
     const char  *FUNC_main = "main";
 
     HDfprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
@@ -680,7 +680,7 @@ main(void)
     if ((fapl = h5_fileaccess()) < 0)
         TEST_ERROR;
 
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 

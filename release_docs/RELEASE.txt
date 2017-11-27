@@ -62,6 +62,31 @@ New Features
 
     Parallel Library:
     -----------------
+    - Optimize parallel open/location of the HDF5 super-block
+
+      Previous releases of PHDF5 required all parallel ranks to
+      search for the HDF5 superblock signature when opening the
+      file. As this is accomplished more or less as a synchronous
+      operation, a large number of processes can experience a
+      slowdown in the file open due to filesystem contention.
+
+      As a first step in improving the startup/file-open performance,
+      we allow MPI rank 0 of the associated MPI communicator to locate
+      the base offset of the super-block and then broadcast that result
+      to the remaining ranks in the parallel group.  Note that this
+      approach is utilized ONLY during file opens which employ the MPIO
+      file driver in HDF5 by previously having called H5Pset_fapl_mpio().
+
+      HDF5 parallel file operations which do not employ multiple ranks
+      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1)
+      as opposed to MPI_COMM_WORLD, will not be affected by this
+      optimization.  Conversely, parallel file operations on subgroups
+      of MPI_COMM_WORLD are allowed to be run in parallel with each
+      subgroup operating as an independant collection of processes.
+
+      (RAW - 2017/10/10, HDFFV-10294)
+
+
     - Large MPI-IO transfers
 
       Previous releases of PHDF5 would fail when attempting to
@@ -84,7 +109,7 @@ New Features
       fulfill the original user request without encountering API
       errors.
 
-      (RAW – 2017/07/11, HDFFV-8839)
+      (RAW - 2017/07/11, HDFFV-8839)
 
     Fortran Library:
     ----------------
@@ -96,7 +121,16 @@ New Features
 
     Tools:
     ------
-    -
+    - h5diff
+
+      h5diff has new option enable-error-stack.
+
+      Updated h5diff with the --enable-error-stack argument, which
+      enables the display of the hdf5 error stack. This completes the
+      improvement to the main tools; h5copy, h5diff, h5dump, h5ls and
+      h5repack.
+
+      (ADB - 2017/08/30, HDFFV-9774)
 
     High-Level APIs:
     ---------------
@@ -123,10 +157,68 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
-    -
+    - filter plugin handling in H5PL.c and H5Z.c
+
+      It was discovered that the dynamic loading process used by
+      filter plugins had issues with library dependencies.
+
+      CMake build process changed to use LINK INTERFACE keywords, which
+      allowed HDF5 C library to make dependent libraries private. The
+      filter plugin libraries no longer require dependent libraries
+      (such as szip or zlib) to be available.
+             (ADB - 2017/11/16, HDFFV-10328)
+
+    - H5Zfilter_avail in H5Z.c
+
+      The public function checked for plugins, while the private
+      function did not.
+
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
+
+    - An uninitialized struct could cause a memory access error when using
+      variable-length or reference types in a compressed, chunked dataset.
+
+      A struct containing a callback function pointer and a pointer to some
+      associated data was used before initialization. This could cause a
+      memory access error and system crash. This could only occur under
+      unusual conditions when using variable-lenth and reference types in
+      a compressed, chunked dataset.
+
+      On recent versions of Visual Studio, when built in debug mode, the
+      debug heap will complain and cause a crash if the code in question
+      is executed (this will cause the objcopy test to fail).
+
+      (DER - 2017/11/21, HDFFV-10330)
 
     Configuration
     -------------
+    - cmake
+
+      The hdf5 library used shared szip and zlib, which needlessly required
+      applications to link with the same szip and zlib libraries.
+
+      Changed the target_link_libraries commands to use the static libs.
+      Removed improper link duplication of szip and zlib.
+      Adjusted the link dependencies and the link interface values of
+      the target_link_libraries commands.
+
+      (ADB - 2017/11/14, HDFFV-10329)
+
+    - cmake MPI
+
+      CMake implementation for MPI was problematic and would create incorrect
+      MPI library references in the hdf5 libraries.
+
+      Reworked the CMake MPI code to properly create CMake targets.Also merged
+      the latest CMake FindMPI.cmake changes to the local copy. This is necessary
+      until HDF changes the CMake minimum to 3.9 or greater.
+
+      (ADB - 2017/11/02, HDFFV-10321)
+
     - cmake
 
       Too many commands for POST_BUILD step caused command line to be
@@ -143,10 +235,46 @@ Bug Fixes since HDF5-1.10.1 release
 
     Fortran
     --------
-    -
+    - Fixed compilation errors when using Intel 18 Fortran compilers
+      (MSB - 2017/11/3, HDFFV-10322)
 
     Tools
     -----
+    - h5repack
+
+      h5repack failed to copy a dataset with existing filter.
+
+      Reworked code for h5repack and h5diff code in tools library. Added
+      improved error handling, cleanup of resources and checks of calls.
+      Modified H5Zfilter_avail and private function, H5Z_filter_avail.
+      Moved check for plugin from public to private function. Updated
+      H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+      Note, h5repack output display has changed to clarify the individual
+      steps of the repack process. The output indicates if an operation
+      applies to all objects. Lines with notation and no information
+      have been removed.
+
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
+
+    - h5repack
+
+      h5repack always set the User Defined filter flag to H5Z_FLAG_MANDATORY.
+
+      Added another parameter to the 'UD=' option to set the flag by default
+      to '0' or H5Z_FLAG_MANDATORY, the other choice is '1' or H5Z_FLAG_OPTIONAL.
+
+      (ADB - 2017/08/31, HDFFV-10269)
+
+    - h5ls
+
+      h5ls generated error on stack when it encountered a H5S_NULL
+      dataspace.
+
+      Adding checks for H5S_NULL before calling H5Sis_simple (located
+      in the h5tools_dump_mem function) fixed the issue.
+
+      (ADB - 2017/08/17, HDFFV-10188)
+
     - h5dump
 
       h5dump segfaulted on output of XML file.
@@ -263,15 +391,20 @@ Supported Platforms
     Windows 7                     Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 2.2.1(0.289/5/3) gcc(4.9.3) compiler and gfortran)
-                                  (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Visual Studio 2015 w/ Intel Parallel Studio 2017 (cmake)
+                                  Visual Studio 2015 w/ Intel C, Fortran 2017 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
+                                      gcc and gfortran compilers (GCC 5.4.0)
+                                      (cmake and autotools)
 
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 2.8.0(0.309/5/3)
+                                      gcc and gfortran compilers (GCC 5.4.0)
+                                      (cmake and autotools)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 

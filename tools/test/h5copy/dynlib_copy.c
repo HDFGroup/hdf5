@@ -17,86 +17,73 @@
 #include <stdio.h>
 #include "H5PLextern.h"
 
-#define H5Z_FILTER_DYNLIB4      260
+#define H5Z_FILTER_DYNLIBUD      300
+#define MULTIPLIER              3
 
-#define PUSH_ERR(func, minor, str) H5Epush2(H5E_DEFAULT, __FILE__, func, __LINE__, H5E_ERR_CLS, H5E_PLUGIN, minor, str)
-
-static size_t H5Z_filter_dynlib4(unsigned int flags, size_t cd_nelmts,
+static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
                 const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_DYNLIB4[1] = {{
+const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
     H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIB4,             /* Filter id number        */
+    H5Z_FILTER_DYNLIBUD,             /* Filter id number        */
     1, 1,                            /* Encoding and decoding enabled   */
-    "dynlib4",                 /* Filter name for debugging    */
+    "dynlibud",                 /* Filter name for debugging    */
     NULL,                            /* The "can apply" callback        */
     NULL,                            /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlib4,    /* The actual filter function    */
+    (H5Z_func_t)H5Z_filter_dynlibud,    /* The actual filter function    */
 }};
 
 H5PL_type_t   H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
-const void    *H5PLget_plugin_info(void) {return H5Z_DYNLIB4;}
+const void   *H5PLget_plugin_info(void) {return H5Z_DYNLIBUD;}
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z_filter_dynlib4
+ * Function:    H5Z_filter_dynlibud
  *
- * Purpose:    A dynlib4 filter method that adds on and subtract from
- *              the original value with another value.  It will be built
- *              as a shared library.  plugin.c test will load and use
- *              this filter library. Designed to call a HDF function.
+ * Purpose:    A dynlib2 filter method that multiplies the original value
+ *              during write and divide the original value during read. It
+ *              will be built as a shared library.  plugin.c test will load
+ *              and use this filter library.
  *
  * Return:    Success:    Data chunk size
  *
  *        Failure:    0
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_dynlib4(unsigned int flags, size_t cd_nelmts,
+H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
       const unsigned int *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
-    int *int_ptr = (int *)*buf;          /* Pointer to the data values */
+    char *int_ptr = (char *)*buf;          /* Pointer to the data values */
     size_t buf_left = *buf_size;  /* Amount of data buffer left to process */
-    int add_on = 0;
-    unsigned ver_info[3];
 
-    /* Check for the library version */
-    if(H5get_libversion(&ver_info[0], &ver_info[1], &ver_info[2]) < 0) {
-        PUSH_ERR("dynlib4", H5E_CALLBACK, "H5get_libversion");
-        return(0);
-    }
     /* Check for the correct number of parameters */
-    if(cd_nelmts == 0)
+    if(cd_nelmts > 0)
         return(0);
 
-    /* Check that permanent parameters are set correctly */
-    if(cd_values[0] > 9)
-        return(0);
-
-    if(ver_info[0] != cd_values[1] || ver_info[1] != cd_values[2]) {
-        PUSH_ERR("dynlib4", H5E_CALLBACK, "H5get_libversion does not match");
-        return(0);
-    }
-
-    add_on = (int)cd_values[0];
+    /* Assignment to eliminate unused parameter warning. */
+    cd_values = cd_values;
 
     if(flags & H5Z_FLAG_REVERSE) { /*read*/
-        /* Substract the "add on" value to all the data values */
+        /* Subtract the original value with MULTIPLIER */
         while(buf_left > 0) {
-            *int_ptr++ -= add_on;
-            buf_left -= sizeof(int);
+            char temp = *int_ptr;
+            *int_ptr = temp - MULTIPLIER;
+            int_ptr++;
+            buf_left -= sizeof(*int_ptr);
         } /* end while */
     } /* end if */
     else { /*write*/
-        /* Add the "add on" value to all the data values */
+        /* Add the original value with MULTIPLIER */
         while(buf_left > 0) {
-            *int_ptr++ += add_on;
-            buf_left -= sizeof(int);
+            char temp = *int_ptr;
+            *int_ptr = temp + MULTIPLIER;
+            int_ptr++;
+            buf_left -= sizeof(*int_ptr);
         } /* end while */
     } /* end else */
 
     return nbytes;
-} /* end H5Z_filter_dynlib4() */
+} /* end H5Z_filter_dynlibud() */
 

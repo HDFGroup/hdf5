@@ -1,4 +1,4 @@
-#
+
 # Copyright by The HDF Group.
 # All rights reserved.
 #
@@ -183,6 +183,7 @@ endforeach ()
 set (HDF5_REFERENCE_TEST_FILES
     aggr.h5
     bad_compound.h5
+    bad_offset.h5
     be_data.h5
     be_extlink1.h5
     be_extlink2.h5
@@ -267,6 +268,7 @@ add_test (NAME H5TEST-clear-testhdf5-objects
         tfile5.h5
         tfile6.h5
         tfile7.h5
+        tfilespace.h5
         th5o_file
         th5s1.h5
         tselect.h5
@@ -333,6 +335,7 @@ else ()
             tfile5.h5
             tfile6.h5
             tfile7.h5
+            tfilespace.h5
             th5o_file
             th5s1.h5
             tselect.h5
@@ -517,7 +520,7 @@ set (test_CLEANFILES
     multi_file-r.h5
     multi_file-s.h5
     core_file
-    plugin.h5
+    filter_plugin.h5
     new_move_a.h5
     new_move_b.h5
     ntypes.h5
@@ -661,7 +664,7 @@ foreach (test ${H5TEST_TESTS})
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
   else ()
-    if (${test} STREQUAL "big" AND CYGWIN)
+    if ("${test}" STREQUAL "big" AND CYGWIN)
       add_test (NAME H5TEST-${test}
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}"
       )
@@ -702,7 +705,7 @@ if (BUILD_SHARED_LIBS)
   )
 
   foreach (test ${H5TEST_TESTS})
-    if (${test} STREQUAL "big" AND CYGWIN)
+    if ("${test}" STREQUAL "big" AND CYGWIN)
       add_test (NAME H5TEST-shared-${test}
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}-shared"
       )
@@ -1011,7 +1014,7 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 ##############################################################################
-###    P L U G I N  T E S T S
+###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
 if (WIN32)
   set (CMAKE_SEP "\;")
@@ -1021,9 +1024,9 @@ else ()
   set (BIN_REL_PATH "../")
 endif ()
 
-add_test (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:plugin>)
-set_tests_properties (H5PLUGIN-plugin PROPERTIES
-    ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
+add_test (NAME H5PLUGIN-filter_plugin COMMAND $<TARGET_FILE:filter_plugin>)
+set_tests_properties (H5PLUGIN-filter_plugin PROPERTIES
+    ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2;srcdir=${HDF5_TEST_BINARY_DIR}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
 )
 
@@ -1115,8 +1118,8 @@ if (HDF5_TEST_VFD)
 
   # Windows only macro
   macro (CHECK_VFD_TEST vfdtest vfdname resultcode)
-    if (${vfdtest} STREQUAL "flush1" OR ${vfdtest} STREQUAL "flush2")
-      if (${vfdname} STREQUAL "multi" OR ${vfdname} STREQUAL "split")
+    if ("${vfdtest}" STREQUAL "flush1" OR "${vfdtest}" STREQUAL "flush2")
+      if ("${vfdname}" STREQUAL "multi" OR "${vfdname}" STREQUAL "split")
         if (NOT BUILD_SHARED_LIBS AND NOT CMAKE_BUILD_TYPE MATCHES Debug)
           add_test (NAME VFD-${vfdname}-${vfdtest}
               COMMAND "${CMAKE_COMMAND}"
@@ -1205,7 +1208,7 @@ if (HDF5_TEST_VFD)
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
-      if (BUILD_SHARED_LIBS AND NOT ${vfdtest} STREQUAL "cache")
+      if (BUILD_SHARED_LIBS AND NOT "${vfdtest}" STREQUAL "cache")
         add_test (NAME VFD-${vfdname}-${vfdtest}-shared
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}-shared>"
@@ -1337,6 +1340,7 @@ if (HDF5_BUILD_GENERATORS)
 
   # generator executables
   set (H5_GENERATORS
+      gen_bad_offset
       gen_bad_ohdr
       gen_bogus
       gen_cross

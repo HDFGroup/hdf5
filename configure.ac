@@ -99,6 +99,7 @@ AC_CONFIG_COMMANDS([pubconf], [
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 AC_SUBST([JNIFLAGS])
+AC_SUBST([AR_FLAGS])
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
@@ -139,6 +140,7 @@ JNIFLAGS="${JNIFLAGS}"
 JAVACFLAGS="${JAVACFLAGS}"
 JAVAFLAGS="${JAVAFLAGS}"
 LDFLAGS="${LDFLAGS}"
+AR_FLAGS="${AR_FLAGS}"
 
 ## Configure may need to alter any of the *FLAGS variables in order for
 ## various checks to work correctly. Save the user's value here so it
@@ -757,11 +759,16 @@ fi
 ## Check which archiving tool to use. This needs to be done before
 ## the AM_PROG_LIBTOOL macro.
 ##
-
 if test -z "$AR"; then
   AC_CHECK_PROGS([AR], [ar xar], [:], [$PATH])
 fi
 AC_SUBST([AR])
+
+# Set the default ar flags to cr
+# The Automake default is to use cru and the 'u' causes ar
+# to emit warnings on some platforms.
+AR_FLAGS=cr
+
 
 ## Export the AR macro so that it will be placed in the libtool file
 ## correctly.
@@ -918,8 +925,8 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-  ## tell libtool to do the right thing with COMMON symbols, this fixes 
-  ## corrupt values with COMMON and EQUIVALENCE when building shared 
+  ## tell libtool to do the right thing with COMMON symbols, this fixes
+  ## corrupt values with COMMON and EQUIVALENCE when building shared
   ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
   case "`uname`" in
     Darwin*)
@@ -1062,6 +1069,7 @@ esac
 case "`uname`" in
   CYGWIN*)
     AC_CHECK_HEADERS([io.h sys/timeb.h])
+    UNAME_CYGWIN="yes"
     ;;
   MINGW*)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
@@ -1251,9 +1259,9 @@ AC_ARG_WITH([fnord],
   ])
 
 ## ----------------------------------------------------------------------
-## Is dmalloc (debug malloc library) requested? It has a header file 
+## Is dmalloc (debug malloc library) requested? It has a header file
 ## `dmalloc.h' and a library `-ldmalloc' and their locations might be
-## specified with the `--with-dmalloc' command-line switch. The value 
+## specified with the `--with-dmalloc' command-line switch. The value
 ## is an include path and/or a library path. If the library path is
 ## specified then it must be preceded by a comma.
 ##
@@ -3340,10 +3348,10 @@ fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
-  ### libtool does not pass the correct argument linking (-WL,-WL,,) for the NAG Fortran compiler 
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
-  ### wl="-Wl,-WL,," in the libtool file. (HDFFV-10037)
+  ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
 
@@ -3368,17 +3376,17 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
                  src/Makefile
                  test/Makefile
+                 test/H5srcdir_str.h
                  test/testcheck_version.sh
                  test/testerror.sh
                  test/testflushrefresh.sh
-                 test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
-                 test/test_filenotclosed.sh
                  test/testswmr.sh
-                 test/test_plugin.sh
-                 test/test_usecases.sh
                  test/testvdsswmr.sh
+                 test/test_filenotclosed.sh
+                 test/test_filter_plugin.sh
+                 test/test_usecases.sh
                  testpar/Makefile
                  tools/Makefile
                  tools/lib/Makefile
@@ -3455,13 +3463,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  java/test/junit.sh
                  java/examples/Makefile
                  java/examples/intro/Makefile
-                 java/examples/intro/runExample.sh
+                 java/examples/intro/JavaIntroExample.sh
                  java/examples/datasets/Makefile
-                 java/examples/datasets/runExample.sh
+                 java/examples/datasets/JavaDatasetExample.sh
                  java/examples/datatypes/Makefile
-                 java/examples/datatypes/runExample.sh
+                 java/examples/datatypes/JavaDatatypeExample.sh
                  java/examples/groups/Makefile
-                 java/examples/groups/runExample.sh
+                 java/examples/groups/JavaGroupExample.sh
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile
@@ -3501,8 +3509,8 @@ fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
-  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler 
-  ## on OS X, which is needed when building shared libraries on OS X.  This script 
+  ## libtool does not pass the correct argument linker (wl=) for the Intel Fortran compiler
+  ## on OS X, which is needed when building shared libraries on OS X.  This script
   ## replaces the 3rd occurrence, which is for Fortran, of wl="" with wl="-Wl," (HDFFV-2772)
   case "`uname`" in
     Darwin*)
@@ -3510,14 +3518,14 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 
-  ### libtool does not pass the correct argument linking (-WL,-WL,,) for the NAG Fortran compiler 
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
-  ### wl="-Wl,-WL,," in the libtool file. (HDFFV-10037)
+  ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
-      if (grep -i 'NAG_Fortran' libtool > /dev/null); then
-         cat libtool | awk '/NAG_Fortran/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      if test "X$FC_BASENAME" = "Xnagfor"; then
+         cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
   esac

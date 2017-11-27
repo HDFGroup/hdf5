@@ -299,9 +299,6 @@ static herr_t H5D__chunk_unlock(const H5D_io_info_t *io_info,
 static herr_t H5D__chunk_cache_prune(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, size_t size);
 static herr_t H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk);
-static herr_t H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info,
-    const H5F_block_t *old_chunk, H5F_block_t *new_chunk, hbool_t *need_insert,
-    hsize_t scaled[]);
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__chunk_collective_fill(const H5D_t *dset, hid_t dxpl_id,
     H5D_chunk_coll_info_t *chunk_info, size_t chunk_size, const void *fill_buf);
@@ -5664,7 +5661,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* needed for commpressed variable length data */
     hbool_t                 must_filter = FALSE;        /* Whether chunk must be filtered during copy */
     size_t                  nbytes;                     /* Size of chunk in file (in bytes) */
-    H5Z_cb_t                cb_struct;                  /* Filter failure callback struct */
+    H5Z_cb_t                filter_cb;                  /* Filter failure callback struct */
     int                     ret_value = H5_ITER_CONT;   /* Return value */
 
 
@@ -5672,6 +5669,10 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Get 'size_t' local value for number of bytes in chunk */
     H5_CHECKED_ASSIGN(nbytes, size_t, chunk_rec->nbytes, uint32_t);
+
+    /* Initialize the filter callback struct */
+    filter_cb.op_data = NULL;
+    filter_cb.func = NULL;      /* no callback function when failed */
 
     /* Check for filtered chunks */
     /* Check for an edge chunk that is not filtered */
@@ -5719,11 +5720,12 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         HDassert(!H5F_addr_defined(chunk_rec->chunk_addr));
         HDmemcpy(buf, udata->chunk, nbytes);
         udata->chunk = NULL;
-    } else {
+    }
+    else {
         H5D_rdcc_ent_t *ent = NULL;    /* Cache entry */
         unsigned idx;                   /* Index of chunk in cache, if present */
         unsigned u;                     /* Counter */
-        H5D_shared_t *shared_fo = udata->cpy_info->shared_fo;
+        H5D_shared_t *shared_fo = (H5D_shared_t *)udata->cpy_info->shared_fo;
 
         /* See if the written chunk is in the chunk cache */
         if(shared_fo && shared_fo->cache.chunk.nslots > 0) {
@@ -5751,7 +5753,8 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
             H5_CHECKED_ASSIGN(nbytes, size_t, shared_fo->layout.u.chunk.size, uint32_t);
             HDmemcpy(buf, ent->chunk, nbytes);
-        } else {
+        }
+        else {
             /* read chunk data from the source file */
             if(H5F_block_read(udata->file_src, H5FD_MEM_DRAW, chunk_rec->chunk_addr, nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
@@ -5762,8 +5765,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     if(must_filter && (is_vlen || fix_ref) && !udata->chunk_in_cache) {
         unsigned filter_mask = chunk_rec->filter_mask;
 
-        cb_struct.func = NULL; /* no callback function when failed */
-        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf) < 0)
+        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &buf_size, &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed")
     } /* end if */
 
@@ -5825,7 +5827,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Need to compress variable-length or reference data elements or a chunk found in cache before writing to file */
     if(must_filter && (is_vlen || fix_ref || udata->chunk_in_cache) ) {
-        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf) < 0)
+        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, filter_cb, &nbytes, &buf_size, &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
         /* Check for the chunk expanding too much to encode in a 32-bit value */
@@ -6558,7 +6560,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
     H5F_block_t *new_chunk, hbool_t *need_insert, hsize_t scaled[])
 {
@@ -6710,46 +6712,49 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     H5_CHECKED_ASSIGN(nbytes, size_t, chunk_rec->nbytes, uint32_t);
     chunk_addr = chunk_rec->chunk_addr;
 
-    if(new_idx_info->pline->nused &&
+    if (new_idx_info->pline->nused &&
           (new_idx_info->layout->flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) &&
           (H5D__chunk_is_partial_edge_chunk(udata->dset_ndims, new_idx_info->layout->dim, chunk_rec->scaled, udata->dset_dims))) {
-	/* This is a partial non-filtered edge chunk */
-	/* Convert the chunk to a filtered edge chunk for v1 B-tree chunk index */
 
-	unsigned filter_mask = chunk_rec->filter_mask;
-	H5Z_cb_t  cb_struct;        	/* Filter failure callback struct */
-	size_t read_size = nbytes;	/* Bytes to read */
+        /* This is a partial non-filtered edge chunk */
+        /* Convert the chunk to a filtered edge chunk for v1 B-tree chunk index */
 
-	HDassert(read_size == new_idx_info->layout->size);
+        unsigned filter_mask = chunk_rec->filter_mask;
+        H5Z_cb_t  filter_cb;        /* Filter failure callback struct */
+        size_t read_size = nbytes;	/* Bytes to read */
 
-	cb_struct.func = NULL; /* no callback function when failed */
+        HDassert(read_size == new_idx_info->layout->size);
 
-	/* Allocate buffer for chunk data */
-	if(NULL == (buf = H5MM_malloc(read_size)))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
+        /* Initialize the filter callback struct */
+        filter_cb.op_data = NULL;
+        filter_cb.func = NULL;      /* no callback function when failed */
 
-	/* Read the non-filtered edge chunk */
-        if(H5F_block_read(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, read_size, H5AC_rawdata_dxpl_id, buf) < 0)
-	    HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
+        /* Allocate buffer for chunk data */
+        if (NULL == (buf = H5MM_malloc(read_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
 
-	/* Pass the chunk through the pipeline */
-	if(H5Z_pipeline(new_idx_info->pline, 0, &filter_mask, H5Z_NO_EDC, cb_struct, &nbytes, &read_size, &buf) < 0)
-	    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
+        /* Read the non-filtered edge chunk */
+        if (H5F_block_read(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, read_size, H5AC_rawdata_dxpl_id, buf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
+
+        /* Pass the chunk through the pipeline */
+        if (H5Z_pipeline(new_idx_info->pline, 0, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &read_size, &buf) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
 
 #if H5_SIZEOF_SIZE_T > 4
         /* Check for the chunk expanding too much to encode in a 32-bit value */
-	if(nbytes > ((size_t)0xffffffff))
-	    HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, H5_ITER_ERROR, "chunk too large for 32-bit length")
+        if (nbytes > ((size_t)0xffffffff))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, H5_ITER_ERROR, "chunk too large for 32-bit length")
 #endif /* H5_SIZEOF_SIZE_T > 4 */
 
-	/* Allocate space for the filtered chunk */
-	if((chunk_addr = H5MF_alloc(new_idx_info->f, H5FD_MEM_DRAW, new_idx_info->dxpl_id, (hsize_t)nbytes)) == HADDR_UNDEF)
-	    HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, H5_ITER_ERROR, "file allocation failed for filtered chunk")
-	HDassert(H5F_addr_defined(chunk_addr));
+        /* Allocate space for the filtered chunk */
+        if ((chunk_addr = H5MF_alloc(new_idx_info->f, H5FD_MEM_DRAW, new_idx_info->dxpl_id, (hsize_t)nbytes)) == HADDR_UNDEF)
+            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, H5_ITER_ERROR, "file allocation failed for filtered chunk")
+        HDassert(H5F_addr_defined(chunk_addr));
 
-	/* Write the filtered chunk to disk */
-	if(H5F_block_write(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file")
+        /* Write the filtered chunk to disk */
+        if (H5F_block_write(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file")
     } /* end if */
 
     /* Set up chunk information for insertion to chunk index */
@@ -6761,11 +6766,11 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     insert_udata.common.storage = new_idx_info->storage;
 
     /* Insert chunk into the v1 B-tree chunk index */
-    if((new_idx_info->storage->ops->insert)(new_idx_info, &insert_udata, NULL) < 0)
+    if ((new_idx_info->storage->ops->insert)(new_idx_info, &insert_udata, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert chunk addr into index")
 
 done:
-    if(buf)
+    if (buf)
         H5MM_xfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -26,14 +26,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5Eprivate.h"		/* Error handling			*/
-#include "H5FOprivate.h"	/* File objects				*/
-#include "H5Iprivate.h"		/* IDs					*/
-#include "H5Lprivate.h"		/* Links				*/
-#include "H5Pprivate.h"         /* Property lists                       */
-#include "H5Tpkg.h"		/* Datatypes				*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FOprivate.h"        /* File objects                             */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MMprivate.h"        /* Memory Management                        */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5Tpkg.h"             /* Datatypes                                */
 
 
 /****************/
@@ -851,4 +852,106 @@ H5T_update_shared(H5T_t *dt)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5T_update_shared() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_construct_datatype
+ *
+ * Purpose:     Create a Library datatype with a plugin specific datatype object 
+ *
+ * Return:      Success:    A type structure
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_construct_datatype(H5VL_object_t *dt_obj)
+{
+    ssize_t        nalloc;
+    void          *buf = NULL;
+    H5T_t         *dt = NULL;       /* datatype token from VOL plugin */
+    H5T_t         *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* get required buf size for encoding the datatype */
+    if (H5VL_datatype_get(dt_obj->vol_obj, dt_obj->vol_info->vol_cls, H5VL_DATATYPE_GET_BINARY, 
+                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &nalloc, NULL, 0) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get datatype serialized size")
+
+    /* allocate buffer to store binary description of the datatype */
+    if (NULL == (buf = (void *)H5MM_calloc ((size_t)nalloc)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
+
+    /* get binary description of the datatype */
+    if (H5VL_datatype_get(dt_obj->vol_obj, dt_obj->vol_info->vol_cls, H5VL_DATATYPE_GET_BINARY, 
+                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &nalloc, buf, (size_t)nalloc) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get serialized datatype")
+
+    if (NULL == (dt = H5T_decode((const unsigned char *)buf)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "can't decode datatype")
+
+    dt->vol_obj = dt_obj;
+
+    ret_value = dt;
+
+done:
+    if (buf)
+        buf = H5MM_xfree(buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_construct_datatype() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_get_named_type
+ *
+ * Purpose:     Returns the VOL object for the named datatype if it exists
+ *
+ * Return:      Success:    Pointer to the VOL Datatype object
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_object_t *
+H5T_get_named_type(const H5T_t *dt)
+{
+    H5VL_object_t *ret_value = NULL;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (NULL != dt->vol_obj)
+        ret_value = dt->vol_obj;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_get_named_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_get_actual_type
+ *
+ * Purpose:     Returns underlying native datatype created by native driver
+ *              if datatype is committed, otherwise return the datatype 
+ *              object associate with the ID.
+ *
+ * Return:      Success:    Pointer to the VOL Datatype object
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_get_actual_type(H5T_t *dt)
+{
+    H5T_t *ret_value = NULL;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check if the datatype is committed */
+    if (NULL == dt->vol_obj)
+        ret_value = dt;
+    else
+        ret_value = (H5T_t *)dt->vol_obj->vol_obj;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_get_actual_type() */
 

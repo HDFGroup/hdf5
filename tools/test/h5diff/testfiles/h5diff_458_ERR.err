@@ -1,0 +1,4 @@
+H5tools-DIAG: Error detected in HDF5:tools (version (number)) thread (IDs):
+  #000: (file name) line (number) in h5diff(): treat dangling link as error
+    major: Failure in tools library
+    minor: error in function

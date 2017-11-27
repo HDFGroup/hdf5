@@ -119,7 +119,7 @@ H5FD__init_package(void)
     FUNC_ENTER_PACKAGE
 
     if(H5I_register_type(H5I_VFL_CLS) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Reset the file serial numbers */
     H5FD_file_serial_no_g = 0;

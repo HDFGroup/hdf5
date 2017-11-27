@@ -24,6 +24,10 @@
 #ifndef _H5Oprivate_H
 #define _H5Oprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5O_t H5O_t;
+typedef struct H5O_fill_t H5O_fill_t;
+
 /* Include the public header file for this API */
 #include "H5Opublic.h"          /* Object header functions              */
 
@@ -44,7 +48,6 @@
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_mesg_t H5O_mesg_t;
-typedef struct H5O_t H5O_t;
 
 /* Values used to create the shared message & attribute heaps */
 /* (Note that these parameters have been tuned so that the resulting heap ID
@@ -306,7 +309,7 @@ typedef struct H5O_linfo_t {
  * message if it's shared.
  */
 
-typedef struct H5O_fill_t {
+struct H5O_fill_t {
     H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
 
     unsigned	        version;	/* Encoding version number           */
@@ -316,7 +319,7 @@ typedef struct H5O_fill_t {
     H5D_alloc_time_t	alloc_time;	/* time to allocate space	     */
     H5D_fill_time_t	fill_time;	/* time to write fill value	     */
     hbool_t		fill_defined;   /* whether fill value is defined     */
-} H5O_fill_t;
+};
 
 /*
  * Link message.
@@ -881,6 +884,9 @@ H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_l
 H5_DLL haddr_t H5O_get_oh_addr(const H5O_t *oh);
 H5_DLL herr_t H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype);
 H5_DLL H5AC_proxy_entry_t *H5O_get_proxy(const H5O_t *oh);
+H5_DLL herr_t H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
+    hid_t dxpl_id);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,

@@ -224,7 +224,8 @@ esac
 export LD_LIBRARY_PATH
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Array"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Array > H5Ex_T_Array.out)
+TESTING examples.datatypes.H5Ex_T_Array
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Array > H5Ex_T_Array.out)
 if diff H5Ex_T_Array.out examples.datatypes.H5Ex_T_Array.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_Array"
 else
@@ -233,7 +234,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ArrayAttribute"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ArrayAttribute > H5Ex_T_ArrayAttribute.out)
+TESTING examples.datatypes.H5Ex_T_ArrayAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ArrayAttribute > H5Ex_T_ArrayAttribute.out)
 if diff H5Ex_T_ArrayAttribute.out examples.datatypes.H5Ex_T_ArrayAttribute.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_ArrayAttribute"
 else
@@ -242,7 +244,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Bit"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Bit > H5Ex_T_Bit.out)
+TESTING examples.datatypes.H5Ex_T_Bit
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Bit > H5Ex_T_Bit.out)
 if diff H5Ex_T_Bit.out examples.datatypes.H5Ex_T_Bit.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_Bit"
 else
@@ -251,7 +254,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_BitAttribute"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_BitAttribute > H5Ex_T_BitAttribute.out)
+TESTING examples.datatypes.H5Ex_T_BitAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_BitAttribute > H5Ex_T_BitAttribute.out)
 if diff H5Ex_T_BitAttribute.out examples.datatypes.H5Ex_T_BitAttribute.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_BitAttribute"
 else
@@ -260,7 +264,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Commit"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Commit > H5Ex_T_Commit.out)
+TESTING examples.datasets.H5Ex_T_Commit
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Commit > H5Ex_T_Commit.out)
 if diff H5Ex_T_Commit.out examples.datatypes.H5Ex_T_Commit.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_Commit"
 else
@@ -269,7 +274,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Compound"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Compound > H5Ex_T_Compound.out)
+TESTING examples.datatypes.H5Ex_T_Compound
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Compound > H5Ex_T_Compound.out)
 if diff H5Ex_T_Compound.out examples.datatypes.H5Ex_T_Compound.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_Compound"
 else
@@ -278,7 +284,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_CompoundAttribute"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_CompoundAttribute > H5Ex_T_CompoundAttribute.out)
+TESTING examples.datatypes.H5Ex_T_CompoundAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_CompoundAttribute > H5Ex_T_CompoundAttribute.out)
 if diff H5Ex_T_CompoundAttribute.out examples.datatypes.H5Ex_T_CompoundAttribute.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_CompoundAttribute"
 else
@@ -287,7 +294,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Float"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Float > H5Ex_T_Float.out)
+TESTING examples.datatypes.H5Ex_T_Float
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Float > H5Ex_T_Float.out)
 if diff H5Ex_T_Float.out examples.datatypes.H5Ex_T_Float.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_Float"
 else
@@ -296,7 +304,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_FloatAttribute"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_FloatAttribute > H5Ex_T_FloatAttribute.out)
+TESTING examples.datatypes.H5Ex_T_FloatAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_FloatAttribute > H5Ex_T_FloatAttribute.out)
 if diff H5Ex_T_FloatAttribute.out examples.datatypes.H5Ex_T_FloatAttribute.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_FloatAttribute"
 else
@@ -305,7 +314,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Integer"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Integer > H5Ex_T_Integer.out)
+TESTING examples.datatypes.H5Ex_T_Integer
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Integer > H5Ex_T_Integer.out)
 if diff H5Ex_T_Integer.out examples.datatypes.H5Ex_T_Integer.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_Integer"
 else
@@ -314,7 +324,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_IntegerAttribute"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_IntegerAttribute > H5Ex_T_IntegerAttribute.out)
+TESTING examples.datatypes.H5Ex_T_IntegerAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_IntegerAttribute > H5Ex_T_IntegerAttribute.out)
 if diff H5Ex_T_IntegerAttribute.out examples.datatypes.H5Ex_T_IntegerAttribute.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_IntegerAttribute"
 else
@@ -323,7 +334,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReference"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReference > H5Ex_T_ObjectReference.out)
+TESTING examples.datatypes.H5Ex_T_ObjectReference
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReference > H5Ex_T_ObjectReference.out)
 if diff H5Ex_T_ObjectReference.out examples.datatypes.H5Ex_T_ObjectReference.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_ObjectReference"
 else
@@ -332,7 +344,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReferenceAttribute"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReferenceAttribute > H5Ex_T_ObjectReferenceAttribute.out)
+TESTING examples.datatypes.H5Ex_T_ObjectReferenceAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_ObjectReferenceAttribute > H5Ex_T_ObjectReferenceAttribute.out)
 if diff H5Ex_T_ObjectReferenceAttribute.out examples.datatypes.H5Ex_T_ObjectReferenceAttribute.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_ObjectReferenceAttribute"
 else
@@ -341,7 +354,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Opaque"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Opaque > H5Ex_T_Opaque.out)
+TESTING examples.datatypes.H5Ex_T_Opaque
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_Opaque > H5Ex_T_Opaque.out)
 if diff H5Ex_T_Opaque.out examples.datatypes.H5Ex_T_Opaque.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_Opaque"
 else
@@ -350,7 +364,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_OpaqueAttribute"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_OpaqueAttribute > H5Ex_T_OpaqueAttribute.out)
+TESTING examples.datatypes.H5Ex_T_OpaqueAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_OpaqueAttribute > H5Ex_T_OpaqueAttribute.out)
 if diff H5Ex_T_OpaqueAttribute.out examples.datatypes.H5Ex_T_OpaqueAttribute.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_OpaqueAttribute"
 else
@@ -359,7 +374,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_String"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_String > H5Ex_T_String.out)
+TESTING examples.datatypes.H5Ex_T_String
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_String > H5Ex_T_String.out)
 if diff H5Ex_T_String.out examples.datatypes.H5Ex_T_String.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_String"
 else
@@ -368,7 +384,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_StringAttribute"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_StringAttribute > H5Ex_T_StringAttribute.out)
+TESTING examples.datatypes.H5Ex_T_StringAttribute
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_StringAttribute > H5Ex_T_StringAttribute.out)
 if diff H5Ex_T_StringAttribute.out examples.datatypes.H5Ex_T_StringAttribute.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_StringAttribute"
 else
@@ -377,7 +394,8 @@ else
 fi
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_VLString"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_VLString > H5Ex_T_VLString.out)
+TESTING examples.datatypes.H5Ex_T_VLString
+($RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datatypes.H5Ex_T_VLString > H5Ex_T_VLString.out)
 if diff H5Ex_T_VLString.out examples.datatypes.H5Ex_T_VLString.txt > /dev/null; then
     echo "  PASSED      datatypes.H5Ex_T_VLString"
 else

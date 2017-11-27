@@ -37,7 +37,7 @@ endif ()
 if (MINGW)
   target_link_libraries (${HDF5_TEST_LIB_TARGET} "wsock32.lib")
 endif ()
-target_link_libraries (${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+target_link_libraries (${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
 H5_SET_LIB_OPTIONS (${HDF5_TEST_LIB_TARGET} ${HDF5_TEST_LIB_NAME} STATIC)
 set_target_properties (${HDF5_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test
@@ -53,7 +53,7 @@ if (BUILD_SHARED_LIBS)
   if (MINGW)
     target_link_libraries (${HDF5_TEST_LIBSH_TARGET} "wsock32.lib")
   endif ()
-  target_link_libraries (${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  target_link_libraries (${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${LINK_LIBS})
   H5_SET_LIB_OPTIONS (${HDF5_TEST_LIBSH_TARGET} ${HDF5_TEST_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
   set_target_properties (${HDF5_TEST_LIBSH_TARGET} PROPERTIES
       FOLDER libraries/test
@@ -70,73 +70,73 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# If plugin library tests can be tested
+# If filter plugin tests can be tested
 #-----------------------------------------------------------------------------
   # make plugins dir
-  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir1")
-  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir2")
+  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/filter_plugin_dir1")
+  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/filter_plugin_dir2")
 
   #-----------------------------------------------------------------------------
-  # Define Plugin Test Sources
+  # Define Filter Plugin Test Sources
   #-----------------------------------------------------------------------------
-  set (TEST_PLUGIN_LIBS
-      dynlib1
-      dynlib3
+  set (FILTER_PLUGINS_FOR_DIR1
+      filter_plugin1_dsets
+      filter_plugin3_dsets
   )
-  set (TEST2_PLUGIN_LIBS
-      dynlib2
-      dynlib4
+  set (FILTER_PLUGINS_FOR_DIR2
+      filter_plugin2_dsets
+      filter_plugin4_groups
   )
 
-  foreach (test_lib ${TEST_PLUGIN_LIBS})
-    set (HDF5_TEST_PLUGIN_LIB_CORENAME         "${test_lib}")
-    set (HDF5_TEST_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_PLUGIN_LIB_CORENAME}")
-    set (HDF5_TEST_PLUGIN_LIB_TARGET           ${HDF5_TEST_PLUGIN_LIB_CORENAME})
+  foreach (plugin_name ${FILTER_PLUGINS_FOR_DIR1})
+    set (HDF5_TEST_PLUGIN_CORENAME          "${plugin_name}")
+    set (HDF5_TEST_PLUGIN_NAME              "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_PLUGIN_CORENAME}")
+    set (HDF5_TEST_PLUGIN_TARGET            ${HDF5_TEST_PLUGIN_CORENAME})
     add_definitions (${HDF_EXTRA_C_FLAGS})
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
-    add_library (${HDF5_TEST_PLUGIN_LIB_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
-    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} SHARED " " " ")
-    target_link_libraries (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-    H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
-    set_target_properties (${HDF5_TEST_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+    add_library (${HDF5_TEST_PLUGIN_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${plugin_name}.c)
+    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_TARGET} SHARED " " " ")
+    target_link_libraries (${HDF5_TEST_PLUGIN_TARGET} ${HDF5_TEST_LIB_TARGET})
+    H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_TARGET} ${HDF5_TEST_PLUGIN_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
+    set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
 
     #-----------------------------------------------------------------------------
-    # Copy plugin library to a plugins folder
+    # Copy the filter plugin to a plugins folder
     #-----------------------------------------------------------------------------
     add_custom_command (
-        TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
+        TARGET     ${HDF5_TEST_PLUGIN_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different
-          "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
-          "${CMAKE_BINARY_DIR}/testdir1/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+          "$<TARGET_FILE:${HDF5_TEST_PLUGIN_TARGET}>"
+          "${CMAKE_BINARY_DIR}/filter_plugin_dir1/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_TARGET}>"
     )
   endforeach ()
 
-  foreach (test_lib ${TEST2_PLUGIN_LIBS})
-    set (HDF5_TEST_PLUGIN_LIB_CORENAME         "${test_lib}")
-    set (HDF5_TEST_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_PLUGIN_LIB_CORENAME}")
-    set (HDF5_TEST_PLUGIN_LIB_TARGET           ${HDF5_TEST_PLUGIN_LIB_CORENAME})
+  foreach ( plugin_name ${FILTER_PLUGINS_FOR_DIR2})
+    set (HDF5_TEST_PLUGIN_CORENAME          "${plugin_name}")
+    set (HDF5_TEST_PLUGIN_NAME              "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_PLUGIN_CORENAME}")
+    set (HDF5_TEST_PLUGIN_TARGET            ${HDF5_TEST_PLUGIN_CORENAME})
     add_definitions (${HDF_EXTRA_C_FLAGS})
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
-    add_library (${HDF5_TEST_PLUGIN_LIB_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
-    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} SHARED " " " ")
-    target_link_libraries (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-    H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
-    set_target_properties (${HDF5_TEST_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+    add_library (${HDF5_TEST_PLUGIN_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${plugin_name}.c)
+    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_TARGET} SHARED " " " ")
+    target_link_libraries (${HDF5_TEST_PLUGIN_TARGET} ${HDF5_TEST_LIB_TARGET})
+    H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_TARGET} ${HDF5_TEST_PLUGIN_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
+    set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
 
     #-----------------------------------------------------------------------------
-    # Copy plugin library to a plugins folder
+    # Copy the filter plugin to a plugins folder
     #-----------------------------------------------------------------------------
     add_custom_command (
-        TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
+        TARGET     ${HDF5_TEST_PLUGIN_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different
-          "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
-          "${CMAKE_BINARY_DIR}/testdir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+          "$<TARGET_FILE:${HDF5_TEST_PLUGIN_TARGET}>"
+          "${CMAKE_BINARY_DIR}/filter_plugin_dir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_TARGET}>"
     )
   endforeach ()
 
@@ -445,17 +445,17 @@ endif ()
 ###    P L U G I N  T E S T S
 ##############################################################################
 if (BUILD_SHARED_LIBS)
-  add_executable (plugin ${HDF5_TEST_SOURCE_DIR}/plugin.c)
-  TARGET_NAMING (plugin SHARED)
-  TARGET_C_PROPERTIES (plugin SHARED " " " ")
-  target_link_libraries (plugin ${HDF5_TEST_LIB_TARGET})
-  set_target_properties (plugin PROPERTIES FOLDER test)
+  add_executable (filter_plugin ${HDF5_TEST_SOURCE_DIR}/filter_plugin.c)
+  TARGET_NAMING (filter_plugin SHARED)
+  TARGET_C_PROPERTIES (filter_plugin SHARED " " " ")
+  target_link_libraries (filter_plugin ${HDF5_TEST_LIB_TARGET})
+  set_target_properties (filter_plugin PROPERTIES FOLDER test)
 else ()
-  add_executable (plugin ${HDF5_TEST_SOURCE_DIR}/plugin.c)
-  TARGET_NAMING (plugin STATIC)
-  TARGET_C_PROPERTIES (plugin STATIC " " " ")
-  target_link_libraries (plugin ${HDF5_TEST_LIB_TARGET})
-  set_target_properties (plugin PROPERTIES FOLDER test)
+  add_executable (filter_plugin ${HDF5_TEST_SOURCE_DIR}/filter_plugin.c)
+  TARGET_NAMING (filter_plugin STATIC)
+  TARGET_C_PROPERTIES (filter_plugin STATIC " " " ")
+  target_link_libraries (filter_plugin ${HDF5_TEST_LIB_TARGET})
+  set_target_properties (filter_plugin PROPERTIES FOLDER test)
 endif ()
 
 ##############################################################################

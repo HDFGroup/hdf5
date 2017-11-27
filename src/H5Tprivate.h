@@ -17,6 +17,9 @@
 #ifndef _H5Tprivate_H
 #define _H5Tprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5T_t H5T_t;
+
 /* Get package's public header */
 #include "H5Tpublic.h"
 
@@ -24,9 +27,10 @@
 #include "H5MMpublic.h"         /* Memory management                    */
 
 /* Private headers needed by this file */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Gprivate.h"		/* Groups 			  	*/
-#include "H5Rprivate.h"		/* References				*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Gprivate.h"         /* Groups                                   */
+#include "H5Rprivate.h"         /* References                               */
+#include "H5VLprivate.h"        /* VOL Drivers                              */
 
 /* Macro for size of temporary buffers to contain a single element */
 #define H5T_ELEM_BUF_SIZE       256
@@ -45,7 +49,6 @@
 #endif /* H5T_MODULE */
 
 /* Forward references of package typedefs (declared in H5Tpkg.h) */
-typedef struct H5T_t H5T_t;
 typedef struct H5T_stats_t H5T_stats_t;
 typedef struct H5T_path_t H5T_path_t;
 
@@ -138,6 +141,9 @@ H5_DLL herr_t H5T_set_latest_version(H5T_t *dt);
 H5_DLL herr_t H5T_patch_file(H5T_t *dt, H5F_t *f);
 H5_DLL herr_t H5T_patch_vlen_file(H5T_t *dt, H5F_t *f);
 H5_DLL htri_t H5T_is_variable_str(const H5T_t *dt);
+H5_DLL H5T_t *H5T_construct_datatype(H5VL_object_t *dt_obj);
+H5_DLL H5VL_object_t *H5T_get_named_type(const H5T_t *dt);
+H5_DLL H5T_t *H5T_get_actual_type(H5T_t *dt);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);

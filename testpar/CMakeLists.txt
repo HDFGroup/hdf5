@@ -30,14 +30,14 @@ set (testphdf5_SOURCES
 add_executable (testphdf5 ${testphdf5_SOURCES})
 TARGET_NAMING (testphdf5 STATIC)
 TARGET_C_PROPERTIES (testphdf5 STATIC " " " ")
-target_link_libraries (testphdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
+target_link_libraries (testphdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (testphdf5 PROPERTIES FOLDER test/par)
 
 MACRO (ADD_H5P_EXE file)
   add_executable (${file} ${HDF5_TEST_PAR_SOURCE_DIR}/${file}.c)
   TARGET_NAMING (${file} STATIC)
   TARGET_C_PROPERTIES (${file} STATIC " " " ")
-  target_link_libraries (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
+  target_link_libraries (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (${file} PROPERTIES FOLDER test/par)
 ENDMACRO (ADD_H5P_EXE file)
 
@@ -47,10 +47,12 @@ set (H5P_TESTS
     t_cache
     t_pflush1
     t_pflush2
+    t_pread
     t_pshutdown
     t_prestart
     t_init_term
     t_shapesame
+    t_filters_parallel
 )
 
 foreach (testp ${H5P_TESTS})

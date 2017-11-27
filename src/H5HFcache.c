@@ -1671,9 +1671,13 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
 	HGOTO_DONE(TRUE);
 
     if(hdr->filter_len > 0) {
-	size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
-	unsigned filter_mask;	/* Excluded filters for direct block */
-	H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+        size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
+        unsigned filter_mask;	/* Excluded filters for direct block */
+        H5Z_cb_t filter_cb;     /* Filter callback structure */
+
+        /* Initialize the filter callback struct */
+        filter_cb.op_data = NULL;
+        filter_cb.func = NULL;      /* no callback function when failed */
 
         /* Allocate buffer to perform I/O filtering on and copy image into
          * it.  Must do this as H5Z_pipeline() may re-size the buffer 
@@ -1682,17 +1686,17 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
         if(NULL == (read_buf = H5MM_malloc(len)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline buffer")
 
-	/* Set up parameters for filter pipeline */
-	nbytes = len;
-	filter_mask = udata->filter_mask;
+        /* Set up parameters for filter pipeline */
+        nbytes = len;
+        filter_mask = udata->filter_mask;
         HDmemcpy(read_buf, image, len);
 
-	/* Push direct block data through I/O filter pipeline */
-	if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed")
+        /* Push direct block data through I/O filter pipeline */
+        if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed")
 
         /* Update info about direct block */
-	udata->decompressed = TRUE;
+        udata->decompressed = TRUE;
         len = nbytes;
     } /* end if */
     else
@@ -1818,45 +1822,49 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
             udata->dblk = NULL;
         } /* end if */
         else {
-            H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+            H5Z_cb_t filter_cb;     /* Filter callback structure */
             size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
             unsigned filter_mask;   /* Excluded filters for direct block */
 
             /* Sanity check */
-	    HDassert(udata->dblk == NULL);
+            HDassert(udata->dblk == NULL);
 
-	    /* Allocate buffer to perform I/O filtering on and copy image into
-	     * it.  Must do this as H5Z_pipeline() may resize the buffer 
-	     * provided to it.
-	     */
-	    if(NULL == (read_buf = H5MM_malloc(len)))
-		HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for pipeline buffer")
+            /* Initialize the filter callback struct */
+            filter_cb.op_data = NULL;
+            filter_cb.func = NULL;      /* no callback function when failed */
+
+            /* Allocate buffer to perform I/O filtering on and copy image into
+             * it.  Must do this as H5Z_pipeline() may resize the buffer 
+             * provided to it.
+             */
+            if (NULL == (read_buf = H5MM_malloc(len)))
+                HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for pipeline buffer")
 
             /* Copy compressed image into buffer */
-	    HDmemcpy(read_buf, image, len);
+            HDmemcpy(read_buf, image, len);
 
-	    /* Push direct block data through I/O filter pipeline */
-	    nbytes = len;
-	    filter_mask = udata->filter_mask;
-	    if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
-		HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed")
+            /* Push direct block data through I/O filter pipeline */
+            nbytes = len;
+            filter_mask = udata->filter_mask;
+            if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed")
 
-	    /* Sanity check */
-	    HDassert(nbytes == dblock->size);
+            /* Sanity check */
+            HDassert(nbytes == dblock->size);
 
-	    /* Copy un-filtered data into block's buffer */
-	    HDmemcpy(dblock->blk, read_buf, dblock->size);
-	} /* end if */
+            /* Copy un-filtered data into block's buffer */
+            HDmemcpy(dblock->blk, read_buf, dblock->size);
+        } /* end if */
     } /* end if */
     else {
         /* Sanity checks */
-	HDassert(udata->dblk == NULL);
-	HDassert(!udata->decompressed);
+        HDassert(udata->dblk == NULL);
+        HDassert(!udata->decompressed);
 
-	/* Allocate block buffer */
-/* XXX: Change to using free-list factories */
-	if(NULL == (dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        /* Allocate block buffer */
+        /* XXX: Change to using free-list factories */
+        if  (NULL == (dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Copy image to dblock->blk */
         HDassert(dblock->size == len);
@@ -1895,9 +1903,9 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
 
     /* Decode checksum on direct block, if requested */
     if(hdr->checksum_dblocks) {
-	uint32_t stored_chksum;         /* Metadata checksum value */
+        uint32_t stored_chksum;         /* Metadata checksum value */
 
-	/* checksum verification already done in verify_chksum cb */
+        /* checksum verification already done in verify_chksum cb */
 
         /* Metadata checksum */
         UINT32DECODE(image, stored_chksum);
@@ -2188,9 +2196,13 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
 
     /* Check for I/O filters on this heap */
     if(hdr->filter_len > 0) {
-        H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+        H5Z_cb_t filter_cb;                 /* Filter callback structure */
         size_t nbytes;                      /* Number of bytes used */
         unsigned filter_mask = 0;           /* Filter mask for block */
+
+        /* Initialize the filter callback struct */
+        filter_cb.op_data = NULL;
+        filter_cb.func = NULL;      /* no callback function when failed */
 
         /* Allocate buffer to perform I/O filtering on */
         write_size = dblock->size;

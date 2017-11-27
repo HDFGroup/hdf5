@@ -20,9 +20,8 @@ namespace H5 {
 /*! \class FloatType
     \brief FloatType is a derivative of a DataType and operates on HDF5
     floating point datatype.
-
-    Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP FloatType : public AtomType {
    public:
         // Creates a floating-point type using a predefined type.
@@ -34,6 +33,10 @@ class H5_DLLCPP FloatType : public AtomType {
         // Constructors that open an HDF5 float datatype, given a location.
         FloatType(const H5Location& loc, const char* name);
         FloatType(const H5Location& loc, const H5std_string& name);
+
+        // Returns an FloatType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
 
         // Retrieves the exponent bias of a floating-point type.
         size_t getEbias() const;

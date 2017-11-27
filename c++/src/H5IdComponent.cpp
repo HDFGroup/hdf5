@@ -370,8 +370,10 @@ IdComponent::IdComponent()
 // Exception:   H5::IdComponentException
 // Description:
 //              This function is protected so that the user applications can
-//              only have access to its code via allowable classes, namely,
-//              Attribute and H5Location subclasses.
+//              only have access to its code via H5Location subclasses.
+//      September 2017
+//              This function should be moved to H5Location now that Attribute
+//              inherits from H5Location.
 // Programmer   Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
 H5std_string IdComponent::p_get_file_name() const

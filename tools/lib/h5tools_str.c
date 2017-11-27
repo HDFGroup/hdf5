@@ -715,10 +715,11 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 {
     size_t         nsize, offset, size=0, nelmts, start;
     H5T_sign_t     nsign;
-    char          *name;
+    char          *name = NULL;
     unsigned char *ucp_vp = (unsigned char *)vp;
     char          *cp_vp = (char *)vp;
-    hid_t          memb, obj;
+    hid_t          memb = -1;
+    hid_t          obj = -1;
     static char    fmt_llong[8], fmt_ullong[8];
     H5T_str_t      pad;
     H5T_class_t    type_class;
@@ -1306,7 +1307,8 @@ void
 h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
         hid_t container, void *vp)
 {
-    hid_t        obj, region;
+    hid_t        obj = -1;
+    hid_t        region = -1;
     char         ref_name[1024];
     H5S_sel_type region_type;
 
