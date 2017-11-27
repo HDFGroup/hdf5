@@ -95,7 +95,7 @@ H5VL__get_driver_cb(void *obj, hid_t id, void *_op_data)
 
     FUNC_ENTER_STATIC_NOERR
 
-    if(0 == HDstrcmp(cls->name, op_data->name)) {
+    if (0 == HDstrcmp(cls->name, op_data->name)) {
         op_data->found_id = id;
         ret_value = H5_ITER_STOP;
     }
@@ -128,29 +128,29 @@ H5VLregister(const H5VL_class_t *cls)
     H5TRACE1("i", "*x", cls);
 
     /* Check arguments */
-    if(!cls)
+    if (!cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "VOL driver class pointer cannot be NULL")
-    if(!cls->name)
+    if (!cls->name)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL driver class name cannot be the NULL pointer");
     /* XXX: Should probably come up with a max length so we can use strnlen()? */
-    if(0 == HDstrlen(cls->name))
+    if (0 == HDstrlen(cls->name))
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL driver class name cannot be the empty string");
 
     op_data.found_id = H5I_INVALID_HID;
     op_data.name = cls->name;
 
     /* check if driver is already registered */
-    if(H5I_iterate(H5I_VOL, H5VL__get_driver_cb, &op_data, TRUE) < 0)
+    if (H5I_iterate(H5I_VOL, H5VL__get_driver_cb, &op_data, TRUE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VOL IDs")
 
     /* XXX: Does this need to be an error? Users probably don't care as long
      *      as their VOL driver is available.
      */
-    if(op_data.found_id != H5I_INVALID_HID)
+    if (op_data.found_id != H5I_INVALID_HID)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL driver with the same name is already registered.")
 
     /* Create the new class ID */
-    if((ret_value = H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
+    if ((ret_value = H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL driver")
 
 done:
@@ -161,10 +161,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLregister_by_name
  *
- * Purpose:     Registers a new vol driver as a member of the virtual object
+ * Purpose:     Registers a new VOL driver as a member of the virtual object
  *              layer class.
  *
- * Return:      Success:    A vol driver ID which is good until the
+ * Return:      Success:    A VOL driver ID which is good until the
  *                          library is closed or the driver is
  *                          unregistered.
  *
@@ -175,16 +175,48 @@ done:
 hid_t
 H5VLregister_by_name(const char *name)
 {
-    hid_t ret_value = H5I_INVALID_HID;
+    H5VL_get_driver_ud_t    op_data;
+    hid_t                   ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "*s", name);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, H5I_INVALID_HID, "Unimplemented VOL function")
+    /* Check arguments */
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null VOL driver name is disallowed")
+    if (0 == HDstrlen(name))
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "zero-length VOL driver name is disallowed")
+
+    op_data.found_id = H5I_INVALID_HID;
+    op_data.name = name;
+
+    /* Check if driver is already registered */
+    if (H5I_iterate(H5I_VOL, H5VL__get_driver_cb, &op_data, TRUE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VOL ids")
+
+    if (op_data.found_id != H5I_INVALID_HID) {
+        /* If driver alread registered, increment ref count on ID and return ID */
+        if (H5I_inc_ref(op_data.found_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL driver")
+        ret_value = op_data.found_id;
+    }
+    else {
+        H5PL_key_t key;
+        const H5VL_class_t *cls;
+
+        /* Try loading the driver */
+        key.name = name;
+        if (NULL == (cls = (const H5VL_class_t *)H5PL_load(H5PL_TYPE_VOL, key)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL driver")
+
+        /* Register the driver we loaded */
+        if ((ret_value = H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL driver ID")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLregister() */
+} /* end H5VLregister_by_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -211,11 +243,11 @@ H5VLunregister(hid_t vol_id)
     H5TRACE1("e", "i", vol_id);
 
     /* Check arguments */
-    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(vol_id, H5I_VOL)))
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(vol_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol driver")
 
     /* The H5VL_class_t struct will be freed by this function */
-    if(H5I_dec_app_ref(vol_id) < 0)
+    if (H5I_dec_app_ref(vol_id) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to unregister vol driver")
 
 done:
@@ -313,10 +345,10 @@ H5VLis_registered(const char *name)
     op_data.name = name;
 
     /* Check arguments */
-    if(H5I_iterate(H5I_VOL, H5VL__get_driver_cb, &op_data, TRUE) < 0)
+    if (H5I_iterate(H5I_VOL, H5VL__get_driver_cb, &op_data, TRUE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "can't iterate over VOL ids")
 
-    if(op_data.found_id != H5I_INVALID_HID)
+    if (op_data.found_id != H5I_INVALID_HID)
         ret_value = TRUE;
 
 done:
@@ -339,12 +371,13 @@ done:
 ssize_t
 H5VLget_driver_name(hid_t obj_id, char *name/*out*/, size_t size)
 {
-    ssize_t    ret_value;
+    ssize_t    ret_value = -1;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "ixz", obj_id, name, size);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, -1, "Unimplemented VOL function")
+    if ((ret_value = H5VL_get_driver_name(obj_id, name, size)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Can't get driver name")
 
 done:
     FUNC_LEAVE_API(ret_value)
