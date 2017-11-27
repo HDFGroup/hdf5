@@ -54,6 +54,7 @@
    }									      \
 }
 
+/* Check that a pointer is valid (i.e.: not NULL) */
 #define CHECK_PTR(ret,where) {						      \
    if (VERBOSE_HI) {					      \
       print_func("   Call to routine: %15s at line %4d in %s returned %p\n",  \
