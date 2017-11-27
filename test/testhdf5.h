@@ -57,16 +57,16 @@
 }
 
 /* Check that a pointer is valid (i.e.: not NULL) */
-#define CHECK_PTR(ret,where) {                                                      \
-   if (VERBOSE_HI) {                                                                \
-      print_func("   Call to routine: %15s at line %4d in %s returned %p\n",        \
-                 (where), (int)__LINE__, __FILE__, (ret));                          \
-   }                                                                                \
-   if (!(ret)) {                                                                    \
-      TestErrPrintf ("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n",      \
-                  (where), (int)__LINE__, __FILE__);                                \
-      H5Eprint2(H5E_DEFAULT, stdout);                                               \
-   }                                                                                \
+#define CHECK_PTR(ret,where) {						      \
+   if (VERBOSE_HI) {					      \
+      print_func("   Call to routine: %15s at line %4d in %s returned %p\n",  \
+                 (where), (int)__LINE__, __FILE__, (ret));		      \
+   }									      \
+   if (!(ret)) {							      \
+      TestErrPrintf ("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n", \
+                  (where), (int)__LINE__, __FILE__);			      \
+      H5Eprint2(H5E_DEFAULT, stdout);				      \
+   }									      \
 }
 
 /* Check that a pointer is NULL */
