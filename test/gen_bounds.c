@@ -360,7 +360,7 @@ error:
  * gen_v18_latest() creates file "bounds_v18_latest.h5"
  *
  * File contents:
- * - Version 2 superblock (H5Pset_shared_mesg_index)
+ * - Version 2 superblock
  * - A chunked dataset with layout version 3, "DS_chunked_layout_3". (default)
  *
  ***********************************************************************/
