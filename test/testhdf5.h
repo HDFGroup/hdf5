@@ -90,7 +90,7 @@
    }                                                                                \
    if (ret != val) {                                                                \
       TestErrPrintf ("*** UNEXPECTED RETURN from %s: returned value of %p is not equal to %p line %4d in %s\n",  \
-                  (where), ret, val, (int)__LINE__, __FILE__);                      \
+                  (where), (void *)(ret), (void *)(val), (int)__LINE__, __FILE__);  \
       H5Eprint2(H5E_DEFAULT, stdout);                                               \
    }                                                                                \
 }
