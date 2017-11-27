@@ -322,17 +322,17 @@ test_skiplist_remove(void)
     search_key=key1;
     found_item=(int *)H5SL_remove(slist,&search_key);
     CHECK_PTR(found_item, "H5SL_remove");
-    VERIFY(found_item, &key1, "H5SL_remove");
+    CHECK_PTR_EQ(found_item, &key1, "H5SL_remove");
 
     search_key=key2;
     found_item=(int *)H5SL_remove(slist,&search_key);
     CHECK_PTR(found_item, "H5SL_remove");
-    VERIFY(found_item, &key2, "H5SL_remove");
+    CHECK_PTR_EQ(found_item, &key2, "H5SL_remove");
 
     search_key=key3;
     found_item=(int *)H5SL_remove(slist,&search_key);
     CHECK_PTR(found_item, "H5SL_remove");
-    VERIFY(found_item, &key3, "H5SL_remove");
+    CHECK_PTR_EQ(found_item, &key3, "H5SL_remove");
 
     /* Check that the skip list has no elements */
     num=H5SL_count(slist);
@@ -1210,8 +1210,8 @@ static herr_t test_tfs_iter(void *_obj, void *key, void *_udata) {
     test_tfs_it_ud_t *udata = (test_tfs_it_ud_t *)_udata;
 
     /* Check consistency */
-    VERIFY((void *)&obj->idx, key, "obj->idx");
-    VERIFY(obj, &udata->obj_list->list[obj->idx], "obj_list->list[obj->idx]");
+    CHECK_PTR_EQ((void *)&obj->idx, key, "obj->idx");
+    CHECK_PTR_EQ(obj, &udata->obj_list->list[obj->idx], "obj_list->list[obj->idx]");
 
     /* Increment number of calls */
     udata->ncalls++;
@@ -1236,8 +1236,8 @@ static htri_t test_tfs_free(void *_obj, void *key, void *_obj_list) {
     htri_t ret_value;
 
     /* Check consistency */
-    VERIFY((void *)&obj->idx, key, "obj->idx");
-    VERIFY(obj, &obj_list->list[obj->idx], "obj_list->list[obj->idx]");
+    CHECK_PTR_EQ((void *)&obj->idx, key, "obj->idx");
+    CHECK_PTR_EQ(obj, &obj_list->list[obj->idx], "obj_list->list[obj->idx]");
 
     /* Mark this object as freed (to make sure it isn't recursively freed, that
      * is not something we support, we will undo this if we decide later not to

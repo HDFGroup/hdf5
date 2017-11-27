@@ -434,19 +434,19 @@ test_heap_remove_min(void)
     ret=H5HP_remove(heap,&val,&ptr);
     CHECK(ret, FAIL, "H5HP_remove");
     VERIFY(val, 5, "H5HP_remove");
-    VERIFY(ptr, &obj2, "H5HP_remove");
+    CHECK_PTR_EQ(ptr, &obj2, "H5HP_remove");
 
     /* Remove second maximum value from heap */
     ret=H5HP_remove(heap,&val,&ptr);
     CHECK(ret, FAIL, "H5HP_remove");
     VERIFY(val, 10, "H5HP_remove");
-    VERIFY(ptr, &obj1, "H5HP_remove");
+    CHECK_PTR_EQ(ptr, &obj1, "H5HP_remove");
 
     /* Remove third maximum value from heap */
     ret=H5HP_remove(heap,&val,&ptr);
     CHECK(ret, FAIL, "H5HP_remove");
     VERIFY(val, 20, "H5HP_remove");
-    VERIFY(ptr, &obj3, "H5HP_remove");
+    CHECK_PTR_EQ(ptr, &obj3, "H5HP_remove");
 
     /* Try removing an object from an empty heap */
     ret=H5HP_remove(heap,&val,&ptr);
@@ -508,19 +508,19 @@ test_heap_remove_max(void)
     ret=H5HP_remove(heap,&val,&ptr);
     CHECK(ret, FAIL, "H5HP_remove");
     VERIFY(val, 20, "H5HP_remove");
-    VERIFY(ptr, &obj3, "H5HP_remove");
+    CHECK_PTR_EQ(ptr, &obj3, "H5HP_remove");
 
     /* Remove second maximum value from heap */
     ret=H5HP_remove(heap,&val,&ptr);
     CHECK(ret, FAIL, "H5HP_remove");
     VERIFY(val, 10, "H5HP_remove");
-    VERIFY(ptr, &obj1, "H5HP_remove");
+    CHECK_PTR_EQ(ptr, &obj1, "H5HP_remove");
 
     /* Remove third maximum value from heap */
     ret=H5HP_remove(heap,&val,&ptr);
     CHECK(ret, FAIL, "H5HP_remove");
     VERIFY(val, 5, "H5HP_remove");
-    VERIFY(ptr, &obj2, "H5HP_remove");
+    CHECK_PTR_EQ(ptr, &obj2, "H5HP_remove");
 
     /* Try removing an object from an empty heap */
     ret=H5HP_remove(heap,&val,&ptr);
