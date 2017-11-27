@@ -322,17 +322,17 @@ test_skiplist_remove(void)
     search_key=key1;
     found_item=(int *)H5SL_remove(slist,&search_key);
     CHECK_PTR(found_item, "H5SL_remove");
-    VERIFY(found_item, &key1, "H5SL_remove");
+    CHECK_PTR_EQ(found_item, &key1, "H5SL_remove");
 
     search_key=key2;
     found_item=(int *)H5SL_remove(slist,&search_key);
     CHECK_PTR(found_item, "H5SL_remove");
-    VERIFY(found_item, &key2, "H5SL_remove");
+    CHECK_PTR_EQ(found_item, &key2, "H5SL_remove");
 
     search_key=key3;
     found_item=(int *)H5SL_remove(slist,&search_key);
     CHECK_PTR(found_item, "H5SL_remove");
-    VERIFY(found_item, &key3, "H5SL_remove");
+    CHECK_PTR_EQ(found_item, &key3, "H5SL_remove");
 
     /* Check that the skip list has no elements */
     num=H5SL_count(slist);

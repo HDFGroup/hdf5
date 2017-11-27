@@ -61,17 +61,16 @@ static int basic_id_test(void)
     if(testPtr != NULL)
         goto out;
 
-	CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
-	if(testPtr != NULL)
-		goto out;
+    H5E_BEGIN_TRY
+        testPtr = H5Iobject_verify((hid_t)700, (H5I_type_t) 700);
+    H5E_END_TRY
 
     CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
     if(testPtr != NULL)
         goto out;
 
-	CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
-	if(testPtr != NULL)
-		goto out;
+    /* Register a type */
+    myType = H5Iregister_type((size_t)64, 0, (H5I_free_t) free );
 
     CHECK(myType, H5I_BADID, "H5Iregister_type");
     if(myType == H5I_BADID)
@@ -124,33 +123,31 @@ static int basic_id_test(void)
     if(testPtr != NULL)
         goto out;
 
-	CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
-	if(testPtr != NULL)
-		goto out;
+    H5E_BEGIN_TRY
+        testPtr = (int*) H5Iremove_verify(arrayID, (H5I_type_t) ((int) myType-1));
+    H5E_END_TRY
 
     CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
     if(testPtr != NULL)
         goto out;
 
-	CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
-	if(testPtr != NULL)
-		goto out;
+    /* Remove an ID and make sure we can't access it */
+    testPtr = (int*) H5Iremove_verify(arrayID, myType);
 
     CHECK_PTR(testPtr, "H5Iremove_verify");
     if(testPtr == NULL)
         goto out;
 
-	CHECK_PTR(testPtr, "H5Iremove_verify");
-	if(testPtr == NULL)
-		goto out;
+    H5E_BEGIN_TRY
+        testPtr = (int*) H5Iobject_verify(arrayID, myType);
+    H5E_END_TRY
 
     CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
     if(testPtr != NULL)
         goto out;
 
-	CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
-	if(testPtr != NULL)
-		goto out;
+    /* Delete the type and make sure we can't access objects within it */
+    arrayID = H5Iregister(myType, testObj);
 
     err = H5Idestroy_type(myType);
     VERIFY(err, 0, "H5Idestroy_type");
