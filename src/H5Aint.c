@@ -102,6 +102,12 @@ static herr_t H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type
 /* Package Variables */
 /*********************/
 
+/* Format version bounds for attribute */
+const unsigned H5O_attr_ver_bounds[] = {
+    H5O_ATTR_VERSION_1,         /* H5F_LIBVER_EARLIEST */
+    H5O_ATTR_VERSION_3,         /* H5F_LIBVER_V18 */
+    H5O_ATTR_VERSION_LATEST     /* H5F_LIBVER_LATEST */
+};
 
 /*****************************/
 /* Library Private Variables */
@@ -111,13 +117,6 @@ static herr_t H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type
 /*******************/
 /* Local Variables */
 /*******************/
-
-/* Format version bounds for attribute */
-static const unsigned H5O_attr_ver_bounds[] = {
-    H5O_ATTR_VERSION_1,         /* H5F_LIBVER_EARLIEST */
-    H5O_ATTR_VERSION_3,         /* H5F_LIBVER_V18 */
-    H5O_ATTR_VERSION_LATEST     /* H5F_LIBVER_LATEST */
-};
 
 typedef H5A_t*	H5A_t_ptr;
 H5FL_SEQ_DEFINE(H5A_t_ptr);
@@ -1861,7 +1860,6 @@ herr_t
 H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
-    hbool_t use_latest_format;          /* Flag indicating the latest attribute version support is enabled */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

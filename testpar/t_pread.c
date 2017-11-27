@@ -55,6 +55,9 @@ fools.\n";
 static int generate_test_file(MPI_Comm comm, int mpi_rank, int group);
 static int test_parallel_read(MPI_Comm comm, int mpi_rank, int group);
 
+static char *test_argv0 = NULL;
+extern char *dirname(char *path); /* Avoids additional includes */
+
 
 /*-------------------------------------------------------------------------
  * Function:    generate_test_file
@@ -99,11 +102,11 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     FILE *header = NULL;
     const char *fcn_name = "generate_test_file()";
     const char *failure_mssg = NULL;
-    const char *group_filename = NULL;
+    char *group_filename = NULL;
     char data_filename[FILENAME_BUF_SIZE];
     char reloc_data_filename[FILENAME_BUF_SIZE];
     char prolog_filename[FILENAME_BUF_SIZE];
-    int file_index;
+    int file_index = 0;
     int group_size;
     int group_rank;
     int local_failure = 0;
@@ -162,7 +165,8 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
          * is used to call into the h5_fixname function. No 
          * need to worry that we reassign it for each file!
          */
-        HDassert((group_filename = FILENAMES[file_index]));
+        group_filename = FILENAMES[file_index];
+        HDassert( group_filename );
 
         /* Assign the 'data_filename' */
         if ( h5_fixname(group_filename, H5P_DEFAULT, data_filename,
@@ -174,7 +178,8 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
     if ( pass ) {
 
-        HDassert( (group_filename = FILENAMES[file_index+1]) );
+        group_filename = FILENAMES[file_index+1];
+        HDassert( group_filename );
 
         /* Assign the 'reloc_data_filename' */
         if ( h5_fixname(group_filename, H5P_DEFAULT, reloc_data_filename,
@@ -186,8 +191,8 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     }
 
     if ( pass ) {
-
-        HDassert( (group_filename = FILENAMES[file_index+2]) );
+        group_filename = FILENAMES[file_index+2];
+        HDassert( group_filename );
 
         /* Assign the 'prolog_filename' */
         if ( h5_fixname(group_filename, H5P_DEFAULT, prolog_filename,
@@ -390,9 +395,29 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
         if ( pass ) {
             char cmd[256];
+            char exe_path[256];
+            char *relative_path = "../tools/src/h5jam";
+            char *exe_dirname = relative_path;
 
-            HDsprintf(cmd, "../tools/src/h5jam/h5jam -i %s -u %s -o %s", 
-                      data_filename, prolog_filename, reloc_data_filename);
+            /* We're checking for the existance of the h5jam utility
+             * With Cmake testing, all binaries are in the same directory
+             * e.g. the same location where this executable is found.
+             * We've copied the argv[0] argument and check to see
+             * if h5jam is co-located here. Otherwise, the autotools
+             * put things into directories, hence the relative path.
+             */
+	    if (test_argv0 != NULL) {
+                HDstrncpy(exe_path, test_argv0, sizeof(exe_path));
+                if ( (exe_dirname = (char *)dirname(exe_path)) != NULL) {
+                    HDsprintf(cmd, "%s/h5jam", exe_dirname);
+                    if ( HDaccess(cmd, F_OK) != 0)
+                        exe_dirname = relative_path;
+                }
+            }
+            HDsprintf(cmd, "%s/h5jam -i %s -u %s -o %s",
+                      exe_dirname,
+                      data_filename,
+                      prolog_filename, reloc_data_filename);
 
             if ( system(cmd) != 0 ) {
                 pass = FALSE;
@@ -678,7 +703,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
     }
 
     /* collect results from other processes.
-     * Only overwrite the failure message if no preveious error 
+     * Only overwrite the failure message if no previous error
      * has been detected
      */
     local_failure = ( pass ? 0 : 1 );
@@ -759,6 +784,17 @@ main( int argc, char **argv)
     int split_size;
     MPI_Comm group_comm = MPI_COMM_WORLD;
 
+    /* I don't believe that argv[0] can ever be NULL.
+     * It should thus be safe to dup and save as a check
+     * for cmake testing. Note that in our Cmake builds,
+     * all executables are located in the same directory.
+     * We assume (but we'll check) that the h5jam utility
+     * is in the directory as this executable.  If that
+     * isn't true, then we can use a relative path that
+     * should be valid for the autotools environment.
+     */
+    test_argv0 = HDstrdup(argv[0]);
+
     if ( (MPI_Init(&argc, &argv)) != MPI_SUCCESS) {
        HDfprintf(stderr, "FATAL: Unable to initialize MPI\n");
        HDexit(EXIT_FAILURE);
@@ -783,11 +819,11 @@ main( int argc, char **argv)
         HDfprintf(stdout, "========================================\n");
     }
 
-    if ( mpi_size < 4 ) {
+    if ( mpi_size < 3 ) {
 
         if ( mpi_rank == 0 ) {
 
-            HDprintf("    Need at least 4 processes.  Exiting.\n");
+            HDprintf("    Need at least 3 processes.  Exiting.\n");
         }
         goto finish;
     }

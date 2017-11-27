@@ -78,13 +78,13 @@ New Features
       file driver in HDF5 by previously having called H5Pset_fapl_mpio().
 
       HDF5 parallel file operations which do not employ multiple ranks
-      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1) 
+      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1)
       as opposed to MPI_COMM_WORLD, will not be affected by this
       optimization.  Conversely, parallel file operations on subgroups
       of MPI_COMM_WORLD are allowed to be run in parallel with each
       subgroup operating as an independant collection of processes.
 
-      (RAW – 2017/10/10, HDFFV-10294)
+      (RAW - 2017/10/10, HDFFV-10294)
 
 
     - Large MPI-IO transfers
@@ -109,7 +109,7 @@ New Features
       fulfill the original user request without encountering API
       errors.
 
-      (RAW – 2017/07/11, HDFFV-8839)
+      (RAW - 2017/07/11, HDFFV-8839)
 
     Fortran Library:
     ----------------
@@ -157,6 +157,17 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - filter plugin handling in H5PL.c and H5Z.c
+
+      It was discovered that the dynamic loading process used by
+      filter plugins had issues with library dependencies.
+
+      CMake build process changed to use LINK INTERFACE keywords, which
+      allowed HDF5 C library to make dependent libraries private. The
+      filter plugin libraries no longer require dependent libraries
+      (such as szip or zlib) to be available.
+             (ADB - 2017/11/16, HDFFV-10328)
+
     - H5Zfilter_avail in H5Z.c
 
       The public function checked for plugins, while the private
@@ -166,10 +177,33 @@ Bug Fixes since HDF5-1.10.1 release
       Moved check for plugin from public to private function. Updated
       H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
 
-      (ADB - 2017/10/10, HDFFV-10297)
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
 
     Configuration
     -------------
+    - cmake
+
+      The hdf5 library used shared szip and zlib, which needlessly required
+      applications to link with the same szip and zlib libraries.
+
+      Changed the target_link_libraries commands to use the static libs.
+      Removed improper link duplication of szip and zlib.
+      Adjusted the link dependencies and the link interface values of
+      the target_link_libraries commands.
+
+      (ADB - 2017/11/14, HDFFV-10329)
+
+    - cmake MPI
+
+      CMake implementation for MPI was problematic and would create incorrect
+      MPI library references in the hdf5 libraries.
+
+      Reworked the CMake MPI code to properly create CMake targets.Also merged
+      the latest CMake FindMPI.cmake changes to the local copy. This is necessary
+      until HDF changes the CMake minimum to 3.9 or greater.
+
+      (ADB - 2017/11/02, HDFFV-10321)
+
     - cmake
 
       Too many commands for POST_BUILD step caused command line to be
@@ -186,7 +220,8 @@ Bug Fixes since HDF5-1.10.1 release
 
     Fortran
     --------
-    -
+    - Fixed compilation errors when using Intel 18 Fortran compilers
+      (MSB - 2017/11/3, HDFFV-10322)
 
     Tools
     -----
@@ -199,8 +234,12 @@ Bug Fixes since HDF5-1.10.1 release
       Modified H5Zfilter_avail and private function, H5Z_filter_avail.
       Moved check for plugin from public to private function. Updated
       H5P__set_filter due to change in H5Z_filter_avail. Updated tests.
+      Note, h5repack output display has changed to clarify the individual
+      steps of the repack process. The output indicates if an operation
+      applies to all objects. Lines with notation and no information
+      have been removed.
 
-      (ADB - 2017/10/10, HDFFV-10297)
+      (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
 
     - h5repack
 
@@ -209,7 +248,7 @@ Bug Fixes since HDF5-1.10.1 release
       Added another parameter to the 'UD=' option to set the flag by default
       to '0' or H5Z_FLAG_MANDATORY, the other choice is '1' or H5Z_FLAG_OPTIONAL.
 
-      (ADB - 2017/08/31, HDFFV-10276)
+      (ADB - 2017/08/31, HDFFV-10269)
 
     - h5ls
 

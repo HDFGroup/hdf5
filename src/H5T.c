@@ -510,6 +510,12 @@ double H5T_NATIVE_DOUBLE_NEG_INF_g          = (double)0.0f;
 H5FL_DEFINE(H5T_t);
 H5FL_DEFINE(H5T_shared_t);
 
+/* Format version bounds for datatype */
+const unsigned H5O_dtype_ver_bounds[] = {
+    H5O_DTYPE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
+    H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V18 */
+    H5O_DTYPE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
+};
 
 /*******************/
 /* Local Variables */
@@ -539,12 +545,6 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     (H5I_free_t)H5T_close    /* Callback routine for closing objects of this class */
 }};
 
-/* Format version bounds for datatype */
-static const unsigned H5O_dtype_ver_bounds[] = {
-    H5O_DTYPE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
-    H5O_DTYPE_VERSION_3,    /* H5F_LIBVER_V18 */
-    H5O_DTYPE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
-};
 
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5T_top_package_initialize_s = FALSE;

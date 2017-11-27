@@ -31,7 +31,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:S:P:T:G:q:z:E";
+static const char *s_opts = "hVvf:l:m:e:nLj:k:c:d:s:u:b:M:t:a:i:o:S:P:T:G:q:z:E";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -42,6 +42,8 @@ static struct long_options l_opts[] = {
     { "file", require_arg, 'e' },
     { "native", no_arg, 'n' },
     { "latest", no_arg, 'L' },
+    { "low", require_arg, 'j' },
+    { "high", require_arg, 'k' },
     { "compact", require_arg, 'c' },
     { "indexed", require_arg, 'd' },
     { "ssize", require_arg, 's' },
@@ -82,6 +84,9 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -V, --version           Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
     PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
+    PRINTVALSTREAM(rawoutstream, "                           This option will take precedence over the -j and -k options\n");
+    PRINTVALSTREAM(rawoutstream, "   -j, --low               The low bound as in H5Pset_libver_bounds()\n");
+    PRINTVALSTREAM(rawoutstream, "   -k, --high              The high bound as in H5Pset_libver_bounds()\n");
     PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
     PRINTVALSTREAM(rawoutstream, "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
     PRINTVALSTREAM(rawoutstream, "   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
@@ -498,6 +503,22 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
             case 'L':
                 options->latest = TRUE;
+                break;
+
+            case 'j':
+                options->low_bound = (H5F_libver_t)HDatoi(opt_arg);
+                if(options->low_bound < H5F_LIBVER_EARLIEST || options->low_bound > H5F_LIBVER_LATEST) {
+                    error_msg("in parsing low bound\n");
+                    goto done;
+                }
+                break;
+
+            case 'k':
+                options->high_bound = (H5F_libver_t)HDatoi(opt_arg);
+                if(options->high_bound < H5F_LIBVER_EARLIEST || options->high_bound > H5F_LIBVER_LATEST) {
+                    error_msg("in parsing high bound\n");
+                    goto done;
+                }
                 break;
 
             case 'c':

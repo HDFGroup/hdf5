@@ -90,7 +90,7 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
 }};
 
 /* Format version bounds for filter pipleline */
-static const unsigned H5O_pline_ver_bounds[] = {
+const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
     H5O_PLINE_VERSION_2,        /* H5F_LIBVER_V18 */
     H5O_PLINE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
@@ -572,9 +572,9 @@ H5O_pline_free(void *mesg)
  */
 static herr_t
 H5O_pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
-    hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t H5_ATTR_UNUSED *cpy_info, void *_udata)
+    hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t *cpy_info, void *_udata)
 {
-    const H5O_pline_t *pline_src = (const H5O_pline_t *)mesg_src;    /* Source datatype */
+    const H5O_pline_t *pline_src = (const H5O_pline_t *)mesg_src;    /* Source pline */
     H5O_copy_file_ud_common_t *udata = (H5O_copy_file_ud_common_t *)_udata; /* Object copying user data */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
@@ -582,6 +582,11 @@ H5O_pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
 
     /* check args */
     HDassert(pline_src);
+    HDassert(cpy_info);
+    HDassert(cpy_info->file_dst);
+
+    if(pline_src->version > H5O_pline_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "pline message version out of bounds")
 
     /* If the user data is non-NULL, assume we are copying a dataset or group
      * and make a copy of the filter pipeline for later in
