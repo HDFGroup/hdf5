@@ -251,7 +251,7 @@ test_refstr_wrap(void)
     /* Get pointer to raw string in ref-counted string */
     s=H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    VERIFY(s, buf, "wrapping");
+    CHECK_PTR_EQ(s, buf, "wrapping");
     cmp=HDstrcmp(s,buf);
     VERIFY(cmp, 0, "HDstrcmp");
 
@@ -309,7 +309,7 @@ test_refstr_own(void)
     /* Get pointer to raw string in ref-counted string */
     t=H5RS_get_str(rs);
     CHECK_PTR(t, "H5RS_get_str");
-    VERIFY(t, s, "transferring");
+    CHECK_PTR_EQ(t, s, "transferring");
     cmp=HDstrcmp(s,t);
     VERIFY(cmp, 0, "HDstrcmp");
 
@@ -323,7 +323,7 @@ test_refstr_own(void)
     /* Get pointer to raw string in ref-counted string */
     t=H5RS_get_str(rs);
     CHECK_PTR(t, "H5RS_get_str");
-    VERIFY(t, s, "transferring");
+    CHECK_PTR_EQ(t, s, "transferring");
     cmp=HDstrcmp(t,s);
     VERIFY(cmp, 0, "HDstrcmp");
 
