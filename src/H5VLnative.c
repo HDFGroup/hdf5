@@ -66,7 +66,6 @@ static herr_t H5VL_native_attr_specific(void *obj, H5VL_loc_params_t loc_params,
 static herr_t H5VL_native_attr_close(void *attr, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
-#if 0
 static void *H5VL_native_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_native_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
@@ -76,7 +75,6 @@ static herr_t H5VL_native_dataset_write(void *dset, hid_t mem_type_id, hid_t mem
 static herr_t H5VL_native_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_dataset_specific(void *dset, H5VL_dataset_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_dataset_close(void *dset, hid_t dxpl_id, void **req);
-#endif
 
 /* File callbacks */
 #if 0
@@ -150,14 +148,14 @@ static H5VL_class_t H5VL_native_g = {
         H5VL_native_attr_close                      /* close        */
     },
     {   /* dataset_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* read         */
-        NULL,                                       /* write        */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
+        H5VL_native_dataset_create,                 /* create       */
+        H5VL_native_dataset_open,                   /* open         */
+        H5VL_native_dataset_read,                   /* read         */
+        H5VL_native_dataset_write,                  /* write        */
+        H5VL_native_dataset_get,                    /* get          */
+        H5VL_native_dataset_specific,               /* specific     */
         NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        H5VL_native_dataset_close                   /* close        */
     },
     {   /* datatype_cls */
         NULL,                                       /* commit       */
@@ -1009,7 +1007,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_attr_close() */
 
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_dataset_create
@@ -1401,6 +1398,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_dataset_close() */
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_file_create
