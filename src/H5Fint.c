@@ -2669,7 +2669,7 @@ H5F_set_latest_flags(H5F_t *f, unsigned flags)
     /* Sanity check */
     HDassert(f);
     HDassert(f->shared);
-    HDassert(0 == ((~flags) & H5F_LATEST_ALL_FLAGS));
+    HDassert(0 == ((flags) & ~H5F_LATEST_ALL_FLAGS));
 
     f->shared->latest_flags = flags;
 

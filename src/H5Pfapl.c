@@ -283,16 +283,16 @@ static int H5P__facc_file_image_info_cmp(const void *value1, const void *value2,
 static herr_t H5P__facc_file_image_info_close(const char *name, size_t size, void *value);
 
 /* encode & decode callbacks */
-static herr_t H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size, void *udata);
 static herr_t H5P__facc_cache_config_dec(const void **_pp, void *value);
 static int H5P__facc_cache_config_cmp(const void *value1, const void *value2, size_t size);
-static herr_t H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size, void *udata);
 static herr_t H5P__facc_fclose_degree_dec(const void **pp, void *value);
-static herr_t H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size, void *udata);
 static herr_t H5P__facc_multi_type_dec(const void **_pp, void *value);
 
 /* Metadata cache log location property callbacks */
-static herr_t H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size, void *udata);
 static herr_t H5P_facc_mdc_log_location_dec(const void **_pp, void *value);
 static herr_t H5P_facc_mdc_log_location_del(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P_facc_mdc_log_location_copy(const char *name, size_t size, void *value);
@@ -301,7 +301,7 @@ static herr_t H5P_facc_mdc_log_location_close(const char *name, size_t size, voi
 
 /* Metadata cache image property callbacks */
 static int H5P__facc_cache_image_config_cmp(const void *_config1, const void *_config2, size_t H5_ATTR_UNUSED size);
-static herr_t H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size, void *udata);
 static herr_t H5P__facc_cache_image_config_dec(const void **_pp, void *_value);
 
 
@@ -2958,7 +2958,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
+H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5AC_cache_image_config_t *config = (const H5AC_cache_image_config_t *)value; /* Create local aliases for value */
     uint8_t **pp = (uint8_t **)_pp;
@@ -3384,7 +3384,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
+H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5AC_cache_config_t *config = (const H5AC_cache_config_t *)value; /* Create local aliases for values */
     uint8_t **pp = (uint8_t **)_pp;
@@ -3664,7 +3664,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size)
+H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5F_close_degree_t *fclose_degree = (const H5F_close_degree_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
@@ -3737,7 +3737,7 @@ H5P__facc_fclose_degree_dec(const void **_pp, void *_value)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
+H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5FD_mem_t *type = (const H5FD_mem_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
@@ -4166,7 +4166,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
+H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const char *log_location = *(const char * const *)value;
     uint8_t **pp = (uint8_t **)_pp;
@@ -4466,7 +4466,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
+H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5P_coll_md_read_flag_t *coll_md_read_flag = (const H5P_coll_md_read_flag_t *)value;
     uint8_t **pp = (uint8_t **)_pp;

@@ -1547,7 +1547,7 @@ H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
     if (NULL == (dspace = (H5S_t *)H5I_object_verify(obj_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-    if(H5S_encode(dspace, (unsigned char **)&buf, nalloc)<0)
+    if(H5S_encode(dspace, (unsigned char **)&buf, nalloc, H5P_FILE_ACCESS_DEFAULT)<0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
 
 done:
@@ -1572,7 +1572,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
+H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc, hid_t fapl_id)
 {
     H5F_t       *f = NULL;      /* Fake file structure*/
     size_t      extent_size;    /* Size of serialized dataspace extent */
@@ -1583,7 +1583,7 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate "fake" file structure */
-    if(NULL == (f = H5F_fake_alloc((uint8_t)0)))
+    if(NULL == (f = H5F_fake_alloc((uint8_t)0, fapl_id)))
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed for extent */
@@ -1591,7 +1591,7 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size")
 
     /* Find out the size of buffer needed for selection */
-    if((sselect_size = H5S_SELECT_SERIAL_SIZE(obj)) < 0)
+    if((sselect_size = H5S_SELECT_SERIAL_SIZE(obj, f)) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace selection size")
     H5_CHECKED_ASSIGN(select_size, size_t, sselect_size, hssize_t);
 
@@ -1621,7 +1621,7 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 
         /* Encode the selection part of dataspace.  */
         *p = pp;
-        if(H5S_SELECT_SERIALIZE(obj, p) < 0)
+        if(H5S_SELECT_SERIALIZE(obj, p, f) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode select space")
     } /* end else */
 
@@ -1715,8 +1715,8 @@ H5S_decode(const unsigned char **p)
     sizeof_size = *pp++;
 
     /* Allocate "fake" file structure */
-    if(NULL == (f = H5F_fake_alloc(sizeof_size)))
-	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate fake file struct")
+    if(NULL == (f = H5F_fake_alloc(sizeof_size, H5P_FILE_ACCESS_DEFAULT)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate fake file struct")
 
     /* Decode size of extent information */
     UINT32DECODE(pp, extent_size);

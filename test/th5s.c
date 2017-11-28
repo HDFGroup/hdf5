@@ -79,6 +79,10 @@ struct space4_struct {
     char c2;
  } space4_data={'v',987123,-3.14F,'g'}; /* Test data for 4th dataspace */
 
+
+/* Used in test_h5s_encode_irregular_exceed32() and test_h5s_encode_points_exceed32() */
+#define POWER32     4294967296      /* 2^32 */
+
 /****************************************************************
 **
 **  test_h5s_basic(): Test basic H5S (dataspace) code.
@@ -2366,6 +2370,188 @@ test_h5s_bug1(void)
 
 /****************************************************************
 **
+**  test_h5s_encode_regular_exceed32(): 
+**      Test to verify HDFFV-9947 is fixed.
+**      Verify that selection encoding that exceeds (2^32 - 1)
+**      (32 bit integer limit) is correctly encoded.
+**
+**  Note: See encoding changes for 1.10 in 
+**        "RFC: H5Sencode/H5Sdecode Format Change".
+**
+****************************************************************/
+static void
+test_h5s_encode_regular_exceed32(void)
+{
+    hid_t sid;                  /* Dataspace ID */
+    hid_t decoded_sid;          /* Dataspace ID from H5Sdecode */
+    size_t sbuf_size=0;         /* Buffer size for H5Sencode */
+    unsigned char *sbuf=NULL;   /* Buffer for H5Sencode */
+    hssize_t num;               /* Number of elements in the dataspace selection */
+    hssize_t decoded_num;       /* Number of elements in the dataspace selection from H5Sdeocde */
+    hsize_t numparticles = 8388608;
+    unsigned num_dsets = 513;
+    hsize_t total_particles = numparticles * num_dsets;
+    hsize_t vdsdims[1] = {total_particles};
+    hsize_t start, count, block;
+    herr_t ret;                 /* Generic return value */
+
+    MESSAGE(5, ("Testing Dataspace encoding regular hyperslabs that exceeds 32 bits\n"));
+
+    /*-------------------------------------------------------------------------
+     * Test encoding and decoding of simple dataspace and hyperslab selection.
+     *-------------------------------------------------------------------------
+     */
+    sid = H5Screate_simple(1, vdsdims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    start = 0;
+    block = total_particles;
+    count = 1;
+
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, NULL, &count, &block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Encode simple data space in a buffer */
+    ret = H5Sencode(sid, NULL, &sbuf_size);
+    CHECK(ret, FAIL, "H5Sencode2");
+
+    if(sbuf_size > 0) {
+        sbuf = (unsigned char*)HDcalloc((size_t)1, sbuf_size);
+        CHECK(sbuf, NULL, "H5Sencode");
+    }
+
+    /* The version used for encoding should be 2 */
+    ret = H5Sencode(sid, sbuf, &sbuf_size);
+    CHECK(ret, FAIL, "H5Sencode");
+    VERIFY((uint32_t)sbuf[35], 2, "Version for regular hyperslab that exceeds 32 bits");
+
+    /* Decode from the dataspace buffer and return an object handle */
+    decoded_sid = H5Sdecode(sbuf);
+    CHECK(decoded_sid, FAIL, "H5Sdecode");
+
+    /* Verify the decoded dataspace */
+    decoded_num = H5Sget_select_npoints(decoded_sid);
+    CHECK(decoded_num, FAIL, "H5Sget_select_npoints");
+
+    num = H5Sget_select_npoints(sid);
+    CHECK(num, FAIL, "H5Sget_select_npoints");
+
+    VERIFY(num, decoded_num, "H5Sget_select_npoints");
+
+    ret = H5Sclose(decoded_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    if(sbuf)
+        HDfree(sbuf);
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+} /* test_h5s_encode_regular_exceed32() */
+
+/****************************************************************
+**
+**  test_h5s_encode_irregular_exceed32(): 
+**      This test verifies that 1.10 H5Sencode() will fail for
+**      irregular hyperslab selection that exceeds 32 bits.
+**
+**  Note: See encoding changes for 1.10 in 
+**        "RFC: H5Sencode/H5Sdecode Format Change".
+**
+****************************************************************/
+static void
+test_h5s_encode_irregular_exceed32(void)
+{
+    hid_t sid;           /* Dataspace ID */
+    hsize_t numparticles = 8388608;
+    unsigned num_dsets = 513;
+    hsize_t total_particles = numparticles * num_dsets;
+    hsize_t vdsdims[1] = {total_particles}; /* Dimension size */
+    hsize_t start, stride, count, block;    /* Selection info */
+    size_t sbuf_size=0; /* Buffer size for H5Sencode */
+    htri_t is_regular;  /* Is this a regular hyperslab */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Dataspace encoding irregular hyperslab that exceeds 32 bits\n"));
+
+    sid = H5Screate_simple(1, vdsdims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    start = 0;
+    block = total_particles;
+    count = 1;
+
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, NULL, &count, &block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    start = 8;
+    count = 5;
+    block = 2;
+    stride = POWER32;
+
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, &start, &stride, &count, &block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Should be irregular hyperslab */
+    is_regular = H5Sis_regular_hyperslab(sid);
+    VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");
+
+    /* Should fail because selection exceeds 32 bits */
+    ret = H5Sencode(sid, NULL, &sbuf_size);
+    VERIFY(ret, FAIL, "H5Sencode");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+} /* test_h5s_encode_irregular_exceed32() */
+
+/****************************************************************
+**
+**  test_h5s_encode_points_exceed32():
+**      This test verifies that 1.10 H5Sencode() will fail for
+**      point selection that exceeds 32 bits.
+**
+**  Note: See encoding changes for 1.10 in 
+**        "RFC: H5Sencode/H5Sdecode Format Change".
+**
+****************************************************************/
+static void
+test_h5s_encode_points_exceed32(void)
+{
+    hid_t sid;           /* Dataspace ID */
+    hsize_t numparticles = 8388608;
+    unsigned num_dsets = 513;
+    hsize_t total_particles = numparticles * num_dsets;
+    hsize_t vdsdims[1] = {total_particles}; /* Dimension size */
+    hsize_t coord[4];   /* The point coordinates */
+    size_t sbuf_size=0; /* Buffer size for H5Sencode */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Dataspace encoding points selection that exceeds 32 bits\n"));
+
+    sid = H5Screate_simple(1, vdsdims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    coord[0] = 5;
+    coord[1] = 15;
+    coord[2] = POWER32;
+    coord[3] = 19;
+    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)4, coord);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Should fail because selection exceeds 32 bits */
+    ret = H5Sencode(sid, NULL, &sbuf_size);
+    VERIFY(ret, FAIL, "H5Sencode");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+} /* test_h5s_encode_points_exceed32() */
+
+/****************************************************************
+**
 **  test_h5s(): Main H5S (dataspace) testing routine.
 **
 ****************************************************************/
@@ -2379,8 +2565,13 @@ test_h5s(void)
     test_h5s_null();		/* Test Null dataspace H5S code */
     test_h5s_zero_dim();        /* Test dataspace with zero dimension size */
     test_h5s_encode();          /* Test encoding and decoding */
+
+    test_h5s_encode_regular_exceed32();     /* Test encoding regular hyperslab selection that exceeds 32 bits */
+    test_h5s_encode_irregular_exceed32();   /* Testing encoding irregular hyperslab selection that exceeds 32 bits */
+    test_h5s_encode_points_exceed32();      /* Testing encoding point selection that exceeds 32 bits */
+
     test_h5s_scalar_write();	/* Test scalar H5S writing code */
-    test_h5s_scalar_read();	/* Test scalar H5S reading code */
+    test_h5s_scalar_read();	    /* Test scalar H5S reading code */
 
     test_h5s_compound_scalar_write();	/* Test compound datatype scalar H5S writing code */
     test_h5s_compound_scalar_read();	/* Test compound datatype scalar H5S reading code */

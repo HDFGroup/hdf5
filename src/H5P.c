@@ -26,10 +26,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5private.h"		/* Generic Functions    */
+#include "H5Eprivate.h"		/* Error handling       */
+#include "H5Iprivate.h"		/* IDs                  */
+#include "H5Ppkg.h"         /* Property lists       */
+#include "H5Fprivate.h"     /* Files                */
 
 /****************/
 /* Local Macros */
@@ -839,6 +840,9 @@ herr_t
 H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
 {
     H5P_genplist_t	*plist;         /* Property list to query */
+    H5P_genplist_t *fapl_plist;
+    hid_t new_fapl_id;
+    hbool_t latest_format = TRUE;
     herr_t ret_value = SUCCEED;          /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -848,8 +852,19 @@ H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
+    /* Make a copy of the default file access property list */
+    if(NULL == (fapl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if((new_fapl_id = H5P_copy_plist(fapl_plist, FALSE)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
+
+    /* Set latest format in fapl_plist */
+    /* This will eventually be used by VDS to encode datasets via H5P__dcrt_layout_enc() */
+    if(H5P_set(fapl_plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+
     /* Call the internal encode routine */
-    if((ret_value = H5P__encode(plist, TRUE, buf, nalloc)) < 0)
+    if((ret_value = H5P__encode(plist, TRUE, buf, nalloc, new_fapl_id)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
 
 done:

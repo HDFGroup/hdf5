@@ -146,7 +146,7 @@ static herr_t H5P__dcrt_reg_prop(H5P_genclass_t *pclass);
 /* Property callbacks */
 static herr_t H5P__dcrt_layout_set(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__dcrt_layout_get(hid_t prop_id, const char *name, size_t size, void *value);
-static herr_t H5P__dcrt_layout_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dcrt_layout_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dcrt_layout_dec(const void **pp, void *value);
 static herr_t H5P__dcrt_layout_del(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__dcrt_layout_copy(const char *name, size_t size, void *value);
@@ -154,14 +154,14 @@ static int H5P__dcrt_layout_cmp(const void *value1, const void *value2, size_t s
 static herr_t H5P__dcrt_layout_close(const char *name, size_t size, void *value);
 static herr_t H5P__dcrt_fill_value_set(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__dcrt_fill_value_get(hid_t prop_id, const char *name, size_t size, void *value);
-static herr_t H5P__dcrt_fill_value_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dcrt_fill_value_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dcrt_fill_value_dec(const void **pp, void *value);
 static herr_t H5P__dcrt_fill_value_del(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__dcrt_fill_value_copy(const char *name, size_t size, void *value);
 static herr_t H5P__dcrt_fill_value_close(const char *name, size_t size, void *value);
 static herr_t H5P__dcrt_ext_file_list_set(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__dcrt_ext_file_list_get(hid_t prop_id, const char *name, size_t size, void *value);
-static herr_t H5P__dcrt_ext_file_list_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dcrt_ext_file_list_enc(const void *value, void **pp, size_t *size, void *udata);
 static herr_t H5P__dcrt_ext_file_list_dec(const void **pp, void *value);
 static herr_t H5P__dcrt_ext_file_list_del(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__dcrt_ext_file_list_copy(const char *name, size_t size, void *value);
@@ -366,9 +366,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
+H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size, void *_udata)
 {
     const H5O_layout_t *layout = (const H5O_layout_t *)value; /* Create local aliases for values */
+    H5P_enc_cb_info_t *udata = (H5P_enc_cb_info_t *)_udata;       /* User data for encode callback */
     uint8_t **pp = (uint8_t **)_pp;
     uint8_t *tmp_p;
     size_t tmp_size;
@@ -426,14 +427,14 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
                  * list before we get here. */
                 tmp_size = (size_t)-1;
                 tmp_p = *pp;
-                if(H5S_encode(layout->storage.u.virt.list[u].source_select, pp, &tmp_size) < 0)
+                if(H5S_encode(layout->storage.u.virt.list[u].source_select, pp, &tmp_size, udata->fapl_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
                 *size += (size_t)(*pp - tmp_p);
 
                 /* Virtual dataset selection.  Same notes as above apply. */
                 tmp_size = (size_t)-1;
                 tmp_p = *pp;
-                if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, pp, &tmp_size) < 0)
+                if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, pp, &tmp_size, udata->fapl_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize virtual selection")
                 *size += (size_t)(*pp - tmp_p);
             } /* end for */
@@ -466,14 +467,14 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
                 /* Source selection */
                 tmp_size = (size_t)0;
                 tmp_p = NULL;
-                if(H5S_encode(layout->storage.u.virt.list[u].source_select, &tmp_p, &tmp_size) < 0)
+                if(H5S_encode(layout->storage.u.virt.list[u].source_select, &tmp_p, &tmp_size, udata->fapl_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
                 *size += tmp_size;
 
                 /* Virtual dataset selection */
                 tmp_size = (size_t)0;
                 tmp_p = NULL;
-                if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, &tmp_p, &tmp_size) < 0)
+                if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, &tmp_p, &tmp_size, udata->fapl_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize virtual selection")
                 *size += tmp_size;
             } /* end for */
@@ -979,7 +980,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dcrt_fill_value_enc(const void *value, void **_pp, size_t *size)
+H5P__dcrt_fill_value_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)value; /* Create local aliases for values */
     size_t   dt_size = 0;                 /* Size of encoded datatype */
@@ -1382,7 +1383,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
+H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size, void H5_ATTR_UNUSED *udata)
 {
     const H5O_efl_t *efl = (const H5O_efl_t *)value; /* Create local aliases for values */
     size_t len = 0;                     /* String length of slot name */

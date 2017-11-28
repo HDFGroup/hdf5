@@ -309,6 +309,7 @@
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
 #define H5F_USE_LATEST_FLAGS(F,FL)  ((F)->shared->latest_flags & (FL))
+#define H5F_GET_LATEST_FLAGS(F)     ((F)->shared->latest_flags)
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    ((F)->shared->store_msg_crt_idx = (FL))
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
@@ -365,7 +366,8 @@
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
 #define H5F_SIEVE_BUF_SIZE(F)   (H5F_sieve_buf_size(F))
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
-#define H5F_USE_LATEST_FLAGS(F,FL) (H5F_use_latest_flags(F,FL))
+#define H5F_USE_LATEST_FLAGS(F,FL)  (H5F_use_latest_flags(F,FL))
+#define H5F_GET_LATEST_FLAGS(F)     (H5F_get_latest_flags(F))
 #define H5F_STORE_MSG_CRT_IDX(F) (H5F_store_msg_crt_idx(F))
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    (H5F_set_store_msg_crt_idx((F), (FL)))
 #define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))
@@ -639,7 +641,8 @@
 #define H5F_LATEST_STYLE_GROUP          0x0080
 #define H5F_LATEST_OBJ_HEADER           0x0100
 #define H5F_LATEST_SUPERBLOCK           0x0200
-#define H5F_LATEST_ALL_FLAGS            (H5F_LATEST_DATATYPE | H5F_LATEST_DATASPACE | H5F_LATEST_ATTRIBUTE | H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG | H5F_LATEST_NO_MOD_TIME_MSG | H5F_LATEST_STYLE_GROUP | H5F_LATEST_OBJ_HEADER | H5F_LATEST_SUPERBLOCK)
+#define H5F_LATEST_DATASPACE_SELECTION  0x0400
+#define H5F_LATEST_ALL_FLAGS            (H5F_LATEST_DATATYPE | H5F_LATEST_DATASPACE | H5F_LATEST_ATTRIBUTE | H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG | H5F_LATEST_NO_MOD_TIME_MSG | H5F_LATEST_STYLE_GROUP | H5F_LATEST_OBJ_HEADER | H5F_LATEST_SUPERBLOCK | H5F_LATEST_DATASPACE_SELECTION)
 
 #define H5F_LATEST_DSET_MSG_FLAGS    (H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG)
 
@@ -838,7 +841,7 @@ H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t **pp, haddr_t *ad
 H5_DLL void H5F_sfile_assert_num(unsigned n);
 
 /* Routines for creating & destroying "fake" file structures */
-H5_DLL H5F_t *H5F_fake_alloc(uint8_t sizeof_size);
+H5_DLL H5F_t *H5F_fake_alloc(uint8_t sizeof_size, hid_t fapl_id);
 H5_DLL herr_t H5F_fake_free(H5F_t *f);
 
 /* Superblock related routines */
