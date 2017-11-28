@@ -513,6 +513,11 @@
 #  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
 #endif
 
+/* Represents an empty asynchronous request handle.
+ * Used in the VOL code.
+ */
+#define H5_REQUEST_NULL                 NULL
+
 /*
  * A macro to portably decrement enumerated types.
  */

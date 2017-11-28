@@ -23,7 +23,7 @@
  */
 static const H5VL_class_t echo_vol_g = {
     0,                                              /* version      */
-    501,                                            /* value        */
+    (H5VL_class_value_t)501,                        /* value        */
     "echo",                                         /* name         */
     NULL,                                           /* initialize   */
     NULL,                                           /* terminate    */

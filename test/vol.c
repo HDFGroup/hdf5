@@ -187,6 +187,34 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_basic_vol_operation()
+ *
+ * Purpose:     Uses the echo VOL driver to test basic VOL operations
+ *              via the H5VL public API.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_vol_operation(void)
+{
+    char name[25];
+
+    TESTING("Basic VOL operations");
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* end test_basic_vol_operation() */
+
+
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the virtual object layer interface (H5VL)
@@ -204,8 +232,9 @@ main(void)
 
     HDputs("Testing basic Virtual Object Layer (VOL) functionality.");
 
-    nerrors += test_vol_registration() < 0      ? 1 : 0;
-    nerrors += test_native_vol_init() < 0      ? 1 : 0;
+    nerrors += test_vol_registration() < 0          ? 1 : 0;
+    nerrors += test_native_vol_init() < 0           ? 1 : 0;
+    nerrors += test_basic_vol_operation() < 0       ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n",

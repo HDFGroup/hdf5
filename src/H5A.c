@@ -59,6 +59,9 @@ typedef struct H5A_iter_cb1 {
 /* Local Prototypes */
 /********************/
 
+/* VOL close */
+static herr_t H5A__close_attr(void *attr);
+
 
 /*********************/
 /* Package Variables */
@@ -212,6 +215,38 @@ H5A_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* H5A_term_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5A__close_attr
+ *
+ * Purpose:     Called when the ref count reaches zero on the attribute's ID
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5A__close_attr(void *_attr)
+{
+    H5VL_object_t       *attr = (H5VL_object_t *)_attr;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(_attr);
+
+    /* Close the attribute through the VOL*/
+    if ((ret_value = H5VL_attr_close(attr->vol_obj, attr->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to close attribute");
+
+    /* Free the attribute */
+    if (H5VL_free_object(attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A__close_attr() */
 
 
 /*--------------------------------------------------------------------------
@@ -1685,12 +1720,12 @@ H5Aexists(hid_t obj_id, const char *attr_name)
     H5TRACE2("t", "i*s", obj_id, attr_name);
 
     /* check arguments */
-    if(H5I_ATTR == H5I_get_type(obj_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(obj_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!attr_name || !*attr_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if (H5I_ATTR == H5I_get_type(obj_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if (H5G_loc(obj_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if (!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
     /* Check if the attribute exists */
     if((ret_value = H5O_attr_exists(loc.oloc, attr_name, H5AC_ind_read_dxpl_id)) < 0)
@@ -1726,20 +1761,20 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!obj_name || !*obj_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
-    if(!attr_name || !*attr_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if (H5I_ATTR == H5I_get_type(loc_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if (H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if (!obj_name || !*obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if (!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    if((ret_value = H5A_exists_by_name(loc, obj_name, attr_name, lapl_id, dxpl_id)) < 0)
+    if ((ret_value = H5A_exists_by_name(loc, obj_name, attr_name, lapl_id, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:

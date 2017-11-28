@@ -110,6 +110,9 @@
 /* Local Prototypes */
 /********************/
 
+/* VOL close */
+static herr_t H5G__close_group(void *grp);
+
 
 /*********************/
 /* Package Variables */
@@ -254,6 +257,38 @@ H5G_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5G_term_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G__close_group
+ *
+ * Purpose:     Called when the ref count reaches zero on the group's ID
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G__close_group(void *_grp)
+{
+    H5VL_object_t       *grp = (H5VL_object_t *)_grp;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(_grp);
+
+    /* Close the group through the VOL*/
+    if ((ret_value = H5VL_group_close(grp->vol_obj, grp->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
+
+    /* Free the group */
+    if (H5VL_free_object(grp) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__close_group() */
 
 
 /*-------------------------------------------------------------------------

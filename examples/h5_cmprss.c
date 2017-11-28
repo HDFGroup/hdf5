@@ -36,7 +36,6 @@ int main () {
     hsize_t  dims[2];
     hsize_t  cdims[2];
  
-    int      idx;
     int      i,j, numfilt;
     int      buf[DIM0][DIM1];
     int      rbuf [DIM0][DIM1];

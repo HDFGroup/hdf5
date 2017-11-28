@@ -68,6 +68,10 @@ static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overw
         hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
 
+/* VOL close */
+static herr_t H5D__close_dataset(void *dset);
+
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -295,6 +299,43 @@ H5D_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5D_term_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__close_dataset
+ *
+ * Purpose:     Called when the ref count reaches zero on the dataset's ID
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__close_dataset(void *_dset)
+{
+    H5VL_object_t       *dset = (H5VL_object_t *)_dset;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(_dset);
+
+    /* Close the dataset through the VOL */
+    if ((ret_value = H5VL_dataset_close(dset->vol_obj, dset->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
+
+done:
+    /* XXX: (MSC) Weird thing for datasets and filters:
+     * Always decrement the ref count on the vol for datasets, since
+     * the ID is removed even if the close fails.
+     */
+
+    /* Free the dataset */
+    if (H5VL_free_object(dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__close_dataset() */
 
 
 /*--------------------------------------------------------------------------
