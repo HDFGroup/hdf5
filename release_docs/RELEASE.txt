@@ -157,6 +157,17 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - filter plugin handling in H5PL.c and H5Z.c
+
+      It was discovered that the dynamic loading process used by
+      filter plugins had issues with library dependencies.
+
+      CMake build process changed to use LINK INTERFACE keywords, which
+      allowed HDF5 C library to make dependent libraries private. The
+      filter plugin libraries no longer require dependent libraries
+      (such as szip or zlib) to be available.
+             (ADB - 2017/11/16, HDFFV-10328)
+
     - H5Zfilter_avail in H5Z.c
 
       The public function checked for plugins, while the private
@@ -168,8 +179,35 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
 
+    - An uninitialized struct could cause a memory access error when using
+      variable-length or reference types in a compressed, chunked dataset.
+
+      A struct containing a callback function pointer and a pointer to some
+      associated data was used before initialization. This could cause a
+      memory access error and system crash. This could only occur under
+      unusual conditions when using variable-lenth and reference types in
+      a compressed, chunked dataset.
+
+      On recent versions of Visual Studio, when built in debug mode, the
+      debug heap will complain and cause a crash if the code in question
+      is executed (this will cause the objcopy test to fail).
+
+      (DER - 2017/11/21, HDFFV-10330)
+
     Configuration
     -------------
+    - cmake
+
+      The hdf5 library used shared szip and zlib, which needlessly required
+      applications to link with the same szip and zlib libraries.
+
+      Changed the target_link_libraries commands to use the static libs.
+      Removed improper link duplication of szip and zlib.
+      Adjusted the link dependencies and the link interface values of
+      the target_link_libraries commands.
+
+      (ADB - 2017/11/14, HDFFV-10329)
+
     - cmake MPI
 
       CMake implementation for MPI was problematic and would create incorrect
@@ -197,7 +235,8 @@ Bug Fixes since HDF5-1.10.1 release
 
     Fortran
     --------
-    -
+    - Fixed compilation errors when using Intel 18 Fortran compilers
+      (MSB - 2017/11/3, HDFFV-10322)
 
     Tools
     -----
@@ -224,7 +263,7 @@ Bug Fixes since HDF5-1.10.1 release
       Added another parameter to the 'UD=' option to set the flag by default
       to '0' or H5Z_FLAG_MANDATORY, the other choice is '1' or H5Z_FLAG_OPTIONAL.
 
-      (ADB - 2017/08/31, HDFFV-10276)
+      (ADB - 2017/08/31, HDFFV-10269)
 
     - h5ls
 

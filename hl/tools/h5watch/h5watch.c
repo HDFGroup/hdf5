@@ -704,6 +704,7 @@ parse_command_line(int argc, const char *argv[])
         case 'h': /* --help */
             usage(h5tools_getprogname());
             leave(EXIT_SUCCESS);
+            break;
 
         case 'V': /* --version */
             print_version(progname);

@@ -436,7 +436,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
     void       *bkg = NULL;             /* Temporary buffer for copying data */
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     hid_t       buf_sid = -1;           /* ID for buffer dataspace */
-    H5D_shared_t    *shared_fo = cpy_info->shared_fo;   /* Pointer to the shared struct for dataset object */
+    H5D_shared_t    *shared_fo = (H5D_shared_t *)cpy_info->shared_fo;   /* Pointer to the shared struct for dataset object */
     H5O_storage_compact_t *storage_src = _storage_src;  /* Pointer to storage_src */
     herr_t      ret_value = SUCCEED;    /* Return value */
 

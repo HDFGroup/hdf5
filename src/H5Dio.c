@@ -1450,7 +1450,9 @@ H5D__ioinfo_init(H5D_t *dset,
     io_info->using_mpi_vfd = H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI);
 #endif /* H5_HAVE_PARALLEL */
 
-done:
+#ifdef H5_DEBUG_BUILD
+	done:
+#endif /* H5_DEBUG_BUILD */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_init() */
 

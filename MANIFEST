@@ -756,6 +756,7 @@
 ./src/H5Oflush.c
 ./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
+./src/H5Oint.c
 ./src/H5Olayout.c
 ./src/H5Olinfo.c
 ./src/H5Olink.c
@@ -813,6 +814,7 @@
 ./src/H5PLextern.h
 ./src/H5R.c
 ./src/H5Rdeprec.c
+./src/H5Rint.c
 ./src/H5Rmodule.h
 ./src/H5Rpkg.h
 ./src/H5Rprivate.h
@@ -939,10 +941,6 @@
 ./test/dt_arith.c
 ./test/dtypes.c
 ./test/dtransform.c
-./test/dynlib1.c
-./test/dynlib2.c
-./test/dynlib3.c
-./test/dynlib4.c
 ./test/earray.c
 ./test/efc.c
 ./test/enc_dec_plist.c
@@ -970,6 +968,11 @@
 ./test/fill_old.h5
 ./test/fillval.c
 ./test/filter_fail.c
+./test/filter_plugin.c
+./test/filter_plugin1_dsets.c
+./test/filter_plugin2_dsets.c
+./test/filter_plugin3_dsets.c
+./test/filter_plugin4_groups.c
 ./test/flush1.c
 ./test/flush2.c
 ./test/flushrefresh.c
@@ -1034,7 +1037,6 @@
 ./test/page_buffer.c
 ./test/paged_nopersist.h5
 ./test/paged_persist.h5
-./test/plugin.c
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
@@ -1069,12 +1071,12 @@
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
 ./test/test_filenotclosed.sh.in
+./test/test_filter_plugin.sh.in
 ./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
-./test/test_plugin.sh.in
 ./test/test_usecases.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh.in

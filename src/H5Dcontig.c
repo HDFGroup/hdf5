@@ -1566,7 +1566,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
     hsize_t     buf_dim[1] = {0};       /* Dimension for buffer */
     hbool_t     is_vlen = FALSE;        /* Flag to indicate that VL type conversion should occur */
     hbool_t     fix_ref = FALSE;        /* Flag to indicate that ref values should be fixed */
-    H5D_shared_t    *shared_fo = cpy_info->shared_fo;  /* Pointer to the shared struct for dataset object */
+    H5D_shared_t    *shared_fo = (H5D_shared_t *)cpy_info->shared_fo;  /* Pointer to the shared struct for dataset object */
     hbool_t     try_sieve = FALSE;      /* Try to get data from the sieve buffer */
     haddr_t     sieve_start = HADDR_UNDEF; /* Start location of sieve buffer */
     haddr_t     sieve_end = HADDR_UNDEF;    /* End locations of sieve buffer */
