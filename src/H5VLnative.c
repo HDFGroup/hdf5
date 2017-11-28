@@ -118,12 +118,10 @@ static herr_t H5VL_native_object_optional(void *obj, hid_t dxpl_id, void **req, 
 #endif
 
 /* Datatype callbacks */
-#if 0
 static void *H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_datatype_close(void *dt, hid_t dxpl_id, void **req);
-#endif
 
 /* Native VOL driver class struct */
 static H5VL_class_t H5VL_native_g = {
@@ -156,12 +154,12 @@ static H5VL_class_t H5VL_native_g = {
         H5VL_native_dataset_close                   /* close        */
     },
     {   /* datatype_cls */
-        NULL,                                       /* commit       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get_size     */
+        H5VL_native_datatype_commit,                /* commit       */
+        H5VL_native_datatype_open,                  /* open         */
+        H5VL_native_datatype_get,                   /* get          */
         NULL,                                       /* specific     */
         NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        H5VL_native_datatype_close                  /* close        */
     },
     {   /* file_cls */
         NULL,                                       /* create       */
@@ -3167,6 +3165,7 @@ H5VL_native_object_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_object_optional() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -3413,4 +3412,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_datatype_close() */
 
-#endif
