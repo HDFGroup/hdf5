@@ -17,6 +17,9 @@
 #ifndef _H5Tprivate_H
 #define _H5Tprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5T_t H5T_t;
+
 /* Get package's public header */
 #include "H5Tpublic.h"
 
@@ -45,7 +48,6 @@
 #endif /* H5T_MODULE */
 
 /* Forward references of package typedefs (declared in H5Tpkg.h) */
-typedef struct H5T_t H5T_t;
 typedef struct H5T_stats_t H5T_stats_t;
 typedef struct H5T_path_t H5T_path_t;
 
