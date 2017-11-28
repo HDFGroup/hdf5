@@ -2709,6 +2709,7 @@ main(int argc, const char *argv[])
                     case 'h': /* --help */
                         usage();
                         leave(EXIT_SUCCESS);
+                        break;
 
                     case 'a': /* --address */
                         address_g = TRUE;
@@ -2759,6 +2760,7 @@ main(int argc, const char *argv[])
                     case 'V': /* --version */
                         print_version(h5tools_getprogname());
                         leave(EXIT_SUCCESS);
+                        break;
 
                     case 'x': /* --hexdump */
                         hexdump_g = TRUE;

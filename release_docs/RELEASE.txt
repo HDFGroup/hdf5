@@ -316,6 +316,21 @@ Bug Fixes since HDF5-1.10.1 release
 
       (RAW - 2017/11/08, HDFFV-10301)
 
+    - An uninitialized struct could cause a memory access error when using
+      variable-length or reference types in a compressed, chunked dataset.
+
+      A struct containing a callback function pointer and a pointer to some
+      associated data was used before initialization. This could cause a
+      memory access error and system crash. This could only occur under
+      unusual conditions when using variable-lenth and reference types in
+      a compressed, chunked dataset.
+
+      On recent versions of Visual Studio, when built in debug mode, the
+      debug heap will complain and cause a crash if the code in question
+      is executed (this will cause the objcopy test to fail).
+
+      (DER - 2017/11/21, HDFFV-10330)
+
     Configuration
     -------------
     - cmake
