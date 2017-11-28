@@ -238,7 +238,7 @@ H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_
 
     /* setup VOL object */
     if (NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, H5I_INVALID_HID, "can't allocate top object structure")
+        HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, H5I_INVALID_HID, "can't allocate top object structure");
     new_obj->vol_info = vol_driver;
     vol_driver->nrefs ++;
     new_obj->vol_obj = object;
@@ -248,11 +248,11 @@ H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_driver, hbool_t app_
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "can't construct datatype object");
 
         if ((ret_value = H5I_register(type, dt, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle")
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle");
     }
     else {
         if ((ret_value = H5I_register(type, new_obj, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle")
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle");
     }
 
 done:
@@ -358,19 +358,19 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, hid_t driver_id, hbool_t ap
     FUNC_ENTER_NOAPI(FAIL)
 
     if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL driver ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL driver ID");
 
     /* setup VOL info struct */
     if (NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, H5I_INVALID_HID, "can't allocate VL info struct")
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, H5I_INVALID_HID, "can't allocate VL info struct");
     vol_info->vol_cls = vol_cls;
     vol_info->vol_id = driver_id;
     if (H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL driver")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL driver");
 
     /* Get an atom for the object */
     if ((ret_value = H5VL_register_id(obj_type, obj, vol_info, app_ref)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -399,7 +399,7 @@ H5VL_get_driver_name(hid_t id, char *name /*out*/, size_t size)
 
     /* get the object pointer */
     if (NULL == (obj = H5VL_get_object(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
     vol_cls = obj->vol_info->vol_cls;
 
@@ -444,16 +444,16 @@ H5VL_get_object(hid_t id)
        H5I_DATASET == obj_type || H5I_DATATYPE == obj_type) {
         /* get the object */
         if (NULL == (obj = H5I_object(id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier");
 
         /* if this is a datatype, get the VOL object attached to the H5T_t struct */
         if (H5I_DATATYPE == obj_type) {
             if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype");
         }
     }
     else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier type to function")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier type to function");
 
 
     ret_value = (H5VL_object_t *)obj;
@@ -489,7 +489,7 @@ H5VL_object(hid_t id)
         case H5I_ATTR:
             /* get the object */
             if (NULL == (obj = (H5VL_object_t *)H5I_object(id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier");
 
             ret_value = obj->vol_obj;
             break;
@@ -499,11 +499,11 @@ H5VL_object(hid_t id)
 
                 /* get the object */
                 if (NULL == (dt = (H5T_t *)H5I_object(id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier");
 
                 /* Get the actual datatype object that should be the vol_obj */
                 if (NULL == (obj = H5T_get_named_type(dt)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype");
 
                 ret_value = obj->vol_obj;
                 break;
@@ -521,7 +521,7 @@ H5VL_object(hid_t id)
         case H5I_ERROR_STACK:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unknown data object type")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unknown data object type");
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -555,7 +555,7 @@ H5VL_object_verify(hid_t id, H5I_type_t obj_type)
         case H5I_ATTR:
             /* get the object */
             if (NULL == (obj = (H5VL_object_t *)H5I_object_verify(id, obj_type)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier");
 
             ret_value = obj->vol_obj;
             break;
@@ -565,11 +565,11 @@ H5VL_object_verify(hid_t id, H5I_type_t obj_type)
 
                 /* get the object */
                 if (NULL == (dt = (H5T_t *)H5I_object_verify(id, obj_type)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier");
 
                 /* Get the actual datatype object that should be the vol_obj */
                 if (NULL == (obj = H5T_get_named_type(dt)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype");
 
                 ret_value = obj->vol_obj;
                 break;
@@ -623,12 +623,11 @@ H5VL_datatype_get(void *obj, const H5VL_class_t *vol_cls, H5VL_datatype_get_t ge
     FUNC_ENTER_NOAPI(FAIL)
 
     if (NULL == vol_cls->datatype_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype get' method")
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no 'datatype get' method");
     va_start (arguments, req);
 
-    if ((ret_value = (vol_cls->datatype_cls.get)(obj, get_type, dxpl_id, 
-                                                        req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    if ((ret_value = (vol_cls->datatype_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed");
     va_end (arguments);
 
 done:
@@ -656,11 +655,105 @@ H5VL_file_close(void *file, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **r
     HDassert(vol_cls);
 
     if (NULL == vol_cls->file_cls.close)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL driver has no `file close' method");
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL driver has no 'file close' method");
+
     if ((ret_value = (vol_cls->file_cls.close)(file, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_request_cancel
+ *
+ * Purpose:     Cancels an asynchronous request through the VOL
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_request_cancel(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(req);
+    HDassert(vol_cls);
+    HDassert(status);
+
+    if (NULL == vol_cls->async_cls.cancel)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol driver has no 'async cancel' method");
+
+    if ((ret_value = (vol_cls->async_cls.cancel)(req, status)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request cancel failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_request_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_request_test
+ *
+ * Purpose:     Tests an asynchronous request through the VOL
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_request_test(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(req);
+    HDassert(vol_cls);
+    HDassert(status);
+
+    if (NULL == vol_cls->async_cls.test)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol driver has no 'async test' method");
+
+    if ((ret_value = (vol_cls->async_cls.test)(req, status)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request test failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_request_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_request_wait
+ *
+ * Purpose:     Waits on an asychronous request through the VOL
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_request_wait(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(req);
+    HDassert(vol_cls);
+    HDassert(status);
+
+    if (NULL == vol_cls->async_cls.wait)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol driver has no 'async wait' method");
+
+    if ((ret_value = (vol_cls->async_cls.wait)(req, status)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request wait failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_request_wait() */
 

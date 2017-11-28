@@ -73,8 +73,13 @@ H5_DLL herr_t H5VL_datatype_get(void *dt, const H5VL_class_t *vol_cls, H5VL_data
 
 H5_DLL herr_t H5VL_file_close(void *file, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req);
 
-/* XXX: Try to put this in H5Fprivate.h */
+/* XXX: Try to put these in the appropriate package private files */
 H5_DLL herr_t H5F_close_file(void *file);
+
+/* Asynchronous functions */
+H5_DLL herr_t H5VL_request_cancel(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status);
+H5_DLL herr_t H5VL_request_test(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status);
+H5_DLL herr_t H5VL_request_wait(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status);
 
 /* XXX: These belong in a private native driver header, not here... */
 H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);

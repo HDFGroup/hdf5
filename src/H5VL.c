@@ -468,7 +468,12 @@ H5VLget_object(hid_t obj_id, void **obj)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i**x", obj_id, obj);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    /* Check args */
+    if (!obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object pointer")
+
+    if (NULL == (*obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain a valid object")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -489,12 +494,17 @@ done:
 herr_t
 H5VLrequest_cancel(void **req, hid_t driver_id, H5ES_status_t *status)
 {
-    herr_t ret_value = SUCCEED;
+    H5VL_class_t    *vol_cls = NULL;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "**xi*Es", req, driver_id, status);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if ((ret_value = H5VL_request_cancel(req, vol_cls, status)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to cancel request")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -515,12 +525,17 @@ done:
 herr_t
 H5VLrequest_test(void **req, hid_t driver_id, H5ES_status_t *status)
 {
-    herr_t ret_value = SUCCEED;
+    H5VL_class_t    *vol_cls = NULL;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "**xi*Es", req, driver_id, status);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if ((ret_value = H5VL_request_test(req, vol_cls, status)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to test request")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -541,12 +556,18 @@ done:
 herr_t
 H5VLrequest_wait(void **req, hid_t driver_id, H5ES_status_t *status)
 {
-    herr_t ret_value = SUCCEED;
+    H5VL_class_t    *vol_cls = NULL;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "**xi*Es", req, driver_id, status);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if ((ret_value = H5VL_request_wait(req, vol_cls, status)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to wait on request")
+
 
 done:
     FUNC_LEAVE_API(ret_value)

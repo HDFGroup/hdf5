@@ -53,7 +53,7 @@
 /* Group creation property names */
 #define H5VL_PROP_GRP_LCPL_ID               "group_lcpl_id"
 
-/* Default VOL plugin value */
+/* Default VOL driver value */
 #define H5VL_VOL_DEFAULT                    0
 
 
@@ -335,7 +335,7 @@ typedef enum H5VL_category_t {
     H5VL_EXTERNAL       /* External VOL driver (plugin) */
 } H5VL_category_t;
 
-/* enum value to identify the class of a VOL plugin (mostly for comparison purposes) */
+/* enum value to identify the class of a VOL driver (mostly for comparison purposes) */
 typedef enum H5VL_class_value_t {
     H5_VOL_NATIVE = 0,              /* This should be first */
     H5_VOL_MAX_LIB_VALUE = 128      /* This should be last */
@@ -405,7 +405,7 @@ H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
 H5_DLL hid_t H5VLregister_by_name(const char *driver_name);
 H5_DLL herr_t H5VLunregister(hid_t driver_id);
 H5_DLL htri_t H5VLis_registered(const char *name);
-H5_DLL ssize_t H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size);
+H5_DLL ssize_t H5VLget_driver_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL hid_t H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t driver_id);
 H5_DLL herr_t H5VLget_object(hid_t obj_id, void **obj);
 
