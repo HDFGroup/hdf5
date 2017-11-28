@@ -57,7 +57,6 @@ static hid_t H5VL_NATIVE_g = 0;
 static H5F_t *H5VL_native_get_file(void *obj, H5I_type_t type);
 
 /* Atrribute callbacks */
-#if 0
 static void *H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_native_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req);
@@ -65,7 +64,6 @@ static herr_t H5VL_native_attr_write(void *attr, hid_t dtype_id, const void *buf
 static herr_t H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_attr_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_attr_close(void *attr, hid_t dxpl_id, void **req);
-#endif
 
 /* Dataset callbacks */
 #if 0
@@ -142,14 +140,14 @@ static H5VL_class_t H5VL_native_g = {
     NULL,                                           /* fapl copy    */
     NULL,                                           /* fapl free    */
     {   /* attribute_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* read         */
-        NULL,                                       /* write        */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
+        H5VL_native_attr_create,                    /* create       */
+        H5VL_native_attr_open,                      /* open         */
+        H5VL_native_attr_read,                      /* read         */
+        H5VL_native_attr_write,                     /* write        */
+        H5VL_native_attr_get,                       /* get          */
+        H5VL_native_attr_specific,                  /* specific     */
         NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        H5VL_native_attr_close                      /* close        */
     },
     {   /* dataset_cls */
         NULL,                                       /* create       */
@@ -487,7 +485,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_unregister() */
 
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_attr_create
@@ -1012,6 +1009,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_attr_close() */
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_dataset_create

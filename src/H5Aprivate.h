@@ -84,6 +84,9 @@ H5_DLL herr_t H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc,
 H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, hid_t dxpl_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t skip, hsize_t *last_attr,
     const H5A_attr_iter_op_t *op, void *op_data);
+H5_DLL herr_t H5A_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
+                          H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data, hid_t dxpl_id);
+H5_DLL herr_t H5A_delete(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t dxpl_id);
 
 #endif /* _H5Aprivate_H */
 
