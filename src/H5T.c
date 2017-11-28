@@ -298,6 +298,9 @@ static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
 static htri_t H5T_compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T_set_size(H5T_t *dt, size_t size);
 
+/* VOL close */
+static herr_t H5T__close_datatype(void *dt);
+
 
 /*****************************/
 /* Library Private Variables */
@@ -1567,6 +1570,45 @@ H5T_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5T_term_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_close_datatype
+ *
+ * Purpose:     Called when the ref count reaches zero on the datatype's ID
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T__close_datatype(void *type)
+{
+    H5T_t   *dt = (H5T_t *)type;
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(type);
+
+    if (NULL != dt->vol_obj) {
+        H5VL_object_t *vol_dt = dt->vol_obj;
+
+        /* Close the datatype through the VOL*/
+        if ((ret_value = H5VL_datatype_close(vol_dt->vol_obj, vol_dt->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype");
+
+        /* Free the datatype */
+        if (H5VL_free_object(vol_dt) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object");
+    }
+
+    if ((ret_value = H5T_close(dt)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T__close_datatype() */
 
 
 /*-------------------------------------------------------------------------

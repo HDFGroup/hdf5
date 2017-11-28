@@ -23,7 +23,9 @@
 /* Library Private Macros */
 /**************************/
 
-#define H5_REQUEST_NULL         NULL
+/* XXX: Unused. Rename to H5VL instead of H5, move to H5private.h, or get rid of it.
+ *      Also, why not just use H5I_INVALID_HID?
+ */
 #define H5_EVENT_STACK_NULL     ((hid_t)-1)
 
 /****************************/
@@ -128,14 +130,6 @@ H5_DLL herr_t H5VL_datatype_get(void *dt, const H5VL_class_t *vol_cls, H5VL_data
 H5_DLL herr_t H5VL_datatype_specific(void *obj, const H5VL_class_t *vol_cls, H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req, ...);
 H5_DLL herr_t H5VL_datatype_optional(void *obj, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req, ...);
 H5_DLL herr_t H5VL_datatype_close(void *dt, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req);
-
-/* Close functions */
-/* XXX: Try to put these in the appropriate package private files */
-H5_DLL herr_t H5A_close_attr(void *attr);
-H5_DLL herr_t H5D_close_dataset(void *dset);
-H5_DLL herr_t H5F_close_file(void *file);
-H5_DLL herr_t H5G_close_group(void *grp);
-H5_DLL herr_t H5T_close_datatype(void *dt);
 
 /* Asynchronous functions */
 H5_DLL herr_t H5VL_request_cancel(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status);

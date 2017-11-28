@@ -605,34 +605,68 @@ H5VL_driver_object(H5VL_object_t *obj)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_datatype_get
+ * Function:    H5VL_attr_close
  *
- * Purpose:     Get specific information about the datatype through the VOL
+ * Purpose:     Closes an attribute through the VOL
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_datatype_get(void *obj, const H5VL_class_t *vol_cls, H5VL_datatype_get_t get_type, 
-                  hid_t dxpl_id, void **req, ...)
+H5VL_attr_close(void *attr, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
 {
-    va_list     arguments;             /* argument list passed from the API call */
-    herr_t      ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
+
+    HDassert(attr);
+    HDassert(vol_cls);
 
     FUNC_ENTER_NOAPI(FAIL)
+            
+    /* Check if the corresponding VOL callback exists */
+    if (NULL == vol_cls->attr_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL driver has no 'attr close' method");
 
-    if (NULL == vol_cls->datatype_cls.get)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no 'datatype get' method");
-    va_start (arguments, req);
-
-    if ((ret_value = (vol_cls->datatype_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed");
-    va_end (arguments);
+    /* Call the corresponding VOL callback */
+    if ((ret_value = (vol_cls->attr_cls.close)(attr, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_datatype_get() */
+} /* end H5VL_attr_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_dataset_close
+ *
+ * Purpose:     Closes a dataset through the VOL
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_dataset_close(void *dset, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(dset);
+    HDassert(vol_cls);
+
+    /* Check if the corresponding VOL callback exists */
+    if (NULL == vol_cls->dataset_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL driver has no 'dset close' method");
+
+    /* Call the corresponding VOL callback */
+    if ((ret_value = (vol_cls->dataset_cls.close)(dset, dxpl_id, req)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed");
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_dataset_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -654,15 +688,111 @@ H5VL_file_close(void *file, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **r
     HDassert(file);
     HDassert(vol_cls);
 
+    /* Check if the corresponding VOL callback exists */
     if (NULL == vol_cls->file_cls.close)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL driver has no 'file close' method");
 
+    /* Call the corresponding VOL callback */
     if ((ret_value = (vol_cls->file_cls.close)(file, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_group_close
+ *
+ * Purpose:     Closes a group through the VOL
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_group_close(void *grp, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;
+
+    HDassert(grp);
+    HDassert(vol_cls);
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check if the corresponding VOL callback exists */
+    if (NULL == vol_cls->group_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL driver has no 'group close' method");
+
+    /* Call the corresponding VOL callback */
+    if ((ret_value = (vol_cls->group_cls.close)(grp, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_group_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_datatype_get
+ *
+ * Purpose:     Get specific information about the datatype through the VOL
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_datatype_get(void *obj, const H5VL_class_t *vol_cls, H5VL_datatype_get_t get_type, 
+                  hid_t dxpl_id, void **req, ...)
+{
+    va_list     arguments;             /* argument list passed from the API call */
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check if the corresponding VOL callback exists */
+    if (NULL == vol_cls->datatype_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL driver has no 'datatype get' method");
+    va_start (arguments, req);
+
+    /* Call the corresponding VOL callback */
+    if ((ret_value = (vol_cls->datatype_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed");
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_datatype_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_datatype_close
+ *
+ * Purpose:     Closes a datatype through the VOL
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_datatype_close(void *dt, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
+{
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check if the corresponding VOL callback exists */
+    if (NULL == vol_cls->datatype_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL driver has no 'datatype close' method");
+
+    /* Call the corresponding VOL callback */
+    if ((ret_value = (vol_cls->datatype_cls.close)(dt, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_datatype_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -685,9 +815,11 @@ H5VL_request_cancel(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *stat
     HDassert(vol_cls);
     HDassert(status);
 
+    /* Check if the corresponding VOL callback exists */
     if (NULL == vol_cls->async_cls.cancel)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol driver has no 'async cancel' method");
 
+    /* Call the corresponding VOL callback */
     if ((ret_value = (vol_cls->async_cls.cancel)(req, status)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request cancel failed");
 
@@ -716,9 +848,11 @@ H5VL_request_test(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status
     HDassert(vol_cls);
     HDassert(status);
 
+    /* Check if the corresponding VOL callback exists */
     if (NULL == vol_cls->async_cls.test)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol driver has no 'async test' method");
 
+    /* Call the corresponding VOL callback */
     if ((ret_value = (vol_cls->async_cls.test)(req, status)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request test failed");
 
@@ -747,9 +881,11 @@ H5VL_request_wait(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status
     HDassert(vol_cls);
     HDassert(status);
 
+    /* Check if the corresponding VOL callback exists */
     if (NULL == vol_cls->async_cls.wait)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol driver has no 'async wait' method");
 
+    /* Call the corresponding VOL callback */
     if ((ret_value = (vol_cls->async_cls.wait)(req, status)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request wait failed");
 

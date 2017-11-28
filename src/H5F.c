@@ -56,6 +56,9 @@
 /* Local Prototypes */
 /********************/
 
+/* VOL close */
+static herr_t H5F__close_file(void *file);
+
 
 /*********************/
 /* Package Variables */
@@ -153,6 +156,37 @@ H5F_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5F_term_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__close_file
+ *
+ * Purpose:     Called when the ref count reaches zero on the file's ID
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__close_file(void *_file)
+{
+    H5VL_object_t   *file = (H5VL_object_t *)_file;
+    herr_t          ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(_file);
+
+    /* Close the file through the VOL */
+    if ((ret_value = H5VL_file_close(file->vol_obj, file->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
+
+    /* Free the file object */
+    if (H5VL_free_object(file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object");
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__close_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -724,37 +758,6 @@ H5Fclose(hid_t file_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclose() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_close_file
- *
- * Purpose:     Called when the ref count reaches zero on the file ID
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_close_file(void *_file)
-{
-    H5VL_object_t *file = (H5VL_object_t *)_file;
-    herr_t ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Close the file through the VOL*/
-    if((ret_value = H5VL_file_close(file->vol_obj, file->vol_info->vol_cls,
-                                    H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
-
-    /* free file */
-    if(H5VL_free_object(file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_close_file() */
 
 
 /*-------------------------------------------------------------------------
