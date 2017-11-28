@@ -87,12 +87,10 @@ static herr_t H5VL_native_file_close(void *file, hid_t dxpl_id, void **req);
 #endif
 
 /* Group callbacks */
-#if 0
 static void *H5VL_native_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_native_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_group_close(void *grp, hid_t dxpl_id, void **req);
-#endif
 
 /* Link callbacks */
 #if 0
@@ -174,12 +172,12 @@ static H5VL_class_t H5VL_native_g = {
         NULL                                        /* close        */
     },
     {   /* group_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get          */
+        H5VL_native_group_create,                   /* create       */
+        H5VL_native_group_open,                     /* open         */
+        H5VL_native_group_get,                      /* get          */
         NULL,                                       /* specific     */
         NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        H5VL_native_group_close                     /* close        */
     },
     {   /* link_cls */
         NULL,                                       /* create       */
@@ -2018,6 +2016,7 @@ H5VL_native_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_file_close() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -2273,6 +2272,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_group_close() */
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_link_create
