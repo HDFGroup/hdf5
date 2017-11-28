@@ -271,8 +271,6 @@ H5MM_malloc(size_t size)
 {
     void *ret_value = NULL;
 
-    HDassert(size);
-
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -360,8 +358,6 @@ H5MM_calloc(size_t size)
 {
     void *ret_value = NULL;
 
-    HDassert(size);
-
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -410,8 +406,6 @@ H5MM_realloc(void *mem, size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(mem || size);
-
     if(NULL == mem && 0 == size)
         /* Not defined in the standard, return NULL */
         ret_value = NULL;
@@ -457,7 +451,7 @@ H5MM_realloc(void *mem, size_t size)
  *              NULL is an acceptable value for the input string.
  *
  * Return:      Success:    Pointer to a new string (NULL if s is NULL).
- *              Failure:    abort()
+ *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
  *              Jul 10 1997

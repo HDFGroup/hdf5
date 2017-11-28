@@ -454,6 +454,7 @@ set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5Oflush.c
     ${HDF5_SRC_DIR}/H5Ofsinfo.c
     ${HDF5_SRC_DIR}/H5Oginfo.c
+    ${HDF5_SRC_DIR}/H5Oint.c
     ${HDF5_SRC_DIR}/H5Olayout.c
     ${HDF5_SRC_DIR}/H5Olinfo.c
     ${HDF5_SRC_DIR}/H5Olink.c
@@ -532,6 +533,7 @@ IDE_GENERATED_PROPERTIES ("H5PL" "${H5PL_HDRS}" "${H5PL_SOURCES}" )
 set (H5R_SOURCES
     ${HDF5_SRC_DIR}/H5R.c
     ${HDF5_SRC_DIR}/H5Rdeprec.c
+    ${HDF5_SRC_DIR}/H5Rint.c
 )
 set (H5R_HDRS
     ${HDF5_SRC_DIR}/H5Rpkg.h
@@ -881,7 +883,7 @@ set (gen_SRCS ${HDF5_BINARY_DIR}/H5Tinit.c ${HDF5_BINARY_DIR}/H5lib_settings.c)
 
 add_library (${HDF5_LIB_TARGET} STATIC ${common_SRCS} ${gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
 TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} STATIC " " " ")
-target_link_libraries (${HDF5_LIB_TARGET} PUBLIC ${LINK_LIBS})
+target_link_libraries (${HDF5_LIB_TARGET} PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS})
 if (NOT WIN32)
   target_link_libraries (${HDF5_LIB_TARGET} PUBLIC dl)
 endif ()
@@ -925,7 +927,7 @@ if (BUILD_SHARED_LIBS)
   set (shared_gen_SRCS ${HDF5_BINARY_DIR}/shared/H5Tinit.c ${HDF5_BINARY_DIR}/shared/H5lib_settings.c)
   add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
   TARGET_C_PROPERTIES (${HDF5_LIBSH_TARGET} SHARED " " " ")
-  target_link_libraries (${HDF5_LIBSH_TARGET} PUBLIC ${LINK_SHARED_LIBS})
+  target_link_libraries (${HDF5_LIBSH_TARGET} PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS})
   if (NOT WIN32)
     target_link_libraries (${HDF5_LIBSH_TARGET} PUBLIC dl)
   endif ()
