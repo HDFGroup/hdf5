@@ -409,11 +409,6 @@ H5_DLL ssize_t H5VLget_driver_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL hid_t H5VLobject_register(void *obj, H5I_type_t obj_type, hid_t driver_id);
 H5_DLL herr_t H5VLget_object(hid_t obj_id, void **obj);
 
-/* Asynchronous Requests */
-H5_DLL herr_t H5VLrequest_cancel(void **req, hid_t driver_id, H5ES_status_t *status);
-H5_DLL herr_t H5VLrequest_test(void **req, hid_t driver_id, H5ES_status_t *status);
-H5_DLL herr_t H5VLrequest_wait(void **req, hid_t driver_id, H5ES_status_t *status);
-
 /* Attributes */
 H5_DLL void *H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
 H5_DLL void *H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name, hid_t aapl_id, hid_t dxpl_id, void **req);
@@ -478,6 +473,11 @@ H5_DLL herr_t H5VLdatatype_get(void *dt, hid_t driver_id, H5VL_datatype_get_t ge
 H5_DLL herr_t H5VLdatatype_specific(void *obj, hid_t driver_id, H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLdatatype_optional(void *obj, hid_t driver_id, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLdatatype_close(void *dt, hid_t driver_id, hid_t dxpl_id, void **req);
+
+/* Asynchronous Requests */
+H5_DLL herr_t H5VLrequest_cancel(void **req, hid_t driver_id, H5ES_status_t *status);
+H5_DLL herr_t H5VLrequest_test(void **req, hid_t driver_id, H5ES_status_t *status);
+H5_DLL herr_t H5VLrequest_wait(void **req, hid_t driver_id, H5ES_status_t *status);
 
 #ifdef __cplusplus
 }

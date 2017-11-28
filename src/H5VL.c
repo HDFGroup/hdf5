@@ -60,6 +60,7 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
+static int H5VL__get_driver_cb(void *obj, hid_t id, void *_op_data);
 
 /*********************/
 /* Package Variables */
@@ -102,6 +103,102 @@ H5VL__get_driver_cb(void *obj, hid_t id, void *_op_data)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__get_driver_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLinitialize
+ *
+ * Purpose:     Calls the driver-specific callback to initialize the driver.
+ *
+ * Return:      Success:    Non-negative
+ *
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLinitialize(hid_t driver_id, hid_t vipl_id)
+{
+    H5VL_class_t *cls = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", driver_id, vipl_id);
+
+    /* Check args */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if (cls->initialize && cls->initialize(vipl_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL driver did not initialize")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLinitialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLterminate
+ *
+ * Purpose:     Calls the driver-specific callback to terminate the driver.
+ *
+ * Return:      Success:    Non-negative
+ *
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLterminate(hid_t driver_id, hid_t vtpl_id)
+{
+    H5VL_class_t *cls = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", driver_id, vtpl_id);
+
+    /* Check args */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if (cls->terminate && cls->terminate(vtpl_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL driver did not terminate cleanly")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLterminate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLclose
+ *
+ * Purpose:     Closes the specified VOL driver.  The VOL ID will no longer
+ *              be valid for accessing the VOL.
+ *
+ * Return:      Success:    Non-negative
+ *
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLclose(hid_t vol_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", vol_id);
+
+    /* Check args */
+    if(NULL == H5I_object_verify(vol_id, H5I_VOL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if(H5I_dec_app_ref(vol_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close VOL driver ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLclose() */
 
 
 /*-------------------------------------------------------------------------
@@ -256,70 +353,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLinitialize
- *
- * Purpose:     Calls the driver-specific callback to initialize the driver.
- *
- * Return:      Success:    Non-negative
- *
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLinitialize(hid_t driver_id, hid_t vipl_id)
-{
-    H5VL_class_t *cls = NULL;
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", driver_id, vipl_id);
-
-    /* Check args */
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
-
-    if (cls->initialize && cls->initialize(vipl_id) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL driver did not initialize")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLinitialize() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLterminate
- *
- * Purpose:     Calls the driver-specific callback to terminate the driver.
- *
- * Return:      Success:    Non-negative
- *
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLterminate(hid_t driver_id, hid_t vtpl_id)
-{
-    H5VL_class_t *cls = NULL;
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", driver_id, vtpl_id);
-
-    /* Check args */
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
-
-    if (cls->terminate && cls->terminate(vtpl_id) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL driver did not terminate cleanly")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLterminate() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5VLis_registered
  *
  * Purpose:     Tests whether a VOL class has been registered or not
@@ -382,38 +415,6 @@ H5VLget_driver_name(hid_t obj_id, char *name/*out*/, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLget_driver_name() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLclose
- *
- * Purpose:     Closes the specified VOL driver.  The VOL ID will no longer
- *              be valid for accessing the VOL.
- *
- * Return:      Success:    Non-negative
- *
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLclose(hid_t vol_id)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", vol_id);
-
-    /* Check args */
-    if(NULL == H5I_object_verify(vol_id, H5I_VOL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
-
-    if(H5I_dec_app_ref(vol_id) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close VOL driver ID")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLclose() */
 
 
 /*---------------------------------------------------------------------------
@@ -481,100 +482,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLrequest_cancel
- *
- * Purpose:     Cancels a request
- *
- * Return:      Success:    Non-negative
- *
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLrequest_cancel(void **req, hid_t driver_id, H5ES_status_t *status)
-{
-    H5VL_class_t    *vol_cls = NULL;
-    herr_t          ret_value = SUCCEED;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "**xi*Es", req, driver_id, status);
-
-    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
-
-    if ((ret_value = H5VL_request_cancel(req, vol_cls, status)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to cancel request")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLrequest_cancel() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLrequest_test
- *
- * Purpose:     Tests a request
- *
- * Return:      Success:    Non-negative
- *
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLrequest_test(void **req, hid_t driver_id, H5ES_status_t *status)
-{
-    H5VL_class_t    *vol_cls = NULL;
-    herr_t          ret_value = SUCCEED;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "**xi*Es", req, driver_id, status);
-
-    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
-
-    if ((ret_value = H5VL_request_test(req, vol_cls, status)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to test request")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLrequest_test() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLrequest_wait
- *
- * Purpose:     Waits on a request
- *
- * Return:      Success:    Non-negative
- *
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VLrequest_wait(void **req, hid_t driver_id, H5ES_status_t *status)
-{
-    H5VL_class_t    *vol_cls = NULL;
-    herr_t          ret_value = SUCCEED;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "**xi*Es", req, driver_id, status);
-
-    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
-
-    if ((ret_value = H5VL_request_wait(req, vol_cls, status)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to wait on request")
-
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLrequest_wait() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5VLattr_create
  *
  * Purpose:     Creates an attribute
@@ -589,13 +496,21 @@ void *
 H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, driver_id, name, acpl_id,
              aapl_id, dxpl_id, req);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
+    if (NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL driver ID")
+
+    if(NULL == (ret_value = H5VL_attr_create(obj, loc_params, vol_cls, name, 
+                                             acpl_id, aapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -617,13 +532,21 @@ void *
 H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id, const char *name,
               hid_t aapl_id, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, driver_id, name, aapl_id,
              dxpl_id, req);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "Unimplemented VOL function")
+    if (NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL driver ID")
+
+    if(NULL == (ret_value = H5VL_attr_open(obj, loc_params, vol_cls, name, aapl_id, 
+                                           dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -643,11 +566,18 @@ done:
  */
 herr_t H5VLattr_read(void *attr, hid_t driver_id, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == attr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if((ret_value = H5VL_attr_read(attr, vol_cls, mem_type_id, buf, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to read attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -667,11 +597,18 @@ done:
  */
 herr_t H5VLattr_write(void *attr, hid_t driver_id, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == attr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if((ret_value = H5VL_attr_write(attr, vol_cls, mem_type_id, buf, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to write attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -693,12 +630,22 @@ herr_t
 H5VLattr_get(void *obj, hid_t driver_id, H5VL_attr_get_t get_type,
              hid_t dxpl_id, void **req, va_list arguments)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "*xiVai**xx", obj, driver_id, get_type, dxpl_id, req, arguments);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    /* Bypass the H5VLint layer */
+    if(NULL == vol_cls->attr_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol driver has no `attr get' method")
+    if((ret_value = (vol_cls->attr_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Unable to get attribute information")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -720,13 +667,24 @@ herr_t
 H5VLattr_specific(void *obj, H5VL_loc_params_t loc_params, hid_t driver_id,
                   H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "*xxiVbi**xx", obj, loc_params, driver_id, specific_type,
              dxpl_id, req, arguments);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    /* Bypass the H5VLint layer */
+    if(NULL == vol_cls->attr_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol driver has no `attr specific' method")
+    if((ret_value = (vol_cls->attr_cls.specific)
+        (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -747,12 +705,22 @@ done:
 herr_t
 H5VLattr_optional(void *obj, hid_t driver_id, hid_t dxpl_id, void **req, va_list arguments)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*xii**xx", obj, driver_id, dxpl_id, req, arguments);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    /* Have to bypass the H5VLint layer due to unknown val_list arguments */
+    if(NULL == vol_cls->attr_cls.optional)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol driver has no `attr optional' method")
+    if((ret_value = (vol_cls->attr_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -773,12 +741,19 @@ done:
 herr_t
 H5VLattr_close(void *attr, hid_t driver_id, hid_t dxpl_id, void **req)
 {
+    H5VL_class_t *vol_cls = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "*xii**x", attr, driver_id, dxpl_id, req);
 
-    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "Unimplemented VOL function")
+    if (NULL == attr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if((ret_value = H5VL_attr_close(attr, vol_cls, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1792,4 +1767,99 @@ H5VLdatatype_close(void *dt, hid_t driver_id, hid_t dxpl_id, void **req)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLdatatype_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_cancel
+ *
+ * Purpose:     Cancels a request
+ *
+ * Return:      Success:    Non-negative
+ *
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_cancel(void **req, hid_t driver_id, H5ES_status_t *status)
+{
+    H5VL_class_t    *vol_cls = NULL;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "**xi*Es", req, driver_id, status);
+
+    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if ((ret_value = H5VL_request_cancel(req, vol_cls, status)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to cancel request")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLrequest_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_test
+ *
+ * Purpose:     Tests a request
+ *
+ * Return:      Success:    Non-negative
+ *
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_test(void **req, hid_t driver_id, H5ES_status_t *status)
+{
+    H5VL_class_t    *vol_cls = NULL;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "**xi*Es", req, driver_id, status);
+
+    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if ((ret_value = H5VL_request_test(req, vol_cls, status)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to test request")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLrequest_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_wait
+ *
+ * Purpose:     Waits on a request
+ *
+ * Return:      Success:    Non-negative
+ *
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_wait(void **req, hid_t driver_id, H5ES_status_t *status)
+{
+    H5VL_class_t    *vol_cls = NULL;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "**xi*Es", req, driver_id, status);
+
+    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL driver ID")
+
+    if ((ret_value = H5VL_request_wait(req, vol_cls, status)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to wait on request")
+
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLrequest_wait() */
+
 
