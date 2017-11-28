@@ -108,6 +108,7 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
 
   set_target_properties (${libtarget}
       PROPERTIES
+      OUTPUT_NAME                ${LIB_RELEASE_NAME}
       OUTPUT_NAME_DEBUG          ${LIB_DEBUG_NAME}
       OUTPUT_NAME_RELEASE        ${LIB_RELEASE_NAME}
       OUTPUT_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
