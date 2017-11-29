@@ -84,9 +84,9 @@ MODULE H5GLOBAL
 
   ! These arrays need to be global because they are used in 
   ! both h5open_f and in h5close_f
-  INTEGER(HID_T), DIMENSION(1:PREDEF_TYPES_LEN)   :: predef_types
-  INTEGER(HID_T), DIMENSION(1:FLOATING_TYPES_LEN) :: floating_types
-  INTEGER(HID_T), DIMENSION(1:INTEGER_TYPES_LEN)  :: integer_types
+  INTEGER(HID_T), DIMENSION(1:PREDEF_TYPES_LEN)   :: predef_types = -1
+  INTEGER(HID_T), DIMENSION(1:FLOATING_TYPES_LEN) :: floating_types = -1
+  INTEGER(HID_T), DIMENSION(1:INTEGER_TYPES_LEN)  :: integer_types = -1
   !
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_FLOAT
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_DOUBLE
