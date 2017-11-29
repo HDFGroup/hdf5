@@ -83,7 +83,8 @@ MODULE H5GLOBAL
   INTEGER, PARAMETER :: INTEGER_TYPES_LEN = 27
 
   ! These arrays need to be global because they are used in 
-  ! both h5open_f and in h5close_f
+  ! both h5open_f and in h5close_f; initialize to fix linking issues
+  ! on OSX and Intel compilers.
   INTEGER(HID_T), DIMENSION(1:PREDEF_TYPES_LEN)   :: predef_types = -1
   INTEGER(HID_T), DIMENSION(1:FLOATING_TYPES_LEN) :: floating_types = -1
   INTEGER(HID_T), DIMENSION(1:INTEGER_TYPES_LEN)  :: integer_types = -1
@@ -436,7 +437,6 @@ MODULE H5GLOBAL
   !
   INTEGER :: H5_SZIP_EC_OM_F
   INTEGER :: H5_SZIP_NN_OM_F
-
 
 CONTAINS
 
