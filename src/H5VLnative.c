@@ -18,14 +18,14 @@
  *              using HDF5 VFDs. 
  */
 
-#define H5A_FRIEND		/*suppress error about including H5Apkg	  */
-#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
-#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
-#define H5G_FRIEND		/*suppress error about including H5Gpkg   */
-#define H5L_FRIEND		/*suppress error about including H5Lpkg   */
-#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
-#define H5R_FRIEND		/*suppress error about including H5Rpkg	  */
-#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
+#define H5A_FRIEND              /* Suppress error about including H5Apkg    */
+#define H5D_FRIEND              /* Suppress error about including H5Dpkg    */
+#define H5F_FRIEND              /* Suppress error about including H5Fpkg    */
+#define H5G_FRIEND              /* Suppress error about including H5Gpkg    */
+#define H5L_FRIEND              /* Suppress error about including H5Lpkg    */
+#define H5O_FRIEND              /* Suppress error about including H5Opkg    */
+#define H5R_FRIEND              /* Suppress error about including H5Rpkg    */
+#define H5T_FRIEND              /* Suppress error about including H5Tpkg    */
 
 
 #include "H5private.h"          /* Generic Functions                        */
