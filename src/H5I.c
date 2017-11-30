@@ -28,25 +28,25 @@
 #include "H5Imodule.h"          /* This source code file is part of the H5I module */
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Ipkg.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5SLprivate.h"	/* Skip Lists                           */
-#include "H5VLprivate.h"	/* Virtual Object Layer                 */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Eprivate.h"		    /* Error handling                           */
+#include "H5FLprivate.h"	    /* Free Lists                               */
+#include "H5Ipkg.h"             /* IDs                                      */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Oprivate.h"         /* Object headers                           */
+#include "H5SLprivate.h"        /* Skip Lists                               */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Define this to compile in support for dumping ID information */
 /* #define H5I_DEBUG_OUTPUT */
 #ifndef H5I_DEBUG_OUTPUT
-#include "H5Gprivate.h"		/* Groups				*/
+#include "H5Gprivate.h"         /* Groups                                   */
 #else /* H5I_DEBUG_OUTPUT */
-#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
-#include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Tprivate.h"		/* Datatypes				*/
+#define H5G_FRIEND              /*suppress error about including H5Gpkg     */
+#include "H5Gpkg.h"             /* Groups                                   */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Tprivate.h"         /* Datatypes                                */
 #endif /* H5I_DEBUG_OUTPUT */
 
 /* Local Macros */
@@ -80,11 +80,24 @@ typedef struct {
     void *ret_obj;              /* Object to return */
 } H5I_search_ud_t;
 
+typedef struct {
+    H5I_iterate_func_t op;      /* Application's callback routine */
+    void *op_data;              /* Application's user data */
+} H5I_iterate_pub_ud_t;
+
+/* User data for iterator callback for retrieveing an ID correponding to an object pointer */
+typedef struct {
+    const void *object;      /* object pointer to search for */
+    H5I_type_t obj_type;     /* type of object we are searching for */
+    hid_t ret_id;            /* ID returned */
+} H5I_get_id_ud_t;
+
 /* User data for iterator callback for ID iteration */
 typedef struct {
     H5I_search_func_t user_func;        /* 'User' function to invoke */
     void *user_udata;                   /* User data to pass to 'user' function */
     hbool_t app_ref;                    /* Whether this is an appl. ref. call */
+    H5I_type_t obj_type;                /* type of object we are iterating over */
 } H5I_iterate_ud_t;
 
 /* User data for H5I__clear_type_cb */
@@ -119,6 +132,8 @@ H5FL_DEFINE_STATIC(H5I_id_type_t);
 /* Declare a free list to manage the H5I_class_t struct */
 H5FL_DEFINE_STATIC(H5I_class_t);
 
+H5FL_EXTERN(H5VL_object_t);
+
 /*--------------------- Local function prototypes ---------------------------*/
 static htri_t H5I__clear_type_cb(void *_id, void *key, void *udata);
 static int H5I__destroy_type(H5I_type_t type);
@@ -127,6 +142,7 @@ static void *H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id);
 static int H5I__inc_type_ref(H5I_type_t type);
 static int H5I__get_type_ref(H5I_type_t type);
 static H5I_id_info_t *H5I__find_id(hid_t id);
+static int H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I__debug(H5I_type_t type);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -1530,16 +1546,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Iinc_type_ref
+ * Function:    H5Iinc_type_ref
  *
- * Purpose:	Increments the number of references outstanding for an ID type.
+ * Purpose:     Increments the number of references outstanding for an ID type.
  *
- * Return:	Success:	New reference count
- *		Failure:	Negative
- *
- * Programmer:  Nat Furrer
- *		James Laird
- *              April 30, 2004
+ * Return:      Success:    New reference count
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1552,14 +1564,14 @@ H5Iinc_type_ref(H5I_type_t type)
     H5TRACE1("Is", "It", type);
 
     /* Check arguments */
-    if(type <= 0 || type >= H5I_next_type)
+    if (type <= 0 || type >= H5I_next_type)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID type")
 
-    if(H5I_IS_LIB_TYPE(type))
+    if (H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type")
 
     /* Do actual increment operation */
-    if((ret_value = H5I__inc_type_ref(type)) < 0)
+    if ((ret_value = H5I__inc_type_ref(type)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID type ref count")
 
 done:
@@ -1568,16 +1580,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I__inc_type_ref
+ * Function:    H5I__inc_type_ref
  *
- * Purpose:	Increment the reference count for an ID type.
+ * Purpose:     Increment the reference count for an ID type.
  *
- * Return:	Success:	The new reference count.
- *		Failure:	Negative
- *
- * Programmer:	James Laird
- *		Nat Furrer
- *              Friday, April 30, 2004
+ * Return:      Success:    The new reference count
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1606,24 +1614,26 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Idec_type_ref
+ * Function:    H5Idec_type_ref
  *
- * Purpose:	Decrements the reference count on an entire type of IDs.
- *		If the type reference count becomes zero then the type is
- *		destroyed along with all atoms in that type regardless of
- *		their reference counts.	 Destroying IDs involves calling
- *		the free-func for each ID's object and then adding the ID
- *		struct to the ID free list.  Public interface to
- *		H5I_dec_type_ref.
- *		Returns the number of references to the type on success; a
- *		return value of 0 means that the type will have to be
- *		re-initialized before it can be used again (and should probably
- *		be set to H5I_UNINIT).
+ * Purpose:     Decrements the reference count on an entire type of IDs.
+ *              If the type reference count becomes zero then the type is
+ *              destroyed along with all atoms in that type regardless of
+ *              their reference counts.	 Destroying IDs involves calling
+ *              the free-func for each ID's object and then adding the ID
+ *              struct to the ID free list.  Public interface to
+ *              H5I_dec_type_ref.
+ *              Returns the number of references to the type on success; a
+ *              return value of 0 means that the type will have to be
+ *              re-initialized before it can be used again (and should probably
+ *              be set to H5I_UNINIT).
  *
- * Return:	Number of references to type on success/Negative on failure
+ * NOTE:        Using an error type to also represent a count is semantially
+ *              incorrect. We should consider fixing this in a future major
+ *              release (DER).
  *
- * Programmer:	Nathaniel Furrer
- *		James Laird
+ * Return:      Success:    Number of references to type
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1646,20 +1656,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I_dec_type_ref
+ * Function:    H5I_dec_type_ref
  *
- * Purpose:	Decrements the reference count on an entire type of IDs.
- *		If the type reference count becomes zero then the type is
- *		destroyed along with all atoms in that type regardless of
- *		their reference counts.	 Destroying IDs involves calling
- *		the free-func for each ID's object and then adding the ID
- *		struct to the ID free list.
- *		Returns the number of references to the type on success; a
- *		return value of 0 means that the type will have to be
- *		re-initialized before it can be used again (and should probably
- *		be set to H5I_UNINIT).
+ * Purpose:     Decrements the reference count on an entire type of IDs.
+ *              If the type reference count becomes zero then the type is
+ *              destroyed along with all atoms in that type regardless of
+ *              their reference counts.	 Destroying IDs involves calling
+ *              the free-func for each ID's object and then adding the ID
+ *              struct to the ID free list.
+ *              Returns the number of references to the type on success; a
+ *              return value of 0 means that the type will have to be
+ *              re-initialized before it can be used again (and should probably
+ *              be set to H5I_UNINIT).
  *
- * Return:	Number of references to type on success/Negative on failure
+ * Return:      Success:    Number of references to type
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1678,20 +1689,19 @@ H5I_dec_type_ref(H5I_type_t type)
     if(type_ptr == NULL || type_ptr->init_count <= 0)
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
-    /*
-     * Decrement the number of users of the atomic type.  If this is the
+    /* Decrement the number of users of the atomic type.  If this is the
      * last user of the type then release all atoms from the type and
      * free all memory it used.  The free function is invoked for each atom
      * being freed.
      */
-    if(1 == type_ptr->init_count) {
+    if (1 == type_ptr->init_count) {
         H5I__destroy_type(type);
         ret_value = 0;
-    } /* end if */
+    }
     else {
         --(type_ptr->init_count);
         ret_value = (herr_t)type_ptr->init_count;
-    } /* end else */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1901,17 +1911,90 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I__iterate_cb
+ * Function:    H5I__iterate_pub_cb
  *
- * Purpose:	Callback routine for H5I_iterate, invokes "user" callback
+ * Purpose:     Callback routine for H5Iiterate, when it calls
+ *              H5I_iterate.  Calls "user" callback search function, and
+ *              then sets return value, based on the result of that
+ *              callback.
+ *
+ * Return:      The value returned by the user callback
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, October 11, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
+{
+    H5I_iterate_pub_ud_t *udata = (H5I_iterate_pub_ud_t *)_udata; /* User data for callback */
+    herr_t ret_value;   /* Callback return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    ret_value = (*udata->op)(id, udata->op_data);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I__iterate_pub_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Iiterate
+ *
+ * Purpose:     Call the callback funciton op for each member of the id
+ *              type type.  op takes as parameters the id and a
+ *              passthrough of op_data, and returns an herr_t.  A positive
+ *              return from op will cause the iteration to stop and
+ *              H5Iiterate will return the value returned by op.  A
+ *              negative return from op will cause the iteration to stop
+ *              and H5Iiterate will return failure.  A zero return from op
+ *              will allow iteration to continue, as long as there are
+ *              other ids remaining in type.
+ *
+ * Limitation:  Currently there is no way to start searching from where a
+ *              previous search left off.
+ *
+ * Return:      The last value returned by op
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, October 11, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Iiterate(H5I_type_t type, H5I_iterate_func_t op, void *op_data)
+{
+    H5I_iterate_pub_ud_t int_udata;  /* Internal user data */
+    herr_t ret_value;            /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "Itx*x", type, op, op_data);
+
+    /* Set up udata struct */
+    int_udata.op = op;
+    int_udata.op_data = op_data;
+
+    /* Note that H5I_iterate returns an error code.  We ignore it
+     * here, as we can't do anything with it without revising the API.
+     */
+    if ((ret_value = H5I_iterate(type, H5I__iterate_pub_cb, &int_udata, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADITER, FAIL, "can't iterate over ids")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Iiterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I__iterate_cb
+ *
+ * Purpose:     Callback routine for H5I_iterate, invokes "user" callback
  *              function, and then sets return value, based on the result of
  *              that callback.
  *
- * Return:	Success:	Non-negative on success
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Thursday, October 3, 2013
+ * Return:      Success:    Non-negative on success
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1979,7 +2062,7 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
 
     /* Check arguments */
     if(type <= H5I_BADID || type >= H5I_next_type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
     type_ptr = H5I_id_type_list_g[type];
 
     /* Only iterate through ID list if it is initialized and there are IDs in type */
@@ -2088,17 +2171,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Iget_file_id
+ * Function:    H5Iget_file_id
  *
- * Purpose:	The public version of H5I_get_file_id(), obtains the file
+ * Purpose:     The public version of H5I_get_file_id(), obtains the file
  *              ID given an object ID.  User has to close this ID.
  *
- * Return:	Success:	file ID
+ * Return:      Success:    The file ID associated with the object
  *
- *		Failure:	a negative value
- *
- * Programmer:  Raymond Lu
- *              Oct 27, 2003
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
@@ -2110,7 +2190,7 @@ H5Iget_file_id(hid_t obj_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", obj_id);
 
-    if((ret_value = H5I_get_file_id(obj_id, TRUE)) < 0)
+    if ((ret_value = H5I_get_file_id(obj_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID")
 
 done:
@@ -2119,38 +2199,36 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I_get_file_id
+ * Function:    H5I_get_file_id
  *
- * Purpose:	The private version of H5Iget_file_id(), obtains the file
+ * Purpose:     The private version of H5Iget_file_id(), obtains the file
  *              ID given an object ID.
  *
- * Return:	Success:	file ID
- *		Failure:	a negative value
+ * Return:      Success:    The file ID associated with the object
  *
- * Programmer:  Raymond Lu
- *              Oct 27, 2003
+ *              Failure:	H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
 {
-    H5I_type_t type;            /* ID type */
-    hid_t ret_value = H5I_INVALID_HID;            /* Return value */
+    H5I_type_t  type;                           /* ID type                  */
+    hid_t       ret_value = H5I_INVALID_HID;    /* Return value             */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Get object type */
     type = H5I_TYPE(obj_id);
-    if(type == H5I_FILE) {
+    if (type == H5I_FILE) {
         /* Increment reference count on file ID */
         if(H5I_inc_ref(obj_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
 
         /* Set return value */
         ret_value = obj_id;
-    } /* end if */
-    else if(type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
+    }
+    else if (type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
         H5G_loc_t loc;              /* Location of object */
 
         /* Get the object location information */
@@ -2160,7 +2238,7 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
         /* Get the file ID for the object */
         if((ret_value = H5F_get_id(loc.oloc->file, app_ref)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't get file ID")
-    } /* end if */
+    }
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_INVALID_HID, "invalid object ID")
 
@@ -2168,18 +2246,102 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_file_id() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I__get_id_cb
+ *
+ * Purpose:     Callback for searching for an ID with a specific pointer
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5I__get_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
+{
+    H5I_id_info_t *item = (H5I_id_info_t *)_item;       /* Pointer to the ID node */
+    H5I_get_id_ud_t *udata = (H5I_get_id_ud_t *)_udata;     /* Pointer to user data */
+    H5I_type_t type = udata->obj_type;
+    const void *obj_ptr = NULL;
+    int ret_value = H5_ITER_CONT;                       /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(item);
+    HDassert(udata);
+
+    if (H5I_FILE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
+        const H5VL_object_t *obj = (const H5VL_object_t *)item->obj_ptr;
+        obj_ptr = obj->vol_obj;
+    }
+    else if (H5I_DATATYPE == type) {
+        const H5T_t *dt = (const H5T_t *)item->obj_ptr;
+        obj_ptr = (void *)H5T_get_actual_type(dt);
+    }
+    else
+        obj_ptr = item->obj_ptr;
+
+    if (obj_ptr == udata->object) {
+        udata->ret_id = item->id;
+        ret_value = H5_ITER_STOP;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I__get_id_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I_get_id
+ *
+ * Purpose:     Return the ID of an object
+ *
+ * Return:      Success:    ID of object
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5I_get_id(const void *object, H5I_type_t type)
+{
+    H5I_id_type_t   *type_ptr;                      /* Pointer to the type  */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value         */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    type_ptr = H5I_id_type_list_g[type];
+    if (!type_ptr || type_ptr->init_count <= 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, H5I_INVALID_HID, "invalid type")
+
+    /* Only iterate through ID list if it is initialized and there are IDs in type */
+    if (type_ptr && type_ptr->init_count > 0 && type_ptr->id_count > 0) {
+        H5I_get_id_ud_t udata;    /* User data */
+        herr_t iter_status;       /* Iteration status */
+
+        /* Set up iterator user data */
+        udata.object = object;
+        udata.obj_type = type;
+        udata.ret_id = FAIL;
+
+        /* Iterate over IDs */
+        if ((iter_status = H5SL_iterate(type_ptr->ids, H5I__get_id_cb, &udata)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADITER, H5I_INVALID_HID, "iteration failed")
+
+        ret_value = udata.ret_id;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_get_id() */
+
 #ifdef H5I_DEBUG_OUTPUT
 
 /*-------------------------------------------------------------------------
- * Function:	H5I__debug_cb
+ * Function:    H5I__debug_cb
  *
- * Purpose:	Dump the contents of an ID to stderr for debugging.
+ * Purpose:     Dump the contents of an ID to stderr for debugging.
  *
- * Return:	Success: Non-negative
- *		Failure: Negative
- *
- * Programmer:	Robb Matzke
- *		Friday, February 19, 1999
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -2227,15 +2389,11 @@ H5I__debug_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I__debug
+ * Function:    H5I__debug
  *
- * Purpose:	Dump the contents of a type to stderr for debugging.
+ * Purpose:     Dump the contents of a type to stderr for debugging.
  *
- * Return:	Success: Non-negative
- *		Failure: Negative
- *
- * Programmer:	Robb Matzke
- *		Friday, February 19, 1999
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
