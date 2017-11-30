@@ -283,6 +283,65 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_copy
+ *
+ * Purpose:     Private version of H5Ocopy
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_copy(H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc, const char *dst_name,
+                hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id)
+{
+    H5G_loc_t	src_loc;                /* Source object group location */
+    /* for opening the destination object */
+    H5G_name_t  src_path;               /* Opened source object hier. path */
+    H5O_loc_t   src_oloc;               /* Opened source object object location */
+    htri_t      dst_exists;             /* Does destination name exist already? */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check if destination name already exists */
+    if ((dst_exists = H5L_exists_tolerant(dst_loc, dst_name, H5P_DEFAULT, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check if destination name exists")
+    if (TRUE == dst_exists)
+        HGOTO_ERROR(H5E_OHDR, H5E_EXISTS, FAIL, "destination object already exists")
+
+    /* Set up opened group location to fill in */
+    src_loc.oloc = &src_oloc;
+    src_loc.path = &src_path;
+    H5G_loc_reset(&src_loc);
+
+    /* Find the source object to copy */
+    if (H5G_loc_find(loc, src_name, &src_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
+    loc_found = TRUE;
+
+    /* Open source object's object header */
+    if (H5O_open(&src_oloc) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+    obj_open = TRUE;
+
+    /* Do the actual copying of the object */
+    if (H5O_copy_obj(&src_loc, dst_loc, dst_name, ocpypl_id, lcpl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+done:
+    if (loc_found && H5G_loc_free(&src_loc) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
+    if (obj_open && H5O_close(&src_oloc, NULL) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_copy_header_real
  *
  * Purpose:     Copy header object from one location to another using

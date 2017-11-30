@@ -247,20 +247,20 @@ struct H5O_msg_class_t {
 };
 
 struct H5O_mesg_t {
-    const H5O_msg_class_t	*type;	/*type of message		     */
-    hbool_t		dirty;		/*raw out of date wrt native	     */
-    uint8_t		flags;		/*message flags			     */
-    H5O_msg_crt_idx_t   crt_idx;        /*message creation index	     */
-    unsigned		chunkno;	/*chunk number for this mesg	     */
-    void		*native;	/*native format message		     */
-    uint8_t		*raw;		/*ptr to raw data		     */
-    size_t		raw_size;	/*size with alignment		     */
+    const H5O_msg_class_t   *type;      /* type of message                  */
+    hbool_t                 dirty;      /* raw out of date wrt native       */
+    uint8_t                 flags;      /* message flags                    */
+    H5O_msg_crt_idx_t       crt_idx;    /* message creation index           */
+    unsigned                chunkno;    /* chunk number for this mesg       */
+    void                    *native;    /* native format message            */
+    uint8_t                 *raw;       /* pointer to raw data              */
+    size_t                  raw_size;   /* size with alignment              */
 };
 
 /* Struct for storing information about "best" message to move to new chunk */
 typedef struct H5O_msg_alloc_info_t {
     int msgno;                      /* Index in message array */
-    unsigned id;		    /* Message type ID on disk */
+    unsigned id;                    /* Message type ID on disk */
     unsigned chunkno;               /* Index in chunk array */
     size_t gap_size;                /* Size of any "gap" in the chunk immediately after message */
     size_t null_size;               /* Size of any null message in the chunk immediately after message */
@@ -416,6 +416,12 @@ typedef struct H5O_chk_cache_ud_t {
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_chk_cache_ud_t;
 
+/* types for object optional VOL operations */
+typedef enum H5VL_object_optional_t {
+    H5VL_OBJECT_GET_COMMENT,            /* get object comment                   */
+    H5VL_OBJECT_GET_INFO,               /* get object info                      */
+    H5VL_OBJECT_SET_COMMENT             /* set object comment                   */
+} H5VL_object_optional_t;
 
 /* Header message ID to class mapping */
 H5_DLLVAR const H5O_msg_class_t *const H5O_msg_class_g[H5O_MSG_TYPES];
