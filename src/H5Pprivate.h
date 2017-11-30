@@ -206,6 +206,8 @@ H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
     H5D_fill_value_t *status);
 H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, const struct H5T_t *type,
     void *value, hid_t dxpl_id);
+H5_DLL int H5P_ignore_cmp(const void H5_ATTR_UNUSED *val1, const void H5_ATTR_UNUSED *val2,
+    size_t H5_ATTR_UNUSED size);
 
 #endif /* _H5Pprivate_H */
 
