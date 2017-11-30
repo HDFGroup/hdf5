@@ -39,6 +39,7 @@
 #endif
 #ifdef H5_STDC_HEADERS
 #   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
+#   include <stdarg.h>      /*for variadic functions in H5VLpublic.h     */
 #endif
 #ifndef __cplusplus
 # ifdef H5_HAVE_STDINT_H

@@ -405,7 +405,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id, hbool_
         case H5I_ERROR_STACK:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
         break;
     } /* end switch */
 

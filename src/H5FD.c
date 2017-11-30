@@ -119,7 +119,7 @@ H5FD__init_package(void)
     FUNC_ENTER_PACKAGE
 
     if(H5I_register_type(H5I_VFL_CLS) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Reset the file serial numbers */
     H5FD_file_serial_no_g = 0;
@@ -151,18 +151,18 @@ H5FD_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_PKG_INIT_VAR) {
-	if(H5I_nmembers(H5I_VFL) > 0) {
-	    (void)H5I_clear_type(H5I_VFL, FALSE, FALSE);
+        if(H5I_nmembers(H5I_VFL) > 0) {
+            (void)H5I_clear_type(H5I_VFL, FALSE, FALSE);
             n++; /*H5I*/
-	} /* end if */
+        } /* end if */
         else {
-            /* Destroy the VFL driver id group */
-	    n += (H5I_dec_type_ref(H5I_VFL) > 0);
+            /* Destroy the VFL driver ID group */
+            n += (H5I_dec_type_ref(H5I_VFL) > 0);
 
-	    /* Mark closed */
+            /* Mark closed */
             if(0 == n)
                 H5_PKG_INIT_VAR = FALSE;
-	} /* end else */
+        } /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
@@ -247,7 +247,7 @@ H5FDregister(const H5FD_class_t *cls)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid free-list mapping")
 
     /* Create the new class ID */
-    if((ret_value=H5FD_register(cls, sizeof(H5FD_class_t), TRUE)) < 0)
+    if((ret_value = H5FD_register(cls, sizeof(H5FD_class_t), TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register file driver ID")
 
 done:

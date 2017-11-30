@@ -598,6 +598,8 @@ H5_DLL herr_t H5D_set_io_info_dxpls(H5D_io_info_t *io_info, hid_t dxpl_id);
 H5_DLL herr_t H5D__format_convert(H5D_t *dataset, hid_t dxpl_id);
 
 /* Internal I/O routines */
+H5_DLL herr_t H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
+    const H5S_t *mem_space, const H5S_t *file_space, hid_t dxpl_id, const void *buf);
 H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
     void *buf/*out*/);

@@ -226,9 +226,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
          * name is the null pointer then don't print the argument or the
          * following `='.  This is used for return values.
          */
-        argname = va_arg(ap, char *); /*lint !e64 Type mismatch not really occuring */
+        argname = va_arg(ap, char *);
         if(argname) {
-            unsigned n = (unsigned)MAX (0, (int)HDstrlen(argname) - 3); /*lint !e666 Allow expression with side effects */
+            unsigned n = (unsigned)MAX (0, (int)HDstrlen(argname) - 3);
 
             if(!HDstrcmp(argname + n, "_id")) {
                 HDstrncpy(buf, argname, (size_t)MIN((int)sizeof(buf) - 1, n));
@@ -242,7 +242,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
         /* The value */
         if(ptr)
-            vp = va_arg(ap, void *); /*lint !e64 Type mismatch not really occuring */
+            vp = va_arg(ap, void *);
         switch(type[0]) {
             case 'a':
                 if(ptr) {
@@ -252,7 +252,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    haddr_t addr = va_arg(ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
+                    haddr_t addr = va_arg(ap, haddr_t);
 
                     HDfprintf(out, "%a", addr);
                 } /* end else */
@@ -807,7 +807,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5E_error2_t *error = va_arg(ap, H5E_error2_t *); /*lint !e64 Type mismatch not really occuring */
+                            H5E_error2_t *error = va_arg(ap, H5E_error2_t *);
 
                             fprintf(out, "0x%lx", (unsigned long)error);
                         } /* end else */
@@ -1099,7 +1099,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5G_stat_t *statbuf = va_arg(ap, H5G_stat_t*); /*lint !e64 Type mismatch not really occuring */
+                            H5G_stat_t *statbuf = va_arg(ap, H5G_stat_t*);
 
                             fprintf(out, "0x%lx", (unsigned long)statbuf);
                         }
@@ -1133,7 +1133,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    hsize_t hsize = va_arg(ap, hsize_t); /*lint !e732 Loss of sign not really occuring */
+                    hsize_t hsize = va_arg(ap, hsize_t);
 
                     if(H5S_UNLIMITED == hsize)
                         HDfprintf(out, "H5S_UNLIMITED");
@@ -1559,7 +1559,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            unsigned iu = va_arg(ap, unsigned); /*lint !e732 Loss of sign not really occuring */
+                            unsigned iu = va_arg(ap, unsigned);
 
                             fprintf(out, "%u", iu);
                             asize[argno] = iu;
@@ -1803,7 +1803,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    hobj_ref_t ref = va_arg(ap, hobj_ref_t); /*lint !e732 Loss of sign not really occuring */
+                    hobj_ref_t ref = va_arg(ap, hobj_ref_t);
 
                     HDfprintf(out, "Reference Object=%a", ref);
                 } /* end else */
@@ -2001,7 +2001,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    const char *str = va_arg(ap, const char *); /*lint !e64 Type mismatch not really occuring */
+                    const char *str = va_arg(ap, const char *);
 
                     fprintf(out, "\"%s\"", str);
                 } /* end else */
@@ -2428,7 +2428,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            unsigned long iul = va_arg(ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
+                            unsigned long iul = va_arg(ap, unsigned long);
 
                             fprintf(out, "%lu", iul);
                             asize[argno] = (hssize_t)iul;
@@ -2452,7 +2452,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            unsigned long long iull = va_arg(ap, unsigned long long); /*lint !e732 Loss of sign not really occuring */
+                            unsigned long long iull = va_arg(ap, unsigned long long);
 
                             fprintf(out, "%llu", iull);
                             asize[argno] = (hssize_t)iull;
@@ -2486,7 +2486,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    vp = va_arg (ap, void *); /*lint !e64 Type mismatch not really occuring */
+                    vp = va_arg (ap, void *);
 
                     if(vp)
                         fprintf(out, "0x%lx", (unsigned long)vp);
@@ -2512,7 +2512,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                 } /* end if */
                 else {
-                    size_t size = va_arg(ap, size_t); /*lint !e732 Loss of sign not really occuring */
+                    size_t size = va_arg(ap, size_t);
 
                     HDfprintf(out, "%Zu", size);
                     asize[argno] = (hssize_t)size;
@@ -2559,7 +2559,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5Z_class2_t *filter = va_arg(ap, H5Z_class2_t*); /*lint !e64 Type mismatch not really occuring */
+                            H5Z_class2_t *filter = va_arg(ap, H5Z_class2_t*);
 
                             fprintf(out, "0x%lx", (unsigned long)filter);
                         } /* end else */

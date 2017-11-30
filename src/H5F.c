@@ -21,20 +21,20 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"        /* Generic Functions */
-#include "H5Aprivate.h"       /* Attributes */
-#include "H5ACprivate.h"      /* Metadata cache */
-#include "H5Dprivate.h"       /* Datasets */
-#include "H5Eprivate.h"       /* Error handling */
-#include "H5Fpkg.h"           /* File access */
-#include "H5FDprivate.h"      /* File drivers */
-#include "H5Gprivate.h"       /* Groups */
-#include "H5Iprivate.h"       /* IDs */
-#include "H5MFprivate.h"      /* File memory management */
-#include "H5MMprivate.h"      /* Memory management */
-#include "H5Pprivate.h"       /* Property lists */
-#include "H5SMprivate.h"      /* Shared Object Header Messages */
-#include "H5Tprivate.h"       /* Datatypes */
+#include "H5private.h"          /* Generic Functions                    */
+#include "H5Aprivate.h"         /* Attributes                           */
+#include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5Dprivate.h"         /* Datasets                             */
+#include "H5Eprivate.h"         /* Error handling                       */
+#include "H5Fpkg.h"             /* File access                          */
+#include "H5FDprivate.h"        /* File drivers                         */
+#include "H5Gprivate.h"         /* Groups                               */
+#include "H5Iprivate.h"         /* IDs                                  */
+#include "H5MFprivate.h"        /* File memory management               */
+#include "H5MMprivate.h"        /* Memory management                    */
+#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5SMprivate.h"        /* Shared Object Header Messages        */
+#include "H5Tprivate.h"         /* Datatypes                            */
 
 
 /****************/
@@ -377,83 +377,82 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fcreate
  *
- * Purpose:    This is the primary function for creating HDF5 files . The
- *        flags parameter determines whether an existing file will be
- *        overwritten or not.  All newly created files are opened for
- *        both reading and writing.  All flags may be combined with the
- *        bit-wise OR operator (`|') to change the behavior of the file
- *        create call.
+ * Purpose:     This is the primary function for creating HDF5 files . The
+ *              flags parameter determines whether an existing file will be
+ *              overwritten or not.  All newly created files are opened for
+ *              both reading and writing.  All flags may be combined with the
+ *              bit-wise OR operator (`|') to change the behavior of the file
+ *              create call.
  *
- *        The more complex behaviors of a file's creation and access
- *        are controlled through the file-creation and file-access
- *        property lists.  The value of H5P_DEFAULT for a template
- *        value indicates that the library should use the default
- *        values for the appropriate template.
+ *              The more complex behaviors of a file's creation and access
+ *              are controlled through the file-creation and file-access
+ *              property lists.  The value of H5P_DEFAULT for a template
+ *              value indicates that the library should use the default
+ *              values for the appropriate template.
  *
  * See also:    H5Fpublic.h for the list of supported flags. H5Ppublic.h for
- *         the list of file creation and file access properties.
+ *              the list of file creation and file access properties.
  *
- * Return:    Success:    A file ID
- *            Failure:    FAIL
+ * Return:      Success:    A file ID
+ *              Failure:    FAIL
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t    *new_file = NULL;      /*file struct for new file  */
-    hid_t     dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library */
-    hid_t     ret_value;            /*return value */
+    H5F_t   *new_file = NULL;               /* file struct for new file                 */
+    hid_t   dxpl_id = H5AC_ind_read_dxpl_id;/* dxpl used by library                     */
+    hid_t   ret_value;                      /* return value                             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Check/fix arguments */
-    if(!filename || !*filename)
+    if (!filename || !*filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+
     /* In this routine, we only accept the following flags:
      *          H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_SWMR_WRITE
      */
-    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE))
+    if (flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
+
     /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
-    if((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
+    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
 
     /* Check file creation property list */
-    if(H5P_DEFAULT == fcpl_id)
+    if (H5P_DEFAULT == fcpl_id)
         fcpl_id = H5P_FILE_CREATE_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
+        if (TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
+    if (H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /*
-     * Adjust bit flags by turning on the creation bit and making sure that
+    /* Adjust bit flags by turning on the creation bit and making sure that
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
-    if (0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
-        flags |= H5F_ACC_EXCL;     /*default*/
+    if (0 == (flags & (H5F_ACC_EXCL | H5F_ACC_TRUNC)))
+        flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
-    /*
-     * Create a new file or truncate an existing file.
-     */
-    if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
+    /* Create a new file or truncate an existing file. */
+    if (NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
 done:
-    if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
+    if (ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
     FUNC_LEAVE_API(ret_value)
@@ -463,46 +462,28 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fopen
  *
- * Purpose:    This is the primary function for accessing existing HDF5
- *        files.  The FLAGS argument determines whether writing to an
- *        existing file will be allowed or not.  All flags may be
- *        combined with the bit-wise OR operator (`|') to change the
- *        behavior of the file open call.  The more complex behaviors
- *        of a file's access are controlled through the file-access
- *        property list.
+ * Purpose:     This is the primary function for accessing existing HDF5
+ *              files.  The FLAGS argument determines whether writing to an
+ *              existing file will be allowed or not.  All flags may be
+ *              combined with the bit-wise OR operator (`|') to change the
+ *              behavior of the file open call.  The more complex behaviors
+ *              of a file's access are controlled through the file-access
+ *              property list.
  *
- * See Also:  H5Fpublic.h for a list of possible values for FLAGS.
+ * See Also:    H5Fpublic.h for a list of possible values for FLAGS.
  *
- * Return:    Success:    A file ID
- *            Failure:    FAIL
+ * Return:      Success:    A file ID
  *
- * Modifications:
- *          Robb Matzke, 1997-07-18
- *        File struct creation and destruction is through H5F_new() and
- *        H5F__dest(). Reading the root symbol table entry is done with
- *        H5G_decode().
+ *              Failure:    FAIL
  *
- *          Robb Matzke, 1997-09-23
- *        Most of the work is now done by H5F_open() since H5Fcreate()
- *        and H5Fopen() originally contained almost identical code.
- *
- *         Robb Matzke, 1998-02-18
- *        Added better error checking for the flags and the file access
- *        property list.  It used to be possible to make the library
- *        dump core by passing an object ID that was not a file access
- *        property list.
- *
- *         Robb Matzke, 1999-08-02
- *        The file access property list is passed to the H5F_open() as
- *        object IDs.
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    H5F_t    *new_file = NULL;    /* file struct for new file */
-    hid_t     dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library  */
-    hid_t     ret_value;          /* return value */
+    H5F_t       *new_file = NULL;                   /* file struct for new file                 */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library                     */
+    hid_t       ret_value;                          /* return value                             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
@@ -685,28 +666,28 @@ H5Fclose(hid_t file_id)
     H5TRACE1("e", "i", file_id);
 
     /* Check/fix arguments. */
-    if(H5I_FILE != H5I_get_type(file_id))
+    if (H5I_FILE != H5I_get_type(file_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
      * This is only necessary to replicate previous behaviour, and could be
-     * disabled by an option/property to improve performance. */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+     * disabled by an option/property to improve performance.
+     */
+    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
-        if((nref = H5I_get_ref(file_id, FALSE)) < 0)
+    if ((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
+        if ((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
-        if(nref == 1)
-            if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
+        if (nref == 1)
+            if (H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    } /* end if */
+    }
 
-    /*
-     * Decrement reference count on atom.  When it reaches zero the file will
+    /* Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    if(H5I_dec_app_ref(file_id) < 0)
+    if (H5I_dec_app_ref(file_id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
 done:
