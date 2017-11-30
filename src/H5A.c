@@ -1185,7 +1185,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     if(HDstrcmp(old_name, new_name)) {
         H5G_loc_t loc;                /* Object location */
   
-        if(H5G_loc(loc_id, & loc) < 0)
+        if(H5G_loc(loc_id, &loc) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
         /* Call private attribute rename routine */
@@ -1240,7 +1240,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
         if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-        if(H5G_loc(loc_id, & loc) < 0)
+        if(H5G_loc(loc_id, &loc) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
         /* Call private attribute rename routine */

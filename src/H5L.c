@@ -1181,24 +1181,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Literate
+ * Function:    H5Literate
  *
- * Purpose:	Iterates over links in a group, with user callback routine,
+ * Purpose:     Iterates over links in a group, with user callback routine,
  *              according to the order within an index.
  *
  *              Same pattern of behavior as H5Giterate.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
- *
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 16, 2006
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */
@@ -1206,25 +1202,25 @@ herr_t
 H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx_p, H5L_iterate_t op, void *op_data)
 {
-    H5I_type_t  id_type;        /* Type of ID */
-    H5G_link_iterate_t lnk_op;  /* Link operator */
-    hsize_t     last_lnk;       /* Index of last object looked at */
-    hsize_t	idx;            /* Internal location to hold index */
-    herr_t ret_value;           /* Return value */
+    H5I_type_t          id_type;        /* Type of ID                       */
+    H5G_link_iterate_t  lnk_op;         /* Link operator                    */
+    hsize_t             last_lnk;       /* Index of last object looked at   */
+    hsize_t	            idx;            /* Internal location to hold index  */
+    herr_t              ret_value;      /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iIiIo*hx*x", grp_id, idx_type, order, idx_p, op, op_data);
 
     /* Check arguments */
     id_type = H5I_get_type(grp_id);
-    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
+    if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
-    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
-    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(!op)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+    if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if (!op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
 
     /* Set up iteration beginning/end info */
     idx = (idx_p == NULL ? 0 : *idx_p);
@@ -1235,8 +1231,8 @@ H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     lnk_op.op_func.op_new = op;
 
     /* Iterate over the links */
-    if((ret_value = H5G_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+    if ((ret_value = H5G_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
     /* Set the index we stopped at */
     if(idx_p)
