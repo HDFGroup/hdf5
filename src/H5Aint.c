@@ -811,18 +811,9 @@ H5A_get_type(H5A_t *attr)
     if (H5T_lock(dt, FALSE) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to lock transient datatype")
 
-//    if (H5T_is_named(dt)) {
-        /* If this is a committed datatype, we need to recreate the
-         * two level IDs, where the VOL object is a copy of the
-         * returned datatype
-         */
-//        if ((ret_value = H5VL_native_register(H5I_DATATYPE, dt, TRUE)) < 0)
-//            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
-//    }
-//    else {
-        if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
-//    }
+    /* Atomize */
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
 
 done:
     if (H5I_INVALID_HID == ret_value && dt && (H5T_close(dt) < 0))

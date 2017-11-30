@@ -320,14 +320,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__pre_write
+ * Function:    H5D__pre_write
  *
- * Purpose:	Preparation for writing data.  
+ * Purpose:     Preparation for writing data.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		2 November 2012
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */

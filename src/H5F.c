@@ -435,7 +435,7 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t          *new_file = NULL;        /*file struct for new file	                */
+    H5F_t   *new_file = NULL;               /* file struct for new file                 */
 
     H5P_genplist_t *plist;                  /* Property list pointer                    */
     H5VL_class_t   *vol_cls = NULL;         /* VOL Class structure for callback info    */
@@ -443,7 +443,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5VL_driver_prop_t  driver_prop;        /* Property for vol driver ID & info        */
 
     hid_t   dxpl_id = H5AC_ind_read_dxpl_id;/* dxpl used by library                     */
-    hid_t   ret_value;	                    /* return value                             */
+    hid_t   ret_value;                      /* return value                             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
@@ -524,8 +524,6 @@ done:
  * Return:      Success:    A file ID
  *
  *              Failure:    FAIL
- *
- * Programmer:  Unknown
  *
  *-------------------------------------------------------------------------
  */
