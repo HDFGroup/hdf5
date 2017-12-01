@@ -322,7 +322,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__pre_write
  *
- * Purpose:     Preparation for writing data.  
+ * Purpose:     Preparation for writing data.
  *
  * Return:      SUCCEED/FAIL
  *
