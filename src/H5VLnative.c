@@ -93,7 +93,6 @@ static herr_t H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t 
 static herr_t H5VL_native_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
-#if 0
 static herr_t H5VL_native_link_create(H5VL_link_create_type_t create_type, void *obj, 
                                       H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_link_copy(void *src_obj, H5VL_loc_params_t loc_params1,
@@ -104,7 +103,6 @@ static herr_t H5VL_native_link_move(void *src_obj, H5VL_loc_params_t loc_params1
                                     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
-#endif
 
 /* Object callbacks */
 #if 0
@@ -178,11 +176,11 @@ static H5VL_class_t H5VL_native_g = {
         H5VL_native_group_close                     /* close        */
     },
     {   /* link_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* copy         */
-        NULL,                                       /* move         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
+        H5VL_native_link_create,                    /* create       */
+        H5VL_native_link_copy,                      /* copy         */
+        H5VL_native_link_move,                      /* move         */
+        H5VL_native_link_get,                       /* get          */
+        H5VL_native_link_specific,                  /* specific     */
         NULL                                        /* optional     */
     },
     {   /* object_cls */
@@ -2270,7 +2268,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_group_close() */
 
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_link_create
@@ -2703,6 +2700,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_link_specific() */
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_object_open
