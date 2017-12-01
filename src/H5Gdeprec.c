@@ -695,29 +695,26 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Giterate
+ * Function:    H5Giterate
  *
- * Purpose:	Iterates over the entries of a group.  The LOC_ID and NAME
- *		identify the group over which to iterate and IDX indicates
- *		where to start iterating (zero means at the beginning).	 The
- *		OPERATOR is called for each member and the iteration
- *		continues until the operator returns non-zero or all members
- *		are processed. The operator is passed a group ID for the
- *		group being iterated, a member name, and OP_DATA for each
- *		member.
+ * Purpose:     Iterates over the entries of a group.  The LOC_ID and NAME
+ *              identify the group over which to iterate and IDX indicates
+ *              where to start iterating (zero means at the beginning).	 The
+ *              OPERATOR is called for each member and the iteration
+ *              continues until the operator returns non-zero or all members
+ *              are processed. The operator is passed a group ID for the
+ *              group being iterated, a member name, and OP_DATA for each
+ *              member.
  *
- * Note:	Deprecated in favor of H5Literate
+ * NOTE:        Deprecated in favor of H5Literate
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
- *
- * Programmer:	Robb Matzke
- *		Monday, March 23, 1998
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */
@@ -725,21 +722,21 @@ herr_t
 H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     void *op_data)
 {
-    H5G_link_iterate_t lnk_op;          /* Link operator */
-    hsize_t     last_obj;               /* Index of last object looked at */
-    hsize_t	idx;                    /* Internal location to hold index */
-    herr_t	ret_value;
+    H5G_link_iterate_t  lnk_op;         /* Link operator                    */
+    hsize_t             last_obj;       /* Index of last object looked at   */
+    hsize_t	            idx;            /* Internal location to hold index  */
+    herr_t              ret_value;      /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*s*Isx*x", loc_id, name, idx_p, op, op_data);
 
     /* Check args */
-    if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(idx_p && *idx_p < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
-    if(!op)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+    if (!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if (idx_p && *idx_p < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
+    if (!op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
 
     /* Set number of objects looked at to zero */
     last_obj = 0;
@@ -750,11 +747,11 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     lnk_op.op_func.op_old = op;
 
     /* Call private function. */
-    if((ret_value = H5G_iterate(loc_id, name, H5_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
+    if ((ret_value = H5G_iterate(loc_id, name, H5_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
 
     /* Set the index we stopped at */
-    if(idx_p)
+    if (idx_p)
         *idx_p = (int)last_obj;
 
 done:
