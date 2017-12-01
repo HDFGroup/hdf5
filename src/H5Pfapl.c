@@ -389,8 +389,8 @@ static const unsigned H5F_def_page_buf_min_raw_perc_g = H5F_ACS_PAGE_BUFFER_MIN_
 static herr_t
 H5P__facc_reg_prop(H5P_genclass_t *pclass)
 {
-    const H5FD_driver_prop_t def_driver_prop = H5F_ACS_FILE_DRV_DEF;           /* Default VFL driver ID & info (initialized from a variable) */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const H5FD_driver_prop_t def_driver_prop    = H5F_ACS_FILE_DRV_DEF;     /* Default VFL driver ID & info (initialized from a variable) */
+    herr_t ret_value = SUCCEED;                                             /* Return value */
 
     FUNC_ENTER_STATIC
 
