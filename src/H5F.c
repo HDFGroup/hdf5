@@ -77,6 +77,10 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
+/* Declare a free list to manage the H5VL_t struct */
+H5FL_EXTERN(H5VL_t);
+/* Declare a free list to manage the H5VL_object_t struct */
+H5FL_EXTERN(H5VL_object_t);
 
 /* File ID class */
 static const H5I_class_t H5I_FILE_CLS[1] = {{
@@ -372,6 +376,46 @@ H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_vfd_handle() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fis_accessible
+ *
+ * Purpose:     Check if the file can be opened with the given fapl.
+ *
+ * Return:      Success:    TRUE/FALSE
+ *
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Fis_accessible(const char *name, hid_t fapl_id)
+{
+    htri_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("t", "*si", name, fapl_id);
+
+    /* Check args */
+    if (!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
+
+    /* Check the file access property list */
+    if (H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else
+        if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+
+    /* Call into the VOL to check if file is accessible */
+    if (H5VL_file_specific(NULL, NULL, H5VL_FILE_IS_ACCESSIBLE, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, fapl_id, name, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fis_accessible() */
 
 
 /*-------------------------------------------------------------------------

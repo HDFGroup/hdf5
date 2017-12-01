@@ -77,14 +77,12 @@ static herr_t H5VL_native_dataset_specific(void *dset, H5VL_dataset_specific_t s
 static herr_t H5VL_native_dataset_close(void *dset, hid_t dxpl_id, void **req);
 
 /* File callbacks */
-#if 0
 static void *H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_file_specific(void *file, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_file_optional(void *file, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_file_close(void *file, hid_t dxpl_id, void **req);
-#endif
 
 /* Group callbacks */
 static void *H5VL_native_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
@@ -158,12 +156,12 @@ static H5VL_class_t H5VL_native_g = {
         H5VL_native_datatype_close                  /* close        */
     },
     {   /* file_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        H5VL_native_file_create,                    /* create       */
+        H5VL_native_file_open,                      /* open         */
+        H5VL_native_file_get,                       /* get          */
+        H5VL_native_file_specific,                  /* specific     */
+        H5VL_native_file_optional,                  /* optional     */
+        H5VL_native_file_close                      /* close        */
     },
     {   /* group_cls */
         H5VL_native_group_create,                   /* create       */
@@ -1390,7 +1388,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_dataset_close() */
 
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_file_create
@@ -1467,7 +1464,7 @@ H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxp
     ret_value = (void *)new_file;
 
 done:
-    if(NULL == ret_value && new_file && H5F_try_close(new_file) < 0)
+    if(NULL == ret_value && new_file && H5F_try_close(new_file, NULL) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_file_open() */
@@ -1667,12 +1664,12 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
                      /* Flush other files, depending on scope */
                      if(H5F_SCOPE_GLOBAL == scope) {
                          /* Call the flush routine for mounted file hierarchies */
-                         if(H5F_flush_mounts(f, dxpl_id) < 0)
+                         if(H5F_flush_mounts(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id) < 0)
                              HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
                      } /* end if */
                      else {
                          /* Call the flush routine, for this file */
-                         if(H5F_flush(f, dxpl_id, FALSE) < 0)
+                         if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                              HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
                      } /* end else */
                  } /* end if */ 
@@ -1720,7 +1717,8 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
                 htri_t     *ret     = va_arg (arguments, htri_t *);
 
                 /* Call private routine */
-                if((*ret = H5F_is_hdf5(name, fapl_id, dxpl_id)) < 0)
+                /* Replace when H5F__is_hdf5() has been updated to accept a fapl */
+//                if((*ret = H5F_is_hdf5(name, fapl_id, dxpl_id)) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
                 break;
             }
@@ -1789,7 +1787,7 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
 
                 f = (H5F_t *)obj;
                 /* Do the actual work */
-                if((*ret = H5F_get_file_image(f, buf_ptr, buf_len, dxpl_id)) < 0)
+                if((*ret = H5F_get_file_image(f, buf_ptr, buf_len, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "get file image failed")
                 break;
             }
@@ -1887,7 +1885,7 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
                 size_t *min_clean_size_ptr  = va_arg (arguments, size_t *);
                 size_t *cur_size_ptr        = va_arg (arguments, size_t *); 
                 int    *cur_num_entries_ptr = va_arg (arguments, int *); 
-                int32_t cur_num_entries;
+                uint32_t cur_num_entries;
 
                 f = (H5F_t *)obj;
                 /* Go get the size data */
@@ -1999,7 +1997,7 @@ H5VL_native_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
         if ((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
         if (nref == 1)
-            if (H5F_flush(f, dxpl_id, FALSE) < 0)
+            if (H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -2010,7 +2008,6 @@ H5VL_native_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_file_close() */
-#endif
 
 
 /*-------------------------------------------------------------------------

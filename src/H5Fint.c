@@ -1575,7 +1575,7 @@ H5F__flush_phase2(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closi
  *
  * Purpose:  Flushes cached data.
  *
- * Return:   Non-negative on success/Negative on failure
+ * Return:   SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1834,6 +1834,50 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_try_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_reopen
+ *
+ * Purpose:	Reopen a file.  The new file handle which is returned points
+ *		to the same file as the specified file handle.  Both handles
+ *		share caches and other information.  The only difference
+ *		between the handles is that the new handle is not mounted
+ *		anywhere and no files are mounted on it.
+ *
+ * Return:	Success:	New file ID
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, October 16, 1998
+ *
+ * Modifications:
+ *              Quincey Koziol, May 14, 2002
+ *              Keep old file's read/write intent in reopened file.
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_t *
+H5F_reopen(H5F_t *f)
+{
+    H5F_t       *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get a new "top level" file struct, sharing the same "low level" file struct */
+    /* Get a new "top level" file struct, sharing the same "low level" file struct */
+    if(NULL == (ret_value = H5F_new(f->shared, 0, H5P_FILE_CREATE_DEFAULT, 
+                                    H5P_FILE_ACCESS_DEFAULT, NULL)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to reopen file")
+
+    /* Duplicate old file's names */
+    ret_value->open_name = H5MM_xstrdup(f->open_name);
+    ret_value->actual_name = H5MM_xstrdup(f->actual_name);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_reopen() */
 
 
 /*-------------------------------------------------------------------------

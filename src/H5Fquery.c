@@ -32,10 +32,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"        /* Generic Functions            */
-#include "H5Eprivate.h"       /* Error handling              */
-#include "H5Fpkg.h"           /* File access                */
-#include "H5FDprivate.h"      /* File drivers                */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fpkg.h"             /* File access                              */
+#include "H5FDprivate.h"        /* File drivers                             */
 
 
 /****************/
@@ -243,6 +243,31 @@ H5F_get_file_id(const H5F_t *f)
     HDassert(f);
 
     FUNC_LEAVE_NOAPI(f->file_id)
+} /* end H5F_get_file_id() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_file_id_exists
+ *
+ * Purpose:     Determines if a file ID exists for this file struct
+ *
+ * Return:      'file_id' on success/abort on failure (shouldn't fail)
+ *              XXX: It is a *terrible* idea to use a boolean for the
+ *                   return value. Semantically, this is wildly incorrect.
+ *
+ * Programmer:	Quincey Koziol, July 20, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_file_id_exists(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->id_exists)
 } /* end H5F_get_file_id() */
 
 
