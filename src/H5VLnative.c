@@ -105,7 +105,6 @@ static herr_t H5VL_native_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL
 static herr_t H5VL_native_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 
 /* Object callbacks */
-#if 0
 static void *H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
                                       void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
@@ -113,7 +112,6 @@ static herr_t H5VL_native_object_copy(void *src_obj, H5VL_loc_params_t loc_param
 static herr_t H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_object_optional(void *obj, hid_t dxpl_id, void **req, va_list arguments);
-#endif
 
 /* Datatype callbacks */
 static void *H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
@@ -184,11 +182,11 @@ static H5VL_class_t H5VL_native_g = {
         NULL                                        /* optional     */
     },
     {   /* object_cls */
-        NULL,                                       /* open         */
-        NULL,                                       /* copy         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL                                        /* optional     */
+        H5VL_native_object_open,                    /* open         */
+        H5VL_native_object_copy,                    /* copy         */
+        H5VL_native_object_get,                     /* get          */
+        H5VL_native_object_specific,                /* specific     */
+        H5VL_native_object_optional                 /* optional     */
     },
     {   /* async_cls */
         NULL,                                       /* cancel       */
@@ -2700,7 +2698,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_link_specific() */
 
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_object_open
@@ -2920,7 +2917,8 @@ H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_
                 void        *ref       = va_arg (arguments, void *);
 
                 /* Get name */
-                if((*ret = H5R_get_name(&loc, H5P_DEFAULT, dxpl_id, ref_type, ref, name, size)) < 0)
+                /* XXX: enable when H5R_get_name is fixed up */
+//                if((*ret = H5R_get_name(&loc, H5P_DEFAULT, dxpl_id, ref_type, ref, name, size)) < 0)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")
                 break;
             }
@@ -2994,14 +2992,17 @@ H5VL_native_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object
                 void *op_data = va_arg (arguments, void *);
 
                 /* Call internal object visitation routine */
-                if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Ovisit */
-                    if((ret_value = H5O_visit(&loc, ".", idx_type, order, op, op_data, 
-                                              H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
+                if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+                    /* H5Ovisit */
+                    /* XXX: enable when H5O_visit is fixed up */
+//                    if((ret_value = H5O_visit(&loc, ".", idx_type, order, op, op_data, H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 }
-                else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Ovisit_by_name */
-                    if((ret_value = H5O_visit(&loc, loc_params.loc_data.loc_by_name.name, idx_type, order, 
-                                              op, op_data, loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
+                else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
+                    /* H5Ovisit_by_name */
+                    /* XXX: enable when H5O_visit is fixed up */
+//                    if((ret_value = H5O_visit(&loc, loc_params.loc_data.loc_by_name.name, idx_type, order, 
+//                                              op, op_data, loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 }
                 else
@@ -3163,7 +3164,6 @@ H5VL_native_object_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_object_optional() */
-#endif
 
 
 /*-------------------------------------------------------------------------
