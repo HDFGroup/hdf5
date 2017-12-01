@@ -23,8 +23,8 @@
 #else
 #include <iostream>
 #endif
-#include <string>
 
+#include <string>
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 

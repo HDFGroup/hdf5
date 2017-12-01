@@ -27,10 +27,10 @@
  * The C++ API provides C++ wrappers for the HDF5 C Library.
  * 
  * It is assumed that the user has knowledge of the 
- * <a href="https://www.hdfgroup.org/HDF5/doc/H5.format.html">
+ * <a href="https://support.hdfgroup.org/HDF5/doc/H5.format.html">
  * HDF5 file format</a> and its components. 
  * For more information on the HDF5 C Library, see the 
- * <a href="https://www.hdfgroup.org/HDF5/doc/index.html"> 
+ * <a href="https://support.hdfgroup.org/HDF5/doc/index.html"> 
  * HDF5 Software Documentation</a> page.
  *
  * Because the HDF5 C Library maps very well to
@@ -50,13 +50,16 @@
     Dataspace Interface (H5S)         DataSpace
     Datatype Interface (H5T)          DataType and subclasses
   \endverbatim
+ *
+ * This <a href="./C2Cppfunction_map.mht">
+ * table </a> provides a map from the C APIs to the C++ member functions.
  * <br />
  * \section install_sec Installation
  *
  * The HDF5 C++ API is included with the HDF5 source code and can 
  * be obtained from 
- * <a href="https://www.hdfgroup.org/HDF5/release/obtainsrc.html">
- * https://www.hdfgroup.org/HDF5/release/obtainsrc.html</a>.
+ * <a href="https://support.hdfgroup.org/HDF5/release/obtainsrc.html">
+ * https://support.hdfgroup.org/HDF5/release/obtainsrc.html</a>.
  * 
  * Please refer to the release_docs/INSTALL file under the top directory 
  * of the HDF5 source code for information about installing, building, 
@@ -65,34 +68,34 @@
  * <br />
  */
 
-///     This example shows how to create datasets.
+///        This example shows how to create datasets.
 ///\par
 ///\example     create.cpp
 
 ///\par
-///     This example shows how to write datasets.
+///        This example shows how to write datasets.
 ///\example     writedata.cpp
 
 ///\par
-///     This example shows how to read datasets.
+///        This example shows how to read datasets.
 ///\example     readdata.cpp
 
 ///\par
-///     This example shows how to create a compound datatype,
-///     write an array which has the compound datatype to the file,
-///     and read back fields' subsets.
+///        This example shows how to create a compound datatype,
+///        write an array which has the compound datatype to the file,
+///        and read back fields' subsets.
 ///\example     compound.cpp
 
 ///\par
-///     This example shows how to work with extendible datasets.
+///        This example shows how to work with extendible datasets.
 ///\example     extend_ds.cpp
 
 ///\par
-///     This example shows how to read data from a chunked dataset.
+///        This example shows how to read data from a chunked dataset.
 ///\example     chunks.cpp
 
 ///\par
-///     This example shows how to work with groups.
+///        This example shows how to work with groups.
 ///\example     h5group.cpp
 
 #endif // __H5CppDoc_H

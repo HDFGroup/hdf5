@@ -401,7 +401,6 @@ option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
 if (BUILD_SHARED_LIBS)
   set (H5_ENABLE_SHARED_LIB YES)
-  set (LINK_SHARED_LIBS ${LINK_LIBS})
 endif ()
 set (H5_ENABLE_STATIC_LIB YES)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -486,6 +485,9 @@ if (MAKE_SYSTEM)
   set (CFG_INIT "")
 endif ()
 
+# Do not generate test programs by default
+option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
+
 #-----------------------------------------------------------------------------
 # Add some definitions for Debug Builds
 #-----------------------------------------------------------------------------
@@ -531,16 +533,15 @@ INCLUDE_DIRECTORIES (${HDF5_BINARY_DIR} ${HDF5_SRC_DIR} ${CMAKE_RUNTIME_OUTPUT_D
 set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MODULE_PATH})
 option (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 if (HDF5_ENABLE_PARALLEL)
-  include (FindMPI)
-  INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_PATH})
+  find_package(MPI REQUIRED)
   if (MPI_C_FOUND)
     set (H5_HAVE_PARALLEL 1)
     # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
     # and once set, they are cached as false and not regenerated
     set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}" )
     # Used by Fortran + MPI
-    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
-    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
+    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
   else ()
     message (STATUS "Parallel libraries not found")
   endif ()
@@ -574,6 +575,8 @@ include (UserMacros.cmake)
 #-----------------------------------------------------------------------------
 # Include filter (zlib, szip, etc.) macros
 #-----------------------------------------------------------------------------
+set (LINK_COMP_LIBS)
+set (LINK_COMP_SHARED_LIBS)
 include (CMakeFilters.cmake)
 
 #-----------------------------------------------------------------------------
@@ -648,7 +651,7 @@ endif ()
 #-----------------------------------------------------------------------------
 add_subdirectory (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
-if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
+if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
     ADD_DEPENDENCIES (${HDF5_LIB_TARGET} ZLIB)
     if (BUILD_SHARED_LIBS)
@@ -759,9 +762,22 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     option (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" ON)
 
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
+
+    set (LINK_Fortran_LIBS ${LINK_LIBS})
+    set (LINK_Fortran_SHARED_LIBS ${LINK_SHARED_LIBS})
+
     if (HDF5_ENABLE_F2003)
       if (NOT FORTRAN_HAVE_ISO_C_BINDING)
         set (HDF5_ENABLE_F2003 OFF)
+      endif ()
+    endif ()
+
+    # Parallel IO usage requires MPI to be Linked and Included
+    if (H5_HAVE_PARALLEL)
+      set (LINK_Fortran_LIBS ${LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
+      set (LINK_Fortran_SHARED_LIBS ${LINK_Fortran_SHARED_LIBS} ${MPI_Fortran_LIBRARIES})
+      if (MPI_Fortran_LINK_FLAGS)
+        set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
       endif ()
     endif ()
 
@@ -806,11 +822,11 @@ endif ()
 # Check if Fortran's default real is double precision. If it is and HL is
 # being built then configure should fail due to bug HDFFV-889.
 #-----------------------------------------------------------------------------
- if (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB )
-   if (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
-     message (FATAL_ERROR " **** Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use HDF5_BUILD_HL_LIB:BOOL=OFF **** ")
-   endif ()
- endif ()
+if (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB)
+  if (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
+    message (FATAL_ERROR " **** Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use HDF5_BUILD_HL_LIB:BOOL=OFF **** ")
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation

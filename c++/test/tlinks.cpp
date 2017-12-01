@@ -22,13 +22,10 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
@@ -44,9 +41,9 @@ using namespace H5;
 //#define H5G_TESTING
 
 //#include "h5test.h"
-//#include "H5Gpkg.h"           /* Groups                               */
-//#include "H5Iprivate.h"               /* IDs                                  */
-//#include "H5Lprivate.h"         /* Links                                */
+//#include "H5Gpkg.h"       // Groups
+//#include "H5Iprivate.h"   // IDs
+//#include "H5Lprivate.h"   // Links
 
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"
@@ -117,22 +114,22 @@ const char *FILENAME[] = {
 #define MAX_NAME_LEN    ((64*1024)+1024)
 
 /* Link type IDs */
-#define UD_HARD_TYPE 201
-#define UD_CB_TYPE H5L_TYPE_MAX
-#define UD_PLIST_TYPE 128
-#define UD_CBFAIL_TYPE UD_PLIST_TYPE
-#define UD_ERROR_TYPE 189
-#define UD_BAD_TYPE1 H5L_TYPE_HARD
-#define UD_BAD_TYPE2 (H5L_TYPE_UD_MIN - 5)
-#define UD_BAD_VERS (H5L_LINK_CLASS_T_VERS + 1)
+#define UD_HARD_TYPE    201
+#define UD_CB_TYPE      H5L_TYPE_MAX
+#define UD_PLIST_TYPE   128
+#define UD_CBFAIL_TYPE  UD_PLIST_TYPE
+#define UD_ERROR_TYPE   189
+#define UD_BAD_TYPE1    H5L_TYPE_HARD
+#define UD_BAD_TYPE2    (H5L_TYPE_UD_MIN - 5)
+#define UD_BAD_VERS     (H5L_LINK_CLASS_T_VERS + 1)
 
-#define DEST_PROP_NAME "destination_group"
-#define REREG_TARGET_NAME "rereg_target"
+#define DEST_PROP_NAME      "destination_group"
+#define REREG_TARGET_NAME   "rereg_target"
 
-#define UD_CB_LINK_NAME "ud_callback_link"
+#define UD_CB_LINK_NAME     "ud_callback_link"
 #define NEW_UD_CB_LINK_NAME "ud_callback_link2"
-#define UD_CB_TARGET "ud_target"
-#define UD_CB_TARGET_LEN 10
+#define UD_CB_TARGET        "ud_target"
+#define UD_CB_TARGET_LEN    10
 
 #define LE_FILENAME "le_extlink1.h5"
 #define BE_FILENAME "be_extlink1.h5"
@@ -145,9 +142,9 @@ const char *FILENAME[] = {
 /* Creation order macros */
 #define CORDER_GROUP_NAME       "corder_group"
 #define CORDER_SOFT_GROUP_NAME  "corder_soft_group"
-#define CORDER_NLINKS               18
-#define CORDER_ITER_STOP            3
-#define CORDER_EST_ENTRY_LEN        9
+#define CORDER_NLINKS           18
+#define CORDER_ITER_STOP        3
+#define CORDER_EST_ENTRY_LEN    9
 
 /* Timestamp macros */
 #define TIMESTAMP_GROUP_1       "timestamp1"
@@ -328,21 +325,19 @@ static const char *FILENAME[] = {
  *
  * Purpose:     Test building a file with assorted links.
  *
- * Return:      Success:        0
+ * Return:      Success: 0
  *
- *              Failure:        -1
+ *              Failure: -1
  *
  * Programmer:  Binh-Minh Ribler
  *              October 16, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 {
-    hsize_t             size[1] = {1};
-    char                filename[NAME_BUF_SIZE];
+    hsize_t size[1] = {1};
+    char filename[NAME_BUF_SIZE];
 
     // Use the file access template id to create a file access prop. list.
     FileAccPropList fapl(fapl_id);
@@ -443,16 +438,14 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 /*-------------------------------------------------------------------------
  * Function:    test_num_links
  *
- * Purpose      Test setting and getting limit of number of links
+ * Purpose:     Test setting and getting limit of number of links
  *
- * Return       Success: 0
+ * Return:      Success: 0
  *
  *              Failure: -1
  *
- * Programmer   Binh-Minh Ribler
+ * Programmer:  Binh-Minh Ribler
  *              Mar, 2017
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -477,7 +470,7 @@ static void test_num_links(hid_t fapl_id, hbool_t new_format)
         size_t nlinks = 5;
         lapl.setNumLinks(nlinks);
 
-         // Read it back and verify
+        // Read it back and verify
         size_t read_nlinks = lapl.getNumLinks();
         verify_val(read_nlinks, nlinks, "LinkAccPropList::setNumLinks", __LINE__, __FILE__);
 
@@ -504,9 +497,9 @@ static void test_num_links(hid_t fapl_id, hbool_t new_format)
 extern "C"
 void test_links()
 {
-    hid_t       fapl_id, fapl2_id;    /* File access property lists */
-    hbool_t new_format;     /* Whether to use the new format or not */
-    const char  *envval;
+    hid_t fapl_id, fapl2_id;    // File access property lists
+    hbool_t new_format;         // Whether to use the new format or not
+    const char *envval;
 
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
@@ -686,8 +679,6 @@ void test_links()
  *
  * Programmer:  Binh-Minh Ribler
  *              October 16, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

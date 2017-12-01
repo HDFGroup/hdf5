@@ -70,6 +70,65 @@ VarLenType::VarLenType(const DataType* base_type) : DataType()
 }
 
 //--------------------------------------------------------------------------
+// Function:    VarLenType overloaded constructor
+///\brief       Creates an VarLenType instance by opening an HDF5 variable
+///             length datatype given its name, provided as a C char*.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Variable length type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openVarLenType(const char*) to
+//              improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+VarLenType::VarLenType(const H5Location& loc, const char *type_name) : DataType()
+{
+    id = p_opentype(loc, type_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:    VarLenType overloaded constructor
+///\brief       Creates an VarLenType instance by opening an HDF5 variable
+///             length datatype given its name, provided as an \c H5std_string.
+///\param       loc       - IN: Location of the type
+///\param       type_name - IN: Variable length type name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+// Description
+//              In 1.8.20, this constructor was introduced and may replace the
+//              existing function CommonFG::openVarLenType(const H5std_string&) to
+//              improve usability.
+//              -BMR, Sept 2017
+//--------------------------------------------------------------------------
+VarLenType::VarLenType(const H5Location& loc, const H5std_string& type_name) : DataType()
+{
+    id = p_opentype(loc, type_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    VarLenType::decode
+///\brief       Returns an VarLenType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+//--------------------------------------------------------------------------
+DataType* VarLenType::decode() const
+{
+    hid_t encoded_vltype_id = H5I_INVALID_HID;
+    try {
+        encoded_vltype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    VarLenType *encoded_vltype = new VarLenType;
+    encoded_vltype->p_setId(encoded_vltype_id);
+    return(encoded_vltype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    VarLenType destructor
 ///\brief       Properly terminates access to this datatype.
 // Programmer   Binh-Minh Ribler - May, 2004

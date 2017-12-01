@@ -9,7 +9,6 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #define SIMPLE_TEST(x) int main(){ x; return 0; }
 
 #ifdef HAVE_C99_DESIGNATED_INITIALIZER

@@ -22,9 +22,6 @@
  * This is a module of useful timing functions for performance testing.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "H5private.h"
 #include "hdf5.h"
 
@@ -53,9 +50,9 @@ io_time_t   *timer_g;            /* timer: global for stub functions     */
 static double sub_time(struct timeval* a, struct timeval* b)
 {
     return (((double)a->tv_sec +
-     ((double)a->tv_usec) / MICROSECOND) -
+     ((double)a->tv_usec) / (double)MICROSECOND) -
   ((double)b->tv_sec +
-   ((double)b->tv_usec) / MICROSECOND));
+   ((double)b->tv_usec) / (double)MICROSECOND));
 }
 
 
@@ -195,8 +192,9 @@ set_time(io_time_t *pt, timer_type t, int start_stop)
 
             }
 	break;
+
     default:
-	HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
+	    HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
 	    return NULL;
     } /* end switch */
 

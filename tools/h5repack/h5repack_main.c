@@ -50,8 +50,8 @@ static struct long_options l_opts[] = {
     { "metadata_block_size", require_arg, 'M' },
     { "threshold", require_arg, 't' },
     { "alignment", require_arg, 'a' },
-    { "infile", require_arg, 'i' }, /* -i for backward compability */
-    { "outfile", require_arg, 'o' }, /* -o for backward compability */
+    { "infile", require_arg, 'i' },   /* -i for backward compability */
+    { "outfile", require_arg, 'o' },  /* -o for backward compability */
     { "sort_by", require_arg, 'q' },
     { "sort_order", require_arg, 'z' },
     { "enable-error-stack", no_arg, 'E' },
@@ -93,7 +93,7 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -f FILT, --filter=FILT  Filter type\n");
     PRINTVALSTREAM(rawoutstream, "   -l LAYT, --layout=LAYT  Layout type\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
+    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0)\n");
     PRINTVALSTREAM(rawoutstream, "    E - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "    S - is an integer\n");
     PRINTVALSTREAM(rawoutstream, "    U - is a filename.\n");
@@ -134,8 +134,8 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "        NBIT (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
     PRINTVALSTREAM(rawoutstream, "            is either IN or DS\n");
-    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>\n");
-    PRINTVALSTREAM(rawoutstream, "            required values for filter_number,cd_value_count,value_1\n");
+    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,filter_flag,cd_value_count,value_1[,value_2,...,value_N]>\n");
+    PRINTVALSTREAM(rawoutstream, "            required values for filter_number,filter_flag,cd_value_count,value_1\n");
     PRINTVALSTREAM(rawoutstream, "            optional values for value_2 to value_N\n");
     PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -170,16 +170,16 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2\n");
     PRINTVALSTREAM(rawoutstream, "   and remove filters to objects dset3, dset4, dset5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "4) h5repack -L -c 10 -s 20:dtype file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "4) h5repack -L -c 10 -s 20:dtype file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Using latest file format with maximum compact group size of 10 and\n");
     PRINTVALSTREAM(rawoutstream, "   and minimum shared datatype size of 20\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add both filters SHUF and GZIP in this order to all datasets\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,1,9 file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,0,1,9 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add bzip2 filter to all datasets\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -191,10 +191,6 @@ static void usage(const char *prog) {
  * Purpose:     Shutdown MPI & HDF5 and call exit()
  *
  * Return:      Does not return
- *
- * Programmer:  Quincey Koziol
- *              Saturday, 31. January 2004
- *
  *-------------------------------------------------------------------------
  */
 static void leave(int ret)
@@ -209,11 +205,6 @@ static void leave(int ret)
  * Purpose: read comp and chunk options from a file
  *
  * Return: void, exit on error
- *
- * Programmer: pvn@ncsa.uiuc.edu
- *
- * Date: September, 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -395,7 +386,6 @@ set_sort_order(const char *form)
  * Function: parse_command_line
  *
  * Purpose: parse command line input
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -408,13 +398,13 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char) opt) {
 
-            /* -i for backward compability */
+            /* -i for backward compatibility */
             case 'i':
                 infile = opt_arg;
                 has_i_o = 1;
                 break;
 
-            /* -o for backward compability */
+            /* -o for backward compatibility */
             case 'o':
                 outfile = opt_arg;
                 has_i_o = 1;
@@ -598,13 +588,6 @@ done:
  * Return: Success: EXIT_SUCCESS(0)
  *
  * Failure: EXIT_FAILURE(1)
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 int main(int argc, const char **argv)
@@ -636,8 +619,10 @@ int main(int argc, const char **argv)
     }
 
     /* initialize options  */
-    h5repack_init(&options, 0);
-
+    if (h5repack_init(&options, 0, FALSE) < 0) {
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 

@@ -10,8 +10,6 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "H5private.h"
 #include "h5tools.h"
@@ -249,17 +247,19 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
 
                 /* Keep copy of prefix before iterating into group */
                 old_prefix = HDstrdup(prefix);
-                HDassert(old_prefix);
+                if (old_prefix) {
+                    /* Append group name to prefix */
+                    add_prefix(&prefix, &prefix_len, name);
 
-                /* Append group name to prefix */
-                add_prefix(&prefix, &prefix_len, name);
+                    /* Iterate into group */
+                    dump_function_table->dump_group_function(obj, name);
 
-                /* Iterate into group */
-                dump_function_table->dump_group_function(obj, name);
-
-                /* Restore old prefix name */
-                HDstrcpy(prefix, old_prefix);
-                HDfree(old_prefix);
+                    /* Restore old prefix name */
+                    HDstrcpy(prefix, old_prefix);
+                    HDfree(old_prefix);
+                }
+                else
+                    error_msg("warning: null prefix\n");
 
                 /* Close group */
                 H5Gclose(obj);
@@ -388,131 +388,137 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
 
         switch(linfo->type) {
         case H5L_TYPE_SOFT:
-            targbuf = (char *)HDmalloc(linfo->u.val_size);
-            HDassert(targbuf);
-
-            ctx.need_prefix = TRUE;
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "%s \"%s\" %s",
-                    h5tools_dump_header_format->softlinkbegin, name,
-                    h5tools_dump_header_format->softlinkblockbegin);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-
-            ctx.indent_level++;
-
-            if(H5Lget_val(group, name, targbuf, linfo->u.val_size, H5P_DEFAULT) < 0) {
-                error_msg("unable to get link value\n");
+            if((targbuf = (char *)HDmalloc(linfo->u.val_size)) == NULL) {
+                error_msg("unable to allocate buffer\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret = FAIL;
             }
             else {
-                /* print the value of a soft link */
-                /* Standard DDL: no modification */
+                ctx.need_prefix = TRUE;
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "%s \"%s\" %s",
+                        h5tools_dump_header_format->softlinkbegin, name,
+                        h5tools_dump_header_format->softlinkblockbegin);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+
+                ctx.indent_level++;
+
+                if(H5Lget_val(group, name, targbuf, linfo->u.val_size, H5P_DEFAULT) < 0) {
+                    error_msg("unable to get link value\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret = FAIL;
+                }
+                else {
+                    /* print the value of a soft link */
+                    /* Standard DDL: no modification */
+                    ctx.need_prefix = TRUE;
+                    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                    /* Render the element */
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "LINKTARGET \"%s\"", targbuf);
+                    h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                }
+
+                ctx.indent_level--;
+
                 ctx.need_prefix = TRUE;
                 h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "LINKTARGET \"%s\"", targbuf);
-                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            }
-
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            if(HDstrlen(h5tools_dump_header_format->softlinkblockend)) {
-                h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->softlinkblockend);
+                if(HDstrlen(h5tools_dump_header_format->softlinkblockend)) {
+                    h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->softlinkblockend);
+                    if(HDstrlen(h5tools_dump_header_format->softlinkend))
+                        h5tools_str_append(&buffer, " ");
+                }
                 if(HDstrlen(h5tools_dump_header_format->softlinkend))
-                    h5tools_str_append(&buffer, " ");
-            }
-            if(HDstrlen(h5tools_dump_header_format->softlinkend))
-                h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->softlinkend);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                    h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->softlinkend);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-            HDfree(targbuf);
+                HDfree(targbuf);
+            }
             break;
 
         case H5L_TYPE_EXTERNAL:
-            targbuf = (char *)HDmalloc(linfo->u.val_size);
-            HDassert(targbuf);
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "%s \"%s\" %s",
-                    h5tools_dump_header_format->extlinkbegin, name,
-                    h5tools_dump_header_format->extlinkblockbegin);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-
-            if(H5Lget_val(group, name, targbuf, linfo->u.val_size, H5P_DEFAULT) < 0) {
-                indentation(dump_indent);
-                error_msg("unable to get external link value\n");
+            if((targbuf = (char *)HDmalloc(linfo->u.val_size)) == NULL) {
+                error_msg("unable to allocate buffer\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret = FAIL;
-            } /* end if */
+            }
             else {
-                const char *filename;
-                const char *targname;
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
-                if(H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &targname) < 0) {
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "%s \"%s\" %s",
+                        h5tools_dump_header_format->extlinkbegin, name,
+                        h5tools_dump_header_format->extlinkblockbegin);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+
+                if(H5Lget_val(group, name, targbuf, linfo->u.val_size, H5P_DEFAULT) < 0) {
                     indentation(dump_indent);
-                    error_msg("unable to unpack external link value\n");
+                    error_msg("unable to get external link value\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
                 } /* end if */
                 else {
-                    ctx.indent_level++;
+                    const char *filename;
+                    const char *targname;
 
-                    ctx.need_prefix = TRUE;
-                    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+                    if(H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &targname) < 0) {
+                        indentation(dump_indent);
+                        error_msg("unable to unpack external link value\n");
+                        h5tools_setstatus(EXIT_FAILURE);
+                        ret = FAIL;
+                    } /* end if */
+                    else {
+                        ctx.indent_level++;
 
-                    /* Render the element */
-                    h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer, "TARGETFILE \"%s\"", filename);
-                    h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                        ctx.need_prefix = TRUE;
+                        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
-                    ctx.need_prefix = TRUE;
-                    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+                        /* Render the element */
+                        h5tools_str_reset(&buffer);
+                        h5tools_str_append(&buffer, "TARGETFILE \"%s\"", filename);
+                        h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                    /* Render the element */
-                    h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer, "TARGETPATH \"%s\"", targname);
-                    h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                        ctx.need_prefix = TRUE;
+                        h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
-                    /* dump the external link */
-                    dump_extlink(group, name, targname);
-                    ctx.indent_level--;
+                        /* Render the element */
+                        h5tools_str_reset(&buffer);
+                        h5tools_str_append(&buffer, "TARGETPATH \"%s\"", targname);
+                        h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+
+                        /* dump the external link */
+                        dump_extlink(group, name, targname);
+                        ctx.indent_level--;
+                    } /* end else */
                 } /* end else */
-            } /* end else */
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            if(HDstrlen(h5tools_dump_header_format->extlinkblockend)) {
-                h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->extlinkblockend);
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                if(HDstrlen(h5tools_dump_header_format->extlinkblockend)) {
+                    h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->extlinkblockend);
+                    if(HDstrlen(h5tools_dump_header_format->extlinkend))
+                        h5tools_str_append(&buffer, " ");
+                }
                 if(HDstrlen(h5tools_dump_header_format->extlinkend))
-                    h5tools_str_append(&buffer, " ");
-            }
-            if(HDstrlen(h5tools_dump_header_format->extlinkend))
-                h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->extlinkend);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                    h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->extlinkend);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-            HDfree(targbuf);
+                HDfree(targbuf);
+            }
             break;
 
         case H5L_TYPE_ERROR:
         case H5L_TYPE_MAX:
-            HDassert(0);
-            /* fall through */
         case H5L_TYPE_HARD:
         default:
             ctx.need_prefix = TRUE;
@@ -1062,7 +1068,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
             case H5T_NO_CLASS:
             case H5T_NCLASSES:
             default:
-                HDassert(0);
+                error_msg("invalid H5TCLASS type\n");
                 break;
             } /* end switch */
         } /* for(u=0; u<data_loop; u++) */
@@ -1924,8 +1930,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
 
         case H5L_TYPE_ERROR:
         case H5L_TYPE_MAX:
-            HDassert(0);
-            /* fall through */
         case H5L_TYPE_HARD:
         default:
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);

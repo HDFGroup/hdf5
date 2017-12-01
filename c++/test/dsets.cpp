@@ -28,16 +28,12 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
 #include "H5Cpp.h"      // C++ API header file
-
-    using namespace H5;
+using namespace H5;
 
 #include "h5cpputil.h"  // C++ utilility header file
 
@@ -69,8 +65,6 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
  *
  * Programmer:  Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -202,8 +196,6 @@ test_create( H5File& file)
  * Programmer:  Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -288,8 +280,6 @@ test_simple_io( H5File& file)
  * Programmer:  Binh-Minh Ribler
  *              Thursday, March 22, 2012
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -357,8 +347,6 @@ test_datasize(FileAccPropList &fapl)
  *
  * Programmer:  Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -452,8 +440,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Programmer:  Robb Matzke
  *              Tuesday, April 21, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -480,8 +466,6 @@ filter_bogus(unsigned int flags, size_t cd_nelmts,
  *
  * Programmer:  Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -884,8 +868,6 @@ static herr_t test_nbit_compression(H5File& file)
  * Programmer:  Binh-Minh Ribler (using C version)
  *              Saturday, February 17, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -965,8 +947,6 @@ test_multiopen (H5File& file)
  *
  * Programmer:  Binh-Minh Ribler (using C version)
  *              February 17, 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1222,8 +1202,6 @@ void test_dset()
  * Return:      none
  *
  * Programmer:  (use C version)
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

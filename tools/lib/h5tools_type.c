@@ -21,12 +21,6 @@
  *
  * Return: Success:    datatype ID
  *         Failure:    FAIL
- *
- * Programmer: Pedro Vicente Nunes
- *             Tuesday, July 18, 2006
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -43,40 +37,40 @@ h5tools_get_little_endian_type(hid_t tid)
 
     switch(type_class) {
         case H5T_INTEGER:
-            if ( size == 1 && sign == H5T_SGN_2)
-                p_type=H5Tcopy(H5T_STD_I8LE);
-            else if ( size == 2 && sign == H5T_SGN_2)
-                p_type=H5Tcopy(H5T_STD_I16LE);
-            else if ( size == 4 && sign == H5T_SGN_2)
-                p_type=H5Tcopy(H5T_STD_I32LE);
-            else if ( size == 8 && sign == H5T_SGN_2)
-                p_type=H5Tcopy(H5T_STD_I64LE);
-            else if ( size == 1 && sign == H5T_SGN_NONE)
-                p_type=H5Tcopy(H5T_STD_U8LE);
-            else if ( size == 2 && sign == H5T_SGN_NONE)
-                p_type=H5Tcopy(H5T_STD_U16LE);
-            else if ( size == 4 && sign == H5T_SGN_NONE)
-                p_type=H5Tcopy(H5T_STD_U32LE);
-            else if ( size == 8 && sign == H5T_SGN_NONE)
-                p_type=H5Tcopy(H5T_STD_U64LE);
+            if (size == 1 && sign == H5T_SGN_2)
+                p_type = H5Tcopy(H5T_STD_I8LE);
+            else if (size == 2 && sign == H5T_SGN_2)
+                p_type = H5Tcopy(H5T_STD_I16LE);
+            else if (size == 4 && sign == H5T_SGN_2)
+                p_type = H5Tcopy(H5T_STD_I32LE);
+            else if (size == 8 && sign == H5T_SGN_2)
+                p_type = H5Tcopy(H5T_STD_I64LE);
+            else if (size == 1 && sign == H5T_SGN_NONE)
+                p_type = H5Tcopy(H5T_STD_U8LE);
+            else if (size == 2 && sign == H5T_SGN_NONE)
+                p_type = H5Tcopy(H5T_STD_U16LE);
+            else if (size == 4 && sign == H5T_SGN_NONE)
+                p_type = H5Tcopy(H5T_STD_U32LE);
+            else if (size == 8 && sign == H5T_SGN_NONE)
+                p_type = H5Tcopy(H5T_STD_U64LE);
             break;
 
         case H5T_FLOAT:
-            if ( size == 4)
-                p_type=H5Tcopy(H5T_IEEE_F32LE);
-            else if ( size == 8)
-                p_type=H5Tcopy(H5T_IEEE_F64LE);
+            if (size == 4)
+                p_type = H5Tcopy(H5T_IEEE_F32LE);
+            else if (size == 8)
+                p_type = H5Tcopy(H5T_IEEE_F64LE);
             break;
 
         case H5T_BITFIELD:
-            if ( size == 1)
-                p_type=H5Tcopy(H5T_STD_B8LE);
-            else if ( size == 2)
-                p_type=H5Tcopy(H5T_STD_B16LE);
-            else if ( size == 4)
-                p_type=H5Tcopy(H5T_STD_B32LE);
-            else if ( size == 8)
-                p_type=H5Tcopy(H5T_STD_B64LE);
+            if (size == 1)
+                p_type = H5Tcopy(H5T_STD_B8LE);
+            else if (size == 2)
+                p_type = H5Tcopy(H5T_STD_B16LE);
+            else if (size == 4)
+                p_type = H5Tcopy(H5T_STD_B32LE);
+            else if (size == 8)
+                p_type = H5Tcopy(H5T_STD_B64LE);
             break;
 
         case H5T_TIME:
@@ -92,7 +86,6 @@ h5tools_get_little_endian_type(hid_t tid)
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
-            HDassert(0);
             break;
 
     } /* end switch */
@@ -108,18 +101,12 @@ h5tools_get_little_endian_type(hid_t tid)
  *
  * Return: Success:    datatype ID
  *         Failure:    FAIL
- *
- * Programmer: Pedro Vicente Nunes
- *             Tuesday, July 18, 2006
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t
 h5tools_get_big_endian_type(hid_t tid)
 {
-    hid_t       p_type=-1;
+    hid_t       p_type = -1;
     H5T_class_t type_class;
     size_t      size;
     H5T_sign_t  sign;
@@ -130,39 +117,39 @@ h5tools_get_big_endian_type(hid_t tid)
 
     switch(type_class) {
         case H5T_INTEGER:
-            if ( size == 1 && sign == H5T_SGN_2)
-                p_type=H5Tcopy(H5T_STD_I8BE);
-            else if ( size == 2 && sign == H5T_SGN_2)
-                p_type=H5Tcopy(H5T_STD_I16BE);
-            else if ( size == 4 && sign == H5T_SGN_2)
-                p_type=H5Tcopy(H5T_STD_I32BE);
-            else if ( size == 8 && sign == H5T_SGN_2)
-                p_type=H5Tcopy(H5T_STD_I64BE);
-            else if ( size == 1 && sign == H5T_SGN_NONE)
-                p_type=H5Tcopy(H5T_STD_U8BE);
-            else if ( size == 2 && sign == H5T_SGN_NONE)
-                p_type=H5Tcopy(H5T_STD_U16BE);
-            else if ( size == 4 && sign == H5T_SGN_NONE)
-                p_type=H5Tcopy(H5T_STD_U32BE);
-            else if ( size == 8 && sign == H5T_SGN_NONE)
-                p_type=H5Tcopy(H5T_STD_U64BE);
+            if (size == 1 && sign == H5T_SGN_2)
+                p_type = H5Tcopy(H5T_STD_I8BE);
+            else if (size == 2 && sign == H5T_SGN_2)
+                p_type = H5Tcopy(H5T_STD_I16BE);
+            else if (size == 4 && sign == H5T_SGN_2)
+                p_type = H5Tcopy(H5T_STD_I32BE);
+            else if (size == 8 && sign == H5T_SGN_2)
+                p_type = H5Tcopy(H5T_STD_I64BE);
+            else if (size == 1 && sign == H5T_SGN_NONE)
+                p_type = H5Tcopy(H5T_STD_U8BE);
+            else if (size == 2 && sign == H5T_SGN_NONE)
+                p_type = H5Tcopy(H5T_STD_U16BE);
+            else if (size == 4 && sign == H5T_SGN_NONE)
+                p_type = H5Tcopy(H5T_STD_U32BE);
+            else if (size == 8 && sign == H5T_SGN_NONE)
+                p_type = H5Tcopy(H5T_STD_U64BE);
             break;
 
         case H5T_FLOAT:
-            if ( size == 4)
-                p_type=H5Tcopy(H5T_IEEE_F32BE);
-            else if ( size == 8)
-                p_type=H5Tcopy(H5T_IEEE_F64BE);
+            if (size == 4)
+                p_type = H5Tcopy(H5T_IEEE_F32BE);
+            else if (size == 8)
+                p_type = H5Tcopy(H5T_IEEE_F64BE);
             break;
 
         case H5T_BITFIELD:
-            if ( size == 1)
-                p_type=H5Tcopy(H5T_STD_B8BE);
-            else if ( size == 2)
-                p_type=H5Tcopy(H5T_STD_B16BE);
-            else if ( size == 4)
-                p_type=H5Tcopy(H5T_STD_B32BE);
-            else if ( size == 8)
+            if (size == 1)
+                p_type = H5Tcopy(H5T_STD_B8BE);
+            else if (size == 2)
+                p_type = H5Tcopy(H5T_STD_B16BE);
+            else if (size == 4)
+                p_type = H5Tcopy(H5T_STD_B32BE);
+            else if (size == 8)
                 p_type=H5Tcopy(H5T_STD_B64BE);
             break;
 
@@ -179,7 +166,6 @@ h5tools_get_big_endian_type(hid_t tid)
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
-            HDassert(0);
             break;
     } /* end switch */
 

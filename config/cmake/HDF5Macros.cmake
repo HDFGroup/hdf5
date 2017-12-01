@@ -8,7 +8,7 @@
 # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
-
+#
 #-------------------------------------------------------------------------------
 macro (H5_SET_LIB_OPTIONS libtarget libname libtype)
   set (LIB_OUT_NAME "${libname}")

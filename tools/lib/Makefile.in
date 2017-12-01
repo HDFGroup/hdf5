@@ -581,6 +581,7 @@ dvidir = @dvidir@
 enable_shared = @enable_shared@
 enable_static = @enable_static@
 exec_prefix = @exec_prefix@
+fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@

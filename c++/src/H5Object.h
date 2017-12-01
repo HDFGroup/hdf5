@@ -33,6 +33,7 @@ namespace H5 {
         Apr 2, 2014: Added wrapper getObjName for H5Iget_name -BMR
 */
 //  Inheritance: H5Location -> IdComponent
+
 class H5_DLLCPP H5Object : public H5Location {
    public:
         // Creates an attribute for the specified object
@@ -59,6 +60,9 @@ class H5_DLLCPP H5Object : public H5Location {
         void removeAttr(const char* name) const;
         void removeAttr(const H5std_string& name) const;
 
+        // Determines the number of attributes belong to this object.
+        int getNumAttrs() const;
+
         // Gets the name of this HDF5 object, i.e., Group, DataSet, or
         // DataType.
         ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
@@ -81,7 +85,7 @@ class H5_DLLCPP H5Object : public H5Location {
         // removal does not raise any problems in two 1.10 releases.
 
         // Creates a copy of an existing object giving the object id
-        H5Object(const hid_t object_id);
+        // H5Object(const hid_t object_id);
 
         // Copy constructor: makes copy of an H5Object object.
         // H5Object(const H5Object& original);

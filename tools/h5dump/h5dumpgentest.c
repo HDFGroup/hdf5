@@ -112,6 +112,7 @@
 #define FILE82  "tcompound_complex2.h5"
 #define FILE83  "tvlenstr_array.h5"
 #define FILE84  "tudfilter.h5"
+#define FILE85  "tgrpnullspace.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -9810,9 +9811,16 @@ static void gent_compound_complex2(void)
 
     compound        buf[F82_DIM32];        /* compound */
 
-    hid_t file, grp=-1, type=-1, space=-1, dset=-1;
-    hid_t dset_array_a, dset_array_b, dset_array_c;
-    hid_t cmpd_tid1, cmpd_tid2, cmpd_tid3;
+    hid_t file = -1, 
+          type = -1, 
+          space = -1, 
+          dset = -1;
+    hid_t dset_array_a, 
+          dset_array_b, 
+          dset_array_c;
+    hid_t cmpd_tid1 = -1, 
+          cmpd_tid2 = -1, 
+          cmpd_tid3 = -1;
     size_t  i;
     size_t j, k;
     unsigned dset_array_ndims;
@@ -9824,6 +9832,10 @@ static void gent_compound_complex2(void)
     if ((space = H5Screate_simple(F82_RANK, &nelmts, NULL)) >= 0) {
         /* CompoundComplex1D */
         if ((type = H5Tcreate(H5T_COMPOUND, sizeof(compound))) >= 0) {
+            hid_t str_type, array;
+            hsize_t dims[1];
+            hid_t nest1, nest2;
+
             /* Insert top-level array members */
             dset_array_ndims = 1; dset_array_a_dims[0] = 4;
             dset_array_a = H5Tarray_create2(H5T_STD_U32LE, dset_array_ndims, dset_array_a_dims);
@@ -9841,8 +9853,6 @@ static void gent_compound_complex2(void)
             H5Tclose(dset_array_c);
 
             /* Insert first nested compound */
-            hid_t str_type, array;
-            hsize_t dims[1];
             cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(nested_compound));
 
             H5Tinsert(cmpd_tid1, "nested_double", HOFFSET(nested_compound, nested_a), H5T_IEEE_F64LE);
@@ -9864,7 +9874,6 @@ static void gent_compound_complex2(void)
             H5Tinsert(type, "nested_compound", HOFFSET(compound, d), cmpd_tid1);
 
             /* Insert second nested compound */
-            hid_t nest1, nest2;
             cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(multiple_nested_compound));
 
             H5Tinsert(cmpd_tid2, "nested_float", HOFFSET(multiple_nested_compound, a), H5T_IEEE_F32LE);
@@ -9954,10 +9963,10 @@ static void gent_compound_complex2(void)
                     /* Set up first nested compound */
                     buf[i].d.nested_a = (double) i;
 
-                    strcpy(buf[i].d.nested_string, "This is a test string.");
+                    HDstrcpy(buf[i].d.nested_string, "This is a test string.");
 
                     for (j = 0; j < 4; j++)
-                        strcpy(buf[i].d.nested_string_array[j], "String test");
+                        HDstrcpy(buf[i].d.nested_string_array[j], "String test");
 
                     /* Set up multiple nested compound */
                     buf[i].e.a = (float) i;
@@ -9969,9 +9978,9 @@ static void gent_compound_complex2(void)
                         buf[i].e.b.multiple_nested_d[j] = (long)(j - i*10);
                     }
 
-                    strcpy(buf[i].e.c.further_nested_string, "1234567890");
+                    HDstrcpy(buf[i].e.c.further_nested_string, "1234567890");
                     for (j = 0; j < 4; j++)
-                        strcpy(buf[i].e.c.further_nested_string_array[j], "STRING ARRAY");
+                        HDstrcpy(buf[i].e.c.further_nested_string_array[j], "STRING ARRAY");
 
                     for (j = 0; j < 10; j++) {
                         buf[i].e.c.deep_nest.deep_nested_short[j] = (short)(j + i*10);
@@ -9983,7 +9992,7 @@ static void gent_compound_complex2(void)
                 }
 
                 if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                    fprintf(stderr, "gent_tcompound_complex2 H5Dwrite failed\n");
+                    HDfprintf(stderr, "gent_tcompound_complex2 H5Dwrite failed\n");
 
                 H5Dclose(dset);
             }
@@ -10069,7 +10078,6 @@ static void gent_compound_complex2(void)
         H5Tclose(type);
     }
 */
-
     H5Fclose(file);
 }
 
@@ -10122,7 +10130,7 @@ static void gent_vlenstr_array(void)
         if ((type = H5Tarray_create2(array_tid, F83_RANK, arraydim)) >= 0) {
             if ((dset = H5Dcreate2(file, F83_DATASETNAME, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                 if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
-                    fprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
+                    HDfprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
 
                 H5Dclose(dset);
             }
@@ -10168,7 +10176,6 @@ static void gent_udfilter(void)
     hid_t    dcpl; /* dataset creation property list */
     hid_t    dsid;  /* dataset ID */
     hid_t    sid;  /* dataspace ID */
-    hid_t    tid;  /* datatype ID */
 
     hsize_t  dims1[RANK]      = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
@@ -10289,6 +10296,43 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
  *-------------------------------------------------------------------------
  */
 
+/*-------------------------------------------------------------------------
+ * Function: gent_null_space_group
+ *
+ * Purpose: generates dataset and attribute of null dataspace in a group
+ *-------------------------------------------------------------------------
+ */
+static void gent_null_space_group(void)
+{
+    hid_t fid, root, group, dataset, space, attr;
+    int dset_buf = 10;
+    int point = 4;
+
+    fid = H5Fcreate(FILE85, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    root = H5Gopen2(fid, "/", H5P_DEFAULT);
+
+    group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* null space */
+    space = H5Screate(H5S_NULL);
+
+    /* dataset */
+    dataset = H5Dcreate2(group, "dset", H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    /* nothing should be written */
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dset_buf);
+
+    /* attribute */
+    attr = H5Acreate2(group, "attr", H5T_NATIVE_UINT, space, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, H5T_NATIVE_INT, &point); /* Nothing can be written */
+
+    H5Dclose(dataset);
+    H5Aclose(attr);
+    H5Gclose(group);
+    H5Gclose(root);
+    H5Sclose(space);
+    H5Fclose(fid);
+}
+
 int main(void)
 {
     gent_group();
@@ -10376,6 +10420,7 @@ int main(void)
     gent_bitnopaquefields();
 
     gent_intsfourdims();
+    gent_null_space_group();
 
     gent_udfilter();
 

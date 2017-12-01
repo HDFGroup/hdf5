@@ -22,13 +22,10 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
@@ -81,18 +78,22 @@ typedef enum int_t {
     INT_LONG, INT_ULONG, INT_LLONG, INT_ULLONG, INT_OTHER
 } int_t;
 
+typedef struct {
+    int    a;
+    float  b;
+    long   c;
+    double d;
+} src_typ_t;
 
 /*-------------------------------------------------------------------------
  * Function:    test_classes
  *
  * Purpose:     Test type classes
  *
- * Return:      None.
+ * Return:      None
  *
  * Programmer:  Binh-Minh Ribler (using C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -126,14 +127,10 @@ static void test_classes()
  *
  * Purpose:     Test datatype copy functionality
  *
- * Return:      Success:        0
- *
- *              Failure:        number of errors
+ * Return:      None
  *
  * Programmer:  Binh-Minh Ribler (using C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -183,14 +180,10 @@ static void test_copy()
  *
  * Purpose:     Tests query functions of compound and enumeration types.
  *
- * Return:      Success:        0
- *
- *              Failure:        number of errors
+ * Return:      None
  *
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -200,12 +193,6 @@ const H5std_string EnumT_NAME("Enum_type");
 
 static void test_query()
 {
-    typedef struct {
-        int    a;
-        float  b;
-        long   c;
-        double d;
-    } src_typ_t;
     short       enum_val;
 
     // Output message about test being performed
@@ -311,14 +298,10 @@ static void test_query()
  *
  * Purpose:     Tests transient datatypes.
  *
- * Return:      Success:        0
- *
- *              Failure:        number of errors
+ * Return:      None
  *
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -390,14 +373,10 @@ static void test_transient ()
  *
  * Purpose:     Tests named datatypes.
  *
- * Return:      Success:        0
- *
- *              Failure:        number of errors
+ * Return:      None
  *
  * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -550,6 +529,227 @@ static void test_named ()
 }   // test_named
 
 
+/*-------------------------------------------------------------------------
+ * Function:    test_encode_decode
+ *
+ * Purpose:     Test datatype encode/decode functionality.
+ *
+ * Return:      None
+ *
+ * Programmer:  Binh-Minh Ribler (using C version)
+ *              October, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5std_string filename3("encode_decode.h5");
+const int ARRAY1_RANK = 1;
+const int ARRAY1_DIM = 10;
+static void test_encode_decode()
+{
+    short        enum_val;
+
+    SUBTEST("DataType::encode() and DataType::decode()");
+    try {
+        // Create the file.
+        H5File file(filename3, H5F_ACC_TRUNC);
+
+        //
+        // Test with CompType
+        //
+
+        // Create a compound datatype
+        CompType cmptyp(sizeof(src_typ_t));
+
+        cmptyp.insertMember("a", HOFFSET(src_typ_t, a), PredType::NATIVE_INT);
+        cmptyp.insertMember("b", HOFFSET(src_typ_t, b), PredType::NATIVE_FLOAT);
+        cmptyp.insertMember("c", HOFFSET(src_typ_t, c), PredType::NATIVE_LONG);
+        cmptyp.insertMember("d", HOFFSET(src_typ_t, d), PredType::NATIVE_DOUBLE);
+
+        // Encode compound type in its buffer
+        cmptyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(cmptyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Decode compound type's buffer to a new CompType
+        CompType* decoded_cmp_ptr(static_cast<CompType *>(cmptyp.decode()));
+
+        // Verify that the datatype was copied exactly via encoding/decoding
+        verify_val(cmptyp == *decoded_cmp_ptr, true, "DataType::decode", __LINE__, __FILE__);
+
+        // Verify again via querying member number and member index by name.
+        verify_val(decoded_cmp_ptr->getNmembers(), 4, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_cmp_ptr->getMemberIndex("c"), 2, "DataType::decode", __LINE__, __FILE__);
+
+        // Create a CompType instance from the pointer and verify it
+        CompType cmptyp_clone(*decoded_cmp_ptr);
+        verify_val(cmptyp == cmptyp_clone, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(cmptyp_clone.getNmembers(), 4, "DataType::decode", __LINE__, __FILE__);
+        verify_val(cmptyp_clone.getMemberIndex("c"), 2, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_cmp_ptr;
+
+        //
+        // Test with EnumType
+        //
+
+        // Create a enumerate datatype
+        EnumType enumtyp(sizeof(short));
+
+        enumtyp.insert("RED", (enum_val=0,&enum_val));
+        enumtyp.insert("GREEN", (enum_val=1,&enum_val));
+        enumtyp.insert("BLUE", (enum_val=2,&enum_val));
+        enumtyp.insert("ORANGE", (enum_val=3,&enum_val));
+        enumtyp.insert("YELLOW", (enum_val=4,&enum_val));
+
+        // Encode compound type in a buffer
+        enumtyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(enumtyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Decode enumeration type's buffer to a new EnumType
+        EnumType* decoded_enum_ptr(static_cast<EnumType *>(enumtyp.decode()));
+
+        // Verify that the datatype was copied exactly via encoding/decoding
+        verify_val(enumtyp == *decoded_enum_ptr, true, "DataType::decode", __LINE__, __FILE__);
+
+        // Verify again via querying member number and member index by name.
+        verify_val(decoded_enum_ptr->getNmembers(), 5, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_enum_ptr->getMemberIndex("GREEN"), 1, "DataType::decode", __LINE__, __FILE__);
+
+        // Create a EnumType instance from the pointer and verify it
+        EnumType enumtyp_clone(*decoded_enum_ptr);
+        verify_val(enumtyp == enumtyp_clone, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(enumtyp_clone.getNmembers(), 5, "DataType::decode", __LINE__, __FILE__);
+        verify_val(enumtyp_clone.getMemberIndex("GREEN"), 1, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_enum_ptr;
+
+        //
+        // Test with variable-length string
+        //
+
+        // Create a variable-length string type
+        StrType vlsttyp(PredType::C_S1);
+        vlsttyp.setSize(H5T_VARIABLE);
+
+        // Encode the variable-length type in its buffer
+        vlsttyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(vlsttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Decode the variable-length type's buffer to a new StrType
+        StrType* decoded_str_ptr(static_cast<StrType *>(vlsttyp.decode()));
+
+        verify_val(vlsttyp == *decoded_str_ptr, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_str_ptr->isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_str_ptr;
+
+        // Test decoding the type by way of DataType*
+
+        // Decode variable-length string type to a new DataType
+        DataType* decoded_vlstr_ptr(vlsttyp.decode());
+
+        // Create a StrType instance from the DataType object and verify it
+        StrType decoded_vlsttyp(decoded_vlstr_ptr->getId());
+        verify_val(vlsttyp == decoded_vlsttyp, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_vlsttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_vlstr_ptr;
+
+        //
+        // Test with ArrayType
+        //
+
+        hsize_t tdims1[] = {ARRAY1_DIM};
+
+        // Create an array datatype of the compound datatype
+        ArrayType arrtyp(cmptyp, ARRAY1_RANK, tdims1);
+
+        // Encode the array type in its buffer
+        arrtyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(arrtyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Create an ArrayType instance from the decoded pointer and verify it
+        ArrayType* decoded_arr_ptr(static_cast<ArrayType *>(arrtyp.decode()));
+
+        verify_val(arrtyp == *decoded_arr_ptr, true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_arr_ptr;
+
+        // Test decoding the type by way of DataType*
+
+        // Decode the array type's buffer
+        DataType *decoded_dt_ptr = arrtyp.decode();
+
+        // Create a ArrayType instance from the decoded pointer and verify it
+        ArrayType decoded_arrtyp(decoded_dt_ptr->getId());
+        verify_val(arrtyp == decoded_arrtyp, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_arrtyp.getArrayNDims(), ARRAY1_RANK, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_dt_ptr;
+
+        //
+        // Test with IntType
+        //
+
+        // Create an int datatype
+        IntType inttyp(PredType::NATIVE_UINT);
+
+        // Encode the array type in its buffer
+        inttyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(inttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Create an IntType instance from the decoded pointer and verify it
+        IntType* decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
+        H5T_sign_t int_sign = decoded_int_ptr->getSign();
+        verify_val(int_sign, H5T_SGN_NONE, "DataType::decode", __LINE__, __FILE__);
+        verify_val(inttyp == *decoded_int_ptr, true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_int_ptr;
+
+        //
+        // Test decoding FloatType by way of DataType*
+        //
+
+        // Create a float datatype
+        FloatType flttyp(PredType::NATIVE_FLOAT);
+
+        // Encode the float type in its buffer
+        flttyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(flttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Decode the array type's buffer
+        DataType* decoded_flt_ptr(flttyp.decode());
+
+        // Create a IntType instance from the decoded pointer and verify it
+        FloatType decoded_flttyp(decoded_flt_ptr->getId());
+        verify_val(flttyp == decoded_flttyp, true, "DataType::decode", __LINE__, __FILE__);
+
+        H5std_string norm_string;
+        H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
+        //verify_val(decoded_flttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_flt_ptr;
+
+        PASSED();
+    }
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_encode_decode", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}
+
+
 /****************************************************************
 **
 **  test_types(): Main datatypes testing routine.
@@ -567,6 +767,7 @@ void test_types()
     test_query();
     test_transient();
     test_named();
+    test_encode_decode();
 
 }   // test_types()
 
@@ -580,8 +781,6 @@ void test_types()
  *
  * Programmer:  Quincey Koziol
  *              September 10, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

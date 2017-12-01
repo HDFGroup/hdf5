@@ -34,7 +34,7 @@ endif ()
 if (MINGW)
   target_link_libraries (${HDF5_TEST_LIB_TARGET} "wsock32.lib")
 endif ()
-target_link_libraries (${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+target_link_libraries (${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
 H5_SET_LIB_OPTIONS (${HDF5_TEST_LIB_TARGET} ${HDF5_TEST_LIB_NAME} STATIC)
 set_target_properties (${HDF5_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test
@@ -50,7 +50,7 @@ if (BUILD_SHARED_LIBS)
   if (MINGW)
     target_link_libraries (${HDF5_TEST_LIBSH_TARGET} "wsock32.lib")
   endif ()
-  target_link_libraries (${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  target_link_libraries (${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${LINK_LIBS})
   H5_SET_LIB_OPTIONS (${HDF5_TEST_LIBSH_TARGET} ${HDF5_TEST_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
   set_target_properties (${HDF5_TEST_LIBSH_TARGET} PROPERTIES
       FOLDER libraries/test
@@ -74,7 +74,7 @@ endif ()
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir2")
 
   #-----------------------------------------------------------------------------
-  # Define Test Library Sources
+  # Define Plugin Test Sources
   #-----------------------------------------------------------------------------
   set (TEST_PLUGIN_LIBS
       dynlib1

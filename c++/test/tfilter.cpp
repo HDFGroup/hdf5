@@ -80,8 +80,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Programmer:  Robb Matzke
  *              Tuesday, April 21, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -286,8 +284,6 @@ void test_filters()
  *
  * Programmer:  Quincey Koziol
  *              September 10, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

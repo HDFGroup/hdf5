@@ -22,7 +22,7 @@ usage: h5repack [OPTIONS] file1 file2
    -f FILT, --filter=FILT  Filter type
    -l LAYT, --layout=LAYT  Layout type
 
-    M - is an integer greater than 1, size of dataset in bytes (default is 0) 
+    M - is an integer greater than 1, size of dataset in bytes (default is 0)
     E - is a filename.
     S - is an integer
     U - is a filename.
@@ -63,8 +63,8 @@ usage: h5repack [OPTIONS] file1 file2
         NBIT (no parameter)
         SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type
             is either IN or DS
-        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>
-            required values for filter_number,cd_value_count,value_1
+        UD=<filter_number,filter_flag,cd_value_count,value_1[,value_2,...,value_N]>
+            required values for filter_number,filter_flag,cd_value_count,value_1
             optional values for value_2 to value_N
         NONE (no parameter)
 
@@ -99,16 +99,16 @@ Examples of use:
    Chunked layout, with a layout size of 20x10, to objects dset1 and dset2
    and remove filters to objects dset3, dset4, dset5
 
-4) h5repack -L -c 10 -s 20:dtype file1 file2 
+4) h5repack -L -c 10 -s 20:dtype file1 file2
 
    Using latest file format with maximum compact group size of 10 and
    and minimum shared datatype size of 20
 
-5) h5repack -f SHUF -f GZIP=1 file1 file2 
+5) h5repack -f SHUF -f GZIP=1 file1 file2
 
    Add both filters SHUF and GZIP in this order to all datasets
 
-6) h5repack -f UD=307,1,9 file1 file2 
+6) h5repack -f UD=307,0,1,9 file1 file2
 
    Add bzip2 filter to all datasets
 

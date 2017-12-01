@@ -41,20 +41,6 @@ class UserData4Aiterate { // user data for attribute iteration
 //  Inheritance: IdComponent
 class H5_DLLCPP H5Location : public IdComponent {
    public:
-        // Creates an attribute for the specified object at this location
-        // PropList is currently not used, so always be default.
-        virtual Attribute createAttribute(const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
-        virtual Attribute createAttribute(const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
-
-        // Given its name, opens the attribute that belongs to an object at
-        // this location.
-        virtual Attribute openAttribute(const char* name) const;
-        virtual Attribute openAttribute(const H5std_string& name) const;
-
-        // Given its index, opens the attribute that belongs to an object at
-        // this location.
-        virtual Attribute openAttribute(const unsigned int idx) const;
-
         // Checks if a link of a given name exists in this location
         bool nameExists(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         bool nameExists(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
@@ -65,8 +51,18 @@ class H5_DLLCPP H5Location : public IdComponent {
         // Gets the name of the file, specified by this location.
         H5std_string getFileName() const;
 
+        // Retrieves information about an object at this location
+            // specified by location
+        void getObjectInfo(H5O_info_t *oinfo) const;
+            // specified by the object's name
+        void getObjectInfo(const char *name, H5O_info_t *oinfo,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getObjectInfo(const H5std_string& name, H5O_info_t *oinfo,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
         // Determines the number of attributes at this location.
-        int getNumAttrs() const;
+        // - moved to H5Object (1.8.20)
+        int getNumAttrs() const;    // Deprecated
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         // Retrieves the type of object that an object reference points to.
@@ -77,21 +73,6 @@ class H5_DLLCPP H5Location : public IdComponent {
         H5O_type_t getRefObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
         // Note: getRefObjType deprecates getObjType, but getObjType's name is
         // misleading, so getRefObjType is used in the new function instead.
-
-        // Iterate user's function over the attributes at this location.
-        virtual int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL, void* op_data = NULL);
-
-        // Checks whether the named attribute exists at this location.
-        virtual bool attrExists(const char* name) const;
-        virtual bool attrExists(const H5std_string& name) const;
-
-        // Renames the named attribute to a new name.
-        virtual void renameAttr(const char* oldname, const char* newname) const;
-        virtual void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
-
-        // Removes the named attribute from this location.
-        virtual void removeAttr(const char* name) const;
-        virtual void removeAttr(const H5std_string& name) const;
 
         // Returns the object header version of an object
         unsigned objVersion() const;
@@ -139,6 +120,51 @@ class H5_DLLCPP H5Location : public IdComponent {
 
         ///\brief Returns an identifier. (pure virtual)
         virtual hid_t getId() const = 0;
+
+/***************************************************************************
+                           Notes for H5A wrappers
+                           ======================
+        These H5A wrappers are marked "deprecated" in 1.8.19.
+        They are moved to H5Object to prevent the object id from being
+        passed in to H5A APIs.
+***************************************************************************/
+
+        // Creates an attribute for the specified object at this location
+        // PropList is currently not used, so always be default.
+        // Deprecated
+        virtual Attribute createAttribute(const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
+        virtual Attribute createAttribute(const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT) const;
+
+        // Given its name, opens the attribute that belongs to an object at
+        // this location.
+        // Deprecated
+        virtual Attribute openAttribute(const char* name) const;
+        virtual Attribute openAttribute(const H5std_string& name) const;
+
+        // Given its index, opens the attribute that belongs to an object at
+        // this location.
+        virtual Attribute openAttribute(const unsigned int idx) const; // Deprecated
+
+        // Iterate user's function over the attributes at this location.
+        virtual int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL,
+                                 void* op_data = NULL); // Deprecated
+
+        // Checks whether the named attribute exists at this location.
+        // Deprecated
+        virtual bool attrExists(const char* name) const;
+        virtual bool attrExists(const H5std_string& name) const;
+
+        // Renames the named attribute to a new name.
+        // Deprecated
+        virtual void renameAttr(const char* oldname, const char* newname) const;
+        virtual void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
+
+        // Removes the named attribute from this location.
+        // Deprecated
+        virtual void removeAttr(const char* name) const;
+        virtual void removeAttr(const H5std_string& name) const;
+
+/**************************** End of H5A note *******************************/
 
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

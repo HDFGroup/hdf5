@@ -8,7 +8,7 @@
 # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
-
+#
 #-------------------------------------------------------------------------------
 macro (SET_GLOBAL_VARIABLE name value)
   set (${name} ${value} CACHE INTERNAL "Used to pass variables between directories" FORCE)

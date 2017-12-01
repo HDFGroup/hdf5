@@ -11,9 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 #include "H5private.h"
 #include "h5diff.h"
 #include "ph5diff.h"
@@ -53,7 +50,7 @@ int main(int argc, const char *argv[])
     const char *fname2 = NULL;
     const char *objname1  = NULL;
     const char *objname2  = NULL;
-    diff_opt_t options;
+    diff_opt_t opts;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -75,11 +72,11 @@ int main(int argc, const char *argv[])
 
         g_Parallel = 0;
 
-        parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+        parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
 
-        h5diff(fname1, fname2, objname1, objname2, &options);
+        h5diff(fname1, fname2, objname1, objname2, &opts);
 
-        print_info(&options);
+        print_info(&opts);
     }
     /* Parallel h5diff */
     else {
@@ -87,13 +84,13 @@ int main(int argc, const char *argv[])
         /* Have the manager process the command-line */
         if(nID == 0)
         {
-            parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+            parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
 
-            h5diff(fname1, fname2, objname1, objname2, &options);
+            h5diff(fname1, fname2, objname1, objname2, &opts);
 
             MPI_Barrier(MPI_COMM_WORLD);
 
-            print_info(&options);
+            print_info(&opts);
             print_manager_output();
         }
         /* All other tasks become workers and wait for assignments. */
@@ -181,8 +178,8 @@ ph5diff_worker(int nID)
             MPI_Recv(&args, sizeof(args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
 
             /* Do the diff */
-            diffs.nfound = diff(file1_id, args.name1, file2_id, args.name2, &(args.options), &(args.argdata));
-            diffs.not_cmp = args.options.not_cmp;
+            diffs.nfound = diff(file1_id, args.name1, file2_id, args.name2, &(args.opts), &(args.argdata));
+            diffs.not_cmp = args.opts.not_cmp;
 
             /* If print buffer has something in it, request print token.*/
             if(outBuffOffset>0)
@@ -318,6 +315,8 @@ void h5diff_exit(int status)
         MPI_Finalize();
         status = EXIT_SUCCESS;  /* Reset exit status, since some mpiexec commands generate output on failure status */
     }
+
+    h5tools_close();
 
     /* Always exit(0), since MPI implementations do weird stuff when they
      *  receive a non-zero exit value. - QAK

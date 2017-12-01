@@ -21,23 +21,23 @@
  * Purpose: initialize a pack_info_t structure
  *
  * Return: void
- *
- *-------------------------------------------------------------------------
+  *-------------------------------------------------------------------------
  */
 
 void init_packobject(pack_info_t *obj) {
-	int j, k;
+    int j, k;
 
-	HDstrcpy(obj->path, "\0");
-	for (j = 0; j < H5_REPACK_MAX_NFILTERS; j++) {
-		obj->filter[j].filtn = -1;
-		for (k = 0; k < CD_VALUES; k++)
-			obj->filter[j].cd_values[k] = 0;
-	}
-	obj->chunk.rank = -1;
-	obj->refobj_id = -1;
-	obj->layout = H5D_LAYOUT_ERROR;
-	obj->nfilters = 0;
+    HDstrcpy(obj->path, "\0");
+    for (j = 0; j < H5_REPACK_MAX_NFILTERS; j++) {
+        obj->filter[j].filtn = -1;
+        obj->filter[j].cd_nelmts = CD_VALUES;
+        for (k = 0; k < CD_VALUES; k++)
+            obj->filter[j].cd_values[k] = 0;
+    }
+    obj->chunk.rank = -1;
+    obj->refobj_id = -1;
+    obj->layout = H5D_LAYOUT_ERROR;
+    obj->nfilters = 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -46,20 +46,14 @@ void init_packobject(pack_info_t *obj) {
  * Purpose: auxiliary function, inserts the filter in object OBJS[ I ]
  *
  * Return: void
- *
  *-------------------------------------------------------------------------
  */
 
-static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I,
-		filter_info_t filt) {
-	if (table->objs[I].nfilters < H5_REPACK_MAX_NFILTERS) {
-		table->objs[I].filter[table->objs[I].nfilters++] = filt;
-	}
-	else {
-		error_msg(
-				"cannot insert the filter in this object.\
-        Maximum capacity exceeded\n");
-	}
+static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I, filter_info_t filt) {
+    if (table->objs[I].nfilters < H5_REPACK_MAX_NFILTERS)
+        table->objs[I].filter[table->objs[I].nfilters++] = filt;
+    else
+        H5TOOLS_INFO(H5E_tools_min_id_g, "cannot insert the filter in this object. Maximum capacity exceeded");
 }
 
 /*-------------------------------------------------------------------------
@@ -68,30 +62,27 @@ static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I,
  * Purpose: auxiliary function, inserts the layout in object OBJS[ I ]
  *
  * Return: void
- *
  *-------------------------------------------------------------------------
  */
+static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I, pack_info_t *pack) {
+    int k;
 
-static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I,
-		pack_info_t *pack) {
-	int k;
-
-	table->objs[I].layout = pack->layout;
-	if (H5D_CHUNKED == pack->layout) {
-		/* -2 means the NONE option, remove chunking
-		 and set the layout to contiguous */
-		if (pack->chunk.rank == -2) {
-			table->objs[I].layout = H5D_CONTIGUOUS;
-			table->objs[I].chunk.rank = -2;
-		}
-		/* otherwise set the chunking type */
-		else {
-			table->objs[I].chunk.rank = pack->chunk.rank;
-			for (k = 0; k < pack->chunk.rank; k++)
-				table->objs[I].chunk.chunk_lengths[k] =
-						pack->chunk.chunk_lengths[k];
-		}
-	}
+    table->objs[I].layout = pack->layout;
+    if (H5D_CHUNKED == pack->layout) {
+        /* -2 means the NONE option, remove chunking
+        and set the layout to contiguous */
+        if (pack->chunk.rank == -2) {
+            table->objs[I].layout = H5D_CONTIGUOUS;
+            table->objs[I].chunk.rank = -2;
+        }
+        /* otherwise set the chunking type */
+        else {
+            table->objs[I].chunk.rank = pack->chunk.rank;
+            for (k = 0; k < pack->chunk.rank; k++)
+                table->objs[I].chunk.chunk_lengths[k] =
+                        pack->chunk.chunk_lengths[k];
+        }
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -100,7 +91,6 @@ static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I,
  * Purpose: auxiliary function, increases the size of the collection by N_OBJS
  *
  * Return: 0, ok, -1, fail
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -111,7 +101,7 @@ aux_inctable(pack_opttbl_t *table, unsigned n_objs)
     table->size += n_objs;
     table->objs = (pack_info_t*) HDrealloc(table->objs, table->size * sizeof(pack_info_t));
     if (table->objs == NULL) {
-        error_msg("not enough memory for options table\n");
+        H5TOOLS_INFO(H5E_tools_min_id_g, "not enough memory for options table");
         return -1;
     }
 
@@ -128,32 +118,30 @@ aux_inctable(pack_opttbl_t *table, unsigned n_objs)
  * Purpose: init options table
  *
  * Return: 0, ok, -1, fail
- *
- *-------------------------------------------------------------------------
+  *-------------------------------------------------------------------------
  */
 int options_table_init(pack_opttbl_t **tbl) {
-	unsigned int i;
-	pack_opttbl_t *table;
+    unsigned int i;
+    pack_opttbl_t *table;
 
-	if (NULL == (table = (pack_opttbl_t *) HDmalloc(sizeof(pack_opttbl_t)))) {
-		error_msg("not enough memory for options table\n");
-		return -1;
-	}
+    if (NULL == (table = (pack_opttbl_t *) HDmalloc(sizeof(pack_opttbl_t)))) {
+        H5TOOLS_INFO(H5E_tools_min_id_g, "not enough memory for options table");
+        return -1;
+    }
 
-	table->size = 30;
-	table->nelems = 0;
-	if (NULL == (table->objs =
-			(pack_info_t*) HDmalloc(table->size * sizeof(pack_info_t)))) {
-		error_msg("not enough memory for options table\n");
-		HDfree(table);
-		return -1;
-	}
+    table->size = 30;
+    table->nelems = 0;
+    if (NULL == (table->objs = (pack_info_t*) HDmalloc(table->size * sizeof(pack_info_t)))) {
+        H5TOOLS_INFO(H5E_tools_min_id_g, "not enough memory for options table");
+        HDfree(table);
+        return -1;
+    }
 
-	for (i = 0; i < table->size; i++)
-		init_packobject(&table->objs[i]);
+    for (i = 0; i < table->size; i++)
+        init_packobject(&table->objs[i]);
 
-	*tbl = table;
-	return 0;
+    *tbl = table;
+    return 0;
 }
 
 
@@ -163,14 +151,13 @@ int options_table_init(pack_opttbl_t **tbl) {
  * Purpose: free table memory
  *
  * Return: 0
- *
  *-------------------------------------------------------------------------
  */
 
 int options_table_free(pack_opttbl_t *table) {
-	HDfree(table->objs);
-	HDfree(table);
-	return 0;
+    HDfree(table->objs);
+    HDfree(table);
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -179,12 +166,10 @@ int options_table_free(pack_opttbl_t *table) {
  * Purpose: add a layout option to the option list
  *
  * Return: 0, ok, -1, fail
- *
- *-------------------------------------------------------------------------
+  *-------------------------------------------------------------------------
  */
 int
-options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack,
-    pack_opttbl_t *table)
+options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack, pack_opttbl_t *table)
 {
     unsigned i, j, I;
     unsigned added = 0;
@@ -205,7 +190,7 @@ options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack,
                 if (HDstrcmp(obj_list[j].obj,table->objs[i].path) == 0) {
                     /* already chunk info inserted for this one; exit */
                     if (table->objs[i].chunk.rank > 0) {
-                        error_msg("chunk information already inserted for <%s>\n", obj_list[j].obj);
+                        H5TOOLS_INFO(H5E_tools_min_id_g, "chunk information already inserted for <%s>\n", obj_list[j].obj);
                         HDexit(EXIT_FAILURE);
                     }
                     /* insert the layout info */
@@ -261,12 +246,10 @@ options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack,
  * Purpose: add a compression -f option to the option list
  *
  * Return: 0, ok, -1, fail
- *
  *-------------------------------------------------------------------------
  */
 int
-options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt,
-    pack_opttbl_t *table)
+options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt, pack_opttbl_t *table)
 {
     unsigned int i, j, I;
     unsigned added = 0;
@@ -279,7 +262,7 @@ options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt,
 
     /* search if this object is already in the table; "path" is the key */
     if (table->nelems > 0) {
-        /* go tru the supplied list of names */
+        /* go through the supplied list of names */
         for (j = 0; j < n_objs; j++) {
             /* linear table search */
             for (i = 0; i < table->nelems; i++) {
@@ -337,29 +320,26 @@ options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt,
  * Purpose: get object from table; "path" is the key
  *
  * Return: pack_info_t* OBJECT or NULL if not found; PATH is the key
- *
  *-------------------------------------------------------------------------
  */
 
 pack_info_t* options_get_object(const char *path, pack_opttbl_t *table) {
-	unsigned int i;
-	char tbl_path[MAX_NC_NAME + 1]; /* +1 for start with "/" case */
+    unsigned int i;
+    char tbl_path[MAX_NC_NAME + 1]; /* +1 for start with "/" case */
 
-	for (i = 0; i < table->nelems; i++) {
-		/* make full path (start with "/") to compare correctly  */
-		if (HDstrncmp(table->objs[i].path, "/", 1)) {
-			HDstrcpy(tbl_path, "/");
-			HDstrcat(tbl_path, table->objs[i].path);
-		}
-		else
-			HDstrcpy(tbl_path, table->objs[i].path);
+    for (i = 0; i < table->nelems; i++) {
+        /* make full path (start with "/") to compare correctly  */
+        if (HDstrncmp(table->objs[i].path, "/", 1)) {
+            HDstrcpy(tbl_path, "/");
+            HDstrcat(tbl_path, table->objs[i].path);
+        }
+        else
+            HDstrcpy(tbl_path, table->objs[i].path);
 
-		/* found it */
-		if (HDstrcmp(tbl_path, path) == 0) {
-			return (&table->objs[i]);
-		}
-	}
-
-	return NULL;
+        /* found it */
+        if (HDstrcmp(tbl_path, path) == 0) {
+            return (&table->objs[i]);
+        }
+    }
+    return NULL;
 }
-

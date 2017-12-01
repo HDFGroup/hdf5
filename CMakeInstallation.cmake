@@ -8,7 +8,7 @@
 # distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
-
+#
 include (CMakePackageConfigHelpers)
 
 #-----------------------------------------------------------------------------
@@ -460,7 +460,7 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
   set (CPACK_INSTALL_CMAKE_PROJECTS "${HDF5_BINARY_DIR};HDF5;ALL;/")
 
   if (HDF5_PACKAGE_EXTLIBS)
-    if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
+    if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
       if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
         if (WIN32)
           set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};ZLIB;ALL;/")

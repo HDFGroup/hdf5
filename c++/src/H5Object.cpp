@@ -29,6 +29,23 @@
 namespace H5 {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+// userAttrOpWrpr simply interfaces between the user's function and the
+// C library function H5Aiterate2; used to resolve the different prototype
+// problem.  May be moved to Iterator later.
+ /* extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
+    const H5A_info_t *ainfo, void *op_data)
+{
+    H5std_string s_attr_name = H5std_string(attr_name);
+#ifdef NO_STATIC_CAST
+    UserData4Aiterate* myData = (UserData4Aiterate *) op_data;
+#else
+    UserData4Aiterate* myData = static_cast <UserData4Aiterate *> (op_data);
+#endif
+    myData->op(*myData->location, s_attr_name, myData->opData);
+    return 0;
+}
+ */ 
+
 //--------------------------------------------------------------------------
 // Function:    H5Object default constructor (protected)
 // Programmer   Binh-Minh Ribler - 2000
@@ -270,6 +287,25 @@ void H5Object::renameAttr(const H5std_string& oldname, const H5std_string& newna
 }
 
 // end of Notes for H5A wrappers
+
+//--------------------------------------------------------------------------
+// Function:    H5Object::getNumAttrs
+///\brief       Returns the number of attributes attached to this HDF5 object.
+///\return      Number of attributes
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
+// Modification
+//          - Moved from H5Location in 1.8.20. -BMR Oct, 2017
+//--------------------------------------------------------------------------
+int H5Object::getNumAttrs() const
+{
+   H5O_info_t oinfo;    /* Object info */
+
+    if(H5Oget_info(getId(), &oinfo) < 0)
+        throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
+    else
+        return(static_cast<int>(oinfo.num_attrs));
+}
 
 //--------------------------------------------------------------------------
 // Function:    getObjName

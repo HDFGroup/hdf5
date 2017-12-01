@@ -24,8 +24,7 @@ int      g_nTasks = 1;
 /*-------------------------------------------------------------------------
  * Function: print_dimensions
  *
- * Purpose: print dimensions
- *
+ * Purpose:  print dimensions
  *-------------------------------------------------------------------------
  */
 void
@@ -33,14 +32,14 @@ print_dimensions (int rank, hsize_t *dims)
 {
     int  i;
 
-    if( rank <= 0 )
+    if(rank <= 0)
         parallel_print("H5S_SCALAR" );
     else {
         if (!dims)
             parallel_print("dimension is NULL");
         else {
             parallel_print("[");
-            for ( i = 0; i < rank-1; i++) {
+            for (i = 0; i < rank-1; i++) {
                 parallel_print(HSIZE_T_FORMAT, dims[i]);
                 parallel_print("x");
             }
@@ -55,16 +54,11 @@ print_dimensions (int rank, hsize_t *dims)
 /*-------------------------------------------------------------------------
  * Function: print_type
  *
- * Purpose: Print name of datatype
+ * Purpose:  Print name of datatype
  *
- * Return: void
+ * Return:   void
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments: Adapted from h5dump for H5T_INTEGER and H5T_FLOAT classes only
- *
+ * Comments:  Adapted from h5dump for H5T_INTEGER and H5T_FLOAT classes only
  *-------------------------------------------------------------------------
  */
 void print_type(hid_t type)
@@ -188,15 +182,10 @@ void print_type(hid_t type)
 /*-------------------------------------------------------------------------
  * Function: diff_basename
  *
- * Purpose: Returns a pointer to the last component absolute name
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
+ * Purpose:  Returns a pointer to the last component absolute name
  *-------------------------------------------------------------------------
  */
-const char*
+ const char*
 diff_basename(const char *name)
 {
     size_t i;
@@ -219,12 +208,7 @@ diff_basename(const char *name)
 /*-------------------------------------------------------------------------
  * Function: get_type
  *
- * Purpose: Returns the type as a string
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
+ * Purpose:  Returns the type as a string
  *-------------------------------------------------------------------------
  */
 const char*
@@ -255,21 +239,13 @@ get_type(h5trav_type_t type)
 /*-------------------------------------------------------------------------
  * Function: get_sign
  *
- * Purpose: Returns the sign as a string
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
+ * Purpose:  Returns the sign as a string
  *-------------------------------------------------------------------------
  */
-const char*
+ const char*
 get_sign(H5T_sign_t sign)
 {
-    switch(sign)
-    {
+    switch(sign) {
         case H5T_SGN_NONE:
             return "H5T_SGN_NONE";
 
@@ -283,7 +259,6 @@ get_sign(H5T_sign_t sign)
             return "H5T_NSGN";
 
         default:
-            HDassert(0);
             return "unknown sign value";
     } /* end switch */
 }
@@ -292,15 +267,10 @@ get_sign(H5T_sign_t sign)
 /*-------------------------------------------------------------------------
  * Function: get_class
  *
- * Purpose: Returns the class as a string
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
+ * Purpose:  Returns the class as a string
  *-------------------------------------------------------------------------
  */
-const char*
+ const char*
 get_class(H5T_class_t tclass)
 {
     switch(tclass) {
@@ -340,7 +310,6 @@ get_class(H5T_class_t tclass)
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
-            HDassert(0);
             return("Invalid class");
     } /* end switch */
 } /* end get_class() */
@@ -348,8 +317,7 @@ get_class(H5T_class_t tclass)
 /*-------------------------------------------------------------------------
  * Function: print_found
  *
- * Purpose: print number of differences found
- *
+ * Purpose:  print number of differences found
  *-------------------------------------------------------------------------
  */
 void print_found(hsize_t nfound)
@@ -364,40 +332,37 @@ void print_found(hsize_t nfound)
 /*-----------------------------------------------------------------
  * Function: match_up_memsize
  *
- * Purpose: match smaller memory size up to bigger memory size
+ * Purpose:  match smaller memory size up to bigger memory size
  *------------------------------------------------------------------
  */
 herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
                          hid_t *m_tid1, hid_t *m_tid2,
                          size_t *m_size1, size_t  *m_size2)
 {
-    herr_t ret = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     if((*m_size1) != (*m_size2)) {
         if((*m_size1) < (*m_size2)) {
-            H5Tclose( *m_tid1 );
+            H5Tclose(*m_tid1);
 
-            if(((*m_tid1) = H5Tget_native_type(f_tid2_id, H5T_DIR_DEFAULT)) < 0) {
-                ret = FAIL;
-                goto out;
-            }
+            if(((*m_tid1) = H5Tget_native_type(f_tid2_id, H5T_DIR_DEFAULT)) < 0)
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
 
-            *m_size1 = H5Tget_size( *m_tid1 );
+            *m_size1 = H5Tget_size(*m_tid1);
         } /* end if */
         else {
             H5Tclose(*m_tid2);
 
-            if(((*m_tid2) = H5Tget_native_type(f_tid1_id, H5T_DIR_DEFAULT)) < 0) {
-                ret = FAIL;
-                goto out;
-            }
+            if(((*m_tid2) = H5Tget_native_type(f_tid1_id, H5T_DIR_DEFAULT)) < 0)
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
 
             *m_size2 = H5Tget_size(*m_tid2);
         } /* end else */
     } /* end if */
-    HDassert((*m_size1) == (*m_size2));
+    if((*m_size1) != (*m_size2))
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "native type sizes do not compare");
 
-out:
-    return ret;
+done:
+    return ret_value;
 }
 

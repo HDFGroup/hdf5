@@ -247,8 +247,8 @@ DataSet CommonFG::openDataSet(const H5std_string& name) const
 ///             specified location.
 ///             For information on creating hard link and soft link, please
 ///             refer to the C layer Reference Manual at:
-/// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateHard and
-/// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateSoft
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateHard and
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateSoft
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //      2007: QAK modified to use H5L APIs - BMR
@@ -328,7 +328,7 @@ void CommonFG::unlink(const H5std_string& name) const
 ///             Exercise care in moving groups as it is possible to render
 ///             data in a file inaccessible with Group::move. Please refer
 ///             to the Group Interface in the HDF5 User's Guide for details at:
-/// https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html#t=HDF5_Users_Guide%2FGroups%2FHDF5_Groups.htm
+/// https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html#t=HDF5_Users_Guide%2FGroups%2FHDF5_Groups.htm
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //      2007: QAK modified to use H5L APIs - BMR
@@ -363,7 +363,7 @@ void CommonFG::move(const H5std_string& src, const H5std_string& dst) const
 ///\par Description
 ///             For more information, please refer to the C layer Reference
 ///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5G.html#Group-GetObjinfo
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5G.html#Group-GetObjinfo
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::getObjinfo(const char* name, hbool_t follow_link, H5G_stat_t& statbuf) const
@@ -1019,7 +1019,7 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) 
 ///             \li \c H5O_TYPE_DATASET
 ///             \li \c H5O_TYPE_NAMED_DATATYPE
 ///             Refer to the C API documentation for more details:
-///             http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
+///             https://support.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
 ///\exception   H5::FileIException or H5::GroupIException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API
@@ -1085,7 +1085,7 @@ H5O_type_t CommonFG::childObjType(const H5std_string& objname) const
 ///             \li \c H5O_TYPE_DATASET
 ///             \li \c H5O_TYPE_NAMED_DATATYPE
 ///             Refer to the C API documentation for more details:
-///             http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
+///             https://support.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
 ///\exception   H5::FileIException or H5::GroupIException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API
