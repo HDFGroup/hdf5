@@ -43,7 +43,7 @@
 #ifndef H5I_DEBUG_OUTPUT
 #include "H5Gprivate.h"         /* Groups                                   */
 #else /* H5I_DEBUG_OUTPUT */
-#define H5G_FRIEND              /*suppress error about including H5Gpkg     */
+#define H5G_FRIEND              /* Suppress error about including H5Gpkg    */
 #include "H5Gpkg.h"             /* Groups                                   */
 #include "H5Dprivate.h"         /* Datasets                                 */
 #include "H5Tprivate.h"         /* Datatypes                                */
@@ -1700,7 +1700,6 @@ done:
  *
  * Return:      Success:    Reference count
  *              Failure:    Negative
- *
  *
  *-------------------------------------------------------------------------
  */
