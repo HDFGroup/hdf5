@@ -821,7 +821,7 @@ void test_compound()
  *
  * Purpose      Cleanup temporary test files - nothing at this time.
  *
- * Return       none
+ * Return       None
  *-------------------------------------------------------------------------
  */
 extern "C"
