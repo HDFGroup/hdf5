@@ -76,15 +76,15 @@ H5Location::H5Location() : IdComponent() {}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:    H5Location::exists
+// Function:    H5Location::nameExists
 ///\brief       Checks if a link of a given name exists in a location
 ///\param       name - IN: Searched name
 ///\param       lapl - IN: Link access property list
 ///\exception   H5::LocationException
-// Programmer   Binh-Minh Ribler - Nov, 2016
 // Modification
+//              Renamed from exists() in 1.10.2 -BMR
 //--------------------------------------------------------------------------
-bool H5Location::exists(const char* name, const LinkAccPropList& lapl) const
+bool H5Location::nameExists(const char* name, const LinkAccPropList& lapl) const
 {
     htri_t ret_value = H5Lexists(getId(), name, lapl.getId());
     if (ret_value > 0)
@@ -93,22 +93,54 @@ bool H5Location::exists(const char* name, const LinkAccPropList& lapl) const
         return false;
     else // Raise exception when H5Lexists returns a negative value
     {
-        throw LocationException(inMemFunc("exists"), "H5Lexists failed");
+        throw LocationException(inMemFunc("nameExists"), "H5Lexists failed");
     }
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5Location::exists
+// Function:    H5Location::nameExists
 ///\brief       Checks if a link of a given name exists in a location
+///\param       name - IN: Searched name
+///\param       lapl - IN: Link access property list
+///\exception   H5::LocationException
+// Modification
+//              Renamed from exists() in 1.10.2 -BMR
+//--------------------------------------------------------------------------
+bool H5Location::nameExists(const H5std_string& name, const LinkAccPropList& lapl) const
+{
+    return(nameExists(name.c_str(), lapl));
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::exists - Deprecated
+// Purpose      Checks if a link of a given name exists in a location
+///\brief       Deprecated in favor of nameExists
+///\param       name - IN: Searched name
+///\param       lapl - IN: Link access property list
+///\exception   H5::LocationException
+// Programmer   Binh-Minh Ribler - Nov, 2016
+// Modification
+//              Renamed to nameExists() in 1.10.2 -BMR
+//--------------------------------------------------------------------------
+bool H5Location::exists(const char* name, const LinkAccPropList& lapl) const
+{
+    return(nameExists(name, lapl));
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::exists - Deprecated
+// Purpose      Checks if a link of a given name exists in a location
+///\brief       Deprecated in favor of nameExists
 ///\param       name - IN: Searched name
 ///\param       lapl - IN: Link access property list
 ///\exception   H5::LocationException
 // Programmer   Binh-Minh Ribler - Dec, 2016
 // Modification
+//              Renamed to nameExists() in 1.10.2 -BMR
 //--------------------------------------------------------------------------
 bool H5Location::exists(const H5std_string& name, const LinkAccPropList& lapl) const
 {
-    return(exists(name.c_str(), lapl));
+    return(nameExists(name.c_str(), lapl));
 }
 
 //--------------------------------------------------------------------------

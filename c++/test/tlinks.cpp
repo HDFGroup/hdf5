@@ -328,9 +328,6 @@ static const char *FILENAME[] = {
  *
  * Programmer   Binh-Minh Ribler
  *              October 16, 2009
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_basic_links(hid_t fapl_id, hbool_t new_format)
@@ -414,6 +411,11 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
         H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
         // Verify link existence
+        if(file.nameExists("dset1", LinkAccPropList::DEFAULT) != TRUE)
+            throw InvalidActionException("H5File::nameExists", "dset1 doesn't exist");
+        if(file.nameExists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
+            throw InvalidActionException("H5File::nameExists", "grp1/soft doesn't exist");
+        // Deprecated
         if(file.exists("dset1", LinkAccPropList::DEFAULT) != TRUE)
             throw InvalidActionException("H5File::exists", "dset1 doesn't exist");
         if(file.exists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
@@ -446,9 +448,6 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
  *
  * Programmer   Binh-Minh Ribler
  *              October 16, 2009
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_num_links(hid_t fapl_id, hbool_t new_format)
@@ -483,6 +482,7 @@ static void test_num_links(hid_t fapl_id, hbool_t new_format)
         issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_num_links
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_links
@@ -493,7 +493,6 @@ static void test_num_links(hid_t fapl_id, hbool_t new_format)
  *
  * Programmer   Binh-Minh Ribler
  *              October 16, 2009
- *
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -671,18 +670,13 @@ void test_links()
 
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_links
  *
  * Purpose      Cleanup temporary test files
  *
  * Return       none
- *
- * Programmer   Binh-Minh Ribler
- *              October 16, 2009
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"

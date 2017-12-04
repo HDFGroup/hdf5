@@ -66,13 +66,9 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_create( H5File& file)
+static herr_t test_create( H5File& file)
 {
     SUBTEST("Create, open, close");
 
@@ -198,13 +194,9 @@ test_create( H5File& file)
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_simple_io( H5File& file)
+static herr_t test_simple_io( H5File& file)
 {
 
     SUBTEST("Simple I/O");
@@ -284,13 +276,9 @@ test_simple_io( H5File& file)
  *
  * Programmer   Binh-Minh Ribler
  *              Thursday, March 22, 2012
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_datasize(FileAccPropList &fapl)
+static herr_t test_datasize(FileAccPropList &fapl)
 {
     SUBTEST("DataSet::getInMemDataSize()");
     try
@@ -354,13 +342,9 @@ test_datasize(FileAccPropList &fapl)
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_tconv(H5File& file)
+static herr_t test_tconv(H5File& file)
 {
     // Prepare buffers for input/output
     char        *out=NULL, *in=NULL;
@@ -437,6 +421,7 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
     (H5Z_func_t)filter_bogus,   /* The actual filter function        */
 }};
 
+
 /*-------------------------------------------------------------------------
  * Function:    bogus
  *
@@ -448,13 +433,9 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *
  * Programmer   Robb Matzke
  *              Tuesday, April 21, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static size_t
-filter_bogus(unsigned int flags, size_t cd_nelmts,
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
       const unsigned int cd_values[], size_t nbytes,
       size_t *buf_size, void **buf)
 // H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
@@ -477,13 +458,9 @@ filter_bogus(unsigned int flags, size_t cd_nelmts,
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_compression(H5File& file)
+static herr_t test_compression(H5File& file)
 {
 #ifndef H5_HAVE_FILTER_DEFLATE
     const char *not_supported;
@@ -764,9 +741,10 @@ test_compression(H5File& file)
  *
  *-------------------------------------------------------------------------
  */
-const H5std_string        DSET_NBIT_NAME("nbit_dataset");
+const H5std_string DSET_NBIT_NAME("nbit_dataset");
 const hsize_t DIM1 = 2;
 const hsize_t DIM2 = 5;
+
 static herr_t test_nbit_compression(H5File& file)
 {
     typedef struct {
@@ -880,13 +858,9 @@ static herr_t test_nbit_compression(H5File& file)
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              Saturday, February 17, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_multiopen (H5File& file)
+static herr_t test_multiopen (H5File& file)
 {
 
     SUBTEST("Multi-open with extending");
@@ -963,13 +937,9 @@ test_multiopen (H5File& file)
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              February 17, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_types(H5File& file)
+static herr_t test_types(H5File& file)
 {
     SUBTEST("Various datatypes");
 
@@ -1148,23 +1118,21 @@ test_types(H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_virtual
  *
- * Purpose:     Tests fixed, unlimited, and printf selections in the same
+ * Purpose      Tests fixed, unlimited, and printf selections in the same
  *              VDS
  *
- * Return:      Success:        0
+ * Return       Success:        0
  *
  *              Failure:        number of errors
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer   Binh-Minh Ribler
  *              Friday, March 10, 2017
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 const int RANK = 2;
-static herr_t
-test_virtual()
+
+static herr_t test_virtual()
 {
     SUBTEST("DSetCreatPropList::setVirtual");
 
@@ -1293,17 +1261,15 @@ void test_dset()
     cleanup_dsets();
 }   // test_dset
 
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_dsets
  *
  * Purpose      Cleanup temporary test files
  *
- * Return       none
+ * Return       None
  *
  * Programmer   (use C version)
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"

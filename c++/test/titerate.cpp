@@ -78,23 +78,25 @@ typedef struct {
 
 int iter_strcmp(const void *s1, const void *s2);
 
-/****************************************************************
-**
-**  iter_strcmp(): String comparison routine for qsort
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    iter_strcmp
+ *
+ * Purpose      String comparison routine for qsort
+ *-------------------------------------------------------------------------
+ */
 int iter_strcmp(const void *s1, const void *s2)
 {
     return(HDstrcmp(*(const char * const *)s1,*(const char * const *)s2));
 }
 
-/****************************************************************
-**
-**  liter_cb(): Custom link iteration callback routine.
-**
-****************************************************************/
-static herr_t
-liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_info, void *op_data)
+/*-------------------------------------------------------------------------
+ * Function:    liter_cb
+ *
+ * Purpose      Custom link iteration callback routine
+ *-------------------------------------------------------------------------
+ */
+static herr_t liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_info, void *op_data)
 {
     iter_info *info = (iter_info *)op_data;
     static int count = 0;
@@ -123,6 +125,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_
     } /* end switch */
 } /* end liter_cb() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_iter_group
  *
@@ -133,9 +136,6 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_
  *
  * Programmer   Binh-Minh Ribler
  *              Friday, September 9, 2016
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_iter_group(FileAccPropList& fapl)
@@ -348,13 +348,13 @@ static void test_iter_group(FileAccPropList& fapl)
 #endif
 } /* test_iter_group() */
 
-
-/****************************************************************
-**
-**  printelems(): Open an attribute and verify that it has a 
-**                the correct name
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    printelems
+ *
+ * Purpose      Open an attribute and verify that it has a the correct name
+ *-------------------------------------------------------------------------
+ */
 const H5std_string FILE_NAME("titerate.h5");
 const H5std_string GRP_NAME("/Group_A");
 const H5std_string FDATASET_NAME("file dset");
@@ -386,6 +386,7 @@ void printelems(const Group& group, const H5std_string& dsname, const H5std_stri
     }
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_HDFFV_9920
  *
@@ -393,9 +394,6 @@ void printelems(const Group& group, const H5std_string& dsname, const H5std_stri
  *
  * Programmer   Binh-Minh Ribler
  *              Friday, September 9, 2016
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_HDFFV_9920()
@@ -444,7 +442,7 @@ static void test_HDFFV_9920()
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_iterate
  *
@@ -455,9 +453,6 @@ static void test_HDFFV_9920()
  *
  * Programmer   Binh-Minh Ribler
  *              Tuesday, September 6, 2016
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -476,17 +471,13 @@ void test_iterate()
 
 }    // test_iterate
 
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_iterate
  *
  * Purpose      Cleanup temporary test files
  *
  * Return       none
- *
- * Programmer   (use C version)
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"

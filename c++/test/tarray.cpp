@@ -53,13 +53,10 @@ typedef enum int_t {
  *
  * Purpose      Tests 1-D array of compound datatypes (with array fields)
  *
- * Return       None.
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              January, 2016
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_array_compound_array()
@@ -280,23 +277,6 @@ static void test_array_compound_array()
 } // end test_array_compound_array()
 
 
-/*-------------------------------------------------------------------------
- * Function:    test_array_assignment
- *
- * Purpose      Tests the operator=
- *
- * Return       None.
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              March, 2016
- *
- * Description:
- *              Used user's sample code in HDFFV-9562
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
 /*
  * Helper routine to demonstrate the issue in HDFFV-9562
  */
@@ -307,8 +287,23 @@ H5::DataType getArr()
     H5::ArrayType ret; 
     ret = H5::ArrayType(H5::PredType::NATIVE_INT, 1, dims); 
     delete[] dims; 
-    return ret; }
+    return ret;
+}
 
+/*-------------------------------------------------------------------------
+ * Function:    test_array_assignment
+ *
+ * Purpose      Tests the operator=
+ *
+ * Return       None
+ *
+ * Programmer   Binh-Minh Ribler (using C version)
+ *              March, 2016
+ *
+ * Description:
+ *              Used user's sample code in HDFFV-9562
+ *-------------------------------------------------------------------------
+ */
 static void test_array_assignment()
 {
     hsize_t sdims1[] = {SPACE1_DIM1};
@@ -359,13 +354,10 @@ static void test_array_assignment()
  *
  * Purpose      Tests getting array information using the const methods.
  *
- * Return       None.
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler
  *              April, 2016
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_array_info()
@@ -477,11 +469,14 @@ static void test_array_info()
 } // end test_array_info()
 
 
-/****************************************************************
-**
-**  test_array(): Main datatypes testing routine.
-**
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:    test_array
+ *
+ * Purpose      Main datatypes testing routine
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 extern "C"
 void test_array()
 {
@@ -505,13 +500,10 @@ void test_array()
  *
  * Purpose      Cleanup temporary test files
  *
- * Return       none
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              January, 2016
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"

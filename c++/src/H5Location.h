@@ -31,6 +31,11 @@ namespace H5 {
 class H5_DLLCPP H5Location : public IdComponent {
    public:
         // Checks if a link of a given name exists in a location
+        bool nameExists(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        bool nameExists(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Checks if a link of a given name exists in a location
+        // Deprecated in favor of nameExists for better name.
         bool exists(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         bool exists(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
 

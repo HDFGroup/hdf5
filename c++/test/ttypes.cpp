@@ -87,6 +87,7 @@ typedef struct {
     long   c;
     double d;
 } src_typ_t;
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_classes
@@ -97,9 +98,6 @@ typedef struct {
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_classes()
@@ -126,6 +124,7 @@ static void test_classes()
         issue_fail_msg("test_classes", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_copy
@@ -136,9 +135,6 @@ static void test_classes()
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_copy()
@@ -192,9 +188,6 @@ static void test_copy()
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              August, 2017
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 typedef struct {     /* Struct with atomic fields */
@@ -390,9 +383,6 @@ static void test_detect_type_class()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              August, 2017
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_vltype()
@@ -465,12 +455,8 @@ static void test_vltype()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 const H5std_string CompT_NAME("Compound_type");
 const H5std_string EnumT_NAME("Enum_type");
 
@@ -591,12 +577,10 @@ static void test_query()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 const char* filename1 = "dtypes1.h5";
+
 static void test_transient ()
 {
     static hsize_t        ds_size[2] = {10, 20};
@@ -668,12 +652,10 @@ static void test_transient ()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 const H5std_string filename2("dtypes2.h5");
+
 static void test_named ()
 {
     static hsize_t ds_size[2] = {10, 20};
@@ -831,14 +813,12 @@ static void test_named ()
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              August, 2017
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 const H5std_string filename3("encode_decode.h5");
 const int ARRAY1_RANK = 1;
 const int ARRAY1_DIM = 10;
+
 static void test_encode_decode()
 {
     short        enum_val;
@@ -1045,11 +1025,14 @@ static void test_encode_decode()
 }
 
 
-/****************************************************************
-**
-**  test_types(): Main datatypes testing routine.
-**
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:    test_types
+ *
+ * Purpose      Main datatypes testing routine
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 extern "C"
 void test_types()
 {
@@ -1074,13 +1057,7 @@ void test_types()
  *
  * Purpose      Cleanup temporary test files
  *
- * Return       none
- *
- * Programmer   Quincey Koziol
- *              September 10, 1999
- *
- * Modifications:
- *
+ * Return       None
  *-------------------------------------------------------------------------
  */
 extern "C"
