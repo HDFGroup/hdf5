@@ -5435,6 +5435,25 @@ H5P_get_class(const H5P_genplist_t *plist)
 
 
 /*-------------------------------------------------------------------------
+ * Function:       H5P_ignore_cmp
+ *
+ * Purpose:        Callback routine to ignore comparing property values.
+ *
+ * Return:         zero
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5P_ignore_cmp(const void H5_ATTR_UNUSED *val1, const void H5_ATTR_UNUSED *val2,
+    size_t H5_ATTR_UNUSED size)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(0)
+} /* end H5P_ignore_cmp() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5P_verify_apl_and_dxpl
  *
  * Purpose:	Validate access property list and/or switch from generic

@@ -752,8 +752,7 @@ hid_t
 H5Aget_space(hid_t attr_id)
 {
     H5A_t	*attr;                  /* Attribute object for ID */
-    H5S_t      *ds = NULL;
-    hid_t	ret_value;
+    hid_t	ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", attr_id);
@@ -762,19 +761,9 @@ H5Aget_space(hid_t attr_id)
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
-    if(NULL == (ds = H5A_get_space(attr)))
+    if((ret_value = H5A_get_space(attr)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of attribute")
-
-    /* Atomize */
-    if((ret_value = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
-
 done:
-    if(ret_value < 0) {
-        if(ds && (H5S_close(ds) < 0))
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
-    } /* end if */
-
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_space() */
 
@@ -799,7 +788,6 @@ hid_t
 H5Aget_type(hid_t attr_id)
 {
     H5A_t	*attr;          /* Attribute object for ID */
-    H5T_t      *dt = NULL;
     hid_t	 ret_value;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -809,19 +797,9 @@ H5Aget_type(hid_t attr_id)
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
-    if(NULL == (dt = H5A_get_type(attr)))
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of attribute")
-
-    /* Create an atom */
-    if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
-
+    if((ret_value = H5A_get_type(attr)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of attribute")
 done:
-    if(ret_value < 0) {
-        if(dt && (H5T_close(dt) < 0))
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
-    } /* end if */
-
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_type() */
 
@@ -1207,7 +1185,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     if(HDstrcmp(old_name, new_name)) {
         H5G_loc_t loc;                /* Object location */
   
-        if(H5G_loc(loc_id, & loc) < 0)
+        if(H5G_loc(loc_id, &loc) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
         /* Call private attribute rename routine */
@@ -1262,7 +1240,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
         if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-        if(H5G_loc(loc_id, & loc) < 0)
+        if(H5G_loc(loc_id, &loc) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
         /* Call private attribute rename routine */

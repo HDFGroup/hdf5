@@ -33,14 +33,16 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Apkg.h"		/* Attributes	  			*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Apkg.h"             /* Attributes                               */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Opkg.h"             /* Object headers                           */
+#include "H5SMprivate.h"        /* Shared Object Header Messages            */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative.h"         /* Native VOL driver                        */
 
 
 /****************/
@@ -735,86 +737,89 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_space
+ * Function:    H5A_get_space
  *
- * Purpose:	Returns dataspace of the attribute.
+ * Purpose:     Returns dataspace of the attribute.
  *
- * Return:	Success:	dataspace
+ * Return:      Success:    A valid ID for the dataspace of an attribute
  *
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ *              Failure:    H5I_INVALID_ID
  *
  *-------------------------------------------------------------------------
  */
-H5S_t *
+hid_t
 H5A_get_space(H5A_t *attr)
 {
-    H5S_t *ret_value = NULL;
+    H5S_t      *ds = NULL;
+    hid_t       ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(attr);
 
     /* Copy the attribute's dataspace */
-    if(NULL == (ret_value = H5S_copy(attr->shared->ds, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to copy dataspace")
+    if (NULL == (ds = H5S_copy(attr->shared->ds, FALSE, TRUE)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy dataspace")
+
+    /* Atomize */
+    if ((ret_value = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
 
 done:
+    if (H5I_INVALID_HID == ret_value && ds && H5S_close(ds) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataspace")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_space() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_type
+ * Function:    H5A_get_type
  *
- * Purpose:	Returns datatype of the dataset.
+ * Purpose:     Returns an ID for the datatype of an attribute
  *
- * Return:	Success:	datatype
+ * Return:      Success:    A valid ID for the datatype of an attribute
  *
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ *              Failure:	H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
-H5T_t *
+hid_t
 H5A_get_type(H5A_t *attr)
 {
     H5T_t *dt = NULL;
-    H5T_t *ret_value = NULL;
+    hid_t ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(attr);
 
     /* Patch the datatype's "top level" file pointer */
-    if(H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to patch datatype's file pointer")
+    if (H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to patch datatype's file pointer")
 
-    /*
-     * Copy the attribute's datatype.  If the type is a named type then
+    /* Copy the attribute's datatype.  If the type is a named type then
      * reopen the type before returning it to the user. Make the type
      * read-only.
      */
-    if(NULL == (dt = H5T_copy(attr->shared->dt, H5T_COPY_REOPEN)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to copy datatype")
+    if (NULL == (dt = H5T_copy(attr->shared->dt, H5T_COPY_REOPEN)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy datatype")
 
     /* Mark any datatypes as being in memory now */
-    if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
+    if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "invalid datatype location")
 
     /* Lock copied type */
-    if(H5T_lock(dt, FALSE) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to lock transient datatype")
+    if (H5T_lock(dt, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to lock transient datatype")
 
-    ret_value = dt;
+    /* Atomize */
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
 
 done:
-    if(!ret_value && dt && (H5T_close(dt) < 0))
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
+    if (H5I_INVALID_HID == ret_value && dt && (H5T_close(dt) < 0))
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_type() */
@@ -2433,3 +2438,217 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_rename_by_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_iterate
+ *
+ * Purpose:	Iterates through attrs in an object
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5A_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
+                   H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data, hid_t dxpl_id)
+{
+    H5G_loc_t	loc;	        /* Object location */
+    H5G_loc_t   obj_loc;        /* Location used to open group */
+    H5G_name_t  obj_path;       /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;       /* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    hid_t       obj_loc_id = (-1);      /* ID for object located */
+    H5A_attr_iter_op_t attr_op; /* Attribute operator */
+    hsize_t	start_idx;      /* Index of attribute to start iterating at */
+    hsize_t	last_attr;      /* Index of last attribute examined */
+    void        *temp_obj = NULL;
+    H5I_type_t  obj_type;
+    herr_t      ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check arguments */
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    /* Build attribute operator info */
+    attr_op.op_type = H5A_ATTR_OP_APP2;
+    attr_op.u.app_op2 = op;
+
+    /* Call attribute iteration routine */
+    last_attr = start_idx = (idx ? *idx : 0);
+
+    /* Iterate over the attributess */
+    if(loc_params.type == H5VL_OBJECT_BY_SELF || loc_params.type == H5VL_OBJECT_BY_NAME) {
+        hid_t lapl_id = (loc_params.type == H5VL_OBJECT_BY_SELF ? H5P_LINK_ACCESS_DEFAULT : loc_params.loc_data.loc_by_name.lapl_id);
+
+        /* Set up opened group location to fill in */
+        obj_loc.oloc = &obj_oloc;
+        obj_loc.path = &obj_path;
+        H5G_loc_reset(&obj_loc);
+
+        /* Find the object's location */
+        if(H5G_loc_find(&loc, (loc_params.type == H5VL_OBJECT_BY_SELF ? "." : loc_params.loc_data.loc_by_name.name), 
+                        &obj_loc, lapl_id, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found");
+        loc_found = TRUE;
+
+        /* Open the object */
+        if((obj_loc_id = H5O_open_by_loc(&obj_loc, lapl_id, dxpl_id, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object");
+
+        /* get the native object from the ID created by the object header and create 
+           a "VOL object" ID */
+        obj_type = H5I_get_type(obj_loc_id);
+        if(NULL == (temp_obj = H5I_remove(obj_loc_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object");
+        /* Get an atom for the object */
+        if((obj_loc_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+    }
+    else {
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link iterate params");
+    }
+
+    /* Do the real iteration */
+    if((ret_value = H5O_attr_iterate(obj_loc_id, dxpl_id, idx_type, order, 
+                                     start_idx, &last_attr, &attr_op, op_data)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error iterating over attributes");
+
+    /* Set the last attribute information */
+    if(idx)
+        *idx = last_attr;
+
+done:
+    /* Release resources */
+    if(loc_params.type == H5VL_OBJECT_BY_SELF || loc_params.type == H5VL_OBJECT_BY_NAME) {
+        if(obj_loc_id >= 0) {
+            if(H5I_dec_app_ref(obj_loc_id) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
+        } /* end if */
+        else if(loc_found && H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
+    }
+    else {
+        HDONE_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link iterate params");
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_delete
+ *
+ * Purpose:	Deletes an attribute from a location
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, attr not deleted.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5A_delete(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t dxpl_id)
+{
+    H5G_loc_t   loc;                    /* Object location */
+    H5G_loc_t   obj_loc;                /* Location used to open group */
+    H5G_name_t  obj_path;            	/* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check arguments */
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    if(H5VL_OBJECT_BY_SELF == loc_params.type) { /* H5Adelete */
+        /* Delete the attribute from the location */
+        if(H5O_attr_remove(loc.oloc, attr_name, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+    }
+    else if(H5VL_OBJECT_BY_NAME == loc_params.type) { /* H5Adelete_by_name */
+        /* Set up opened group location to fill in */
+        obj_loc.oloc = &obj_oloc;
+        obj_loc.path = &obj_path;
+        H5G_loc_reset(&obj_loc);
+
+        /* Find the object's location */
+        if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_name.name, &obj_loc/*out*/, 
+                        loc_params.loc_data.loc_by_name.lapl_id, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
+        loc_found = TRUE;
+
+        /* Delete the attribute from the location */
+        if(H5O_attr_remove(obj_loc.oloc, attr_name, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+    }
+    else if(H5VL_OBJECT_BY_IDX == loc_params.type) { /* H5Adelete_by_idx */
+        /* Set up opened group location to fill in */
+        obj_loc.oloc = &obj_oloc;
+        obj_loc.path = &obj_path;
+        H5G_loc_reset(&obj_loc);
+
+        /* Find the object's location */
+        if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_idx.name, &obj_loc/*out*/, 
+                        loc_params.loc_data.loc_by_idx.lapl_id, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
+        loc_found = TRUE;
+
+        /* Delete the attribute from the location */
+        if(H5O_attr_remove_by_idx(obj_loc.oloc, loc_params.loc_data.loc_by_idx.idx_type, 
+                                  loc_params.loc_data.loc_by_idx.order, 
+                                  loc_params.loc_data.loc_by_idx.n, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+    }
+    else {
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown attribute remove parameters")
+    }
+
+done:
+    /* Release resources */
+    if(loc_found && H5G_loc_free(&obj_loc) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5A_close_attr
+ *
+ * Purpose:     Called when the ref count reaches zero on the attribute's ID
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5A_close_attr(void *_attr)
+{
+    H5VL_object_t   *attr = (H5VL_object_t *)_attr;
+    herr_t          ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Close the attr through the VOL*/
+    if ((ret_value = H5VL_attr_close(attr->vol_obj, attr->vol_info->vol_cls, 
+                                    H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to close attribute")
+
+    /* free attribute */
+    if (H5VL_free_object(attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_close_attr() */
+

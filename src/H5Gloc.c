@@ -141,6 +141,79 @@ static herr_t H5G_loc_get_comment_cb(H5G_loc_t *grp_loc, const char *name,
 
 
 
+/*---------------------------------------------------------------------------
+ * Function:    H5G_loc_real
+ *
+ * Purpose:     Utility routine to get object location
+ *
+ * Returns:     SUCCEED/FAIL
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (type) {
+        case H5I_FILE:
+            /* Construct a group location for root group of the file */
+            if (H5G_root_loc((H5F_t *)obj, loc) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
+            break;
+        case H5I_GROUP:
+            if (NULL == (loc->oloc = H5G_oloc((H5G_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group")
+            if (NULL == (loc->path = H5G_nameof((H5G_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of group")
+            break;
+        case H5I_DATATYPE:
+            {
+                H5T_t *dt = NULL;
+
+                /* Get the actual datatype object if the VOL object is set */
+                dt = H5T_get_actual_type((H5T_t *)obj);
+    
+                if (NULL == (loc->oloc = H5T_oloc(dt)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
+                if (NULL == (loc->path = H5T_nameof(dt)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of datatype")
+                break;
+            }
+        case H5I_DATASET:
+            if (NULL == (loc->oloc = H5D_oloc((H5D_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset")
+             if (NULL == (loc->path = H5D_nameof((H5D_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of dataset")
+            break;
+        case H5I_ATTR:
+            if (NULL == (loc->oloc = H5A_oloc((H5A_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute")
+            if (NULL == (loc->path = H5A_nameof((H5A_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of attribute")
+            break;
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+    } /* end switch */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5G_loc_real */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5G_loc
  *

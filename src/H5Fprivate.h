@@ -587,7 +587,7 @@ typedef struct H5F_t H5F_t;
 #define H5_SIZEOF_CHKSUM              	4
 
 /* v1 B-tree node signature */
-#define H5B_MAGIC	                "TREE"
+#define H5B_MAGIC                       "TREE"
 
 /* v2 B-tree signatures */
 #define H5B2_HDR_MAGIC                  "BTHD"          /* Header */
@@ -617,7 +617,7 @@ typedef struct H5F_t H5F_t;
 #define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
 
 /* Global heap signature */
-#define H5HG_MAGIC	                "GCOL"
+#define H5HG_MAGIC                      "GCOL"
 
 /* Local heap signature */
 #define H5HL_MAGIC                      "HEAP"
@@ -748,6 +748,7 @@ H5_DLL unsigned H5F_get_nopen_objs(const H5F_t *f);
 H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
 H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 H5_DLL hid_t H5F_get_file_id(const H5F_t *f);
+H5_DLL hbool_t H5F_file_id_exists(const H5F_t *f);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
 H5_DLL unsigned H5F_get_read_attempts(const H5F_t *f);

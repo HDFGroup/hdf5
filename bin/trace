@@ -140,6 +140,7 @@ $Source = "";
                "H5G_iterate_t"              => "x",
                "H5G_info_t"                 => "x",
                "H5I_free_t"                 => "x",
+               "H5I_iterate_func_t"         => "x",
                "H5I_search_func_t"          => "x",
                "H5L_class_t"                => "x",
                "H5L_elink_traverse_t"       => "x",

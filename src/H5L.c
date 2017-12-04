@@ -50,18 +50,6 @@ typedef struct {
     hid_t           dxpl_id;            /* DXPL to use in callback */
 } H5L_trav_gi_t;
 
-/* User data for path traversal routine for getting link info by index */
-typedef struct {
-    /* In */
-    H5_index_t idx_type;               /* Index to use */
-    H5_iter_order_t order;              /* Order to iterate in index */
-    hsize_t n;                          /* Offset of link within index */
-    hid_t dxpl_id;                      /* DXPL to use in callback */
-
-    /* Out */
-    H5L_info_t      *linfo;             /* Buffer to return to user */
-} H5L_trav_gibi_t;
-
 /* User data for path traversal callback to creating a link */
 typedef struct {
     H5F_t *file;                        /* Pointer to the file */
@@ -108,46 +96,10 @@ typedef struct {
     void *buf;                          /* User buffer */
 } H5L_trav_gv_t;
 
-/* User data for path traversal routine for getting link value by index */
-typedef struct {
-    /* In */
-    H5_index_t idx_type;               /* Index to use */
-    H5_iter_order_t order;              /* Order to iterate in index */
-    hsize_t n;                          /* Offset of link within index */
-    hid_t dxpl_id;                      /* DXPL to use in callback */
-    size_t size;                        /* Size of user buffer */
-
-    /* Out */
-    void *buf;                          /* User buffer */
-} H5L_trav_gvbi_t;
-
 /* User data for path traversal routine for removing link */
 typedef struct {
     hid_t dxpl_id;                      /* DXPL to use in callback */
 } H5L_trav_rm_t;
-
-/* User data for path traversal routine for removing link by index */
-typedef struct {
-    /* In */
-    H5_index_t idx_type;               /* Index to use */
-    H5_iter_order_t order;              /* Order to iterate in index */
-    hsize_t n;                          /* Offset of link within index */
-    hid_t dxpl_id;                      /* DXPL to use in callback */
-} H5L_trav_rmbi_t;
-
-/* User data for path traversal routine for getting name by index */
-typedef struct {
-    /* In */
-    H5_index_t idx_type;                /* Index to use */
-    H5_iter_order_t order;              /* Order to iterate in index */
-    hsize_t n;                          /* Offset of link within index */
-    size_t size;                        /* Size of name buffer */
-    hid_t dxpl_id;                      /* DXPL to use in callback */
-
-    /* Out */
-    char *name;                         /* Buffer to return name to user */
-    ssize_t name_len;                   /* Length of full name */
-} H5L_trav_gnbi_t;
 
 /********************/
 /* Local Prototypes */
@@ -185,8 +137,6 @@ static herr_t H5L__exists_final_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 static herr_t H5L__exists_inter_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static htri_t H5L__exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id,
-    hid_t dxpl_id);
 static herr_t H5L_get_info_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -866,17 +816,17 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Check for the existence of the link */
-    if((ret_value = H5L__exists(&loc, name, lapl_id, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+    if((ret_value = H5L_exists(&loc, name, lapl_id, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1181,24 +1131,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Literate
+ * Function:    H5Literate
  *
- * Purpose:	Iterates over links in a group, with user callback routine,
+ * Purpose:     Iterates over links in a group, with user callback routine,
  *              according to the order within an index.
  *
  *              Same pattern of behavior as H5Giterate.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
- *
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 16, 2006
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */
@@ -1206,25 +1152,25 @@ herr_t
 H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx_p, H5L_iterate_t op, void *op_data)
 {
-    H5I_type_t  id_type;        /* Type of ID */
-    H5G_link_iterate_t lnk_op;  /* Link operator */
-    hsize_t     last_lnk;       /* Index of last object looked at */
-    hsize_t	idx;            /* Internal location to hold index */
-    herr_t ret_value;           /* Return value */
+    H5I_type_t          id_type;        /* Type of ID                       */
+    H5G_link_iterate_t  lnk_op;         /* Link operator                    */
+    hsize_t             last_lnk;       /* Index of last object looked at   */
+    hsize_t	            idx;            /* Internal location to hold index  */
+    herr_t              ret_value;      /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iIiIo*hx*x", grp_id, idx_type, order, idx_p, op, op_data);
 
     /* Check arguments */
     id_type = H5I_get_type(grp_id);
-    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
+    if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
-    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
-    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(!op)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+    if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if (!op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
 
     /* Set up iteration beginning/end info */
     idx = (idx_p == NULL ? 0 : *idx_p);
@@ -1235,8 +1181,8 @@ H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     lnk_op.op_func.op_new = op;
 
     /* Iterate over the links */
-    if((ret_value = H5G_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+    if ((ret_value = H5G_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
     /* Set the index we stopped at */
     if(idx_p)
@@ -2930,7 +2876,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L__exists
+ * Function:	H5L_exists
  *
  * Purpose:	Returns whether a link exists in a group
  *
@@ -2944,13 +2890,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
-H5L__exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
+htri_t
+H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_le_t udata;        /* User data for traversal */
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* A path of "/" will always exist in a file */
     if(0 == HDstrcmp(name, "/"))
@@ -2966,7 +2912,7 @@ H5L__exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5L__exists() */
+} /* H5L_exists() */
 
 
 /*-------------------------------------------------------------------------
@@ -3294,4 +3240,205 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_link_copy_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_get_val_by_idx
+ *
+ * Purpose:	Get Value of a link
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_get_val_by_idx(H5G_loc_t *loc, const char *name, void *udata, hid_t lapl_id, hid_t dxpl_id)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Traverse the group hierarchy to locate the object to get val about */
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_val_by_idx_cb, 
+                    (H5L_trav_gvbi_t *)udata, lapl_id, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link val")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_get_val_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_delete_by_idx
+ *
+ * Purpose:	Delete a link from a group.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_delete_by_idx(H5G_loc_t *loc, const char *name, void *udata, hid_t lapl_id, hid_t dxpl_id)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(loc);
+    HDassert(name && *name);
+
+    /* Traverse the group hierarchy to remove the link */
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, 
+                    H5L_delete_by_idx_cb, (H5L_trav_rmbi_t *)udata, lapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_delete_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_get_info_by_idx
+ *
+ * Purpose:	Get_Info a link from a group.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_get_info_by_idx(H5G_loc_t *loc, const char *name, void *udata, hid_t lapl_id, hid_t dxpl_id)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Traverse the group hierarchy to locate the object to get info about */
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_info_by_idx_cb, 
+                    (H5L_trav_gibi_t *)udata, lapl_id, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_get_info_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_get_name_by_idx
+ *
+ * Purpose:	Get name of a link from a group.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_get_name_by_idx(H5G_loc_t *loc, const char *name, void *udata, hid_t lapl_id, hid_t dxpl_id)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Traverse the group hierarchy to locate the object to get name about */
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_name_by_idx_cb, 
+                    (H5L_trav_gnbi_t *)udata, lapl_id, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link name")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_get_name_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_iterate
+ *
+ * Purpose:	Iterates through links in a group
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5L_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
+                   H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, 
+                   H5L_iterate_t op, void *op_data, hid_t dxpl_id)
+{
+    H5G_loc_t	loc;
+    herr_t ret_value = SUCCEED;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    if(!recursive) {
+        H5G_link_iterate_t lnk_op;  /* Link operator */
+        hsize_t     last_lnk;       /* Index of last object looked at */
+        hsize_t	idx;            /* Internal location to hold index */
+
+        /* Set up iteration beginning/end info */
+        idx = (idx_p == NULL ? 0 : *idx_p);
+        last_lnk = 0;
+
+        /* Build link operator info */
+        lnk_op.op_type = H5G_LINK_OP_NEW;
+        lnk_op.op_func.op_new = op;
+
+        /* Iterate over the links */
+        if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+            if((ret_value = H5G_iterate(&loc, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, 
+                                        H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+        }
+        else if(loc_params.type == H5VL_OBJECT_BY_NAME) { 
+            if((ret_value = H5G_iterate(&loc, loc_params.loc_data.loc_by_name.name, 
+                                        idx_type, order, idx, &last_lnk, &lnk_op, op_data, 
+                                        loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+        }
+        else {
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link iterate params")
+        }
+
+        /* Set the index we stopped at */
+        if(idx_p)
+            *idx_p = last_lnk;
+    }
+    else {
+        /* Call internal group visitation routine */
+        if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+            if((ret_value = H5G_visit(&loc, ".", idx_type, order, op, op_data, 
+                                      H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+        }
+        else if(loc_params.type == H5VL_OBJECT_BY_NAME) { 
+            if((ret_value = H5G_visit(&loc, loc_params.loc_data.loc_by_name.name, 
+                                      idx_type, order, op, op_data, 
+                                      loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+        }
+        else {
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link visit params")
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_iterate() */
 
