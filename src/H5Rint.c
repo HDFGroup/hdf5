@@ -289,7 +289,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
             HDmemset(ref, 0, H5R_DSET_REG_REF_BUF_SIZE);
 
             /* Get the amount of space required to serialize the selection */
-            if ((buf_size = H5S_SELECT_SERIAL_SIZE(space)) < 0)
+            if ((buf_size = H5S_SELECT_SERIAL_SIZE(space, loc->oloc->file)) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "Invalid amount of space for serializing selection")
 
             /* Increase buffer size to allow for the dataset OID */
@@ -305,7 +305,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
             H5F_addr_encode(loc->oloc->file, &p, obj_loc.oloc->addr);
 
             /* Serialize the selection into heap buffer */
-            if (H5S_SELECT_SERIALIZE(space, &p) < 0)
+            if (H5S_SELECT_SERIALIZE(space, &p, loc->oloc->file) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Unable to serialize selection")
 
             /* Save the serialized buffer for later */
