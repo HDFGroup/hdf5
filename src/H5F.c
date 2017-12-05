@@ -87,7 +87,7 @@ static const H5I_class_t H5I_FILE_CLS[1] = {{
     H5I_FILE,            /* ID class value */
     0,                   /* Class flags */
     0,                   /* # of reserved IDs for class */
-    (H5I_free_t)H5F_close    /* Callback routine for closing objects of this class */
+    (H5I_free_t)H5F__close_file  /* Callback routine for closing objects of this class */
 }};
 
 
@@ -479,15 +479,15 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t   *new_file = NULL;               /* file struct for new file                 */
+    H5F_t               *new_file = NULL;   /* file struct for new file                 */
 
-    H5P_genplist_t *plist;                  /* Property list pointer                    */
-    H5VL_class_t   *vol_cls = NULL;         /* VOL Class structure for callback info    */
-    H5VL_t         *vol_info = NULL;        /* VOL info struct                          */
+    H5P_genplist_t      *plist;             /* Property list pointer                    */
+    H5VL_class_t        *vol_cls = NULL;    /* VOL Class structure for callback info    */
+    H5VL_t              *vol_info = NULL;   /* VOL info struct                          */
     H5VL_driver_prop_t  driver_prop;        /* Property for vol driver ID & info        */
 
-    hid_t   dxpl_id = H5AC_ind_read_dxpl_id;/* dxpl used by library                     */
-    hid_t   ret_value;                      /* return value                             */
+    hid_t               dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library     */
+    hid_t               ret_value;          /* return value                             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
@@ -533,15 +533,25 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
-    /* Create a new file or truncate an existing file. */
-    if (NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
+    /* create a new file or truncate an existing file through the VOL */
+    if(NULL == (new_file = H5VL_file_create(vol_cls, filename, flags, fcpl_id, fapl_id, 
+                                        dxpl_id, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = vol_cls;
+    vol_info->vol_id = driver_prop.driver_id;
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL driver")
+
     /* Get an atom for the file */
-    if ((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+    if((ret_value = H5VL_register_id(H5I_FILE, new_file, vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
+    /* XXX: REMOVE THIS (straggler from old code) */
     new_file->file_id = ret_value;
 
 done:
@@ -574,13 +584,13 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    H5F_t       *new_file = NULL;                   /* file struct for new file                 */
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library                     */
+    H5F_t               *new_file = NULL;           /* file struct for new file                 */
+    hid_t               dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library             */
     H5P_genplist_t      *plist;                     /* Property list pointer                    */
-    H5VL_driver_prop_t  driver_prop;                /* Property for vol plugin ID & info        */
+    H5VL_driver_prop_t  driver_prop;                /* Property for vol driver ID & info        */
     H5VL_class_t        *vol_cls = NULL;            /* VOL Class structure for callback info    */
     H5VL_t              *vol_info = NULL;           /* VOL info struct                          */
-    hid_t       ret_value;                          /* return value                             */
+    hid_t               ret_value;                  /* return value                             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
@@ -592,6 +602,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
             (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
+    /* XXX: Might want to move SWMR flag checks to H5F_open() */
     /* Asking for SWMR write access on a read-only file is invalid */
     if((flags & H5F_ACC_SWMR_WRITE) && 0 == (flags & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "SWMR write access on a file open for read-only access is not allowed")
@@ -608,19 +619,27 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
     if(H5P_peek(plist, H5F_ACS_VOL_DRV_NAME, &driver_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL driver info")
-
     if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(driver_prop.driver_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL driver ID")
 
-    /* Open the file */
-    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
+    /* Open the file through the VOL layer */
+    if(NULL == (new_file = H5VL_file_open(vol_cls, filename, flags, fapl_id, dxpl_id, H5_REQUEST_NULL)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
+
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = vol_cls;
+    vol_info->vol_id = driver_prop.driver_id;
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL driver")
 
     /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_FILE, new_file, vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
+    /* XXX: REMOVE THIS (straggler from old code) */
     new_file->file_id = ret_value;
 
 done:
@@ -765,8 +784,6 @@ done:
 herr_t
 H5Fclose(hid_t file_id)
 {
-    H5F_t       *f = NULL;
-    int         nref;
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -775,21 +792,6 @@ H5Fclose(hid_t file_id)
     /* Check/fix arguments. */
     if (H5I_FILE != H5I_get_type(file_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
-
-    /* Flush file if this is the last reference to this id and we have write
-     * intent, unless it will be flushed by the "shared" file being closed.
-     * This is only necessary to replicate previous behaviour, and could be
-     * disabled by an option/property to improve performance.
-     */
-    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    if ((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
-        if ((nref = H5I_get_ref(file_id, FALSE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
-        if (nref == 1)
-            if (H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    }
 
     /* Decrement reference count on atom.  When it reaches zero the file will
      * be closed.

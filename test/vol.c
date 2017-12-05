@@ -189,8 +189,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_basic_vol_operation()
  *
- * Purpose:     Uses the echo VOL driver to test basic VOL operations
- *              via the H5VL public API.
+ * Purpose:     Uses the native VOL driver to test basic VOL operations
  *
  * Return:      SUCCEED/FAIL
  *
@@ -199,9 +198,45 @@ error:
 static herr_t
 test_basic_vol_operation(void)
 {
-    char name[25];
+    hid_t fid = -1;
 
     TESTING("Basic VOL operations");
+
+    if ((fid = H5Fcreate("native_vol_test", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    if ((fid = H5Fopen("native_vol_test", H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* end test_basic_vol_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_echo_vol_operation()
+ *
+ * Purpose:     Uses the echo VOL driver to test basic VOL operations
+ *              via the H5VL public API.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_echo_vol_operation(void)
+{
+    char name[25];
+
+    TESTING("Echo VOL operations");
 
     PASSED();
     return SUCCEED;
