@@ -331,6 +331,17 @@ Bug Fixes since HDF5-1.10.1 release
 
       (DER - 2017/11/21, HDFFV-10330)
 
+    - Fix for collective metadata writes on file close
+
+      It was discovered that metadata was being written twice as part of
+      the parallel file close behavior, once independently and once
+      collectively.
+
+      A fix for this error was included as part of the parallel compression
+      feature but remained undocumented here.
+
+      (RAW - 2017/12/01, HDFFV-10272)
+
     Configuration
     -------------
     - cmake
