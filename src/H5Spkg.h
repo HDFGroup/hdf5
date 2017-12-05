@@ -33,8 +33,28 @@
 #define H5S_VALID_PERM	0x02
 
 /* Flags for serialization of selections */
-#define H5S_SELECT_FLAG_UNLIM   0x01
-#define H5S_SELECT_FLAG_BITS    (H5S_SELECT_FLAG_UNLIM)
+#define H5S_HYPER_REGULAR       0x01
+#define H5S_SELECT_FLAG_BITS    (H5S_HYPER_REGULAR)
+
+/* Versions for H5S_SEL_HYPER selection info */
+#define H5S_HYPER_VERSION_1     1
+#define H5S_HYPER_VERSION_2     2
+
+/* Versions for H5S_SEL_POINTS selection info */
+#define H5S_POINT_VERSION_1     1
+
+/* Versions for H5S_SEL_NONE selection info */
+#define H5S_NONE_VERSION_1      1
+
+/* Versions for H5S_SEL_ALL selection info */
+#define H5S_ALL_VERSION_1       1
+
+/* Size of point/offset info for H5S_SEL_POINTS/H5S_SEL_HYPER */
+#define H5S_INFO_SIZE_4 0x04        /* 4 bytes: 32 bits */
+#define H5S_INFO_SIZE_8 0x08        /* 8 bytes: 64 bits */
+#define H5S_SELECT_INFO_SIZE_BITS   (H5S_INFO_SIZE_4|H5S_INFO_SIZE_8)
+
+#define H5S_UINT32_MAX      4294967295  /* 2^32 - 1 */
 
 /* Length of stack-allocated sequences for "project intersect" routines */
 #define H5S_PROJECT_INTERSECT_NSEQS 256
@@ -139,9 +159,9 @@ typedef herr_t (*H5S_sel_release_func_t)(H5S_t *space);
 /* Method to determine if current selection is valid for dataspace */
 typedef htri_t (*H5S_sel_is_valid_func_t)(const H5S_t *space);
 /* Method to determine number of bytes required to store current selection */
-typedef hssize_t (*H5S_sel_serial_size_func_t)(const H5S_t *space);
+typedef hssize_t (*H5S_sel_serial_size_func_t)(const H5S_t *space, H5F_t *f);
 /* Method to store current selection in "serialized" form (a byte sequence suitable for storing on disk) */
-typedef herr_t (*H5S_sel_serialize_func_t)(const H5S_t *space, uint8_t **p);
+typedef herr_t (*H5S_sel_serialize_func_t)(const H5S_t *space, uint8_t **p, H5F_t *f);
 /* Method to create selection from "serialized" form (a byte sequence suitable for storing on disk) */
 typedef herr_t (*H5S_sel_deserialize_func_t)(H5S_t *space, uint32_t version, uint8_t flags,
     const uint8_t **p);
@@ -222,7 +242,7 @@ typedef hsize_t (*H5S_sel_iter_nelmts_func_t)(const H5S_sel_iter_t *iter);
 /* Method to determine if there are more blocks left in the current selection */
 typedef htri_t (*H5S_sel_iter_has_next_block_func_t)(const H5S_sel_iter_t *iter);
 /* Method to move selection iterator to the next element in the selection */
-typedef herr_t (*H5S_sel_iter_next_func_t)(H5S_sel_iter_t *iter, size_t nelem);
+typedef herr_t (*H5S_sel_iter_next_func_t)(H5S_sel_iter_t *iter, hsize_t nelem);
 /* Method to move selection iterator to the next block in the selection */
 typedef herr_t (*H5S_sel_iter_next_block_func_t)(H5S_sel_iter_t *iter);
 /* Method to release iterator for current selection */
