@@ -30,6 +30,7 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 #include "H5Dpkg.h"         /* Datasets                 */
+#include "H5MMprivate.h"    /* Memory                   */
 
 /* Definitions for misc. test #1 */
 #define MISC1_FILE  "tmisc1.h5"
@@ -722,7 +723,7 @@ create_struct3(void)
     herr_t ret;                         /* For error checking */
 
     str3hndl = (misc5_struct3_hndl *)HDmalloc(sizeof(misc5_struct3_hndl));
-    CHECK(str3hndl,NULL,"malloc");
+    CHECK_PTR(str3hndl, "malloc");
 
     str3hndl->st3h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct3));
     CHECK(str3hndl->st3h_base, FAIL, "H5Tcreate");
@@ -765,7 +766,7 @@ create_struct2(void)
     herr_t ret;                         /* For error checking */
 
     str2hndl = (misc5_struct2_hndl *)HDmalloc(sizeof(misc5_struct2_hndl));
-    CHECK(str2hndl, NULL, "malloc");
+    CHECK_PTR(str2hndl, "HDmalloc");
 
     str2hndl->st2h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct2));
     CHECK(str2hndl->st2h_base, FAIL, "H5Tcreate");
@@ -774,7 +775,7 @@ create_struct2(void)
     CHECK(ret, FAIL, "H5Tinsert");
 
     str2hndl->st2h_st3hndl = create_struct3();
-    CHECK(str2hndl->st2h_st3hndl,NULL,"create_struct3");
+    CHECK_PTR(str2hndl->st2h_st3hndl, "create_struct3");
 
     ret = H5Tinsert(str2hndl->st2h_base, "st2_el2", HOFFSET(misc5_struct2, st2_el2), str2hndl->st2h_st3hndl->st3h_id);
     CHECK(ret,FAIL,"H5Tinsert");
@@ -810,7 +811,7 @@ set_struct2(misc5_struct2 *buf)
     buf->st2_el2.len = MISC5_DBGNELM3;
 
     buf->st2_el2.p = HDmalloc((buf->st2_el2.len)*sizeof(misc5_struct3));
-    CHECK(buf->st2_el2.p,NULL,"malloc");
+    CHECK_PTR(buf->st2_el2.p, "HDmalloc");
 
     for(i=0; i<(buf->st2_el2.len); i++)
         set_struct3(&(((misc5_struct3 *)(buf->st2_el2.p))[i]));
@@ -831,7 +832,7 @@ create_struct1(void)
     herr_t ret;                         /* For error checking */
 
     str1hndl = (misc5_struct1_hndl *)HDmalloc(sizeof(misc5_struct1_hndl));
-    CHECK(str1hndl, NULL, "malloc");
+    CHECK_PTR(str1hndl, "HDmalloc");
 
     str1hndl->st1h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct1));
     CHECK(str1hndl->st1h_base, FAIL, "H5Tcreate");
@@ -840,7 +841,7 @@ create_struct1(void)
     CHECK(ret, FAIL, "H5Tinsert");
 
     str1hndl->st1h_st2hndl=create_struct2();
-    CHECK(str1hndl->st1h_st2hndl,NULL,"create_struct2");
+    CHECK_PTR(str1hndl->st1h_st2hndl, "create_struct2");
 
     ret = H5Tinsert(str1hndl->st1h_base, "st1_el2", HOFFSET(misc5_struct1, st1_el2), str1hndl->st1h_st2hndl->st2h_id);
     CHECK(ret,FAIL,"H5Tinsert");
@@ -876,7 +877,7 @@ set_struct1(misc5_struct1 *buf)
     buf->st1_el2.len=MISC5_DBGNELM2;
 
     buf->st1_el2.p=HDmalloc((buf->st1_el2.len)*sizeof(misc5_struct2));
-    CHECK(buf->st1_el2.p,NULL,"malloc");
+    CHECK_PTR(buf->st1_el2.p, "HDmalloc");
 
     for(i=0; i<(buf->st1_el2.len); i++)
         set_struct2(&(((misc5_struct2 *)(buf->st1_el2.p))[i]));
@@ -912,7 +913,7 @@ test_misc5(void)
 
     /* Create the memory structure to write */
     str1hndl = create_struct1();
-    CHECK(str1hndl, NULL, "create_struct1");
+    CHECK_PTR(str1hndl, "create_struct1");
 
     /* Create the dataspace */
     dims[0] = MISC5_NELMTOPLVL;
@@ -926,7 +927,7 @@ test_misc5(void)
     /* Create the variable-length buffer */
     buf.len = MISC5_DBGNELM1;
     buf.p = HDmalloc((buf.len) * sizeof(misc5_struct1));
-    CHECK(buf.p, NULL, "malloc");
+    CHECK_PTR(buf.p, "HDmalloc");
 
     /* Create the top-level VL information */
     for(i = 0; i < MISC5_DBGNELM1; i++)
@@ -1252,10 +1253,10 @@ test_misc8(void)
 
     /* Allocate space for the data to write & read */
     wdata = (int *)HDmalloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
-    CHECK(wdata,NULL,"malloc");
+    CHECK_PTR(wdata, "HDmalloc");
 #ifdef VERIFY_DATA
     rdata = (int *)HDmalloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
-    CHECK(rdata,NULL,"malloc");
+    CHECK_PTR(rdata, "HDmalloc");
 #endif /* VERIFY_DATA */
 
     /* Initialize values */
@@ -2143,7 +2144,7 @@ misc13_verify_dataset(hid_t loc_id, const char *name, const unsigned *data)
 
     /* Create a data buffer for the dataset read */
     read_data = (unsigned *)HDcalloc(MISC13_DIM1, sizeof(unsigned));
-    CHECK(read_data, NULL, "HDcalloc");
+    CHECK_PTR(read_data, "HDcalloc");
 
     /* Open the contiguous dataset in the root group */
     dsid = H5Dopen2(loc_id, name, H5P_DEFAULT);
@@ -2269,14 +2270,14 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
 
     /* Allocate space for the user block */
     user_block = HDcalloc(size, (size_t)1);
-    CHECK(user_block, NULL, "HDcalloc");
+    CHECK_PTR(user_block, "HDcalloc");
 
     /* Copy in the user block data */
     HDmemcpy(user_block, str, strlen(str));
 
     /* Open the new file */
     new_fp = HDfopen(new_name,"wb");
-    CHECK(new_fp, NULL, "HDfopen");
+    CHECK_PTR(new_fp, "HDfopen");
 
     /* Write the user block to the new file */
     written = HDfwrite(user_block, (size_t)1, size, new_fp);
@@ -2284,11 +2285,11 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
 
     /* Open the old file */
     old_fp = HDfopen(old_name,"rb");
-    CHECK(old_fp, NULL, "HDfopen");
+    CHECK_PTR(old_fp, "HDfopen");
 
     /* Allocate space for the copy buffer */
     copy_buf = HDmalloc((size_t)MISC13_COPY_BUF_SIZE);
-    CHECK(copy_buf, NULL, "HDmalloc");
+    CHECK_PTR(copy_buf, "HDmalloc");
 
     /* Copy data from the old file to the new file */
     while((read_in = HDfread(copy_buf, (size_t)1, (size_t)MISC13_COPY_BUF_SIZE, old_fp)) > 0) {
@@ -2438,7 +2439,7 @@ test_misc13(void)
 
     /* Create a data buffer for the datasets */
     data = (unsigned *)HDcalloc(MISC13_DIM1, sizeof(unsigned));
-    CHECK(data, NULL, "HDcalloc");
+    CHECK_PTR(data, "HDcalloc");
 
     /* Initialize data to write */
     misc13_init_data(data);
@@ -3445,7 +3446,7 @@ test_misc19(void)
 
     /* Get a VFD class to register */
     vfd_cls = h5_get_dummy_vfd_class();
-    CHECK(vfd_cls, NULL, "h5_get_dummy_vfd_class");
+    CHECK_PTR(vfd_cls, "h5_get_dummy_vfd_class");
 
     /* Register a virtual file driver */
     vfdid = H5FDregister(vfd_cls);
@@ -5526,6 +5527,64 @@ test_misc33(void)
 
 } /* end test_misc33() */
 
+/****************************************************************
+**
+**  test_misc34(): Ensure zero-size memory allocations work
+**
+****************************************************************/
+static void
+test_misc34(void)
+{
+    void *mem = NULL;       /* allocated buffer     */
+    char *dup = NULL;       /* 'duplicated' string  */
+    size_t sz = 0;          /* buffer size          */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing O and NULL behavior in H5MM API calls"));
+
+    /* H5MM_xfree(): Ensure that passing NULL is allowed and returns NULL */
+    mem = H5MM_xfree(mem);
+    CHECK_PTR_NULL(mem, "H5MM_xfree");
+
+    /* H5MM_malloc(): Ensure that size 0 returns NULL */
+    mem = H5MM_malloc(sz);
+    CHECK_PTR_NULL(mem, "H5MM_malloc");
+    mem = H5MM_xfree(mem);
+
+    /* H5MM_calloc(): Ensure that size 0 returns NULL */
+    mem = H5MM_calloc(sz);
+    CHECK_PTR_NULL(mem, "H5MM_calloc");
+    mem = H5MM_xfree(mem);
+
+    /* H5MM_realloc(): Check behavior:
+     *
+     *  H5MM_realloc(NULL, size)    <==> H5MM_malloc(size)
+     *  H5MM_realloc(ptr, 0)        <==> H5MM_xfree(ptr)
+     *  H5MM_realloc(NULL, 0)       <==> NULL
+     */
+    mem = H5MM_xfree(mem);
+
+    sz = 1024;
+    mem = H5MM_realloc(mem, sz);
+    CHECK_PTR(mem, "H5MM_realloc (case 1)");
+    /* Don't free mem here! */
+
+    sz = 0;
+    mem = H5MM_realloc(mem, sz);
+    CHECK_PTR_NULL(mem, "H5MM_realloc (case 2)");
+    mem = H5MM_xfree(mem);
+
+    mem = H5MM_realloc(mem, sz);
+    CHECK_PTR_NULL(mem, "H5MM_realloc (case 3)");
+    mem = H5MM_xfree(mem);
+
+    /* H5MM_xstrdup(): Ensure NULL returns NULL */
+    dup = H5MM_xstrdup((const char *)mem);
+    CHECK_PTR_NULL(dup, "H5MM_xstrdup");
+    dup = (char *)H5MM_xfree((void *)dup);
+
+} /* end test_misc34() */
+
 
 /****************************************************************
 **
@@ -5575,6 +5634,7 @@ test_misc(void)
     test_misc31();      /* Test Reentering library through deprecated routines after H5close() */
     test_misc32();      /* Test filter memory allocation functions */
     test_misc33();      /* Test to verify that H5HL_offset_into() returns error if offset exceeds heap block */
+    test_misc34();      /* Test behavior of 0 and NULL in H5MM API calls */
 
 } /* test_misc() */
 
@@ -5632,5 +5692,5 @@ cleanup_misc(void)
     HDremove(MISC29_COPY_FILE);
     HDremove(MISC30_FILE);
     HDremove(MISC31_FILE);
-}
+} /* end cleanup_misc() */
 

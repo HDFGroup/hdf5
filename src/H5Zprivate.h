@@ -18,6 +18,9 @@
 #ifndef _H5Zprivate_H
 #define _H5Zprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5Z_filter_info_t H5Z_filter_info_t;
+
 /* Include package's public header */
 #include "H5Zpublic.h"
 
@@ -49,7 +52,7 @@
 /****************************/
 
 /* Structure to store information about each filter's parameters */
-typedef struct H5Z_filter_info_t {
+struct H5Z_filter_info_t {
     H5Z_filter_t	id;		/*filter identification number	     */
     unsigned		flags;		/*defn and invocation flags	     */
     char		_name[H5Z_COMMON_NAME_LEN];	/*internal filter name		     */
@@ -57,7 +60,7 @@ typedef struct H5Z_filter_info_t {
     size_t		cd_nelmts;	/*number of elements in cd_values[]  */
     unsigned		_cd_values[H5Z_COMMON_CD_VALUES];	/*internal client data values		     */
     unsigned		*cd_values;	/*client data values		     */
-} H5Z_filter_info_t;
+};
 
 /*****************************/
 /* Library-private Variables */

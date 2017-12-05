@@ -226,7 +226,9 @@ check_file(char *filename)
     const char *pathname = H5_get_srcdir_filename(filename);    /* Corrected test file name     */
     hid_t       fid = -1;                                       /* file ID                      */
     int         nerrors = 0;                                    /* # of datasets with errors    */
+#if !defined(H5_HAVE_FILTER_DEFLATE) || !defined(H5_HAVE_FILTER_SZIP)
     const char  *not_supported= "    filter is not enabled.";   /* no filter message            */
+#endif
 
     /* Open the file. */
     if((fid = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
