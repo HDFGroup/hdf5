@@ -70,16 +70,10 @@ MODULE H5GLOBAL
      INTEGER, DIMENSION(1:REF_REG_BUF_LEN) :: ref
   END TYPE hdset_reg_ref_t_f
 
-  ! Do not forget to change this value when new predefined
+  ! Do not forget to change these values when new predefined
   ! datatypes are added
   INTEGER, PARAMETER :: PREDEF_TYPES_LEN = 19
-
-  ! Do not forget to change the following line when new predefined
-  ! floating data types are added
   INTEGER, PARAMETER :: FLOATING_TYPES_LEN = 4
-
-  ! Do not forget to change the following line when new predefined
-  ! integer data types are added
   INTEGER, PARAMETER :: INTEGER_TYPES_LEN = 27
 
   ! These arrays need to be global because they are used in 
