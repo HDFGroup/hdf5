@@ -25,9 +25,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
-    hid_t plist_id, hid_t dxpl_id);
-static herr_t H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
 static void H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
 
 
@@ -99,7 +96,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
 	  hid_t H5_ATTR_UNUSED plist_id, hid_t dxpl_id)
 {
@@ -265,7 +262,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5G_t	*child_group = NULL;	/* Child's group in parent mtab	*/

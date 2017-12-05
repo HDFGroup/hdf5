@@ -586,7 +586,7 @@ typedef struct H5F_t H5F_t;
 #define H5_SIZEOF_CHKSUM              	4
 
 /* v1 B-tree node signature */
-#define H5B_MAGIC	                "TREE"
+#define H5B_MAGIC                       "TREE"
 
 /* v2 B-tree signatures */
 #define H5B2_HDR_MAGIC                  "BTHD"          /* Header */
@@ -616,7 +616,7 @@ typedef struct H5F_t H5F_t;
 #define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
 
 /* Global heap signature */
-#define H5HG_MAGIC	                "GCOL"
+#define H5HG_MAGIC                      "GCOL"
 
 /* Local heap signature */
 #define H5HL_MAGIC                      "HEAP"
