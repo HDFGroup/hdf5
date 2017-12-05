@@ -47,9 +47,6 @@ using namespace H5;
  *
  * Programmer   Binh-Minh Ribler (using C code segment for reporting tests)
  *              Friday, February 6, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int test_report( int nerrors, const H5std_string& testname )
@@ -135,9 +132,6 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
  *
  * Programmer   Binh-Minh Ribler (using C code segment for checking values)
  *              Friday, February 6, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
@@ -191,9 +185,6 @@ void check_values(const char *value, const char* msg, int line, const char* file
  *
  * Programmer   Binh-Minh Ribler
  *              May 2, 2010
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void verify_val(const char* x, const char* value, const char* where, int line, const char* file_name)
