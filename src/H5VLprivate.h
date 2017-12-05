@@ -35,6 +35,7 @@
 /* Internal struct to track VOL driver information for objects */
 typedef struct H5VL_t {
     const H5VL_class_t *vol_cls;        /* constant driver class info                           */
+    /* XXX: Is an integer big enough? */
     int                 nrefs;          /* number of references by objects using this struct    */
     hid_t               vol_id;         /* identifier for the VOL class                         */
 } H5VL_t;

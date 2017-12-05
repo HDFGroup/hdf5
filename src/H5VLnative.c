@@ -1153,7 +1153,7 @@ H5VL_native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
 
     /* read raw data */
     if(H5D__read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1209,7 +1209,7 @@ H5VL_native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     } /* end if */
 
     if(H5D__pre_write(dset, direct_write, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0) 
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1381,8 +1381,8 @@ H5VL_native_dataset_close(void *dset, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5D_close((H5D_t*)dset) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close dataset")
+    if (H5D_close((H5D_t*)dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close dataset")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1416,8 +1416,8 @@ H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t f
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
-    if(0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
-	flags |= H5F_ACC_EXCL;	 /*default*/
+    if (0 == (flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
+        flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create the file */ 
