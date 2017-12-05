@@ -899,7 +899,7 @@ hid_t DataType::p_opentype(const H5Location& loc, const char *dtype_name) const
     // Call C function to open the named datatype at this location
     hid_t ret_value = H5Topen2(loc.getId(), dtype_name, H5P_DEFAULT);
     if (ret_value < 0)
-        throw DataTypeIException("DataType constructor", "H5Topen2 failed");
+        throw DataTypeIException(inMemFunc("constructor"), "H5Topen2 failed");
     return(ret_value);
 }
 
