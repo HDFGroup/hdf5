@@ -419,25 +419,26 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
+H5Fget_vfd_handle(hid_t file_id, hid_t fapl_id, void **file_handle)
 {
-    H5F_t               *file;          /* File to query */
-    herr_t              ret_value = SUCCEED;      /* Return value */
+    H5VL_object_t   *file;                          /* File info */
+    herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii**x", file_id, fapl, file_handle);
+    H5TRACE3("e", "ii**x", file_id, fapl_id, file_handle);
 
     /* Check args */
-    if(!file_handle)
+    if (!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle pointer")
 
-    /* Get the file */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
+    /* Get the file object */
+    if (NULL == (file = (H5VL_object_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Retrieve the VFD handle for the file */
-    if(H5F_get_vfd_handle(file, fapl, file_handle) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
+    if (H5VL_file_optional(file->vol_obj, file->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, H5VL_FILE_GET_VFD_HANDLE, file_handle, fapl_id) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1010,7 +1011,7 @@ done:
  *
  * Purpose:     Retrieves the file size of the HDF5 file. This function
  *              is called after an existing file is opened in order
- *        to learn the true size of the underlying file.
+ *              to learn the true size of the underlying file.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -1019,30 +1020,22 @@ done:
 herr_t
 H5Fget_filesize(hid_t file_id, hsize_t *size)
 {
-    H5F_t       *file;                  /* File object for file ID */
-    haddr_t     eof;                    /* End of file address */
-    haddr_t     eoa;                    /* End of allocation address */
-    haddr_t     max_eof_eoa;            /* Maximum of the EOA & EOF */
-    haddr_t     base_addr;              /* Base address for the file */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t   *file;                          /* File info */
+    herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", file_id, size);
 
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size parameter cannot be NULL")
+    if (NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* Go get the actual file size */
-    eof = H5FD_get_eof(file->shared->lf, H5FD_MEM_DEFAULT);
-    eoa = H5FD_get_eoa(file->shared->lf, H5FD_MEM_DEFAULT);
-    max_eof_eoa = MAX(eof, eoa);
-    if(HADDR_UNDEF == max_eof_eoa)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file get eof/eoa requests failed")
-    base_addr = H5FD_get_base_addr(file->shared->lf);
-
-    if(size)
-        *size = (hsize_t)(max_eof_eoa + base_addr);     /* Convert relative base address for file to absolute address */
+    /* Get the file size */
+    if (H5VL_file_optional(file->vol_obj, file->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, H5VL_FILE_GET_SIZE, size) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file size")
 
 done:
     FUNC_LEAVE_API(ret_value)

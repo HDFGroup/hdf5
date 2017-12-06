@@ -203,6 +203,9 @@ test_basic_vol_operation(void)
     hid_t fcpl_id = H5I_INVALID_HID;
 
     ssize_t obj_count;
+    size_t  file_size;
+
+    void *os_file_handle = NULL;
 
     TESTING("Basic VOL operations");
 
@@ -224,6 +227,12 @@ test_basic_vol_operation(void)
     if ((fcpl_id = H5Fget_create_plist(fid)) < 0)
         TEST_ERROR;
     if (H5Pclose(fcpl_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fget_filesize(fid, &file_size) < 0)
+        TEST_ERROR;
+
+    if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)

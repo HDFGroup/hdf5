@@ -1763,11 +1763,11 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
                 eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT);
                 eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT);
                 max_eof_eoa = MAX(eof, eoa);
-                if(HADDR_UNDEF == max_eof_eoa)
+                if (HADDR_UNDEF == max_eof_eoa)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file get eof/eoa requests failed")
                 base_addr = H5FD_get_base_addr(f->shared->lf);
 
-                if(ret)
+                if (ret)
                     *ret = (hsize_t)(max_eof_eoa + base_addr);     /* Convert relative base address for file to absolute address */
 
                 break;
@@ -1894,12 +1894,13 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         /* H5Fget_vfd_handle */
         case H5VL_FILE_GET_VFD_HANDLE:
             {
-                void **file_handle = va_arg (arguments, void **);
-                hid_t  fapl        = va_arg (arguments, hid_t);
+                void **file_handle  = va_arg (arguments, void **);
+                hid_t  fapl_id      = va_arg (arguments, hid_t);
 
                 f = (H5F_t *)obj;
+
                 /* Retrieve the VFD handle for the file */
-                if(H5F_get_vfd_handle(f, fapl, file_handle) < 0)
+                if  (H5F_get_vfd_handle(f, fapl_id, file_handle) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
                 break;
             }
