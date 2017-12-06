@@ -200,6 +200,7 @@ test_basic_vol_operation(void)
 {
     hid_t fid = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
+    hid_t fcpl_id = H5I_INVALID_HID;
 
     ssize_t obj_count;
 
@@ -218,6 +219,11 @@ test_basic_vol_operation(void)
     if ((fapl_id = H5Fget_access_plist(fid)) < 0)
         TEST_ERROR;
     if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    if ((fcpl_id = H5Fget_create_plist(fid)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fcpl_id) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)

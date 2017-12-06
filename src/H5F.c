@@ -202,29 +202,28 @@ done:
  *           this file. This function returns an atom with a copy of the
  *           properties used to create a file.
  *
- * Return:   Success:    template ID
- *           Failure:    FAIL
+ * Return:   Success:    Object ID for a copy of the file creation
+ *                       property list.
+ *           Failure:    H5I_INVALID_HID
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fget_create_plist(hid_t file_id)
 {
-    H5F_t *file;                /* File info */
-    H5P_genplist_t *plist;      /* Property list */
-    hid_t ret_value;            /* Return value */
+    H5VL_object_t   *file;                          /* File info */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
     /* check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(file->shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if (NULL == (file = (H5VL_object_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
-    /* Create the property list object to return */
-    if((ret_value = H5P_copy_plist(plist, TRUE)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
+    /* Retrieve the file's access property list */
+    if (H5VL_file_get(file->vol_obj, file->vol_info->vol_cls, H5VL_FILE_GET_FCPL, 
+                     H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5I_INVALID_HID, "can't get file creation property list via the VOL")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -253,7 +252,7 @@ H5Fget_access_plist(hid_t file_id)
     H5VL_object_t   *file;                          /* File info */
     hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
     /* Check args */
