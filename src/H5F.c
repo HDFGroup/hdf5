@@ -250,21 +250,23 @@ done:
 hid_t
 H5Fget_access_plist(hid_t file_id)
 {
-    H5F_t *f;                               /* File info */
-    hid_t ret_value = H5I_INVALID_HID;      /* Return value */
+    H5VL_object_t   *file;                          /* File info */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", file_id);
 
     /* Check args */
-    if (NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file")
+    if (NULL == (file = (H5VL_object_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
     /* Retrieve the file's access property list */
-    if ((ret_value = H5F_get_access_plist(f, TRUE)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get file access property list")
+    if (H5VL_file_get(file->vol_obj, file->vol_info->vol_cls, H5VL_FILE_GET_FAPL, 
+                     H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5I_INVALID_HID, "can't get file access property list via the VOL")
 
 done:
+    /* XXX: Did not move over error handling from the vol branch since it seemed superfluous */
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_access_plist() */
 

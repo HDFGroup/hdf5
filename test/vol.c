@@ -198,7 +198,8 @@ error:
 static herr_t
 test_basic_vol_operation(void)
 {
-    hid_t fid = -1;
+    hid_t fid = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     ssize_t obj_count;
 
@@ -212,6 +213,11 @@ test_basic_vol_operation(void)
     if ((obj_count = H5Fget_obj_count(fid, H5F_OBJ_ALL)) < 0)
         TEST_ERROR;
     if ((obj_count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATASET)) < 0)
+        TEST_ERROR;
+
+    if ((fapl_id = H5Fget_access_plist(fid)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
