@@ -1557,17 +1557,29 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
         /* H5Fget_intent */
         case H5VL_FILE_GET_INTENT:
             {
-                unsigned *ret = va_arg (arguments, unsigned *);
+                unsigned *intent_flags = va_arg(arguments, unsigned *);
 
                 f = (H5F_t *)obj;
+
                 /* HDF5 uses some flags internally that users don't know about.
                  * Simplify things for them so that they only get either H5F_ACC_RDWR
-                 * or H5F_ACC_RDONLY.
+                 * or H5F_ACC_RDONLY and any SWMR flags.
                  */
-                if (H5F_INTENT(f) & H5F_ACC_RDWR)
-                    *ret = H5F_ACC_RDWR;
-                else
-                    *ret = H5F_ACC_RDONLY;
+                if (H5F_INTENT(f) & H5F_ACC_RDWR) {
+                    *intent_flags = H5F_ACC_RDWR;
+
+                    /* Check for SWMR write access on the file */
+                    if (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+                        *intent_flags |= H5F_ACC_SWMR_WRITE;
+                }
+                else {
+                    *intent_flags = H5F_ACC_RDONLY;
+
+                    /* Check for SWMR read access on the file */
+                    if (H5F_INTENT(f) & H5F_ACC_SWMR_READ)
+                        *intent_flags |= H5F_ACC_SWMR_READ;
+                }
+
                 break;
             }
         /* H5Fget_name */
@@ -1636,7 +1648,7 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
     FUNC_ENTER_NOAPI_NOINIT
 
     switch (specific_type) {
-        /* H5Fmount */
+        /* H5Fflush */
         case H5VL_FILE_FLUSH:
             {
                 H5I_type_t type = va_arg (arguments, H5I_type_t);
@@ -1687,7 +1699,7 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
 
                 break;
             }
-        /* H5Fmount */
+        /* H5Funmount */
         case H5VL_FILE_UNMOUNT:
             {
                 H5I_type_t  type       = va_arg (arguments, H5I_type_t);

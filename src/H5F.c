@@ -940,32 +940,19 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags)
     H5TRACE2("e", "i*Iu", file_id, intent_flags);
 
     /* If no intent flags were passed in, exit quietly */
-    if(intent_flags) {
-        H5F_t *file;           /* Pointer to file structure */
+    /* XXX: Why do we silently handle NULL values in this way? */
+    if (intent_flags) {
+        H5VL_object_t   *file;                      /* File info */
 
         /* Get the internal file structure */
-        if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        if (NULL == (file = (H5VL_object_t *)H5I_object(file_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-        /* HDF5 uses some flags internally that users don't know about.
-         * Simplify things for them so that they only get either H5F_ACC_RDWR
-         * or H5F_ACC_RDONLY.
-         */
-        if(H5F_INTENT(file) & H5F_ACC_RDWR) {
-            *intent_flags = H5F_ACC_RDWR;
-
-            /* Check for SWMR write access on the file */
-            if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)
-                *intent_flags |= H5F_ACC_SWMR_WRITE;
-        } /* end if */
-        else {
-            *intent_flags = H5F_ACC_RDONLY;
-
-            /* Check for SWMR read access on the file */
-            if(H5F_INTENT(file) & H5F_ACC_SWMR_READ)
-                *intent_flags |= H5F_ACC_SWMR_READ;
-        } /* end else */
-    } /* end if */
+        /* Get the flags */
+        if ((ret_value = H5VL_file_get(file->vol_obj, file->vol_info->vol_cls, H5VL_FILE_GET_INTENT, 
+                                      H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, intent_flags)) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file intent")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1027,7 +1014,7 @@ H5Fget_filesize(hid_t file_id, hsize_t *size)
     H5TRACE2("e", "i*h", file_id, size);
 
     /* Check args */
-    if (NULL == size)
+    if (!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size parameter cannot be NULL")
     if (NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")

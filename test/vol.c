@@ -204,7 +204,7 @@ test_basic_vol_operation(void)
 
     ssize_t obj_count;
     size_t  file_size;
-
+    unsigned intent;
     void *os_file_handle = NULL;
 
     TESTING("Basic VOL operations");
@@ -233,6 +233,9 @@ test_basic_vol_operation(void)
         TEST_ERROR;
 
     if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
+        TEST_ERROR;
+
+    if (H5Fget_intent(fid, &intent) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
