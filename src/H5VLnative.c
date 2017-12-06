@@ -1471,15 +1471,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_file_get
+ * Function:    H5VL_native_file_get
  *
- * Purpose:	Gets certain data about a file
+ * Purpose:     Gets certain data about a file
  *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              February, 2012
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -1515,11 +1511,11 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
                 hid_t *plist_id = va_arg (arguments, hid_t *);
 
                 f = (H5F_t *)obj;
-                if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
+                if (NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
                 /* Create the property list object to return */
-                if((*plist_id = H5P_copy_plist(plist, TRUE)) < 0)
+                if ((*plist_id = H5P_copy_plist(plist, TRUE)) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
 
                 break;
@@ -1533,7 +1529,7 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
 
                 f = (H5F_t *)obj;
                 /* Perform the query */
-                if(H5F_get_obj_count(f, types, TRUE, &obj_count) < 0)
+                if (H5F_get_obj_count(f, types, TRUE, &obj_count) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
 
                 /* Set the return value */
@@ -1551,7 +1547,7 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
 
                 f = (H5F_t *)obj;
                 /* Perform the query */
-                if(H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_count) < 0)
+                if (H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_count) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_ids failed")
 
                 /* Set the return value */
@@ -1568,7 +1564,7 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
                  * Simplify things for them so that they only get either H5F_ACC_RDWR
                  * or H5F_ACC_RDONLY.
                  */
-                if(H5F_INTENT(f) & H5F_ACC_RDWR)
+                if (H5F_INTENT(f) & H5F_ACC_RDWR)
                     *ret = H5F_ACC_RDWR;
                 else
                     *ret = H5F_ACC_RDONLY;
@@ -1583,17 +1579,16 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
                 ssize_t   *ret  = va_arg (arguments, ssize_t *);
                 size_t     len;
 
-                if(NULL == (f = H5VL_native_get_file(obj, type))) {
+                if (NULL == (f = H5VL_native_get_file(obj, type)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-                }
 
                 len = HDstrlen(H5F_OPEN_NAME(f));
 
-                if(name) {
+                if (name) {
                     HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
-                    if(len >= size)
+                    if (len >= size)
                         name[size-1]='\0';
-                } /* end if */
+                }
 
                 /* Set the return value for the API call */
                 *ret = (ssize_t)len;
@@ -1605,9 +1600,8 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
                 H5I_type_t type = va_arg (arguments, H5I_type_t);
                 void      **ret = va_arg (arguments, void **);
 
-                if(NULL == (f = H5VL_native_get_file(obj, type))) {
+                if (NULL == (f = H5VL_native_get_file(obj, type)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-                }
                 f->id_exists = TRUE;
                 *ret = (void*)f;
                 break;

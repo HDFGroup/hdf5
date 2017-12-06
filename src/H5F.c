@@ -59,6 +59,8 @@
 /* VOL close */
 static herr_t H5F__close_file(void *file);
 
+/* Callback for getting object counts in a file */
+static int H5F_get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key);
 
 /*********************/
 /* Package Variables */
@@ -242,29 +244,52 @@ done:
  *
  * Return:   Success:    Object ID for a copy of the file access
  *                       property list.
- *           Failure:    FAIL
+ *           Failure:    H5I_INVALID_HID
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fget_access_plist(hid_t file_id)
 {
-    H5F_t *f;           /* File info */
-    hid_t ret_value;    /* Return value */
+    H5F_t *f;                               /* File info */
+    hid_t ret_value = H5I_INVALID_HID;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", file_id);
 
     /* Check args */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+    if (NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file")
 
     /* Retrieve the file's access property list */
-    if((ret_value = H5F_get_access_plist(f, TRUE)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
+    if ((ret_value = H5F_get_access_plist(f, TRUE)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get file access property list")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_access_plist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_all_count_cb
+ *
+ * Purpose:     Get counter of all object types currently open.
+ *
+ * Return:      Non-negative on success; negative on failure.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5F_get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
+{
+    H5F_trav_obj_cnt_t *udata = (H5F_trav_obj_cnt_t *)key;
+    int                ret_value = H5_ITER_CONT;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    *(udata->obj_count) = *(udata->obj_count) + 1; 
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_get_all_count_cb */
 
 
 /*-------------------------------------------------------------------------
@@ -279,25 +304,65 @@ done:
 ssize_t
 H5Fget_obj_count(hid_t file_id, unsigned types)
 {
-    H5F_t    *f = NULL;         /* File to query */
-    size_t   obj_count = 0;     /* Number of opened objects */
     ssize_t  ret_value;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("Zs", "iIu", file_id, types);
 
     /* Check arguments */
-    if(file_id != (hid_t)H5F_OBJ_ALL && (NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
-    if(0 == (types & H5F_OBJ_ALL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
+    if (0 == (types & H5F_OBJ_ALL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not an object type")
 
     /* Perform the query */
-    if(H5F_get_obj_count(f, types, TRUE, &obj_count) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
+    /* If the 'special' ID wasn't passed in, just make a normal VOL call to
+     * get the IDs from the file.
+     */
+    if (file_id != (hid_t)H5F_OBJ_ALL) {
+        H5VL_object_t *obj;
 
-    /* Set the return value */
-    ret_value = (ssize_t)obj_count;
+        /* get the file object */
+        if (NULL == (obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a file id")
+
+        /* Get the count via the VOL driver */
+        if (H5VL_file_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_GET_OBJ_COUNT, 
+                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, types, &ret_value) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get object count in file(s)")
+    }
+    /* If we passed in the 'special' ID, get the count for everything open in the
+     * library, iterating over all open files and getting the object count for each.
+     *
+     * XXX: Consider making this a helper function in H5I.
+     * XXX: Should probably have made a special hid_t value and not overloaded
+     *      the 'all flags' value.
+     */
+    else {
+        H5F_trav_obj_cnt_t udata;
+
+        udata.obj_count = &ret_value;
+        udata.types = types | H5F_OBJ_LOCAL;
+
+        if (types & H5F_OBJ_FILE) {
+            if (H5I_iterate(H5I_FILE, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over file IDs failed");
+        }
+        if (types & H5F_OBJ_DATASET) {
+            if (H5I_iterate(H5I_DATASET, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over dataset IDs failed");
+        }
+        if (types & H5F_OBJ_GROUP) {
+            if (H5I_iterate(H5I_GROUP, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over group IDs failed");
+        }
+        if (types & H5F_OBJ_DATATYPE) {
+            if (H5I_iterate(H5I_DATATYPE, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over datatype IDs failed");
+        }
+        if (types & H5F_OBJ_ATTR) {
+            if (H5I_iterate(H5I_ATTR, H5F_get_all_count_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over attribute IDs failed");
+        }
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)

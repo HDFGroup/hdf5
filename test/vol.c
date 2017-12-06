@@ -200,10 +200,20 @@ test_basic_vol_operation(void)
 {
     hid_t fid = -1;
 
+    ssize_t obj_count;
+
     TESTING("Basic VOL operations");
 
     if ((fid = H5Fcreate("native_vol_test", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
+
+    if ((obj_count = H5Fget_obj_count(fid, H5F_OBJ_FILE)) < 0)
+        TEST_ERROR;
+    if ((obj_count = H5Fget_obj_count(fid, H5F_OBJ_ALL)) < 0)
+        TEST_ERROR;
+    if ((obj_count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATASET)) < 0)
+        TEST_ERROR;
+
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
