@@ -1713,9 +1713,12 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
                 htri_t     *ret     = va_arg(arguments, htri_t *);
 
                 /* Call private routine */
-                /* Replace when H5F__is_hdf5() has been updated to accept a fapl */
-//                if ((*ret = H5F_is_hdf5(name, fapl_id, dxpl_id)) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
+                /* XXX: I'm just using the default dxpls instead of the one passed in here.
+                 *      The VOL was created before the raw/metadata dxpl split so we may
+                 *      have some fixup to do regarding this.
+                 */
+                if ((*ret = H5F_is_hdf5(name, fapl_id, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "error in HDF5 file check")
                 break;
             }
         default:

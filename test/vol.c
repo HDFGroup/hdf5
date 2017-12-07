@@ -259,11 +259,20 @@ test_basic_vol_operation(void)
     if (H5Fclear_elink_file_cache(fid) < 0)
         TEST_ERROR;
 
+    /* H5Fflush */
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
         TEST_ERROR;
 
     /* H5Fclose */
     if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* H5Fis_hdf5 */
+    if (H5Fis_hdf5(NATIVE_VOL_TEST_FILENAME) < 0)
+        TEST_ERROR;
+
+    /* H5Fis_accessible */
+    if (H5Fis_accessible(NATIVE_VOL_TEST_FILENAME, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     /* H5Fopen */

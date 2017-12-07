@@ -485,52 +485,55 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F__is_hdf5
+ * Function:    H5F_is_hdf5
  *
- * Purpose:  Check the file signature to detect an HDF5 file.
+ * Purpose:     Check the file signature to detect an HDF5 file.
  *
- * Bugs:     This function is not robust: it only uses the default file
- *           driver when attempting to open the file when in fact it
- *           should use all known file drivers.
+ * Return:      Success:    1 (true) or 0 (false)
  *
- * Return:   Success:    TRUE/FALSE
- * *         Failure:    Negative
+ *              Failure:    -1
+ *
  *-------------------------------------------------------------------------
  */
 htri_t
-H5F__is_hdf5(const char *name, hid_t meta_dxpl_id, hid_t raw_dxpl_id)
+H5F_is_hdf5(const char *name, hid_t fapl_id, hid_t meta_dxpl_id, hid_t raw_dxpl_id)
 {
-    H5FD_t    *file = NULL;            /* Low-level file struct */
-    H5FD_io_info_t fdio_info;          /* File driver I/O info */
-    haddr_t    sig_addr;               /* Addess of hdf5 file signature */
-    htri_t     ret_value = FAIL;       /* Return value */
+    H5FD_t         *file = NULL;            /* Low-level file struct                    */
+    H5FD_io_info_t  fdio_info;              /* File driver I/O info                     */
+    haddr_t         sig_addr;               /* Addess of hdf5 file signature            */
+    htri_t          ret_value = (-1);       /* Return value                             */
 
+    /* XXX: Unclear why this is NOINIT since H5F_open is going to initialize the library... */
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Open the file at the virtual file layer */
-    if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
-    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
+    /* Open the file */
+    /* XXX: This now uses the fapl_id that was passed in, so H5Fis_accessible()
+     *      should work with arbitrary VFDs, unlike H5Fis_hdf5().
+     */
+    if (NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* Set up the file driver info */
     fdio_info.file = file;
-    if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(meta_dxpl_id)))
+    if (NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(meta_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
-    if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(raw_dxpl_id)))
+    if (NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(raw_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    if(H5FD_locate_signature(&fdio_info, &sig_addr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
+    if (H5FD_locate_signature(&fdio_info, &sig_addr) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, (-1), "unable to locate file signature")
+
     ret_value = (HADDR_UNDEF != sig_addr);
 
 done:
     /* Close the file */
-    if(file)
-        if(H5FD_close(file) < 0 && ret_value >= 0)
-            HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+    if (file)
+        if (H5FD_close(file) < 0 && ret_value >= 0)
+            HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, (-1), "unable to close file")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__is_hdf5() */
+} /* end H5F_is_hdf5() */
 
 
 /*-------------------------------------------------------------------------
@@ -2471,7 +2474,7 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t meta_dxpl_i
 
         /* read in the file image */
         /* (Note compensation for base address addition in internal routine) */
-        if(H5FD_read(&fdio_info, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
+        if (H5FD_read(&fdio_info, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
 
         /* Offset to "status_flags" in the superblock */

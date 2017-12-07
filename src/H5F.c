@@ -582,43 +582,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Fis_hdf5
- *
- * Purpose:     Check the file signature to detect an HDF5 file.
- *
- * Bugs:        This function is not robust: it only uses the default file
- *              driver when attempting to open the file when in fact it
- *              should use all known file drivers.
- *
- * Return:      Success:    1 (true) or 0 (false)
- *
- *              Failure:    -1
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5Fis_hdf5(const char *name)
-{
-    htri_t      ret_value;              /* Return value */
-
-    FUNC_ENTER_API((-1))
-    H5TRACE1("t", "*s", name);
-
-    /* Check args and all the boring stuff. */
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, (-1), "no file name specified")
-
-    /* call the private is_HDF5 function */
-    if((ret_value = H5F__is_hdf5(name, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, (-1), "unable open file")
-
-done:
-
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Fis_hdf5() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5Fcreate
  *
  * Purpose:     This is the primary function for creating HDF5 files . The
