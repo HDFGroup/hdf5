@@ -205,7 +205,7 @@ test_basic_vol_operation(void)
 
     ssize_t     obj_count;
     hid_t       obj_id_list[1];
-    size_t      file_size;
+    hsize_t     file_size;
     unsigned    intent;
     void       *os_file_handle = NULL;
 
@@ -251,6 +251,10 @@ test_basic_vol_operation(void)
 
     /* H5Fget_intent */
     if (H5Fget_intent(fid, &intent) < 0)
+        TEST_ERROR;
+
+    /* H5Fclear_elink_file_cache */
+    if (H5Fclear_elink_file_cache(fid) < 0)
         TEST_ERROR;
 
     /* H5Fclose */

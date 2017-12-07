@@ -1906,9 +1906,10 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         case H5VL_FILE_CLEAR_ELINK_CACHE:
             {
                 f = (H5F_t *)obj;
+
                 /* Release the EFC */
-                if(f->shared->efc)
-                    if(H5F_efc_release(f->shared->efc) < 0)
+                if (f->shared->efc)
+                    if (H5F_efc_release(f->shared->efc) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
                 break;
             }

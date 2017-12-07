@@ -408,7 +408,7 @@ H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
         HGOTO_DONE(H5_ITER_STOP);
 
     udata->oid_list[*udata->obj_count] = obj_id;
-    *(udata->obj_count) = *(udata->obj_count)+1; 
+    *(udata->obj_count) = *(udata->obj_count) + 1;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1669,8 +1669,8 @@ done:
 herr_t
 H5Fclear_elink_file_cache(hid_t file_id)
 {
-    H5F_t         *file;        /* File */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    H5VL_object_t   *file;                          /* File info */
+    herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
@@ -1680,9 +1680,10 @@ H5Fclear_elink_file_cache(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Release the EFC */
-    if (file->shared->efc)
-        if (H5F_efc_release(file->shared->efc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+    if (H5VL_file_optional(file->vol_obj, file->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, H5VL_FILE_CLEAR_ELINK_CACHE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+
 
 done:
     FUNC_LEAVE_API(ret_value)
