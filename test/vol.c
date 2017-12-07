@@ -23,6 +23,8 @@
 #include "H5VLnative.h"
 
 
+#define NATIVE_VOL_TEST_FILENAME    "native_vol_test"
+
 #define FAKE_VOL_NAME   "fake"
 
 /* A VOL class struct that describes a VOL class with no
@@ -187,23 +189,21 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_basic_vol_operation()
+ * Function:    test_basic_file_operation()
  *
- * Purpose:     Uses the native VOL driver to test basic VOL operations
+ * Purpose:     Uses the native VOL driver to test basic VOL file operations
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_vol_operation(void)
+test_basic_file_operation(void)
 {
     hid_t fid = H5I_INVALID_HID;
 //    hid_t fid2 = H5I_INVALID_HID;   /* for H5Freopen() */
     hid_t fapl_id = H5I_INVALID_HID;
     hid_t fcpl_id = H5I_INVALID_HID;
-
-#define NATIVE_VOL_TEST_FILENAME    "native_vol_test"
 
     ssize_t     obj_count;
     hid_t       obj_id_list[1];
@@ -211,7 +211,7 @@ test_basic_vol_operation(void)
     unsigned    intent;
     void       *os_file_handle = NULL;
 
-    TESTING("Basic VOL operations");
+    TESTING("Basic VOL file operations");
 
     /* H5Fcreate */
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -293,7 +293,41 @@ test_basic_vol_operation(void)
 error:
     return FAIL;
 
-} /* end test_basic_vol_operation() */
+} /* end test_basic_file_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_group_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL group operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_group_operation(void)
+{
+    hid_t fid = H5I_INVALID_HID;
+
+    TESTING("Basic VOL group operations");
+
+    /* H5Fcreate */
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* end test_basic_group_operation() */
 
 #if 0
 
@@ -344,7 +378,8 @@ main(void)
 
     nerrors += test_vol_registration() < 0          ? 1 : 0;
     nerrors += test_native_vol_init() < 0           ? 1 : 0;
-    nerrors += test_basic_vol_operation() < 0       ? 1 : 0;
+    nerrors += test_basic_file_operation() < 0      ? 1 : 0;
+    nerrors += test_basic_group_operation() < 0     ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n",

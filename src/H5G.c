@@ -14,14 +14,12 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5G.c
- *		Jul 18 1997
- *		Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:	Symbol table functions.	 The functions that begin with
- *		`H5G_stab_' don't understand the naming system; they operate
+ *		'H5G_stab_' don't understand the naming system; they operate
  * 		on a single symbol table at a time.
  *
- *		The functions that begin with `H5G_node_' operate on the leaf
+ *		The functions that begin with 'H5G_node_' operate on the leaf
  *		nodes of a symbol table B-tree.  They should be defined in
  *		the H5Gnode.c file.
  *
@@ -42,11 +40,11 @@
  *              +--------------+----------- +--------------------------------+
  * 		| Location ID  | Name       | Meaning                        |
  *              +--------------+------------+--------------------------------+
- * 		| File ID      | "/foo/bar" | Find `foo' within `bar' within |
+ * 		| File ID      | "/foo/bar" | Find 'foo' within 'bar' within |
  *		|              |            | the root group of the specified|
  *		|              |            | file.                          |
  *              +--------------+------------+--------------------------------+
- * 		| File ID      | "foo/bar"  | Find `foo' within `bar' within |
+ * 		| File ID      | "foo/bar"  | Find 'foo' within 'bar' within |
  *		|              |            | the root group of the specified|
  *		|              |            | file.                          |
  *              +--------------+------------+--------------------------------+
@@ -56,11 +54,11 @@
  * 		| File ID      | "."        | The root group of the specified|
  *		|              |            | the specified file.            |
  *              +--------------+------------+--------------------------------+
- * 		| Group ID     | "/foo/bar" | Find `foo' within `bar' within |
+ * 		| Group ID     | "/foo/bar" | Find 'foo' within 'bar' within |
  *		|              |            | the root group of the file     |
  *		|              |            | containing the specified group.|
  *              +--------------+------------+--------------------------------+
- * 		| Group ID     | "foo/bar"  | File `foo' within `bar' within |
+ * 		| Group ID     | "foo/bar"  | File 'foo' within 'bar' within |
  *		|              |            | the specified group.           |
  *              +--------------+------------+--------------------------------+
  * 		| Group ID     | "/"        | The root group of the file     |
@@ -83,12 +81,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Gpkg.h"             /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Pprivate.h"         /* Property lists                           */
 
 
 /****************/
