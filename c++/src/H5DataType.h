@@ -150,7 +150,6 @@ class H5_DLLCPP DataType : public H5Object {
 
         // Opens a datatype and returns the id.
         hid_t p_opentype(const H5Location& loc, const char* dtype_name) const;
-
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
@@ -162,7 +161,9 @@ class H5_DLLCPP DataType : public H5Object {
         // Friend function to set DataType id.  For library use only.
         friend void f_DataType_setId(DataType* dtype, hid_t new_id);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
         void p_commit(hid_t loc_id, const char* name);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end of DataType
 } // namespace H5
