@@ -1605,21 +1605,22 @@ H5F__flush(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing)
 /*-------------------------------------------------------------------------
  * Function:    H5F_close
  *
- * Purpose:    Closes a file or causes the close operation to be pended.
- *        This function is called two ways: from the API it gets called
- *        by H5Fclose->H5I_dec_ref->H5F_close when H5I_dec_ref()
- *        decrements the file ID reference count to zero.  The file ID
- *        is removed from the H5I_FILE group by H5I_dec_ref() just
- *        before H5F_close() is called. If there are open object
- *        headers then the close is pended by moving the file to the
- *        H5I_FILE_CLOSING ID group (the f->closing contains the ID
- *        assigned to file).
+ * Purpose:     Closes a file or causes the close operation to be pended.
+ *              This function is called two ways: from the API it gets called
+ *              by H5Fclose->H5I_dec_ref->H5F_close when H5I_dec_ref()
+ *              decrements the file ID reference count to zero.  The file ID
+ *              is removed from the H5I_FILE group by H5I_dec_ref() just
+ *              before H5F_close() is called. If there are open object
+ *              headers then the close is pended by moving the file to the
+ *              H5I_FILE_CLOSING ID group (the f->closing contains the ID
+ *              assigned to file).
  *
- *        This function is also called directly from H5O_close() when
- *        the last object header is closed for the file and the file
- *        has a pending close.
+ *              This function is also called directly from H5O_close() when
+ *              the last object header is closed for the file and the file
+ *              has a pending close.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1631,31 +1632,31 @@ H5F_close(H5F_t *f)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
 
     /* Perform checks for "semi" file close degree here, since closing the
-     * file is not allowed if there are objects still open */
-    if(f->shared->fc_degree == H5F_CLOSE_SEMI) {
+     * file is not allowed if there are objects still open
+     */
+    if (f->shared->fc_degree == H5F_CLOSE_SEMI) {
         unsigned nopen_files = 0;       /* Number of open files in file/mount hierarchy */
         unsigned nopen_objs = 0;        /* Number of open objects in file/mount hierarchy */
 
         /* Get the number of open objects and open files on this file/mount hierarchy */
-        if(H5F_mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
+        if (H5F_mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy")
 
         /* If there are no other file IDs open on this file/mount hier., but
          * there are still open objects, issue an error and bail out now,
          * without decrementing the file ID's reference count and triggering
          * a "real" attempt at closing the file */
-        if(nopen_files == 1 && nopen_objs > 0)
+        if (nopen_files == 1 && nopen_objs > 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
-    } /* end if */
+    }
 
     /* Reset the file ID for this file */
-    f->file_id = -1;
+    f->id_exists = FALSE;
 
     /* Attempt to close the file/mount hierarchy */
-    if(H5F_try_close(f, NULL) < 0)
+    if (H5F_try_close(f, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
 done:

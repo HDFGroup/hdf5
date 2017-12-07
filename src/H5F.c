@@ -719,7 +719,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Keep this ID in file object structure */
     /* XXX: REMOVE THIS (straggler from old code) */
-    new_file->file_id = ret_value;
+//    new_file->file_id = ret_value;
 
 done:
     if (H5I_INVALID_HID == ret_value)
@@ -808,7 +808,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 
     /* Keep this ID in file object structure */
     /* XXX: REMOVE THIS (straggler from old code) */
-    new_file->file_id = ret_value;
+//    new_file->file_id = ret_value;
 
 done:
     if (H5I_INVALID_HID == ret_value)
@@ -1676,7 +1676,7 @@ H5Fclear_elink_file_cache(hid_t file_id)
     H5TRACE1("e", "i", file_id);
 
     /* Check args */
-    if (NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Release the EFC */
