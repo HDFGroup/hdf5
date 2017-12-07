@@ -62,6 +62,10 @@ static herr_t H5F__close_file(void *file);
 /* Callback for getting object counts in a file */
 static int H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key);
 
+/* Callback for getting IDs for open objects in a file */
+static int H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key);
+
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -327,7 +331,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
 
     /* Perform the query */
     /* If the 'special' ID wasn't passed in, just make a normal VOL call to
-     * get the IDs from the file.
+     * count the IDs in the file.
      */
     if (file_id != (hid_t)H5F_OBJ_ALL) {
         H5VL_object_t *obj;
@@ -382,6 +386,36 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F__get_all_ids_cb
+ *
+ * Purpose:     Get IDs of all currently open objects of a given type.
+ *
+ * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
+ *
+ *              Failure:    H5_ITER_ERROR
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
+{
+    H5F_trav_obj_ids_t *udata = (H5F_trav_obj_ids_t *)key;
+    int                ret_value = H5_ITER_CONT;    /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    if (*udata->obj_count >= udata->max_objs)
+        HGOTO_DONE(H5_ITER_STOP);
+
+    udata->oid_list[*udata->obj_count] = obj_id;
+    *(udata->obj_count) = *(udata->obj_count)+1; 
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__get_all_ids_cb */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Fget_object_ids
  *
  * Purpose:     Public function to return a list of opened object IDs.
@@ -395,27 +429,75 @@ done:
 ssize_t
 H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
 {
-    H5F_t    *f = NULL;         /* File to query */
-    size_t    obj_id_count = 0; /* Number of open objects */
-    ssize_t   ret_value;        /* Return value */
+    /* XXX: Note the type mismatch - you can ask for more objects than can be returned */
+
+    ssize_t     ret_value;          /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE4("Zs", "iIuz*i", file_id, types, max_objs, oid_list);
 
     /* Check arguments */
-    if (file_id != (hid_t)H5F_OBJ_ALL && (NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not a file id")
     if (0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not an object type")
     if (!oid_list)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "object ID list is NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "object ID list cannot be NULL")
 
     /* Perform the query */
-    if (H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_id_count) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, (-1), "H5F_get_obj_ids failed")
+    /* If the 'special' ID wasn't passed in, just make a normal VOL call to
+     * get the IDs from the file.
+     */
+    if (file_id != (hid_t)H5F_OBJ_ALL) {
+        H5VL_object_t *file;
 
-    /* Set the return value */
-    ret_value = (ssize_t)obj_id_count;
+        /* get the file object */
+        if (NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
+
+        /* Get the IDs via the VOL driver */
+        if (H5VL_file_get(file->vol_obj, file->vol_info->vol_cls, H5VL_FILE_GET_OBJ_IDS, 
+                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, types, max_objs, oid_list, &ret_value) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get object count in file(s)")
+    }
+    /* If we passed in the 'special' ID, get the count for everything open in the
+     * library, iterating over all open files and getting the object count for each.
+     *
+     * XXX: Consider making this a helper function in H5I.
+     * XXX: Should probably have made a special hid_t value and not overloaded
+     *      the 'all flags' value.
+     * XXX: Note that the RM states that passing in a negative value for max_objs
+     *      gets you all the objects. This technically works, but is clearly wrong
+     *      behavior since max_objs is an unsigned type.
+     */
+    else {
+        H5F_trav_obj_ids_t udata;
+
+        /* XXX: Unclear why this is commented out */
+        //udata.types = types | H5F_OBJ_LOCAL;
+        udata.max_objs = max_objs;
+        udata.oid_list = oid_list;
+        udata.obj_count = &ret_value;
+
+        if (types & H5F_OBJ_FILE) {
+            if (H5I_iterate(H5I_FILE, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over file IDs failed");
+        }
+        if (types & H5F_OBJ_DATASET) {
+            if (H5I_iterate(H5I_DATASET, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over dataset IDs failed");
+        }
+        if (types & H5F_OBJ_GROUP) {
+            if (H5I_iterate(H5I_GROUP, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over group IDs failed");
+        }
+        if (types & H5F_OBJ_DATATYPE) {
+            if (H5I_iterate(H5I_DATATYPE, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over datatype IDs failed");
+        }
+        if (types & H5F_OBJ_ATTR) {
+            if (H5I_iterate(H5I_ATTR, H5F__get_all_ids_cb, &udata, TRUE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_BADITER, (-1), "iteration over attribute IDs failed");
+        }
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -632,7 +714,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL driver")
 
     /* Get an atom for the file */
-    if((ret_value = H5VL_register_id(H5I_FILE, new_file, vol_info, TRUE)) < 0)
+    if ((ret_value = H5VL_register_id(H5I_FILE, new_file, vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
@@ -1306,6 +1388,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_name
  *
+ * XXX: Fix this mess...
  * Purpose:     Gets the name of the file to which object OBJ_ID belongs.
  *              If `name' is non-NULL then write up to `size' bytes into that
  *              buffer and always return the length of the entry name.

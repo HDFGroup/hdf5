@@ -1390,15 +1390,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_file_create
+ * Function:    H5VL_native_file_create
  *
- * Purpose:	Creates a file as a native HDF5 file.
+ * Purpose:     Creates a file as a native HDF5 file.
  *
- * Return:	Success:	the file id. 
- *		Failure:	NULL
+ * Return:      Success:    A pointer to an H5F_t file struct
  *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -1411,8 +1409,7 @@ H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t f
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /*
-     * Adjust bit flags by turning on the creation bit and making sure that
+    /* Adjust bit flags by turning on the creation bit and making sure that
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
@@ -1421,30 +1418,28 @@ H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t f
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create the file */ 
-    if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
+    if (NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
 
     new_file->id_exists = TRUE;
     ret_value = (void *)new_file;
 
 done:
-    if(NULL == ret_value && new_file) 
-        if(H5F_close(new_file) < 0)
+    if (NULL == ret_value && new_file) 
+        if (H5F_close(new_file) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_file_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_file_open
+ * Function:    H5VL_native_file_open
  *
- * Purpose:	Opens a file as a native HDF5 file.
+ * Purpose:     Opens a file as a native HDF5 file.
  *
- * Return:	Success:	file id. 
- *		Failure:	NULL
+ * Return:      Success:    A pointer to an H5F_t file struct
  *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -1457,14 +1452,14 @@ H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxp
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Open the file */ 
-    if(NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
+    if (NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
 
     new_file->id_exists = TRUE;
     ret_value = (void *)new_file;
 
 done:
-    if(NULL == ret_value && new_file && H5F_try_close(new_file, NULL) < 0)
+    if (NULL == ret_value && new_file && H5F_try_close(new_file, NULL) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_file_open() */
@@ -1482,7 +1477,7 @@ done:
 static herr_t
 H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5F_t *f = NULL;  /* File struct */
+    H5F_t       *f = NULL;              /* File struct */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1492,15 +1487,15 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
         case H5VL_FILE_GET_FAPL:
             {
                 H5P_genplist_t *new_plist;              /* New property list */
-                hid_t *plist_id = va_arg (arguments, hid_t *);
+                hid_t          *plist_id = va_arg(arguments, hid_t *);
 
                 f = (H5F_t *)obj;
 
                 /* Retrieve the file's access property list */
-                if((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
+                if ((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
 
-                if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(*plist_id)))
+                if (NULL == (new_plist = (H5P_genplist_t *)H5I_object(*plist_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
                 break;
             }
@@ -1508,7 +1503,7 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
         case H5VL_FILE_GET_FCPL:
             {
                 H5P_genplist_t *plist;      /* Property list */
-                hid_t *plist_id = va_arg (arguments, hid_t *);
+                hid_t          *plist_id = va_arg(arguments, hid_t *);
 
                 f = (H5F_t *)obj;
                 if (NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
@@ -1523,9 +1518,9 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
         /* H5Fget_obj_count */
         case H5VL_FILE_GET_OBJ_COUNT:
             {
-                unsigned types = va_arg (arguments, unsigned);
-                ssize_t *ret = va_arg (arguments, ssize_t *);
-                size_t  obj_count = 0;      /* Number of opened objects */
+                unsigned    types = va_arg(arguments, unsigned);
+                ssize_t    *ret = va_arg(arguments, ssize_t *);
+                size_t      obj_count = 0;      /* Number of opened objects */
 
                 f = (H5F_t *)obj;
                 /* Perform the query */
@@ -1539,11 +1534,11 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
         /* H5Fget_obj_ids */
         case H5VL_FILE_GET_OBJ_IDS:
             {
-                unsigned types = va_arg (arguments, unsigned);
-                size_t max_objs = va_arg (arguments, size_t);
-                hid_t *oid_list = va_arg (arguments, hid_t *);
-                ssize_t *ret = va_arg (arguments, ssize_t *);
-                size_t  obj_count = 0;      /* Number of opened objects */
+                unsigned    types = va_arg(arguments, unsigned);
+                size_t      max_objs = va_arg(arguments, size_t);
+                hid_t      *oid_list = va_arg(arguments, hid_t *);
+                ssize_t    *ret = va_arg(arguments, ssize_t *);
+                size_t      obj_count = 0;      /* Number of opened objects */
 
                 f = (H5F_t *)obj;
                 /* Perform the query */
@@ -1585,11 +1580,11 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
         /* H5Fget_name */
         case H5VL_FILE_GET_NAME:
             {
-                H5I_type_t type = va_arg (arguments, H5I_type_t);
-                size_t     size = va_arg (arguments, size_t);
-                char      *name = va_arg (arguments, char *);
-                ssize_t   *ret  = va_arg (arguments, ssize_t *);
-                size_t     len;
+                H5I_type_t  type = va_arg(arguments, H5I_type_t);
+                size_t      size = va_arg(arguments, size_t);
+                char       *name = va_arg(arguments, char *);
+                ssize_t    *ret  = va_arg(arguments, ssize_t *);
+                size_t      len;
 
                 if (NULL == (f = H5VL_native_get_file(obj, type)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
@@ -1609,8 +1604,8 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
         /* H5I_get_file_id */
         case H5VL_OBJECT_GET_FILE:
             {
-                H5I_type_t type = va_arg (arguments, H5I_type_t);
-                void      **ret = va_arg (arguments, void **);
+                H5I_type_t  type = va_arg(arguments, H5I_type_t);
+                void      **ret = va_arg(arguments, void **);
 
                 if (NULL == (f = H5VL_native_get_file(obj, type)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
@@ -1627,15 +1622,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_file_specific
+ * Function:    H5VL_native_file_specific
  *
- * Purpose:	Perform an operation
+ * Purpose:     Perform an operation
  *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              April, 2012
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -1651,50 +1642,49 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
         /* H5Fflush */
         case H5VL_FILE_FLUSH:
             {
-                H5I_type_t type = va_arg (arguments, H5I_type_t);
-                H5F_scope_t scope = va_arg (arguments, H5F_scope_t);
-                H5F_t	*f = NULL;              /* File to flush */
+                H5I_type_t      type = va_arg(arguments, H5I_type_t);
+                H5F_scope_t     scope = va_arg(arguments, H5F_scope_t);
+                H5F_t	       *f = NULL;              /* File to flush */
 
-                if(NULL == (f = H5VL_native_get_file(obj, type)))
+                if (NULL == (f = H5VL_native_get_file(obj, type)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-                /*
-                 * Nothing to do if the file is read only.	This determination is
+                /* Nothing to do if the file is read only. This determination is
                  * made at the shared open(2) flags level, implying that opening a
                  * file twice, once for read-only and once for read-write, and then
                  * calling H5Fflush() with the read-only handle, still causes data
                  * to be flushed.
                  */
 
-                 if(H5F_ACC_RDWR & H5F_INTENT(f)) {
+                 if (H5F_ACC_RDWR & H5F_INTENT(f)) {
                      /* Flush other files, depending on scope */
-                     if(H5F_SCOPE_GLOBAL == scope) {
+                     if (H5F_SCOPE_GLOBAL == scope) {
                          /* Call the flush routine for mounted file hierarchies */
-                         if(H5F_flush_mounts(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id) < 0)
+                         if (H5F_flush_mounts(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id) < 0)
                              HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
-                     } /* end if */
+                     }
                      else {
                          /* Call the flush routine, for this file */
-                         if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
+                         if (H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                              HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
-                     } /* end else */
-                 } /* end if */ 
+                     }
+                 }
                 break;
             }
         /* H5Fmount */
         case H5VL_FILE_MOUNT:
             {
-                H5I_type_t  type       = va_arg (arguments, H5I_type_t);
-                const char *name       = va_arg (arguments, const char *);
-                H5F_t      *child      = va_arg (arguments, H5F_t *);
-                hid_t       plist_id   = va_arg (arguments, hid_t);
+                H5I_type_t  type       = va_arg(arguments, H5I_type_t);
+                const char *name       = va_arg(arguments, const char *);
+                H5F_t      *child      = va_arg(arguments, H5F_t *);
+                hid_t       plist_id   = va_arg(arguments, hid_t);
                 H5G_loc_t   loc;
 
-                if(H5G_loc_real(obj, type, &loc) < 0) {
+                if (H5G_loc_real(obj, type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-                }
+
                 /* Do the mount */
-                if(H5F_mount(&loc, name, child, plist_id, dxpl_id) < 0)
+                if (H5F_mount(&loc, name, child, plist_id, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
                 break;
@@ -1702,15 +1692,15 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
         /* H5Funmount */
         case H5VL_FILE_UNMOUNT:
             {
-                H5I_type_t  type       = va_arg (arguments, H5I_type_t);
-                const char *name       = va_arg (arguments, const char *);
+                H5I_type_t  type       = va_arg(arguments, H5I_type_t);
+                const char *name       = va_arg(arguments, const char *);
                 H5G_loc_t   loc;
 
-                if(H5G_loc_real(obj, type, &loc) < 0) {
+                if (H5G_loc_real(obj, type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-                }
+
                 /* Unmount */
-                if(H5F_unmount(&loc, name, dxpl_id) < 0)
+                if (H5F_unmount(&loc, name, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
                 break;
@@ -1718,13 +1708,13 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
         /* H5Fis_accessible */
         case H5VL_FILE_IS_ACCESSIBLE:
             {
-                hid_t fapl_id  = va_arg (arguments, hid_t);
-                const char *name    = va_arg (arguments, const char *);
-                htri_t     *ret     = va_arg (arguments, htri_t *);
+                hid_t       fapl_id = va_arg(arguments, hid_t);
+                const char *name    = va_arg(arguments, const char *);
+                htri_t     *ret     = va_arg(arguments, htri_t *);
 
                 /* Call private routine */
                 /* Replace when H5F__is_hdf5() has been updated to accept a fapl */
-//                if((*ret = H5F_is_hdf5(name, fapl_id, dxpl_id)) < 0)
+//                if ((*ret = H5F_is_hdf5(name, fapl_id, dxpl_id)) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
                 break;
             }
@@ -1738,24 +1728,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_file_optional
+ * Function:    H5VL_native_file_optional
  *
- * Purpose:	Perform a driver specific operation on a native file
+ * Purpose:     Perform a driver specific operation on a native file
  *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              May, 2012
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5F_t        *f = NULL;           /* File */
-    H5VL_file_optional_t optional_type = va_arg (arguments, H5VL_file_optional_t);
-    herr_t       ret_value = SUCCEED;    /* Return value */
+    H5F_t *f = NULL;           /* File */
+    H5VL_file_optional_t optional_type = va_arg(arguments, H5VL_file_optional_t);
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1767,7 +1753,7 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
                 haddr_t     eoa;                    /* End of allocation address */
                 haddr_t     max_eof_eoa;            /* Maximum of the EOA & EOF */
                 haddr_t     base_addr;              /* Base address for the file */
-                hsize_t    *ret = va_arg (arguments, hsize_t *);
+                hsize_t    *ret = va_arg(arguments, hsize_t *);
 
                 f = (H5F_t *)obj;
 

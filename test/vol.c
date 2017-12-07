@@ -199,19 +199,23 @@ static herr_t
 test_basic_vol_operation(void)
 {
     hid_t fid = H5I_INVALID_HID;
+//    hid_t fid2 = H5I_INVALID_HID;   /* for H5Freopen() */
     hid_t fapl_id = H5I_INVALID_HID;
     hid_t fcpl_id = H5I_INVALID_HID;
 
-    ssize_t obj_count;
-    size_t  file_size;
-    unsigned intent;
-    void *os_file_handle = NULL;
+    ssize_t     obj_count;
+    hid_t       obj_id_list[1];
+    size_t      file_size;
+    unsigned    intent;
+    void       *os_file_handle = NULL;
 
     TESTING("Basic VOL operations");
 
+    /* H5Fcreate */
     if ((fid = H5Fcreate("native_vol_test", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
+    /* H5Fget_obj_count */
     if ((obj_count = H5Fget_obj_count(fid, H5F_OBJ_FILE)) < 0)
         TEST_ERROR;
     if ((obj_count = H5Fget_obj_count(fid, H5F_OBJ_ALL)) < 0)
@@ -219,32 +223,49 @@ test_basic_vol_operation(void)
     if ((obj_count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATASET)) < 0)
         TEST_ERROR;
 
+    /* H5Fget_obj_ids */
+    if ((obj_count = H5Fget_obj_ids(fid, H5F_OBJ_ALL, 2, obj_id_list)) < 0)
+        TEST_ERROR;
+    if ((obj_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATASET, 2, obj_id_list)) < 0)
+        TEST_ERROR;
+
+    /* H5Fget_access_plist */
     if ((fapl_id = H5Fget_access_plist(fid)) < 0)
         TEST_ERROR;
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
+    /* H5Fget_create_plist */
     if ((fcpl_id = H5Fget_create_plist(fid)) < 0)
         TEST_ERROR;
     if (H5Pclose(fcpl_id) < 0)
         TEST_ERROR;
 
+    /* H5Fget_filesize */
     if (H5Fget_filesize(fid, &file_size) < 0)
         TEST_ERROR;
 
+    /* H5Fget_vfd_handle */
     if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
         TEST_ERROR;
 
+    /* H5Fget_intent */
     if (H5Fget_intent(fid, &intent) < 0)
         TEST_ERROR;
 
+    /* H5Fclose */
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
+    /* H5Fopen */
     if ((fid = H5Fopen("native_vol_test", H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         TEST_ERROR;
+//    if ((fid2 = H5Freopen(fid)) < 0)
+//        TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
+//    if (H5Fclose(fid2) < 0)
+//        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
