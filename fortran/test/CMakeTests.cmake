@@ -132,7 +132,7 @@ set_tests_properties (FORTRAN_fflush1 PROPERTIES DEPENDS FORTRAN_testhdf5-clear-
 add_test (NAME FORTRAN_fflush2 COMMAND $<TARGET_FILE:fflush2>)
 set_tests_properties (FORTRAN_fflush2 PROPERTIES DEPENDS FORTRAN_fflush1)
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS)
   add_test (
     NAME FORTRAN_testhdf5-shared-clear-objects
     COMMAND    ${CMAKE_COMMAND}
