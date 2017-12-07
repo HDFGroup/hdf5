@@ -21,20 +21,23 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"         /* Generic Functions */
-#include "H5Aprivate.h"        /* Attributes */
-#include "H5ACprivate.h"       /* Metadata cache */
-#include "H5Dprivate.h"        /* Datasets */
-#include "H5Eprivate.h"        /* Error handling */
-#include "H5Fpkg.h"            /* File access */
-#include "H5FDprivate.h"       /* File drivers */
-#include "H5Gprivate.h"        /* Groups */
-#include "H5Iprivate.h"        /* IDs */
-#include "H5MFprivate.h"       /* File memory management */
-#include "H5MMprivate.h"       /* Memory management */
-#include "H5Pprivate.h"        /* Property lists */
-#include "H5SMprivate.h"       /* Shared Object Header Messages */
-#include "H5Tprivate.h"        /* Datatypes */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Aprivate.h"         /* Attributes                               */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fpkg.h"             /* File access                              */
+#include "H5FDprivate.h"        /* File drivers                             */
+#include "H5Gprivate.h"         /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MFprivate.h"        /* File memory management                   */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5SMprivate.h"        /* Shared Object Header Messages            */
+#include "H5Tprivate.h"         /* Datatypes                                */
+#include "H5VLprivate.h"        /* VOL drivers                              */
+
+#include "H5VLnative.h"         /* Native VOL driver                        */
 
 
 /****************/
@@ -1647,7 +1650,8 @@ H5F_close(H5F_t *f)
         /* If there are no other file IDs open on this file/mount hier., but
          * there are still open objects, issue an error and bail out now,
          * without decrementing the file ID's reference count and triggering
-         * a "real" attempt at closing the file */
+         * a "real" attempt at closing the file.
+         */
         if (nopen_files == 1 && nopen_objs > 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
     }
@@ -1665,14 +1669,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F_try_close
+ * Function:    H5F_try_close
  *
- * Purpose:  Attempts to close a file due to one of several actions:
- *                      - The reference count on the file ID dropped to zero
- *                      - The last open object was closed in the file
- *                      - The file was unmounted
+ * Purpose:     Attempts to close a file due to one of several actions:
+ *              - The reference count on the file ID dropped to zero
+ *              - The last open object was closed in the file
+ *              - The file was unmounted
  *
- * Return:   Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1694,18 +1699,18 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
      * It's needed by the evict-on-close code. Clients can ignore
      * this value by passing in NULL.
      */
-    if(was_closed)
+    if (was_closed)
         *was_closed = FALSE;
 
     /* Check if this file is already in the process of closing */
-    if(f->closing) {
-        if(was_closed)
+    if (f->closing) {
+        if (was_closed)
             *was_closed = TRUE;
         HGOTO_DONE(SUCCEED)
-    } /* end if */
+    }
 
     /* Get the number of open objects and open files on this file/mount hierarchy */
-    if(H5F_mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
+    if (H5F_mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy")
 
     /*
@@ -1718,7 +1723,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
      *  H5F_CLOSE_STRONG:    if there are still objects open, close them
      *            first, then close file.
      */
-    switch(f->shared->fc_degree) {
+    switch (f->shared->fc_degree) {
         case H5F_CLOSE_WEAK:
             /*
              * If file or object IDS are still open then delay deletion of
@@ -1732,11 +1737,12 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
 
         case H5F_CLOSE_SEMI:
             /* Can leave safely if file IDs are still open on this file */
-            if(nopen_files > 0)
+            if (nopen_files > 0)
                 HGOTO_DONE(SUCCEED)
 
             /* Sanity check: If close degree if "semi" and we have gotten this
-             * far and there are objects left open, bail out now */
+             * far and there are objects left open, bail out now.
+             */
             HDassert(nopen_files == 0 && nopen_objs == 0);
 
             /* If we've gotten this far (ie. there are no open objects in the file), fall through to flush & close */
@@ -1744,7 +1750,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
 
         case H5F_CLOSE_STRONG:
             /* If there are other open files in the hierarchy, we can leave now */
-            if(nopen_files > 0)
+            if (nopen_files > 0)
                 HGOTO_DONE(SUCCEED)
 
             /* If we've gotten this far (ie. there are no open file IDs in the file/mount hierarchy), fall through to flush & close */
@@ -1753,32 +1759,32 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
         case H5F_CLOSE_DEFAULT:
         default:
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, unknown file close degree")
-    } /* end switch */
+    }
 
     /* Mark this file as closing (prevents re-entering file shutdown code below) */
     f->closing = TRUE;
 
     /* If the file close degree is "strong", close all the open objects in this file */
-    if(f->shared->fc_degree == H5F_CLOSE_STRONG) {
+    if (f->shared->fc_degree == H5F_CLOSE_STRONG) {
         HDassert(nopen_files ==  0);
 
         /* Forced close of all opened objects in this file */
-        if(f->nopen_objs > 0) {
+        if (f->nopen_objs > 0) {
             size_t obj_count;       /* # of open objects */
             hid_t objs[128];        /* Array of objects to close */
             herr_t result;          /* Local result from obj ID query */
             size_t u;               /* Local index variable */
 
             /* Get the list of IDs of open dataset, group, & attribute objects */
-            while((result = H5F_get_obj_ids(f, H5F_OBJ_LOCAL | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_ATTR, (int)(sizeof(objs) / sizeof(objs[0])), objs, FALSE, &obj_count)) <= 0
+            while ((result = H5F_get_obj_ids(f, H5F_OBJ_LOCAL | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_ATTR, (int)(sizeof(objs) / sizeof(objs[0])), objs, FALSE, &obj_count)) <= 0
                     && obj_count != 0 ) {
 
                 /* Try to close all the open objects in this file */
-                for(u = 0; u < obj_count; u++)
-                    if(H5I_dec_ref(objs[u]) < 0)
+                for (u = 0; u < obj_count; u++)
+                    if (H5I_dec_ref(objs[u]) < 0)
                         HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object")
-            } /* end while */
-            if(result < 0)
+            }
+            if (result < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_ids failed(1)")
 
             /* Get the list of IDs of open named datatype objects */
@@ -1786,15 +1792,15 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
              * they could be using one of the named datatypes and then the
              * open named datatype ID will get closed twice)
              */
-            while((result = H5F_get_obj_ids(f, H5F_OBJ_LOCAL | H5F_OBJ_DATATYPE, (int)(sizeof(objs) / sizeof(objs[0])), objs, FALSE, &obj_count)) <= 0
+            while ((result = H5F_get_obj_ids(f, H5F_OBJ_LOCAL | H5F_OBJ_DATATYPE, (int)(sizeof(objs) / sizeof(objs[0])), objs, FALSE, &obj_count)) <= 0
                     && obj_count != 0) {
 
                 /* Try to close all the open objects in this file */
-                for(u = 0; u < obj_count; u++)
-                    if(H5I_dec_ref(objs[u]) < 0)
+                for (u = 0; u < obj_count; u++)
+                    if (H5I_dec_ref(objs[u]) < 0)
                         HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object")
-            } /* end while */
-            if(result < 0)
+            }
+            if (result < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_ids failed(2)")
         } /* end if */
     } /* end if */
@@ -1802,35 +1808,36 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
     /* Check if this is a child file in a mounting hierarchy & proceed up the
      * hierarchy if so.
      */
-    if(f->parent)
-        if(H5F_try_close(f->parent, NULL) < 0)
+    if (f->parent)
+        if (H5F_try_close(f->parent, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close parent file")
 
     /* Unmount and close each child before closing the current file. */
-    if(H5F_close_mounts(f) < 0)
+    if (H5F_close_mounts(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child files")
 
     /* If there is more than one reference to the shared file struct and the
      * file has an external file cache, we should see if it can be closed.  This
-     * can happen if a cycle is formed with external file caches */
-    if(f->shared->efc && (f->shared->nrefs > 1))
+     * can happen if a cycle is formed with external file caches.
+     */
+    if (f->shared->efc && (f->shared->nrefs > 1))
         if(H5F_efc_try_close(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't attempt to close EFC")
 
     /* Delay flush until the shared file struct is closed, in H5F__dest.  If the
      * application called H5Fclose, it would have been flushed in that function
-     * (unless it will have been flushed in H5F_dest anyways). */
+     * (unless it will have been flushed in H5F_dest anyways).
+     */
 
-    /*
-     * Destroy the H5F_t struct and decrement the reference count for the
+    /* Destroy the H5F_t struct and decrement the reference count for the
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
      */
-    if(H5F__dest(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, TRUE) < 0)
+    if (H5F__dest(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
     /* Since we closed the file, this should be set to TRUE */
-    if(was_closed)
+    if (was_closed)
         *was_closed = TRUE;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1840,18 +1847,15 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F_reopen
  *
- * Purpose:	Reopen a file.  The new file handle which is returned points
- *		to the same file as the specified file handle.  Both handles
- *		share caches and other information.  The only difference
- *		between the handles is that the new handle is not mounted
- *		anywhere and no files are mounted on it.
+ * Purpose:     Reopen a file.  The new file handle which is returned points
+ *		        to the same file as the specified file handle.  Both handles
+ *		        share caches and other information.  The only difference
+ *		        between the handles is that the new handle is not mounted
+ *		        anywhere and no files are mounted on it.
  *
- * Return:	Success:	New file ID
+ * Return:      Success:    A pointer to a file struct
  *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Friday, October 16, 1998
+ *              Failure:    NULL
  *
  * Modifications:
  *              Quincey Koziol, May 14, 2002
@@ -1867,14 +1871,13 @@ H5F_reopen(H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if(NULL == (ret_value = H5F_new(f->shared, 0, H5P_FILE_CREATE_DEFAULT, 
+    if (NULL == (ret_value = H5F_new(f->shared, 0, H5P_FILE_CREATE_DEFAULT, 
                                     H5P_FILE_ACCESS_DEFAULT, NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to reopen file")
 
     /* Duplicate old file's names */
-    ret_value->open_name = H5MM_xstrdup(f->open_name);
-    ret_value->actual_name = H5MM_xstrdup(f->actual_name);
+    ret_value->open_name    = H5MM_xstrdup(f->open_name);
+    ret_value->actual_name  = H5MM_xstrdup(f->actual_name);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1882,12 +1885,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F_get_id
+ * Function:    H5F_get_id
  *
- * Purpose:  Get the file ID, incrementing it, or "resurrecting" it as
- *           appropriate.
+ * Purpose:     Get the file ID, incrementing it, or "resurrecting" it as
+ *              appropriate.
  *
- * Return:   Non-negative on success/Negative on failure
+ * Return:      Success:    An ID for a file
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1899,16 +1905,20 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
 
     HDassert(file);
 
-    if(file->file_id == -1) {
-        /* Get an atom for the file */
-        if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+    /* XXX: Change this back to use file->id but allow special behavior when
+     *      the ID is H5I_INVALID_HID.
+     */
+    if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
+        /* resurrect the ID - Register an ID with the native plugin */
+        if ((ret_value = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        file->id_exists = TRUE;
     }
     else {
-        /* Increment reference count on atom. */
-        if(H5I_inc_ref(file->file_id, app_ref) < 0)
+        /* Increment ref count on existing ID */
+        if (H5I_inc_ref(ret_value, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
-    } /* end else */
+    }
 
     ret_value = file->file_id;
 
