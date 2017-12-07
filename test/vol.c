@@ -203,6 +203,8 @@ test_basic_vol_operation(void)
     hid_t fapl_id = H5I_INVALID_HID;
     hid_t fcpl_id = H5I_INVALID_HID;
 
+#define NATIVE_VOL_TEST_FILENAME    "native_vol_test"
+
     ssize_t     obj_count;
     hid_t       obj_id_list[1];
     hsize_t     file_size;
@@ -212,7 +214,7 @@ test_basic_vol_operation(void)
     TESTING("Basic VOL operations");
 
     /* H5Fcreate */
-    if ((fid = H5Fcreate("native_vol_test", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* H5Fget_obj_count */
@@ -262,7 +264,7 @@ test_basic_vol_operation(void)
         TEST_ERROR;
 
     /* H5Fopen */
-    if ((fid = H5Fopen("native_vol_test", H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fopen(NATIVE_VOL_TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 //    if ((fid2 = H5Freopen(fid)) < 0)
 //        TEST_ERROR;
@@ -270,6 +272,8 @@ test_basic_vol_operation(void)
         TEST_ERROR;
 //    if (H5Fclose(fid2) < 0)
 //        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
 
     PASSED();
     return SUCCEED;
