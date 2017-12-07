@@ -877,32 +877,31 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I_object
+ * Function:    H5I_object
  *
- * Purpose:	Find an object pointer for the specified ID.
+ * Purpose:     Find an object pointer for the specified ID.
  *
- * Return:	Success:	Non-null object pointer associated with the
- *				specified ID.
- *		Failure:	NULL
+ * Return:      Success:    Non-null object pointer associated with the
+ *                          specified ID
  *
- * Programmer:	Unknown
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
 void *
 H5I_object(hid_t id)
 {
-    H5I_id_info_t	*id_ptr;		/*ptr to the new atom	*/
-    void		*ret_value = NULL;	/*return value		*/
+    H5I_id_info_t	*id_ptr;            /* pointer to the new atom  */
+    void		    *ret_value = NULL;  /* return value             */
 
     FUNC_ENTER_NOAPI_NOERR
 
     /* General lookup of the ID */
-    if(NULL != (id_ptr = H5I__find_id(id))) {
+    if (NULL != (id_ptr = H5I__find_id(id))) {
         /* Get the object pointer to return */
         /* (Casting away const OK -QAK) */
         ret_value = (void *)id_ptr->obj_ptr;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_object() */

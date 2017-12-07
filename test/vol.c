@@ -259,6 +259,9 @@ test_basic_vol_operation(void)
     if (H5Fclear_elink_file_cache(fid) < 0)
         TEST_ERROR;
 
+    if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+        TEST_ERROR;
+
     /* H5Fclose */
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -283,6 +286,7 @@ error:
 
 } /* end test_basic_vol_operation() */
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:    test_echo_vol_operation()
@@ -308,8 +312,7 @@ error:
     return FAIL;
 
 } /* end test_basic_vol_operation() */
-
-
+#endif
 
 
 /*-------------------------------------------------------------------------

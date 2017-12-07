@@ -317,14 +317,14 @@ done:
 static H5F_t *
 H5VL_native_get_file(void *obj, H5I_type_t type)
 {
-    H5F_t	*ret_value = NULL;      /* File to flush */
-    H5O_loc_t	*oloc = NULL;           /* Object location for ID */
+    H5F_t	    *ret_value  = NULL;         /* File pointer             */
+    H5O_loc_t	*oloc       = NULL;         /* Object location for ID   */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    switch(type) {
+    switch (type) {
         case H5I_FILE:
-            ret_value = (H5F_t *) obj;
+            ret_value = (H5F_t *)obj;
             break;
         case H5I_GROUP:
             {
@@ -381,7 +381,7 @@ H5VL_native_get_file(void *obj, H5I_type_t type)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL_native_get_file */
+} /* H5VL_native_get_file */
 
 
 /*---------------------------------------------------------------------------
@@ -1646,6 +1646,7 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
                 H5F_scope_t     scope = va_arg(arguments, H5F_scope_t);
                 H5F_t	       *f = NULL;              /* File to flush */
 
+                /* Get the file for the object */
                 if (NULL == (f = H5VL_native_get_file(obj, type)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
@@ -1655,7 +1656,6 @@ H5VL_native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t d
                  * calling H5Fflush() with the read-only handle, still causes data
                  * to be flushed.
                  */
-
                  if (H5F_ACC_RDWR & H5F_INTENT(f)) {
                      /* Flush other files, depending on scope */
                      if (H5F_SCOPE_GLOBAL == scope) {

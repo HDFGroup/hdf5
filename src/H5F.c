@@ -717,10 +717,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if ((ret_value = H5VL_register_id(H5I_FILE, new_file, vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
-    /* Keep this ID in file object structure */
-    /* XXX: REMOVE THIS (straggler from old code) */
-//    new_file->file_id = ret_value;
-
 done:
     if (H5I_INVALID_HID == ret_value)
         if (new_file && H5F_try_close(new_file, NULL) < 0)
@@ -806,10 +802,6 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if ((ret_value = H5VL_register_id(H5I_FILE, new_file, vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
-    /* Keep this ID in file object structure */
-    /* XXX: REMOVE THIS (straggler from old code) */
-//    new_file->file_id = ret_value;
-
 done:
     if (H5I_INVALID_HID == ret_value)
         if (new_file && H5F_try_close(new_file, NULL) < 0)
@@ -833,104 +825,28 @@ done:
 herr_t
 H5Fflush(hid_t object_id, H5F_scope_t scope)
 {
-    H5F_t      *f = NULL;              /* File to flush */
-    H5O_loc_t  *oloc = NULL;           /* Object location for ID */
-    herr_t      ret_value = SUCCEED;   /* Return value */
+    H5VL_object_t   *obj = NULL;                    /* Object info      */
+    H5I_type_t      obj_type;                       /* Type of object   */
+    herr_t          ret_value = SUCCEED;            /* Return value     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iFs", object_id, scope);
 
-    switch (H5I_get_type(object_id)) {
-        case H5I_FILE:
-            if (NULL == (f = (H5F_t *)H5I_object(object_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-            break;
-
-        case H5I_GROUP:
-            {
-                H5G_t    *grp;
-
-                if (NULL == (grp = (H5G_t *)H5I_object(object_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
-                oloc = H5G_oloc(grp);
-            }
-            break;
-
-        case H5I_DATATYPE:
-            {
-                H5T_t    *type;
-
-                if (NULL == (type = (H5T_t *)H5I_object(object_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid type identifier")
-                oloc = H5T_oloc(type);
-            }
-            break;
-
-        case H5I_DATASET:
-            {
-                H5D_t    *dset;
-
-                if (NULL == (dset = (H5D_t *)H5I_object(object_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
-                oloc = H5D_oloc(dset);
-            }
-            break;
-
-        case H5I_ATTR:
-            {
-                H5A_t    *attr;
-
-                if (NULL == (attr = (H5A_t *)H5I_object(object_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
-                oloc = H5A_oloc(attr);
-            }
-            break;
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_DATASPACE:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-    } /* end switch */
-
-    if (!f) {
-        if (!oloc)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not assocated with a file")
-        f = oloc->file;
+    /* Get the type of object we're flushing + sanity check */
+    obj_type = H5I_get_type(object_id);
+    if (H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
+       H5I_DATASET != obj_type && H5I_ATTR != obj_type) {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
     }
-    if (!f)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file")
 
-    /* Flush the file */
-    /*
-     * Nothing to do if the file is read only.    This determination is
-     * made at the shared open(2) flags level, implying that opening a
-     * file twice, once for read-only and once for read-write, and then
-     * calling H5Fflush() with the read-only handle, still causes data
-     * to be flushed.
-     */
-    if (H5F_ACC_RDWR & H5F_INTENT(f)) {
-        /* Flush other files, depending on scope */
-        if (H5F_SCOPE_GLOBAL == scope) {
-            /* Call the flush routine for mounted file hierarchies */
-            if (H5F_flush_mounts(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
-        }
-        else {
-            /* Call the flush routine, for this file */
-            if (H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
-        }
-    }
+    /* get the file object */
+    if (NULL == (obj = H5VL_get_object(object_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    /* Flush the object */
+    if (H5VL_file_specific(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_FLUSH, 
+                          H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, obj_type, scope) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
 
 done:
     FUNC_LEAVE_API(ret_value)
