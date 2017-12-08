@@ -1979,7 +1979,7 @@ H5VL_native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
     FUNC_ENTER_NOAPI_NOINIT
 
     /* This routine should only be called when a file ID's ref count drops to zero */
-    HDassert(f->id_exists);
+    HDassert(H5F_FILE_ID(f));
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
@@ -1987,7 +1987,7 @@ H5VL_native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
      * disabled by an option/property to improve performance.
      */
     /* XXX: Note that we're not using the passed-in dxpl here... */
-    if ((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
+    if ((H5F_NREFS(f) > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
         /* get the file ID corresponding to the H5F_t struct */
         if ((file_id = H5I_get_id(f, H5I_FILE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom")
