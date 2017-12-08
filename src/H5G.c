@@ -565,6 +565,7 @@ H5Gget_create_plist(hid_t group_id)
     if (NULL == (grp = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group ID")
 
+    /* Get the group creation property list for the group */
     if (H5VL_group_get(grp->vol_obj, grp->vol_info->vol_cls, H5VL_GROUP_GET_GCPL, 
                       H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5I_INVALID_HID, "unable to get group creation properties")
@@ -575,42 +576,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gget_info
+ * Function:    H5Gget_info
  *
- * Purpose:	Retrieve information about a group.
+ * Purpose:     Retrieve information about a group.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		November 27 2006
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gget_info(hid_t grp_id, H5G_info_t *grp_info)
+H5Gget_info(hid_t loc_id, H5G_info_t *group_info)
 {
-    H5I_type_t  id_type;                /* Type of ID */
-    H5G_loc_t	loc;                    /* Location of group */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t      *obj;
+    H5I_type_t          id_type;                /* Type of ID */
+    H5VL_loc_params_t   loc_params;
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", grp_id, grp_info);
+    H5TRACE2("e", "i*x", loc_id, group_info);
 
     /* Check args */
-    id_type = H5I_get_type(grp_id);
-    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
-    if(!grp_info)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    id_type = H5I_get_type(loc_id);
+    if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID")
+    if (!group_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL")
 
-    /* Get group location */
-    if(H5G_loc(grp_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    /* get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Retrieve the group's information */
-    if(H5G__obj_info(loc.oloc, grp_info/*out*/, H5AC_ind_read_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+    /* Get the group info through the VOL using the location token */
+    loc_params.type     = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = id_type;
+    if ((ret_value = H5VL_group_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_GROUP_GET_INFO, 
+                                   H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, loc_params, group_info)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
     FUNC_LEAVE_API(ret_value)
