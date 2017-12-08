@@ -2008,7 +2008,7 @@ H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
         coords_in_chunk[u] = coords[u] - (scaled[u] * fm->layout->u.chunk.dim[u]);
 
     /* Add point to file selection for chunk */
-    if(H5S_select_elements(chunk_info->fspace, H5S_SELECT_APPEND, (size_t)1, coords_in_chunk) < 0)
+    if(H5S_select_elements(chunk_info->fspace, H5S_SELECT_APPEND, (hsize_t)1, coords_in_chunk) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element")
 
     /* Increment the number of elemented selected in chunk */
@@ -2088,7 +2088,7 @@ H5D__chunk_mem_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, u
     } /* end else */
 
     /* Move memory selection iterator to next element in selection */
-    if(H5S_SELECT_ITER_NEXT(&fm->mem_iter, (size_t)1) < 0)
+    if(H5S_SELECT_ITER_NEXT(&fm->mem_iter, (hsize_t)1) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to move to next iterator location")
 
 done:

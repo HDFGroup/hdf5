@@ -58,7 +58,7 @@ static herr_t H5S_point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 static herr_t H5S_point_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
 static hsize_t H5S_point_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S_point_iter_has_next_block(const H5S_sel_iter_t *iter);
-static herr_t H5S_point_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
+static herr_t H5S_point_iter_next(H5S_sel_iter_t *sel_iter, hsize_t nelem);
 static herr_t H5S_point_iter_next_block(H5S_sel_iter_t *sel_iter);
 static herr_t H5S_point_iter_release(H5S_sel_iter_t *sel_iter);
 
@@ -278,7 +278,7 @@ done:
  USAGE
     herr_t H5S_point_iter_next(iter, nelem)
         H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
-        size_t nelem;               IN: Number of elements to advance by
+        hsize_t nelem;              IN: Number of elements to advance by
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -289,7 +289,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
+H5S_point_iter_next(H5S_sel_iter_t *iter, hsize_t nelem)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -376,7 +376,7 @@ H5S_point_iter_release (H5S_sel_iter_t H5_ATTR_UNUSED * iter)
  USAGE
     herr_t H5S_point_add(space, num_elem, coord)
         H5S_t *space;           IN: Dataspace of selection to modify
-        size_t num_elem;        IN: Number of elements in COORD array.
+        hsize_t num_elem;       IN: Number of elements in COORD array.
         const hsize_t *coord[];    IN: The location of each element selected
  RETURNS
     Non-negative on success/Negative on failure
@@ -388,7 +388,7 @@ H5S_point_iter_release (H5S_sel_iter_t H5_ATTR_UNUSED * iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)
+H5S_point_add(H5S_t *space, H5S_seloper_t op, hsize_t num_elem, const hsize_t *coord)
 {
     H5S_pnt_node_t *top = NULL, *curr = NULL, *new_node = NULL; /* Point selection nodes */
     unsigned u;                         /* Counter */
@@ -527,7 +527,7 @@ H5S_point_release (H5S_t *space)
     herr_t H5S_select_elements(dsid, op, num_elem, coord)
         hid_t dsid;             IN: Dataspace ID of selection to modify
         H5S_seloper_t op;       IN: Operation to perform on current selection
-        size_t num_elem;        IN: Number of elements in COORD array.
+        hsize_t num_elem;       IN: Number of elements in COORD array.
         const hsize_t *coord;   IN: The location of each element selected
  RETURNS
     Non-negative on success/Negative on failure
@@ -549,7 +549,7 @@ H5S_point_release (H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_elem,
+H5S_select_elements(H5S_t *space, H5S_seloper_t op, hsize_t num_elem,
     const hsize_t *coord)
 {
     herr_t ret_value = SUCCEED;  /* return value */
@@ -1043,7 +1043,7 @@ H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_
     H5S_seloper_t op = H5S_SELECT_SET;  /* Selection operation */
     hsize_t *coord = NULL, *tcoord;     /* Pointer to array of elements */
     const uint8_t *pp = (*p);   /* Local pointer for decoding */
-    size_t num_elem = 0;        /* Number of elements in selection */
+    hsize_t num_elem = 0;       /* Number of elements in selection */
     unsigned rank;              /* Rank of points */
     unsigned i, j;              /* local counting variables */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1756,7 +1756,7 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "unsupported operation attempted")
 
     /* Call the real element selection routine */
-    if((ret_value = H5S_select_elements(space, op, num_elem, coord)) < 0)
+    if((ret_value = H5S_select_elements(space, op, (hsize_t)num_elem, coord)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't select elements")
 
 done:

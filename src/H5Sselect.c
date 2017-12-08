@@ -1226,7 +1226,7 @@ H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter)
  USAGE
     herr_t H5S_select_iter_next(iter, nelem)
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator to change
-        size_t nelem;           IN: Number of elements to advance by
+        hsize_t nelem;          IN: Number of elements to advance by
  RETURNS
     Non-negative on success, negative on failure.
  DESCRIPTION
@@ -1241,7 +1241,7 @@ H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
+H5S_select_iter_next(H5S_sel_iter_t *iter, hsize_t nelem)
 {
     herr_t ret_value = FAIL;    /* Return value */
 
