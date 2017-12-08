@@ -358,6 +358,40 @@ error:
 
 } /* end test_basic_group_operation() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_dataset_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL dataset operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_dataset_operation(void)
+{
+    hid_t fid = H5I_INVALID_HID;
+    hid_t did = H5I_INVALID_HID;
+
+    TESTING("Basic VOL dataset operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* end test_basic_dataset_operation() */
+
 #if 0
 
 /*-------------------------------------------------------------------------
@@ -409,6 +443,7 @@ main(void)
     nerrors += test_native_vol_init() < 0           ? 1 : 0;
     nerrors += test_basic_file_operation() < 0      ? 1 : 0;
     nerrors += test_basic_group_operation() < 0     ? 1 : 0;
+    nerrors += test_basic_dataset_operation() < 0   ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n",
