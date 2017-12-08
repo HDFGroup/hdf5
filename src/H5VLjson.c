@@ -461,6 +461,10 @@ H5VL_json_init(void)
 {
     herr_t ret_value = SUCCEED;
 
+#ifdef PLUGIN_DEBUG
+    printf("initing json vol\n");
+#endif
+
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Register the JSON VOL plugin, if it isn't already registered */
@@ -490,6 +494,10 @@ herr_t
 H5VLjson_term(void)
 {
     herr_t ret_value = SUCCEED;
+
+#ifdef PLUGIN_DEBUG
+    printf("terminating json vol\n");
+#endif
 
     FUNC_ENTER_API(FAIL)
     H5TRACE0("e","");
@@ -552,6 +560,10 @@ H5Pset_fapl_json_vol(hid_t fapl_id)
 {
     H5P_genplist_t *plist;
     herr_t          ret_value;
+
+#ifdef PLUGIN_DEBUG
+    printf("setting fapl json vol\n");
+#endif
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", fapl_id);

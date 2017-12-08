@@ -338,6 +338,7 @@ typedef enum H5VL_category_t {
 /* enum value to identify the class of a VOL driver (mostly for comparison purposes) */
 typedef enum H5VL_class_value_t {
     H5_VOL_NATIVE = 0,              /* This should be first */
+    H5_VOL_JSON = -2,               /* FTW: Just a placeholder. This should be verified. */
     H5_VOL_MAX_LIB_VALUE = 128      /* This should be last */
 } H5VL_class_value_t;
 
