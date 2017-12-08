@@ -23,7 +23,8 @@
 #include "H5VLnative.h"
 
 
-#define NATIVE_VOL_TEST_FILENAME    "native_vol_test"
+#define NATIVE_VOL_TEST_FILENAME        "native_vol_test"
+#define NATIVE_VOL_TEST_GROUP_NAME      "test_group"
 
 #define FAKE_VOL_NAME   "fake"
 
@@ -309,11 +310,19 @@ static herr_t
 test_basic_group_operation(void)
 {
     hid_t fid = H5I_INVALID_HID;
+    hid_t gid = H5I_INVALID_HID;
 
     TESTING("Basic VOL group operations");
 
-    /* H5Fcreate */
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Gcreate */
+    if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Gclose */
+    if (H5Gclose(gid) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)

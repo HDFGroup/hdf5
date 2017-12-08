@@ -895,7 +895,8 @@ H5Freopen(hid_t file_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
-    new_file->file_id = ret_value;
+    /* XXX: Fix up after id_exists hax */
+//    new_file->file_id = ret_value;
 
 done:
     if (ret_value < 0 && new_file)

@@ -32,12 +32,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Gprivate.h"         /* Groups                               */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Gprivate.h"         /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Oprivate.h"         /* Object headers                           */
+#include "H5Ppkg.h"             /* Property lists                           */
 
 
 /****************/
@@ -128,6 +128,7 @@ static const H5O_linfo_t H5G_def_linfo_g = H5G_CRT_LINK_INFO_DEF;      /* Defaul
 static herr_t
 H5P__gcrt_reg_prop(H5P_genclass_t *pclass)
 {
+    hid_t lcpl_id     = H5P_LINK_CREATE_DEFAULT;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -142,6 +143,11 @@ H5P__gcrt_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5G_CRT_LINK_INFO_NAME, H5G_CRT_LINK_INFO_SIZE, &H5G_def_linfo_g, 
             NULL, NULL, NULL, H5G_CRT_LINK_INFO_ENC, H5G_CRT_LINK_INFO_DEC,
             NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the lcpl ID property */
+    if(H5P_register_real(pclass, H5VL_PROP_GRP_LCPL_ID, sizeof(hid_t), &lcpl_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:

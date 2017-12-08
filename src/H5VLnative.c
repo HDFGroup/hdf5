@@ -1971,10 +1971,10 @@ done:
 static herr_t
 H5VL_native_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    int nref;
-    H5F_t *f = (H5F_t *)file;
-    hid_t file_id = FAIL;
-    herr_t ret_value = SUCCEED;                 /* Return value */
+    int     nref;
+    H5F_t   *f          = (H5F_t *)file;
+    hid_t   file_id     = H5I_INVALID_HID;
+    herr_t  ret_value   = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1996,7 +1996,7 @@ H5VL_native_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
         if (nref == 1)
             if (H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    } /* end if */
+    }
 
     /* close the file */
     if (H5F_close(f) < 0)

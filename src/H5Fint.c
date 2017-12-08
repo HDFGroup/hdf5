@@ -1927,8 +1927,6 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
     }
 
-    ret_value = file->file_id;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_id() */

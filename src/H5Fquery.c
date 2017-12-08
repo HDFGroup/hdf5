@@ -225,6 +225,8 @@ H5F_get_nopen_objs(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->nopen_objs)
 } /* end H5F_get_nopen_objs() */
 
+/* XXX: Consider reinstating after hax */
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function: H5F_get_file_id
@@ -244,6 +246,7 @@ H5F_get_file_id(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->file_id)
 } /* end H5F_get_file_id() */
+#endif
 
 
 /*-------------------------------------------------------------------------
