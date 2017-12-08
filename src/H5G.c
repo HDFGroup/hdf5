@@ -316,8 +316,8 @@ hid_t
 H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     hid_t gapl_id)
 {
-    H5G_t	            *grp = NULL;                /* New group created */
-    H5VL_object_t       *obj = NULL;                /* object token of loc_id */
+    void               *grp = NULL;                 /* New group created */
+    H5VL_object_t      *obj = NULL;                 /* object token of loc_id */
     H5VL_loc_params_t   loc_params;
     H5P_genplist_t      *plist;                     /* Property list pointer */
     hid_t               dxpl_id = H5I_INVALID_HID;  /* dxpl used by library */
@@ -497,8 +497,8 @@ done:
 hid_t
 H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 {
-    H5G_t	            *grp = NULL;                /* New group created */
-    H5VL_object_t       *obj = NULL;                /* object token of loc_id */
+    void               *grp = NULL;                 /* New group created */
+    H5VL_object_t      *obj = NULL;                 /* object token of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t               dxpl_id = H5I_INVALID_HID;  /* dxpl used by library */
     hid_t	            ret_value;                  /* Return value */

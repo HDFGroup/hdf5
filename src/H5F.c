@@ -609,11 +609,11 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t               *new_file = NULL;   /* file struct for new file                 */
+    void               *new_file = NULL;    /* file struct for new file                 */
 
-    H5P_genplist_t      *plist;             /* Property list pointer                    */
-    H5VL_class_t        *vol_cls = NULL;    /* VOL Class structure for callback info    */
-    H5VL_t              *vol_info = NULL;   /* VOL info struct                          */
+    H5P_genplist_t     *plist;              /* Property list pointer                    */
+    H5VL_class_t       *vol_cls = NULL;     /* VOL Class structure for callback info    */
+    H5VL_t             *vol_info = NULL;    /* VOL info struct                          */
     H5VL_driver_prop_t  driver_prop;        /* Property for vol driver ID & info        */
 
     hid_t               dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library     */
@@ -681,6 +681,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
+    /* XXX: Need to replace H5F_try_close(), which takes a H5F_t */
     if (H5I_INVALID_HID == ret_value)
         if (new_file && H5F_try_close(new_file, NULL) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
@@ -711,12 +712,12 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    H5F_t               *new_file = NULL;           /* file struct for new file                 */
+    void               *new_file = NULL;            /* file struct for new file                 */
     hid_t               dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library             */
-    H5P_genplist_t      *plist;                     /* Property list pointer                    */
+    H5P_genplist_t     *plist;                      /* Property list pointer                    */
     H5VL_driver_prop_t  driver_prop;                /* Property for vol driver ID & info        */
-    H5VL_class_t        *vol_cls = NULL;            /* VOL Class structure for callback info    */
-    H5VL_t              *vol_info = NULL;           /* VOL info struct                          */
+    H5VL_class_t       *vol_cls = NULL;             /* VOL Class structure for callback info    */
+    H5VL_t             *vol_info = NULL;            /* VOL info struct                          */
     hid_t               ret_value;                  /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -766,6 +767,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
+    /* XXX: Need to replace H5F_try_close(), which takes a H5F_t */
     if (H5I_INVALID_HID == ret_value)
         if (new_file && H5F_try_close(new_file, NULL) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
