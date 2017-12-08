@@ -376,7 +376,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
 
 done:
     if (H5I_INVALID_HID == ret_value)
-        if (grp && H5VL_group_close (grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
+        if (grp && H5VL_group_close(grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -532,7 +532,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 
 done:
     if (H5I_INVALID_HID == ret_value)
-        if (grp && H5VL_group_close (grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
+        if (grp && H5VL_group_close(grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -540,36 +540,34 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gget_create_plist
+ * Function:    H5Gget_create_plist
  *
- * Purpose:	Returns a copy of the group creation property list.
+ * Purpose:     Returns a copy of the group creation property list.
  *
- * Return:	Success:	ID for a copy of the group creation
- *				property list.  The property list ID should be
- *				released by calling H5Pclose().
+ * Return:      Success:    ID for a copy of the group creation
+ *                          property list.  The property list ID should be
+ *                          released by calling H5Pclose().
  *
- *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, October 25, 2005
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Gget_create_plist(hid_t group_id)
 {
-    H5G_t		*group = NULL;
-    hid_t		ret_value = FAIL;
+    H5VL_object_t  *grp = NULL;
+    hid_t		    ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", group_id);
 
     /* Check args */
-    if(NULL == (group = (H5G_t *)H5I_object_verify(group_id, H5I_GROUP)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+    if (NULL == (grp = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group ID")
 
-    if((ret_value = H5G_get_create_plist(group)) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+    if (H5VL_group_get(grp->vol_obj, grp->vol_info->vol_cls, H5VL_GROUP_GET_GCPL, 
+                      H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5I_INVALID_HID, "unable to get group creation properties")
 
 done:
     FUNC_LEAVE_API(ret_value)

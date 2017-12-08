@@ -311,6 +311,7 @@ test_basic_group_operation(void)
 {
     hid_t fid = H5I_INVALID_HID;
     hid_t gid = H5I_INVALID_HID;
+    hid_t gcpl_id = H5I_INVALID_HID;
 
     TESTING("Basic VOL group operations");
 
@@ -319,6 +320,12 @@ test_basic_group_operation(void)
 
     /* H5Gcreate */
     if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Gget_create_plist */
+    if ((gcpl_id = H5Gget_create_plist(gid)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(gcpl_id) < 0)
         TEST_ERROR;
 
     /* H5Gclose */
