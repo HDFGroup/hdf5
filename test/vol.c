@@ -325,6 +325,12 @@ test_basic_group_operation(void)
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
 
+    /* H5Gopen */
+    if ((gid = H5Gopen2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Gclose(gid) < 0)
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
