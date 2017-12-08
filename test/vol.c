@@ -335,6 +335,10 @@ test_basic_group_operation(void)
     if (H5Gget_info(fid, &info) < 0)
         TEST_ERROR;
 
+    /* H5Gget_info_by_name */
+    if (H5Gget_info_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, &info, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
     /* H5Gclose */
     if (H5Gclose(gid) < 0)
         TEST_ERROR;

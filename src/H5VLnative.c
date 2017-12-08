@@ -1988,10 +1988,10 @@ H5VL_native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
      */
     /* XXX: Note that we're not using the passed-in dxpl here... */
     if ((H5F_NREFS(f) > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
-        /* get the file ID corresponding to the H5F_t struct */
+        /* Get the file ID corresponding to the H5F_t struct */
         if ((file_id = H5I_get_id(f, H5I_FILE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom")
-        /* get the number of references outstanding for this file ID */
+        /* Get the number of references outstanding for this file ID */
         if ((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
         if (nref == 1)
@@ -1999,7 +1999,7 @@ H5VL_native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     }
 
-    /* close the file */
+    /* Close the file */
     if (H5F_close(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")
 
