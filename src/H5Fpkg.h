@@ -368,7 +368,7 @@ struct H5F_t {
     unsigned		    nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
     hbool_t             id_exists;      /* Whether an ID for this struct exists                         */
-    hid_t               file_id;        /* ID of this file                                              */
+//    hid_t               file_id;        /* ID of this file                                              */
     hbool_t             closing;        /* File is in the process of being closed                       */
     struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
     unsigned            nmounts;        /* Number of children mounted to this file                      */
