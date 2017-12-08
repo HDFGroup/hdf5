@@ -594,7 +594,6 @@ HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."    
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
-SKIP_HDF5_FORTRAN_SHARED       "Do not build the fortran shared libraries"                    OFF
 if (APPLE)
     HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 if (CMAKE_BUILD_TYPE MATCHES Debug)

@@ -409,39 +409,39 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
         H5O_loc_t *oloc;        /* Group entry info for object */
 
         switch(olist->obj_type) {
-        case H5I_ATTR:
-            oloc = H5A_oloc((H5A_t *)obj_ptr);
-            break;
+            case H5I_ATTR:
+                oloc = H5A_oloc((H5A_t *)obj_ptr);
+                break;
 
-        case H5I_GROUP:
-            oloc = H5G_oloc((H5G_t *)obj_ptr);
-            break;
+            case H5I_GROUP:
+                oloc = H5G_oloc((H5G_t *)obj_ptr);
+                break;
 
-        case H5I_DATASET:
-            oloc = H5D_oloc((H5D_t *)obj_ptr);
-            break;
+            case H5I_DATASET:
+                oloc = H5D_oloc((H5D_t *)obj_ptr);
+                break;
 
-        case H5I_DATATYPE:
-            if(H5T_is_named((H5T_t*)obj_ptr)==TRUE)
-                oloc = H5T_oloc((H5T_t*)obj_ptr);
-            else
-                oloc = NULL;
-            break;
+            case H5I_DATATYPE:
+                if(H5T_is_named((H5T_t*)obj_ptr)==TRUE)
+                    oloc = H5T_oloc((H5T_t*)obj_ptr);
+                else
+                    oloc = NULL;
+                break;
 
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_FILE:
-        case H5I_DATASPACE:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
+            case H5I_UNINIT:
+            case H5I_BADID:
+            case H5I_FILE:
+            case H5I_DATASPACE:
+            case H5I_REFERENCE:
+            case H5I_VFL:
+            case H5I_GENPROP_CLS:
+            case H5I_GENPROP_LST:
+            case H5I_ERROR_CLASS:
+            case H5I_ERROR_MSG:
+            case H5I_ERROR_STACK:
+            case H5I_NTYPES:
             default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown data object")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown or invalid data object")
         } /* end switch */
 
         if((olist->file_info.local &&
@@ -1575,7 +1575,7 @@ H5F__flush_phase2(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closi
  *
  * Purpose:  Flushes cached data.
  *
- * Return:   Non-negative on success/Negative on failure
+ * Return:   SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 herr_t

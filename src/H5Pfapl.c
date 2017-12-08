@@ -14,8 +14,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pfapl.c
- *			February 26 1998
- *			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		File access property list class routines
  *
@@ -32,21 +30,21 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* Files		  	        */
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5private.h"          /* Generic Functions                    */
+#include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5Dprivate.h"         /* Datasets                             */
+#include "H5Eprivate.h"         /* Error handling                       */
+#include "H5Fprivate.h"         /* Files                                */
+#include "H5FDprivate.h"        /* File drivers                         */
+#include "H5Iprivate.h"         /* IDs                                  */
 #include "H5MMprivate.h"        /* Memory Management                    */
-#include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5Ppkg.h"             /* Property lists                       */
 
 /* Includes needed to set as default file driver */
-#include "H5FDsec2.h"		/* Posix unbuffered I/O	file driver	*/
-#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
+#include "H5FDsec2.h"           /* Posix unbuffered I/O	file driver     */
+#include "H5FDstdio.h"          /* Standard C buffered I/O              */
 #ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Windows buffered I/O                 */
+#include "H5FDwindows.h"        /* Win32 I/O                            */
 #endif
 
 
@@ -404,8 +402,8 @@ static const unsigned H5F_def_page_buf_min_raw_perc_g = H5F_ACS_PAGE_BUFFER_MIN_
 static herr_t
 H5P__facc_reg_prop(H5P_genclass_t *pclass)
 {
-    const H5FD_driver_prop_t def_driver_prop = H5F_ACS_FILE_DRV_DEF;           /* Default VFL driver ID & info (initialized from a variable) */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const H5FD_driver_prop_t def_driver_prop    = H5F_ACS_FILE_DRV_DEF;     /* Default VFL driver ID & info (initialized from a variable) */
+    herr_t ret_value = SUCCEED;                                             /* Return value */
 
     FUNC_ENTER_STATIC
 

@@ -19,17 +19,18 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"          /* Generic Functions                    */
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5Dprivate.h"         /* Datasets                             */
-#include "H5Eprivate.h"         /* Error handling                       */
-#include "H5FLprivate.h"        /* Free lists                           */
-#include "H5Lprivate.h"         /* Links                                */
-#include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Pprivate.h"         /* Property lists                       */
-#include "H5SLprivate.h"        /* Skip lists                           */
-#include "H5Tprivate.h"         /* Datatypes                            */
-#include "H5FSprivate.h"        /* File free space                      */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free lists                               */
+#include "H5FSprivate.h"        /* File free space                          */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5SLprivate.h"        /* Skip lists                               */
+#include "H5Tprivate.h"         /* Datatypes                                */
+#include "H5FSprivate.h"        /* File free space                          */
 
 /****************/
 /* Local Macros */
@@ -80,9 +81,9 @@ hbool_t H5_libterm_g = FALSE;   /* Library isn't being shutdown */
 hbool_t H5_MPEinit_g = FALSE;	/* MPE Library hasn't been initialized */
 #endif
 
-char			H5_lib_vers_info_g[] = H5_VERS_INFO;
+char                    H5_lib_vers_info_g[] = H5_VERS_INFO;
 static hbool_t          H5_dont_atexit_g = FALSE;
-H5_debug_t		H5_debug_g;		/*debugging info	*/
+H5_debug_t              H5_debug_g; /* debugging info */
 
 
 /*******************/
@@ -243,11 +244,6 @@ done:
  *
  * Return:	void
  *
- * Programmer:	Robb Matzke
- *              Friday, November 20, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -281,11 +277,11 @@ H5_term_library(void)
      */
 #define DOWN(F)								      \
     (((n = H5##F##_term_package()) && (at + 8) < sizeof loop)?	      \
-     (sprintf(loop + at, "%s%s", (at ? "," : ""), #F),			      \
+     (HDsprintf(loop + at, "%s%s", (at ? "," : ""), #F),			      \
       at += HDstrlen(loop + at),					      \
       n):                                                                     \
      ((n > 0 && (at + 5) < sizeof loop) ?				      \
-     (sprintf(loop + at, "..."),					      \
+     (HDsprintf(loop + at, "..."),					      \
       at += HDstrlen(loop + at),					      \
      n) : n))
 
@@ -364,8 +360,8 @@ H5_term_library(void)
     if(pending) {
         /* Only display the error message if the user is interested in them. */
         if(func) {
-            fprintf(stderr, "HDF5: infinite loop closing library\n");
-            fprintf(stderr, "      %s\n", loop);
+            HDfprintf(stderr, "HDF5: infinite loop closing library\n");
+            HDfprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
             HDabort();
 #endif /* NDEBUG */
@@ -440,11 +436,6 @@ done:
  *		Failure:	negative if this function is called more than
  *				once or if it is called too late.
  *
- * Programmer:	Robb Matzke
- *              Friday, November 20, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -478,11 +469,6 @@ H5dont_atexit(void)
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Saturday, March 11, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -528,13 +514,6 @@ done:
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, August 2, 2000
- *
- * Modifications:   Neil Fortner
- *                  Wednesday, April 8, 2009
- *                  Added support for factory free lists
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -577,9 +556,6 @@ done:
  *              'trace' word was shown.
  *
  * Return:      void
- *
- * Programmer:  Robb Matzke
- *              Wednesday, August 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -632,7 +608,7 @@ H5_debug_mask(const char *s)
 		            } /* end if */
                 } /* end for */
                 if (i>=(size_t)H5_NPKGS)
-                    fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
+                    HDfprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
             } /* end if-else */
 
         } else if (HDisdigit(*s)) {
@@ -672,8 +648,6 @@ H5_debug_mask(const char *s)
  *
  * Return:	MPI_SUCCESS
  *
- * Programmer:	Mohamad Chaarawi, February 2015
- *
  *-------------------------------------------------------------------------
  */
 static int H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H5_ATTR_UNUSED *attr_val, int H5_ATTR_UNUSED *flag)
@@ -697,13 +671,6 @@ static int H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED key
  *		printf("version %u.%u release %u", maj, min, rel)
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Unknown
- *
- * Modifications:
- * 	Robb Matzke, 4 Mar 1998
- *	Now use "normal" data types for the interface.  Any of the arguments
- *	may be null pointers
  *
  *-------------------------------------------------------------------------
  */
@@ -737,13 +704,6 @@ done:
  * Return:	Success:	SUCCEED
  *
  *		Failure:	abort()
- *
- * Programmer:	Robb Matzke
- *              Tuesday, April 21, 1998
- *
- * Modifications:
- *	Albert Cheng, May 12, 2001
- *	Added verification of H5_VERS_INFO.
  *
  *-------------------------------------------------------------------------
  */
@@ -869,11 +829,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -895,11 +850,6 @@ done:
  * Purpose:	Terminate the library and release all resources.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Friday, January 30, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

@@ -1196,7 +1196,7 @@ test_get_obj_ids(void)
     VERIFY(oid_count, (NGROUPS + NDSETS + 1), "H5Fget_obj_count");
 
     oid_list = (hid_t *)HDcalloc((size_t)oid_list_size, sizeof(hid_t));
-    CHECK(oid_list, NULL, "HDcalloc");
+    CHECK_PTR(oid_list, "HDcalloc");
 
     /* Call the public function H5F_get_obj_ids to use H5F_get_objects.  User reported having problem here. 
      * that the returned size (ret_count) from H5Fget_obj_ids is one greater than the size passed in 
@@ -1259,7 +1259,7 @@ test_get_obj_ids(void)
     VERIFY(oid_count, NDSETS, "H5Fget_obj_count");
 
     oid_list = (hid_t *)HDcalloc((size_t)oid_count, sizeof(hid_t));
-    CHECK(oid_list, NULL, "HDcalloc");
+    CHECK_PTR(oid_list, "HDcalloc");
 
     /* Get the list of all opened objects */
     ret_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)oid_count, oid_list);
@@ -2791,7 +2791,7 @@ cal_chksum(const char *file, uint32_t *chksum)
 
     /* Allocate space for the file data */
     file_data = HDmalloc((size_t)sb.st_size);
-    CHECK(file_data, NULL, "HDmalloc");
+    CHECK_PTR(file_data, "HDmalloc");
 
     if(file_data) {
         /* Read file's data into memory */

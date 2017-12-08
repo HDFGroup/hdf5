@@ -361,16 +361,16 @@ struct H5F_file_t {
  * to shared H5F_file_t structs.
  */
 struct H5F_t {
-    char		*open_name;	/* Name used to open file	*/
-    char		*actual_name;	/* Actual name of the file, after resolving symlinks, etc. */
-    char               	*extpath;       /* Path for searching target external link file */
-    H5F_file_t		*shared;	/* The shared file info		*/
-    unsigned		nopen_objs;	/* Number of open object headers*/
-    H5FO_t              *obj_count;     /* # of time each object is opened through top file structure */
-    hid_t               file_id;        /* ID of this file              */
-    hbool_t             closing;        /* File is in the process of being closed */
-    struct H5F_t        *parent;        /* Parent file that this file is mounted to */
-    unsigned            nmounts;        /* Number of children mounted to this file */
+    char		       *open_name;      /* Name used to open file                                       */
+    char		       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
+    char               *extpath;        /* Path for searching target external link file                 */
+    H5F_file_t		   *shared;         /* The shared file info                                         */
+    unsigned		    nopen_objs;     /* Number of open object headers                                */
+    H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
+    hid_t               file_id;        /* ID of this file                                              */
+    hbool_t             closing;        /* File is in the process of being closed                       */
+    struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
+    unsigned            nmounts;        /* Number of children mounted to this file                      */
 #ifdef H5_HAVE_PARALLEL
     H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
     hbool_t             coll_md_write;  /* Do all metadata writes collectively */
@@ -400,11 +400,12 @@ H5_DLL herr_t H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t
 H5_DLL herr_t H5F__flush(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing);
 H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
-H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len,
-    hid_t meta_dxpl_id, hid_t raw_dxpl_id);
+H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len, hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 H5_DLL herr_t H5F_close(H5F_t *f);
 
 /* File mount related routines */
+H5_DLL herr_t H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id, hid_t dxpl_id);
+H5_DLL herr_t H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
 H5_DLL herr_t H5F_close_mounts(H5F_t *f);
 H5_DLL int H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void *key);
 H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);

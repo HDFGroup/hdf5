@@ -49,10 +49,6 @@
 /* Local Prototypes */
 /********************/
 
-/* Internal I/O routines */
-static herr_t H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
-    const H5S_t *mem_space, const H5S_t *file_space, hid_t dxpl_id, const void *buf);
-
 /* Setup/teardown routines */
 static herr_t H5D__ioinfo_init(H5D_t *dset,
 #ifndef H5_HAVE_PARALLEL
@@ -324,18 +320,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__pre_write
+ * Function:    H5D__pre_write
  *
- * Purpose:	Preparation for writing data.  
+ * Purpose:     Preparation for writing data.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		2 November 2012
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
          const H5S_t *mem_space, const H5S_t *file_space, 
          hid_t dxpl_id, const void *buf)
@@ -962,7 +955,9 @@ const
     io_info->using_mpi_vfd = H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI);
 #endif /* H5_HAVE_PARALLEL */
 
-done:
+#ifdef H5_DEBUG_BUILD
+	done:
+#endif /* H5_DEBUG_BUILD */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_init() */
 
