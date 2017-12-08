@@ -1969,7 +1969,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL_native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     int     nref;
     H5F_t   *f          = (H5F_t *)file;
@@ -1986,6 +1986,7 @@ H5VL_native_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
      * This is only necessary to replicate previous behaviour, and could be
      * disabled by an option/property to improve performance.
      */
+    /* XXX: Note that we're not using the passed-in dxpl here... */
     if ((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
         /* get the file ID corresponding to the H5F_t struct */
         if ((file_id = H5I_get_id(f, H5I_FILE)) < 0)
@@ -2008,15 +2009,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_group_create
+ * Function:    H5VL_native_group_create
  *
- * Purpose:	Creates a group inside a native h5 file.
+ * Purpose:     Creates a group inside a native h5 file.
  *
- * Return:	Success:	group id. 
- *		Failure:	NULL
+ * Return:      Success:    Pointer to a group struct
  *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -2024,74 +2023,74 @@ static void *
 H5VL_native_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, 
                          hid_t gapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5P_genplist_t *plist;              /* Property list pointer */
-    H5G_loc_t      loc;                 /* Location to create group */
-    H5G_t	   *grp = NULL;         /* New group created */
-    hid_t          lcpl_id;
+    H5P_genplist_t *plist;              /* Property list pointer        */
+    H5G_loc_t       loc;                /* Location to create group     */
+    H5G_t          *grp = NULL;         /* New group created            */
+    hid_t           lcpl_id;
     void           *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
+    /* Get the property list structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
-    /* get creation properties */
-    if(H5P_get(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
+    /* Get creation properties */
+    if (H5P_get(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
 
-    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+    /* Set up the location */
+    if (H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
     /* if name is NULL then this is from H5Gcreate_anon */
-    if(name == NULL) {
+    if (name == NULL) {
         H5G_obj_create_t gcrt_info;         /* Information for group creation */
+
         /* Set up group creation info */
         gcrt_info.gcpl_id = gcpl_id;
         gcrt_info.cache_type = H5G_NOTHING_CACHED;
         HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
 
         /* Create the new group & get its ID */
-        if(NULL == (grp = H5G__create(loc.oloc->file, &gcrt_info, dxpl_id)))
+        if (NULL == (grp = H5G__create(loc.oloc->file, &gcrt_info, dxpl_id)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")            
     }
     /* otherwise it's from H5Gcreate */
     else {
         /* Create the new group & get its ID */
-        if(NULL == (grp = H5G__create_named(&loc, name, lcpl_id, gcpl_id, gapl_id, dxpl_id)))
+        if (NULL == (grp = H5G__create_named(&loc, name, lcpl_id, gcpl_id, gapl_id, dxpl_id)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")
     }
     ret_value = (void *)grp;
 
 done:
-    if(name == NULL) {
+    if (name == NULL) {
         /* Release the group's object header, if it was created */
-        if(grp) {
+        if (grp) {
             H5O_loc_t *oloc;         /* Object location for group */
 
             /* Get the new group's object location */
-            if(NULL == (oloc = H5G_oloc(grp)))
+            if (NULL == (oloc = H5G_oloc(grp)))
                 HDONE_ERROR(H5E_SYM, H5E_CANTGET, NULL, "unable to get object location of group")
 
             /* Decrement refcount on group's object header in memory */
-            if(H5O_dec_rc_by_loc(oloc, dxpl_id) < 0)
+            if (H5O_dec_rc_by_loc(oloc, dxpl_id) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object")
-         } /* end if */
+         }
     }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_group_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_group_open
+ * Function:    H5VL_native_group_open
  *
- * Purpose:	Opens a group inside a native h5 file.
+ * Purpose:     Opens a group inside a native h5 file.
  *
- * Return:	Success:	group id. 
- *		Failure:	NULL
+ * Return:      Success:    Pointer to a group struct
  *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -2099,17 +2098,18 @@ static void *
 H5VL_native_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, 
                        hid_t gapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5G_loc_t	    loc;                /* Location to open group */
-    H5G_t	   *grp = NULL;         /* New group opend */
+    H5G_loc_t       loc;                /* Location to open group   */
+    H5G_t          *grp = NULL;         /* New group opend          */
     void           *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+    /* Set up the location */
+    if (H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
     /* Open the group */
-    if((grp = H5G__open_name(&loc, name, gapl_id, dxpl_id)) == NULL)
+    if ((grp = H5G__open_name(&loc, name, gapl_id, dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group")
 
     ret_value = (void *)grp;
@@ -2120,15 +2120,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_group_get
+ * Function:    H5VL_native_group_get
  *
- * Purpose:	Gets certain data about a group
+ * Purpose:     Gets data about a group
  *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              February, 2012
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -2143,32 +2139,36 @@ H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void 
         /* H5Gget_create_plist */
         case H5VL_GROUP_GET_GCPL:
             {
-                hid_t *new_gcpl_id = va_arg (arguments, hid_t *);
-                H5G_t *grp = (H5G_t *)obj;
+                hid_t      *new_gcpl_id     = va_arg(arguments, hid_t *);
+                H5G_t      *grp             = (H5G_t *)obj;
 
-                if((*new_gcpl_id = H5G_get_create_plist(grp)) < 0)
+                if ((*new_gcpl_id = H5G_get_create_plist(grp)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get creation property list for group")
                 break;
             }
         /* H5Gget_info */
         case H5VL_GROUP_GET_INFO:
             {
-                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
-                H5G_info_t  *grp_info = va_arg (arguments, H5G_info_t *);
-                H5G_loc_t    loc;
+                H5VL_loc_params_t   loc_params  = va_arg(arguments, H5VL_loc_params_t);
+                H5G_info_t         *grp_info    = va_arg(arguments, H5G_info_t *);
+                H5G_loc_t           loc;
 
-                if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+                if (H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-                if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Gget_info */
+                if (loc_params.type == H5VL_OBJECT_BY_SELF) {
+                    /* H5Gget_info */
+
                     /* Retrieve the group's information */
-                    if(H5G__obj_info(loc.oloc, grp_info, dxpl_id) < 0)
+                    if (H5G__obj_info(loc.oloc, grp_info, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
                 }
-                else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Gget_info_by_name */
-                    H5G_loc_t   grp_loc;                /* Location used to open group */
-                    H5G_name_t  grp_path;            	/* Opened object group hier. path */
-                    H5O_loc_t   grp_oloc;            	/* Opened object object location */
+                else if (loc_params.type == H5VL_OBJECT_BY_NAME) {
+                    /* H5Gget_info_by_name */
+
+                    H5G_loc_t   grp_loc;                /* Location used to open group      */
+                    H5G_name_t  grp_path;            	/* Opened object group hier. path   */
+                    H5O_loc_t   grp_oloc;            	/* Opened object object location    */
 
                     /* Set up opened group location to fill in */
                     grp_loc.oloc = &grp_oloc;
@@ -2176,24 +2176,26 @@ H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void 
                     H5G_loc_reset(&grp_loc);
 
                     /* Find the group object */
-                    if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_name.name, &grp_loc/*out*/, 
+                    if (H5G_loc_find(&loc, loc_params.loc_data.loc_by_name.name, &grp_loc/*out*/, 
                                     loc_params.loc_data.loc_by_name.lapl_id, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
 
                     /* Retrieve the group's information */
-                    if(H5G__obj_info(grp_loc.oloc, grp_info/*out*/, dxpl_id) < 0) {
+                    if (H5G__obj_info(grp_loc.oloc, grp_info/*out*/, dxpl_id) < 0) {
                         H5G_loc_free(&grp_loc);
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve group info")
                     }
 
                     /* Release the object location */
-                    if(H5G_loc_free(&grp_loc) < 0)
+                    if (H5G_loc_free(&grp_loc) < 0)
                         HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
                 }
-                else if(loc_params.type == H5VL_OBJECT_BY_IDX) { /* H5Gget_info_by_idx */
-                    H5G_loc_t   grp_loc;                /* Location used to open group */
-                    H5G_name_t  grp_path;            	/* Opened object group hier. path */
-                    H5O_loc_t   grp_oloc;            	/* Opened object object location */
+                else if (loc_params.type == H5VL_OBJECT_BY_IDX) {
+                    /* H5Gget_info_by_idx */
+
+                    H5G_loc_t   grp_loc;                /* Location used to open group      */
+                    H5G_name_t  grp_path;            	/* Opened object group hier. path   */
+                    H5O_loc_t   grp_oloc;            	/* Opened object object location    */
 
                     /* Set up opened group location to fill in */
                     grp_loc.oloc = &grp_oloc;
@@ -2201,7 +2203,7 @@ H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void 
                     H5G_loc_reset(&grp_loc);
 
                     /* Find the object's location, according to the order in the index */
-                    if(H5G_loc_find_by_idx(&loc, loc_params.loc_data.loc_by_idx.name, 
+                    if (H5G_loc_find_by_idx(&loc, loc_params.loc_data.loc_by_idx.name, 
                                            loc_params.loc_data.loc_by_idx.idx_type, 
                                            loc_params.loc_data.loc_by_idx.order, 
                                            loc_params.loc_data.loc_by_idx.n, &grp_loc/*out*/, 
@@ -2210,13 +2212,13 @@ H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void 
                         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "group not found")
 
                     /* Retrieve the group's information */
-                    if(H5G__obj_info(grp_loc.oloc, grp_info/*out*/, dxpl_id) < 0) {
+                    if (H5G__obj_info(grp_loc.oloc, grp_info/*out*/, dxpl_id) < 0) {
                         H5G_loc_free(&grp_loc);
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve group info")
                     }
 
                     /* Release the object location */
-                    if(H5G_loc_free(&grp_loc) < 0)
+                    if (H5G_loc_free(&grp_loc) < 0)
                         HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
                 }
                 else {
@@ -2234,15 +2236,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_group_close
+ * Function:    H5VL_native_group_close
  *
- * Purpose:	Closes a group.
+ * Purpose:     Closes a group.
  *
- * Return:	Success:	0
- *		Failure:	-1, group not closed.
- *
- * Programmer:  Mohamad Chaarawi
- *              March, 2012
+ * Return:      SUCCEED/FAIL (the group will not be closed on failure)
  *
  *-------------------------------------------------------------------------
  */
@@ -2253,8 +2251,8 @@ H5VL_native_group_close(void *grp, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5G_close((H5G_t *)grp) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close group")
+    if (H5G_close((H5G_t *)grp) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close group")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
