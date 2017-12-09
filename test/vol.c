@@ -397,6 +397,12 @@ test_basic_dataset_operation(void)
     if (H5Dclose(did) < 0)
         TEST_ERROR;
 
+    /* H5Dopen */
+    if ((did = H5Dopen2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
     if (H5Fclose(fid) < 0)

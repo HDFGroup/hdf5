@@ -167,8 +167,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
 done:
     if (H5I_INVALID_HID == ret_value)
-        if (dset)
-            if (H5VL_dataset_close(dset, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
+        if (dset && H5VL_dataset_close(dset, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
 
     FUNC_LEAVE_API(ret_value)
@@ -272,55 +271,63 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dopen2
+ * Function:    H5Dopen2
  *
- * Purpose:	Finds a dataset named NAME at LOC_ID, opens it, and returns
- *		its ID.	 The dataset should be close when the caller is no
- *		longer interested in it.
+ * Purpose:     Finds a dataset named NAME at LOC_ID, opens it, and returns
+ *              its ID. The dataset should be close when the caller is no
+ *              longer interested in it.
  *
  *              Takes a dataset access property list
  *
- * Return:	Success:	A new dataset ID
- *		Failure:	FAIL
+ * Return:      Success:    Object ID of the dataset
  *
- * Programmer:	James Laird
- *		Thursday, July 27, 2006
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 {
-    H5D_t       *dset = NULL;
-    H5G_loc_t   loc;                    /* Object location of group */
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl to use to open datset */
-    hid_t       ret_value;
+    void               *dset = NULL;        /* dset token from VOL plugin */
+    H5VL_object_t      *obj = NULL;         /* object token of loc_id */
+    H5VL_loc_params_t   loc_params;
+    hid_t               dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    hid_t               ret_value;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, name, dapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if (H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access and transfer property lists")
 
-    /* Open the dataset */
-    if(NULL == (dset = H5D__open_name(&loc, name, dapl_id, dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
+    /* get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
-    /* Register an atom for the dataset */
-    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't register dataset atom")
+    /* Set the location parameters */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(loc_id);
+
+    /* Create the dataset through the VOL */
+    if (NULL == (dset = H5VL_dataset_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, name, 
+                                         dapl_id, dxpl_id, H5_REQUEST_NULL)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset")
+
+    /* Get an atom for the dataset */
+    if ((ret_value = H5VL_register_id(H5I_DATASET, dset, obj->vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize dataset handle")
 
 done:
-    if(ret_value < 0)
-        if(dset && H5D_close(dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+    if (H5I_INVALID_HID == ret_value)
+        if (dset && H5VL_dataset_close(dset, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen2() */
 
