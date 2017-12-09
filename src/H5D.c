@@ -439,37 +439,35 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dget_type
+ * Function:    H5Dget_type
  *
- * Purpose:	Returns a copy of the file datatype for a dataset.
+ * Purpose:     Returns a copy of the file datatype for a dataset.
  *
- * Return:	Success:	ID for a copy of the datatype.	 The data
- *				type should be released by calling
- *				H5Tclose().
+ * Return:      Success:    ID for a copy of the datatype. The data
+ *                          type should be released by calling
+ *                          H5Tclose().
  *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *		Tuesday, February  3, 1998
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Dget_type(hid_t dset_id)
 {
+    H5VL_object_t  *dset;                           /* Dataset structure    */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value         */
 
-    H5D_t	*dset;                  /* Dataset */
-    hid_t	ret_value;              /* Return value */
-
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dset_id);
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if (NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier")
 
-    if((ret_value = H5D_get_type(dset)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
+    /* get the datatype through the VOL */
+    if (H5VL_dataset_get(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_GET_TYPE, 
+                        H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5I_INVALID_HID, "unable to get datatype")
 
 done:
     FUNC_LEAVE_API(ret_value)

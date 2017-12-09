@@ -387,6 +387,7 @@ test_basic_dataset_operation(void)
     hid_t dapl_id   = H5I_INVALID_HID;
     hid_t did       = H5I_INVALID_HID;
     hid_t sid       = H5I_INVALID_HID;
+    hid_t tid       = H5I_INVALID_HID;
 
     hsize_t curr_dims   = 0;
     hsize_t max_dims    = H5S_UNLIMITED;
@@ -442,6 +443,12 @@ test_basic_dataset_operation(void)
     if ((sid = H5Dget_space(did)) < 0)
         TEST_ERROR;
     if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_type */
+    if ((tid = H5Dget_type(did)) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
     /* H5Dget_create_plist */
