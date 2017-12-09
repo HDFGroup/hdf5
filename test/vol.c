@@ -400,23 +400,23 @@ test_basic_dataset_operation(void)
 
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-
-    curr_dims = 0;
-    if ((sid = H5Screate_simple(1, &curr_dims, &max_dims)) < 0)
-        TEST_ERROR;
-
     for (i = 0; i < N_ELEMENTS; i++) {
         in_buf[i] = i;
         out_buf[i] = 0;
     }
 
     /* H5Dcreate */
+    curr_dims = 0;
+    if ((sid = H5Screate_simple(1, &curr_dims, &max_dims)) < 0)
+        TEST_ERROR;
     curr_dims = N_ELEMENTS;
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     if (H5Pset_chunk(dcpl_id, 1, &curr_dims) < 0)
         TEST_ERROR;
     if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
         TEST_ERROR;
     if (H5Pclose(dcpl_id) < 0)
         TEST_ERROR;
@@ -428,6 +428,20 @@ test_basic_dataset_operation(void)
 
     /* H5Dwrite */
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, in_buf) < 0)
+        TEST_ERROR;
+
+    /* H5Dclose */
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    /* H5Dopen */
+    if ((did = H5Dopen2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_space */
+    if ((sid = H5Dget_space(did)) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
         TEST_ERROR;
 
     /* H5Dget_create_plist */
@@ -442,14 +456,6 @@ test_basic_dataset_operation(void)
     if (H5Pclose(dapl_id) < 0)
         TEST_ERROR;
 
-    /* H5Dclose */
-    if (H5Dclose(did) < 0)
-        TEST_ERROR;
-
-    /* H5Dopen */
-    if ((did = H5Dopen2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
     /* H5Dread */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, out_buf) < 0)
         TEST_ERROR;
@@ -459,8 +465,6 @@ test_basic_dataset_operation(void)
             TEST_ERROR;
 
     if (H5Dclose(did) < 0)
-        TEST_ERROR;
-    if (H5Sclose(sid) < 0)
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;

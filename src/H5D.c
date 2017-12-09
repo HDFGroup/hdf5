@@ -367,36 +367,35 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dget_space
+ * Function:    H5Dget_space
  *
- * Purpose:	Returns a copy of the file dataspace for a dataset.
+ * Purpose:     Returns a copy of the file dataspace for a dataset.
  *
- * Return:	Success:	ID for a copy of the dataspace.  The data
- *				space should be released by calling
- *				H5Sclose().
+ * Return:      Success:    ID for a copy of the dataspace.  The data
+ *                          space should be released by calling
+ *                          H5Sclose().
  *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January 28, 1998
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Dget_space(hid_t dset_id)
 {
-    H5D_t	*dset = NULL;
-    hid_t	ret_value;
+    H5VL_object_t  *dset;                           /* Dataset structure    */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value         */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dset_id);
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if (NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier")
 
-    if((ret_value = H5D_get_space(dset)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
+    /* Get the dataspace through the VOL */
+    if (H5VL_dataset_get(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_GET_SPACE, 
+                        H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5I_INVALID_HID, "unable to get data space")
 
 done:
     FUNC_LEAVE_API(ret_value)
