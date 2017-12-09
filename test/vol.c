@@ -475,6 +475,138 @@ error:
 
 } /* end test_basic_dataset_operation() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_attribute_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL attribute operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_attribute_operation(void)
+{
+    hid_t fid       = H5I_INVALID_HID;
+
+    TESTING("Basic VOL attribute operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* end test_basic_attribute_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_object_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL object operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_object_operation(void)
+{
+    hid_t fid       = H5I_INVALID_HID;
+
+    TESTING("Basic VOL object operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* end test_basic_object_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_link_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL link operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_link_operation(void)
+{
+    hid_t fid       = H5I_INVALID_HID;
+
+    TESTING("Basic VOL link operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* end test_basic_link_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_datatype_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL datatype operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_datatype_operation(void)
+{
+    hid_t fid       = H5I_INVALID_HID;
+
+    TESTING("Basic VOL datatype operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* end test_basic_datatype_operation() */
+
 #if 0
 
 /*-------------------------------------------------------------------------
@@ -527,6 +659,10 @@ main(void)
     nerrors += test_basic_file_operation() < 0      ? 1 : 0;
     nerrors += test_basic_group_operation() < 0     ? 1 : 0;
     nerrors += test_basic_dataset_operation() < 0   ? 1 : 0;
+    nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_object_operation() < 0    ? 1 : 0;
+    nerrors += test_basic_link_operation() < 0      ? 1 : 0;
+    nerrors += test_basic_datatype_operation() < 0  ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n",
