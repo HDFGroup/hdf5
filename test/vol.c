@@ -384,6 +384,7 @@ test_basic_dataset_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
     hid_t dcpl_id   = H5I_INVALID_HID;
+    hid_t dapl_id   = H5I_INVALID_HID;
     hid_t did       = H5I_INVALID_HID;
     hid_t sid       = H5I_INVALID_HID;
 
@@ -433,6 +434,12 @@ test_basic_dataset_operation(void)
     if ((dcpl_id = H5Dget_create_plist(did)) < 0)
         TEST_ERROR;
     if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_access_plist */
+    if ((dapl_id = H5Dget_access_plist(did)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dapl_id) < 0)
         TEST_ERROR;
 
     /* H5Dclose */

@@ -493,8 +493,8 @@ done:
 hid_t
 H5Dget_create_plist(hid_t dset_id)
 {
-    H5VL_object_t  *dset;
-    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
+    H5VL_object_t  *dset;                           /* Dataset structure    */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dset_id);
@@ -514,53 +514,52 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dget_access_plist
+ * Function:    H5Dget_access_plist
  *
- * Purpose:	Returns a copy of the dataset creation property list.
+ * Purpose:     Returns a copy of the dataset access property list.
  *
  * Description: H5Dget_access_plist returns the dataset access property
- *      list identifier of the specified dataset.
+ *              list identifier of the specified dataset.
  *
- *      The chunk cache parameters in the returned property lists will be
- *      those used by the dataset.  If the properties in the file access
- *      property list were used to determine the dataset’s chunk cache
- *      configuration, then those properties will be present in the
- *      returned dataset access property list.  If the dataset does not
- *      use a chunked layout, then the chunk cache properties will be set
- *      to the default.  The chunk cache properties in the returned list
- *      are considered to be “set”, and any use of this list will override
- *      the corresponding properties in the file’s file access property
- *      list.
+ *              The chunk cache parameters in the returned property lists will be
+ *              those used by the dataset.  If the properties in the file access
+ *              property list were used to determine the dataset’s chunk cache
+ *              configuration, then those properties will be present in the
+ *              returned dataset access property list.  If the dataset does not
+ *              use a chunked layout, then the chunk cache properties will be set
+ *              to the default.  The chunk cache properties in the returned list
+ *              are considered to be “set”, and any use of this list will override
+ *              the corresponding properties in the file’s file access property
+ *              list.
  *
- *      All link access properties in the returned list will be set to the
- *      default values.
+ *              All link access properties in the returned list will be set to the
+ *              default values.
  *
- * Return:	Success:	ID for a copy of the dataset access
- *				property list.  The template should be
- *				released by calling H5Pclose().
+ * Return:      Success:    ID for a copy of the dataset access
+ *                          property list.  The template should be
+ *                          released by calling H5Pclose().
  *
- *		Failure:	FAIL
- *
- * Programmer:	Neil Fortner
- *		Wednesday, October 29, 2008
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Dget_access_plist(hid_t dset_id)
 {
-    H5D_t           *dset;          /* Dataset structure */
-    hid_t           ret_value;      /* Return value */
+    H5VL_object_t  *dset;                           /* Dataset structure    */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value         */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dset_id);
 
     /* Check args */
-    if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if (NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier")
 
-    if((ret_value = H5D_get_access_plist(dset)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get access plist")
+    /* Get the dataset access property list */
+    if (H5VL_dataset_get(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_GET_DAPL, 
+                        H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataset access properties")
 
 done:
     FUNC_LEAVE_API(ret_value)
