@@ -384,7 +384,10 @@ test_basic_dataset_operation(void)
 
     hsize_t dims = N_ELEMENTS;
 
-    int buf[N_ELEMENTS];
+    int in_buf[N_ELEMENTS];
+    int out_buf[N_ELEMENTS];
+
+    int i;
 
     TESTING("Basic VOL dataset operations");
 
@@ -393,12 +396,17 @@ test_basic_dataset_operation(void)
     if ((sid = H5Screate_simple(1, &dims, &dims)) < 0)
         TEST_ERROR;
 
+    for (i = 0; i < N_ELEMENTS; i++) {
+        in_buf[i] = i;
+        out_buf[i] = 0;
+    }
+
     /* H5Dcreate */
     if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* H5Dwrite */
-    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, in_buf) < 0)
         TEST_ERROR;
 
     /* H5Dclose */
@@ -408,9 +416,13 @@ test_basic_dataset_operation(void)
     /* H5Dopen */
     if ((did = H5Dopen2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    if (H5Dclose(did) < 0)
+
+    /* H5Dread */
+    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, out_buf) < 0)
         TEST_ERROR;
 
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
