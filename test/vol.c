@@ -382,11 +382,13 @@ error:
 static herr_t
 test_basic_dataset_operation(void)
 {
-    hid_t fid = H5I_INVALID_HID;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
+    hid_t fid       = H5I_INVALID_HID;
+    hid_t dcpl_id   = H5I_INVALID_HID;
+    hid_t did       = H5I_INVALID_HID;
+    hid_t sid       = H5I_INVALID_HID;
 
-    hsize_t dims = N_ELEMENTS;
+    hsize_t curr_dims   = N_ELEMENTS;
+    hsize_t max_dims    = H5S_UNLIMITED;
 
     int in_buf[N_ELEMENTS];
     int out_buf[N_ELEMENTS];
@@ -397,7 +399,11 @@ test_basic_dataset_operation(void)
 
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    if ((sid = H5Screate_simple(1, &dims, &dims)) < 0)
+    if ((sid = H5Screate_simple(1, &curr_dims, &max_dims)) < 0)
+        TEST_ERROR;
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl_id, 1, &curr_dims) < 0)
         TEST_ERROR;
 
     for (i = 0; i < N_ELEMENTS; i++) {
@@ -406,7 +412,7 @@ test_basic_dataset_operation(void)
     }
 
     /* H5Dcreate */
-    if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* H5Dwrite */
@@ -429,6 +435,8 @@ test_basic_dataset_operation(void)
         if (in_buf[i] != out_buf[i])
             TEST_ERROR;
 
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
         TEST_ERROR;
     if (H5Sclose(sid) < 0)
