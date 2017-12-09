@@ -478,36 +478,35 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dget_create_plist
+ * Function:    H5Dget_create_plist
  *
- * Purpose:	Returns a copy of the dataset creation property list.
+ * Purpose:     Returns a copy of the dataset creation property list.
  *
- * Return:	Success:	ID for a copy of the dataset creation
- *				property list.  The template should be
- *				released by calling H5P_close().
+ * Return:      Success:    ID for a copy of the dataset creation
+ *                          property list.  The template should be
+ *                          released by calling H5P_close().
  *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *		Tuesday, February  3, 1998
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Dget_create_plist(hid_t dset_id)
 {
-    H5D_t		*dataset;                  /* Dataset structure */
-    hid_t		ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t  *dset;
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dset_id);
 
     /* Check args */
-    if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if (NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier")
 
-    if((ret_value = H5D_get_create_plist(dataset)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get creation plist")
+    /* Get the dataset creation property list */
+    if (H5VL_dataset_get(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_GET_DCPL, 
+                        H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataset creation properties")
 
 done:
     FUNC_LEAVE_API(ret_value)
