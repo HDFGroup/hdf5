@@ -27,6 +27,8 @@
 #define NATIVE_VOL_TEST_GROUP_NAME      "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME    "test_dataset"
 
+#define N_ELEMENTS  10
+
 #define FAKE_VOL_NAME   "fake"
 
 /* A VOL class struct that describes a VOL class with no
@@ -380,7 +382,9 @@ test_basic_dataset_operation(void)
     hid_t did = H5I_INVALID_HID;
     hid_t sid = H5I_INVALID_HID;
 
-    hsize_t dims = 10;
+    hsize_t dims = N_ELEMENTS;
+
+    int buf[N_ELEMENTS];
 
     TESTING("Basic VOL dataset operations");
 
@@ -391,6 +395,10 @@ test_basic_dataset_operation(void)
 
     /* H5Dcreate */
     if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Dwrite */
+    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         TEST_ERROR;
 
     /* H5Dclose */
