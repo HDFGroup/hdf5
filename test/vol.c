@@ -342,6 +342,10 @@ test_basic_group_operation(void)
     if (H5Gget_info_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, &info, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
+    /* H5Gget_info_by_idx */
+    if (H5Gget_info_by_idx(fid, "/", H5_INDEX_NAME, H5_ITER_NATIVE, 0, &info, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
     /* H5Gclose */
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
@@ -420,6 +424,10 @@ test_basic_dataset_operation(void)
     /* H5Dread */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, out_buf) < 0)
         TEST_ERROR;
+
+    for (i = 0; i < N_ELEMENTS; i++)
+        if (in_buf[i] != out_buf[i])
+            TEST_ERROR;
 
     if (H5Dclose(did) < 0)
         TEST_ERROR;
