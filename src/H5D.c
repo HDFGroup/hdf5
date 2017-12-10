@@ -592,7 +592,7 @@ H5Dget_storage_size(hid_t dset_id)
     if (NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid dataset identifier")
 
-    /* get storage size through the VOL */
+    /* Get storage size through the VOL */
     if (H5VL_dataset_get(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_GET_STORAGE_SIZE, 
                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, 0, "unable to get storage size")
@@ -603,34 +603,34 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dget_offset
+ * Function:    H5Dget_offset
  *
- * Purpose:	Returns the address of dataset in file.
+ * Purpose:     Returns the address of dataset in file.
  *
- * Return:	Success:        the address of dataset
+ * Return:      Success:    The address of dataset
  *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:  Raymond Lu
- *              November 6, 2002
+ *              Failure:    HADDR_UNDEF (can also be a valid return value!)
  *
  *-------------------------------------------------------------------------
  */
 haddr_t
 H5Dget_offset(hid_t dset_id)
 {
-    H5D_t	*dset;          /* Dataset to query */
-    haddr_t	ret_value;      /* Return value */
+    H5VL_object_t  *dset;                           /* Dataset structure    */
+    haddr_t         ret_value = HADDR_UNDEF;        /* Return value         */
 
+    /* Another bad API call that can't flag actual errors */
     FUNC_ENTER_API(HADDR_UNDEF)
     H5TRACE1("a", "i", dset_id);
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a dataset")
+    if (NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "invalid dataset identifier")
 
-    /* Set return value */
-    ret_value = H5D__get_offset(dset);
+    /* Get offset through the VOL */
+    if (H5VL_dataset_get(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_GET_OFFSET, 
+                        H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "unable to get offset")
 
 done:
     FUNC_LEAVE_API(ret_value)

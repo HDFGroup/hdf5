@@ -295,6 +295,12 @@ test_basic_file_operation(void)
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Pclose(fapl_id);
+        H5Pclose(fcpl_id);
+    } H5E_END_TRY;
+
     return FAIL;
 
 } /* end test_basic_file_operation() */
@@ -365,6 +371,12 @@ test_basic_group_operation(void)
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Gclose(gid);
+        H5Pclose(gcpl_id);
+    } H5E_END_TRY;
+
     return FAIL;
 
 } /* end test_basic_group_operation() */
@@ -391,7 +403,9 @@ test_basic_dataset_operation(void)
 
     hsize_t curr_dims   = 0;
     hsize_t max_dims    = H5S_UNLIMITED;
+
     hsize_t storage_size;
+    haddr_t offset;
 
     int in_buf[N_ELEMENTS];
     int out_buf[N_ELEMENTS];
@@ -469,6 +483,13 @@ test_basic_dataset_operation(void)
     if (0 == (storage_size = H5Dget_storage_size(did)))
         TEST_ERROR;
 
+    /* H5Dget_offset */
+    /* XXX: Another bad API call that can't flag error values. Also, this
+     *      returns HADDR_UNDEF for chunked datasets, which is bizarre.
+     */
+    if (HADDR_UNDEF != (offset = H5Dget_offset(did)))
+        TEST_ERROR;
+
     /* H5Dread */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, out_buf) < 0)
         TEST_ERROR;
@@ -488,6 +509,15 @@ test_basic_dataset_operation(void)
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Tclose(tid);
+        H5Pclose(dapl_id);
+        H5Pclose(dcpl_id);
+    } H5E_END_TRY;
+
     return FAIL;
 
 } /* end test_basic_dataset_operation() */
@@ -521,6 +551,10 @@ test_basic_attribute_operation(void)
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
     return FAIL;
 
 } /* end test_basic_attribute_operation() */
@@ -554,6 +588,10 @@ test_basic_object_operation(void)
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
     return FAIL;
 
 } /* end test_basic_object_operation() */
@@ -587,6 +625,10 @@ test_basic_link_operation(void)
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
     return FAIL;
 
 } /* end test_basic_link_operation() */
@@ -620,6 +662,10 @@ test_basic_datatype_operation(void)
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
     return FAIL;
 
 } /* end test_basic_datatype_operation() */
