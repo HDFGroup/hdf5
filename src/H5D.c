@@ -564,39 +564,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dget_storage_size
+ * Function:    H5Dget_storage_size
  *
- * Purpose:	Returns the amount of storage that is required for the
- *		dataset. For chunked datasets this is the number of allocated
- *		chunks times the chunk size.
+ * Purpose:     Returns the amount of storage that is required for the
+ *              dataset. For chunked datasets this is the number of allocated
+ *              chunks times the chunk size.
  *
- * Return:	Success:	The amount of storage space allocated for the
- *				dataset, not counting meta data. The return
- *				value may be zero if no data has been stored.
+ * Return:      Success:    The amount of storage space allocated for the
+ *                          dataset, not counting meta data. The return
+ *                          value may be zero if no data has been stored.
  *
- *		Failure:	Zero
- *
- * Programmer:	Robb Matzke
- *              Wednesday, April 21, 1999
+ *              Failure:    Zero
  *
  *-------------------------------------------------------------------------
  */
 hsize_t
 H5Dget_storage_size(hid_t dset_id)
 {
-    H5D_t	*dset;          /* Dataset to query */
-    hsize_t	ret_value;      /* Return value */
+    H5VL_object_t  *dset;                           /* Dataset structure    */
+    hsize_t         ret_value = 0;                  /* Return value         */
 
+    /* XXX: This is awful. Technically, we can't return a true error value */
     FUNC_ENTER_API(0)
     H5TRACE1("h", "i", dset_id);
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset")
+    if (NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid dataset identifier")
 
-    /* Set return value */
-    if(H5D__get_storage_size(dset, H5AC_ind_read_dxpl_id, &ret_value) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of dataset's storage")
+    /* get storage size through the VOL */
+    if (H5VL_dataset_get(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_GET_STORAGE_SIZE, 
+                        H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, 0, "unable to get storage size")
 
 done:
     FUNC_LEAVE_API(ret_value)

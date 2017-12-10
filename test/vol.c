@@ -391,6 +391,7 @@ test_basic_dataset_operation(void)
 
     hsize_t curr_dims   = 0;
     hsize_t max_dims    = H5S_UNLIMITED;
+    hsize_t storage_size;
 
     int in_buf[N_ELEMENTS];
     int out_buf[N_ELEMENTS];
@@ -461,6 +462,11 @@ test_basic_dataset_operation(void)
     if ((dapl_id = H5Dget_access_plist(did)) < 0)
         TEST_ERROR;
     if (H5Pclose(dapl_id) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_storage_size */
+    /* XXX: This is a terrible API call that can't truly indicate failure */
+    if (0 == (storage_size = H5Dget_storage_size(did)))
         TEST_ERROR;
 
     /* H5Dread */
