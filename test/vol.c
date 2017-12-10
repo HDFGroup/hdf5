@@ -26,6 +26,7 @@
 #define NATIVE_VOL_TEST_FILENAME        "native_vol_test"
 #define NATIVE_VOL_TEST_GROUP_NAME      "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME    "test_dataset"
+#define NATIVE_VOL_TEST_ATTRIBUTE_NAME  "test_dataset"
 
 #define N_ELEMENTS  10
 
@@ -536,10 +537,27 @@ static herr_t
 test_basic_attribute_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
+    hid_t aid       = H5I_INVALID_HID;
+    hid_t sid       = H5I_INVALID_HID;
+
+    hsize_t dims    = 1;
 
     TESTING("Basic VOL attribute operations");
 
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Acreate */
+    dims = 1;
+    if ((sid = H5Screate_simple(1, &dims, &dims)) < 0)
+        TEST_ERROR;
+    if ((aid = H5Acreate2(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* H5Aclose */
+    if (H5Aclose(aid) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
@@ -553,6 +571,8 @@ test_basic_attribute_operation(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
+        H5Aclose(aid);
+        H5Sclose(sid);
     } H5E_END_TRY;
 
     return FAIL;

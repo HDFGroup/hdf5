@@ -26,6 +26,7 @@
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5FLprivate.h"        /* Free lists                               */
 #include "H5Iprivate.h"         /* IDs                                      */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
