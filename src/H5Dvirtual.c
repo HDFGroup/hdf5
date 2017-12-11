@@ -731,6 +731,38 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_delete */
 
+
+/*--------------------------------------------------------------------------
+ * Function: H5D__virtual_build_name
+ *
+ * Purpose:  Prepend PREFIX to FILE_NAME and store in FULL_NAME
+ *
+ * Return:   Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+static herr_t
+H5D__virtual_build_name(char *prefix, char *file_name, char **full_name/*out*/)
+{
+    size_t      prefix_len;             /* length of prefix */
+    size_t      fname_len;              /* Length of external link file name */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    prefix_len = HDstrlen(prefix);
+    fname_len = HDstrlen(file_name);
+
+    /* Allocate a buffer to hold the filename + prefix + possibly the delimiter + terminating null byte */
+    if(NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 2)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
+
+    /* Compose the full file name */
+    HDsnprintf(*full_name, (prefix_len + fname_len + 2), "%s%s%s", prefix,
+        (H5_CHECK_DELIMITER(prefix[prefix_len - 1]) ? "" : H5_DIR_SEPS), file_name);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__virtual_build_name() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_open_source_dset
@@ -750,9 +782,11 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_srcdset_t *source_dset, hid_t dxpl_id)
 {
     H5F_t       *src_file = NULL;       /* Source file */
+    char        *vds_prefix = NULL;     /* Source file vds_prefix */
     hbool_t     src_file_open = FALSE;  /* Whether we have opened and need to close src_file */
     H5G_loc_t   src_root_loc;           /* Object location of source file root group */
     herr_t      ret_value = SUCCEED;    /* Return value */
+    char        *full_name = NULL;      /* File name with prefix */
 
     FUNC_ENTER_STATIC
 
@@ -762,14 +796,27 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     HDassert(!source_dset->dset);
     HDassert(source_dset->file_name);
     HDassert(source_dset->dset_name);
+    vds_prefix = vdset->shared->vds_prefix;
 
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
-        /* Open the source file */
-        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
-            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
-        else
-            src_file_open = TRUE;
+        if(vds_prefix && HDstrlen(vds_prefix) > 0) {
+            if(H5D__virtual_build_name(vds_prefix, source_dset->file_name, &full_name/*out*/) < 0)
+                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
+            /* Open the source file */
+            if(NULL == (src_file = H5F_open(full_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
+                H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
+            else
+                src_file_open = TRUE;
+            full_name = (char *)H5MM_xfree(full_name);
+        }
+        else {
+            /* Open the source file */
+            if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
+                H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
+            else
+                src_file_open = TRUE;
+        }
     } /* end if */
     else
         /* Source file is ".", use the virtual dataset's file */
@@ -1407,7 +1454,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
                         } /* end if */
 
-                        /* Update cached values unlim_extent_source and 
+                        /* Update cached values unlim_extent_source and
                          * clip_size_virtual */
                         storage->list[i].unlim_extent_source = curr_dims[storage->list[i].unlim_dim_source];
                         storage->list[i].clip_size_virtual = clip_size;
@@ -1559,7 +1606,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
 
         /* Mark the space as dirty, for later writing to the file */
-        if(H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR) 
+        if(H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR)
             if(H5D__mark(dset, dxpl_id, H5D_MARK_SPACE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
@@ -2246,7 +2293,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected memory space")
                         storage->list[i].sub_dset[j].projected_mem_space = NULL;
                     } /* end if */
-                    else 
+                    else
                         *tot_nelmts += (hsize_t)select_nelmts;
                 } /* end if */
             } /* end for */
@@ -2506,7 +2553,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to clip fill selection")
 
             /* Write fill values to memory buffer */
-            if(H5D__fill(io_info->dset->shared->dcpl_cache.fill.buf, io_info->dset->shared->type, io_info->u.rbuf, 
+            if(H5D__fill(io_info->dset->shared->dcpl_cache.fill.buf, io_info->dset->shared->type, io_info->u.rbuf,
                          type_info->mem_type, fill_space, io_info->md_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "filling buf failed")
 
