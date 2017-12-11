@@ -455,7 +455,7 @@ am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tarray.$(OBJEXT) \
 	trefer.$(OBJEXT) trefstr.$(OBJEXT) tselect.$(OBJEXT) \
 	tskiplist.$(OBJEXT) tsohm.$(OBJEXT) ttime.$(OBJEXT) \
 	ttst.$(OBJEXT) tunicode.$(OBJEXT) tvlstr.$(OBJEXT) \
-	tvltypes.$(OBJEXT)
+	tvltypes.$(OBJEXT) tverbounds18.$(OBJEXT)
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
 testhdf5_DEPENDENCIES = libh5test.la $(LIBHDF5)
@@ -1149,7 +1149,7 @@ VFD_LIST = sec2 stdio core core_paged split multi family \
 testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
     trefer.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
-    tvlstr.c tvltypes.c
+    tvlstr.c tvltypes.c tverbounds18.c
 
 
 # Temporary files.
@@ -1664,6 +1664,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tunicode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tverbounds18.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvlstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvltypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unlink.Po@am__quote@

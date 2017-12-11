@@ -31,20 +31,18 @@
 *
 *************************************************************/
 
- /* #include "hdf5.h"
- */ 
 #include "h5test.h"
 #include "H5srcdir.h"
 #include "testhdf5.h"
 
 /***********************************************************************
- * test_earliest_latest() creates file "bounds_earliest_latest.h5"
+ * test_earliest_latest() reads file "bounds_earliest_latest.h5"
  *
  * Description:
  *   This test shows that the 1.8 library is able to open a chunked dataset
- *   with layout version 3 in a file with superblock version 0 and
- *   earliest and latest bounds.  However, it cannot open the chunked
- *   dataset with layout version 4 in the same file.
+ *   with layout version 3 in a file with superblock version 0.
+ *   However, it cannot open the chunked dataset with layout version 4
+ *   in the same file.
  *
  ***********************************************************************/
 #define FILENAME_E_L "bounds_earliest_latest.h5"
@@ -89,12 +87,11 @@ static void test_earliest_latest(void)
 }
 
 /***********************************************************************
- * test_earliest_v18() creates file "bounds_earliest_v18.h5"
+ * test_earliest_v18() reads file "bounds_earliest_v18.h5"
  *
  * Description:
  *   This test shows that the 1.8 library is able to open a chunked dataset
- *   with layout version 3 in a file with superblock version 0 and
- *   earliest and version 1.8 bounds.
+ *   with layout version 3 in a file with superblock version 0.
  *
  ***********************************************************************/
 #define FILENAME_E_18 "bounds_earliest_v18.h5"
@@ -129,10 +126,10 @@ static void test_earliest_v18(void)
 }
 
 /***********************************************************************
- * test_latest_latest() creates file "bounds_latest_latest.h5"
+ * test_latest_latest() reads file "bounds_latest_latest.h5"
  *
  * Description:
- *   This test shows that the 1.8 library is able to open a file with
+ *   This test shows that the 1.8 library is unable to open a file with
  *   superblock version 3.
  *
  ***********************************************************************/
@@ -153,7 +150,7 @@ static void test_latest_latest(void)
 }
 
 /***********************************************************************
- * test_v18_latest() creates file "bounds_v18_latest.h5"
+ * test_v18_latest() reads file "bounds_v18_latest.h5"
  *
  * Description:
  *   This test shows that the 1.8 library is able to open a chunked dataset
@@ -192,7 +189,7 @@ static void test_v18_latest(void)
 }
 
 /***********************************************************************
- * test_v18_v18() creates file "bounds_v18_v18.h5"
+ * test_v18_v18() reads file "bounds_v18_v18.h5"
  *
  * Description:
  *   This test shows that the 1.8 library is able to open a chunked dataset
