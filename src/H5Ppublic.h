@@ -343,6 +343,8 @@ H5_DLL herr_t H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low,
     H5F_libver_t *high);
 H5_DLL herr_t H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size);
 H5_DLL herr_t H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size);
+H5_DLL herr_t H5Pset_vds_file_cache_size(hid_t plist_id, unsigned vds_size);
+H5_DLL herr_t H5Pget_vds_file_cache_size(hid_t plist_id, unsigned *vds_size);
 H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
 H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr);
 H5_DLL herr_t H5Pset_file_image_callbacks(hid_t fapl_id,
@@ -420,6 +422,8 @@ H5_DLL herr_t H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view);
 H5_DLL herr_t H5Pget_virtual_view(hid_t plist_id, H5D_vds_view_t *view);
 H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size);
 H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size);
+H5_DLL herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char* prefix);
+H5_DLL ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
 H5_DLL herr_t H5Pset_append_flush(hid_t plist_id, unsigned ndims,
     const hsize_t boundary[], H5D_append_cb_t func, void *udata);
 H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, unsigned dims,

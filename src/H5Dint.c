@@ -63,6 +63,8 @@ static herr_t H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
         hid_t dapl_id);
 static herr_t H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id,
         char **extfile_prefix);
+static herr_t H5D_build_vds_prefix(const H5D_t *dset, hid_t dapl_id,
+        char **vds_prefix);
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
         hsize_t old_dim[]);
@@ -1037,6 +1039,81 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_build_extfile_prefix() */
 
+
+/*--------------------------------------------------------------------------
+ * Function:    H5D_build_vds_prefix
+ *
+ * Purpose:     Determine the vds file prefix to be used and store
+ *              it in vds_prefix. Stores an empty string if no prefix
+ *              should be used.
+ *
+ * Return:      SUCCEED/FAIL
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5D_build_vds_prefix(const H5D_t *dset, hid_t dapl_id, char **vds_prefix /*out*/)
+{
+    char            *prefix = NULL;       /* prefix used to look for the file               */
+    char            *vdspath = NULL;      /* absolute path of directory the HDF5 file is in */
+    size_t          vdspath_len;          /* length of vdstpath                              */
+    size_t          prefix_len;           /* length of prefix                               */
+    size_t          vds_prefix_len;       /* length of expanded prefix                      */
+    H5P_genplist_t  *plist = NULL;        /* Property list pointer                          */
+    herr_t          ret_value = SUCCEED;  /* Return value                                   */
+
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+    HDassert(dset->oloc.file);
+
+    vdspath = H5F_EXTPATH(dset->oloc.file);
+    HDassert(vdspath);
+
+    /* XXX: Future thread-safety note - getenv is not required
+     *      to be reentrant.
+     */
+    prefix = HDgetenv("HDF5_VDS_PREFIX");
+
+    if(prefix == NULL || *prefix == '\0') {
+        /* Set prefix to value of H5D_ACS_VDS_PREFIX_NAME property */
+        if(NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        if(H5P_peek(plist, H5D_ACS_VDS_PREFIX_NAME, &prefix) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vds prefix")
+    } /* end if */
+
+    /* Prefix has to be checked for NULL / empty string again because the
+     * code above might have updated it.
+     */
+    if(prefix == NULL || *prefix == '\0' || HDstrcmp(prefix, ".") == 0) {
+        /* filename is interpreted as relative to the current directory,
+         * does not need to be expanded
+         */
+        if(NULL == (*vds_prefix = (char *)H5MM_strdup("")))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    } /* end if */
+    else {
+        if (HDstrncmp(prefix, "${ORIGIN}", HDstrlen("${ORIGIN}")) == 0) {
+            /* Replace ${ORIGIN} at beginning of prefix by directory of HDF5 file */
+            vdspath_len = HDstrlen(vdspath);
+            prefix_len = HDstrlen(prefix);
+            vds_prefix_len = vdspath_len + prefix_len - HDstrlen("${ORIGIN}") + 1;
+
+            if(NULL == (*vds_prefix = (char *)H5MM_malloc(vds_prefix_len)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate buffer")
+            HDsnprintf(*vds_prefix, vds_prefix_len, "%s%s", vdspath, prefix + HDstrlen("${ORIGIN}"));
+        } /* end if */
+        else {
+            if(NULL == (*vds_prefix = (char *)H5MM_strdup(prefix)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        } /* end else */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D_build_vds_prefix() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__create
@@ -1220,6 +1297,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     if(H5D_build_extfile_prefix(new_dset, dapl_id, &new_dset->shared->extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
 
+    /* Set the vds file prefix */
+    if(H5D_build_vds_prefix(new_dset, dapl_id, &new_dset->shared->vds_prefix) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize vds  prefix")
+
     /* Add the dataset to the list of opened objects in the file */
     if(H5FO_top_incr(new_dset->oloc.file, new_dset->oloc.addr) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't incr object ref. count")
@@ -1265,6 +1346,7 @@ done:
             if(new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
             new_dset->shared->extfile_prefix = (char *)H5MM_xfree(new_dset->shared->extfile_prefix);
+            new_dset->shared->vds_prefix = (char *)H5MM_xfree(new_dset->shared->vds_prefix);
             new_dset->shared = H5FL_FREE(H5D_shared_t, new_dset->shared);
         } /* end if */
         new_dset->oloc.file = NULL;
@@ -1351,6 +1433,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
     H5D_shared_t    *shared_fo = NULL;
     H5D_t           *dataset = NULL;
     char            *extfile_prefix = NULL;  /* Expanded external file prefix */
+    char            *vds_prefix = NULL;      /* Expanded vds prefix */
     H5D_t           *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1373,6 +1456,10 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
     /* Get the external file prefix */
     if(H5D_build_extfile_prefix(dataset, dapl_id, &extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
+
+    /* Get the vds prefix */
+    if(H5D_build_vds_prefix(dataset, dapl_id, &vds_prefix) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize vds prefix")
 
     /* Check if dataset was already open */
     if(NULL == (shared_fo = (H5D_shared_t *)H5FO_opened(dataset->oloc.file, dataset->oloc.addr))) {
@@ -1398,6 +1485,11 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
         dataset->shared->extfile_prefix = extfile_prefix;
         /* Prevent string from being freed during done: */
         extfile_prefix = NULL;
+
+        /* Set the vds file prefix */
+        dataset->shared->vds_prefix = vds_prefix;
+        /* Prevent string from being freed during done: */
+        vds_prefix = NULL;
 
     } /* end if */
     else {
@@ -1430,12 +1522,14 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
 
 done:
     extfile_prefix = (char *)H5MM_xfree(extfile_prefix);
+    vds_prefix = (char *)H5MM_xfree(vds_prefix);
 
     if(ret_value == NULL) {
         /* Free the location--casting away const*/
         if(dataset) {
             if(shared_fo == NULL && dataset->shared) {   /* Need to free shared fo */
                 dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
+                dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
                 dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
             }
 
@@ -1817,6 +1911,9 @@ H5D_close(H5D_t *dataset)
 
         /* Free the external file prefix */
         dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
+
+        /* Free the vds file prefix */
+        dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
 
         /* Release layout, fill-value, efl & pipeline messages */
         if(dataset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT)
@@ -3359,6 +3456,10 @@ H5D_get_access_plist(H5D_t *dset)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS view")
     if(H5P_set(new_plist, H5D_ACS_VDS_PRINTF_GAP_NAME, &(dset->shared->layout.storage.u.virt.printf_gap)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS printf gap")
+
+    /* Set the vds prefix option */
+    if(H5P_set(new_plist, H5D_ACS_VDS_PREFIX_NAME, &(dset->shared->vds_prefix)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vds prefix")
 
     /* Set the external file prefix option */
     if(H5P_set(new_plist, H5D_ACS_EFILE_PREFIX_NAME, &(dset->shared->extfile_prefix)) < 0)

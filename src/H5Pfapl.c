@@ -2462,6 +2462,75 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Pset_vds_file_cache_size
+ *
+ * Purpose:     Sets the number of files opened through vds links
+ *              from the file associated with this fapl to be held open
+ *              in that file's vds file cache.  When the maximum
+ *              number of files is reached, the least recently used file
+ *              is closed (unless it is opened from somewhere else).
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_vds_file_cache_size(hid_t plist_id, unsigned vds_size)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iIu", plist_id, vds_size);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set value */
+    if(H5P_set(plist, H5F_ACS_VDS_SIZE_NAME, &vds_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set elink file cache size")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_vds_file_cache_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_vds_file_cache_size
+ *
+ * Purpose:     Gets the number of files opened through vds links
+ *              from the file associated with this fapl to be held open
+ *              in that file's vds file cache.  When the maximum
+ *              number of files is reached, the least recently used file
+ *              is closed (unless it is opened from somewhere else).
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vds_file_cache_size(hid_t plist_id, unsigned *vds_size)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Iu", plist_id, vds_size);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get value */
+    if(vds_size)
+        if(H5P_get(plist, H5F_ACS_VDS_SIZE_NAME, vds_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get elink file cache size")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vds_file_cache_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function: H5Pset_file_image
  *
  * Purpose:     Sets the initial file image. Some file drivers can initialize 

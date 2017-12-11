@@ -489,6 +489,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_METADATA_READ_ATTEMPTS_NAME     "metadata_read_attempts" /* # of metadata read attempts */
 #define H5F_ACS_OBJECT_FLUSH_CB_NAME            "object_flush_cb" 	 /* Object flush callback */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
+#define H5F_ACS_VDS_SIZE_NAME                   "vds_size"      /* Size of vds file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME         "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) */
 #define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
