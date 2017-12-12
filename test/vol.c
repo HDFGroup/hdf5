@@ -482,6 +482,12 @@ test_basic_dataset_operation(void)
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
+    /* H5Tcopy (when used w/ a dataset, it gets an H5VL struct */
+    if ((tid = H5Tcopy(did)) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
+
     /* H5Dget_create_plist */
     if ((dcpl_id = H5Dget_create_plist(did)) < 0)
         TEST_ERROR;

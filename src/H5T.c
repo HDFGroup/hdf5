@@ -1659,42 +1659,36 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Tcopy
  *
- * Purpose:    Copies a datatype.  The resulting datatype is not locked.
- *        The datatype should be closed when no longer needed by
- *        calling H5Tclose().
+ * Purpose:     Copies a datatype.  The resulting datatype is not locked.
+ *              The datatype should be closed when no longer needed by
+ *              calling H5Tclose().
  *
- * Return:    Success:    The ID of a new datatype.
+ * Return:      Success:    The ID of a new datatype
  *
- *            Failure:    Negative
+ *              Failure:    H5I_INVALID_HID
  *
- * Programmer:    Robb Matzke
- *        Tuesday, December  9, 1997
- *
- * Modifications:
- *
- *     Robb Matzke, 4 Jun 1998
- *    The returned type is always transient and unlocked.  If the TYPE_ID
- *    argument is a dataset instead of a datatype then this function
- *    returns a transient, modifiable datatype which is a copy of the
- *    dataset's datatype.
+ * Note:        The returned type is always transient and unlocked. If the
+ *              TYPE_ID argument is a dataset instead of a datatype then
+ *              this function returns a transient, modifiable datatype
+ *              which is a copy of the dataset's datatype.
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Tcopy(hid_t type_id)
 {
-    H5T_t    *dt;                    /* Pointer to the datatype to copy */
-    H5T_t    *new_dt = NULL;
-    hid_t    ret_value;              /* Return value */
+    H5T_t    *dt        = NULL;     /* Pointer to the datatype to copy */
+    H5T_t    *new_dt    = NULL;
+    hid_t    ret_value  = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", type_id);
 
-    switch(H5I_get_type(type_id)) {
+    switch (H5I_get_type(type_id)) {
         case H5I_DATATYPE:
             /* The argument is a datatype handle */
-            if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+            if (NULL == (dt = (H5T_t *)H5I_object(type_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype")
             break;
 
         case H5I_DATASET:
@@ -1702,10 +1696,10 @@ H5Tcopy(hid_t type_id)
                 H5D_t    *dset;          /* Dataset for datatype */
 
                 /* The argument is a dataset handle */
-                if(NULL == (dset = (H5D_t *)H5I_object(type_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-                if(NULL == (dt = H5D_typeof(dset)))
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get the dataset datatype")
+                if (NULL == (dset = (H5D_t *)H5VL_object(type_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataset")
+                if (NULL == (dt = H5D_typeof(dset)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the dataset datatype")
             }
             break;
 
@@ -1725,21 +1719,21 @@ H5Tcopy(hid_t type_id)
         case H5I_ERROR_STACK:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype or dataset")
-    } /* end switch */
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype or dataset")
+    }
 
     /* Copy datatype */
-    if(NULL == (new_dt = H5T_copy(dt, H5T_COPY_TRANSIENT)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy");
+    if (NULL == (new_dt = H5T_copy(dt, H5T_COPY_TRANSIENT)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy");
 
     /* Atomize result */
-    if((ret_value = H5I_register(H5I_DATATYPE, new_dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")
+    if ((ret_value = H5I_register(H5I_DATATYPE, new_dt, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype atom")
 
 done:
-    if(ret_value < 0)
-        if(new_dt && H5T_close(new_dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype info")
+    if (ret_value < 0)
+        if (new_dt && H5T_close(new_dt) < 0)
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release datatype info")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcopy() */
