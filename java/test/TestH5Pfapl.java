@@ -1376,4 +1376,45 @@ public class TestH5Pfapl {
         deleteH5file();
         _deleteLogFile();
     }
+
+    @Test
+    public void testH5P_evict_on_close() {
+        boolean ret_val_id = false;
+        try {
+            H5.H5Pset_evict_on_close(fapl_id, true);
+            ret_val_id = H5.H5Pget_evict_on_close(fapl_id);
+            assertTrue("H5P_evict_on_close", ret_val_id);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5P_evict_on_close: " + err);
+        }
+    }
+
+    @Test
+    public void testH5P_vds_file_cache_size() {
+        int vds_size = 0;
+        try {
+            try {
+                vds_size = H5.H5Pget_vds_file_cache_size(fapl_id);
+                assertTrue("H5P_vds_file_cache_size default", vds_size == 0);
+            }
+            catch (UnsupportedOperationException err) {
+                System.out.println(err.getMessage());
+            }
+            try {
+                vds_size = 8;
+                H5.H5Pset_vds_file_cache_size(fapl_id, vds_size);
+                vds_size = H5.H5Pget_vds_file_cache_size(fapl_id);
+                assertTrue("H5P_vds_file_cache_size 8", vds_size == 8);
+            }
+            catch (UnsupportedOperationException err) {
+                System.out.println(err.getMessage());
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5P_vds_file_cache_size: " + err);
+        }
+    }
 }
