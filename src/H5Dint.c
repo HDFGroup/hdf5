@@ -116,7 +116,7 @@ static const H5I_class_t H5I_DATASET_CLS[1] = {{
     H5I_DATASET,        /* ID class value */
     0,                  /* Class flags */
     0,                  /* # of reserved IDs for class */
-    (H5I_free_t)H5D_close       /* Callback routine for closing objects of this class */
+    (H5I_free_t)H5D__close_dataset       /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */
@@ -2423,13 +2423,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5D__get_offset
+ * Function:    H5D__get_offset
  *
- * Purpose:  Private function for H5D__get_offset.  Returns the address
- *           of dataset in file.
+ * Purpose:     Private function for H5D__get_offset.  Returns the address
+ *              of dataset in file.
  *
- * Return:   Success:        the address of dataset
- *           Failure:    HADDR_UNDEF
+ * Return:      Success:    The address of dataset
+ *
+ *              Failure:    HADDR_UNDEF (but also a valid value)
+ *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -2441,7 +2443,7 @@ H5D__get_offset(const H5D_t *dset)
 
     HDassert(dset);
 
-    switch(dset->shared->layout.type) {
+    switch (dset->shared->layout.type) {
         case H5D_VIRTUAL:
         case H5D_CHUNKED:
         case H5D_COMPACT:
@@ -2449,8 +2451,9 @@ H5D__get_offset(const H5D_t *dset)
 
         case H5D_CONTIGUOUS:
             /* If dataspace hasn't been allocated or dataset is stored in
-             * an external file, the value will be HADDR_UNDEF. */
-            if(dset->shared->dcpl_cache.efl.nused == 0 || H5F_addr_defined(dset->shared->layout.storage.u.contig.addr))
+             * an external file, the value will be HADDR_UNDEF.
+             */
+            if (dset->shared->dcpl_cache.efl.nused == 0 || H5F_addr_defined(dset->shared->layout.storage.u.contig.addr))
                 /* Return the absolute dataset offset from the beginning of file. */
                 ret_value = dset->shared->layout.storage.u.contig.addr + H5F_BASE_ADDR(dset->oloc.file);
             break;
@@ -2459,7 +2462,7 @@ H5D__get_offset(const H5D_t *dset)
         case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "unknown dataset layout type")
-    } /*lint !e788 All appropriate cases are covered */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

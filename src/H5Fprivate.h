@@ -294,7 +294,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_BASE_ADDR(F)        ((F)->shared->sblock->base_addr)
 #define H5F_SYM_LEAF_K(F)       ((F)->shared->sblock->sym_leaf_k)
 #define H5F_KVALUE(F,T)         ((F)->shared->sblock->btree_k[(T)->id])
-#define H5F_NREFS(F)		((F)->shared->nrefs)
+#define H5F_NREFS(F)            ((F)->shared->nrefs)
 #define H5F_SIZEOF_ADDR(F)      ((F)->shared->sizeof_addr)
 #define H5F_SIZEOF_SIZE(F)      ((F)->shared->sizeof_size)
 #define H5F_SOHM_ADDR(F)        ((F)->shared->sohm_addr)

@@ -25,6 +25,10 @@
 
 #define NATIVE_VOL_TEST_FILENAME        "native_vol_test"
 #define NATIVE_VOL_TEST_GROUP_NAME      "test_group"
+#define NATIVE_VOL_TEST_DATASET_NAME    "test_dataset"
+#define NATIVE_VOL_TEST_ATTRIBUTE_NAME  "test_dataset"
+
+#define N_ELEMENTS  10
 
 #define FAKE_VOL_NAME   "fake"
 
@@ -292,6 +296,12 @@ test_basic_file_operation(void)
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Pclose(fapl_id);
+        H5Pclose(fcpl_id);
+    } H5E_END_TRY;
+
     return FAIL;
 
 } /* end test_basic_file_operation() */
@@ -335,6 +345,14 @@ test_basic_group_operation(void)
     if (H5Gget_info(fid, &info) < 0)
         TEST_ERROR;
 
+    /* H5Gget_info_by_name */
+    if (H5Gget_info_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, &info, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* H5Gget_info_by_idx */
+    if (H5Gget_info_by_idx(fid, "/", H5_INDEX_NAME, H5_ITER_NATIVE, 0, &info, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
     /* H5Gclose */
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
@@ -354,9 +372,323 @@ test_basic_group_operation(void)
     return SUCCEED;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Gclose(gid);
+        H5Pclose(gcpl_id);
+    } H5E_END_TRY;
+
     return FAIL;
 
 } /* end test_basic_group_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_dataset_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL dataset operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_dataset_operation(void)
+{
+    hid_t fid       = H5I_INVALID_HID;
+    hid_t dcpl_id   = H5I_INVALID_HID;
+    hid_t dapl_id   = H5I_INVALID_HID;
+    hid_t did       = H5I_INVALID_HID;
+    hid_t sid       = H5I_INVALID_HID;
+    hid_t tid       = H5I_INVALID_HID;
+
+    hsize_t curr_dims   = 0;
+    hsize_t max_dims    = H5S_UNLIMITED;
+
+    hsize_t storage_size;
+    haddr_t offset;
+
+    int in_buf[N_ELEMENTS];
+    int out_buf[N_ELEMENTS];
+
+    int i;
+
+    TESTING("Basic VOL dataset operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    for (i = 0; i < N_ELEMENTS; i++) {
+        in_buf[i] = i;
+        out_buf[i] = 0;
+    }
+
+    /* H5Dcreate */
+    curr_dims = 0;
+    if ((sid = H5Screate_simple(1, &curr_dims, &max_dims)) < 0)
+        TEST_ERROR;
+    curr_dims = N_ELEMENTS;
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl_id, 1, &curr_dims) < 0)
+        TEST_ERROR;
+    if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    /* H5Dset_extent */
+    curr_dims = N_ELEMENTS;
+    if (H5Dset_extent(did, &curr_dims) < 0)
+        TEST_ERROR;
+
+    /* H5Dwrite */
+    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, in_buf) < 0)
+        TEST_ERROR;
+
+    /* H5Dclose */
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    /* H5Dopen */
+    if ((did = H5Dopen2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_space */
+    if ((sid = H5Dget_space(did)) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_type */
+    if ((tid = H5Dget_type(did)) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_create_plist */
+    if ((dcpl_id = H5Dget_create_plist(did)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_access_plist */
+    if ((dapl_id = H5Dget_access_plist(did)) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dapl_id) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_storage_size */
+    /* XXX: This is a terrible API call that can't truly indicate failure */
+    if (0 == (storage_size = H5Dget_storage_size(did)))
+        TEST_ERROR;
+
+    /* H5Dget_offset */
+    /* XXX: Another bad API call that can't flag error values. Also, this
+     *      returns HADDR_UNDEF for chunked datasets, which is bizarre.
+     */
+    if (HADDR_UNDEF != (offset = H5Dget_offset(did)))
+        TEST_ERROR;
+
+    /* H5Dread */
+    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, out_buf) < 0)
+        TEST_ERROR;
+
+    for (i = 0; i < N_ELEMENTS; i++)
+        if (in_buf[i] != out_buf[i])
+            TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Tclose(tid);
+        H5Pclose(dapl_id);
+        H5Pclose(dcpl_id);
+    } H5E_END_TRY;
+
+    return FAIL;
+
+} /* end test_basic_dataset_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_attribute_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL attribute operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_attribute_operation(void)
+{
+    hid_t fid       = H5I_INVALID_HID;
+    hid_t aid       = H5I_INVALID_HID;
+    hid_t sid       = H5I_INVALID_HID;
+
+    hsize_t dims    = 1;
+
+    TESTING("Basic VOL attribute operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Acreate */
+    dims = 1;
+    if ((sid = H5Screate_simple(1, &dims, &dims)) < 0)
+        TEST_ERROR;
+    if ((aid = H5Acreate2(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* H5Aclose */
+    if (H5Aclose(aid) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Aclose(aid);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+
+    return FAIL;
+
+} /* end test_basic_attribute_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_object_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL object operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_object_operation(void)
+{
+    hid_t fid       = H5I_INVALID_HID;
+
+    TESTING("Basic VOL object operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    return FAIL;
+
+} /* end test_basic_object_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_link_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL link operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_link_operation(void)
+{
+    hid_t fid       = H5I_INVALID_HID;
+
+    TESTING("Basic VOL link operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    return FAIL;
+
+} /* end test_basic_link_operation() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_datatype_operation()
+ *
+ * Purpose:     Uses the native VOL driver to test basic VOL datatype operations
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_datatype_operation(void)
+{
+    hid_t fid       = H5I_INVALID_HID;
+
+    TESTING("Basic VOL datatype operations");
+
+    if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    HDremove(NATIVE_VOL_TEST_FILENAME);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    return FAIL;
+
+} /* end test_basic_datatype_operation() */
 
 #if 0
 
@@ -409,6 +741,11 @@ main(void)
     nerrors += test_native_vol_init() < 0           ? 1 : 0;
     nerrors += test_basic_file_operation() < 0      ? 1 : 0;
     nerrors += test_basic_group_operation() < 0     ? 1 : 0;
+    nerrors += test_basic_dataset_operation() < 0   ? 1 : 0;
+    nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_object_operation() < 0    ? 1 : 0;
+    nerrors += test_basic_link_operation() < 0      ? 1 : 0;
+    nerrors += test_basic_datatype_operation() < 0  ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n",

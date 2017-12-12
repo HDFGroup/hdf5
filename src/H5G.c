@@ -522,6 +522,8 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the group through the VOL */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
     if (NULL == (grp = H5VL_group_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
                                       name, gapl_id, dxpl_id, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group")
@@ -619,133 +621,118 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gget_info_by_name
+ * Function:    H5Gget_info_by_name
  *
- * Purpose:	Retrieve information about a group.
+ * Purpose:     Retrieve information about a group, where the group is
+ *              identified by name instead of ID.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		November 27 2006
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
+H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *group_info,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Location of group */
-    H5G_loc_t   grp_loc;                /* Location used to open group */
-    H5G_name_t  grp_path;            	/* Opened object group hier. path */
-    H5O_loc_t   grp_oloc;            	/* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t      *obj;
+    H5VL_loc_params_t   loc_params;
+    hid_t               dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library */
+    herr_t              ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*s*xi", loc_id, name, grp_info, lapl_id);
+    H5TRACE4("e", "i*s*xi", loc_id, name, group_info, lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(!grp_info)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be an empty string")
+    if (!group_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Set up opened group location to fill in */
-    grp_loc.oloc = &grp_oloc;
-    grp_loc.path = &grp_path;
-    H5G_loc_reset(&grp_loc);
+    /* Get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Find the group object */
-    if(H5G_loc_find(&loc, name, &grp_loc/*out*/, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
-    loc_found = TRUE;
+    /* Set up location parameters */
+    loc_params.type                             = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name        = name;
+    loc_params.loc_data.loc_by_name.lapl_id     = lapl_id;
+    loc_params.obj_type                         = H5I_get_type(loc_id);
 
-    /* Retrieve the group's information */
-    if(H5G__obj_info(grp_loc.oloc, grp_info/*out*/, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+    /* Get the group info through the VOL using the location token */
+    if((ret_value = H5VL_group_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_GROUP_GET_INFO, 
+                                   dxpl_id, H5_REQUEST_NULL, loc_params, group_info)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
-    if(loc_found && H5G_loc_free(&grp_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_info_by_name() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gget_info_by_idx
+ * Function:    H5Gget_info_by_idx
  *
- * Purpose:	Retrieve information about a group, according to the order
+ * Purpose:     Retrieve information about a group, according to the order
  *              of an index.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		November 27 2006
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n, H5G_info_t *grp_info, hid_t lapl_id)
+    H5_iter_order_t order, hsize_t n, H5G_info_t *group_info, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Location of group */
-    H5G_loc_t   grp_loc;                /* Location used to open group */
-    H5G_name_t  grp_path;            	/* Opened object group hier. path */
-    H5O_loc_t   grp_oloc;            	/* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
+    H5VL_object_t       *obj;
+    H5VL_loc_params_t loc_params;
     hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, grp_info,
+    H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, group_info,
              lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!group_name || !*group_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
-    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(!grp_info)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    if (!group_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be NULL")
+    if (!*group_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_name parameter cannot be an empty string")
+    if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if (!group_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Set up opened group location to fill in */
-    grp_loc.oloc = &grp_oloc;
-    grp_loc.path = &grp_path;
-    H5G_loc_reset(&grp_loc);
+    /* get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Find the object's location, according to the order in the index */
-    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &grp_loc/*out*/, 
-                           lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
-    loc_found = TRUE;
+    /* Set location parameters */
+    /* XXX: Not happy about location parameters being partially set in different API calls. */
+    loc_params.type                         = H5VL_OBJECT_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name     = group_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order    = order;
+    loc_params.loc_data.loc_by_idx.n        = n;
+    loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
 
-    /* Retrieve the group's information */
-    if(H5G__obj_info(grp_loc.oloc, grp_info/*out*/, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+    /* Get the group info through the VOL using the location token */
+    if ((ret_value = H5VL_group_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_GROUP_GET_INFO, 
+                                   dxpl_id, H5_REQUEST_NULL, loc_params, group_info)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
-    /* Release the object location */
-    if(loc_found && H5G_loc_free(&grp_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_info_by_idx() */
 
