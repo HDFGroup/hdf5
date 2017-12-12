@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Ocopy.c
- *			Nov  6 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5Ocopy.c
  *
- * Purpose:		Object copying routines.
+ * Purpose:     Object copying routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -32,18 +30,18 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Aprivate.h"         /* Attributes                           */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5HGprivate.h"        /* Global Heaps                         */
-#include "H5FOprivate.h"        /* File objects                         */
-#include "H5Lprivate.h"         /* Links			  	*/
-#include "H5MFprivate.h"	/* File memory management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Aprivate.h"         /* Attributes                               */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free lists                               */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5HGprivate.h"        /* Global Heaps                             */
+#include "H5FOprivate.h"        /* File objects                             */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MFprivate.h"        /* File memory management                   */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Opkg.h"             /* Object headers                           */
+#include "H5Pprivate.h"         /* Property lists                           */
 
 
 /****************/
@@ -1922,7 +1920,7 @@ H5O_copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src,
 
                 /* Traverse the destination file, adding committed datatypes to the skip
                 * list */
-                if(H5G_visit(H5F_FILE_ID(oloc_dst->file), "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O_copy_search_comm_dt_cb, &udata, H5P_LINK_ACCESS_DEFAULT, dxpl_id) < 0)
+                if(H5G_visit(&dst_root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O_copy_search_comm_dt_cb, &udata, H5P_LINK_ACCESS_DEFAULT, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 cpy_info->dst_dt_list_complete = TRUE;
             } /* end if */

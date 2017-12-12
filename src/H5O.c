@@ -781,9 +781,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ovisit
+ * Function:    H5Ovisit
  *
- * Purpose:	Recursively visit an object and all the objects reachable
+ * Purpose:     Recursively visit an object and all the objects reachable
  *              from it.  If the starting object is a group, all the objects
  *              linked to from that group will be visited.  Links within
  *              each group are visited according to the order within the
@@ -799,16 +799,13 @@ done:
  *              iteration index and iteration order given) will be used to in
  *              the callback about the object.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
- *
- * Programmer:	Quincey Koziol
- *		November 25 2007
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */
@@ -816,22 +813,34 @@ herr_t
 H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     H5O_iterate_t op, void *op_data)
 {
-    herr_t      ret_value;              /* Return value */
+    H5VL_object_t      *obj         = NULL;     /* Object token of loc_id */
+    H5VL_loc_params_t   loc_params;
+    herr_t              ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iIiIox*x", obj_id, idx_type, order, op, op_data);
 
     /* Check args */
-    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+    if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
-    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+    if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
-    /* Call internal object visitation routine */
-    if((ret_value = H5O_visit(obj_id, ".", idx_type, order, op, op_data, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
+    /* Get the location object */
+    if (NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(obj_id);
+
+    /* Iterate over the objects through the VOL */
+    if ((ret_value = H5VL_object_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                         H5VL_OBJECT_VISIT, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
+                                         idx_type, order, op, op_data)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -839,9 +848,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ovisit_by_name
+ * Function:    H5Ovisit_by_name
  *
- * Purpose:	Recursively visit an object and all the objects reachable
+ * Purpose:     Recursively visit an object and all the objects reachable
  *              from it.  If the starting object is a group, all the objects
  *              linked to from that group will be visited.  Links within
  *              each group are visited according to the order within the
@@ -857,16 +866,13 @@ done:
  *              iteration index and iteration order given) will be used to in
  *              the callback about the object.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
- *
- * Programmer:	Quincey Koziol
- *		November 24 2007
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */
@@ -874,30 +880,46 @@ herr_t
 H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id)
 {
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    herr_t      ret_value;              /* Return value */
+    H5VL_object_t       *obj        = NULL;     /* Object token of loc_id */
+    H5VL_loc_params_t   loc_params; 
+    hid_t               dxpl_id     = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    herr_t              ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIox*xi", loc_id, obj_name, idx_type, order, op, op_data,
              lapl_id);
 
     /* Check args */
-    if(!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+    if (!obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "obj_name parameter cannot be NULL")
+    if (!*obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "obj_name parameter cannot be an empty string")
+    if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
-    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+    if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(!op)
+    if (!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Call internal object visitation routine */
-    if((ret_value = H5O_visit(loc_id, obj_name, idx_type, order, op, op_data, lapl_id, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
+    /* Get the location object */
+    if (NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = obj_name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+
+    /* iterate over the objects through the VOL */
+    if ((ret_value = H5VL_object_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                         H5VL_OBJECT_VISIT, dxpl_id, H5_REQUEST_NULL, 
+                                         idx_type, order, op, op_data)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
     FUNC_LEAVE_API(ret_value)

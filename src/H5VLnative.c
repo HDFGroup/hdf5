@@ -2986,15 +2986,13 @@ H5VL_native_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object
                 /* Call internal object visitation routine */
                 if(loc_params.type == H5VL_OBJECT_BY_SELF) {
                     /* H5Ovisit */
-                    /* XXX: enable when H5O_visit is fixed up */
-//                    if((ret_value = H5O_visit(&loc, ".", idx_type, order, op, op_data, H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
+                    if((ret_value = H5O_visit(&loc, ".", idx_type, order, op, op_data, H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 }
                 else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
                     /* H5Ovisit_by_name */
-                    /* XXX: enable when H5O_visit is fixed up */
-//                    if((ret_value = H5O_visit(&loc, loc_params.loc_data.loc_by_name.name, idx_type, order, 
-//                                              op, op_data, loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
+                    if((ret_value = H5O_visit(&loc, loc_params.loc_data.loc_by_name.name, idx_type, order, 
+                                              op, op_data, loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 }
                 else

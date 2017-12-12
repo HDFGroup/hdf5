@@ -1273,13 +1273,11 @@ done:
  *
  * Purpose:     Tries to figure out the path to an object from it's address
  *
- * Return:      returns size of path name, and copies it into buffer
- * 		pointed to by name if that buffer is big enough.
- * 		0 if it cannot find the path
- * 		negative on failure.
+ * Return:      Success:    Returns size of path name, and copies it into buffer
+ *                          pointed to by name if that buffer is big enough.
+ *                          0 if it cannot find the path
  *
- * Programmer:	Quincey Koziol
- *		November 4 2007
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1287,11 +1285,11 @@ ssize_t
 H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *loc,
     char *name, size_t size)
 {
-    H5G_gnba_iter_t udata;      /* User data for iteration */
-    H5G_loc_t root_loc;         /* Root group's location */
-    hbool_t found_obj = FALSE;  /* If we found the object */
-    herr_t status;              /* Status from iteration */
-    ssize_t ret_value = -1;     /* Return value */
+    H5G_gnba_iter_t udata;                  /* User data for iteration  */
+    H5G_loc_t       root_loc;               /* Root group's location    */
+    hbool_t         found_obj = FALSE;      /* If we found the object   */
+    herr_t          status;                 /* Status from iteration    */
+    ssize_t         ret_value = -1;         /* Return value             */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
@@ -1299,15 +1297,15 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Construct the link info for the file's root group */
-    if(H5G_loc(file, &root_loc) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get root group's location")
+    if (H5G_loc(file, &root_loc) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get root group's location")
 
     /* Check for root group being the object looked for */
-    if(root_loc.oloc->addr == loc->addr && root_loc.oloc->file == loc->file) {
-        if(NULL == (udata.path = H5MM_strdup("")))
+    if (root_loc.oloc->addr == loc->addr && root_loc.oloc->file == loc->file) {
+        if (NULL == (udata.path = H5MM_strdup("")))
             HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "can't duplicate path string")
         found_obj = TRUE;
-    } /* end if */
+    }
     else {
         /* Set up user data for iterator */
         udata.loc = loc;
@@ -1316,29 +1314,29 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
         udata.path = NULL;
 
         /* Visit all the links in the file */
-        if((status = H5G_visit(file, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata, lapl_id, dxpl_id)) < 0)
+        if ((status = H5G_visit(&root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata, lapl_id, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group traversal failed while looking for object name")
-        else if(status > 0)
+        else if (status > 0)
             found_obj = TRUE;
-    } /* end else */
+    }
 
     /* Check for finding the object */
-    if(found_obj) {
+    if (found_obj) {
         /* Set the length of the full path */
         ret_value = (ssize_t)(HDstrlen(udata.path) + 1);        /* Length of path + 1 (for "/") */
 
         /* If there's a buffer provided, copy into it, up to the limit of its size */
-        if(name) {
+        if (name) {
             /* Copy the initial path separator */
             HDstrncpy(name, "/", (size_t)2);
 
             /* Append the rest of the path */
             /* (less one character, for the initial path separator) */
             HDstrncat(name, udata.path, (size - 2));
-            if((size_t)ret_value >= size)
+            if ((size_t)ret_value >= size)
                 name[size - 1] = '\0';
-        } /* end if */
-    } /* end if */
+        }
+    }
     else
         ret_value = 0;
 
@@ -1348,3 +1346,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_name_by_addr() */
+
