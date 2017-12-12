@@ -447,18 +447,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lcreate_hard
+ * Function:    H5Lcreate_hard
  *
- * Purpose:	Creates a hard link from NEW_NAME to CUR_NAME.
+ * Purpose:     Creates a hard link from NEW_NAME to CUR_NAME.
  *
- *		CUR_NAME must name an existing object.  CUR_NAME and
+ *              CUR_NAME must name an existing object.  CUR_NAME and
  *              NEW_NAME are interpreted relative to CUR_LOC_ID and
  *              NEW_LOC_ID, which are either file IDs or group IDs.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Monday, April  6, 1998
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -466,47 +463,83 @@ herr_t
 H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	cur_loc, *cur_loc_p;
-    H5G_loc_t	new_loc, *new_loc_p;
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
-    herr_t      ret_value = SUCCEED;            /* Return value */
+    H5VL_object_t      *obj1 = NULL;            /* object token of cur_loc_id */
+    H5VL_object_t      *obj2 = NULL;            /* object token of new_loc_id */
+    H5VL_loc_params_t   loc_params1;
+    H5VL_loc_params_t   loc_params2;
+    H5P_genplist_t     *plist;                  /* Property list pointer */
+    hid_t               dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id,
              lapl_id);
 
     /* Check arguments */
-    if(cur_loc_id == H5L_SAME_LOC && new_loc_id == H5L_SAME_LOC)
+    if (cur_loc_id == H5L_SAME_LOC && new_loc_id == H5L_SAME_LOC)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should not be both H5L_SAME_LOC")
-    if(cur_loc_id != H5L_SAME_LOC && H5G_loc(cur_loc_id, &cur_loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(new_loc_id != H5L_SAME_LOC && H5G_loc(new_loc_id, &new_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!cur_name || !*cur_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified")
-    if(!new_name || !*new_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
-    if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
+    if (!cur_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cur_name parameter cannot be NULL")
+    if (!*cur_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cur_name parameter cannot be an empty string")
+    if (!new_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new_name parameter cannot be NULL")
+    if (!*new_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new_name parameter cannot be an empty string")
+    if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Check the link create property list */
+    if (H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, cur_loc_id, TRUE) < 0)
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, cur_loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Set up current & new location pointers */
-    cur_loc_p = &cur_loc;
-    new_loc_p = &new_loc;
-    if(cur_loc_id == H5L_SAME_LOC)
-        cur_loc_p = new_loc_p;
-    else if(new_loc_id == H5L_SAME_LOC)
-   	new_loc_p = cur_loc_p;
-    else if(cur_loc_p->oloc->file != new_loc_p->oloc->file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.")
+    /* Set up current & new location structs */
+    loc_params1.type                            = H5VL_OBJECT_BY_NAME;
+    loc_params1.obj_type                        = H5I_get_type(cur_loc_id);
+    loc_params1.loc_data.loc_by_name.name       = cur_name;
+    loc_params1.loc_data.loc_by_name.lapl_id    = lapl_id;
 
-    /* Create the link */
-    if(H5L_create_hard(cur_loc_p, cur_name, new_loc_p, new_name,
-                lcpl_id, lapl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+    loc_params2.type                            = H5VL_OBJECT_BY_NAME;
+    loc_params2.obj_type                        = H5I_get_type(new_loc_id);
+    loc_params2.loc_data.loc_by_name.name       = new_name;
+    loc_params2.loc_data.loc_by_name.lapl_id    = lapl_id;
+
+    if (H5L_SAME_LOC != cur_loc_id) {
+        /* Get the current location object */
+        if (NULL == (obj1 = (H5VL_object_t *)H5VL_get_object(cur_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    }
+    if (H5L_SAME_LOC != new_loc_id) {
+        /* Get the new location object */
+        if (NULL == (obj2 = (H5VL_object_t *)H5VL_get_object(new_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    }
+
+    /* Make sure that the VOL drivers are the same */
+    if (obj1 && obj2) {
+        if (obj1->vol_info->vol_cls->value != obj2->vol_info->vol_cls->value)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+    }
+
+    /* Get the link creation plist structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set creation properties */
+    if (H5P_set(plist, H5VL_PROP_LINK_TARGET, (obj1 ? &(obj1->vol_obj) : NULL)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
+    if (H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
+
+    /* Create the link through the VOL */
+    if (H5VL_link_create(H5VL_LINK_CREATE_HARD, (obj2 ? (obj2->vol_obj) : NULL), loc_params2, 
+                        (obj1!=NULL ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
+                        lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
