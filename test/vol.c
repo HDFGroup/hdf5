@@ -27,7 +27,8 @@
 #define NATIVE_VOL_TEST_GROUP_NAME      "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME    "test_dataset"
 #define NATIVE_VOL_TEST_ATTRIBUTE_NAME  "test_dataset"
-#define NATIVE_VOL_TEST_LINK_NAME       "test_link"
+#define NATIVE_VOL_TEST_HARD_LINK_NAME  "test_hard_link"
+#define NATIVE_VOL_TEST_SOFT_LINK_NAME  "test_soft_link"
 
 #define N_ELEMENTS  10
 
@@ -638,7 +639,11 @@ test_basic_link_operation(void)
         TEST_ERROR;
 
     /* H5Lcreate_hard */
-    if (H5Lcreate_hard(fid, "/", H5L_SAME_LOC, NATIVE_VOL_TEST_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
+    if (H5Lcreate_hard(fid, "/", H5L_SAME_LOC, NATIVE_VOL_TEST_HARD_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* H5Lcreate_soft */
+    if (H5Lcreate_soft("/", fid, NATIVE_VOL_TEST_SOFT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)

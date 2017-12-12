@@ -395,51 +395,77 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lcreate_soft
+ * Function:    H5Lcreate_soft
  *
- * Purpose:	Creates a soft link from LINK_NAME to LINK_TARGET.
+ * Purpose:     Creates a soft link from LINK_NAME to LINK_TARGET.
  *
- * 		LINK_TARGET can be anything and is interpreted at lookup
+ *              LINK_TARGET can be anything and is interpreted at lookup
  *              time relative to the group which contains the final component
  *              of LINK_NAME.  For instance, if LINK_TARGET is `./foo' and
  *              LINK_NAME is `./x/y/bar' and a request is made for `./x/y/bar'
  *              then the actual object looked up is `./x/y/./foo'.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Monday, April  6, 1998
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lcreate_soft(const char *link_target,
-    hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
+H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name,
+    hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	link_loc;               /* Group location for new link */
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t      *obj         = NULL;         /* object token of loc_id */
+    H5VL_loc_params_t   loc_params;
+    H5P_genplist_t     *plist       = NULL;         /* Property list pointer */
+    hid_t               dxpl_id     = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    herr_t              ret_value   = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*si*sii", link_target, link_loc_id, link_name, lcpl_id, lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(link_loc_id, &link_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!link_target || !*link_target)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no target specified")
-    if(!link_name || !*link_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
-    if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
+    if (link_loc_id == H5L_SAME_LOC)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link location id should not be H5L_SAME_LOC")
+    if (!link_target)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_target parameter cannot be NULL")
+    if (!*link_target)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_target parameter cannot be an empty string")
+    if (!link_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_name parameter cannot be NULL")
+    if (!*link_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_name parameter cannot be an empty string")
+    if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Check the group access property list */
+    if (H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, link_loc_id, TRUE) < 0)
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, link_loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Create the link */
-    if(H5L_create_soft(link_target, &link_loc, link_name, lcpl_id, lapl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+    /* Set location fields */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = link_name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(link_loc_id);
+
+    /* get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5VL_get_object(link_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Get the plist structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* set creation properties */
+    if (H5P_set(plist, H5VL_PROP_LINK_TARGET_NAME, &link_target) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
+
+    /* Create the link through the VOL */
+    if (H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj->vol_obj, loc_params, obj->vol_info->vol_cls,
+                        lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2001,14 +2027,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_create_soft
+ * Function:    H5L_create_soft
  *
- * Purpose:	Creates a soft link from LINK_NAME to TARGET_PATH.
+ * Purpose:     Creates a soft link from LINK_NAME to TARGET_PATH.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Monday, April  6, 1998
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
