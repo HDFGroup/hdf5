@@ -17,6 +17,9 @@
 #ifndef _H5Pprivate_H
 #define _H5Pprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5P_genplist_t H5P_genplist_t;
+
 /* Include package's public header */
 #include "H5Ppublic.h"
 
@@ -58,7 +61,6 @@ struct H5S_t;
 struct H5T_t;
 
 /* Forward declarations for anonymous H5P objects */
-typedef struct H5P_genplist_t H5P_genplist_t;
 typedef struct H5P_genclass_t H5P_genclass_t;
 
 typedef enum H5P_plist_type_t {
@@ -145,6 +147,10 @@ H5_DLLVAR const struct H5P_libclass_t H5P_CLS_FACC[1];  /* File access */
 /******************************/
 /* Library Private Prototypes */
 /******************************/
+
+/* Forward declaration of structs used below */
+struct H5O_fill_t;
+struct H5T_t;
 
 /* Package initialization routine */
 H5_DLL herr_t H5P_init(void);
