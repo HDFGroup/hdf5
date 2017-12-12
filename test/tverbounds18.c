@@ -241,8 +241,7 @@ static void test_v18_v18(void)
 }
 
 /*************************************************************************
-**
-**  test_libver_bounds_withv18():
+**  test_verbounds_18()
 **      Main routine to test library version bounds with HDF5 1.8 library.
 **
 *************************************************************************/
