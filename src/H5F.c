@@ -28,6 +28,7 @@
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Fpkg.h"             /* File access                              */
 #include "H5FDprivate.h"        /* File drivers                             */
+#include "H5FLprivate.h"        /* Free lists                               */
 #include "H5Gprivate.h"         /* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MFprivate.h"        /* File memory management                   */
@@ -85,6 +86,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Declare a free list to manage the H5VL_t struct */
 H5FL_EXTERN(H5VL_t);
+
 /* Declare a free list to manage the H5VL_object_t struct */
 H5FL_EXTERN(H5VL_object_t);
 

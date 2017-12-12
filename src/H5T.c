@@ -504,10 +504,6 @@ float H5T_NATIVE_FLOAT_NEG_INF_g            = 0.0f;
 double H5T_NATIVE_DOUBLE_POS_INF_g          = (double)0.0f;
 double H5T_NATIVE_DOUBLE_NEG_INF_g          = (double)0.0f;
 
-/* Declare the free list for H5T_t's and H5T_shared_t's */
-H5FL_DEFINE(H5T_t);
-H5FL_DEFINE(H5T_shared_t);
-
 
 /*******************/
 /* Local Variables */
@@ -525,6 +521,10 @@ static struct {
     size_t         asoft;         /*number of soft conversions allocated  */
     H5T_soft_t    *soft;          /*unsorted array of soft conversions    */
 } H5T_g;
+
+/* Declare the free list for H5T_t's and H5T_shared_t's */
+H5FL_DEFINE(H5T_t);
+H5FL_DEFINE(H5T_shared_t);
 
 /* Declare the free list for H5T_path_t's */
 H5FL_DEFINE_STATIC(H5T_path_t);
