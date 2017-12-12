@@ -1396,7 +1396,7 @@ H5VL_json_datatype_close(void *dt, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Frank Willmore
- *              November, 2017
+ *              December, 2017
  *
  */
 static void *
@@ -1407,9 +1407,6 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     H5VL_json_object_t *new_dataset = NULL;
     H5P_genplist_t     *plist = NULL;
     hid_t               space_id, type_id;
- //FTW   char                create_request_host_header[HOST_HEADER_MAX_LENGTH] = "Host: ";
-//FTW    char               *create_request_body = NULL;
-//FTW    char                temp_url[URL_MAX_LENGTH];
     void               *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1441,33 +1438,24 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     new_dataset->u.dataset.space_id = FAIL;
 
 #if 0
-    /* Form the request body to give the new Dataset its properties */
-    if (NULL == (create_request_body = (char *) H5MM_malloc(REQUEST_BODY_MAX_LENGTH)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate space for dataset create request body")
-
     if (H5VL_json_parse_dataset_create_options(obj, name, dcpl_id, create_request_body) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, NULL, "can't parse dataset creation parameters")
-
-    /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(create_request_host_header, parent->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
-
-    /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
-
-    /* Redirect from base URL to "/datasets" to create the dataset */
-    snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets", base_URL);
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-    curl_easy_setopt(curl, CURLOPT_POST, 1);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, create_request_body);
-    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
-
-    CURL_PERFORM(curl, H5E_DATASET, H5E_CANTCREATE, NULL);
-
+//...was rest stuff...
     /* Store the newly-created dataset's URI */
     if (H5VL_json_parse_response(response_buffer.buffer, NULL, new_dataset->URI, yajl_copy_object_URI_parse_callback) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, NULL, "unable to parse new dataset's URI")
 #endif
+
+//FTW: replace the rest stuff with the appropriate modifications on a JANNSON object
+// FTW WIP
+new_dataset->domain->u.file.json_file_object; // This is the JANNSON File object that will contain the new dataset. 
+// Go into this and grab the dataset collection.
+// Create a new uuid and insert into the dataset collection.
+// Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. 
+
+// Use the junk below to get the type and shape for the dataset. The attributes field will be empty [] and the value field will be null. 
+
+
 
     if (NULL == (plist = (H5P_genplist_t *) H5I_object(dcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't get dataset creation property list")
@@ -1476,6 +1464,7 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property list value for datatype ID")
     if (H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property list value for space ID")
+
 
     if ((new_dataset->u.dataset.dtype_id = H5Tcopy(type_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "failed to copy datatype")
@@ -1492,31 +1481,10 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     ret_value = (void *) new_dataset;
 
 done:
-#if 0
-
-#ifdef PLUGIN_DEBUG
-    printf("Dataset create body: %s.\n\n", create_request_body);
-    printf("Dataset Create response buffer: %s\n\n", response_buffer.buffer);
-#endif
-
-    if (create_request_body)
-        H5MM_xfree(create_request_body);
-#endif
-
     /* Clean up allocated dataset object if there was an issue */
     if (new_dataset && !ret_value)
         if (H5VL_json_dataset_close(new_dataset, FAIL, NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "unable to close dataset")
-
-#if 0
-    /* Restore cURL URL to the base URL */
-    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-
-    if (curl_headers) {
-        curl_slist_free_all(curl_headers);
-        curl_headers = NULL;
-    } /* end if */
-#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_dataset_create() */
