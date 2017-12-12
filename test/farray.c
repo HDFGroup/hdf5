@@ -25,8 +25,9 @@
 #include "H5FApkg.h"		/* Fixed Arrays			*/
 
 /* Other private headers that this test requires */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5VMprivate.h"		/* Vectors and arrays                       */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /* Local macros */
@@ -137,35 +138,37 @@ init_cparam(H5FA_create_t *cparam, farray_test_param_t *tparam)
 
 
 /*-------------------------------------------------------------------------
- * Function:	create_file
+ * Function:    create_file
  *
- * Purpose:	Create file and retrieve pointer to internal file object
+ * Purpose:     Create file and retrieve pointer to internal file object
  *
- * Return:	Success:	0
- *		Failure:	-1
- *
+ * Return:      SUCCEED/FAIL
+ *   
  *-------------------------------------------------------------------------
  */
-static int
-create_file(hid_t fapl, hid_t *file, H5F_t **f)
+static herr_t
+create_file(hid_t fapl_id, hid_t *fid, H5F_t **f)
 {
+    H5VL_object_t   *obj = NULL;
+
     /* Create the file to work on */
-    if((*file = H5Fcreate(filename_g, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+    if ((*fid = H5Fcreate(filename_g, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (*f = (H5F_t *)H5I_object(*file)))
-        FAIL_STACK_ERROR
+    if (NULL == (obj = (H5VL_object_t *)H5I_object_verify(*fid, H5I_FILE)))
+        FAIL_STACK_ERROR;
+    *f = (H5F_t *)obj->vol_obj;
 
     /* Ignore metadata tags in the file's cache */
-    if(H5AC_ignore_tags(*f) < 0)
-        FAIL_STACK_ERROR
+    if (H5AC_ignore_tags(*f) < 0)
+        FAIL_STACK_ERROR;
 
     /* Success */
-    return(0);
+    return SUCCEED;
 
 error:
-    return(-1);
+    return FAIL;
 } /* create_file() */
 
 
@@ -1664,7 +1667,7 @@ main(void)
     fapl = h5_fileaccess();
     ExpressMode = GetTestExpress();
     if(ExpressMode > 1)
-	printf("***Express test mode on.  Some tests may be skipped\n");
+        HDprintf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
@@ -1700,12 +1703,12 @@ main(void)
         switch(curr_test) {
             /* "Normal" testing parameters */
             case FARRAY_TEST_NORMAL:
-                puts("Testing with NORMAL PARAMETERS");
+                HDputs("Testing with NORMAL PARAMETERS");
                 break;
 
             /* "Re-open array" testing parameters */
             case FARRAY_TEST_REOPEN:
-                puts("Testing with reopen array flag set");
+                HDputs("Testing with reopen array flag set");
                 tparam.reopen_array = FARRAY_TEST_REOPEN;
                 break;
 
@@ -1732,25 +1735,25 @@ main(void)
             switch(curr_iter) {
                 /* "Forward" testing parameters */
                 case FARRAY_ITER_FW:
-                    puts("Testing with forward iteration");
+                    HDputs("Testing with forward iteration");
                     tparam.fiter = &fa_iter_fw;
                     break;
 
                 /* "Reverse" testing parameters */
                 case FARRAY_ITER_RV:
-                    puts("Testing with reverse iteration");
+                    HDputs("Testing with reverse iteration");
                     tparam.fiter = &fa_iter_rv;
                     break;
 
                 /* "Random" testing parameters */
                 case FARRAY_ITER_RND:
-                    puts("Testing with random iteration");
+                    HDputs("Testing with random iteration");
                     tparam.fiter = &fa_iter_rnd;
                     break;
 
                 /* "Cyclic" testing parameters */
                 case FARRAY_ITER_CYC:
-                    puts("Testing with cyclic iteration");
+                    HDputs("Testing with cyclic iteration");
                     tparam.fiter = &fa_iter_cyc;
                     break;
 
@@ -1766,22 +1769,21 @@ main(void)
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)tparam.nelmts, "setting all the array elements");
         } /* end for */
 
-	/* Check skipping elements */
+        /* Check skipping elements */
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)1, TRUE, "skipping to first element");
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, ((hsize_t)1 << cparam.max_dblk_page_nelmts_bits), TRUE, "skipping to first element in data block page");
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), TRUE, "skipping to last element");
 
-	/* Create Fixed Array of MAX_NELMTS elements */
-	/*
-	 * MAX_NELMTS succeeds on jam and smirom.
-	 * The value was adjusted for linew due to the following:
-	    Linew failed with "H5FD_sec2_truncate(): unable to extend file properly"
-	    Linew failed with "H5FD_sec2_truncate(): File too large"
-	 */
+	    /* Create Fixed Array of MAX_NELMTS elements */
+        /* MAX_NELMTS succeeds on jam and smirom.
+         * The value was adjusted for linew due to the following:
+         * Linew failed with "H5FD_sec2_truncate(): unable to extend file properly"
+         * Linew failed with "H5FD_sec2_truncate(): File too large"
+         */
         tparam.nelmts = MAX_NELMTS/17;
-	init_cparam(&cparam, &tparam);
+        init_cparam(&cparam, &tparam);
 
-	/* Set the last element in the Fixed Array */
+        /* Set the last element in the Fixed Array */
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), FALSE, "skipping to last element");
     } /* end for */
 
@@ -1790,20 +1792,20 @@ main(void)
 
     if(nerrors)
         goto error;
-    puts("All fixed array tests passed.");
+    HDputs("All fixed array tests passed.");
 
     /* Clean up file used */
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY {
-	H5Pclose(fapl);
+        H5Pclose(fapl);
     } H5E_END_TRY;
 
-    return 1;
+    HDexit(EXIT_FAILURE);
 } /* end main() */
 
