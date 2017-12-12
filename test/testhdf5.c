@@ -63,6 +63,7 @@ main(int argc, char *argv[])
     AddTest("array", test_array, cleanup_array,  "Array Datatypes", NULL);
     AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
     AddTest("misc", test_misc, cleanup_misc,  "Miscellaneous", NULL);
+    AddTest("verbounds16", test_verbounds_16, cleanup_verbounds_16,  "Version Bounds", NULL);
 
     /* Display testing information */
     TestInfo(argv[0]);
