@@ -401,6 +401,7 @@ test_basic_dataset_operation(void)
     hid_t dcpl_id   = H5I_INVALID_HID;
     hid_t dapl_id   = H5I_INVALID_HID;
     hid_t did       = H5I_INVALID_HID;
+    hid_t did_a     = H5I_INVALID_HID;
     hid_t sid       = H5I_INVALID_HID;
     hid_t tid       = H5I_INVALID_HID;
 
@@ -435,6 +436,11 @@ test_basic_dataset_operation(void)
         TEST_ERROR;
     if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
+
+    /* H5Dcreate_anon */
+    if ((did_a = H5Dcreate_anon(fid, H5T_NATIVE_INT, sid, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
     if (H5Pclose(dcpl_id) < 0)
@@ -451,6 +457,8 @@ test_basic_dataset_operation(void)
 
     /* H5Dclose */
     if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Dclose(did_a) < 0)
         TEST_ERROR;
 
     /* H5Dopen */
@@ -515,6 +523,7 @@ error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
         H5Dclose(did);
+        H5Dclose(did_a);
         H5Sclose(sid);
         H5Tclose(tid);
         H5Pclose(dapl_id);

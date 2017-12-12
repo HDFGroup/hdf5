@@ -176,37 +176,34 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dcreate_anon
+ * Function:    H5Dcreate_anon
  *
- * Purpose:	Creates a new dataset named NAME at LOC_ID, opens the
- *		dataset for access, and associates with that dataset constant
- *		and initial persistent properties including the type of each
- *		datapoint as stored in the file (TYPE_ID), the size of the
- *		dataset (SPACE_ID), and other initial miscellaneous
- *		properties (DCPL_ID).
+ * Purpose:     Creates a new dataset named NAME at LOC_ID, opens the
+ *              dataset for access, and associates with that dataset constant
+ *              and initial persistent properties including the type of each
+ *              datapoint as stored in the file (TYPE_ID), the size of the
+ *              dataset (SPACE_ID), and other initial miscellaneous
+ *              properties (DCPL_ID).
  *
- *		All arguments are copied into the dataset, so the caller is
- *		allowed to derive new types, dataspaces, and creation
- *		parameters from the old ones and reuse them in calls to
- *		create other datasets.
+ *              All arguments are copied into the dataset, so the caller is
+ *              allowed to derive new types, dataspaces, and creation
+ *              parameters from the old ones and reuse them in calls to
+ *              create other datasets.
  *
  *              The resulting ID should be linked into the file with
  *              H5Olink or it will be deleted when closed.
  *
- * Return:	Success:	The object ID of the new dataset.  At this
- *				point, the dataset is ready to receive its
- *				raw data.  Attempting to read raw data from
- *				the dataset will probably return the fill
- *				value.	The dataset should be linked into
- *                              the group hierarchy before being closed or
- *                              it will be deleted.  The dataset should be
- *                              closed when the caller is no longer interested
- *                              in it.
+ * Return:      Success:    The object ID of the new dataset. At this
+ *                          point, the dataset is ready to receive its
+ *                          raw data. Attempting to read raw data from
+ *                          the dataset will probably return the fill
+ *                          value. The dataset should be linked into
+ *                          the group hierarchy before being closed or
+ *                          it will be deleted. The dataset should be
+ *                          closed when the caller is no longer interested
+ *                          in it.
  *
- *		Failure:	FAIL
- *
- * Programmer:	James Laird
- *		Tuesday, January 24, 2006
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
@@ -214,58 +211,60 @@ hid_t
 H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     hid_t dapl_id)
 {
-    H5G_loc_t	   loc;                 /* Object location to insert dataset into */
-    H5D_t	   *dset = NULL;        /* New dataset's info */
-    const H5S_t    *space;              /* Dataspace for dataset */
-    hid_t           dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    hid_t           ret_value;          /* Return value */
+    void                *dset       = NULL;             /* dset token from VOL plugin */
+    H5VL_object_t       *obj        = NULL;             /* object token of loc_id */
+    H5VL_loc_params_t   loc_params;
+    H5P_genplist_t      *plist;                         /* Property list pointer */
+    hid_t               dxpl_id     = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    hid_t               ret_value   = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE5("i", "iiiii", loc_id, type_id, space_id, dcpl_id, dapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
-    if(H5I_DATATYPE != H5I_get_type(type_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID")
-    if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace ID")
-    if(H5P_DEFAULT == dcpl_id)
+    if (H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
+        if (TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not dataset create property list ID")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if (H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access and transfer property lists")
 
-    /* build and open the new dataset */
-    if(NULL == (dset = H5D__create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, dxpl_id)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+    /* get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
-    /* Register the new dataset to get an ID for it */
-    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
+    /* Get the plist structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5I_INVALID_HID, "can't find object for ID")
+
+    /* set creation properties */
+    if (H5P_set(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't set property value for datatype id")
+    if (H5P_set(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't set property value for space id")
+
+    /* Set location parameters */
+    loc_params.type     = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* Create the dataset through the VOL */
+    if (NULL == (dset = H5VL_dataset_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                           NULL, dcpl_id, dapl_id, 
+                                           dxpl_id, H5_REQUEST_NULL)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
+
+    /* Get an atom for the dataset */
+    if ((ret_value = H5VL_register_id(H5I_DATASET, dset, obj->vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize dataset handle")
 
 done:
-    /* Release the dataset's object header, if it was created */
-    if(dset) {
-        H5O_loc_t *oloc;         /* Object location for dataset */
-
-        /* Get the new dataset's object location */
-        if(NULL == (oloc = H5D_oloc(dset)))
-            HDONE_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get object location of dataset")
-
-        /* Decrement refcount on dataset's object header in memory */
-        if(H5O_dec_rc_by_loc(oloc, dxpl_id) < 0)
-           HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
-    } /* end if */
-
     /* Cleanup on failure */
-    if(ret_value < 0)
-        if(dset && H5D_close(dset) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+    if (H5I_INVALID_HID == ret_value)
+        if (dset && H5VL_dataset_close (dset, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release dataset")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate_anon() */

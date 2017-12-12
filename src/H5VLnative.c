@@ -999,15 +999,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_dataset_create
+ * Function:    H5VL_native_dataset_create
  *
- * Purpose:	Creates a dataset inside a native h5 file.
+ * Purpose:     Creates a dataset inside a native h5 file.
  *
- * Return:	Success:	dataset id. 
- *		Failure:	NULL
+ * Return:      Success:    A pointer to a dataset struct
  *
- * Programmer:  Mohamad Chaarawi
- *              March, 2012
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -1016,36 +1014,38 @@ H5VL_native_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *
                            hid_t dapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
-    H5G_loc_t	   loc;                 /* Object location to insert dataset into */
-    hid_t          type_id, space_id, lcpl_id;
-    H5D_t	   *dset = NULL;        /* New dataset's info */
+    H5G_loc_t	    loc;                 /* Object location to insert dataset into */
+    hid_t           type_id = H5I_INVALID_HID;
+    hid_t           space_id = H5I_INVALID_HID;
+    hid_t           lcpl_id = H5I_INVALID_HID;;
+    H5D_t          *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
     void           *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
     /* get creation properties */
-    if(H5P_get(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
+    if (H5P_get(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id")
-    if(H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
+    if (H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id")
-    if(H5P_get(plist, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
+    if (H5P_get(plist, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
 
     /* Check arguments */
-    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+    if (H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
-    if(H5I_DATATYPE != H5I_get_type(type_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype ID")
-    if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+    if (H5I_DATATYPE != H5I_get_type(type_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype ID")
+    if (NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace ID")
 
     /* H5Dcreate_anon */
-    if(NULL == name) {
+    if (NULL == name) {
         /* build and open the new dataset */
         if(NULL == (dset = H5D__create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, dxpl_id)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset")
@@ -1053,26 +1053,26 @@ H5VL_native_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *
     /* H5Dcreate2 */
     else {
         /* Create the new dataset & get its ID */
-        if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, lcpl_id, 
+        if (NULL == (dset = H5D__create_named(&loc, name, type_id, space, lcpl_id, 
                                              dcpl_id, dapl_id, dxpl_id)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset")
     }
     ret_value = (void *)dset;
 
 done:
-    if(NULL == name) {
+    if (NULL == name) {
         /* Release the dataset's object header, if it was created */
-        if(dset) {
+        if (dset) {
             H5O_loc_t *oloc;         /* Object location for dataset */
 
             /* Get the new dataset's object location */
-            if(NULL == (oloc = H5D_oloc(dset)))
+            if (NULL == (oloc = H5D_oloc(dset)))
                 HDONE_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get object location of dataset")
 
             /* Decrement refcount on dataset's object header in memory */
-            if(H5O_dec_rc_by_loc(oloc, dxpl_id) < 0)
+            if (H5O_dec_rc_by_loc(oloc, dxpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object")
-        } /* end if */
+        }
     }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_dataset_create() */
