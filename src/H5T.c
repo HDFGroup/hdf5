@@ -28,23 +28,18 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"      /* Generic Functions        */
-#include "H5ACprivate.h"    /* Metadata cache           */
-#include "H5Dprivate.h"     /* Datasets                 */
-#include "H5Eprivate.h"     /* Error handling           */
-#include "H5Fprivate.h"     /* Files                    */
-#include "H5FLprivate.h"    /* Free Lists               */
-#include "H5FOprivate.h"    /* File objects             */
-#include "H5Gprivate.h"     /* Groups                   */
-#include "H5Iprivate.h"     /* IDs                      */
-#include "H5MMprivate.h"    /* Memory management        */
-#include "H5Pprivate.h"     /* Property lists           */
-#include "H5Tpkg.h"         /* Datatypes                */
-
-/* Check for header needed for SGI floating-point code */
-#ifdef H5_HAVE_SYS_FPU_H
-#include <sys/fpu.h>
-#endif /* H5_HAVE_SYS_FPU_H */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fprivate.h"         /* Files                                    */
+#include "H5FLprivate.h"        /* Free Lists                               */
+#include "H5FOprivate.h"        /* File objects                             */
+#include "H5Gprivate.h"         /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5Tpkg.h"             /* Datatypes                                */
 
 
 /****************/
@@ -539,7 +534,7 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     H5I_DATATYPE,        /* ID class value */
     0,                   /* Class flags    */
     8,                   /* # of reserved IDs for class */
-    (H5I_free_t)H5T_close    /* Callback routine for closing objects of this class */
+    (H5I_free_t)H5T__close_datatype    /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */
