@@ -403,35 +403,31 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dget_space_status
+ * Function:    H5Dget_space_status
  *
- * Purpose:	Returns the status of dataspace allocation.
+ * Purpose:     Returns the status of dataspace allocation.
  *
- * Return:
- *		Success:	Non-negative
- *
- *		Failture:	Negative
- *
- * Programmer:	Raymond Lu
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
 {
-    H5D_t 	*dset = NULL;
-    herr_t 	ret_value = SUCCEED;
+    H5VL_object_t  *dset = NULL;
+    herr_t 	        ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Ds", dset_id, allocation);
 
-    /* Check arguments */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    /* Check args */
+    if (NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
-    /* Read dataspace address and return */
-    if(H5D__get_space_status(dset, allocation, H5AC_ind_read_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
+    /* Read data space address through the VOL and return */
+    if ((ret_value = H5VL_dataset_get(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_GET_SPACE_STATUS, 
+                                     H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, allocation)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get space status")
 
 done:
     FUNC_LEAVE_API(ret_value)

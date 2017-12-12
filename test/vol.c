@@ -410,6 +410,7 @@ test_basic_dataset_operation(void)
 
     hsize_t storage_size;
     haddr_t offset;
+    H5D_space_status_t status;
 
     int in_buf[N_ELEMENTS];
     int out_buf[N_ELEMENTS];
@@ -469,6 +470,10 @@ test_basic_dataset_operation(void)
     if ((sid = H5Dget_space(did)) < 0)
         TEST_ERROR;
     if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* H5Dget_space_status */
+    if (H5Dget_space_status(did, &status) < 0)
         TEST_ERROR;
 
     /* H5Dget_type */
