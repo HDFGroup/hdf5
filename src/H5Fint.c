@@ -1864,10 +1864,6 @@ done:
  *
  *              Failure:    NULL
  *
- * Modifications:
- *              Quincey Koziol, May 14, 2002
- *              Keep old file's read/write intent in reopened file.
- *
  *-------------------------------------------------------------------------
  */
 H5F_t *

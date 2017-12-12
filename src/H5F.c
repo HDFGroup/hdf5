@@ -683,11 +683,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
-    /* XXX: Need to replace H5F_try_close(), which takes a H5F_t */
-    if (H5I_INVALID_HID == ret_value)
-        if (new_file && H5F_try_close(new_file, NULL) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
 
@@ -769,11 +764,6 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
-    /* XXX: Need to replace H5F_try_close(), which takes a H5F_t */
-    if (H5I_INVALID_HID == ret_value)
-        if (new_file && H5F_try_close(new_file, NULL) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
 
@@ -875,38 +865,32 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    H5F_t    *old_file = NULL;
-    H5F_t    *new_file = NULL;
-    hid_t    ret_value = H5I_INVALID_HID;
+    H5VL_object_t   *obj = NULL;
+    void            *file;                          /* File token from VOL driver */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
-    /* Check arguments */
-    if (NULL == (old_file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file")
+    /* Get the file object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
-    /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if (NULL == (new_file = H5F_new(old_file->shared, 0, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
+    /* Reopen the file */
+    if (H5VL_file_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, H5VL_FILE_REOPEN, &file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL driver")
+
+    /* Make sure that worked */
+    if (NULL == file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
 
-    /* Duplicate old file's names */
-    new_file->open_name = H5MM_xstrdup(old_file->open_name);
-    new_file->actual_name = H5MM_xstrdup(old_file->actual_name);
-    new_file->extpath = H5MM_xstrdup(old_file->extpath);
-
-    if ((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
+    /* Get an atom for the file */
+    if ((ret_value = H5VL_register_id(H5I_FILE, file, obj->vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
-    /* Keep this ID in file object structure */
-    /* XXX: Fix up after id_exists hax */
-//    new_file->file_id = ret_value;
-
 done:
-    if (ret_value < 0 && new_file)
-        if (H5F__dest(new_file, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "can't close file")
-
+    /* XXX: If registration fails, file will not be closed */
     FUNC_LEAVE_API(ret_value)
 } /* end H5Freopen() */
 

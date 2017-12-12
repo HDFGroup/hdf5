@@ -207,10 +207,10 @@ error:
 static herr_t
 test_basic_file_operation(void)
 {
-    hid_t fid = H5I_INVALID_HID;
-//    hid_t fid2 = H5I_INVALID_HID;   /* for H5Freopen() */
-    hid_t fapl_id = H5I_INVALID_HID;
-    hid_t fcpl_id = H5I_INVALID_HID;
+    hid_t fid           = H5I_INVALID_HID;
+    hid_t fid_reopen    = H5I_INVALID_HID;
+    hid_t fapl_id       = H5I_INVALID_HID;
+    hid_t fcpl_id       = H5I_INVALID_HID;
 
     ssize_t     obj_count;
     hid_t       obj_id_list[1];
@@ -285,12 +285,12 @@ test_basic_file_operation(void)
     /* H5Fopen */
     if ((fid = H5Fopen(NATIVE_VOL_TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-//    if ((fid2 = H5Freopen(fid)) < 0)
-//        TEST_ERROR;
+    if ((fid_reopen = H5Freopen(fid)) < 0)
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
-//    if (H5Fclose(fid2) < 0)
-//        TEST_ERROR;
+    if (H5Fclose(fid_reopen) < 0)
+        TEST_ERROR;
 
     HDremove(NATIVE_VOL_TEST_FILENAME);
 
@@ -300,6 +300,7 @@ test_basic_file_operation(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
+        H5Fclose(fid_reopen);
         H5Pclose(fapl_id);
         H5Pclose(fcpl_id);
     } H5E_END_TRY;
