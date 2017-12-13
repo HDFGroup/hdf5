@@ -32,17 +32,18 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"         /* Datasets                             */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5HLprivate.h"	/* Local Heaps				*/
-#include "H5Iprivate.h"		/* IDs					*/
-#include "H5Lprivate.h"		/* Links				*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Ppublic.h"		/* Property Lists			*/
-#include "H5WBprivate.h"        /* Wrapped Buffers                      */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fprivate.h"         /* File access                              */
+#include "H5Gpkg.h"             /* Groups                                   */
+#include "H5HLprivate.h"        /* Local Heaps                              */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Ppublic.h"          /* Property Lists                           */
+#include "H5WBprivate.h"        /* Wrapped Buffers                          */
+#include "H5VLnative.h"         /* Virtual Object Layer (native)            */
 
 
 /****************/
@@ -205,7 +206,8 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     /* Create a group ID to pass to the user-defined callback */
     if(NULL == (grp = H5G_open(&grp_loc_copy, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-    if((cur_grp = H5I_register(H5I_GROUP, grp, FALSE)) < 0)
+    /* XXX: Unclear if it's okay to use the native call here */
+    if((cur_grp = H5VL_native_register(H5I_GROUP, grp, FALSE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Check for generic default property list and use link access default if so */

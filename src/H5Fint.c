@@ -1874,13 +1874,13 @@ H5F_reopen(H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if (NULL == (ret_value = H5F_new(f->shared, 0, H5P_FILE_CREATE_DEFAULT, 
-                                    H5P_FILE_ACCESS_DEFAULT, NULL)))
+    if (NULL == (ret_value = H5F_new(f->shared, 0, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to reopen file")
 
     /* Duplicate old file's names */
     ret_value->open_name    = H5MM_xstrdup(f->open_name);
     ret_value->actual_name  = H5MM_xstrdup(f->actual_name);
+    ret_value->extpath      = H5MM_xstrdup(f->extpath);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

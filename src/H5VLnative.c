@@ -1919,14 +1919,16 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         /* H5Freopen */
         case H5VL_FILE_REOPEN:
             {
-                void   **ret = va_arg(arguments, void **);
-                H5F_t  *new_file = NULL;
+                void   **ret        = va_arg(arguments, void **);
+                H5F_t  *new_file    = NULL;
 
                 f = (H5F_t *)obj;
+
+                /* Reopen the file through the VOL driver */
                 if (NULL == (new_file = H5F_reopen(f)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+
                 new_file->id_exists = TRUE;
-                new_file->extpath = H5MM_xstrdup(f->extpath);
 
                 *ret = (void *)new_file;
                 break;
