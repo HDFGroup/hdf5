@@ -161,6 +161,7 @@ typedef struct H5VL_json_object_t {
     H5VL_json_object_t *domain; /* containing_file */ 
     H5I_type_t          obj_type;
     json_t*             object_uuid; /* identify the object within type lists in file */
+    json_t*             object_json; /* a pointer into the object within the file object */
     char                URI[URI_MAX_LENGTH]; //FTW: URI will go away, functionally replaced by object_uuid
     object_union_t      u;
 } H5VL_json_object_t;

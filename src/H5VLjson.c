@@ -1437,26 +1437,7 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     new_dataset->u.dataset.dtype_id = FAIL;
     new_dataset->u.dataset.space_id = FAIL;
 
-#if 0
-    if (H5VL_json_parse_dataset_create_options(obj, name, dcpl_id, create_request_body) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, NULL, "can't parse dataset creation parameters")
-//...was rest stuff...
-    /* Store the newly-created dataset's URI */
-    if (H5VL_json_parse_response(response_buffer.buffer, NULL, new_dataset->URI, yajl_copy_object_URI_parse_callback) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, NULL, "unable to parse new dataset's URI")
-#endif
-
-//FTW: replace the rest stuff with the appropriate modifications on a JANNSON object
-// FTW WIP
-new_dataset->domain->u.file.json_file_object; // This is the JANNSON File object that will contain the new dataset. 
-// Go into this and grab the dataset collection.
-// Create a new uuid and insert into the dataset collection.
-// Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. 
-
-// Use the junk below to get the type and shape for the dataset. The attributes field will be empty [] and the value field will be null. 
-
-
-
+    /* Get the type and shape for the dataset. The attributes field will be empty [] and the value field will be null. */
     if (NULL == (plist = (H5P_genplist_t *) H5I_object(dcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't get dataset creation property list")
 
@@ -1465,11 +1446,59 @@ new_dataset->domain->u.file.json_file_object; // This is the JANNSON File object
     if (H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property list value for space ID")
 
-
     if ((new_dataset->u.dataset.dtype_id = H5Tcopy(type_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "failed to copy datatype")
     if ((new_dataset->u.dataset.space_id = H5Scopy(space_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "failed to copy dataspace")
+
+    /* create a new uuid for this dataset */
+    h5json_uuid_t       new_dataset_uuid;
+    h5json_uuid_generate(new_dataset_uuid);
+    new_dataset->object_uuid = json_string(new_dataset_uuid);
+
+    /* Now the persistent JANSSON representation */
+
+    /* create a new JANSSON object and attach it to the library object */
+    new_dataset->object_json = json_object();
+
+    /* grab the dataset collection from the Domain/File */
+    json_t* dataset_collection = json_object_get(new_dataset->domain->u.file.json_file_object, "datasets");
+
+    /* insert the new JANSSON object into the dataset collection */
+    json_object_set_new(dataset_collection, json_string_value(new_dataset->object_uuid), new_dataset->object_json);
+
+    /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
+    json_t* parent_uuid;
+    switch (parent->obj_type)
+    {
+        case H5I_FILE:
+            /* if starting with file, grab id of the root group, and move on. */
+            parent_uuid = json_object_get(new_dataset->domain->u.file.json_file_object, "root");
+            break;
+        case H5I_GROUP:
+            parent_uuid = parent->object_uuid;
+            break;
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "Not a valid parent object type.")
+    }
+
+// FTW WIP
+    /* insert a new link into the groups linklist */
+    
+    // get the group
+    json_t* group_hashtable = json_object_get(new_dataset->domain->u.file.json_file_object, "groups");
+    json_t* group = json_object_get(group_hashtable, json_string_value(parent_uuid));
+
+    /* create the link */
+    json_t* link = json_object();
+    json_object_set_new(link, "class", json_string("H5L_TYPE_HARD"));
+    json_object_set_new(link, "title", json_string(name));
+    json_object_set_new(link, "collection", json_string("datasets"));
+    json_object_set_new(link, "id", json_string(new_dataset_uuid)); 
+
+    /* add the link to the group's link collection */
+    json_t* link_collection = json_object_get(group, "links");
+    json_array_append(link_collection, link); 
 
 #ifdef PLUGIN_DEBUG
     printf("Dataset H5VL_json_object_t fields:\n");
