@@ -156,10 +156,10 @@
 #define H5F_ACS_EFC_SIZE_ENC                    H5P__encode_unsigned
 #define H5F_ACS_EFC_SIZE_DEC                    H5P__decode_unsigned
 /* Definition for vds file cache size */
-#define H5F_ACS_VDS_SIZE_SIZE                   sizeof(unsigned)
-#define H5F_ACS_VDS_SIZE_DEF                    0
-#define H5F_ACS_VDS_SIZE_ENC                    H5P__encode_unsigned
-#define H5F_ACS_VDS_SIZE_DEC                    H5P__decode_unsigned
+#define H5F_ACS_VDS_FILE_CACHE_SIZE_SIZE        sizeof(unsigned)
+#define H5F_ACS_VDS_FILE_CACHE_SIZE_DEF         0
+#define H5F_ACS_VDS_FILE_CACHE_SIZE_ENC         H5P__encode_unsigned
+#define H5F_ACS_VDS_FILE_CACHE_SIZE_DEC         H5P__decode_unsigned
 /* Definition of pointer to initial file image info */
 #define H5F_ACS_FILE_IMAGE_INFO_SIZE            sizeof(H5FD_file_image_info_t)
 #define H5F_ACS_FILE_IMAGE_INFO_DEF             H5FD_DEFAULT_FILE_IMAGE_INFO
@@ -360,7 +360,7 @@ static const H5FD_mem_t H5F_def_mem_type_g = H5F_ACS_MULTI_TYPE_DEF;            
 static const hbool_t H5F_def_latest_format_g = H5F_ACS_LATEST_FORMAT_DEF;          /* Default setting for "use the latest version of the format" flag */
 static const hbool_t H5F_def_want_posix_fd_g = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
 static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
-static const unsigned H5F_def_vds_size_g = H5F_ACS_VDS_SIZE_DEF;                   /* Default vds file cache size */
+static const unsigned H5F_def_vds_file_cache_size_g = H5F_ACS_VDS_FILE_CACHE_SIZE_DEF;        /* Default vds file cache size */
 static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;                 /* Default file image info and callbacks */
 static const hbool_t H5F_def_core_write_tracking_flag_g = H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF;              /* Default setting for core VFD write tracking */
 static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF;     /* Default core VFD write tracking page size */
@@ -517,8 +517,8 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the vds file cache size */
-    if(H5P_register_real(pclass, H5F_ACS_VDS_SIZE_NAME, H5F_ACS_VDS_SIZE_SIZE, &H5F_def_vds_size_g,
-            NULL, NULL, NULL, H5F_ACS_VDS_SIZE_ENC, H5F_ACS_VDS_SIZE_DEC,
+    if(H5P_register_real(pclass, H5F_ACS_VDS_FILE_CACHE_SIZE_NAME, H5F_ACS_VDS_FILE_CACHE_SIZE_SIZE, &H5F_def_vds_file_cache_size_g,
+            NULL, NULL, NULL, H5F_ACS_VDS_FILE_CACHE_SIZE_ENC, H5F_ACS_VDS_FILE_CACHE_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -2499,7 +2499,7 @@ H5Pset_vds_file_cache_size(hid_t plist_id, unsigned vds_size)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
-    if(H5P_set(plist, H5F_ACS_VDS_SIZE_NAME, &vds_size) < 0)
+    if(H5P_set(plist, H5F_ACS_VDS_FILE_CACHE_SIZE_NAME, &vds_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vds file cache size")
 
 done:
@@ -2534,7 +2534,7 @@ H5Pget_vds_file_cache_size(hid_t plist_id, unsigned *vds_size)
 
     /* Get value */
     if(vds_size)
-        if(H5P_get(plist, H5F_ACS_VDS_SIZE_NAME, vds_size) < 0)
+        if(H5P_get(plist, H5F_ACS_VDS_FILE_CACHE_SIZE_NAME, vds_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vds file cache size")
 
 done:
