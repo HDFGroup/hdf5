@@ -667,6 +667,12 @@ test_basic_link_operation(void)
     if (H5Lcreate_soft("/", fid, NATIVE_VOL_TEST_SOFT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
+    /* H5Lexists */
+    if (H5Lexists(fid, NATIVE_VOL_TEST_SOFT_LINK_NAME, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (H5Lexists(fid, NATIVE_VOL_TEST_HARD_LINK_NAME, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 

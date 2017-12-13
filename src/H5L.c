@@ -32,6 +32,8 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Oprivate.h"         /* File objects                             */
 #include "H5Pprivate.h"         /* Property lists                           */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+
 
 /****************/
 /* Local Macros */
@@ -851,41 +853,51 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lexists
+ * Function:    H5Lexists
  *
- * Purpose:	Checks if a link of a given name exists in a group
+ * Purpose:     Checks if a link of a given name exists in a group
  *
- * Return:	Success:	TRUE/FALSE
- * 		Failure:	Negative
+ * Return:      Success:    TRUE/FALSE
  *
- * Programmer:	Quincey Koziol
- *              Friday, March 16, 2007
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
-    htri_t ret_value;
+    H5VL_object_t      *obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t   loc_params;
+    hid_t               dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
+    htri_t              ret_value;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "name parameter cannot be an empty string")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, (-1), "can't set access and transfer property lists")
 
-    /* Check for the existence of the link */
-    if((ret_value = H5L_exists(&loc, name, lapl_id, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+    /* Set location struct fields */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name    = name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+
+    /* Get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
+
+    /* Check link existence through the VOL */
+    if (H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_EXISTS,
+                          dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
