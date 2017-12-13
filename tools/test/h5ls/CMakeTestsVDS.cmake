@@ -119,7 +119,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
-      set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
+      set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix")
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -134,7 +134,7 @@
               ${resultfile}.out
               ${resultfile}.out.err
       )
-      set_tests_properties (H5LS_PREFIX-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
+      set_tests_properties (H5LS_PREFIX-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix")
       add_test (
           NAME H5LS_PREFIX-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
