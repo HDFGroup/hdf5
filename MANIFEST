@@ -838,6 +838,11 @@
 ./test/be_extlink2.h5
 ./test/big.c
 ./test/bittests.c
+./test/bounds_earliest_latest.h5
+./test/bounds_earliest_v18.h5
+./test/bounds_latest_latest.h5
+./test/bounds_v18_latest.h5
+./test/bounds_v18_v18.h5
 ./test/btree2.c
 ./test/cache.c
 ./test/cache_api.c
@@ -977,6 +982,7 @@
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
 ./test/tunicode.c
+./test/tverbounds18.c
 ./test/tvlstr.c
 ./test/tvltypes.c
 ./test/unlink.c

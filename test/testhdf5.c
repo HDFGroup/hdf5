@@ -66,6 +66,7 @@ main(int argc, char *argv[])
     AddTest("unicode", test_unicode, cleanup_unicode,  "UTF-8 Encoding", NULL);
     AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL);
     AddTest("misc", test_misc, cleanup_misc,  "Miscellaneous", NULL);
+    AddTest("verbounds18", test_verbounds_18, cleanup_verbounds_18,  "Version Bounds", NULL);
 
     /* Display testing information */
     TestInfo(argv[0]);
