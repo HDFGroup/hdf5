@@ -625,7 +625,7 @@ H5VL_json_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_
     printf("Received Attribute create call with following parameters:\n");
     printf("  - Attribute Name: %s\n", attr_name);
     printf("  - AAPL: %ld\n", aapl_id);
-    printf("  - Parent Object URI: %s\n", parent->URI);
+//    printf("  - Parent Object URI: %s\n", parent->URI);
     printf("  - Parent Object Type: %d\n", parent->obj_type);
 #endif
 
@@ -1100,7 +1100,7 @@ H5VL_json_attr_close(void *attr, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUS
 
 #ifdef PLUGIN_DEBUG
     printf("Received Attribute close call with following parameters:\n");
-    printf("  - parent URI: %s\n", _attr->u.attribute.parent_obj->URI);
+//    printf("  - parent URI: %s\n", _attr->u.attribute.parent_obj->URI);
     printf("  - attribute name: %s\n", _attr->u.attribute.attr_name);
     printf("  - DXPL: %ld\n\n", dxpl_id);
 #endif
@@ -1292,7 +1292,7 @@ H5VL_json_datatype_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, 
 
 #ifdef PLUGIN_DEBUG
     printf("Datatype H5VL_json_object_t fields:\n");
-    printf("  - Datatype URI: %s\n", datatype->URI);
+//    printf("  - Datatype URI: %s\n", datatype->URI);
     printf("  - Datatype object type: %d\n", datatype->obj_type);
     printf("  - Datatype Parent Domain path: %s\n\n", datatype->domain->u.file.filepath_name);
 #endif
@@ -1374,7 +1374,7 @@ H5VL_json_datatype_close(void *dt, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
 
 #ifdef PLUGIN_DEBUG
     printf("Received Datatype close call with following parameters:\n");
-    printf("  - URI: %s\n", _dtype->URI);
+//    printf("  - URI: %s\n", _dtype->URI);
 #endif
 
     HDassert(H5I_DATATYPE == _dtype->obj_type && "not a datatype");
@@ -1403,11 +1403,11 @@ static void *
 H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name, hid_t dcpl_id,
                          hid_t dapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *parent = (H5VL_json_object_t *) obj;
-    H5VL_json_object_t *new_dataset = NULL;
-    H5P_genplist_t     *plist = NULL;
+    H5VL_json_object_t* parent = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t* new_dataset = NULL;
+    H5P_genplist_t*     plist = NULL;
     hid_t               space_id, type_id;
-    void               *ret_value = NULL;
+    void*               ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1417,7 +1417,7 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     printf("  - DCPL: %ld\n", dcpl_id);
     printf("  - DAPL: %ld\n", dapl_id);
     printf("  - DXPL: %ld\n", dxpl_id);
-    printf("  - Parent Object URI: %s\n", parent->URI);
+//    printf("  - Parent Object URI: %s\n", parent->URI);
     printf("  - Parent Object Type: %d\n\n", parent->obj_type);
 #endif
 
@@ -1502,7 +1502,7 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
 
 #ifdef PLUGIN_DEBUG
     printf("Dataset H5VL_json_object_t fields:\n");
-    printf("  - Dataset URI: %s\n", new_dataset->URI);
+//    printf("  - Dataset URI: %s\n", new_dataset->URI);
     printf("  - Dataset Object type: %d\n", new_dataset->obj_type);
     printf("  - Dataset Parent Domain path: %s\n", new_dataset->domain->u.file.filepath_name);
 #endif
@@ -1552,6 +1552,9 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
     HDassert((H5I_FILE == parent->obj_type || H5I_GROUP == parent->obj_type)
             && "parent object not a file or group");
 
+
+// Dataset open call differs from create in that the JANSSON representation already exists and needs to be looked up, similar to finding a group. On return, the library/VOL object still needs to contain the correct handle information. 
+
     /* Allocate and setup internal Dataset struct */
     if (NULL == (dataset = (H5VL_json_object_t *) H5MM_malloc(sizeof(*dataset))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate dataset object")
@@ -1577,7 +1580,7 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
 
 #ifdef PLUGIN_DEBUG
     printf("Dataset H5VL_json_object_t fields:\n");
-    printf("  - Dataset URI: %s\n", dataset->URI);
+//    printf("  - Dataset URI: %s\n", dataset->URI);
     printf("  - Dataset Object type: %d\n", dataset->obj_type);
     printf("  - Dataset Parent Domain path: %s\n\n", dataset->domain->u.file.filepath_name);
 #endif
@@ -1628,7 +1631,7 @@ H5VL_json_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
 
 #ifdef PLUGIN_DEBUG
     printf("Receive Dataset read call with following parameters:\n");
-    printf("  - Dataset URI: %s\n", dataset->URI);
+//    printf("  - Dataset URI: %s\n", dataset->URI);
     printf("  - mem_type_id: %ld\n", mem_space_id);
     printf("  - is all mem: %s\n", (mem_space_id == H5S_ALL) ? "yes" : "no");
     printf("  - file_space_id: %ld\n", file_space_id);
@@ -1780,7 +1783,7 @@ H5VL_json_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
 
 #ifdef PLUGIN_DEBUG
     printf("Received Dataset write call with following parameters:\n");
-    printf("  - Dataset URI: %s\n", dataset->URI);
+//    printf("  - Dataset URI: %s\n", dataset->URI);
     printf("  - mem_space_id: %ld\n", mem_space_id);
     printf("  - is all mem: %s\n", (mem_space_id == H5S_ALL) ? "true" : "false");
     printf("  - file_space_id: %ld\n", file_space_id);
@@ -2046,7 +2049,7 @@ H5VL_json_dataset_close(void *dset, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
 
 #ifdef PLUGIN_DEBUG
     printf("Received Dataset close call with following parameters:\n");
-    printf("  - URI: %s\n", _dset->URI);
+//    printf("  - URI: %s\n", _dset->URI);
     printf("  - DXPL: %ld\n\n", dxpl_id);
 #endif
 
@@ -2398,7 +2401,7 @@ H5VL_json_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED dxp
 #ifdef PLUGIN_DEBUG
     printf("Received File get call with following parameters:\n");
     printf("  - Get Type: %d\n", get_type);
-    printf("  - File URI: %s\n", file->URI);
+//    printf("  - File URI: %s\n", file->URI);
     printf("  - File Pathname: %s\n\n", file->domain->u.file.filepath_name);
 #endif
 
@@ -2463,7 +2466,7 @@ H5VL_json_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t H5_
 #ifdef PLUGIN_DEBUG
     printf("Received File-specific call with following parameters:\n");
     printf("  - Specific Type: %d\n", specific_type);
-    printf("  - File URI: %s\n", file->URI);
+//    printf("  - File URI: %s\n", file->URI);
     printf("  - File Pathname: %s\n\n", file->domain->u.file.filepath_name);
 #endif
 
@@ -2951,7 +2954,7 @@ H5VL_json_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void H5
 #ifdef PLUGIN_DEBUG
     printf("Received Group get call with following parameters:\n");
     printf("  - Get Type: %d\n", get_type);
-    printf("  - Group URI: %s\n", group->URI);
+//    printf("  - Group URI: %s\n", group->URI);
     printf("  - Group File: %s\n", group->domain->u.file.filepath_name);
 #endif
 
@@ -3083,20 +3086,20 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for link target object loc params")
 
 #ifdef PLUGIN_DEBUG
-            printf("  - Link loc URI: %s\n", ((H5VL_json_object_t *) link_loc_obj)->URI);
+//            printf("  - Link loc URI: %s\n", ((H5VL_json_object_t *) link_loc_obj)->URI);
             printf("  - Link target loc params by name: %s\n", target_loc_params.loc_data.loc_by_name.name);
 #endif
 
-            search_ret = H5VL_json_find_link_by_path((H5VL_json_object_t *) link_loc_obj, target_loc_params.loc_data.loc_by_name.name,
-                    yajl_copy_object_URI_parse_callback, NULL, &link_target.URI);
+//            search_ret = H5VL_json_find_link_by_path((H5VL_json_object_t *) link_loc_obj, target_loc_params.loc_data.loc_by_name.name, yajl_copy_object_URI_parse_callback, NULL, &link_target.URI);
+
             if (!search_ret || search_ret < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to locate link target object")
 
 #ifdef PLUGIN_DEBUG
-            printf("  - Target object URI: %s\n", link_target.URI);
+//            printf("  - Target object URI: %s\n", link_target.URI);
 #endif
 
-            snprintf(create_request_body, REQUEST_BODY_MAX_LENGTH, "{\"id\": \"%s\"}", link_target.URI);
+//            snprintf(create_request_body, REQUEST_BODY_MAX_LENGTH, "{\"id\": \"%s\"}", link_target.URI);
             break;
         } /* H5VL_LINK_CREATE_HARD */
 
@@ -3153,7 +3156,7 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
     curl_headers = curl_slist_append(curl_headers, "Expect:");
 
     /* Redirect from base URL to "/groups/<id>/links/<name>" to create the link */
-    snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/links/%s", base_URL, link_new_loc_obj->URI, get_basename(link_path_copy));
+//    snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/links/%s", base_URL, link_new_loc_obj->URI, get_basename(link_path_copy));
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -3233,7 +3236,7 @@ H5VL_json_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 #ifdef PLUGIN_DEBUG
     printf("Received Link get call with following parameters:\n");
     printf("  - Get type: %d\n", get_type);
-    printf("  - Link URI: %s\n", link->URI);
+//    printf("  - Link URI: %s\n", link->URI);
     printf("  - Link File: %s\n\n", link->domain->u.file.filepath_name);
 #endif
 
@@ -3314,7 +3317,7 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
 #ifdef PLUGIN_DEBUG
     printf("Received Link-specific call with following parameters:\n");
     printf("  - Specific type: %d\n", specific_type);
-    printf("  - Link URI: %s\n", loc_obj->URI);
+//    printf("  - Link URI: %s\n", loc_obj->URI);
 #endif
 
     HDassert((H5I_FILE == loc_obj->obj_type || H5I_GROUP == loc_obj->obj_type)
@@ -5302,12 +5305,12 @@ H5VL_json_parse_datatype(H5VL_json_object_t *object)
     switch (object->obj_type) {
         case H5I_DATASET:
             /* Redirect cURL to "/datasets/<id>" to get the datatype of the dataset */
-            snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/type", base_URL, object->URI);
+//            snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/type", base_URL, object->URI);
             break;
 
         case H5I_DATATYPE:
             /* Redirect cURL to "/datatypes/<id>" to get the string representation of the datatype */
-            snprintf(temp_url, URL_MAX_LENGTH, "%s/datatypes/%s", base_URL, object->URI);
+//            snprintf(temp_url, URL_MAX_LENGTH, "%s/datatypes/%s", base_URL, object->URI);
             break;
 
         case H5I_ATTR:
@@ -5479,7 +5482,7 @@ H5VL_json_parse_dataspace(H5VL_json_object_t *object)
     switch (object->obj_type) {
         case H5I_DATASET:
             /* Redirect cURL to "/datasets/<id>/shape" to get the shape of the dataset's dataspace */
-            snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/shape", base_URL, object->URI);
+//            snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/shape", base_URL, object->URI);
             break;
 
         case H5I_ATTR:
@@ -5493,18 +5496,15 @@ H5VL_json_parse_dataspace(H5VL_json_object_t *object)
             /* XXX: Determine best way to add in attribute name below */
             switch (object->u.attribute.parent_obj->obj_type) {
                 case H5I_GROUP:
-                    snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/attributes/%s",
-                            base_URL, object->u.attribute.parent_obj->URI, object->u.attribute.attr_name);
+//                    snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/attributes/%s", base_URL, object->u.attribute.parent_obj->URI, object->u.attribute.attr_name);
                     break;
 
                 case H5I_DATASET:
-                    snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/attributes/%s",
-                            base_URL, object->u.attribute.parent_obj->URI, object->u.attribute.attr_name);
+//                    snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/attributes/%s", base_URL, object->u.attribute.parent_obj->URI, object->u.attribute.attr_name);
                     break;
 
                 case H5I_DATATYPE:
-                    snprintf(temp_url, URL_MAX_LENGTH, "%s/datatypes/%s/attributes/%s",
-                            base_URL, object->u.attribute.parent_obj->URI, object->u.attribute.attr_name);
+//                    snprintf(temp_url, URL_MAX_LENGTH, "%s/datatypes/%s/attributes/%s", base_URL, object->u.attribute.parent_obj->URI, object->u.attribute.attr_name);
                     break;
 
                 case H5I_UNINIT:
@@ -5886,13 +5886,7 @@ H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate space for dataset link body")
 
         /* Form the Dataset Creation Link portion of the Dataset create request */
-        snprintf(link_body, DATASET_CREATE_LINK_BODY_MAX_LENGTH,
-                 "\"link\": {"
-                     "\"id\": \"%s\", "
-                     "\"name\": \"%s\""
-                 "}",
-                 pobj->URI,
-                 get_basename(name));
+//        snprintf(link_body, DATASET_CREATE_LINK_BODY_MAX_LENGTH, "\"link\": {" "\"id\": \"%s\", " "\"name\": \"%s\"" "}", pobj->URI, get_basename(name));
     } /* end if */
 
     snprintf(create_request_body, REQUEST_BODY_MAX_LENGTH, "{ %s%s%s%s%s%s%s%s%s }",
