@@ -161,6 +161,7 @@ set (testhdf5_SRCS
     ${HDF5_TEST_SOURCE_DIR}/ttime.c
     ${HDF5_TEST_SOURCE_DIR}/ttst.c
     ${HDF5_TEST_SOURCE_DIR}/tunicode.c
+    ${HDF5_TEST_SOURCE_DIR}/tverbounds18.c
     ${HDF5_TEST_SOURCE_DIR}/tvltypes.c
     ${HDF5_TEST_SOURCE_DIR}/tvlstr.c
 )

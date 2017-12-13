@@ -107,6 +107,11 @@ set (HDF5_REFERENCE_TEST_FILES
     be_data.h5
     be_extlink1.h5
     be_extlink2.h5
+    bounds_earliest_latest.h5
+    bounds_earliest_v18.h5
+    bounds_latest_latest.h5
+    bounds_v18_latest.h5
+    bounds_v18_v18.h5
     corrupt_stab_msg.h5
     deflate.h5
     family_v16_00000.h5
