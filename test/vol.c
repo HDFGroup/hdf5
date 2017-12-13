@@ -565,6 +565,9 @@ test_basic_attribute_operation(void)
 
     hsize_t dims    = 1;
 
+    int     data_in     = 42;
+    int     data_out    = 0;
+
     TESTING("Basic VOL attribute operations");
 
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -577,6 +580,16 @@ test_basic_attribute_operation(void)
     if ((aid = H5Acreate2(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* H5Awrite */
+    if (H5Awrite(aid, H5T_NATIVE_INT, &data_in) < 0)
+        TEST_ERROR;
+
+    /* H5Aread */
+    if (H5Aread(aid, H5T_NATIVE_INT, &data_out) < 0)
+        TEST_ERROR;
+    if (data_in != data_out)
         TEST_ERROR;
 
     /* H5Aclose */
