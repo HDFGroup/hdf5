@@ -36,7 +36,7 @@ set_target_properties (H5HL_buildiface PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_HL_F90_SRC_BINARY_DIR}/shared")
   if (WIN32)
     set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${CMAKE_BUILD_TYPE})
@@ -87,7 +87,7 @@ set_target_properties (${HDF5_HL_F90_C_LIB_TARGET} PROPERTIES
 )
 set (install_targets ${HDF5_HL_F90_C_LIB_TARGET})
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS)
   add_library (${HDF5_HL_F90_C_LIBSH_TARGET} SHARED ${HDF5_HL_F90_C_SOURCES} ${HDF5_HL_F90_HEADERS})
   TARGET_C_PROPERTIES (${HDF5_HL_F90_C_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_HL_F90_C_LIBSH_TARGET} ${HDF5_F90_C_LIBSH_TARGET} ${HDF5_HL_LIBSH_TARGET})
@@ -129,7 +129,7 @@ set_source_files_properties (
     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
     PROPERTIES GENERATED TRUE
 )
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS)
   set (CMDSH $<TARGET_FILE:H5HL_buildiface>)
   add_custom_command (
       OUTPUT ${HDF5_HL_F90_SRC_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_SRC_BINARY_DIR}/shared/H5TBff_gen.F90
@@ -157,7 +157,7 @@ set (HDF5_HL_F90_F_SOURCES
 )
 set_source_files_properties (${HDF5_HL_F90_F_SOURCES} PROPERTIES LANGUAGE Fortran)
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS)
   set (HDF5_HL_F90_F_SOURCES_SHARED
       ${HDF5_HL_F90_F_BASE_SOURCES}
 
@@ -187,7 +187,7 @@ endif ()
 set (install_targets ${install_targets} ${HDF5_HL_F90_LIB_TARGET})
 add_dependencies(${HDF5_HL_F90_LIB_TARGET} H5HLgen)
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS)
   add_library (${HDF5_HL_F90_LIBSH_TARGET} SHARED ${HDF5_HL_F90_F_SOURCES_SHARED})
   set (SHARED_LINK_FLAGS " ")
   if (WIN32 AND MSVC)
@@ -236,7 +236,7 @@ install (
         fortheaders
 )
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS)
   set (modsh_files
       ${MODSH_BUILD_DIR}/h5ds.mod
       ${MODSH_BUILD_DIR}/h5tb.mod
@@ -259,7 +259,7 @@ endif ()
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
-  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_HL_F90_C_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hlfortlibraries)
     #INSTALL_TARGET_PDB (${HDF5_HL_F90_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hlfortlibraries)
   endif ()

@@ -117,7 +117,7 @@ IntType::IntType(const H5Location& loc, const char *dtype_name) : AtomType()
 // Programmer   Binh-Minh Ribler - Dec 2016
 // Description
 //              In 1.10.1, this constructor was introduced and may replace the
-//              existing function CommonFG::openArrayType(const H5std_string&)
+//              existing function CommonFG::openIntType(const H5std_string&)
 //              to improve usability.
 //              -BMR, Dec 2016
 //--------------------------------------------------------------------------

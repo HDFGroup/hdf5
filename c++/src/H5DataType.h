@@ -36,6 +36,10 @@ class H5_DLLCPP DataType : public H5Object {
         // Creates a copy of a predefined type
         DataType(const PredType& pred_type);
 
+        // Constructors to open a generic named datatype at a given location.
+        DataType(const H5Location& loc, const char* name);
+        DataType(const H5Location& loc, const H5std_string& name);
+
         // Creates a datatype by way of dereference.
         DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 //        DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
@@ -123,13 +127,6 @@ class H5_DLLCPP DataType : public H5Object {
 
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DataType"); }
-
-// From CommonFG then H5Location
-        // Constructors to open a generic named datatype at a given location.
-        DataType(const H5Location& loc, const char* name);
-        DataType(const H5Location& loc, const H5std_string& name);
-
-// End of From CommonFG then H5Location
 
         // Creates a copy of an existing DataType using its id
         DataType(const hid_t type_id);
