@@ -1815,33 +1815,32 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         /* H5Fget_info2 */
         case H5VL_FILE_GET_INFO:
             {
-                H5I_type_t  type   = va_arg (arguments, H5I_type_t);
-                H5F_info2_t *finfo = va_arg (arguments, H5F_info2_t *);
-
-                if(NULL == (f = H5VL_native_get_file(obj, type))) {
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-                }
+                H5I_type_t  type   = va_arg(arguments, H5I_type_t);
+                H5F_info2_t *finfo = va_arg(arguments, H5F_info2_t *);
 
                 /* For file IDs, get the file object directly */
                 /* (This prevents the H5G_loc() call from returning the file pointer for
                  * the top file in a mount hierarchy)
                  */
+                /* XXX: Unclear if this is doing the right thing. Check the develop code */
+                if (NULL == (f = H5VL_native_get_file(obj, type)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
                 HDassert(f->shared);
 
                 /* Reset file info struct */
                 HDmemset(finfo, 0, sizeof(*finfo));
 
                 /* Get the size of the superblock and any superblock extensions */
-                if(H5F__super_size(f, dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
+                if (H5F__super_size(f, dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
                 /* Get the size of any persistent free space */
-                if(H5MF_get_freespace(f, dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
+                if (H5MF_get_freespace(f, dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
 
                 /* Check for SOHM info */
-                if(H5F_addr_defined(f->shared->sohm_addr))
-                    if(H5SM_ih_size(f, dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
+                if (H5F_addr_defined(f->shared->sohm_addr))
+                    if (H5SM_ih_size(f, dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
 
                 /* Set version # fields */

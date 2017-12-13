@@ -1334,54 +1334,30 @@ done:
 herr_t
 H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
 {
-    H5F_t *f;                           /* Top file in mount hierarchy */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5VL_object_t  *obj = NULL;
+    H5I_type_t      type;
+    herr_t          ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", obj_id, finfo);
 
     /* Check args */
     if (!finfo)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file info pointer can't be NULL")
 
-    /* For file IDs, get the file object directly */
-    /* (This prevents the H5G_loc() call from returning the file pointer for
-     * the top file in a mount hierarchy)
-     */
-    if(H5I_get_type(obj_id) == H5I_FILE ) {
-        if (NULL == (f = (H5F_t *)H5I_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-    }
-    else {
-        H5G_loc_t     loc;        /* Object location */
+    /* Check the type */
+    type = H5I_get_type(obj_id);
+    if (H5I_FILE != type && H5I_GROUP != type && H5I_DATATYPE != type && H5I_DATASET != type && H5I_ATTR != type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-        /* Get symbol table entry */
-        if (H5G_loc(obj_id, &loc) < 0)
-             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object ID")
-        f = loc.oloc->file;
-    }
-    HDassert(f->shared);
+    /* Get the file object */
+    if (NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    /* Reset file info struct */
-    HDmemset(finfo, 0, sizeof(*finfo));
-
-    /* Get the size of the superblock and any superblock extensions */
-    if (H5F__super_size(f, H5AC_ind_read_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
-
-    /* Get the size of any persistent free space */
-    if (H5MF_get_freespace(f, H5AC_ind_read_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
-
-    /* Check for SOHM info */
-    if (H5F_addr_defined(f->shared->sohm_addr))
-        if (H5SM_ih_size(f, H5AC_ind_read_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
-
-    /* Set version # fields */
-    finfo->super.version = f->shared->sblock->super_vers;
-    finfo->sohm.version = f->shared->sohm_vers;
-    finfo->free.version = HDF5_FREESPACE_VERSION;
+    /* Get the file information via the VOL */
+    if (H5VL_file_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_INFO, type, finfo) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 
 done:
     FUNC_LEAVE_API(ret_value)

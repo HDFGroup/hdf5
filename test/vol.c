@@ -212,11 +212,12 @@ test_basic_file_operation(void)
     hid_t fapl_id       = H5I_INVALID_HID;
     hid_t fcpl_id       = H5I_INVALID_HID;
 
-    ssize_t     obj_count;
-    hid_t       obj_id_list[1];
-    hsize_t     file_size;
-    unsigned    intent;
-    void       *os_file_handle = NULL;
+    ssize_t         obj_count;
+    hid_t           obj_id_list[1];
+    hsize_t         file_size;
+    unsigned        intent;
+    void           *os_file_handle = NULL;
+    H5F_info2_t     finfo;
 
     TESTING("Basic VOL file operations");
 
@@ -260,6 +261,10 @@ test_basic_file_operation(void)
 
     /* H5Fget_intent */
     if (H5Fget_intent(fid, &intent) < 0)
+        TEST_ERROR;
+
+    /* H5Fget_info2 */
+    if (H5Fget_info2(fid, &finfo) < 0)
         TEST_ERROR;
 
     /* H5Fclear_elink_file_cache */
