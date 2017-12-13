@@ -148,16 +148,13 @@ init_cparam(H5FA_create_t *cparam, farray_test_param_t *tparam)
 static herr_t
 create_file(hid_t fapl_id, hid_t *fid, H5F_t **f)
 {
-    H5VL_object_t   *obj = NULL;
-
     /* Create the file to work on */
     if ((*fid = H5Fcreate(filename_g, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if (NULL == (obj = (H5VL_object_t *)H5I_object(*fid)))
+    if (NULL == (*f = (H5F_t *)H5VL_object(*fid)))
         FAIL_STACK_ERROR;
-    *f = (H5F_t *)obj->vol_obj;
 
     /* Ignore metadata tags in the file's cache */
     if (H5AC_ignore_tags(*f) < 0)
@@ -267,8 +264,6 @@ static int
 reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, hid_t dxpl_id,
     H5FA_t **fa, haddr_t fa_addr, const farray_test_param_t *tparam)
 {
-    H5VL_object_t   *obj = NULL;
-
     /* Check for closing & re-opening the array */
     /* (actually will close & re-open the file as well) */
     if (tparam->reopen_array) {
@@ -293,9 +288,8 @@ reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, hid_t dxpl_id,
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if (NULL == (obj = (H5VL_object_t *)H5I_object(*fid)))
+        if (NULL == (*f = (H5F_t *)H5VL_object(*fid)))
             FAIL_STACK_ERROR;
-        *f = (H5F_t *)obj->vol_obj;
 
         /* Ignore metadata tags in the file's cache */
         if (H5AC_ignore_tags(*f) < 0)
@@ -637,7 +631,6 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
     H5FA_t         *fa      = NULL;             /* Fixed array wrapper          */
     H5FA_t         *fa2     = NULL;             /* Fixed array wrapper          */
     haddr_t         fa_addr = HADDR_UNDEF;      /* Array address in file        */
-    H5VL_object_t  *obj     = NULL;             /* VOL object                   */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl_id, &fid, &f) < 0)
@@ -674,9 +667,8 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if (NULL == (obj = (H5VL_object_t *)H5I_object(fid2)))
+    if (NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
         FAIL_STACK_ERROR;
-    f2 = (H5F_t *)obj->vol_obj;
 
     /* Open the fixed array through the second file handle */
     if (NULL == (fa2 = H5FA_open(f2, H5AC_ind_read_dxpl_id, fa_addr, NULL)))
@@ -815,9 +807,8 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if (NULL == (obj = (H5VL_object_t *)H5I_object(fid2)))
+    if (NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
         FAIL_STACK_ERROR;
-    f2 = (H5F_t *)obj->vol_obj;
 
     /* Open the fixed array through the second file handle */
     if (NULL == (fa2 = H5FA_open(f2, H5AC_ind_read_dxpl_id, fa_addr, NULL)))
