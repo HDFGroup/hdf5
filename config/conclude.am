@@ -31,7 +31,7 @@ TESTS = $(TEST_PROG) $(TEST_SCRIPT) $(EXTRA_TEST)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS =
-
+REALTIMEOUTPUT = $(realtimeOutput)
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)

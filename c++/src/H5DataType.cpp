@@ -243,35 +243,6 @@ void DataType::copy(const DataSet& dset)
 }
 
 //--------------------------------------------------------------------------
-// Function:    DataType::p_decode
-// Purpose      Returns an id of a type by decoding the binary object
-///             description of this datatype.
-///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - Sept 2017
-//--------------------------------------------------------------------------
-hid_t DataType::p_decode() const
-{
-    // Make sure that the buffer can be decoded
-    if (encoded_buf == NULL)
-    {
-        throw DataTypeIException("DataType::p_decode", "No encoded buffer");
-    }
-
-    // Call C function to decode the binary object description
-    hid_t encoded_dtype_id = H5Tdecode(encoded_buf);
-
-    // If H5Tdecode fails, raise exception
-    if (encoded_dtype_id < 0)
-    {
-        throw DataTypeIException("DataType::p_decode", "H5Tdecode failed");
-    }
-    else
-    {
-        return(encoded_dtype_id);
-    }
-}
-
-//--------------------------------------------------------------------------
 // Function:    DataType::decode
 ///\brief       Returns a DataType instance by decoding the binary object
 ///             description of this datatype.
@@ -388,28 +359,6 @@ bool DataType::operator==(const DataType& compared_type) const
     {
         throw DataTypeIException(inMemFunc("operator=="), "H5Tequal returns negative value");
     }
-}
-
-//--------------------------------------------------------------------------
-// Function:    DataType::p_commit (private)
-//\brief        Commits a transient datatype to a file, creating a new
-//              named datatype
-//\param        loc_id - IN: The id of either a file, group, dataset, named
-//                       datatype, or attribute.
-//\param        name - IN: Name of the datatype
-//\exception    H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
-// Modification:
-//              Copied from DataType::commit and made into private function
-//              to be commonly used by several overloads of DataType::commit.
-//              BMR - Jan, 2007
-//--------------------------------------------------------------------------
-void DataType::p_commit(hid_t loc_id, const char* name)
-{
-    // Call C routine to commit the transient datatype
-    herr_t ret_value = H5Tcommit2(loc_id, name, id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if(ret_value < 0)
-        throw DataTypeIException(inMemFunc("p_commit"), "H5Tcommit2 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -856,6 +805,57 @@ hid_t DataType::getId() const
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:    DataType::p_commit (private)
+//\brief        Commits a transient datatype to a file, creating a new
+//              named datatype
+//\param        loc_id - IN: The id of either a file, group, dataset, named
+//                       datatype, or attribute.
+//\param        name - IN: Name of the datatype
+//\exception    H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+// Modification:
+//              Copied from DataType::commit and made into private function
+//              to be commonly used by several overloads of DataType::commit.
+//              BMR - Jan, 2007
+//--------------------------------------------------------------------------
+void DataType::p_commit(hid_t loc_id, const char* name)
+{
+    // Call C routine to commit the transient datatype
+    herr_t ret_value = H5Tcommit2(loc_id, name, id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if(ret_value < 0)
+        throw DataTypeIException(inMemFunc("p_commit"), "H5Tcommit2 failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType::p_decode
+// Purpose      Returns an id of a type by decoding the binary object
+///             description of this datatype.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Sept 2017
+//--------------------------------------------------------------------------
+hid_t DataType::p_decode() const
+{
+    // Make sure that the buffer can be decoded
+    if (encoded_buf == NULL)
+    {
+        throw DataTypeIException("DataType::p_decode", "No encoded buffer");
+    }
+
+    // Call C function to decode the binary object description
+    hid_t encoded_dtype_id = H5Tdecode(encoded_buf);
+
+    // If H5Tdecode fails, raise exception
+    if (encoded_dtype_id < 0)
+    {
+        throw DataTypeIException("DataType::p_decode", "H5Tdecode failed");
+    }
+    else
+    {
+        return(encoded_dtype_id);
+    }
+}
+
 //--------------------------------------------------------------------------
 // Function:    DataType::p_opentype (private)
 ///\brief       Opens an HDF5 datatype given its name
