@@ -5786,8 +5786,6 @@ Java_hdf_hdf5lib_H5_H5Pset_1virtual_1prefix
         if(retVal < 0)
             h5libraryError(env);
     }
-
-    return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1virtual_1prefix */
 
 /*
@@ -5854,8 +5852,6 @@ Java_hdf_hdf5lib_H5_H5Pset_1efile_1prefix
         if(retVal < 0)
             h5libraryError(env);
     }
-
-    return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1efile_1prefix */
 
 /*
