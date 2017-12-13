@@ -218,6 +218,7 @@ test_basic_file_operation(void)
     unsigned        intent;
     void           *os_file_handle = NULL;
     H5F_info2_t     finfo;
+    char            name[32];
 
     TESTING("Basic VOL file operations");
 
@@ -265,6 +266,10 @@ test_basic_file_operation(void)
 
     /* H5Fget_info2 */
     if (H5Fget_info2(fid, &finfo) < 0)
+        TEST_ERROR;
+
+    /* H5Fget_name */
+    if (H5Fget_name(fid, name, 32) < 0)
         TEST_ERROR;
 
     /* H5Fclear_elink_file_cache */

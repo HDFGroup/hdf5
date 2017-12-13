@@ -1256,14 +1256,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_name
  *
- * XXX: Fix this mess...
  * Purpose:     Gets the name of the file to which object OBJ_ID belongs.
- *              If `name' is non-NULL then write up to `size' bytes into that
+ *              If 'name' is non-NULL then write up to 'size' bytes into that
  *              buffer and always return the length of the entry name.
- *              Otherwise `size' is ignored and the function does not store the name,
- *              just returning the number of characters required to store the name.
- *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
- *              is unchanged and the function returns a negative value.
+ *              Otherwise `size' is ignored and the function does not store
+ *              the name, just returning the number of characters required to
+ *              store the name. If an error occurs then the buffer pointed to
+ *              by 'name' (NULL or non-NULL) is unchanged and the function
+ *              returns a negative value.
  *
  * Note:        This routine returns the name that was used to open the file,
  *              not the actual name after resolving symlinks, etc.
@@ -1277,41 +1277,26 @@ done:
 ssize_t
 H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
 {
-    H5F_t         *f;           /* Top file in mount hierarchy */
-    size_t        len;
-    ssize_t       ret_value;
+    H5VL_object_t       *obj = NULL;
+    H5I_type_t          type;
+    ssize_t             ret_value = -1;
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "ixz", obj_id, name, size);
 
-    /* For file IDs, get the file object directly
-     *
-     * This prevents the H5G_loc() call from returning the file pointer for
-     * the top file in a mount hierarchy.
-     */
-    if (H5I_get_type(obj_id) == H5I_FILE ) {
-        if (NULL == (f = (H5F_t *)H5I_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a file")
-    }
-    else {
-        H5G_loc_t     loc;        /* Object location */
+    /* Check the type */
+    type = H5I_get_type(obj_id);
+    if (H5I_FILE != type && H5I_GROUP != type && H5I_DATATYPE != type && H5I_DATASET != type && H5I_ATTR != type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a file or file object")
 
-        /* Get symbol table entry */
-        if (H5G_loc(obj_id, &loc) < 0)
-             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not a valid object ID")
-        f = loc.oloc->file;
-    }
+    /* Get the file object */
+    if (NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
-    len = HDstrlen(H5F_OPEN_NAME(f));
-
-    if (name) {
-        HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
-        if (len >= size)
-            name[size-1]='\0';
-    }
-
-    /* Set return value */
-    ret_value = (ssize_t)len;
+    /* Get the filename via the VOL */
+    if (H5VL_file_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_GET_NAME, 
+                     H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, type, size, name, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get file name")
 
 done:
     FUNC_LEAVE_API(ret_value)
