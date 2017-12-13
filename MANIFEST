@@ -1703,6 +1703,11 @@
 ./test/Makefile.in
 ./test/big.c
 ./test/bittests.c
+./test/bounds_earliest_latest.h5
+./test/bounds_earliest_v18.h5
+./test/bounds_latest_latest.h5
+./test/bounds_v18_latest.h5
+./test/bounds_v18_v18.h5
 ./test/cache.c
 ./test/cmpd_dset.c
 ./test/dangle.c
@@ -1793,6 +1798,7 @@
 ./test/ttsafe_cancel.c
 ./test/ttsafe_dcreate.c
 ./test/ttsafe_error.c
+./test/tverbounds16.c
 ./test/tvlstr.c
 ./test/tvltypes.c
 ./test/unlink.c

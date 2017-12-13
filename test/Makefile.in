@@ -85,7 +85,7 @@ TEST_SRC=big.c bittests.c cache.c cmpd_dset.c dsets.c dtypes.c extend.c      \
     tselect.c tskiplist.c ttime.c ttst.c tvltypes.c tvlstr.c                 \
     unlink.c enum.c ttsafe.c ttsafe_dcreate.c ttsafe_error.c                 \
     ttsafe_cancel.c ttsafe_acreate.c set_extent.c getname.c file_handle.c    \
-    ntypes.c dangle.c reserved.c err_vers.c
+    ntypes.c dangle.c reserved.c err_vers.c tverbounds16.c
 
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
@@ -117,7 +117,7 @@ $(PROGS): $(LIB) $(LIBHDF5)
 TESTHDF5_OBJ=testhdf5.lo tarray.lo tattr.lo tconfig.lo tfile.lo               \
     tgenprop.lo th5s.lo tcoords.lo theap.lo titerate.lo tmeta.lo tmisc.lo     \
     trefer.lo trefstr.lo tselect.lo tskiplist.lo ttime.lo ttst.lo             \
-    tvltypes.lo tvlstr.lo
+    tvltypes.lo tvlstr.lo tverbounds16.lo
 
 TTS_OBJ=ttsafe.lo ttsafe_dcreate.lo ttsafe_error.lo             \
     ttsafe_cancel.lo ttsafe_acreate.lo
