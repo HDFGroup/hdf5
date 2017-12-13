@@ -805,7 +805,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         hsize_t *size)
 {
     H5D_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0, 0};
-    H5D_t *dset;                /* Dataset for operation */
+    H5VL_object_t  *dset;       /* Dataset for operation */
     H5S_t *fspace = NULL;       /* Dataset's dataspace */
     H5S_t *mspace = NULL;       /* Memory dataspace */
     char bogus;                 /* bogus value to pass to H5Diterate() */
@@ -822,8 +822,8 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     if(H5I_DATASET != H5I_get_type(dataset_id) ||
             H5I_DATATYPE != H5I_get_type(type_id) || size == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
-    if(NULL == (dset = (H5D_t *)H5I_object(dataset_id)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == (dset = (H5VL_object_t *)H5I_object(dataset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -833,16 +833,20 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
 
     /* Save the dataset */
     vlen_bufsize.dset = dset;
+    vlen_bufsize.fspace_id = H5I_INVALID_HID;
+    vlen_bufsize.mspace_id = H5I_INVALID_HID;
 
-    /* Get a copy of the dataset's dataspace */
-    if(NULL == (fspace = H5S_copy(dset->shared->space, FALSE, TRUE)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to get dataspace")
-    vlen_bufsize.fspace = fspace;
+    /* Get a copy of the dataspace ID */
+    if (H5VL_dataset_get(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_GET_SPACE, 
+                        H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &vlen_bufsize.fspace_id) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace")
 
     /* Create a scalar for the memory dataspace */
     if(NULL == (mspace = H5S_create(H5S_SCALAR)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
-    vlen_bufsize.mspace = mspace;
+    /* Atomize */
+    if((vlen_bufsize.mspace_id = H5I_register (H5I_DATASPACE, mspace, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
     /* Grab the temporary buffers required */
     if(NULL == (vlen_bufsize.fl_tbuf = H5FL_BLK_MALLOC(vlen_fl_buf, (size_t)1)))
@@ -866,9 +870,9 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     vlen_bufsize.size = 0;
 
     /* Call H5S_select_iterate with args, etc. */
-    dset_op.op_type = H5S_SEL_ITER_OP_APP;
-    dset_op.u.app_op.op = H5D__vlen_get_buf_size;
-    dset_op.u.app_op.type_id = type_id;
+    dset_op.op_type             = H5S_SEL_ITER_OP_APP;
+    dset_op.u.app_op.op         = H5D__vlen_get_buf_size;
+    dset_op.u.app_op.type_id    = type_id;
 
     ret_value = H5S_select_iterate(&bogus, type, space, &dset_op, &vlen_bufsize);
 
@@ -877,6 +881,11 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         *size = vlen_bufsize.size;
 
 done:
+    if (ret_value < 0) {
+        if (mspace && H5S_close(mspace) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+    }
+
     if(fspace && H5S_close(fspace) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
     if(mspace && H5S_close(mspace) < 0)

@@ -147,9 +147,9 @@ void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_p
      */
     TestProgName = ProgName;
     if (NULL != private_usage)
-	TestPrivateUsage = private_usage;
+        TestPrivateUsage = private_usage;
     if (NULL != private_parser)
-	TestPrivateParser = private_parser;
+        TestPrivateParser = private_parser;
 }
 
 

@@ -2964,6 +2964,8 @@ H5T_decode(const unsigned char *buf)
     if(H5T_set_loc(ret_value, NULL, H5T_LOC_MEMORY) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
+    /* No VOL object */
+    ret_value->vol_obj = NULL;
 done:
     /* Release fake file structure */
     if(f && H5F_fake_free(f) < 0)
@@ -3087,6 +3089,9 @@ H5T__create(H5T_class_t type, size_t size)
     if(H5T_STRING != type || H5T_VARIABLE != size)
         dt->shared->size = size;
 
+    /* No VOL object */
+    dt->vol_obj = NULL;
+
     /* Set return value */
     ret_value = dt;
 
@@ -3160,6 +3165,9 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
 
     /* Copy shared information (entry information is copied last) */
     *(new_dt->shared) = *(old_dt->shared);
+
+    /* No VOL object */
+    new_dt->vol_obj = NULL;
 
     /* Check what sort of copy we are making */
     switch (method) {
@@ -3487,6 +3495,9 @@ H5T__alloc(void)
     if(NULL == (dt->shared = H5FL_CALLOC(H5T_shared_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     dt->shared->version = H5O_DTYPE_VERSION_1;
+
+    /* No VOL object */
+    dt->vol_obj = NULL;
 
     /* Assign return value */
     ret_value = dt;
@@ -4984,12 +4995,8 @@ done:
  *
  * Purpose:     Check if a datatype is named.
  *
- * Return:      TRUE
+ * Return:      TRUE/FALSE/-1
  *
- *              FALSE
- *
- * Programmer:  Pedro Vicente
- *              Tuesday, Sep 3, 2002
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -5001,8 +5008,10 @@ H5T_is_named(const H5T_t *dt)
 
     HDassert(dt);
 
-    if(dt->shared->state == H5T_STATE_OPEN || dt->shared->state == H5T_STATE_NAMED)
+    if (dt->vol_obj)
         ret_value = TRUE;
+    else
+        ret_value = (H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
