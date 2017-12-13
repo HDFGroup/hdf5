@@ -489,7 +489,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_METADATA_READ_ATTEMPTS_NAME     "metadata_read_attempts" /* # of metadata read attempts */
 #define H5F_ACS_OBJECT_FLUSH_CB_NAME            "object_flush_cb"      /* Object flush callback */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
-#define H5F_ACS_VDS_FILE_CACHE_SIZE_NAME        "vds_file_cache_size"      /* Size of vds file cache */
+#define H5F_ACS_VDS_FILE_CACHE_SIZE_NAME        "vds_file_cache_size"  /* Size of vds file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME         "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) */
 #define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
@@ -580,14 +580,14 @@ typedef struct H5F_t H5F_t;
 
 /* Size of signature information (on disk) */
 /* (all on-disk signatures should be this length) */
-#define H5_SIZEOF_MAGIC                 4
+#define H5_SIZEOF_MAGIC                   4
 
 /* Size of checksum information (on disk) */
 /* (all on-disk checksums should be this length) */
 #define H5_SIZEOF_CHKSUM                  4
 
 /* v1 B-tree node signature */
-#define H5B_MAGIC                    "TREE"
+#define H5B_MAGIC                       "TREE"
 
 /* v2 B-tree signatures */
 #define H5B2_HDR_MAGIC                  "BTHD"          /* Header */
@@ -617,7 +617,7 @@ typedef struct H5F_t H5F_t;
 #define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
 
 /* Global heap signature */
-#define H5HG_MAGIC                    "GCOL"
+#define H5HG_MAGIC                      "GCOL"
 
 /* Local heap signature */
 #define H5HL_MAGIC                      "HEAP"
