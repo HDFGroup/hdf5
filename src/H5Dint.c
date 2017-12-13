@@ -61,9 +61,7 @@ static herr_t H5D__cache_dataspace_info(const H5D_t *dset);
 static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
         hid_t dapl_id);
-static herr_t H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id,
-        char **extfile_prefix);
-static herr_t H5D_build_vds_prefix(const H5D_t *dset, hid_t dapl_id,
+static herr_t H5D_build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char * prefix_type,
         char **vds_prefix);
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
@@ -965,24 +963,25 @@ done:
 } /* end H5D__update_oh_info() */
 
 
+
 /*--------------------------------------------------------------------------
- * Function:    H5D_build_extfile_prefix
+ * Function:    H5D_build_file_prefix
  *
- * Purpose:     Determine the external file prefix to be used and store
- *              it in extfile_prefix. Stores an empty string if no prefix
+ * Purpose:     Determine the file prefix to be used and store
+ *              it in file_prefix. Stores an empty string if no prefix
  *              should be used.
  *
  * Return:      SUCCEED/FAIL
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix /*out*/)
+H5D_build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type, char **file_prefix /*out*/)
 {
     char            *prefix = NULL;       /* prefix used to look for the file               */
-    char            *extpath = NULL;      /* absolute path of directory the HDF5 file is in */
-    size_t          extpath_len;          /* length of extpath                              */
+    char            *filepath = NULL;     /* absolute path of directory the HDF5 file is in */
+    size_t          filepath_len;         /* length of file path                            */
     size_t          prefix_len;           /* length of prefix                               */
-    size_t          extfile_prefix_len;   /* length of expanded prefix                      */
+    size_t          file_prefix_len;      /* length of expanded prefix                      */
     H5P_genplist_t  *plist = NULL;        /* Property list pointer                          */
     herr_t          ret_value = SUCCEED;  /* Return value                                   */
 
@@ -992,20 +991,25 @@ H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix
     HDassert(dset);
     HDassert(dset->oloc.file);
 
-    extpath = H5F_EXTPATH(dset->oloc.file);
-    HDassert(extpath);
+    filepath = H5F_EXTPATH(dset->oloc.file);
+    HDassert(filepath);
 
     /* XXX: Future thread-safety note - getenv is not required
      *      to be reentrant.
      */
-    prefix = HDgetenv("HDF5_EXTFILE_PREFIX");
+    if (HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0)
+        prefix = HDgetenv("HDF5_VDS_PREFIX");
+    else if (HDstrcmp(prefix_type, H5D_ACS_EFILE_PREFIX_NAME) == 0)
+        prefix = HDgetenv("HDF5_EXTFILE_PREFIX");
+    else
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "prefix name is not sensible")
 
     if(prefix == NULL || *prefix == '\0') {
-        /* Set prefix to value of H5D_ACS_EFILE_PREFIX_NAME property */
+        /* Set prefix to value of prefix_type property */
         if(NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-        if(H5P_peek(plist, H5D_ACS_EFILE_PREFIX_NAME, &prefix) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file prefix")
+        if(H5P_peek(plist, prefix_type, &prefix) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file prefix")
     } /* end if */
 
     /* Prefix has to be checked for NULL / empty string again because the
@@ -1015,104 +1019,29 @@ H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix
         /* filename is interpreted as relative to the current directory,
          * does not need to be expanded
          */
-        if(NULL == (*extfile_prefix = (char *)H5MM_strdup("")))
+        if(NULL == (*file_prefix = (char *)H5MM_strdup("")))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end if */
     else {
         if (HDstrncmp(prefix, "${ORIGIN}", HDstrlen("${ORIGIN}")) == 0) {
             /* Replace ${ORIGIN} at beginning of prefix by directory of HDF5 file */
-            extpath_len = HDstrlen(extpath);
+            filepath_len = HDstrlen(filepath);
             prefix_len = HDstrlen(prefix);
-            extfile_prefix_len = extpath_len + prefix_len - HDstrlen("${ORIGIN}") + 1;
+            file_prefix_len = filepath_len + prefix_len - HDstrlen("${ORIGIN}") + 1;
 
-            if(NULL == (*extfile_prefix = (char *)H5MM_malloc(extfile_prefix_len)))
+            if(NULL == (*file_prefix = (char *)H5MM_malloc(file_prefix_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate buffer")
-            HDsnprintf(*extfile_prefix, extfile_prefix_len, "%s%s", extpath, prefix + HDstrlen("${ORIGIN}"));
+            HDsnprintf(*file_prefix, file_prefix_len, "%s%s", filepath, prefix + HDstrlen("${ORIGIN}"));
         } /* end if */
         else {
-            if(NULL == (*extfile_prefix = (char *)H5MM_strdup(prefix)))
+            if(NULL == (*file_prefix = (char *)H5MM_strdup(prefix)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
         } /* end else */
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_build_extfile_prefix() */
-
-
-/*--------------------------------------------------------------------------
- * Function:    H5D_build_vds_prefix
- *
- * Purpose:     Determine the vds file prefix to be used and store
- *              it in vds_prefix. Stores an empty string if no prefix
- *              should be used.
- *
- * Return:      SUCCEED/FAIL
- *--------------------------------------------------------------------------
- */
-static herr_t
-H5D_build_vds_prefix(const H5D_t *dset, hid_t dapl_id, char **vds_prefix /*out*/)
-{
-    char            *prefix = NULL;       /* prefix used to look for the file               */
-    char            *vdspath = NULL;      /* absolute path of directory the HDF5 file is in */
-    size_t          vdspath_len;          /* length of vdstpath                              */
-    size_t          prefix_len;           /* length of prefix                               */
-    size_t          vds_prefix_len;       /* length of expanded prefix                      */
-    H5P_genplist_t  *plist = NULL;        /* Property list pointer                          */
-    herr_t          ret_value = SUCCEED;  /* Return value                                   */
-
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(dset);
-    HDassert(dset->oloc.file);
-
-    vdspath = H5F_EXTPATH(dset->oloc.file);
-    HDassert(vdspath);
-
-    /* XXX: Future thread-safety note - getenv is not required
-     *      to be reentrant.
-     */
-    prefix = HDgetenv("HDF5_VDS_PREFIX");
-
-    if(prefix == NULL || *prefix == '\0') {
-        /* Set prefix to value of H5D_ACS_VDS_PREFIX_NAME property */
-        if(NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-        if(H5P_peek(plist, H5D_ACS_VDS_PREFIX_NAME, &prefix) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vds prefix")
-    } /* end if */
-
-    /* Prefix has to be checked for NULL / empty string again because the
-     * code above might have updated it.
-     */
-    if(prefix == NULL || *prefix == '\0' || HDstrcmp(prefix, ".") == 0) {
-        /* filename is interpreted as relative to the current directory,
-         * does not need to be expanded
-         */
-        if(NULL == (*vds_prefix = (char *)H5MM_strdup("")))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    } /* end if */
-    else {
-        if (HDstrncmp(prefix, "${ORIGIN}", HDstrlen("${ORIGIN}")) == 0) {
-            /* Replace ${ORIGIN} at beginning of prefix by directory of HDF5 file */
-            vdspath_len = HDstrlen(vdspath);
-            prefix_len = HDstrlen(prefix);
-            vds_prefix_len = vdspath_len + prefix_len - HDstrlen("${ORIGIN}") + 1;
-
-            if(NULL == (*vds_prefix = (char *)H5MM_malloc(vds_prefix_len)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate buffer")
-            HDsnprintf(*vds_prefix, vds_prefix_len, "%s%s", vdspath, prefix + HDstrlen("${ORIGIN}"));
-        } /* end if */
-        else {
-            if(NULL == (*vds_prefix = (char *)H5MM_strdup(prefix)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        } /* end else */
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_build_vds_prefix() */
+} /* H5D_build_file_prefix() */
 
 
 /*-------------------------------------------------------------------------
@@ -1294,11 +1223,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set up flush append property")
 
     /* Set the external file prefix */
-    if(H5D_build_extfile_prefix(new_dset, dapl_id, &new_dset->shared->extfile_prefix) < 0)
+    if(H5D_build_file_prefix(new_dset, dapl_id, H5D_ACS_EFILE_PREFIX_NAME, &new_dset->shared->extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
 
     /* Set the vds file prefix */
-    if(H5D_build_vds_prefix(new_dset, dapl_id, &new_dset->shared->vds_prefix) < 0)
+    if(H5D_build_file_prefix(new_dset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &new_dset->shared->vds_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize vds  prefix")
 
     /* Add the dataset to the list of opened objects in the file */
@@ -1454,11 +1383,11 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy path")
 
     /* Get the external file prefix */
-    if(H5D_build_extfile_prefix(dataset, dapl_id, &extfile_prefix) < 0)
+    if(H5D_build_file_prefix(dataset, dapl_id, H5D_ACS_EFILE_PREFIX_NAME, &extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
 
     /* Get the vds prefix */
-    if(H5D_build_vds_prefix(dataset, dapl_id, &vds_prefix) < 0)
+    if(H5D_build_file_prefix(dataset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &vds_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize vds prefix")
 
     /* Check if dataset was already open */
