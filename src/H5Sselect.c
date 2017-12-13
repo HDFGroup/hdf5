@@ -225,7 +225,7 @@ H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
  *-------------------------------------------------------------------------
  */
 hssize_t
-H5S_select_serial_size(const H5S_t *space)
+H5S_select_serial_size(const H5S_t *space, H5F_t *f)
 {
     hssize_t ret_value = -1;   /* Return value */
 
@@ -234,7 +234,7 @@ H5S_select_serial_size(const H5S_t *space)
     HDassert(space);
 
     /* Call the selection type's serial_size function */
-    ret_value=(*space->select.type->serial_size)(space);
+    ret_value=(*space->select.type->serial_size)(space, f);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_serial_size() */
@@ -251,6 +251,7 @@ H5S_select_serial_size(const H5S_t *space)
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
+        H5F_t *f;               IN: File pointer
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -265,7 +266,7 @@ H5S_select_serial_size(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_serialize(const H5S_t *space, uint8_t **p)
+H5S_select_serialize(const H5S_t *space, uint8_t **p, H5F_t *f)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -275,7 +276,7 @@ H5S_select_serialize(const H5S_t *space, uint8_t **p)
     HDassert(p);
 
     /* Call the selection type's serialize function */
-    ret_value=(*space->select.type->serialize)(space,p);
+    ret_value=(*space->select.type->serialize)(space,p,f);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_serialize() */
@@ -1225,7 +1226,7 @@ H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter)
  USAGE
     herr_t H5S_select_iter_next(iter, nelem)
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator to change
-        size_t nelem;           IN: Number of elements to advance by
+        hsize_t nelem;          IN: Number of elements to advance by
  RETURNS
     Non-negative on success, negative on failure.
  DESCRIPTION
@@ -1240,7 +1241,7 @@ H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
+H5S_select_iter_next(H5S_sel_iter_t *iter, hsize_t nelem)
 {
     herr_t ret_value = FAIL;    /* Return value */
 

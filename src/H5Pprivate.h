@@ -17,6 +17,9 @@
 #ifndef _H5Pprivate_H
 #define _H5Pprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5P_genplist_t H5P_genplist_t;
+
 /* Include package's public header */
 #include "H5Ppublic.h"
 
@@ -52,12 +55,7 @@ typedef enum H5P_coll_md_read_flag_t {
     H5P_USER_TRUE               = 1
 } H5P_coll_md_read_flag_t;
 
-/* Forward declarations (for prototypes & type definitions) */
-struct H5O_fill_t;
-struct H5T_t;
-
 /* Forward declarations for anonymous H5P objects */
-typedef struct H5P_genplist_t H5P_genplist_t;
 typedef struct H5P_genclass_t H5P_genclass_t;
 
 typedef enum H5P_plist_type_t {
@@ -85,6 +83,16 @@ typedef enum H5P_plist_type_t {
 
 /* Function pointer for library classes with properties to register */
 typedef herr_t (*H5P_reg_prop_func_t)(H5P_genclass_t *pclass);
+
+/* Move encode/decode callback typedefs from H5Ppublic.h: not exposed to user */
+/* Add a parameter to encode callback */
+typedef herr_t (*H5P_prp_encode_func_t)(const void *value, void **buf, size_t *size, void *udata);
+typedef herr_t (*H5P_prp_decode_func_t)(const void **buf, void *value);
+
+/* User data passed to encode callback */
+typedef struct H5P_enc_cb_info_t {
+    hid_t fapl_id;      /* File access property list */
+} H5P_enc_cb_info_t;
 
 /*
  * Each library property list class has a variable of this type that contains
@@ -144,6 +152,10 @@ H5_DLLVAR const struct H5P_libclass_t H5P_CLS_FACC[1];  /* File access */
 /******************************/
 /* Library Private Prototypes */
 /******************************/
+
+/* Forward declaration of structs used below */
+struct H5O_fill_t;
+struct H5T_t;
 
 /* Package initialization routine */
 H5_DLL herr_t H5P_init(void);

@@ -39,6 +39,7 @@
 #endif
 #ifdef H5_STDC_HEADERS
 #   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
+#   include <stdarg.h>      /*for variadic functions in H5VLpublic.h     */
 #endif
 #ifndef __cplusplus
 # ifdef H5_HAVE_STDINT_H
@@ -93,9 +94,9 @@ extern "C" {
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	10	/* For minor interface/format changes  	     */
 #define H5_VERS_RELEASE	2	/* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE "snap4"	/* For pre-releases like snap0       */
+#define H5_VERS_SUBRELEASE "snap5"	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.10.2-snap4"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.10.2-snap5"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)

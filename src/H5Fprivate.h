@@ -18,6 +18,9 @@
 #ifndef _H5Fprivate_H
 #define _H5Fprivate_H
 
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5F_t H5F_t;
+
 /* Include package's public header */
 #include "H5Fpublic.h"
 
@@ -309,6 +312,7 @@
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
 #define H5F_USE_LATEST_FLAGS(F,FL)  ((F)->shared->latest_flags & (FL))
+#define H5F_GET_LATEST_FLAGS(F)     ((F)->shared->latest_flags)
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    ((F)->shared->store_msg_crt_idx = (FL))
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
@@ -365,7 +369,8 @@
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
 #define H5F_SIEVE_BUF_SIZE(F)   (H5F_sieve_buf_size(F))
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
-#define H5F_USE_LATEST_FLAGS(F,FL) (H5F_use_latest_flags(F,FL))
+#define H5F_USE_LATEST_FLAGS(F,FL)  (H5F_use_latest_flags(F,FL))
+#define H5F_GET_LATEST_FLAGS(F)     (H5F_get_latest_flags(F))
 #define H5F_STORE_MSG_CRT_IDX(F) (H5F_store_msg_crt_idx(F))
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    (H5F_set_store_msg_crt_idx((F), (FL)))
 #define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))
@@ -475,8 +480,8 @@
 #define H5F_ACS_SIEVE_BUF_SIZE_NAME             "sieve_buf_size" /* Maximum sieve buffer size (when data sieving is allowed by file driver) */
 #define H5F_ACS_SDATA_BLOCK_SIZE_NAME           "sdata_block_size" /* Minimum "small data" allocation block size (when aggregating "small" raw data allocations) */
 #define H5F_ACS_GARBG_COLCT_REF_NAME            "gc_ref"        /* Garbage-collect references */
-#define H5F_ACS_FILE_DRV_NAME                   "driver-id/info" /* File driver ID & info */
-#define H5F_ACS_CLOSE_DEGREE_NAME		"close_degree"  /* File close degree */
+#define H5F_ACS_FILE_DRV_NAME                   "vfd_info" /* File driver ID & info */
+#define H5F_ACS_CLOSE_DEGREE_NAME               "close_degree"  /* File close degree */
 #define H5F_ACS_FAMILY_OFFSET_NAME              "family_offset" /* Offset position in file for family file driver */
 #define H5F_ACS_FAMILY_NEWSIZE_NAME             "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
 #define H5F_ACS_FAMILY_TO_SEC2_NAME             "family_to_sec2" /* Whether to convert family to sec2 driver.  (private property only used by h5repart) */
@@ -484,7 +489,7 @@
 #define H5F_ACS_LATEST_FORMAT_NAME              "latest_format" /* 'Use latest format version' flag */
 #define H5F_ACS_WANT_POSIX_FD_NAME              "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address */
 #define H5F_ACS_METADATA_READ_ATTEMPTS_NAME     "metadata_read_attempts" /* # of metadata read attempts */
-#define H5F_ACS_OBJECT_FLUSH_CB_NAME     	"object_flush_cb" 	 /* Object flush callback */
+#define H5F_ACS_OBJECT_FLUSH_CB_NAME            "object_flush_cb" 	 /* Object flush callback */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME         "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) */
@@ -583,7 +588,7 @@
 #define H5_SIZEOF_CHKSUM              	4
 
 /* v1 B-tree node signature */
-#define H5B_MAGIC	                "TREE"
+#define H5B_MAGIC                       "TREE"
 
 /* v2 B-tree signatures */
 #define H5B2_HDR_MAGIC                  "BTHD"          /* Header */
@@ -613,7 +618,7 @@
 #define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
 
 /* Global heap signature */
-#define H5HG_MAGIC	                "GCOL"
+#define H5HG_MAGIC                      "GCOL"
 
 /* Local heap signature */
 #define H5HL_MAGIC                      "HEAP"
@@ -639,7 +644,8 @@
 #define H5F_LATEST_STYLE_GROUP          0x0080
 #define H5F_LATEST_OBJ_HEADER           0x0100
 #define H5F_LATEST_SUPERBLOCK           0x0200
-#define H5F_LATEST_ALL_FLAGS            (H5F_LATEST_DATATYPE | H5F_LATEST_DATASPACE | H5F_LATEST_ATTRIBUTE | H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG | H5F_LATEST_NO_MOD_TIME_MSG | H5F_LATEST_STYLE_GROUP | H5F_LATEST_OBJ_HEADER | H5F_LATEST_SUPERBLOCK)
+#define H5F_LATEST_DATASPACE_SELECTION  0x0400
+#define H5F_LATEST_ALL_FLAGS            (H5F_LATEST_DATATYPE | H5F_LATEST_DATASPACE | H5F_LATEST_ATTRIBUTE | H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG | H5F_LATEST_NO_MOD_TIME_MSG | H5F_LATEST_STYLE_GROUP | H5F_LATEST_OBJ_HEADER | H5F_LATEST_SUPERBLOCK | H5F_LATEST_DATASPACE_SELECTION)
 
 #define H5F_LATEST_DSET_MSG_FLAGS    (H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG)
 
@@ -652,12 +658,12 @@ struct H5B_class_t;
 struct H5UC_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
+struct H5VL_class_t;
 struct H5P_genplist_t;
 
 /* Forward declarations for anonymous H5F objects */
 
 /* Main file structures */
-typedef struct H5F_t H5F_t;
 typedef struct H5F_file_t H5F_file_t;
 
 /* Block aggregation structure */
@@ -838,7 +844,7 @@ H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t **pp, haddr_t *ad
 H5_DLL void H5F_sfile_assert_num(unsigned n);
 
 /* Routines for creating & destroying "fake" file structures */
-H5_DLL H5F_t *H5F_fake_alloc(uint8_t sizeof_size);
+H5_DLL H5F_t *H5F_fake_alloc(uint8_t sizeof_size, hid_t fapl_id);
 H5_DLL herr_t H5F_fake_free(H5F_t *f);
 
 /* Superblock related routines */

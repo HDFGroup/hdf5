@@ -4079,13 +4079,15 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
                 olap = nelmts;
-            } else if (src_p->shared->size>=dst_p->shared->size) {
+            }
+            else if (src_p->shared->size>=dst_p->shared->size) {
                 double olap_d = HDceil((double)(dst_p->shared->size)/
                                        (double)(src_p->shared->size-dst_p->shared->size));
                 olap = (size_t)olap_d;
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
-            } else {
+            }
+            else {
                 double olap_d = HDceil((double)(src_p->shared->size)/
                                        (double)(dst_p->shared->size-src_p->shared->size));
                 olap = (size_t)olap_d;
@@ -4127,7 +4129,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (direction>0) {
                     s = sp;
                     d = elmtno<olap ? dbuf : dp;
-                } else {
+                }
+                else {
                     s = sp;
                     d = elmtno+olap >= nelmts ? dbuf : dp;
                 }
@@ -4136,7 +4139,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (d==dbuf) {
                     HDassert((dp>=sp && dp<sp+src_p->shared->size) ||
                             (sp>=dp && sp<dp+dst_p->shared->size));
-                } else {
+                }
+                else {
                     HDassert((dp<sp && dp+dst_p->shared->size<=sp) ||
                             (sp<dp && sp+src_p->shared->size<=dp));
                 }
@@ -4154,7 +4158,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         s[src_p->shared->size-(i+1)] = s[i];
                         s[i] = tmp1;
                     }
-                } else if (H5T_ORDER_VAX==src.order) {
+                }
+                else if (H5T_ORDER_VAX==src.order) {
                     tsize = src_p->shared->size;
                     HDassert(0 == tsize % 2);
 
@@ -4187,7 +4192,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T__bit_set (d, dst.u.f.epos, dst.u.f.esize, FALSE);
                         H5T__bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                         goto padding;
-                    } else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
+                    }
+                    else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                              H5T_BIT_LSB, FALSE)<0) {
                         /* +Inf or -Inf */
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
@@ -4210,16 +4216,19 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                              *this case.*/
                             if (H5T_NORM_NONE==dst.u.f.norm)
                                 H5T__bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, (size_t)1, TRUE);
-                        } else if(except_ret == H5T_CONV_HANDLED) {
+                        }
+                        else if(except_ret == H5T_CONV_HANDLED) {
                             /*No need to reverse the order of destination because user handles it*/
                             reverse = FALSE;
                             goto next;
-                        } else if(except_ret == H5T_CONV_ABORT)
+                        }
+                        else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                         goto padding;
                     }
-                } else if (H5T_NORM_NONE==src.u.f.norm && H5T__bit_find (s, src.u.f.mpos, src.u.f.msize-1,
+                }
+                else if (H5T_NORM_NONE==src.u.f.norm && H5T__bit_find (s, src.u.f.mpos, src.u.f.msize-1,
                                   H5T_BIT_LSB, TRUE)<0 && H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                   H5T_BIT_LSB, FALSE)<0) {
                     /*This is a special case for the source of no implied mantissa bit.
@@ -4246,11 +4255,13 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                          *this case.*/
                         if (H5T_NORM_NONE==dst.u.f.norm)
                             H5T__bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, (size_t)1, TRUE);
-                    } else if(except_ret == H5T_CONV_HANDLED) {
+                    }
+                    else if(except_ret == H5T_CONV_HANDLED) {
                         /*No need to reverse the order of destination because user handles it*/
                         reverse = FALSE;
                         goto next;
-                    } else if(except_ret == H5T_CONV_ABORT)
+                    }
+                    else if(except_ret == H5T_CONV_ABORT)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                     goto padding;
@@ -4259,7 +4270,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * still need to handle legacy VAX files so this code must
                  * remain in place.
                  */
-                } else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
+                }
+                else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /* NaN */
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
@@ -4275,11 +4287,13 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T__bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
                         H5T__bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
                         H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, TRUE);
-                    } else if(except_ret == H5T_CONV_HANDLED) {
+                    }
+                    else if(except_ret == H5T_CONV_HANDLED) {
                         /*No need to reverse the order of destination because user handles it*/
                         reverse = FALSE;
                         goto next;
-                    } else if(except_ret == H5T_CONV_ABORT)
+                    }
+                    else if(except_ret == H5T_CONV_ABORT)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                     goto padding;
@@ -4292,7 +4306,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 expo = (int64_t)H5T__bit_get_d(s, src.u.f.epos, src.u.f.esize);
 
-                if(expo==0)
+                if (expo==0)
                    denormalized=TRUE;
 
                 /*
@@ -4302,16 +4316,19 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 implied = 1;
                 mpos = src.u.f.mpos;
                 mrsh = 0;
-                if(0 == expo || H5T_NORM_NONE == src.u.f.norm) {
-                    if((bitno = H5T__bit_find(s, src.u.f.mpos, src.u.f.msize, H5T_BIT_MSB, TRUE)) > 0) {
+                if (0 == expo || H5T_NORM_NONE == src.u.f.norm) {
+                    if ((bitno = H5T__bit_find(s, src.u.f.mpos, src.u.f.msize, H5T_BIT_MSB, TRUE)) > 0) {
                         msize = (size_t)bitno;
-                    } else if (0==bitno) {
+                    }
+                    else if (0==bitno) {
                         msize = 1;
                         H5T__bit_set(s, src.u.f.mpos, (size_t)1, FALSE);
                     }
-                } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
+                }
+                else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     msize = src.u.f.msize;
-                } else {
+                }
+                else {
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "normalization method not implemented yet")
                 }
 
@@ -4328,9 +4345,11 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (0==expo || H5T_NORM_NONE==src.u.f.norm) {
                     HDassert(bitno>=0);
                     expo -= (int64_t)((src.u.f.ebias - 1) + (src.u.f.msize - (size_t)bitno));
-                } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
+                }
+                else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     expo -= (int64_t)src.u.f.ebias;
-                } else {
+                }
+                else {
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "normalization method not implemented yet")
                 }
 
@@ -4353,7 +4372,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     expo = 0;
                     H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                     msize = 0;
-                } else if (expo<=0) {
+                }
+                else if (expo<=0) {
                     /*
                      * The exponent is too small to fit in the exponent field,
                      * but by shifting the mantissa to the right we can
@@ -4363,7 +4383,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     mrsh += (size_t)(1 - expo);
                     expo = 0;
                     denormalized=TRUE;
-                } else if (expo>=expo_max) {
+                }
+                else if (expo>=expo_max) {
                     /*
                      * The exponent is too large to fit in the available region
                      * or it results in the maximum possible value.	 Use positive
@@ -4383,7 +4404,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         expo = expo_max;
                         H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                         msize = 0;
-                    } else if(except_ret == H5T_CONV_ABORT)
+                    }
+                    else if(except_ret == H5T_CONV_ABORT)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                     else if(except_ret == H5T_CONV_HANDLED) {
                         reverse = FALSE;
@@ -4410,7 +4432,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             if(carry)
                                 implied = 2;
                         }
-                    } else if(H5T__bit_get_d(s, (mpos + (size_t)bitno) - 1, (size_t)1) && denormalized)
+                    }
+                    else if(H5T__bit_get_d(s, (mpos + (size_t)bitno) - 1, (size_t)1) && denormalized)
                         /* For either source or destination, denormalized value doesn't increment carry.*/
                         H5T__bit_inc(s, mpos + (size_t)bitno - 1, 1 + msize - (size_t)bitno);
                 }
@@ -4422,13 +4445,16 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 if (mrsh>dst.u.f.msize+1) {
                     H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
-                } else if (mrsh==dst.u.f.msize+1) {
+                }
+                else if (mrsh==dst.u.f.msize+1) {
                     H5T__bit_set(d, dst.u.f.mpos+1, dst.u.f.msize-1, FALSE);
                     H5T__bit_set(d, dst.u.f.mpos, (size_t)1, TRUE);
-                } else if (mrsh==dst.u.f.msize) {
+                }
+                else if (mrsh==dst.u.f.msize) {
                     H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                     H5T__bit_set_d(d, dst.u.f.mpos, MIN(2, dst.u.f.msize), (hsize_t)implied);
-                } else {
+                }
+                else {
                     if (mrsh>0) {
                         H5T__bit_set(d, dst.u.f.mpos+dst.u.f.msize-mrsh, mrsh,
                                     FALSE);
@@ -4439,7 +4465,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T__bit_copy(d, dst.u.f.mpos,
                                      s, (mpos+msize+mrsh-dst.u.f.msize),
                                      dst.u.f.msize-mrsh);
-                    } else {
+                    }
+                    else {
                         H5T__bit_copy(d, dst.u.f.mpos+dst.u.f.msize-(mrsh+msize),
                                      s, mpos, msize);
                         H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize-(mrsh+msize),
@@ -4469,7 +4496,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         if(except_ret == H5T_CONV_UNHANDLED) {
                             expo = expo_max;
                             H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
-                        } else if(except_ret == H5T_CONV_ABORT)
+                        }
+                        else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED) {
                             reverse = FALSE;

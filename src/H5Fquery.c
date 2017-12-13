@@ -32,10 +32,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"        /* Generic Functions            */
-#include "H5Eprivate.h"       /* Error handling              */
-#include "H5Fpkg.h"           /* File access                */
-#include "H5FDprivate.h"      /* File drivers                */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fpkg.h"             /* File access                              */
+#include "H5FDprivate.h"        /* File drivers                             */
 
 
 /****************/
@@ -686,12 +686,16 @@ H5F_gc_ref(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F_use_latest_flags
+ * Function:    H5F_use_latest_flags
  *
- * Purpose:  Retrieve the 'latest version support' for the file.
+ * Purpose:	    Retrieve the requested 'latest version support' for the file.
  *
- * Return:   Success:    Non-negative, the requested 'version support'
- *           Failure:    (can't happen)
+ * Return:	    Success:	Non-negative, the requested 'version support'
+ *              Failure:	(can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  5 2007
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -708,12 +712,39 @@ H5F_use_latest_flags(const H5F_t *f, unsigned fl)
 
 
 /*-------------------------------------------------------------------------
- * Function: H5F_get_fc_degree
+ * Function:    H5F_get_latest_flags
  *
- * Purpose:  Retrieve the 'file close degree' for the file.
+ * Purpose:     Retrieve the 'latest version support' setting for the file.
  *
- * Return:   Success:    Non-negative, the 'file close degree'
- *           Failure:    (can't happen)
+ * Return:      Success:	Non-negative
+ *              Failure:	(can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  5 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_latest_flags(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->latest_flags)
+} /* end H5F_get_latest_flags() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_fc_degree
+ *
+ * Purpose:     Retrieve the 'file close degree' for the file.
+ *
+ * Return:      Success:    Non-negative, the 'file close degree'
+ *              Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
 H5F_close_degree_t

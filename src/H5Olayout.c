@@ -553,6 +553,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     uint8_t                *heap_block = NULL;
     size_t                  *str_size = NULL;
     unsigned               u;
+    unsigned saved_latest_flags = H5F_GET_LATEST_FLAGS(f);
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -680,6 +681,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
             /* Note that we assume here that the contents of the heap block
              * cannot change!  If this ever stops being the case we must change
              * this code to allow overwrites of the heap block.  -NAF */
+            
             if((mesg->storage.u.virt.serial_list_hobjid.addr == HADDR_UNDEF)
                     && (mesg->storage.u.virt.list_nused > 0)) {
                 uint8_t *heap_block_p;
@@ -688,6 +690,8 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 hsize_t tmp_hsize;
                 uint32_t chksum;
                 size_t i;
+
+                H5F_SET_LATEST_FLAGS(f, H5F_LATEST_ALL_FLAGS);
 
                 /* Allocate array for caching results of strlen */
                 if(NULL == (str_size = (size_t *)H5MM_malloc(2 * mesg->storage.u.virt.list_nused *sizeof(size_t))))
@@ -715,12 +719,12 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                     block_size += str_size[(2 * i) + 1];
 
                     /* Source selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_select)) < 0)
+                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_select, f)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
                     block_size += (size_t)select_serial_size;
 
                     /* Virtual dataset selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select)) < 0)
+                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select, f)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
                     block_size += (size_t)select_serial_size;
                 } /* end for */
@@ -755,11 +759,11 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                     heap_block_p += str_size[(2 * i) + 1];
 
                     /* Source selection */
-                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
+                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_select, &heap_block_p, f) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize source selection")
 
                     /* Virtual selection */
-                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
+                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p, f) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize virtual selection")
                 } /* end for */
 
@@ -785,6 +789,8 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     } /* end switch */
 
 done:
+    H5F_SET_LATEST_FLAGS(f, saved_latest_flags);
+
     heap_block = (uint8_t *)H5MM_xfree(heap_block);
     str_size = (size_t *)H5MM_xfree(str_size);
 

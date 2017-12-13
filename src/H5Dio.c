@@ -49,10 +49,6 @@
 /* Local Prototypes */
 /********************/
 
-/* Internal I/O routines */
-static herr_t H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
-    const H5S_t *mem_space, const H5S_t *file_space, hid_t dxpl_id, const void *buf);
-
 /* Setup/teardown routines */
 static herr_t H5D__ioinfo_init(H5D_t *dset,
 #ifndef H5_HAVE_PARALLEL
@@ -324,18 +320,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__pre_write
+ * Function:    H5D__pre_write
  *
- * Purpose:	Preparation for writing data.  
+ * Purpose:     Preparation for writing data.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		2 November 2012
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
          const H5S_t *mem_space, const H5S_t *file_space, 
          hid_t dxpl_id, const void *buf)
