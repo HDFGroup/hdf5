@@ -527,9 +527,9 @@ typedef struct H5D_fill_buf_info_t {
 
 /* Internal data structure for computing variable-length dataset's total size */
 typedef struct {
-    H5D_t *dset;        /* Dataset for operation */
-    H5S_t *fspace;      /* Dataset's dataspace for operation */
-    H5S_t *mspace;      /* Memory dataspace for operation */
+    void *dset;         /* Dataset for operation */
+    hid_t fspace_id;    /* ID of the file dataset's dataspace we are working on */
+    hid_t mspace_id;    /* ID of the memory dataset's dataspace we are working on */
     void *fl_tbuf;      /* Ptr to the temporary buffer we are using for fixed-length data */
     void *vl_tbuf;      /* Ptr to the temporary buffer we are using for VL data */
     hid_t xfer_pid;     /* ID of the dataset xfer property list */

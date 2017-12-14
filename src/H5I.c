@@ -908,19 +908,15 @@ H5I_object(hid_t id)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Iobject_verify
+ * Function:    H5Iobject_verify
  *
- * Purpose:	Find an object pointer for the specified ID, verifying that
- *                  its in a particular type.  Public interface to
- *					H5I_object_verify.
+ * Purpose:     Find an object pointer for the specified ID, verifying that
+ *              its in a particular type.  Public interface to
+ *              H5I_object_verify.
  *
- * Return:	Success:	Non-null object pointer associated with the
- *				specified ID.
- *		Failure:	NULL
- *
- * Programmer:	Nathaniel Furrer
- *		James Laird
- *		Friday, April 23, 2004
+ * Return:      Success:    Non-null object pointer associated with the
+ *                          specified ID.
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -932,10 +928,10 @@ H5Iobject_verify(hid_t id, H5I_type_t id_type)
     FUNC_ENTER_API(NULL)
     H5TRACE2("*x", "iIt", id, id_type);
 
-    if(H5I_IS_LIB_TYPE(id_type))
+    if (H5I_IS_LIB_TYPE(id_type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
 
-    if(id_type < 1 || id_type >= H5I_next_type)
+    if (id_type < 1 || id_type >= H5I_next_type)
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "identifier has invalid type")
 
     ret_value = H5I_object_verify(id, id_type);
@@ -946,36 +942,33 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I_object_verify
+ * Function:    H5I_object_verify
  *
- * Purpose:	Find an object pointer for the specified ID, verifying that
- *                  its in a particular type.
+ * Purpose:     Find an object pointer for the specified ID, verifying that
+ *              its in a particular type.
  *
- * Return:	Success:	Non-null object pointer associated with the
- *				specified ID.
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, July 31, 2002
+ * Return:      Success:    Non-null object pointer associated with the
+ *                          specified ID.
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
 void *
 H5I_object_verify(hid_t id, H5I_type_t id_type)
 {
-    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
-    void		*ret_value = NULL;	/*return value		*/
+    H5I_id_info_t  *id_ptr      = NULL;     /* Pointer to the new atom  */
+    void           *ret_value   = NULL;     /* Return value             */
 
     FUNC_ENTER_NOAPI_NOERR
 
     HDassert(id_type >= 1 && id_type < H5I_next_type);
 
     /* Verify that the type of the ID is correct & lookup the ID */
-    if(id_type == H5I_TYPE(id) && NULL != (id_ptr = H5I__find_id(id))) {
+    if (id_type == H5I_TYPE(id) && NULL != (id_ptr = H5I__find_id(id))) {
         /* Get the object pointer to return */
         /* (Casting away const OK -QAK) */
         ret_value = (void *)id_ptr->obj_ptr;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5I_object_verify() */

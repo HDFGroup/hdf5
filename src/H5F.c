@@ -28,6 +28,7 @@
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Fpkg.h"             /* File access                              */
 #include "H5FDprivate.h"        /* File drivers                             */
+#include "H5FLprivate.h"        /* Free lists                               */
 #include "H5Gprivate.h"         /* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MFprivate.h"        /* File memory management                   */
@@ -85,6 +86,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Declare a free list to manage the H5VL_t struct */
 H5FL_EXTERN(H5VL_t);
+
 /* Declare a free list to manage the H5VL_object_t struct */
 H5FL_EXTERN(H5VL_object_t);
 
@@ -681,11 +683,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
-    /* XXX: Need to replace H5F_try_close(), which takes a H5F_t */
-    if (H5I_INVALID_HID == ret_value)
-        if (new_file && H5F_try_close(new_file, NULL) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
 
@@ -767,11 +764,6 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
 done:
-    /* XXX: Need to replace H5F_try_close(), which takes a H5F_t */
-    if (H5I_INVALID_HID == ret_value)
-        if (new_file && H5F_try_close(new_file, NULL) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
 
@@ -873,38 +865,32 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    H5F_t    *old_file = NULL;
-    H5F_t    *new_file = NULL;
-    hid_t    ret_value = H5I_INVALID_HID;
+    H5VL_object_t   *obj = NULL;
+    void            *file;                          /* File token from VOL driver */
+    hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
 
-    /* Check arguments */
-    if (NULL == (old_file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file")
+    /* Get the file object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
-    /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if (NULL == (new_file = H5F_new(old_file->shared, 0, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
+    /* Reopen the file */
+    if (H5VL_file_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, H5VL_FILE_REOPEN, &file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL driver")
+
+    /* Make sure that worked */
+    if (NULL == file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
 
-    /* Duplicate old file's names */
-    new_file->open_name = H5MM_xstrdup(old_file->open_name);
-    new_file->actual_name = H5MM_xstrdup(old_file->actual_name);
-    new_file->extpath = H5MM_xstrdup(old_file->extpath);
-
-    if ((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
+    /* Get an atom for the file */
+    if ((ret_value = H5VL_register_id(H5I_FILE, file, obj->vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
-    /* Keep this ID in file object structure */
-    /* XXX: Fix up after id_exists hax */
-//    new_file->file_id = ret_value;
-
 done:
-    if (ret_value < 0 && new_file)
-        if (H5F__dest(new_file, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "can't close file")
-
+    /* XXX: If registration fails, file will not be closed */
     FUNC_LEAVE_API(ret_value)
 } /* end H5Freopen() */
 
@@ -1270,14 +1256,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_name
  *
- * XXX: Fix this mess...
  * Purpose:     Gets the name of the file to which object OBJ_ID belongs.
- *              If `name' is non-NULL then write up to `size' bytes into that
+ *              If 'name' is non-NULL then write up to 'size' bytes into that
  *              buffer and always return the length of the entry name.
- *              Otherwise `size' is ignored and the function does not store the name,
- *              just returning the number of characters required to store the name.
- *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
- *              is unchanged and the function returns a negative value.
+ *              Otherwise `size' is ignored and the function does not store
+ *              the name, just returning the number of characters required to
+ *              store the name. If an error occurs then the buffer pointed to
+ *              by 'name' (NULL or non-NULL) is unchanged and the function
+ *              returns a negative value.
  *
  * Note:        This routine returns the name that was used to open the file,
  *              not the actual name after resolving symlinks, etc.
@@ -1291,41 +1277,26 @@ done:
 ssize_t
 H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
 {
-    H5F_t         *f;           /* Top file in mount hierarchy */
-    size_t        len;
-    ssize_t       ret_value;
+    H5VL_object_t       *obj = NULL;
+    H5I_type_t          type;
+    ssize_t             ret_value = -1;
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "ixz", obj_id, name, size);
 
-    /* For file IDs, get the file object directly
-     *
-     * This prevents the H5G_loc() call from returning the file pointer for
-     * the top file in a mount hierarchy.
-     */
-    if (H5I_get_type(obj_id) == H5I_FILE ) {
-        if (NULL == (f = (H5F_t *)H5I_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a file")
-    }
-    else {
-        H5G_loc_t     loc;        /* Object location */
+    /* Check the type */
+    type = H5I_get_type(obj_id);
+    if (H5I_FILE != type && H5I_GROUP != type && H5I_DATATYPE != type && H5I_DATASET != type && H5I_ATTR != type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a file or file object")
 
-        /* Get symbol table entry */
-        if (H5G_loc(obj_id, &loc) < 0)
-             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not a valid object ID")
-        f = loc.oloc->file;
-    }
+    /* Get the file object */
+    if (NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
-    len = HDstrlen(H5F_OPEN_NAME(f));
-
-    if (name) {
-        HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
-        if (len >= size)
-            name[size-1]='\0';
-    }
-
-    /* Set return value */
-    ret_value = (ssize_t)len;
+    /* Get the filename via the VOL */
+    if (H5VL_file_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_GET_NAME, 
+                     H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, type, size, name, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get file name")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1348,54 +1319,30 @@ done:
 herr_t
 H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
 {
-    H5F_t *f;                           /* Top file in mount hierarchy */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5VL_object_t  *obj = NULL;
+    H5I_type_t      type;
+    herr_t          ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", obj_id, finfo);
 
     /* Check args */
     if (!finfo)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file info pointer can't be NULL")
 
-    /* For file IDs, get the file object directly */
-    /* (This prevents the H5G_loc() call from returning the file pointer for
-     * the top file in a mount hierarchy)
-     */
-    if(H5I_get_type(obj_id) == H5I_FILE ) {
-        if (NULL == (f = (H5F_t *)H5I_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-    }
-    else {
-        H5G_loc_t     loc;        /* Object location */
+    /* Check the type */
+    type = H5I_get_type(obj_id);
+    if (H5I_FILE != type && H5I_GROUP != type && H5I_DATATYPE != type && H5I_DATASET != type && H5I_ATTR != type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-        /* Get symbol table entry */
-        if (H5G_loc(obj_id, &loc) < 0)
-             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object ID")
-        f = loc.oloc->file;
-    }
-    HDassert(f->shared);
+    /* Get the file object */
+    if (NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    /* Reset file info struct */
-    HDmemset(finfo, 0, sizeof(*finfo));
-
-    /* Get the size of the superblock and any superblock extensions */
-    if (H5F__super_size(f, H5AC_ind_read_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
-
-    /* Get the size of any persistent free space */
-    if (H5MF_get_freespace(f, H5AC_ind_read_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
-
-    /* Check for SOHM info */
-    if (H5F_addr_defined(f->shared->sohm_addr))
-        if (H5SM_ih_size(f, H5AC_ind_read_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
-
-    /* Set version # fields */
-    finfo->super.version = f->shared->sblock->super_vers;
-    finfo->sohm.version = f->shared->sohm_vers;
-    finfo->free.version = HDF5_FREESPACE_VERSION;
+    /* Get the file information via the VOL */
+    if (H5VL_file_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_INFO, type, finfo) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -96,7 +96,7 @@ else ()
 endif ()
 set_tests_properties (HL_FORTRAN_f90_tsttable PROPERTIES DEPENDS HL_FORTRAN_test-clear-objects)
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS)
   add_test (
       NAME HL_FORTRAN_test-shared-clear-objects
       COMMAND    ${CMAKE_COMMAND}

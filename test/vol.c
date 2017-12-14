@@ -27,6 +27,8 @@
 #define NATIVE_VOL_TEST_GROUP_NAME      "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME    "test_dataset"
 #define NATIVE_VOL_TEST_ATTRIBUTE_NAME  "test_dataset"
+#define NATIVE_VOL_TEST_HARD_LINK_NAME  "test_hard_link"
+#define NATIVE_VOL_TEST_SOFT_LINK_NAME  "test_soft_link"
 
 #define N_ELEMENTS  10
 
@@ -205,16 +207,18 @@ error:
 static herr_t
 test_basic_file_operation(void)
 {
-    hid_t fid = H5I_INVALID_HID;
-//    hid_t fid2 = H5I_INVALID_HID;   /* for H5Freopen() */
-    hid_t fapl_id = H5I_INVALID_HID;
-    hid_t fcpl_id = H5I_INVALID_HID;
+    hid_t fid           = H5I_INVALID_HID;
+    hid_t fid_reopen    = H5I_INVALID_HID;
+    hid_t fapl_id       = H5I_INVALID_HID;
+    hid_t fcpl_id       = H5I_INVALID_HID;
 
-    ssize_t     obj_count;
-    hid_t       obj_id_list[1];
-    hsize_t     file_size;
-    unsigned    intent;
-    void       *os_file_handle = NULL;
+    ssize_t         obj_count;
+    hid_t           obj_id_list[1];
+    hsize_t         file_size;
+    unsigned        intent;
+    void           *os_file_handle = NULL;
+    H5F_info2_t     finfo;
+    char            name[32];
 
     TESTING("Basic VOL file operations");
 
@@ -260,6 +264,14 @@ test_basic_file_operation(void)
     if (H5Fget_intent(fid, &intent) < 0)
         TEST_ERROR;
 
+    /* H5Fget_info2 */
+    if (H5Fget_info2(fid, &finfo) < 0)
+        TEST_ERROR;
+
+    /* H5Fget_name */
+    if (H5Fget_name(fid, name, 32) < 0)
+        TEST_ERROR;
+
     /* H5Fclear_elink_file_cache */
     if (H5Fclear_elink_file_cache(fid) < 0)
         TEST_ERROR;
@@ -283,12 +295,12 @@ test_basic_file_operation(void)
     /* H5Fopen */
     if ((fid = H5Fopen(NATIVE_VOL_TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-//    if ((fid2 = H5Freopen(fid)) < 0)
-//        TEST_ERROR;
+    if ((fid_reopen = H5Freopen(fid)) < 0)
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
-//    if (H5Fclose(fid2) < 0)
-//        TEST_ERROR;
+    if (H5Fclose(fid_reopen) < 0)
+        TEST_ERROR;
 
     HDremove(NATIVE_VOL_TEST_FILENAME);
 
@@ -298,6 +310,7 @@ test_basic_file_operation(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
+        H5Fclose(fid_reopen);
         H5Pclose(fapl_id);
         H5Pclose(fcpl_id);
     } H5E_END_TRY;
@@ -399,6 +412,7 @@ test_basic_dataset_operation(void)
     hid_t dcpl_id   = H5I_INVALID_HID;
     hid_t dapl_id   = H5I_INVALID_HID;
     hid_t did       = H5I_INVALID_HID;
+    hid_t did_a     = H5I_INVALID_HID;
     hid_t sid       = H5I_INVALID_HID;
     hid_t tid       = H5I_INVALID_HID;
 
@@ -407,6 +421,7 @@ test_basic_dataset_operation(void)
 
     hsize_t storage_size;
     haddr_t offset;
+    H5D_space_status_t status;
 
     int in_buf[N_ELEMENTS];
     int out_buf[N_ELEMENTS];
@@ -433,6 +448,11 @@ test_basic_dataset_operation(void)
         TEST_ERROR;
     if ((did = H5Dcreate2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
+
+    /* H5Dcreate_anon */
+    if ((did_a = H5Dcreate_anon(fid, H5T_NATIVE_INT, sid, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
     if (H5Pclose(dcpl_id) < 0)
@@ -450,6 +470,8 @@ test_basic_dataset_operation(void)
     /* H5Dclose */
     if (H5Dclose(did) < 0)
         TEST_ERROR;
+    if (H5Dclose(did_a) < 0)
+        TEST_ERROR;
 
     /* H5Dopen */
     if ((did = H5Dopen2(fid, NATIVE_VOL_TEST_DATASET_NAME, H5P_DEFAULT)) < 0)
@@ -461,8 +483,18 @@ test_basic_dataset_operation(void)
     if (H5Sclose(sid) < 0)
         TEST_ERROR;
 
+    /* H5Dget_space_status */
+    if (H5Dget_space_status(did, &status) < 0)
+        TEST_ERROR;
+
     /* H5Dget_type */
     if ((tid = H5Dget_type(did)) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
+
+    /* H5Tcopy (when used w/ a dataset, it gets an H5VL struct */
+    if ((tid = H5Tcopy(did)) < 0)
         TEST_ERROR;
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
@@ -513,6 +545,7 @@ error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
         H5Dclose(did);
+        H5Dclose(did_a);
         H5Sclose(sid);
         H5Tclose(tid);
         H5Pclose(dapl_id);
@@ -542,6 +575,9 @@ test_basic_attribute_operation(void)
 
     hsize_t dims    = 1;
 
+    int     data_in     = 42;
+    int     data_out    = 0;
+
     TESTING("Basic VOL attribute operations");
 
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -554,6 +590,16 @@ test_basic_attribute_operation(void)
     if ((aid = H5Acreate2(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* H5Awrite */
+    if (H5Awrite(aid, H5T_NATIVE_INT, &data_in) < 0)
+        TEST_ERROR;
+
+    /* H5Aread */
+    if (H5Aread(aid, H5T_NATIVE_INT, &data_out) < 0)
+        TEST_ERROR;
+    if (data_in != data_out)
         TEST_ERROR;
 
     /* H5Aclose */
@@ -634,6 +680,20 @@ test_basic_link_operation(void)
     TESTING("Basic VOL link operations");
 
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Lcreate_hard */
+    if (H5Lcreate_hard(fid, "/", H5L_SAME_LOC, NATIVE_VOL_TEST_HARD_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* H5Lcreate_soft */
+    if (H5Lcreate_soft("/", fid, NATIVE_VOL_TEST_SOFT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* H5Lexists */
+    if (H5Lexists(fid, NATIVE_VOL_TEST_SOFT_LINK_NAME, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (H5Lexists(fid, NATIVE_VOL_TEST_HARD_LINK_NAME, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)

@@ -678,30 +678,28 @@ done:
 herr_t
 H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
 {
-    H5A_t *attr;                /* Attribute object for ID */
-    H5T_t *mem_type;            /* Memory datatype */
-    hid_t  dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    hid_t  aapl_id = H5P_DEFAULT;  /* temp access plist */
-    herr_t ret_value;           /* Return value */
+    H5VL_object_t  *attr;                   /* Attribute object for ID */
+    hid_t           dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    hid_t           aapl_id = H5P_DEFAULT;  /* Temp access plist */
+    herr_t          ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
-    /* check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    /* Check arguments */
+    if (NULL == (attr = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if(NULL == buf)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
+    if (NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf parameter can't be NULL")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id, attr_id, TRUE) < 0)
+    if (H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id, attr_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Go write the actual data to the attribute */
-    if((ret_value = H5A__write(attr, mem_type, buf, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
+    /* write the data through the VOL */
+    if ((ret_value = H5VL_attr_write(attr->vol_obj, attr->vol_info->vol_cls, 
+                                    dtype_id, buf, dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't write attribute data via the VOL")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -727,30 +725,28 @@ done:
 herr_t
 H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 {
-    H5A_t *attr;                /* Attribute object for ID */
-    H5T_t *mem_type;            /* Memory datatype */
-    hid_t  dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    hid_t  aapl_id = H5P_DEFAULT;  /* temp access plist */
-    herr_t ret_value;           /* Return value */
+    H5VL_object_t  *attr;               /* Attribute object for ID */
+    hid_t           dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    hid_t           aapl_id = H5P_DEFAULT;      /* Temp access plist */
+    herr_t          ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
-    /* check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    /* Check arguments */
+    if (NULL == (attr = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if(NULL == buf)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
+    if (NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf parameter can't be NULL")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id, attr_id, FALSE) < 0)
+    if (H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id, attr_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Go write the actual data to the attribute */
-    if((ret_value = H5A__read(attr, mem_type, buf, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
+    /* Read the data through the VOL */
+    if ((ret_value = H5VL_attr_read(attr->vol_obj, attr->vol_info->vol_cls, 
+                                   dtype_id, buf, dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read attribute data via the VOL")
 
 done:
     FUNC_LEAVE_API(ret_value)
