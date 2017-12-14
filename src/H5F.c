@@ -1041,24 +1041,26 @@ done:
  * Return:      Success:    Bytes copied / number of bytes needed
  *
  *              Failure:    -1
+ *
  *-------------------------------------------------------------------------
  */
 ssize_t
 H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
 {
-    H5F_t      *file;                   /* File object for file ID */
-    ssize_t     ret_value;              /* Return value */
+    H5VL_object_t  *file;           /* File object for file ID  */
+    ssize_t         ret_value;      /* Return value             */
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "i*xz", file_id, buf_ptr, buf_len);
 
     /* Check args */
-    if (NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not a file ID")
 
-    /* call private get_file_image function */
-    if ((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get file image")
+    /* Get image through the VOL */
+    if (H5VL_file_optional(file->vol_obj, file->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
+                          H5VL_FILE_GET_FILE_IMAGE, buf_ptr, &ret_value, buf_len) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get file image")
 
 done:
     FUNC_LEAVE_API(ret_value)
