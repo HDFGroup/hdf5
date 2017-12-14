@@ -641,13 +641,24 @@ static herr_t
 test_basic_object_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
+    hid_t gid       = H5I_INVALID_HID;
+
+    H5O_info_t object_info;
 
     TESTING("Basic VOL object operations");
 
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
+    if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Oget_info_by_name */
+    if (H5Oget_info_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, &object_info, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+    if (H5Gclose(gid) < 0)
         TEST_ERROR;
 
     HDremove(NATIVE_VOL_TEST_FILENAME);
@@ -658,6 +669,7 @@ test_basic_object_operation(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
+        H5Gclose(gid);
     } H5E_END_TRY;
 
     return FAIL;
