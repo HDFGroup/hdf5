@@ -1452,9 +1452,7 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "failed to copy dataspace")
 
     /* create a new uuid for this dataset */
-    h5json_uuid_t       new_dataset_uuid;
-    h5json_uuid_generate(new_dataset_uuid);
-    new_dataset->object_uuid = json_string(new_dataset_uuid);
+    h5json_uuid_generate(new_dataset->object_uuid);
 
     /* Now the persistent JANSSON representation */
 
@@ -1465,7 +1463,7 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     json_t* dataset_collection = json_object_get(new_dataset->domain->u.file.json_file_object, "datasets");
 
     /* insert the new JANSSON object into the dataset collection */
-    json_object_set_new(dataset_collection, json_string_value(new_dataset->object_uuid), new_dataset->object_json);
+    json_object_set_new(dataset_collection, new_dataset->object_uuid, new_dataset->object_json);
 
     /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
     json_t* parent_uuid;
@@ -1473,7 +1471,7 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     {
         case H5I_FILE:
             /* if starting with file, grab id of the root group, and move on. */
-            parent_uuid = json_object_get(new_dataset->domain->u.file.json_file_object, "root");
+            parent_uuid = json_string_value(json_object_get(new_dataset->domain->u.file.json_file_object, "root"));
             break;
         case H5I_GROUP:
             parent_uuid = parent->object_uuid;
@@ -1487,14 +1485,14 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     
     // get the group
     json_t* group_hashtable = json_object_get(new_dataset->domain->u.file.json_file_object, "groups");
-    json_t* group = json_object_get(group_hashtable, json_string_value(parent_uuid));
+    json_t* group = json_object_get(group_hashtable, parent_uuid);
 
     /* create the link */
     json_t* link = json_object();
     json_object_set_new(link, "class", json_string("H5L_TYPE_HARD"));
     json_object_set_new(link, "title", json_string(name));
     json_object_set_new(link, "collection", json_string("datasets"));
-    json_object_set_new(link, "id", json_string(new_dataset_uuid)); 
+    json_object_set_new(link, "id", json_string(new_dataset->object_uuid)); 
 
     /* add the link to the group's link collection */
     json_t* link_collection = json_object_get(group, "links");
@@ -2141,21 +2139,21 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
      */
 
     /* create an uuid for the file object itself */
-    h5json_uuid_t uuid;
-    h5json_uuid_generate(uuid);
-printf("FTW uuid = %s\n", uuid);
-    json_t *uuid_json_string = json_string(uuid);
-    assert(json_object_set_new(new_file_object, "id", uuid_json_string) == 0);
+//    h5json_uuid_t uuid;
+    h5json_uuid_generate(new_file->object_uuid);
+//    json_t *uuid_json_string = json_string(uuid);
+//    assert(json_object_set_new(new_file_object, "id", uuid_json_string) == 0);
+    assert(json_object_set_new(new_file_object, "id", json_string(new_file->object_uuid)) == 0);
     /* The reference to uuid_json_string is 'stolen' by new_file_object when 
      * json_object_set_new() is used. The point to it declared here is a stack var
      * and cleaned up when it goes out of scope. 
      *
      * It's handled similarly for the following insertions into json_file_object.
-     */
+     */  // above is no longer true, now that uuid is recorded as char[37] instead of json_t
 
      /* This uuid also gets *copied* to the library object */
-     new_file->object_uuid = json_string(uuid);
-printf("FTW uuid = %s\n", json_string_value(new_file->object_uuid));
+//     new_file->object_uuid = json_string(uuid);
+printf("FTW uuid = %s\n", new_file->object_uuid);
 
     /* create the root group */
     h5json_uuid_t root_group_uuid;
@@ -2359,7 +2357,10 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
     file->u.file.json_file_object = document;
 
     /* This uuid also gets *copied* to the library object */
-    file->object_uuid = json_string(json_string_value(id));
+//    file->object_uuid = json_string(json_string_value(id));
+//WIP 
+//char *strncpy( char *dest, const char *src, size_t count );
+strncpy(file->object_uuid, id, sizeof(h5json_uuid_t));
 
     /* Copy the path name into the new file object */
     name_length = strlen(name);
@@ -2523,7 +2524,7 @@ H5VL_json_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 #ifdef PLUGIN_DEBUG
     printf("Received File close call with following parameters:\n");
     printf("  - DXPL: %ld\n", dxpl_id);
-    printf("  - UUID: %s\n", json_string_value(_file->object_uuid));
+    printf("  - UUID: %s\n", _file->object_uuid);
     printf("  - JSON content begin: \n\n%s\n\n", json_dumps(_file->u.file.json_file_object, JSON_INDENT(4)));
     printf("  - JSON content end. \n\n");
 #endif
@@ -2570,12 +2571,13 @@ H5VL_json_group_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     H5VL_json_object_t* parent = (H5VL_json_object_t *) obj;
     H5VL_json_object_t* new_group = NULL;
     void*               ret_value = NULL;
-    json_t*             current_uuid = NULL;
+//    json_t*             current_uuid = NULL;
+    h5json_uuid_t*      current_uuid = NULL;
     json_t*             current_group = NULL;
     json_t*             groups_in_file = NULL;    
     h5json_uuid_t       new_group_uuid;
     json_t*             new_group_json;
-    json_t*             new_group_uuid_json;
+//    json_t*             new_group_uuid_json;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2587,45 +2589,6 @@ H5VL_json_group_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     printf("  - DXPL: %ld\n", dxpl_id);
     printf("  - Parent Object Type: %d\n\n", parent->obj_type);
 #endif
-
-    /* Get the Link Creation property list ID */
-
-
-
-#if 0
-/* stuff to dtermeine if parent links should be created. Contemplating leaving this out entirely. */
-//    if (H5Pget(dcpl, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
-hid_t lcpl_id;
-H5P_genplist_t* plist;
-unsigned cig;
-H5G_loc_t loc;
-/* Get the plist structure */
-if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
-    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
-printf("FTW 1 cig = %u\n", cig);
-printf("FTW plist = %u\n", plist);
-
-/* get creation properties */
-if(H5P_get(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
-HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
-printf("FTW lcpl_id = %u\n", lcpl_id);
-printf("FTW 2 cig = %u\n", cig);
-
-// FTW this one fails... WIP
-//if (H5Pget(gcpl_id, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
-//    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for link creation property list ID")
-printf("FTW 3 cig = %u\n", cig);
-
-//if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
-//    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
-
-
-//FTW WIP
-H5Pget_create_intermediate_group(lcpl_id, &cig);
-printf("got cig = %u\n", cig);
-
-#endif
-
 
     /* Check for write access */
     if(!(parent->domain->u.file.intent & H5F_ACC_RDWR))
@@ -2639,30 +2602,21 @@ printf("got cig = %u\n", cig);
     new_group->domain = parent->domain;
     new_group->obj_type = H5I_GROUP;
 
-    /* create a uuid for this new group and add it to library object */
-    h5json_uuid_generate(new_group_uuid);
-    new_group->object_uuid = json_string(new_group_uuid);
-
-    /* handle the JANSSON representation: */
-    groups_in_file = json_object_get(new_group->domain->u.file.json_file_object, "groups"); 
+    /* generate the JANSSON representation: */
 
     /* start from location ID */
     switch (parent->obj_type) 
     {
         case H5I_FILE:
-            /* if starting with file, grab id of the root group, and move on. */
-            current_uuid = json_object_get(new_group->domain->u.file.json_file_object, "root");
+            /* if starting with a file, look up the id of the root group. */
+            current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(new_group->domain->u.file.json_file_object, "root"));
             break;
         case H5I_GROUP:
-            current_uuid = parent->object_uuid;
+            current_uuid = &(parent->object_uuid);
             break;
         default:
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "Not a valid parent object type.")
     }
-
-    /* make a copy of current_uuid */
-    current_uuid = json_string(json_string_value(current_uuid));
-
     HDassert(current_uuid && "parent uuid not found. ");
 
     /* get the list of tokens in the provided name/path */
@@ -2678,17 +2632,16 @@ printf("got cig = %u\n", cig);
 
     /* group-spotting: search the path/tokens provided, create as needed and allowed. 
        The last token is our target, and library object for it created and returned. */
-   
+    groups_in_file = json_object_get(new_group->domain->u.file.json_file_object, "groups"); 
+
     for(token_index=0; token_index<n_tokens; token_index++)
     {
         /* Locate the current/cursor group in Jansson and get links */
-        current_group = json_object_get(groups_in_file, json_string_value(current_uuid));
+        current_group = json_object_get(groups_in_file, current_uuid);
 
         /* search links of current group for current token */
         char *current_token = tokens[token_index];
         json_t* links_for_current_group = json_object_get(current_group, "links");
-
-        /* search the links for the current token */
         size_t index;
         json_t *link;
         hbool_t found = FALSE;
@@ -2696,47 +2649,36 @@ printf("got cig = %u\n", cig);
         {
             /* block of code that uses index and link */
             json_t* title = json_object_get(link, "title");
-            if (json_equal(title, json_string(current_token)))
+            if (!strcmp(json_string_value(title), current_token))
             {
-                /* found it. */
-                found = TRUE;
-                break; /* breaks out of enclosing json_array_foreach() macro */
+                found = TRUE; /* found it. */
+                break; /* break out of enclosing json_array_foreach() macro */
             }
         } /* end of loop over link array */
 
         /* after searching all links, these are the scenarios: */
 
-        /* 1 - last token is found --> group exists, so fail */
+        /* 1 - last token is found --> group already exists, so fail */
         if((token_index == n_tokens - 1) && found) 
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "Cannot create link which already exists.")
 
         /* 2 - intermediate token found, so move on */
         if ((token_index < (n_tokens - 1)) && found)
         {
-            current_uuid = json_object_get(link, "id");
+            current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(link, "id"));
             continue; 
         }
 
-
-        /* 3 - intermediate or final token not found, so create it in JANSSON. 
+        /* 3 - intermediate or final token not found, so create the group in JANSSON. 
                (or fail for intermediate, depending on gcpl, when implemented) */
+        if (!found)       
         {
-            /* if its intermediate, create a new uuid, otherwise copy the library object uuid. */
-            if(token_index == n_tokens - 1)
-            {
-                /* construct a copy here, because the library object and persistent rep need to manage memory independently */
-                new_group_uuid_json = json_string(json_string_value(new_group->object_uuid));
-            }
-            else 
-            {
-                h5json_uuid_t intermediate_group_uuid;
-                h5json_uuid_generate(intermediate_group_uuid);
-                new_group_uuid_json = json_string(intermediate_group_uuid);
-            }
+            /* generate uuid for the new or intermediate group */
+            h5json_uuid_generate(new_group_uuid);
 
-            /* create a new entry in the all groups object */ 
+            /* create a new group in the groups hashtable */ 
             new_group_json = json_object();
-            json_object_set_new(groups_in_file, json_string_value(new_group_uuid_json), new_group_json);
+            json_object_set_new(groups_in_file, new_group_uuid, new_group_json);
 
             /* grab the links from current group, insert a new/empty link object to the new group */
             json_t* link_list = json_object_get(current_group, "links");
@@ -2744,13 +2686,10 @@ printf("got cig = %u\n", cig);
             json_t* new_link = json_object();
             HDassert((json_array_append(link_list, new_link) == 0));
 
-            /* flesh out the jansson object */
-
-            /* FTW: need to get link class from gcpl? */
-            json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD"));
+            json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD")); /* FTW: need to get link class from pl? */
             json_object_set_new(new_link, "title", json_string(tokens[token_index]));
             json_object_set_new(new_link, "collection", json_string("groups"));
-            json_object_set_new(new_link, "id", new_group_uuid_json);
+            json_object_set_new(new_link, "id", json_string(new_group_uuid));
 
              /* populate fields in that new group */
             json_t *hdf5_path_name_array = json_array(); /* create new, empty array */ 
@@ -2778,15 +2717,19 @@ printf("got cig = %u\n", cig);
             json_object_set_new(new_group_json, "creationProperties",creationProperties);
             
             /* set the current group pointer to point to the next one before moving to the next token */
-            current_uuid = new_group_uuid_json;
+            current_uuid = &new_group_uuid; 
 
         } /* end of !found */
 
     } /* end of tokens */
  
+    /* copy the final current_uuid and pointer to current_group into the VOL object */
+    //if(token_index == n_tokens - 1) strncpy(new_group->object_uuid, current_uuid, sizeof(h5json_uuid_t));
+    strncpy(new_group->object_uuid, current_uuid, sizeof(h5json_uuid_t));
+
 #ifdef PLUGIN_DEBUG
     printf("  - Finished adding group %s... \n", name);
-    printf("  - With uuid %s... \n", json_string_value(new_group->object_uuid));
+    printf("  - With uuid %s... \n", (new_group->object_uuid));
     printf("  - File now reads:\n\n");
     json_dumpf(parent->domain->u.file.json_file_object, stdout, JSON_INDENT(4));
 #endif
@@ -2799,13 +2742,33 @@ done:
     /* Clean up allocated group object if there was an issue */
     if (new_group && !ret_value) //FTW : new_group != ret_value would be simpler?
     {
-        new_group->object_uuid = current_uuid;
+//FTW ???        new_group->object_uuid = current_uuid;
         if (H5VL_json_group_close(new_group, FAIL, NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, NULL, "unable to close group")
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
 
+#if 0
+    /* Get the Link Creation property list ID */
+/* stuff to dtermeine if parent links should be created. Contemplating leaving this out entirely. */
+//    if (H5Pget(dcpl, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
+hid_t lcpl_id;
+H5P_genplist_t* plist;
+unsigned cig;
+H5G_loc_t loc;
+/* Get the plist structure */
+if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
+    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
+/* get creation properties */
+if(H5P_get(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
+HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
+//if (H5Pget(gcpl_id, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
+//    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for link creation property list ID")
+//if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+//    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
+H5Pget_create_intermediate_group(lcpl_id, &cig);
+#endif
 } /* end H5VL_json_group_create() */
 
 
@@ -2818,7 +2781,7 @@ H5VL_json_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name,
     htri_t              search_ret;
     void               *ret_value = NULL;
     json_t*            groups_in_file;
-    json_t*            current_uuid;
+    h5json_uuid_t*     current_uuid;
     json_t*            current_group;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2861,14 +2824,14 @@ H5VL_json_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name,
     if ((parent->obj_type == H5I_FILE) || (n_tokens == 0)) 
     {
         /* borrow reference to root group as starting point */
-        current_uuid = json_object_get(parent->domain->u.file.json_file_object, "root");
+        current_uuid = (h5json_uuid_t*)json_object_get(parent->domain->u.file.json_file_object, "root");
     }
     else /* borrow reference to provided group */
     {
-        current_uuid = group->object_uuid; 
+        current_uuid = &(group->object_uuid); 
     }
 
-    current_group = json_object_get(groups_in_file, json_string_value(current_uuid));
+    current_group = json_object_get(groups_in_file, current_uuid);
     HDassert(current_uuid && "Couldn't get uuid for provided location.");
     HDassert(current_group && "Couldn't get group for provided location.");
 
@@ -2895,8 +2858,8 @@ H5VL_json_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name,
                 /* found it. */
                 found = TRUE;
                 /* set the current group pointer to point to the new one before moving on to the next token */
-                current_uuid = json_object_get(link, "id");
-                current_group = json_object_get(groups_in_file, json_string_value(current_uuid));
+                current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(link, "id"));
+                current_group = json_object_get(groups_in_file, current_uuid);
 
                 break; /* breaks out of enclosing json_array_foreach() macro */
             }
@@ -2913,11 +2876,13 @@ H5VL_json_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name,
     printf("Group H5VL_json_object_t fields:\n");
     printf("  - Group Object type: %d\n", group->obj_type);
     printf("  - Group Parent Domain path: %s\n", group->domain->u.file.filepath_name);
-    printf("  - Group uuid: %s\n\n", json_string_value(current_uuid));
+    printf("  - Group uuid: %s\n\n", (current_uuid));
 #endif
 
     /* The last token is the group we're actually opening... so copy the ID. */
-    group->object_uuid = json_string(json_string_value(current_uuid));
+//    group->object_uuid = json_string(json_string_value(current_uuid));
+//FTW
+    strncpy(group->object_uuid, current_uuid, sizeof(h5json_uuid_t));
 
     ret_value = (void *) group;
 
