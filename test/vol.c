@@ -652,6 +652,10 @@ test_basic_object_operation(void)
     if ((gid = H5Gcreate2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
+    /* H5Oget_info */
+    if (H5Oget_info(fid, &object_info) < 0)
+        TEST_ERROR;
+
     /* H5Oget_info_by_name */
     if (H5Oget_info_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, &object_info, H5P_DEFAULT) < 0)
         TEST_ERROR;
