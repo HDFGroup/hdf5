@@ -1601,7 +1601,7 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED d
                 *ret = (ssize_t)len;
                 break;
             }
-        /* H5I_get_file_id */
+        /* H5Iget_file_id */
         case H5VL_OBJECT_GET_FILE:
             {
                 H5I_type_t  type = va_arg(arguments, H5I_type_t);

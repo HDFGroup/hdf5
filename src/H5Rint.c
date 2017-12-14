@@ -750,7 +750,7 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
     } /* end switch */
 
     /* Retrieve file ID for name search */
-    if ((file_id = H5I_get_file_id(id, FALSE)) < 0)
+    if ((file_id = H5F_get_id(id, FALSE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
     /* Get name, length, etc. */

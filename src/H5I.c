@@ -1886,7 +1886,7 @@ static herr_t
 H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
 {
     H5I_iterate_pub_ud_t *udata = (H5I_iterate_pub_ud_t *)_udata; /* User data for callback */
-    herr_t ret_value;   /* Callback return value */
+    herr_t ret_value = FAIL;   /* Callback return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1965,16 +1965,24 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     FUNC_ENTER_STATIC_NOERR
 
     /* Don't make callback if app_ref is set and the appl. ref count is 0 */
-    if((!udata->app_ref) || (item->app_count > 0)) {
-        herr_t cb_ret_val;
+    if ((!udata->app_ref) || (item->app_count > 0)) {
+        H5I_type_t type = udata->obj_type;
+        const void *obj_ptr = NULL;
+
+        if (H5I_FILE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
+            const H5VL_object_t *obj = (const H5VL_object_t *)item->obj_ptr;
+            obj_ptr = obj->vol_obj;
+        }
+        else if (H5I_DATATYPE == type) {
+            const H5T_t *dt = (const H5T_t *)item->obj_ptr;
+            obj_ptr = (void *)H5T_get_actual_type(dt);
+        }
+        else
+            obj_ptr = item->obj_ptr;
 
         /* (Casting away const OK) */
-        cb_ret_val = (*udata->user_func)((void *)item->obj_ptr, item->id, udata->user_udata);
-        if(cb_ret_val > 0)
-            ret_value = H5_ITER_STOP;	/* terminate iteration early */
-        else if(cb_ret_val < 0)
-            ret_value = H5_ITER_ERROR;  /* indicate failure (which terminates iteration) */
-    } /* end if */
+        ret_value = (*udata->user_func)((void *)obj_ptr, item->id, udata->user_udata);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_cb() */
@@ -2008,8 +2016,8 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 herr_t
 H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_ref)
 {
-    H5I_id_type_t *type_ptr;		/*ptr to the type	*/
-    herr_t	   ret_value = SUCCEED;	/*return value		*/
+    H5I_id_type_t *type_ptr;            /* Pointer to the type  */
+    herr_t	   ret_value = SUCCEED;     /* Return value         */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2024,9 +2032,9 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
         herr_t iter_status;             /* Iteration status */
 
         /* Set up iterator user data */
-        iter_udata.user_func = func;
-        iter_udata.user_udata = udata;
-        iter_udata.app_ref = app_ref;
+        iter_udata.user_func    = func;
+        iter_udata.user_udata   = udata;
+        iter_udata.app_ref      = app_ref;
 
         /* Iterate over IDs */
         if ((iter_status = H5SL_iterate(type_ptr->ids, H5I__iterate_cb, &iter_udata)) < 0)
@@ -2134,66 +2142,49 @@ done:
 hid_t
 H5Iget_file_id(hid_t obj_id)
 {
-    hid_t ret_value = H5I_INVALID_HID;          /* Return value */
+    H5VL_object_t  *obj;
+    void           *file        = NULL;
+    H5I_type_t      type;                           /* ID type */
+    hid_t           ret_value   = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", obj_id);
 
-    if ((ret_value = H5I_get_file_id(obj_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Iget_file_id() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5I_get_file_id
- *
- * Purpose:     The private version of H5Iget_file_id(), obtains the file
- *              ID given an object ID.
- *
- * Return:      Success:    The file ID associated with the object
- *
- *              Failure:	H5I_INVALID_HID
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
-{
-    H5I_type_t  type;                           /* ID type                  */
-    hid_t       ret_value = H5I_INVALID_HID;    /* Return value             */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* Get object type */
     type = H5I_TYPE(obj_id);
-    if (type == H5I_FILE) {
-        /* Increment reference count on file ID */
-        if(H5I_inc_ref(obj_id, app_ref) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
 
-        /* Set return value */
-        ret_value = obj_id;
-    }
-    else if (type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
-        H5G_loc_t loc;              /* Location of object */
+    if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || 
+       H5I_DATASET == type || H5I_ATTR == type) {
+        /* Get the object pointer*/
+        if (NULL == (obj = H5VL_get_object(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
 
-        /* Get the object location information */
-        if(H5G_loc(obj_id, &loc) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't get object location")
+        /* Get the file through the VOL */
+        if (H5VL_file_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_OBJECT_GET_FILE, 
+                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, type, &file) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file")
 
-        /* Get the file ID for the object */
-        if((ret_value = H5F_get_id(loc.oloc->file, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't get file ID")
+        if (NULL == file)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
+
+        /* Check if the ID already exists and procceed accordingly */
+        if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
+            /* Get an atom for the file */
+            if ((ret_value = H5VL_register_id(H5I_FILE, file, obj->vol_info, TRUE)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        }
+        else {
+            /* Increment ref count on existing ID */
+            if (H5I_inc_ref(ret_value, TRUE) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
+        }
     }
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_INVALID_HID, "invalid object ID")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_get_file_id() */
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Iget_file_id() */
 
 
 /*-------------------------------------------------------------------------
