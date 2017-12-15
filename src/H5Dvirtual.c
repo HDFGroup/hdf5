@@ -763,6 +763,208 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__virtual_build_name() */
 
+
+/*--------------------------------------------------------------------------
+ * Function: H5D_getenv_prefix_name --
+ *
+ * Purpose:  Get the first pathname in the list of pathnames stored in env_prefix,
+ *           which is separated by the environment delimiter.
+ *           env_prefix is modified to point to the remaining pathnames
+ *           in the list.
+ *
+ * Return:   A pointer to a pathname
+--------------------------------------------------------------------------*/
+static char *
+H5D_getenv_prefix_name(char **env_prefix/*in,out*/)
+{
+    char        *retptr=NULL;
+    char        *strret=NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    strret = HDstrchr(*env_prefix, H5_COLON_SEPC);
+    if (strret == NULL) {
+        retptr = *env_prefix;
+        *env_prefix = strret;
+    } else {
+        retptr = *env_prefix;
+        *env_prefix = strret + 1;
+        *strret = '\0';
+    }
+
+    FUNC_LEAVE_NOAPI(retptr)
+} /* end H5D_getenv_prefix_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_open_file
+ *
+ * Purpose:     Attempts to open a source dataset file.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+static H5F_t *
+H5D__virtual_open_file(H5P_genplist_t *plist, const H5F_t *vdset_file,
+        const char *file_name,
+        hid_t fapl_id, hid_t dxpl_id)
+{
+    H5F_t       *src_file = NULL;       /* Source file */
+    H5F_t       *ret_value = NULL;      /* Actual return value  */
+    char        *full_name = NULL;      /* File name with prefix */
+    char        *my_prefix;             /* Library's copy of the prefix */
+    unsigned    intent;                 /* File access permissions */
+    char        *actual_file_name = NULL; /* Virtual file's actual name */
+    char        *temp_file_name = NULL; /* Temporary pointer to file name */
+    size_t      temp_file_name_len;     /* Length of temporary file name */
+
+    FUNC_ENTER_STATIC
+
+    /* Simplify intent flags for open calls */
+    intent = H5F_INTENT(vdset_file);
+    intent &= (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ);
+
+    /* Copy the file name to use */
+    if(NULL == (temp_file_name = H5MM_strdup(file_name)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    temp_file_name_len = HDstrlen(temp_file_name);
+
+    /* target file_name is an absolute pathname: see RM for detailed description */
+    if(H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
+        /* Try opening file */
+        if(NULL == (src_file = H5F_open(file_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id))) {
+            char *ptr;
+
+            H5E_clear_stack(NULL);
+
+            /* get last component of file_name */
+            H5_GET_LAST_DELIMITER(file_name, ptr)
+            HDassert(ptr);
+
+            /* Increment past delimiter */
+            ptr++;
+
+            /* Copy into the temp. file name */
+            HDstrncpy(temp_file_name, ptr, temp_file_name_len);
+            temp_file_name[temp_file_name_len - 1] = '\0';
+        } /* end if */
+    } /* end if */
+    else if(H5_CHECK_ABS_DRIVE(file_name)) {
+        /* Try opening file */
+        if(NULL == (src_file = H5F_open(file_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id))) {
+
+            H5E_clear_stack(NULL);
+
+            /* strip "<drive-letter>:" */
+            HDstrncpy(temp_file_name, &file_name[2], temp_file_name_len);
+            temp_file_name[temp_file_name_len - 1] = '\0';
+        } /* end if */
+    } /* end if */
+
+    /* try searching from paths set in the environment variable */
+    if(src_file == NULL) {
+        char *env_prefix;
+
+        if(NULL != (env_prefix = HDgetenv("HDF5_VDS_PREFIX"))) {
+            char *tmp_env_prefix, *saved_env;
+
+            if(NULL == (saved_env = tmp_env_prefix = H5MM_strdup(env_prefix)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+            while((tmp_env_prefix) && (*tmp_env_prefix)) {
+                char *out_prefix_name;
+
+                out_prefix_name = H5D_getenv_prefix_name(&tmp_env_prefix/*in,out*/);
+                if(out_prefix_name && (*out_prefix_name)) {
+                    if(H5D__virtual_build_name(out_prefix_name, temp_file_name, &full_name/*out*/) < 0) {
+                        saved_env = (char *)H5MM_xfree(saved_env);
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't prepend prefix to filename")
+                    } /* end if */
+
+                    src_file = H5F_open(full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id);
+                    full_name = (char *)H5MM_xfree(full_name);
+                    if(src_file != NULL)
+                        break;
+                    H5E_clear_stack(NULL);
+                } /* end if */
+            } /* end while */
+            saved_env = (char *)H5MM_xfree(saved_env);
+        } /* end if */
+    } /* end if */
+
+    /* try searching from property list */
+    if(src_file == NULL) {
+        size_t  size = 0;
+        if((size = H5Pget_virtual_prefix(plist, NULL, 0)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vds prefix")
+        /* Allocate a buffer to hold the filename + prefix + possibly the delimiter + terminating null byte */
+        if(NULL == (my_prefix = (char *)H5MM_malloc(size + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate prefix buffer")
+        if(H5Pget_virtual_prefix(plist, my_prefix, size+1) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vds  prefix")
+        if(my_prefix) {
+            if(H5D__virtual_build_name(my_prefix, temp_file_name, &full_name/*out*/) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't prepend prefix to filename")
+            if(NULL == (src_file = H5F_open(full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
+                H5E_clear_stack(NULL);
+            full_name = (char *)H5MM_xfree(full_name);
+        } /* end if */
+    } /* end if */
+
+    /* try searching from main file's "extpath": see description in H5F_open() & H5_build_extpath() */
+    if(src_file == NULL) {
+        char *vdspath;
+
+        if(NULL != (vdspath = H5F_EXTPATH(vdset_file))) {
+            if(H5D__virtual_build_name(vdspath, temp_file_name, &full_name/*out*/) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't prepend prefix to filename")
+            if(NULL == (src_file = H5F_open(full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
+                H5E_clear_stack(NULL);
+            full_name = (char *)H5MM_xfree(full_name);
+        } /* end if */
+    } /* end if */
+
+    /* try the relative file_name stored in temp_file_name */
+    if(src_file == NULL) {
+        if(NULL == (src_file = H5F_open(temp_file_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
+            H5E_clear_stack(NULL);
+    } /* end if */
+
+    /* try the 'resolved' name for the virtual file */
+    if(src_file == NULL) {
+        char *ptr = NULL;
+
+        /* Copy resolved file name */
+        if(NULL == (actual_file_name = H5MM_strdup(H5F_ACTUAL_NAME(vdset_file))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't duplicate resolved file name string")
+
+        /* get last component of file_name */
+        H5_GET_LAST_DELIMITER(actual_file_name, ptr)
+        if(!ptr)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, NULL, "unable to open vds file, vds file name = '%s', temp_file_name = '%s'", file_name, temp_file_name)
+
+        /* Truncate filename portion from actual file name path */
+        *ptr = '\0';
+
+        /* Build new file name for the external file */
+        if(H5D__virtual_build_name(actual_file_name, temp_file_name, &full_name/*out*/) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't prepend prefix to filename")
+
+        /* Try opening with the resolved name */
+        if(NULL == (src_file = H5F_open(full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, NULL, "unable to open vds file, vds file name = '%s', temp_file_name = '%s'", file_name, temp_file_name)
+        full_name = (char *)H5MM_xfree(full_name);
+    } /* end if */
+
+    /* Success */
+    ret_value = src_file;
+done:
+    if((NULL == ret_value) && src_file)
+        if(H5F_try_close(src_file, NULL) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__virtual_open_file() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_open_source_dset
@@ -787,6 +989,8 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5G_loc_t   src_root_loc;           /* Object location of source file root group */
     herr_t      ret_value = SUCCEED;    /* Return value */
     char        *full_name = NULL;      /* File name with prefix */
+    unsigned    intent;                 /* File access permissions */
+    H5P_genplist_t *plist;              /* Property list pointer */
 
     FUNC_ENTER_STATIC
 
@@ -796,27 +1000,15 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     HDassert(!source_dset->dset);
     HDassert(source_dset->file_name);
     HDassert(source_dset->dset_name);
-    vds_prefix = vdset->shared->vds_prefix;
 
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
-        if(vds_prefix && HDstrlen(vds_prefix) > 0) {
-            if(H5D__virtual_build_name(vds_prefix, source_dset->file_name, &full_name/*out*/) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
-            /* Open the source file */
-            if(NULL == (src_file = H5F_open(full_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
-                H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
-            else
-                src_file_open = TRUE;
-            full_name = (char *)H5MM_xfree(full_name);
-        }
-        else {
-            /* Open the source file */
-            if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
-                H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
-            else
-                src_file_open = TRUE;
-        }
+        if((plist = H5D_get_access_plist(vdset)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get access plist")
+        if(NULL == (src_file = H5D__virtual_open_file(plist, vdset->oloc.file, source_dset->file_name, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
+            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
+        else
+            src_file_open = TRUE;
     } /* end if */
     else
         /* Source file is ".", use the virtual dataset's file */
@@ -2312,7 +2504,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                 /* Check if anything is selected */
                 if(select_nelmts > (hssize_t)0) {
                     /* Open source dataset */
-                    if(!storage->list[i].source_dset.dset) 
+                    if(!storage->list[i].source_dset.dset)
                         /* Try to open dataset */
                         if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].source_dset, io_info->md_dxpl_id) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
