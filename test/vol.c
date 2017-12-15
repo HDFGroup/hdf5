@@ -615,6 +615,12 @@ test_basic_attribute_operation(void)
     if (H5Aclose(aid) < 0)
         TEST_ERROR;
 
+    /* H5Aopen */
+    if ((aid = H5Aopen(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Aclose(aid) < 0)
+        TEST_ERROR;
+
     /* H5Adelete */
     if (H5Adelete(fid, NATIVE_VOL_TEST_ATTRIBUTE_NAME) < 0)
         TEST_ERROR;
