@@ -336,6 +336,7 @@ test_basic_group_operation(void)
 {
     hid_t fid = H5I_INVALID_HID;
     hid_t gid = H5I_INVALID_HID;
+    hid_t gid_a = H5I_INVALID_HID;
     hid_t gcpl_id = H5I_INVALID_HID;
     H5G_info_t info;
 
@@ -376,7 +377,13 @@ test_basic_group_operation(void)
     if ((gid = H5Gopen2(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
+    /* H5Gcreate_anon */
+    if ((gid_a = H5Gcreate_anon(fid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
     if (H5Gclose(gid) < 0)
+        TEST_ERROR;
+    if (H5Gclose(gid_a) < 0)
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
