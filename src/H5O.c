@@ -434,41 +434,50 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oexists_by_name
+ * Function:    H5Oexists_by_name
  *
- * Purpose:	Determine if a linked-to object exists
+ * Purpose:     Determine if a linked-to object exists
  *
- * Return:	Success:	TRUE/FALSE
- * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		February  2 2010
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Location info */
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    htri_t      ret_value = FAIL;       /* Return value */
+    H5VL_object_t  *obj         = NULL;         /* Object token of loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t           dxpl_id     = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    htri_t          ret_value   = -1;           /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "name parameter cannot be an empty string")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, (-1), "can't set access and transfer property lists")
 
-    /* Check if the object exists */
-    if((ret_value = H5G_loc_exists(&loc, name, lapl_id, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
+    /* Get the location object */
+    if (NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
+
+    /* Set the location struct fields */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+
+    /* Check if the object exists via the VOL */
+    if (H5VL_object_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_OBJECT_EXISTS, 
+                            dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, (-1), "unable to determine if '%s' exists", name)
 
 done:
     FUNC_LEAVE_API(ret_value)
