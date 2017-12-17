@@ -659,6 +659,7 @@ test_basic_object_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
     hid_t gid       = H5I_INVALID_HID;
+    hid_t oid       = H5I_INVALID_HID;
 
     H5O_info_t object_info;
 
@@ -675,6 +676,12 @@ test_basic_object_operation(void)
 
     /* H5Oget_info_by_name */
     if (H5Oget_info_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, &object_info, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* H5Oopen/close */
+    if ((oid = H5Oopen(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) 
+        TEST_ERROR;
+    if (H5Oclose(oid) < 0)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)

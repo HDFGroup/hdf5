@@ -75,9 +75,9 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oopen
+ * Function:    H5Oopen
  *
- * Purpose:	Opens an object within an HDF5 file.
+ * Purpose:     Opens an object within an HDF5 file.
  *
  *              This function opens an object in the same way that H5Gopen2,
  *              H5Topen2, and H5Dopen2 do. However, H5Oopen doesn't require
@@ -88,38 +88,53 @@
  *              The opened object should be closed again with H5Oclose
  *              or H5Gclose, H5Tclose, or H5Dclose.
  *
- * Return:	Success:	An open object identifier
- *		Failure:	Negative
+ * Return:      Success:    An open object identifier
  *
- * Programmer:	James Laird
- *		July 14 2006
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    hid_t       ret_value = FAIL;
+    H5VL_object_t  *obj         = NULL;                     /* Object token of loc_id */
+    H5I_type_t      opened_type;
+    void           *opened_obj  = NULL;
+    H5VL_loc_params_t loc_params;
+    hid_t           dxpl_id     = H5AC_ind_read_dxpl_id;    /* dxpl used by library */
+    hid_t           ret_value   = H5I_INVALID_HID;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, name, lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set access and transfer property lists")
 
-    /* Open the object */
-    if((ret_value = H5O_open_name(&loc, name, lapl_id, dxpl_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+    /* Get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
+    /* Set location struct fields */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+
+    /* Open the object through the VOL */
+    if (NULL == (opened_obj = H5VL_object_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                              &opened_type, dxpl_id, H5_REQUEST_NULL)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
+
+    /* Get an atom for the object */
+    if ((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen() */
@@ -939,20 +954,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oclose
+ * Function:    H5Oclose
  *
- * Purpose:	Close an open file object.
+ * Purpose:     Close an open file object.
  *
  *              This is the companion to H5Oopen. It is used to close any
  *              open object in an HDF5 file (but not IDs are that not file
  *              objects, such as property lists and dataspaces). It has
  *              the same effect as calling H5Gclose, H5Dclose, or H5Tclose.
  *
- * Return:	Success:	Non-negative
- *          Failure:	Negative
- *
- * Programmer:	James Laird
- *		July 14 2006
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -992,7 +1003,7 @@ H5Oclose(hid_t object_id)
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
         break;
-    } /* end switch */
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
