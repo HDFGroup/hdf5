@@ -787,12 +787,20 @@ static herr_t
 test_basic_datatype_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
+    hid_t tid       = H5I_INVALID_HID;
 
     TESTING("Basic VOL datatype operations");
 
     if ((fid = H5Fcreate(NATIVE_VOL_TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
+    if ((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
 
+    /* H5Tcommit */
+
+
+    if (H5Tclose(tid) < 0)
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
@@ -804,6 +812,7 @@ test_basic_datatype_operation(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
+        H5Fclose(tid);
     } H5E_END_TRY;
 
     return FAIL;
