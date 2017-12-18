@@ -594,69 +594,59 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tget_create_plist
+ * Function:    H5Tget_create_plist
  *
- * Purpose:	Returns a copy of the datatype creation property list.
+ * Purpose:     Returns a copy of the datatype creation property list.
  *
- * Return:	Success:	ID for a copy of the datatype creation
- *				property list.  The property list ID should be
- *				released by calling H5Pclose().
+ * Return:      Success:    ID for a copy of the datatype creation
+ *                          property list.  The property list ID should be
+ *                          released by calling H5Pclose().
  *
- *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, November 28, 2006
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Tget_create_plist(hid_t dtype_id)
 {
-    H5T_t	        *type;          /* Datatype object for ID */
-    H5P_genplist_t      *tcpl_plist;    /* Existing datatype creation propertty list */
-    hid_t		new_tcpl_id = FAIL;     /* New datatype creation property list */
-    herr_t              status;         /* Generic status value */
-    hid_t		ret_value;      /* Return value */
+    H5T_t	       *type        = NULL;             /* Datatype object for ID */
+    H5P_genplist_t *tcpl_plist  = NULL;             /* Existing datatype creation propertty list */
+    htri_t          status;                         /* Generic status value */
+    hid_t           ret_value   = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", dtype_id);
 
     /* Check arguments */
-    if(NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-
-    /* Copy the default datatype creation property list */
-    if(NULL == (tcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATATYPE_CREATE_ID_g)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default creation property list")
-    if((new_tcpl_id = H5P_copy_plist(tcpl_plist, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to copy the creation property list")
+    if (NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype")
 
     /* Check if the datatype is committed */
-    if((status = H5T_committed(type)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check whether datatype is committed")
+    if ((status = H5T_is_named(type)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "can't check whether datatype is committed")
 
-    /* Retrieve further information, if the datatype is committed */
-    if(status > 0) {
-        H5P_genplist_t  *new_plist;     /* New datatype creation property list */
+    /* If the datatype is not committed, just copy the default
+       creation property list and return that. */
+    if (FALSE == status) {
+        /* Copy the default datatype creation property list */
+        if (NULL == (tcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATATYPE_CREATE_ID_g)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "can't get default creation property list")
+        if ((ret_value = H5P_copy_plist(tcpl_plist, TRUE)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "unable to copy the creation property list")
+    }
+    /* If the datatype is committed, let the VOL create the creation
+     * property list ID.
+     */
+    else if (TRUE == status) {
+        H5VL_object_t *vol_dt = type->vol_obj;
 
-        /* Get property list object for new TCPL */
-        if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_tcpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-
-        /* Retrieve any object creation properties */
-        if(H5O_get_create_plist(&type->oloc, H5AC_ind_read_dxpl_id, new_plist) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info")
-    } /* end if */
-
-    /* Set the return value */
-    ret_value = new_tcpl_id;
+        /* get the rest of the plist through the VOL */
+        if (H5VL_datatype_get(vol_dt->vol_obj, vol_dt->vol_info->vol_cls, H5VL_DATATYPE_GET_TCPL, 
+                             H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5I_INVALID_HID, "unable to get datatype")
+    }
 
 done:
-    if(ret_value < 0)
-        if(new_tcpl_id > 0)
-            if(H5I_dec_app_ref(new_tcpl_id) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to close temporary object")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_create_plist() */
 

@@ -789,7 +789,7 @@ test_basic_datatype_operation(void)
 {
     hid_t fid       = H5I_INVALID_HID;
     hid_t tid       = H5I_INVALID_HID;
-    hid_t tid2      = H5I_INVALID_HID;
+    hid_t tcpl_id   = H5I_INVALID_HID;
 
     TESTING("Basic VOL datatype operations");
 
@@ -801,14 +801,20 @@ test_basic_datatype_operation(void)
     /* H5Tcommit */
     if (H5Tcommit2(fid, NATIVE_VOL_TEST_DATATYPE_NAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
-
-    /* H5Topen */
-    if ((tid2 = H5Topen2(fid, NATIVE_VOL_TEST_DATATYPE_NAME, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
-    if (H5Tclose(tid2) < 0)
+
+    /* H5Topen */
+    if ((tid = H5Topen2(fid, NATIVE_VOL_TEST_DATATYPE_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* H5Tget_create_plist */
+    if ((tcpl_id = H5Tget_create_plist(tid)) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(tcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(tid) < 0)
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -820,9 +826,9 @@ test_basic_datatype_operation(void)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(tcpl_id);
         H5Fclose(fid);
-        H5Fclose(tid);
-        H5Fclose(tid2);
+        H5Tclose(tid);
     } H5E_END_TRY;
 
     return FAIL;
