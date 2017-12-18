@@ -677,45 +677,52 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ldelete
+ * Function:    H5Ldelete
  *
- * Purpose:	Removes the specified NAME from the group graph and
- *		decrements the link count for the object to which NAME
- *		points.  If the link count reaches zero then all file-space
- *		associated with the object will be reclaimed (but if the
- *		object is open, then the reclamation of the file space is
- *		delayed until all handles to the object are closed).
+ * Purpose:     Removes the specified NAME from the group graph and
+ *              decrements the link count for the object to which NAME
+ *              points. If the link count reaches zero then all file-space
+ *              associated with the object will be reclaimed (but if the
+ *              object is open, then the reclamation of the file space is
+ *              delayed until all handles to the object are closed).
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Monday, April  6, 1998
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group's location */
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5VL_object_t  *obj         = NULL;         /* Object token of loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t           dxpl_id     = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    herr_t          ret_value   = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*si", loc_id, name, lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Unlink */
-    if(H5L_delete(&loc, name, lapl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
+    /* Fill in the location struct fields */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name    = name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+
+    /* get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Delete the link through the VOL */
+    if (H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_DELETE, 
+                          dxpl_id, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
     FUNC_LEAVE_API(ret_value)

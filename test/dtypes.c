@@ -6696,6 +6696,7 @@ error:
     return 1;
 } /* end test_named_indirect_reopen() */
 
+/* XXX: FIX THIS - assert 'error checking', no return type, no ID init = badness! */
 static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
     hbool_t new_format)
 {
@@ -6824,65 +6825,84 @@ test_delete_obj_named(hid_t fapl)
     TESTING("deleting objects that use named datatypes");
 
     /* Set up filenames & FAPLs */
-    if((fapl2 = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
-    h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
-    h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
+    if ((fapl2 = H5Pcopy(fapl)) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[8], fapl, filename, sizeof(filename));
+    h5_fixname(FILENAME[9], fapl2, filename2, sizeof(filename2));
 
     /* Loop over old & new format files */
-    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = FALSE; new_format <= TRUE; new_format++) {
         /* Create test file, with attribute that uses committed datatype */
         create_del_obj_named_test_file(filename, fapl, new_format);
 
-/* Test deleting dataset opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        /* Test deleting dataset opened through different file ID */
+        if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
+        if ((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
 
-        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+        if ((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+        if (H5Dclose(dset) < 0)
+            TEST_ERROR;
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+        if (H5Fclose(filea1) < 0)
+            TEST_ERROR;
 
-        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+        if ((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0)
+            TEST_ERROR;
 
-        if(H5Ldelete(filea2, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if (H5Ldelete(filea2, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT) < 0)
+            TEST_ERROR;
 
-        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
-
+        if (H5Fclose(filea2) < 0)
+            TEST_ERROR;
+        if (H5Fclose(fileb) < 0)
+            TEST_ERROR;
 
         /* Create test file, with attribute that uses committed datatype */
         create_del_obj_named_test_file(filename, fapl, new_format);
 
 /* Test deleting attribute opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
+        if ((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
 
-        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+        if ((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+        if (H5Aclose(attr) < 0)
+            TEST_ERROR;
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+        if (H5Fclose(filea1) < 0)
+            TEST_ERROR;
 
-        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+        if ((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0)
+            TEST_ERROR;
 
-        if(H5Adelete_by_name(filea2, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if (H5Adelete_by_name(filea2, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT) < 0)
+            TEST_ERROR;
 
-        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
-    } /* end for */
+        if (H5Fclose(filea2) < 0)
+            TEST_ERROR;
+        if (H5Fclose(fileb) < 0)
+            TEST_ERROR;
+    }
 
-    if(H5Pclose(fapl2) < 0) FAIL_STACK_ERROR
+    if (H5Pclose(fapl2) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-	H5Tclose(attr);
-	H5Dclose(dset);
-	H5Pclose(fapl2);
-	H5Fclose(filea1);
-	H5Fclose(filea2);
-	H5Fclose(fileb);
+        H5Tclose(attr);
+        H5Dclose(dset);
+        H5Pclose(fapl2);
+        H5Fclose(filea1);
+        H5Fclose(filea2);
+        H5Fclose(fileb);
     } H5E_END_TRY;
     return 1;
 } /* end test_delete_obj_named() */
