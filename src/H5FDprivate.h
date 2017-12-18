@@ -203,6 +203,9 @@ H5_DLL int H5FD_mpi_get_rank(const H5FD_t *file);
 H5_DLL int H5FD_mpi_get_size(const H5FD_t *file);
 H5_DLL MPI_Comm H5FD_mpi_get_comm(const H5FD_t *_file);
 H5_DLL herr_t H5FD_get_mpi_info(H5FD_t *file, void** file_info);
+#if 1 /* JRM */
+H5_DLL void H5FD_mpio_mark_pre_trunc_barrier_unecessary(H5FD_t *_file);
+#endif /* JRM */
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* !_H5FDprivate_H */
