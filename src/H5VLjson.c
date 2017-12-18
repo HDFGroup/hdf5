@@ -1461,9 +1461,73 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
 
     /* grab the dataset collection from the Domain/File */
     json_t* dataset_collection = json_object_get(new_dataset->domain->u.file.json_file_object, "datasets");
-
-    /* insert the new JANSSON object into the dataset collection */
     json_object_set_new(dataset_collection, new_dataset->object_uuid, new_dataset->object_json);
+
+    /* fill in the dataset fields */
+    json_t* shape = json_object();
+    json_t* type = json_object();
+    json_t* value = json_null();
+    json_object_set_new(new_dataset->object_json, "shape", shape);
+    json_object_set_new(new_dataset->object_json, "type", type);
+    json_object_set_new(new_dataset->object_json, "value", value);
+
+    /* flesh out these fields */
+
+    /* shape */
+    //first get the dataspace class/type
+    htri_t is_simple = H5Sis_simple( space_id );
+    HDAassert(is_simple >= 0);
+
+    if (is_simple) 
+    {
+        /* insert the class */
+        json_object_set_new(shape, "class", json_string("H5S_SIMPLE"));
+
+        /* get the dims and max dims */
+        int ndims = H5Sget_simple_extent_ndims( hid_t space_id );
+        hsize_t dims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
+        hsize_t ndims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
+        int ndims = H5Sget_simple_extent_dims(hid_t space_id, dims, maxdims);
+
+        json_t dims_json_array = json_array();
+        json_object_set_new(shape, "dims", dims_json_array));
+        json_t ndims_json_array = json_array();
+        json_object_set_new(shape, "ndims", ndims_json_array));
+
+        unsigned i = 0;
+        for (i=0; i<dims; i++) 
+        {
+            json_array_append(dims_json_array, json_integer(dims[i]));
+            json_array_append(ndims_json_array, json_integer(ndims[i]));
+        }
+
+
+        H5MM_free(dims);
+        H5MM_free(ndims);
+    } 
+    else /* null or scalar */
+    {
+printf("FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
+    }
+        
+
+#if 0
+            "shape": {
+                "class": "H5S_SIMPLE", 
+                "dims": [4],
+                "maxdims": [4]
+            }, 
+            "type": {
+                "class": "H5T_STRING", 
+                "charSet": "H5T_CSET_ASCII", 
+                "strPad": "H5T_STR_NULLPAD", 
+                "length": 7
+            }, 
+            "value": ["Parting", "is such", "sweet", "sorrow."]
+        }
+#endif
+
+
 
     /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
     json_t* parent_uuid;
@@ -1480,7 +1544,6 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "Not a valid parent object type.")
     }
 
-// FTW WIP
     /* insert a new link into the groups linklist */
     
     // get the group
@@ -1531,6 +1594,7 @@ done:
 static void *
 H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name,
                        hid_t dapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
+// FTW WIP
 {
     H5VL_json_object_t *parent = (H5VL_json_object_t *) obj;
     H5VL_json_object_t *dataset = NULL;
@@ -1550,9 +1614,6 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
     HDassert((H5I_FILE == parent->obj_type || H5I_GROUP == parent->obj_type)
             && "parent object not a file or group");
 
-
-// Dataset open call differs from create in that the JANSSON representation already exists and needs to be looked up, similar to finding a group. On return, the library/VOL object still needs to contain the correct handle information. 
-
     /* Allocate and setup internal Dataset struct */
     if (NULL == (dataset = (H5VL_json_object_t *) H5MM_malloc(sizeof(*dataset))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate dataset object")
@@ -1560,12 +1621,7 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
     dataset->obj_type = H5I_DATASET;
     dataset->domain = parent->domain; /* Store pointer to file that the opened Dataset is within */
 
-#if 0
     /* Traverse links until the named Dataset is found */
-    search_ret = H5VL_json_find_link_by_path(parent, name, yajl_copy_object_URI_parse_callback, NULL, dataset->URI);
-    if (!search_ret || search_ret < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_PATH, NULL, "can't locate dataset by path")
-#endif
 
 
     /* Set up a Dataspace for the opened Dataset */
