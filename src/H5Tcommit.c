@@ -450,34 +450,31 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tcommitted
+ * Function:    H5Tcommitted
  *
- * Purpose:	Determines if a datatype is committed or not.
+ * Purpose:     Determines if a datatype is committed or not.
  *
- * Return:	Success:	TRUE if committed, FALSE otherwise.
+ * Return:      Success:    TRUE if committed, FALSE otherwise.
  *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Thursday, June  4, 1998
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5Tcommitted(hid_t type_id)
 {
-    H5T_t	*type;          /* Datatype to query */
+    H5T_t      *type;           /* Datatype to query */
     htri_t      ret_value;      /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE1("t", "i", type_id);
 
     /* Check arguments */
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a datatype")
 
     /* Set return value */
-    ret_value = H5T_committed(type);
+    ret_value = H5T_is_named(type);
 
 done:
     FUNC_LEAVE_API(ret_value)

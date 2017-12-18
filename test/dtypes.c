@@ -3797,116 +3797,131 @@ test_named (hid_t fapl)
     TESTING("named datatypes");
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
-	goto error;
-    }
-    if ((space = H5Screate_simple (2, ds_size, ds_size)) < 0) goto error;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+    if ((space = H5Screate_simple (2, ds_size, ds_size)) < 0)
+        goto error;
 
     /* Predefined types cannot be committed */
     H5E_BEGIN_TRY {
-	status = H5Tcommit2(file, "test_named_1 (should not exist)", H5T_NATIVE_INT, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Tcommit2(file, "test_named_1 (should not exist)", H5T_NATIVE_INT, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    if(status >= 0) {
-	H5_FAILED();
-	HDputs ("    Predefined types should not be committable!");
-	goto error;
+    if (status >= 0) {
+        H5_FAILED();
+        HDputs("    Predefined types should not be committable!");
+        goto error;
     }
 
     /* Copy a predefined datatype and commit the copy */
-    if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) goto error;
-    if(H5Tcommit2(file, "native-int", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) goto error;
-    if((status = H5Tcommitted(type)) < 0) goto error;
-    if(0 == status) {
-	H5_FAILED();
-	HDputs ("    H5Tcommitted() returned false!");
-	goto error;
+    if ((type = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        goto error;
+    if (H5Tcommit2(file, "native-int", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto error;
+    if ((status = H5Tcommitted(type)) < 0)
+        goto error;
+    if (0 == status) {
+        H5_FAILED();
+        HDputs("    H5Tcommitted() returned false!");
+        goto error;
     }
 
     /* We should not be able to modify a type after it has been committed. */
     H5E_BEGIN_TRY {
-	status = H5Tset_precision (type, (size_t)256);
+        status = H5Tset_precision(type, (size_t)256);
     } H5E_END_TRY;
-    if (status>=0) {
-	H5_FAILED();
-	HDputs ("    Committed type is not constant!");
-	goto error;
+    if (status >= 0) {
+        H5_FAILED();
+        HDputs("    Committed type is not constant!");
+        goto error;
     }
 
     /* We should not be able to re-commit a committed type */
     H5E_BEGIN_TRY {
-	status = H5Tcommit2(file, "test_named_2 (should not exist)", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Tcommit2(file, "test_named_2 (should not exist)", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    if(status >= 0) {
-	H5_FAILED();
-	HDputs ("    Committed types should not be recommitted!");
-	goto error;
+    if (status >= 0) {
+        H5_FAILED();
+        HDputs("    Committed types should not be recommitted!");
+        goto error;
     }
 
     /* It should be possible to define an attribute for the named type */
-    if((attr1 = H5Acreate2(type, "attr1", H5T_NATIVE_UCHAR, space,
-			  H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
-    for(i = 0; i < (size_t)ds_size[0]; i++)
-        for(j = 0; j < (size_t)ds_size[1]; j++)
+    if ((attr1 = H5Acreate2(type, "attr1", H5T_NATIVE_UCHAR, space, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+    for (i = 0; i < (size_t)ds_size[0]; i++)
+        for (j = 0; j < (size_t)ds_size[1]; j++)
             attr_data[i][j] = (unsigned)(i * ds_size[1] + j);
-    if(H5Awrite(attr1, H5T_NATIVE_UINT, attr_data) < 0) goto error;
-    if(H5Aclose(attr1) < 0) goto error;
+    if (H5Awrite(attr1, H5T_NATIVE_UINT, attr_data) < 0)
+        goto error;
+    if (H5Aclose(attr1) < 0)
+        goto error;
 
-    /*
-     * Copying a committed type should result in a transient type which is
+    /* Copying a committed type should result in a transient type which is
      * not locked.
      */
-    if((t2 = H5Tcopy(type)) < 0) goto error;
-    if((status = H5Tcommitted(t2)) < 0) goto error;
-    if(status) {
-	H5_FAILED();
-	HDputs ("    Copying a named type should result in a transient type!");
-	goto error;
+    if ((t2 = H5Tcopy(type)) < 0)
+        goto error;
+    if ((status = H5Tcommitted(t2)) < 0)
+        goto error;
+    if (status) {
+        H5_FAILED();
+        HDputs("    Copying a named type should result in a transient type!");
+        goto error;
     }
-    if(H5Tset_precision(t2, (size_t)256) < 0) goto error;
-    if(H5Tclose(t2) < 0) goto error;
+    if (H5Tset_precision(t2, (size_t)256) < 0)
+        goto error;
+    if (H5Tclose(t2) < 0)
+        goto error;
 
-    /*
-     * Close the committed type and reopen it.  It should return a named type.
+    /* Close the committed type and reopen it.  It should return a named type.
      */
-    if(H5Tclose(type) < 0) goto error;
-    if((type = H5Topen2(file, "native-int", H5P_DEFAULT)) < 0)
+    if (H5Tclose(type) < 0)
+        goto error;
+    if ((type = H5Topen2(file, "native-int", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((status = H5Tcommitted(type)) < 0) goto error;
-    if(!status) {
-	H5_FAILED();
-	HDputs ("    Opened named types should be named types!");
-	goto error;
+    if ((status = H5Tcommitted(type)) < 0)
+        goto error;
+    if (!status) {
+        H5_FAILED();
+        HDputs("    Opened named types should be named types!");
+        goto error;
     }
 
     /* Create a dataset that uses the named type */
-    if((dset = H5Dcreate2(file, "dset1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	goto error;
+    if ((dset = H5Dcreate2(file, "dset1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Get the dataset's datatype and make sure it's a named type */
-    if((t2 = H5Dget_type(dset)) < 0) goto error;
-    if((status = H5Tcommitted(t2)) < 0) goto error;
-    if(!status) {
-	H5_FAILED();
-	HDputs ("    Dataset type should be a named type!");
-	goto error;
+    if ((t2 = H5Dget_type(dset)) < 0)
+        goto error;
+    if ((status = H5Tcommitted(t2)) < 0)
+        goto error;
+    if (!status) {
+        H5_FAILED();
+        HDputs("    Dataset type should be a named type!");
+        goto error;
     }
 
     /* Close the dataset, then close its type, then reopen the dataset */
-    if(H5Dclose(dset) < 0) goto error;
-    if(H5Tclose(t2) < 0) goto error;
-    if((dset = H5Dopen2(file, "dset1", H5P_DEFAULT)) < 0) goto error;
+    if (H5Dclose(dset) < 0)
+        goto error;
+    if (H5Tclose(t2) < 0)
+        goto error;
+    if ((dset = H5Dopen2(file, "dset1", H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Get the dataset's type and make sure it's named */
-    if((t2 = H5Dget_type(dset)) < 0) goto error;
-    if((status = H5Tcommitted(t2)) < 0) goto error;
-    if(!status) {
-	H5_FAILED();
-	HDputs ("    Dataset type should be a named type!");
-	goto error;
+    if ((t2 = H5Dget_type(dset)) < 0)
+        goto error;
+    if ((status = H5Tcommitted(t2)) < 0)
+        goto error;
+    if (!status) {
+        H5_FAILED();
+        HDputs("    Dataset type should be a named type!");
+        goto error;
     }
 
-    /*
-     * Close the dataset and create another with the type returned from the
+    /* Close the dataset and create another with the type returned from the
      * first dataset.
      */
     if(H5Dclose(dset) < 0) goto error;
