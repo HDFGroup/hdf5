@@ -31,6 +31,7 @@
 #define NATIVE_VOL_TEST_SOFT_LINK_NAME  "test_soft_link"
 #define NATIVE_VOL_TEST_MOVE_LINK_NAME  "test_move_link"
 #define NATIVE_VOL_TEST_COPY_LINK_NAME  "test_copy_link"
+#define NATIVE_VOL_TEST_DATATYPE_NAME   "test_datatype"
 
 #define N_ELEMENTS  10
 
@@ -797,7 +798,8 @@ test_basic_datatype_operation(void)
         TEST_ERROR;
 
     /* H5Tcommit */
-
+    if (H5Tcommit2(fid, NATIVE_VOL_TEST_DATATYPE_NAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
