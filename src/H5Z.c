@@ -335,12 +335,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Zunregister
+ * Function:    H5Zunregister
  *
- * Purpose:  This function unregisters a filter.
+ * Purpose:     This function unregisters a filter.
  *
- * Return:   Non-negative on success
- *           Negative on failure
+ * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -367,13 +367,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Z_unregister
+ * Function:    H5Z_unregister
  *
- * Purpose:  Same as the public version except this one allows filters
- *           to be unset for predefined method numbers <H5Z_FILTER_RESERVED
+ * Purpose:     Same as the public version except this one allows filters
+ *               to be unset for predefined method numbers <H5Z_FILTER_RESERVED
  *
- * Return:   Non-negative on success
- *           Negative on failure
+ * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -432,12 +432,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Z__check_unregister
+ * Function:    H5Z__check_unregister
  *
- * Purpose: Check if an object uses the filter to be unregistered.
+ * Purpose:     Check if an object uses the filter to be unregistered.
  *
- * Return:  TRUE if the object uses the filter.
- *          FALSE if not, NEGATIVE on error.
+ * Return:      TRUE if the object uses the filter
+ *              FALSE if not
+ *              NEGATIVE on error
+ *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -462,15 +464,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Z__check_unregister_group_cb
+ * Function:    H5Z__check_unregister_group_cb
  *
- * Purpose:  The callback function for H5Z_unregister. It iterates
- *           through all opened objects.  If the object is a dataset
- *           or a group and it uses the filter to be unregistered, the
- *           function returns TRUE.
+ * Purpose:     The callback function for H5Z_unregister. It iterates
+ *              through all opened objects.  If the object is a dataset
+ *              or a group and it uses the filter to be unregistered, the
+ *              function returns TRUE.
  *
- * Return:   TRUE if the object uses the filter.
- *           FALSE otherwise.
+ * Return:      TRUE if the object uses the filter
+ *              FALSE if not
+ *              NEGATIVE on error
+ *
  *-------------------------------------------------------------------------
  */
 static int
@@ -499,7 +503,7 @@ H5Z__check_unregister_group_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void 
     if (filter_in_pline) {
         object->found = TRUE;
         ret_value = TRUE;
-    } /* end if */
+    }
 
 done:
     if (ocpl_id > 0)
@@ -511,15 +515,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Z__check_unregister_dset_cb
+ * Function:    H5Z__check_unregister_dset_cb
  *
- * Purpose: The callback function for H5Z_unregister. It iterates
- *          through all opened objects.  If the object is a dataset
- *          or a group and it uses the filter to be unregistered, the
- *          function returns TRUE.
+ * Purpose:     The callback function for H5Z_unregister. It iterates
+ *              through all opened objects.  If the object is a dataset
+ *              or a group and it uses the filter to be unregistered, the
+ *              function returns TRUE.
  *
- * Return:  TRUE if the object uses the filter.
- *          FALSE otherwise.
+ * Return:      TRUE if the object uses the filter
+ *              FALSE if not
+ *              NEGATIVE on error
+ *
  *-------------------------------------------------------------------------
  */
 static int
@@ -548,7 +554,7 @@ H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *
     if (filter_in_pline) {
         object->found = TRUE;
         ret_value = TRUE;
-    } /* end if */
+    }
 
 done:
     if (ocpl_id > 0)
@@ -560,13 +566,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Z__flush_file_cb
+ * Function:    H5Z__flush_file_cb
  *
- * Purpose:  The callback function for H5Z_unregister. It iterates
- *           through all opened files and flush them.
+ * Purpose:     The callback function for H5Z_unregister. It iterates
+ *              through all opened files and flush them.
  *
- * Return:   FALSE if finishes flushing and moves on
- *           FAIL if there is an error
+ * Return:      FALSE if finishes flushing and moves on
+ *              NEGATIVE if there is an error
  *-------------------------------------------------------------------------
  */
 static int
@@ -579,11 +585,12 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_UNUS
     HDassert(obj_ptr);
 
     /* Call the flush routine for mounted file hierarchies. Do a global flush
-     * if the file is opened for write */
+     * if the file is opened for write.
+     */
     if (H5F_ACC_RDWR & H5F_INTENT((H5F_t *)obj_ptr)) {
         if (H5F_flush_mounts((H5F_t *)obj_ptr, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFLUSH, FAIL, "unable to flush file hierarchy")
-    } /* end if */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

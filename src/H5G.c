@@ -384,9 +384,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gcreate_anon
+ * Function:    H5Gcreate_anon
  *
- * Purpose:	Creates a new group relative to LOC_ID, giving it the
+ * Purpose:     Creates a new group relative to LOC_ID, giving it the
  *              specified creation property list GCPL_ID and access
  *              property list GAPL_ID.
  *
@@ -402,78 +402,63 @@ done:
  *                  hid_t gcpl_id;	  IN: Property list for group creation
  *                  hid_t gapl_id;	  IN: Property list for group access
  *
- * Example:	To create missing groups "A" and "B01" along the given path "/A/B01/grp"
+ * Example:     To create missing groups "A" and "B01" along the given path "/A/B01/grp"
  *              hid_t create_id = H5Pcreate(H5P_GROUP_CREATE);
  *              int   status = H5Pset_create_intermediate_group(create_id, TRUE);
  *              hid_t gid = H5Gcreate_anon(file_id, "/A/B01/grp", create_id, H5P_DEFAULT);
  *
- * Return:	Success:	The object ID of a new, empty group open for
- *				writing.  Call H5Gclose() when finished with
- *				the group.
+ * Return:      Success:    The object ID of a new, empty group open for
+ *                          writing. Call H5Gclose() when finished with
+ *                          the group.
  *
- *		Failure:	FAIL
- *
- * Programmer:  Peter Cao
- *	        May 08, 2005
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 {
-    H5G_loc_t	    loc;
-    H5G_t	   *grp = NULL;
-    H5G_obj_create_t gcrt_info;         /* Information for group creation */
-    hid_t           dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    hid_t	    ret_value;
+    void *grp = NULL;                   /* group token from VOL plugin */
+    H5VL_object_t *obj = NULL;          /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    hid_t ret_value = H5I_INVALID_HID;                    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
-    /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
     /* Check group creation property list */
-    if(H5P_DEFAULT == gcpl_id)
+    if (H5P_DEFAULT == gcpl_id)
         gcpl_id = H5P_GROUP_CREATE_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group create property list")
+        if (TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group create property list")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&gapl_id, H5P_CLS_GACC, &dxpl_id, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if (H5P_verify_apl_and_dxpl(&gapl_id, H5P_CLS_GACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access and transfer property lists")
 
-    /* Set up group creation info */
-    gcrt_info.gcpl_id = gcpl_id;
-    gcrt_info.cache_type = H5G_NOTHING_CACHED;
-    HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+    /* Set location struct fields */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(loc_id);
 
-    /* Create the new group & get its ID */
-    if(NULL == (grp = H5G__create(loc.oloc->file, &gcrt_info, dxpl_id)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
-    if((ret_value = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+    /* get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+    /* Create the group through the VOL */
+    if (NULL == (grp = H5VL_group_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, NULL, 
+                                        gcpl_id, gapl_id, dxpl_id, H5_REQUEST_NULL)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
+
+    /* Get an atom for the group */
+    if ((ret_value = H5VL_register_id(H5I_GROUP, grp, obj->vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
 
 done:
-    /* Release the group's object header, if it was created */
-    if(grp) {
-        H5O_loc_t *oloc;         /* Object location for group */
-
-        /* Get the new group's object location */
-        if(NULL == (oloc = H5G_oloc(grp)))
-            HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object location of group")
-
-        /* Decrement refcount on group's object header in memory */
-        if(H5O_dec_rc_by_loc(oloc, dxpl_id) < 0)
-           HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
-    } /* end if */
-
-    /* Cleanup on failure */
-    if(ret_value < 0)
-        if(grp && H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+    if (H5I_INVALID_HID == ret_value)
+        if (grp && H5VL_group_close(grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate_anon() */

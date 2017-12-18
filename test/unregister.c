@@ -23,8 +23,8 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define GROUP_NAME              "group"
-#define DSET_NAME               "dataset"
+#define GROUP_NAME              "test_group"
+#define DSET_NAME               "test_dataset"
 #define FILENAME_BUF_SIZE       1024
 #define DSET_DIM1               100
 #define DSET_DIM2               200
@@ -34,39 +34,34 @@ const char *FILENAME[] = {
 
 #define H5Z_FILTER_DUMMY        312
 
-static size_t filter_dummy(unsigned int flags, size_t cd_nelmts,
+static size_t do_nothing(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
 /* Dummy filter for test_unregister_filters only */
 const H5Z_class2_t H5Z_DUMMY[1] = {{
-    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
-    H5Z_FILTER_DUMMY,		/* Filter id number		*/
-    1, 1,                       /* Encoding and decoding enabled */
-    "dummy",			/* Filter name for debugging	*/
-    NULL,                       /* The "can apply" callback     */
-    NULL,                       /* The "set local" callback     */
-    filter_dummy,		/* The actual filter function	*/
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version              */
+    H5Z_FILTER_DUMMY,           /* Filter ID number                 */
+    1, 1,                       /* Encoding and decoding enabled    */
+    "dummy",                    /* Filter name for debugging        */
+    NULL,                       /* The "can apply" callback         */
+    NULL,                       /* The "set local" callback         */
+    do_nothing,                 /* The actual filter function       */
 }};
 
 
 /*-------------------------------------------------------------------------
- * Function:	filter_dummy
+ * Function:    do_nothing
  *
- * Purpose:	A dummy compression method that doesn't do anything.  This
- *              filter is only for test_unregister_filters.  Please don't 
+ * Purpose:     A dummy compression method that doesn't do anything. This
+ *              filter is only for test_unregister_filters. Please don't 
  *              use it for other tests because it may mess up this test.
  *
- * Return:	Success:	Data chunk size
- *
- *		Failure:	0
- *
- * Programmer:	Raymond Lu
- *              April 24, 2013
+ * Return:      Data chunk size
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_dummy(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+do_nothing(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
       const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
       size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
@@ -74,181 +69,220 @@ filter_dummy(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_unregister_filters
+ * Function:    test_unregister_filters
  *
- * Purpose:	Tests unregistering filter before closing the file
+ * Purpose:     Tests unregistering filter before closing the file
  *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *              11 April 2013
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_unregister_filters(hid_t my_fapl)
+test_unregister_filters(hid_t fapl_id)
 {
-    hid_t	file1, file2;
-    hid_t	dc;
-    hid_t	gcpl, gid, group;
-    hid_t       dataset, space;
-    int		i, j, n;
-    char        gname[256];
+    hid_t       fid1        = H5I_INVALID_HID;
+    hid_t       fid2        = H5I_INVALID_HID;
+    hid_t       dcpl_id     = H5I_INVALID_HID;
+    hid_t       gcpl_id     = H5I_INVALID_HID;
+    hid_t       gid         = H5I_INVALID_HID;
+    hid_t       gid_loop    = H5I_INVALID_HID;
+    hid_t       did         = H5I_INVALID_HID;
+    hid_t       sid         = H5I_INVALID_HID;
+    int         i, j, n;
+    char        group_name[32];
     char        filename[FILENAME_BUF_SIZE];
-    const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
-    hsize_t	dims[2];
-    int	        points[DSET_DIM1][DSET_DIM2];
+    const hsize_t chunk_dims[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
+    hsize_t     dims[2];
+    int	        data[DSET_DIM1][DSET_DIM2];
     herr_t      ret;
 
     TESTING("Unregistering filter");
 
     /* Create first file */
-    h5_fixname(FILENAME[0], my_fapl, filename, sizeof filename);
-    if((file1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) goto error;
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
+    if ((fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        goto error;
 
     /* Create second file */
-    h5_fixname(FILENAME[1], my_fapl, filename, sizeof filename);
-    if((file2 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) goto error;
+    h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
+    if ((fid2 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        goto error;
 
     /* Register DUMMY filter */
-    if(H5Zregister(H5Z_DUMMY) < 0) goto error;
+    if (H5Zregister(H5Z_DUMMY) < 0)
+        goto error;
+    if (H5Zfilter_avail(H5Z_FILTER_DUMMY) != TRUE)
+        goto error;
+ 
+    /*******************
+     * PART 1 - GROUPS *
+     *******************/
 
-    if(H5Zfilter_avail(H5Z_FILTER_DUMMY)!=TRUE) goto error;
-
-    if((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0) goto error;
-  
     /* Use DUMMY filter for creating groups */ 
-    if(H5Pset_filter (gcpl, H5Z_FILTER_DUMMY, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0) goto error;
+    if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
+        goto error;
+    if (H5Pset_filter(gcpl_id, H5Z_FILTER_DUMMY, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0)
+        goto error;
 
     /* Create a group using this filter */
-    if((gid = H5Gcreate2(file1, GROUP_NAME, H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0) goto error;
+    if ((gid = H5Gcreate2(fid1, GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Create multiple groups under the main group */
-    for (i=0; i < GROUP_ITERATION; i++) {
-        sprintf(gname, "group_%d", i);
-        if((group = H5Gcreate2(gid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
-        if(H5Gclose(group) < 0) goto error; 
+    for (i = 0; i < GROUP_ITERATION; i++) {
+        HDsprintf(group_name, "group_%d", i);
+        if ((gid_loop = H5Gcreate2(gid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        if (H5Gclose(gid_loop) < 0)
+            goto error; 
     }
 
-    if(H5Fflush(file1, H5F_SCOPE_GLOBAL) < 0) goto error;
+    /* Flush the file containing the groups */
+    if (H5Fflush(fid1, H5F_SCOPE_GLOBAL) < 0)
+        goto error;
 
     /* Unregister the filter before closing the group.  It should fail */
     H5E_BEGIN_TRY {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     } H5E_END_TRY;
-    if(ret>=0) {
+    if (ret >= 0) {
         H5_FAILED();
-        printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
+        HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
         goto error;
-    } /* end if */
+    }
 
     /* Close the group */
-    if(H5Gclose(gid) < 0) goto error;
+    if (H5Gclose(gid) < 0)
+        goto error;
 
     /* Clean up objects used for this test */
-    if(H5Pclose (gcpl) < 0) goto error;
+    if (H5Pclose (gcpl_id) < 0)
+        goto error;
 
-    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
+    /*********************
+     * PART 2 - DATASETS *
+     *********************/
 
-    if(H5Pset_filter(dc, H5Z_FILTER_DUMMY, 0, (size_t)0, NULL) < 0) goto error;
+    /* Use DUMMY filter for creating datasets */ 
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if (H5Pset_chunk(dcpl_id, 2, chunk_dims) < 0)
+        goto error;
+    if(H5Pset_filter(dcpl_id, H5Z_FILTER_DUMMY, 0, (size_t)0, NULL) < 0)
+        goto error;
 
-    /* Initialize the dataset */
-    for(i = n = 0; i < DSET_DIM1; i++)
-        for(j = 0; j < DSET_DIM2; j++)
-            points[i][j] = n++;
+    /* Initialize the data for writing */
+    for (i = n = 0; i < DSET_DIM1; i++)
+        for (j = 0; j < DSET_DIM2; j++)
+            data[i][j] = n++;
 
-    /* Create the data space */
+    /* Create the dataspace */
     dims[0] = DSET_DIM1;
     dims[1] = DSET_DIM2;
-    if((space = H5Screate_simple(2, dims, NULL)) < 0) goto error;
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        goto error;
 
     /* Create a dataset in the first file */
-    if((dataset = H5Dcreate2(file1, DSET_NAME, H5T_NATIVE_INT, space,
-                             H5P_DEFAULT, dc, H5P_DEFAULT)) < 0) goto error;
+    if ((did = H5Dcreate2(fid1, DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
         goto error;
 
     /* Unregister the filter before closing the dataset.  It should fail */
     H5E_BEGIN_TRY {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     } H5E_END_TRY;
-    if(ret>=0) {
+    if (ret >= 0) {
         H5_FAILED();
-        printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
+        HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
         goto error;
-    } /* end if */
+    }
 
-    if(H5Dclose(dataset) < 0) goto error;
+    /* Close the dataset */
+    if (H5Dclose(did) < 0)
+        goto error;
 
     /* Create a dataset in the second file */
-    if((dataset = H5Dcreate2(file2, DSET_NAME, H5T_NATIVE_INT, space,
-                             H5P_DEFAULT, dc, H5P_DEFAULT)) < 0) goto error;
-
-    /* Write the data to the dataset */
-    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
+    if ((did = H5Dcreate2(fid2, DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         goto error;
 
-    if(H5Dclose(dataset) < 0) goto error;
+    /* Write the data to the dataset */
+    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        goto error;
+
+    /* Close the dataset in the second file */
+    if (H5Dclose(did) < 0)
+        goto error;
 
     /* Unregister the filter after closing all objects but before closing files. 
-     * It should flush all files. */
-    if(H5Zunregister(H5Z_FILTER_DUMMY) < 0) goto error;
+     * It should flush all files.
+     */
+    if (H5Zunregister(H5Z_FILTER_DUMMY) < 0)
+        goto error;
 
     /* Clean up objects used for this test */
-    if(H5Pclose (dc) < 0) goto error;
-    if(H5Fclose(file1) < 0) goto error;
-    if(H5Fclose(file2) < 0) goto error;
+    if (H5Pclose(dcpl_id) < 0)
+        goto error;
+    if (H5Fclose(fid1) < 0)
+        goto error;
+    if (H5Fclose(fid2) < 0)
+        goto error;
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
-    return -1;
+    H5E_BEGIN_TRY {
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+        H5Pclose(dcpl_id);
+        H5Pclose(gcpl_id);
+        H5Gclose(gid);
+        H5Gclose(gid_loop);
+        H5Dclose(did);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+
+    return FAIL;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Tests unregistering filter with H5Zunregister
+ * Purpose:     Tests unregistering filter with H5Zunregister
  *
- * Return:	Success:	exit(EXIT_SUCCESS)
- *
- *		Failure:	exit(EXIT_FAILURE)
- *
- * Programmer:	Raymond Lu
- *              11 April 2013
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    hid_t		fapl;
-    int	nerrors = 0;
+    hid_t   fapl_id = H5I_INVALID_HID;
+    int     nerrors = 0;
 
     /* Testing setup */
     h5_reset();
-    fapl = h5_fileaccess();
+    fapl_id = h5_fileaccess();
 
     /* Test unregistering filter in its own file */
-    nerrors += (test_unregister_filters(fapl) < 0           ? 1 : 0);
+    nerrors += (test_unregister_filters(fapl_id) < 0           ? 1 : 0);
 
-    if(nerrors)
+    h5_cleanup(FILENAME, fapl_id);
+
+    if (nerrors)
         goto error;
-    printf("All filter unregistration tests passed.\n");
-    h5_cleanup(FILENAME, fapl);
+    HDprintf("All filter unregistration tests passed.\n");
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n",
+    HDprintf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
-    return 1;
-}
+    HDexit(EXIT_FAILURE);
+} /* end main() */
 

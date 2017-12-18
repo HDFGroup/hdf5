@@ -33,6 +33,7 @@
 #include "H5Oprivate.h"         /* File objects                             */
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative.h"         /* Virtual Object Layer (native)            */
 
 
 /****************/
@@ -264,19 +265,16 @@ H5L_term_package(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lmove
+ * Function:    H5Lmove
  *
- * Purpose:	Renames an object within an HDF5 file and moves it to a new
+ * Purpose:     Renames an object within an HDF5 file and moves it to a new
  *              group.  The original name SRC is unlinked from the group graph
  *              and then inserted with the new name DST (which can specify a
  *              new path for the object) as an atomic operation. The names
- *              are interpreted relative to SRC_LOC_ID and
- *              DST_LOC_ID, which are either file IDs or group ID.
+ *              are interpreted relative to SRC_LOC_ID and DST_LOC_ID,
+ *              which are either file IDs or group ID.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Wednesday, March 29, 2006
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -284,47 +282,72 @@ herr_t
 H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	src_loc, *src_loc_p;
-    H5G_loc_t	dst_loc, *dst_loc_p;
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
-    herr_t      ret_value=SUCCEED;              /* Return value */
+    H5VL_object_t      *obj1            = NULL;         /* Object token of src_id */
+    H5VL_loc_params_t   loc_params1;
+    H5VL_object_t      *obj2            = NULL;         /* Object token of dst_id */
+    H5VL_loc_params_t   loc_params2;
+    hid_t               dxpl_id         = H5AC_ind_read_dxpl_id;    /* dxpl used by library */
+    herr_t              ret_value       = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
              lapl_id);
 
     /* Check arguments */
-    if(src_loc_id == H5L_SAME_LOC && dst_loc_id == H5L_SAME_LOC)
+    if (src_loc_id == H5L_SAME_LOC && dst_loc_id == H5L_SAME_LOC)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should not both be H5L_SAME_LOC")
-    if(src_loc_id != H5L_SAME_LOC && H5G_loc(src_loc_id, &src_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(dst_loc_id != H5L_SAME_LOC && H5G_loc(dst_loc_id, &dst_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!src_name || !*src_name)
+    if (!src_name || !*src_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified")
-    if(!dst_name || !*dst_name)
+    if (!dst_name || !*dst_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
-    if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
+    if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Check the link create property list */
+    if (H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id,
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id,
                                ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id),
                                TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Set up src & dst location pointers */
-    src_loc_p = &src_loc;
-    dst_loc_p = &dst_loc;
-    if(src_loc_id == H5L_SAME_LOC)
-        src_loc_p = dst_loc_p;
-    else if(dst_loc_id == H5L_SAME_LOC)
-        dst_loc_p = src_loc_p;
+    /* Set location paramter for source object */
+    loc_params1.type                            = H5VL_OBJECT_BY_NAME;
+    loc_params1.loc_data.loc_by_name.name       = src_name;
+    loc_params1.loc_data.loc_by_name.lapl_id    = lapl_id;
+    loc_params1.obj_type                        = H5I_get_type(src_loc_id);
 
-    /* Move the link */
-    if(H5L_move(src_loc_p, src_name, dst_loc_p, dst_name, FALSE, lcpl_id,
-            lapl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
+    /* Set location paramter for destination object */
+    loc_params2.type                            = H5VL_OBJECT_BY_NAME;
+    loc_params2.loc_data.loc_by_name.name       = dst_name;
+    loc_params2.loc_data.loc_by_name.lapl_id    = lapl_id;
+    loc_params2.obj_type                        = H5I_get_type(dst_loc_id);
+
+    if (H5L_SAME_LOC != src_loc_id) {
+        /* Get the location object */
+        if (NULL == (obj1 = (H5VL_object_t *)H5I_object(src_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    }
+    if (H5L_SAME_LOC != dst_loc_id) {
+        /* Get the location object */
+        if (NULL == (obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    }
+
+    /* Make sure that the VOL plugins are the same */
+    if (obj1 && obj2) {
+        if (obj1->vol_info->vol_cls->value != obj2->vol_info->vol_cls->value)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+    }
+
+    /* Move the link through the VOL */
+    if (H5VL_link_move((obj1 ? obj1->vol_obj : NULL), loc_params1, 
+                      (obj2 ? obj2->vol_obj : NULL), loc_params2, 
+                      (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
+                      lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -332,16 +355,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lcopy
+ * Function:    H5Lcopy
  *
- * Purpose:	Creates an identical copy of a link with the same creation
+ * Purpose:     Creates an identical copy of a link with the same creation
  *              time and target.  The new link can have a different name
  *              and be in a different location than the original.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Wednesday, March 29, 2006
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -349,47 +369,72 @@ herr_t
 H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	src_loc, *src_loc_p;
-    H5G_loc_t	dst_loc, *dst_loc_p;
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
-    herr_t      ret_value=SUCCEED;              /* Return value */
+    H5VL_object_t      *obj1            = NULL;         /* Object token of src_id */
+    H5VL_loc_params_t   loc_params1;
+    H5VL_object_t      *obj2            = NULL;         /* Object token of dst_id */
+    H5VL_loc_params_t   loc_params2;
+    hid_t               dxpl_id         = H5AC_ind_read_dxpl_id;    /* dxpl used by library */
+    herr_t              ret_value       = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
              lapl_id);
 
     /* Check arguments */
-    if(src_loc_id == H5L_SAME_LOC && dst_loc_id == H5L_SAME_LOC)
+    if (src_loc_id == H5L_SAME_LOC && dst_loc_id == H5L_SAME_LOC)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should not both be H5L_SAME_LOC")
-    if(src_loc_id != H5L_SAME_LOC && H5G_loc(src_loc_id, &src_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(dst_loc_id != H5L_SAME_LOC && H5G_loc(dst_loc_id, &dst_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!src_name || !*src_name)
+    if (!src_name || !*src_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified")
-    if(!dst_name || !*dst_name)
+    if (!dst_name || !*dst_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
-    if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
+    if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Check the link create property list */
+    if (H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id,
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id,
                                ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id),
                                TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* Set up src & dst location pointers */
-    src_loc_p = &src_loc;
-    dst_loc_p = &dst_loc;
-    if(src_loc_id == H5L_SAME_LOC)
-        src_loc_p = dst_loc_p;
-    else if(dst_loc_id == H5L_SAME_LOC)
-        dst_loc_p = src_loc_p;
+    /* Set location paramter for source object */
+    loc_params1.type                            = H5VL_OBJECT_BY_NAME;
+    loc_params1.loc_data.loc_by_name.name       = src_name;
+    loc_params1.loc_data.loc_by_name.lapl_id    = lapl_id;
+    loc_params1.obj_type                        = H5I_get_type(src_loc_id);
 
-    /* Copy the link */
-    if(H5L_move(src_loc_p, src_name, dst_loc_p, dst_name, TRUE, lcpl_id,
-                lapl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
+    /* Set location paramter for destination object */
+    loc_params2.type                            = H5VL_OBJECT_BY_NAME;
+    loc_params2.loc_data.loc_by_name.name       = dst_name;
+    loc_params2.loc_data.loc_by_name.lapl_id    = lapl_id;
+    loc_params2.obj_type                        = H5I_get_type(dst_loc_id);
+
+    if (H5L_SAME_LOC != src_loc_id) {
+        /* Get the location object */
+        if (NULL == (obj1 = (H5VL_object_t *)H5I_object(src_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    }
+    if (H5L_SAME_LOC != dst_loc_id) {
+        /* Get the location object */
+        if (NULL == (obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    }
+
+    /* Make sure that the VOL plugins are the same */
+    if (obj1 && obj2) {
+        if (obj1->vol_info->vol_cls->value != obj2->vol_info->vol_cls->value)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+    }
+
+    /* Move the link through the VOL */
+    if (H5VL_link_copy((obj1 ? obj1->vol_obj : NULL), loc_params1, 
+                      (obj2 ? obj2->vol_obj : NULL), loc_params2, 
+                      (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
+                      lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1842,7 +1887,7 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t H5_ATTR
             /* Set up location for user-defined callback */
             if((grp = H5G_open(&temp_loc, udata->dxpl_id)) == NULL)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-            if((grp_id = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
+            if((grp_id = H5VL_native_register(H5I_GROUP, grp, TRUE)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register ID for group")
 
             /* Make callback */
@@ -2553,7 +2598,7 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
             /* Set up location for user-defined callback */
             if((grp = H5G_open(&temp_loc, udata->dxpl_id)) == NULL)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-            if((grp_id = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
+            if((grp_id = H5VL_native_register(H5I_GROUP, grp, TRUE)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group ID")
 
             if(udata->copy) {

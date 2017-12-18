@@ -402,6 +402,7 @@ typedef struct {
 } H5F_trav_obj_cnt_t;
 
 /* User data for traversal routine to get ID lists */
+/* XXX: Type of obj_count and max_objs should be identical! */
 typedef struct {
     size_t max_objs;
     hid_t *oid_list;
