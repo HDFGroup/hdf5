@@ -1294,7 +1294,7 @@ H5VL_json_datatype_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, 
     printf("Datatype H5VL_json_object_t fields:\n");
 //    printf("  - Datatype URI: %s\n", datatype->URI);
     printf("  - Datatype object type: %d\n", datatype->obj_type);
-    printf("  - Datatype Parent Domain path: %s\n\n", datatype->domain->u.file.filepath_name);
+//    printf("  - Datatype Parent Domain path: %s\n\n", datatype->domain->u.file.filepath_name);
 #endif
 
     ret_value = (void *) datatype;
@@ -1322,7 +1322,7 @@ H5VL_json_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_t H5_ATTR_UN
     printf("Received Datatype get call with following parameters:\n");
     printf("  - Get Type: %d\n", get_type);
 //    printf("  - Datatype URI: %s\n", dtype->URI);
-    printf("  - Datatype File: %s\n\n", dtype->domain->u.file.filepath_name);
+//    printf("  - Datatype File: %s\n\n", dtype->domain->u.file.filepath_name);
 #endif
 
     HDassert(H5I_DATATYPE == dtype->obj_type && "not a datatype");
@@ -1473,10 +1473,9 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
 
     /* flesh out these fields */
 
-    /* shape */
-    //first get the dataspace class/type
+    /* shape:  First get the dataspace class/type */
     htri_t is_simple = H5Sis_simple( space_id );
-    HDAassert(is_simple >= 0);
+    HDassert(is_simple >= 0);
 
     if (is_simple) 
     {
@@ -1484,50 +1483,105 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
         json_object_set_new(shape, "class", json_string("H5S_SIMPLE"));
 
         /* get the dims and max dims */
-        int ndims = H5Sget_simple_extent_ndims( hid_t space_id );
-        hsize_t dims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
-        hsize_t ndims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
-        int ndims = H5Sget_simple_extent_dims(hid_t space_id, dims, maxdims);
+        hsize_t  ndims   = H5Sget_simple_extent_ndims(space_id);
+        hsize_t* dims    = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
+        hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
+        H5Sget_simple_extent_dims(space_id, dims, maxdims);
 
-        json_t dims_json_array = json_array();
-        json_object_set_new(shape, "dims", dims_json_array));
-        json_t ndims_json_array = json_array();
-        json_object_set_new(shape, "ndims", ndims_json_array));
+        json_t* dims_json_array = json_array();
+        json_object_set_new(shape, "dims", dims_json_array);
+        json_t* maxdims_json_array = json_array();
+        json_object_set_new(shape, "maxdims", maxdims_json_array);
 
         unsigned i = 0;
-        for (i=0; i<dims; i++) 
+        for (i=0; i<ndims; i++) 
         {
             json_array_append(dims_json_array, json_integer(dims[i]));
-            json_array_append(ndims_json_array, json_integer(ndims[i]));
+            json_array_append(maxdims_json_array, json_integer(maxdims[i]));
         }
 
-
         H5MM_free(dims);
-        H5MM_free(ndims);
+        H5MM_free(maxdims);
     } 
     else /* null or scalar */
     {
 printf("FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
     }
         
+    /* type: get the datatype info */
+    H5T_class_t type_class = H5Tget_class(type_id);
+    
+    switch (type_class)
+    {
+        case H5T_INTEGER:
+            // FTW: is it user or predef type? need to figure out how to check this.
+            //        hid_t H5Tget_super( hid_t dtype_id )
+            //        htri_t H5Tequal( hid_t dtype_id1, hid_t dtype_id2 )
+            json_object_set_new(type, "class", json_string("H5T_INTEGER")); 
+            //    json_object_set_new(type, "charSet", json_string("H5T_CSET_ASCII")); 
+            //    json_object_set_new(type, "strPad", json_string("H5T_STR_NULL")); 
+            break;
 
-#if 0
-            "shape": {
-                "class": "H5S_SIMPLE", 
-                "dims": [4],
-                "maxdims": [4]
-            }, 
-            "type": {
-                "class": "H5T_STRING", 
-                "charSet": "H5T_CSET_ASCII", 
-                "strPad": "H5T_STR_NULLPAD", 
-                "length": 7
-            }, 
-            "value": ["Parting", "is such", "sweet", "sorrow."]
-        }
-#endif
+        case H5T_FLOAT:
+            json_object_set_new(type, "class", json_string("H5T_FLOAT")); 
+            break;
+            
+        case H5T_STRING:
+            json_object_set_new(type, "class", json_string("H5T_STRING")); 
+            break;
+            
+        case H5T_BITFIELD:
+            json_object_set_new(type, "class", json_string("H5T_BITFIELD")); 
+            break;
+            
+        case H5T_OPAQUE:
+            json_object_set_new(type, "class", json_string("H5T_OPAQUE")); 
+            break;
+            
+        case H5T_COMPOUND:
+            json_object_set_new(type, "class", json_string("H5T_COMPOUND")); 
+            break;
+            
+        case H5T_REFERENCE:
+            json_object_set_new(type, "class", json_string("H5T_REFERENCE")); 
+            break;
+            
+        case H5T_ENUM:
+            json_object_set_new(type, "class", json_string("H5T_ENUM")); 
+            break;
+            
+        case H5T_VLEN:
+            json_object_set_new(type, "class", json_string("H5T_VLEN")); 
+            break;
+            
+        case H5T_ARRAY:
+            json_object_set_new(type, "class", json_string("H5T_ARRAY")); 
+            break;
+        
+        default:
+            printf("Type class %d not supported.\n", type_class);
+    }
 
-
+    /* value */
+    /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
+     * implemented, a fill value *could* be provided here. */
+    switch (type_class)
+    {
+/*
+        case H5T_INTEGER:
+        H5T_FLOAT
+        H5T_STRING
+        H5T_BITFIELD
+        H5T_OPAQUE
+        H5T_COMPOUND
+        H5T_REFERENCE
+        H5T_ENUM
+        H5T_VLEN
+        H5T_ARRAY
+*/
+        default:
+        ;
+    }
 
     /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
     json_t* parent_uuid;
@@ -1563,9 +1617,9 @@ printf("FTW: datasdet create with null / scalar dataspace not yet implemented.\n
 
 #ifdef PLUGIN_DEBUG
     printf("Dataset H5VL_json_object_t fields:\n");
-//    printf("  - Dataset URI: %s\n", new_dataset->URI);
+    printf("  - Dataset uuid: %s\n", new_dataset->object_uuid);
     printf("  - Dataset Object type: %d\n", new_dataset->obj_type);
-    printf("  - Dataset Parent Domain path: %s\n", new_dataset->domain->u.file.filepath_name);
+//    printf("  - Dataset Parent Domain path: %s\n", new_dataset->domain->u.file.filepath_name);
 #endif
 
     ret_value = (void *) new_dataset;
@@ -1622,6 +1676,7 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
     dataset->domain = parent->domain; /* Store pointer to file that the opened Dataset is within */
 
     /* Traverse links until the named Dataset is found */
+    //FTW WIP
 
 
     /* Set up a Dataspace for the opened Dataset */
@@ -1636,7 +1691,7 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
     printf("Dataset H5VL_json_object_t fields:\n");
 //    printf("  - Dataset URI: %s\n", dataset->URI);
     printf("  - Dataset Object type: %d\n", dataset->obj_type);
-    printf("  - Dataset Parent Domain path: %s\n\n", dataset->domain->u.file.filepath_name);
+//    printf("  - Dataset Parent Domain path: %s\n\n", dataset->domain->u.file.filepath_name);
 #endif
 
     ret_value = (void *) dataset;
@@ -1976,7 +2031,7 @@ H5VL_json_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t H5_ATTR_UNUS
     printf("Received Dataset get call with following parameters:\n");
     printf("  - Get Type: %d\n", get_type);
 //FTW    printf("  - Dataset URI: %s\n", dset->URI);
-    printf("  - Dataset File: %s\n\n", dset->domain->u.file.filepath_name);
+//    printf("  - Dataset File: %s\n\n", dset->domain->u.file.filepath_name);
 #endif
 
     HDassert(H5I_DATASET == dset->obj_type && "not a dataset");
@@ -2048,7 +2103,7 @@ H5VL_json_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
     printf("Received Dataset-specific call with following parameters:\n");
     printf("  - Specific type: %d\n", specific_type);
 //FTW    printf("  - Dataset URI: %s\n", dset->URI);
-    printf("  - Dataset File: %s\n\n", dset->domain->u.file.filepath_name);
+//    printf("  - Dataset File: %s\n\n", dset->domain->u.file.filepath_name);
 #endif
 
     /* Check for write access */
@@ -2177,11 +2232,11 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     new_file->u.file.intent = H5F_ACC_RDWR;
 
     /* Copy the path name into the new file object */
-    name_length = strlen(name);
-    if (NULL == (new_file->u.file.filepath_name = (char *) H5MM_malloc(name_length + 1)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for filepath name")
-    strncpy(new_file->u.file.filepath_name, name, name_length);
-    new_file->u.file.filepath_name[name_length] = '\0';
+//    name_length = strlen(name);
+//    if (NULL == (new_file->u.file.filepath_name = (char *) H5MM_malloc(name_length + 1)))
+//        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for filepath name")
+//    strncpy(new_file->u.file.filepath_name, name, name_length);
+//    new_file->u.file.filepath_name[name_length] = '\0';
 
     /* Set up the JANSSON file object and store the reference in VOL File struct */
 
@@ -2392,7 +2447,8 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
      *         "apiVersion" ":" "1.0.0"
      */
 
-    json_t* id = json_object_get(document, "id");
+    //json_t* id = json_object_get(document, "id");
+    h5json_uuid_t* id = (h5json_uuid_t*)json_string_value(json_object_get(document, "id"));
     assert(id);
     json_t* root = json_object_get(document, "root");
     assert(root);
@@ -2412,22 +2468,20 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
     /* set up the JANSSON file object and store the reference */
     file->u.file.json_file_object = document;
 
-    /* This uuid also gets *copied* to the library object */
-//    file->object_uuid = json_string(json_string_value(id));
-//WIP 
-//char *strncpy( char *dest, const char *src, size_t count );
-strncpy(file->object_uuid, id, sizeof(h5json_uuid_t));
+    /* This uuid gets *copied* to the library object */
+    strncpy(file->object_uuid, id, sizeof(h5json_uuid_t));
 
     /* Copy the path name into the new file object */
-    name_length = strlen(name);
-    if (NULL == (file->u.file.filepath_name = (char *) H5MM_malloc(name_length + 1)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for filepath name")
-    strncpy(file->u.file.filepath_name, name, name_length);
-    file->u.file.filepath_name[name_length] = '\0';
+//    name_length = strlen(name);
+//    if (NULL == (file->u.file.filepath_name = (char *) H5MM_malloc(name_length + 1)))
+//        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for filepath name")
+//    strncpy(file->u.file.filepath_name, name, name_length);
+//    file->u.file.filepath_name[name_length] = '\0';
 
 #ifdef PLUGIN_DEBUG
     printf("File H5VL_json_object_t fields:\n");
-    printf("  - File Path Name: %s\n", file->domain->u.file.filepath_name);
+//WIP 
+//    printf("  - File Path Name: %s\n", file->domain->u.file.filepath_name);
     printf("  - File Object type: %d\n\n", file->obj_type);
 #endif
 
@@ -2459,7 +2513,7 @@ H5VL_json_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED dxp
     printf("Received File get call with following parameters:\n");
     printf("  - Get Type: %d\n", get_type);
 //    printf("  - File URI: %s\n", file->URI);
-    printf("  - File Pathname: %s\n\n", file->domain->u.file.filepath_name);
+//    printf("  - File Pathname: %s\n\n", file->domain->u.file.filepath_name);
 #endif
 
     HDassert(H5I_FILE == file->obj_type && "not a file");
@@ -2524,18 +2578,18 @@ H5VL_json_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t H5_
     printf("Received File-specific call with following parameters:\n");
     printf("  - Specific Type: %d\n", specific_type);
 //    printf("  - File URI: %s\n", file->URI);
-    printf("  - File Pathname: %s\n\n", file->domain->u.file.filepath_name);
+//    printf("  - File Pathname: %s\n\n", file->domain->u.file.filepath_name);
 #endif
 
     HDassert(H5I_FILE == file->obj_type && "not a file");
 
     /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(specific_request_header, file->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH - 7));
+//    curl_headers = curl_slist_append(curl_headers, strncat(specific_request_header, file->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH - 7));
 
     /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
+//    curl_headers = curl_slist_append(curl_headers, "Expect:");
 
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
+//    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
 
     switch (specific_type) {
         case H5VL_FILE_FLUSH:
@@ -2549,10 +2603,10 @@ H5VL_json_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t H5_
     } /* end switch */
 
 done:
-    if (curl_headers) {
-        curl_slist_free_all(curl_headers);
-        curl_headers = NULL;
-    } /* end if */
+//    if (curl_headers) {
+//        curl_slist_free_all(curl_headers);
+//        curl_headers = NULL;
+//    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_file_specific() */
@@ -2596,8 +2650,8 @@ H5VL_json_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
     fclose(_file->u.file.filesystem_file_object); 
     HDassert(json_object_clear(_file->u.file.json_file_object) == 0); 
 
-    if (_file->u.file.filepath_name)
-        H5MM_xfree(_file->u.file.filepath_name);
+//    if (_file->u.file.filepath_name)
+//        H5MM_xfree(_file->u.file.filepath_name);
 
     H5MM_xfree(_file);
 
@@ -2931,7 +2985,7 @@ H5VL_json_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name,
 #ifdef PLUGIN_DEBUG
     printf("Group H5VL_json_object_t fields:\n");
     printf("  - Group Object type: %d\n", group->obj_type);
-    printf("  - Group Parent Domain path: %s\n", group->domain->u.file.filepath_name);
+//    printf("  - Group Parent Domain path: %s\n", group->domain->u.file.filepath_name);
     printf("  - Group uuid: %s\n\n", (current_uuid));
 #endif
 
@@ -2976,7 +3030,7 @@ H5VL_json_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void H5
     printf("Received Group get call with following parameters:\n");
     printf("  - Get Type: %d\n", get_type);
 //    printf("  - Group URI: %s\n", group->URI);
-    printf("  - Group File: %s\n", group->domain->u.file.filepath_name);
+//    printf("  - Group File: %s\n", group->domain->u.file.filepath_name);
 #endif
 
     HDassert(H5I_GROUP == group->obj_type && "not a group");
@@ -3171,20 +3225,20 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
     } /* end switch */
 
     /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(create_request_host_header, link_new_loc_obj->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
+//    curl_headers = curl_slist_append(curl_headers, strncat(create_request_host_header, link_new_loc_obj->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
 
     /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
+//    curl_headers = curl_slist_append(curl_headers, "Expect:");
 
     /* Redirect from base URL to "/groups/<id>/links/<name>" to create the link */
 //    snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/links/%s", base_URL, link_new_loc_obj->URI, get_basename(link_path_copy));
 
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, create_request_body);
-    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
+//    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
+//    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+//    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, create_request_body);
+//    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
 
-    CURL_PERFORM(curl, H5E_LINK, H5E_CANTCREATE, FAIL);
+//    CURL_PERFORM(curl, H5E_LINK, H5E_CANTCREATE, FAIL);
 
 done:
 #ifdef PLUGIN_DEBUG
@@ -3258,7 +3312,7 @@ H5VL_json_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
     printf("Received Link get call with following parameters:\n");
     printf("  - Get type: %d\n", get_type);
 //    printf("  - Link URI: %s\n", link->URI);
-    printf("  - Link File: %s\n\n", link->domain->u.file.filepath_name);
+//    printf("  - Link File: %s\n\n", link->domain->u.file.filepath_name);
 #endif
 
 #if 0
@@ -5318,10 +5372,10 @@ H5VL_json_parse_datatype(H5VL_json_object_t *object)
     HDassert(object);
 
     /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(host_header, object->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
+//    curl_headers = curl_slist_append(curl_headers, strncat(host_header, object->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
 
     /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
+//    curl_headers = curl_slist_append(curl_headers, "Expect:");
 
     switch (object->obj_type) {
         case H5I_DATASET:
@@ -5495,10 +5549,10 @@ H5VL_json_parse_dataspace(H5VL_json_object_t *object)
     HDassert(object);
 
     /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(host_header, object->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
+//    curl_headers = curl_slist_append(curl_headers, strncat(host_header, object->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
 
     /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
+//    curl_headers = curl_slist_append(curl_headers, "Expect:");
 
     switch (object->obj_type) {
         case H5I_DATASET:

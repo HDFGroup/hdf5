@@ -122,7 +122,7 @@ typedef struct H5VL_json_attr_t H5VL_json_attr_t;
 
 typedef struct H5VL_json_file_t {
     unsigned  intent;   
-    char*     filepath_name;
+//    char*     filepath_name;
     json_t*   json_file_object;         /* represents in-memory structure */
     FILE*     filesystem_file_object;   /* holds object place on filesystem */
 //    json_t*   root_group_uuid;        /* do we need this? */
