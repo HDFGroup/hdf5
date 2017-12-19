@@ -1695,7 +1695,7 @@ H5Aclose(hid_t attr_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", attr_id);
 
-    /* check arguments */
+    /* Check arguments */
     if (NULL == H5I_object_verify(attr_id, H5I_ATTR))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 

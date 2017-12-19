@@ -206,7 +206,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     /* Create a group ID to pass to the user-defined callback */
     if(NULL == (grp = H5G_open(&grp_loc_copy, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-    /* XXX: Unclear if it's okay to use the native call here */
+
     if((cur_grp = H5VL_native_register(H5I_GROUP, grp, FALSE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
@@ -847,25 +847,26 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
     HDassert(lapl_id >= 0);
 
     /* Set nlinks value from property list, if it exists */
-    if(lapl_id == H5P_DEFAULT)
+    if (lapl_id == H5P_DEFAULT)
         nlinks = H5L_NUM_LINKS;
     else {
-        if(NULL == (lapl = (H5P_genplist_t *)H5I_object(lapl_id)))
+        if (NULL == (lapl = (H5P_genplist_t *)H5I_object(lapl_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-        if(H5P_get(lapl, H5L_ACS_NLINKS_NAME, &nlinks) < 0)
+        if (H5P_get(lapl, H5L_ACS_NLINKS_NAME, &nlinks) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of links")
-    } /* end else */
+    }
 
     /* Set up invalid tag. This is a precautionary step only. Setting an invalid
-       tag here will ensure that no metadata accessed while doing the traversal
-       is given an improper tag, unless another one is specifically set up 
-       first. This will ensure we're not accidentally tagging something we 
-       shouldn't be during the traversal. Note that for best tagging assertion 
-       coverage, setting H5C_DO_TAGGING_SANITY_CHECKS is advised. */
+     * tag here will ensure that no metadata accessed while doing the traversal
+     * is given an improper tag, unless another one is specifically set up 
+     * first. This will ensure we're not accidentally tagging something we 
+     * shouldn't be during the traversal. Note that for best tagging assertion 
+     *coverage, setting H5C_DO_TAGGING_SANITY_CHECKS is advised.
+     */
     H5_BEGIN_TAG(dxpl_id, H5AC__INVALID_TAG, FAIL);
 
     /* Go perform "real" traversal */
-    if(H5G_traverse_real(loc, name, target, &nlinks, op, op_data, lapl_id, dxpl_id) < 0)
+    if (H5G_traverse_real(loc, name, target, &nlinks, op, op_data, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR_TAG(H5E_SYM, H5E_NOTFOUND, FAIL, "internal path traversal failed")
 
     /* Reset tag after traversal */

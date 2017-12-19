@@ -805,11 +805,10 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name,
     HDassert(last_lnk);
     HDassert(lnk_op && lnk_op->op_func.op_new);
 
-    /*
-     * Open the group on which to operate.  We also create a group ID which
+    /* Open the group on which to operate.  We also create a group ID which
      * we can pass to the application-defined operator.
      */
-    if (NULL == (grp = H5G__open_name(&loc, group_name, lapl_id, dxpl_id)))
+    if (NULL == (grp = H5G__open_name(loc, group_name, lapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if ((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
@@ -826,10 +825,10 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name,
 done:
     /* Release the group opened */
     if (gid != H5I_INVALID_HID) {
-        if(H5I_dec_app_ref(gid) < 0)
+        if (H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
     }
-    else if(grp && H5G_close(grp) < 0)
+    else if (grp && H5G_close(grp) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1070,7 +1069,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "loc parameter cannot be NULL")
 
     /* Open the group to begin visiting within */
-    if ((grp = H5G__open_name(&loc, group_name, lapl_id, dxpl_id)) == NULL)
+    if ((grp = H5G__open_name(loc, group_name, lapl_id, dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an ID for the starting group */
