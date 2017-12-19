@@ -991,7 +991,7 @@ H5VL_native_attr_close(void *attr, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
     FUNC_ENTER_NOAPI_NOINIT
 
     if(H5A_close((H5A_t*)attr) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close attribute")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close attribute")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -87,6 +87,7 @@
 #include "H5Gpkg.h"             /* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Pprivate.h"         /* Property lists                           */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/

@@ -1547,7 +1547,7 @@ H5O_copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get attribute datatype")
 
     /* Check if the datatype is committed and search the skip list if so */
-    if(H5T_committed(dt)) {
+    if (H5T_is_named(dt)) {
         /* Allocate key */
         if(NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1569,8 +1569,8 @@ H5O_copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
             if(H5SL_insert(udata->dst_dt_list, addr, key) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
             obj_inserted = TRUE;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
 done:
     /* Release resources */
@@ -1668,9 +1668,8 @@ H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
         if(NULL == (key->dt = (H5T_t *)H5O_msg_read(obj_oloc, H5O_DTYPE_ID, NULL, udata->dxpl_id)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message")
 
-        /* Check if the datatype is committed and search the skip list if so
-            */
-        if(H5T_committed(key->dt)) {
+        /* Check if the datatype is committed and search the skip list if so */
+        if (H5T_is_named(key->dt)) {
             /* Get datatype object fileno */
             H5F_GET_FILENO(obj_oloc->file, key->fileno);
 
@@ -1704,12 +1703,13 @@ done:
             if(key->dt)
                 key->dt = (H5T_t *)H5O_msg_free(H5O_DTYPE_ID, key->dt);
             key = H5FL_FREE(H5O_copy_search_comm_dt_key_t, key);
-        } /* end if */
+        }
+
         if(addr) {
             HDassert(ret_value < 0);
             addr = H5FL_FREE(haddr_t, addr);
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_copy_search_comm_dt_check */

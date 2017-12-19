@@ -278,8 +278,6 @@ test_classes(void)
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -324,11 +322,6 @@ test_copy(void)
  * Programmer:  Quincey Koziol
  *              Saturday, August 30, 2003
  *
- * Modifications:
- *              Raymond Lu
- *              8 December 2009
- *              I added a field of VL string in the compound type to test
- *              H5Tdetect_class correctly detect it as string type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -500,8 +493,6 @@ error:
  * Programmer:  Robb Matzke
  *              Wednesday, January  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -666,8 +657,6 @@ error:
  * Programmer:	Robb Matzke
  *              Thursday, June 17, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -797,8 +786,6 @@ error:
  * Programmer:	Robb Matzke
  *              Thursday, June 17, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -923,8 +910,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Thursday, June 17, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1060,8 +1045,6 @@ error:
  * Programmer:	Robb Matzke
  *              Thursday, June 17, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1163,8 +1146,6 @@ test_compound_5(void)
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, December 13, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1276,11 +1257,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, December 18, 2001
- *
- * Modifications:
- *              The size of compound datatype can be expanded now.
- *              Raymond Lu
- *              Wednesday, September 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1423,11 +1399,6 @@ error:
  * Programmer:  Robb Matzke
  *              Wednesday, January  7, 1998
  *
- * Modifications:
- *              Raymond Lu
- *              27 June 2008
- *              Added verification of compound type size for H5Tpack and
- *              test for array of nested compound type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -1669,8 +1640,6 @@ test_compound_8(void)
  * Programmer:  Raymond Lu
  *              Wednesday, June 9, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1891,8 +1860,6 @@ test_compound_9(void)
  * Programmer:  Raymond Lu
  *              Tuesday, June 15, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2086,8 +2053,6 @@ test_compound_10(void)
  *
  * Programmer:  Quincey Koziol
  *              Saturday, August 7, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2330,8 +2295,6 @@ error:
  * Programmer:  Raymond Lu
  *              Wednesday, September 29, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2515,8 +2478,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              Monday, August 25, 2008
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2907,8 +2868,6 @@ test_compound_14(void)
  * Programmer:  Neil Fortner
  *              Friday, September 19, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3066,8 +3025,6 @@ test_compound_15(void)
  * Programmer:  Neil Fortner
  *              Friday, October 3, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3158,8 +3115,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              Tuesday, January 13, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3405,11 +3360,6 @@ error:
  * Programmer:  Raymond Lu
  *              Thursday, April 4, 2002
  *
- * Modifications:
- *              Raymond Lu
- *              Wednesday, Febuary 9, 2005
- *              Added test for H5Tenum_valueof, H5Tenum_nameof, and
- *              H5Tget_member_value.
  *-------------------------------------------------------------------------
  */
 static int
@@ -3651,8 +3601,6 @@ test_query(void)
  * Programmer:	Robb Matzke
  *              Thursday, June  4, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3779,8 +3727,6 @@ test_transient (hid_t fapl)
  *
  * Programmer:	Robb Matzke
  *              Monday, June  1, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4582,8 +4528,6 @@ error:
  * Programmer:	Robb Matzke
  *              Tuesday, January  5, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4743,8 +4687,6 @@ test_conv_enum_2(void)
  * Programmer:	Robb Matzke
  *              Thursday, May 20, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4840,8 +4782,6 @@ error:
  *
  * Programmer:	Raymond Lu
  *              Wednesday, April 5, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4969,8 +4909,6 @@ error:
  * Programmer:	Robb Matzke
  *              Friday, June  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4995,8 +4933,6 @@ convert_opaque(hid_t H5_ATTR_UNUSED st, hid_t H5_ATTR_UNUSED dt, H5T_cdata_t *cd
  *
  * Programmer:	Raymond Lu
  *              June 2, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5165,8 +5101,6 @@ error:
  * Programmer:	Raymond Lu
  *              Wednesday, April 5, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5280,13 +5214,6 @@ opaque_funcs(void)
  * Programmer:  Raymond Lu
  *              July 14, 2004
  *
- * Modifications: Raymond Lu
- *              July 13, 2009
- *              Added the test for VL string types.
- *
- *              Raymond Lu
- *              17 February 2011
- *              I added the test of reference count for decoded datatypes.
  *-------------------------------------------------------------------------
  */
 static int
@@ -6070,8 +5997,6 @@ conv_except(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
  *              make it portable to other architectures, but further
  *              input and changes are welcome.  -QAK
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6507,8 +6432,6 @@ error:
  * Programmer:	Neil Fortner
  *              Thursday, June 4, 2009
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6697,8 +6620,8 @@ error:
 } /* end test_named_indirect_reopen() */
 
 /* XXX: FIX THIS - assert 'error checking', no return type, no ID init = badness! */
-static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
-    hbool_t new_format)
+static void
+create_del_obj_named_test_file(const char *filename, hid_t fapl, hbool_t new_format)
 {
     hid_t file;         /* File ID */
     hid_t type;         /* Datatype ID */

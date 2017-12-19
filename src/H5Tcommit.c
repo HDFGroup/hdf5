@@ -482,30 +482,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_committed
- *
- * Purpose:	Determines if a datatype is committed or not.
- *
- * Return:	Success:	TRUE if committed, FALSE otherwise.
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, September 24, 2003
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5T_committed(const H5T_t *type)
-{
-    /* Use no-init for efficiency */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(type);
-
-    FUNC_LEAVE_NOAPI(H5T_STATE_OPEN == type->shared->state || H5T_STATE_NAMED == type->shared->state)
-} /* end H5T_committed() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_link
  *
  * Purpose:	Adjust the link count for an object header by adding
