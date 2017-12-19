@@ -1648,7 +1648,6 @@ done:
 static void *
 H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name,
                        hid_t dapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
-// FTW WIP
 {
     H5VL_json_object_t *parent = (H5VL_json_object_t *) obj;
     H5VL_json_object_t *dataset = NULL;
@@ -1668,16 +1667,51 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
     HDassert((H5I_FILE == parent->obj_type || H5I_GROUP == parent->obj_type)
             && "parent object not a file or group");
 
+printf("FTW here\n");
     /* Allocate and setup internal Dataset struct */
     if (NULL == (dataset = (H5VL_json_object_t *) H5MM_malloc(sizeof(*dataset))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate dataset object")
+printf("FTW here\n");
 
     dataset->obj_type = H5I_DATASET;
     dataset->domain = parent->domain; /* Store pointer to file that the opened Dataset is within */
+printf("FTW here\n");
 
-    /* Traverse links until the named Dataset is found */
+//FTW WIP for a file as parent, need to find group 
+printf("parent->object_json = %s\n", json_dumps(parent->object_json, JSON_INDENT(4)));
+    /* Get the named dataset in JANSSON */
+    json_t* groups = json_object_get(parent->object_json, "groups");
+printf("FTW here\n");
+
+    const char *index;
+    json_t *value;
+    h5json_uuid_t* uuid = NULL;
+printf("FTW here\n");
+
+    json_array_foreach(groups, index, value) 
+    {
+        /* block of code that uses key and value */
+        h5json_uuid_t* title = json_string_value(json_object_get(value, "title"));
+        if (strcmp(title, name) == 0) 
+        {
+            uuid = (h5json_uuid_t*)json_string_value(json_object_get(value, "id"));
+            strncpy(dataset->object_uuid, uuid, sizeof(h5json_uuid_t));
+            break;
+        }
+    }
+printf("FTW herexx\n");
+
+    if (uuid == NULL)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to locate link to dataset")
+
+    /* the link is found. Go ahead and open the datset object. */
+    json_t* datsets = json_object_get(dataset->domain->u.file.json_file_object, "datsets");
+    dataset->object_json = json_object_get(datsets, uuid);
+printf("Got datset json: %s\n", json_dumps(dataset->object_json, JSON_INDENT(4)));
     //FTW WIP
 
+
+// below needs work to read the JANSSON
 
     /* Set up a Dataspace for the opened Dataset */
     if (H5VL_json_parse_dataspace(dataset) < 0)
@@ -1689,9 +1723,7 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
 
 #ifdef PLUGIN_DEBUG
     printf("Dataset H5VL_json_object_t fields:\n");
-//    printf("  - Dataset URI: %s\n", dataset->URI);
     printf("  - Dataset Object type: %d\n", dataset->obj_type);
-//    printf("  - Dataset Parent Domain path: %s\n\n", dataset->domain->u.file.filepath_name);
 #endif
 
     ret_value = (void *) dataset;
@@ -2250,7 +2282,6 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
      */
 
     /* create an uuid for the file object itself */
-//    h5json_uuid_t uuid;
     h5json_uuid_generate(new_file->object_uuid);
 //    json_t *uuid_json_string = json_string(uuid);
 //    assert(json_object_set_new(new_file_object, "id", uuid_json_string) == 0);
@@ -2267,10 +2298,12 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
 printf("FTW uuid = %s\n", new_file->object_uuid);
 
     /* create the root group */
-    h5json_uuid_t root_group_uuid;
-    h5json_uuid_generate(root_group_uuid);
-    json_t *root_uuid_json_string = json_string(root_group_uuid);
-    assert(json_object_set_new(new_file_object, "root", root_uuid_json_string) == 0);
+//    h5json_uuid_t root_group_uuid;
+//    h5json_uuid_generate(root_group_uuid);
+    //json_t *root_uuid_json_string = json_string(root_group_uuid);
+    /* setting root group uuid same as file uuid to make passing file as a location easier to handle */
+    json_t *root_uuid_json_string = json_string(new_file->object_uuid);
+    HDassert(json_object_set_new(new_file_object, "root", json_string(new_file->object_uuid)) == 0);
     /* copy the uuid to the library object */
 //    strcpy(char *dest, const char *src)
 //    strcpy(char *dest, uuid);
@@ -2314,7 +2347,7 @@ printf("FTW uuid = %s\n", new_file->object_uuid);
 
     /* build the root group object and insert into groups hashtable object */
     json_t* root_group = json_object();
-    json_object_set_new(groups_hashtable, root_group_uuid, root_group);
+    json_object_set_new(groups_hashtable, new_file->object_uuid, root_group);
 
     /* populate the root group with the rest of the components */
     json_t* hdf5_path_name_array = json_array();
@@ -2459,7 +2492,7 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
 
 #ifdef PLUGIN_DEBUG
     printf("Validated JSON document: \n");
-    printf("  - id: %s\n", json_string_value(id));
+    printf("  - id: %s\n", id);
     printf("  - root: %s\n", json_string_value(root));
     printf("  - groups: %s\n", json_dumps(groups, JSON_INDENT(4)));
     printf("  - apiVersion: %s\n", json_string_value(apiVersion));
@@ -2480,7 +2513,6 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
 
 #ifdef PLUGIN_DEBUG
     printf("File H5VL_json_object_t fields:\n");
-//WIP 
 //    printf("  - File Path Name: %s\n", file->domain->u.file.filepath_name);
     printf("  - File Object type: %d\n\n", file->obj_type);
 #endif
@@ -2903,7 +2935,7 @@ H5VL_json_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name,
     printf("  - DXPL: %ld\n", dxpl_id);
     printf("  - Parent: %ld\n", parent);
     printf("  - Parent Object Type: %d\n", parent->obj_type);
-    printf("  - Parent UUID: %s\n", json_string_value(parent->object_uuid));
+    printf("  - Parent UUID: %s\n", parent->object_uuid);
 #endif
 
     HDassert((H5I_FILE == parent->obj_type || H5I_GROUP == parent->obj_type)
@@ -2934,7 +2966,7 @@ H5VL_json_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name,
     if ((parent->obj_type == H5I_FILE) || (n_tokens == 0)) 
     {
         /* borrow reference to root group as starting point */
-        current_uuid = (h5json_uuid_t*)json_object_get(parent->domain->u.file.json_file_object, "root");
+        current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(parent->domain->u.file.json_file_object, "root"));
     }
     else /* borrow reference to provided group */
     {
@@ -3076,7 +3108,7 @@ H5VL_json_group_close(void *grp, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUS
 #ifdef PLUGIN_DEBUG
     printf("Received Group close call with following parameters:\n");
     printf("  - DXPL: %ld\n", dxpl_id);
-    printf("  - UUID: %s\n", json_string_value(_grp->object_uuid));
+    printf("  - UUID: %s\n", _grp->object_uuid);
 #endif
 
     /* checking group is group */
