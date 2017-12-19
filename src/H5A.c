@@ -906,21 +906,28 @@ done:
 ssize_t
 H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 {
-    H5A_t		*my_attr;               /* Attribute object for ID */
-    ssize_t		ret_value;
+    H5VL_object_t      *attr        = NULL;
+    H5VL_loc_params_t   loc_params;
+    ssize_t             ret_value   = -1;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "iz*s", attr_id, buf_size, buf);
 
     /* check arguments */
-    if(NULL == (my_attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    if (NULL == (attr = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not an attribute")
     if(!buf && buf_size)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "buf cannot be NULL if buf_size is non-zero")
 
-    /* Call private function in turn */
-    if(0 > (ret_value = H5A__get_name(my_attr, buf_size, buf)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
+    /* Set location struct parameters */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(attr_id);
+
+    /* get the name through the VOL */
+    if (H5VL_attr_get(attr->vol_obj, attr->vol_info->vol_cls, H5VL_ATTR_GET_NAME, 
+                     H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
+                     loc_params, buf_size, buf, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get name")
 
 done:
     FUNC_LEAVE_API(ret_value)

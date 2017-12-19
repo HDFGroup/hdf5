@@ -647,38 +647,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oset_comment
+ * Function:    H5Oset_comment
  *
  * Purpose:     Gives the specified object a comment.  The COMMENT string
- *		should be a null terminated string.  An object can have only
- *		one comment at a time.  Passing NULL for the COMMENT argument
- *		will remove the comment property from the object.
+ *              should be a null terminated string.  An object can have only
+ *              one comment at a time.  Passing NULL for the COMMENT argument
+ *              will remove the comment property from the object.
  *
- * Note:	Deprecated in favor of using attributes on objects
+ * Note:        Deprecated in favor of using attributes on objects
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		August 30 2007
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Oset_comment(hid_t obj_id, const char *comment)
 {
-    H5G_loc_t	loc;                    /* Location of group */
+    H5VL_object_t    *obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", obj_id, comment);
 
-    /* Check args */
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    /* Get the location object */
+    if (NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* (Re)set the object's comment */
-    if(H5G_loc_set_comment(&loc, ".", comment, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_read_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
+    /* Fill in location struct fields */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(obj_id);
+
+    /* set comment on object through the VOL */
+    if (H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                            H5_REQUEST_NULL, H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -686,19 +689,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oset_comment_by_name
+ * Function:    H5Oset_comment_by_name
  *
  * Purpose:     Gives the specified object a comment.  The COMMENT string
- *		should be a null terminated string.  An object can have only
- *		one comment at a time.  Passing NULL for the COMMENT argument
- *		will remove the comment property from the object.
+ *              should be a null terminated string.  An object can have only
+ *              one comment at a time.  Passing NULL for the COMMENT argument
+ *              will remove the comment property from the object.
  *
- * Note:	Deprecated in favor of using attributes on objects
+ * Note:        Deprecated in favor of using attributes on objects
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		August 30 2007
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -706,7 +706,8 @@ herr_t
 H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Location of group */
+    H5VL_object_t    *obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
     hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -714,18 +715,27 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     H5TRACE4("e", "i*s*si", loc_id, name, comment, lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
+    if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
-    /* (Re)set the object's comment */
-    if(H5G_loc_set_comment(&loc, name, comment, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
+    /* Fill in location struct fields */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+
+    /* get the location object */
+    if (NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set comment on object through the VOL */
+    if (H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL, 
+                            H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -733,37 +743,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oget_comment
+ * Function:    H5Oget_comment
  *
- * Purpose:	Retrieve comment for an object.
+ * Purpose:     Retrieve comment for an object.
  *
- * Return:	Success:	Number of bytes in the comment excluding the
- *				null terminator.  Zero if the object has no
- *				comment.
+ * Return:      Success:    Number of bytes in the comment excluding the
+ *                          null terminator. Zero if the object has no
+ *                          comment.
  *
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		August 30 2007
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
 ssize_t
 H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize)
 {
-    H5G_loc_t	loc;                    /* Location of group */
-    ssize_t     ret_value;              /* Return value */
+    H5VL_object_t    *obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
+    ssize_t     ret_value = -1;              /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "i*sz", obj_id, comment, bufsize);
 
-    /* Check args */
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    /* Get the object */
+    if (NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
-    /* Retrieve the object's comment */
-    if((ret_value = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
+    /* Set fields in the location struct */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(obj_id);
+
+    /* Get the comment via the VOL */
+    if (H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
+                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get object comment")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -771,18 +784,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oget_comment_by_name
+ * Function:    H5Oget_comment_by_name
  *
- * Purpose:	Retrieve comment for an object.
+ * Purpose:     Retrieve comment for an object.
  *
- * Return:	Success:	Number of bytes in the comment excluding the
- *				null terminator.  Zero if the object has no
- *				comment.
+ * Return:      Success:    Number of bytes in the comment excluding the
+ *                          null terminator. Zero if the object has no
+ *                          comment.
  *
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		August 30 2007
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
@@ -790,26 +800,36 @@ ssize_t
 H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t bufsize,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Location of group */
+    H5VL_object_t    *obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
     hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    ssize_t     ret_value;              /* Return value */
+    ssize_t     ret_value = -1;              /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE5("Zs", "i*s*szi", loc_id, name, comment, bufsize, lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if (!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "no name")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if (H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, (-1), "can't set access and transfer property lists")
 
-    /* Retrieve the object's comment */
-    if((ret_value = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize, lapl_id, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
+    /* Fill in location struct fields */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+
+    /* Get the location object */
+    if (NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
+
+    /* Get the comment via the VOL */
+    if (H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL, 
+                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get object info")
 
 done:
     FUNC_LEAVE_API(ret_value)
