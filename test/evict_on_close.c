@@ -11,11 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Dana Robinson
- *              Spring 2016
- *
- * Purpose:     Tests the basic operation of the evict-on-close cache
+/* Purpose:     Tests the basic operation of the evict-on-close cache
  *              behavior. Tests that ensure the tagging is handled correctly
  *              are located in cache.c.
  */
@@ -91,9 +87,6 @@ static herr_t check_group_layout(hid_t fid, const char *group_name);
  *
  * Return:      TRUE/FALSE
  *
- * Programmer:  Dana Robinson
- *              Fall 2016
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -114,8 +107,8 @@ verify_tag_not_in_cache(H5F_t *f, haddr_t tag)
                 return TRUE;
             else
                 entry_ptr = entry_ptr->ht_next;
-        } /* end while */
-    } /* end for */
+        }
+    }
 
     return FALSE;
 } /* end verify_tag_not_in_cache() */
@@ -128,9 +121,6 @@ verify_tag_not_in_cache(H5F_t *f, haddr_t tag)
  *
  * Return:      Success: The file ID of the created file
  *              Failure: -1
- *
- * Programmer:  Dana Robinson
- *              Fall 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -207,7 +197,7 @@ generate_eoc_test_file(hid_t fapl_id)
             TEST_ERROR;
         if(H5Gclose(gid2) < 0)
             TEST_ERROR;
-    } /* end for */
+    }
 
     if(H5Gclose(gid1) < 0)
         TEST_ERROR;
@@ -303,7 +293,7 @@ generate_eoc_test_file(hid_t fapl_id)
             TEST_ERROR;
         if(H5Gclose(gid2) < 0)
             TEST_ERROR;
-    } /* end for */
+    }
 
     if(H5Gclose(gid1) < 0)
         TEST_ERROR;
@@ -593,9 +583,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -611,7 +598,7 @@ check_group_layout(hid_t fid, const char *group_name)
     /* NOTE: The TESTING() macro is called in main() */
 
     /* Get a pointer to the file struct */
-    if(NULL == (file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE)))
+    if(NULL == (file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE)))
         TEST_ERROR;
 
     /* Record the number of cache entries */
@@ -627,7 +614,7 @@ check_group_layout(hid_t fid, const char *group_name)
     /* Open the main group and get its tag */
     if((gid1 = H5Gopen2(fid, group_name, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    if(NULL == (grp_ptr = (H5G_t *)H5I_object_verify(gid1, H5I_GROUP)))
+    if(NULL == (grp_ptr = (H5G_t *)H5VL_object_verify(gid1, H5I_GROUP)))
         TEST_ERROR;
     tag1 = grp_ptr->oloc.addr;
 
@@ -644,7 +631,7 @@ check_group_layout(hid_t fid, const char *group_name)
         if((gid2 = H5Gopen2(gid1, subgroup_name, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
-        if(NULL == (grp_ptr = (H5G_t *)H5I_object_verify(gid2, H5I_GROUP)))
+        if(NULL == (grp_ptr = (H5G_t *)H5VL_object_verify(gid2, H5I_GROUP)))
             TEST_ERROR;
         tag2 = grp_ptr->oloc.addr;
 
@@ -710,9 +697,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -728,7 +712,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     /* NOTE: The TESTING() macro is called in main() */
 
     /* Get a pointer to the file struct */
-    if(NULL == (file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE)))
+    if(NULL == (file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE)))
         TEST_ERROR;
 
     /* Create the data buffer */
@@ -748,7 +732,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     /* Open dataset and get the metadata tag */
     if((did = H5Dopen2(fid, dset_name, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    if(NULL == (dset_ptr = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset_ptr = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         TEST_ERROR;
     tag = dset_ptr->oloc.addr;
 
@@ -815,9 +799,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Spring 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -873,7 +854,7 @@ check_evict_on_close_api(void)
 
     /* ensure an invalid plist fails */
     H5E_BEGIN_TRY {
-        status = H5Pget_evict_on_close((hid_t)-1, &evict_on_close);
+        status = H5Pget_evict_on_close(H5I_INVALID_HID, &evict_on_close);
     } H5E_END_TRY;
     if(status >= 0)
         FAIL_PUTS_ERROR("H5Pget_evict_on_close() accepted invalid hid_t.");
@@ -896,9 +877,6 @@ error:
  * Function:    main
  *
  * Return:      EXIT_FAILURE/EXIT_SUCCESS
- *
- * Programmer:  Dana Robinson
- *              Spring 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -979,7 +957,7 @@ main(void)
 
     HDprintf("All evict-on-close tests passed.\n");
 
-    return EXIT_SUCCESS;
+    HDexit(EXIT_SUCCESS);
 
 error:
 
@@ -992,7 +970,7 @@ error:
         H5Pclose(fapl_id);
     } H5E_END_TRY;
 
-    return EXIT_FAILURE;
+    HDexit(EXIT_FAILURE);
 
 } /* end main() */
 
@@ -1006,9 +984,6 @@ error:
  *              parallel HDF5.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Spring 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1052,9 +1027,6 @@ error:
  *
  * Return:      EXIT_FAILURE/EXIT_SUCCESS
  *
- * Programmer:  Dana Robinson
- *              Spring 2016
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1076,14 +1048,14 @@ main(void)
     HDprintf("All evict-on-close tests passed.\n");
     HDprintf("Note that EoC is not supported under parallel so most tests are skipped.\n");
 
-    return EXIT_SUCCESS;
+    HDexit(EXIT_SUCCESS);
 
 error:
 
     HDprintf("***** %u evict-on-close test%s FAILED! *****\n",
         nerrors, nerrors > 1 ? "S" : "");
 
-    return EXIT_FAILURE;
+    HDexit(EXIT_FAILURE);
 
 } /* main() - parallel */
 
