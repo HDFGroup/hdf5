@@ -352,6 +352,15 @@ Bug Fixes since HDF5-1.10.1 release
     -------------
     - cmake
 
+      The hdf5 fortran utility H5match_types needs to include mpi.h when
+      parallel is enabled..
+
+      Added target_include_directories command to H5match_types executable..
+
+      (ADB - 2017/12/20)
+
+    - cmake
+
       The hdf5 library used shared szip and zlib, which needlessly required
       applications to link with the same szip and zlib libraries.
 
@@ -367,7 +376,7 @@ Bug Fixes since HDF5-1.10.1 release
       CMake implementation for MPI was problematic and would create incorrect
       MPI library references in the hdf5 libraries.
 
-      Reworked the CMake MPI code to properly create CMake targets.Also merged
+      Reworked the CMake MPI code to properly create CMake targets. Also merged
       the latest CMake FindMPI.cmake changes to the local copy. This is necessary
       until HDF changes the CMake minimum to 3.9 or greater.
 
