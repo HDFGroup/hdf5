@@ -533,15 +533,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_mount_count_ids_recurse
+ * Function:    H5F_mount_count_ids_recurse
  *
- * Purpose:	Helper routine for counting number of open IDs in mount
+ * Purpose:     Helper routine for counting number of open IDs in mount
  *              hierarchy.
  *
- * Return:	<none>
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 19, 2005
+ * Return:      void
  *
  *-------------------------------------------------------------------------
  */
@@ -558,7 +555,7 @@ H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_obj
     HDassert(nopen_objs);
 
     /* If this file is still open, increment number of file IDs open */
-    if(H5F_FILE_ID(f) > 0)
+    if (H5F_ID_EXISTS(f))
         *nopen_files += 1;
 
     /* Increment number of open objects in file
@@ -568,11 +565,11 @@ H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_obj
     *nopen_objs += (f->nopen_objs - f->nmounts);
 
     /* Iterate over files mounted in this file and add in their open ID counts also */
-    for(u = 0; u < f->shared->mtab.nmounts; u++) {
+    for (u = 0; u < f->shared->mtab.nmounts; u++) {
         /* Only recurse on children mounted to this top level file structure */
-        if(f->shared->mtab.child[u].file->parent == f) {
+        if (f->shared->mtab.child[u].file->parent == f) {
             /* Increment the open object count if the mount point group has an open ID */
-            if(H5G_get_shared_count(f->shared->mtab.child[u].group) > 1)
+            if (H5G_get_shared_count(f->shared->mtab.child[u].group) > 1)
                 *nopen_objs += 1;
 
             H5F_mount_count_ids_recurse(f->shared->mtab.child[u].file, nopen_files, nopen_objs);

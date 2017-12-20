@@ -1908,9 +1908,6 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
 
     HDassert(file);
 
-    /* XXX: Change this back to use file->id but allow special behavior when
-     *      the ID is H5I_INVALID_HID.
-     */
     if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
         /* resurrect the ID - Register an ID with the native plugin */
         if ((ret_value = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)

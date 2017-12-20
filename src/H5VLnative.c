@@ -1980,7 +1980,7 @@ H5VL_native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
     FUNC_ENTER_NOAPI_NOINIT
 
     /* This routine should only be called when a file ID's ref count drops to zero */
-    HDassert(H5F_FILE_ID(f));
+    HDassert(H5F_ID_EXISTS(f));
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
