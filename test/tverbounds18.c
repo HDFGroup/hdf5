@@ -64,8 +64,8 @@ static void test_earliest_latest(void)
      */
 
     /* Open the dataset */
-    dset = H5Dopen(fid, "DS_chunked_layout_3", H5P_DEFAULT);
-    CHECK(dset, FAIL, "H5Dopen");
+    dset = H5Dopen2(fid, "DS_chunked_layout_3", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
 
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -77,9 +77,9 @@ static void test_earliest_latest(void)
 
     /* Open the dataset */
     H5E_BEGIN_TRY {
-        dset = H5Dopen(fid, "DS_chunked_layout_4", H5P_DEFAULT);
+        dset = H5Dopen2(fid, "DS_chunked_layout_4", H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(dset, FAIL, "H5Dopen");
+    VERIFY(dset, FAIL, "H5Dopen2");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -114,8 +114,8 @@ static void test_earliest_v18(void)
      */
 
     /* Open the dataset */
-    dset = H5Dopen(fid, "DS_chunked_layout_3", H5P_DEFAULT);
-    CHECK(dset, FAIL, "H5Dopen");
+    dset = H5Dopen2(fid, "DS_chunked_layout_3", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
 
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -177,8 +177,8 @@ static void test_v18_latest(void)
      */
 
     /* Open the dataset */
-    dset = H5Dopen(fid, "DS_chunked_layout_3", H5P_DEFAULT);
-    CHECK(dset, FAIL, "H5Dopen");
+    dset = H5Dopen2(fid, "DS_chunked_layout_3", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
 
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -218,8 +218,8 @@ static void test_v18_v18(void)
      */
 
     /* Open the dataset */
-    dset = H5Dopen(fid, "DS_chunked_layout_3", H5P_DEFAULT);
-    CHECK(dset, FAIL, "H5Dopen");
+    dset = H5Dopen2(fid, "DS_chunked_layout_3", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
 
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -231,9 +231,9 @@ static void test_v18_v18(void)
 
     /* Open the dataset */
     H5E_BEGIN_TRY {
-        dset = H5Dopen(fid, "DS_chunked_layout_4", H5P_DEFAULT);
+        dset = H5Dopen2(fid, "DS_chunked_layout_4", H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(dset, FAIL, "H5Dopen");
+    VERIFY(dset, FAIL, "H5Dopen2");
 
     /* Close the file */
     ret = H5Fclose(fid);
