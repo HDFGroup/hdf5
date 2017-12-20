@@ -1667,28 +1667,26 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
     HDassert((H5I_FILE == parent->obj_type || H5I_GROUP == parent->obj_type)
             && "parent object not a file or group");
 
-printf("FTW here\n");
     /* Allocate and setup internal Dataset struct */
     if (NULL == (dataset = (H5VL_json_object_t *) H5MM_malloc(sizeof(*dataset))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate dataset object")
-printf("FTW here\n");
 
     dataset->obj_type = H5I_DATASET;
     dataset->domain = parent->domain; /* Store pointer to file that the opened Dataset is within */
-printf("FTW here\n");
 
-//FTW WIP for a file as parent, need to find group 
-printf("parent->object_json = %s\n", json_dumps(parent->object_json, JSON_INDENT(4)));
     /* Get the named dataset in JANSSON */
     json_t* groups = json_object_get(parent->object_json, "groups");
-printf("FTW here\n");
+//printf("groups: >>>%s<<<\n", json_dumps(groups, JSON_INDENT(4)));
+// get the parent group, then search its links
+    json_t* parent_group = json_object_get(groups, parent->object_uuid);
+//printf("parent group: >>>%s<<<\n", json_dumps(parent_group, JSON_INDENT(4)));
+    json_t* parent_group_links = json_object_get(parent_group, "links");
 
     const char *index;
     json_t *value;
     h5json_uuid_t* uuid = NULL;
-printf("FTW here\n");
 
-    json_array_foreach(groups, index, value) 
+    json_array_foreach(parent_group_links, index, value) 
     {
         /* block of code that uses key and value */
         h5json_uuid_t* title = json_string_value(json_object_get(value, "title"));
@@ -1699,20 +1697,22 @@ printf("FTW here\n");
             break;
         }
     }
-printf("FTW herexx\n");
+//printf("FTW herexx\n");
+    //FTW WIP
+printf("FTW uuid=%s\n", uuid);
 
     if (uuid == NULL)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to locate link to dataset")
 
     /* the link is found. Go ahead and open the datset object. */
-    json_t* datsets = json_object_get(dataset->domain->u.file.json_file_object, "datsets");
-    dataset->object_json = json_object_get(datsets, uuid);
+    json_t* datasets = json_object_get(dataset->domain->u.file.json_file_object, "datasets");
+    dataset->object_json = json_object_get(datasets, uuid);
 printf("Got datset json: %s\n", json_dumps(dataset->object_json, JSON_INDENT(4)));
+
     //FTW WIP
 
-
 // below needs work to read the JANSSON
-
+#if 0
     /* Set up a Dataspace for the opened Dataset */
     if (H5VL_json_parse_dataspace(dataset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to parse dataset dataspace")
@@ -1720,6 +1720,7 @@ printf("Got datset json: %s\n", json_dumps(dataset->object_json, JSON_INDENT(4))
     /* Set up a Datatype for the opened Dataset */
     if (H5VL_json_parse_datatype(dataset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to parse dataset datatype")
+#endif
 
 #ifdef PLUGIN_DEBUG
     printf("Dataset H5VL_json_object_t fields:\n");
@@ -2498,8 +2499,11 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
     printf("  - apiVersion: %s\n", json_string_value(apiVersion));
 #endif
 
+
     /* set up the JANSSON file object and store the reference */
     file->u.file.json_file_object = document;
+    /* need to set the object_json for VOL object as well */
+    file->object_json = document;
 
     /* This uuid gets *copied* to the library object */
     strncpy(file->object_uuid, id, sizeof(h5json_uuid_t));
