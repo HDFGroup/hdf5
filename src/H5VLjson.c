@@ -1697,30 +1697,93 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
             break;
         }
     }
-//printf("FTW herexx\n");
-    //FTW WIP
-printf("FTW uuid=%s\n", uuid);
 
     if (uuid == NULL)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to locate link to dataset")
 
-    /* the link is found. Go ahead and open the datset object. */
+    /* the link is found. Go ahead and open the dataset object. */
     json_t* datasets = json_object_get(dataset->domain->u.file.json_file_object, "datasets");
     dataset->object_json = json_object_get(datasets, uuid);
-printf("Got datset json: %s\n", json_dumps(dataset->object_json, JSON_INDENT(4)));
+//printf("Got dataset json: %s\n", json_dumps(dataset->object_json, JSON_INDENT(4)));
 
     //FTW WIP
 
-// below needs work to read the JANSSON
-#if 0
-    /* Set up a Dataspace for the opened Dataset */
-    if (H5VL_json_parse_dataspace(dataset) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to parse dataset dataspace")
+    /* >>>shape<<< Set up a Dataspace for the opened Dataset */
+    json_t* shape = json_object_get(dataset->object_json, "shape");
+//printf("dataset shape = '%s'\n", json_dumps(shape, JSON_INDENT(4)));
+    json_t* class = json_object_get(shape, "class");
+//printf("dataset class = '%s'\n", json_string_value(class));
+    json_t* dims = json_object_get(shape, "dims");
+//printf("dataset dims= '%s'\n", json_dumps(dims, JSON_INDENT(4)));
+    json_t* maxdims = json_object_get(shape, "maxdims");
+//printf("dataset maxdims= '%s'\n", json_dumps(maxdims, JSON_INDENT(4)));
 
-    /* Set up a Datatype for the opened Dataset */
-    if (H5VL_json_parse_datatype(dataset) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to parse dataset datatype")
-#endif
+    /* create the dataspace library object */
+    hid_t dataspace; 
+
+    if (strcmp(json_string_value(class), "H5S_SIMPLE") == 0)
+    {
+        hsize_t rank = json_array_size(dims);
+//printf("got rank = %d\n", rank);
+        hsize_t* current_dims = H5MM_malloc(sizeof(hsize_t) * rank);
+        hsize_t* maximum_dims = H5MM_malloc(sizeof(hsize_t) * rank);
+        hsize_t index;
+        for (index=0; index<rank; index++) 
+        {
+            current_dims[index] = json_integer_value(json_array_get(dims, index));
+//printf("Got current_dims[index] = %d\n", current_dims[index]);
+            maximum_dims[index] = json_integer_value(json_array_get(maxdims, index));
+//printf("Got maximum_dims[index] = %d\n", maximum_dims[index]);
+        }
+
+        dataspace = H5Screate_simple(rank, current_dims, maximum_dims);
+        H5MM_free(current_dims);
+        H5MM_free(maximum_dims);
+    }
+    else
+    {
+//FTW other type of dataspace??
+    }
+
+    HDassert(dataspace >= 0);
+    dataset->u.dataset.space_id = dataspace;
+
+printf("FTW dataspace ok xyz\n");
+    
+    json_t* type = json_object_get(dataset->object_json, "type");
+printf("FTW type = %s\n", json_dumps(type, JSON_INDENT(4)));
+
+//    if (H5VL_json_parse_dataspace(dataset) < 0)
+//        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to parse dataset dataspace")
+
+    /* >>>type<<< Set up a Datatype for the opened Dataset */
+    json_t* datatype_class = json_object_get(type, "class");
+printf("Got datatype_class = %s\n", json_string_value(datatype_class));
+
+    hid_t datatype = NULL;
+    char* datatype_class_str = json_string_value(datatype_class);
+    if (strcmp(datatype_class_str, "H5T_STRING") == 0)
+    {
+        //datatype = H5Tcopy(H5T_STRING);
+        datatype = H5Tcopy(H5T_NATIVE_CHAR);
+        //stuff
+        //break;
+    }
+    else if (strcmp(datatype_class_str, "H5T_INTEGER") == 0)
+    {        
+        //datatype = H5Tcopy(H5T_INTEGER);
+        datatype = H5T_NATIVE_INT;
+        // stuff
+        //break;
+    }
+    else
+    {
+        // default:
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "Unkown datatype.")
+    }
+
+//    if (H5VL_json_parse_datatype(dataset) < 0)
+//        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to parse dataset datatype")
 
 #ifdef PLUGIN_DEBUG
     printf("Dataset H5VL_json_object_t fields:\n");
