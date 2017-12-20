@@ -5733,37 +5733,6 @@ Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts
      } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts */
 
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5Pset_vds_file_cache_size
- * Signature: (JI)V
- */
-JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1vds_1file_1cache_1size
-    (JNIEnv *env, jclass clss, jlong plist, jint size)
-{
-    unsigned  sz = (unsigned)size;
-
-    if (H5Pset_vds_file_cache_size((hid_t)plist, (unsigned)sz) < 0)
-        h5libraryError(env);
-} /* end Java_hdf_hdf5lib_H5_H5Pset_1vds_1file_1cache_1size */
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5Pget_vds_file_cache_size
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1vds_1file_1cache_1size
-    (JNIEnv *env, jclass clss, jlong plist)
-{
-    unsigned  s;
-
-    if (H5Pget_vds_file_cache_size((hid_t)plist, &s) < 0)
-        h5libraryError(env);
-
-    return (jint)s;
-} /* end Java_hdf_hdf5lib_H5_H5Pget_1vds_1file_1cache_1size */
 
 /*
  * Class:     hdf_hdf5lib_H5
