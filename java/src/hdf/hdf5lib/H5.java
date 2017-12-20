@@ -6097,34 +6097,35 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native String H5Pget_virtual_dsetname(long dcpl_id, long index) throws HDF5LibraryException, IllegalArgumentException;
 
-    /**
-     * H5Pget_vds_file_cache_size retrieves the size of the vds link open file cache.
-     *
-     * @param fapl_id
-     *            IN: File access property list identifier
-     *
-     * @return VDS link open file cache size in number of files.
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     *
-     **/
-    public synchronized static native int H5Pget_vds_file_cache_size(long fapl_id) throws HDF5LibraryException;
-
-    /**
-     * H5Pset_vds_file_cache_size sets the number of files that can be held open in an vds link open file cache.
-     *
-     * @param fapl_id
-     *            IN: File access property list identifier
-     * @param efc_size
-     *            IN: VDS link open file cache size in number of files.
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     *
-     **/
-    public synchronized static native void H5Pset_vds_file_cache_size(long fapl_id, int efc_size)
-            throws HDF5LibraryException;
+//    /////  unimplemented /////
+//    /**
+//     * H5Pget_vds_file_cache_size retrieves the size of the vds link open file cache.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     *
+//     * @return VDS link open file cache size in number of files.
+//     *
+//     * @exception HDF5LibraryException
+//     *                - Error from the HDF-5 Library.
+//     *
+//     **/
+//    public synchronized static native int H5Pget_vds_file_cache_size(long fapl_id) throws HDF5LibraryException;
+//
+//    /**
+//     * H5Pset_vds_file_cache_size sets the number of files that can be held open in an vds link open file cache.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     * @param efc_size
+//     *            IN: VDS link open file cache size in number of files.
+//     *
+//     * @exception HDF5LibraryException
+//     *                - Error from the HDF-5 Library.
+//     *
+//     **/
+//    public synchronized static native void H5Pset_vds_file_cache_size(long fapl_id, int efc_size)
+//            throws HDF5LibraryException;
 
     /**
      * H5Pget_external returns information about an external file.
