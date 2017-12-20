@@ -542,6 +542,7 @@ if (HDF5_ENABLE_PARALLEL)
     # Used by Fortran + MPI
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+    INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_DIRS})
   else ()
     message (STATUS "Parallel libraries not found")
   endif ()
