@@ -782,7 +782,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
          * Unix: does not apply
          */
         if(H5_CHECK_ABS_DRIVE(name)) {
-            drive = name[0] - 'A' + 1;
+            drive = HDtoupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             HDstrncpy(new_name, &name[2], name_len);
         } /* end if */
@@ -876,7 +876,7 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
         if(NULL == (*full_name = (char *)H5MM_strdup(path2)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    } /* end if */ 
+    } /* end if */
     else if(H5_CHECK_ABS_PATH(path2)) {
 
         /* On windows path2 is a path absolute name */
