@@ -947,22 +947,20 @@ done:
 hssize_t
 H5Fget_freespace(hid_t file_id)
 {
-    H5F_t      *file;           /* File object for file ID */
-    hsize_t     tot_space;      /* Amount of free space in the file */
+    H5VL_object_t *obj = NULL;
     hssize_t    ret_value;      /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE1("Hs", "i", file_id);
 
-    /* Check args */
-    if (NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "not a file ID")
+    /* get the file object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier")
 
     /* Go get the actual amount of free space in the file */
-    if (H5MF_get_freespace(file, H5AC_ind_read_dxpl_id, &tot_space, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to check free space for file")
-
-    ret_value = (hssize_t)tot_space;
+    if(H5VL_file_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, H5VL_FILE_GET_FREE_SPACE, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get file free space")
 
 done:
     FUNC_LEAVE_API(ret_value)
