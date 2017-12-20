@@ -85,9 +85,6 @@ add_executable (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
 )
-if (H5_HAVE_PARALLEL AND MPI_C_FOUND)
-  target_include_directories (H5match_types PUBLIC ${MPI_C_INCLUDE_DIRS})
-endif ()
 set (CMD $<TARGET_FILE:H5match_types>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
