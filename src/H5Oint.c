@@ -43,6 +43,8 @@
 #endif /* H5O_ENABLE_BOGUS */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5SMprivate.h"        /* Shared object header messages            */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative.h"         /* Virtual Object Layer (native)            */
 
 
 /****************/
@@ -581,12 +583,12 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
     H5F_DECR_NOPEN_OBJS(loc->file);
 
 #ifdef H5O_DEBUG
-    if(H5DEBUG(O)) {
-        if(H5F_FILE_ID(loc->file)< 0 && 1 == H5F_NREFS(loc->file))
-            HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n",
-                loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
-	else
-	    HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
+    if (H5DEBUG(O)) {
+        /* XXX: That weird boolean ID thing gets flagged here... */
+        if (H5F_FILE_ID(loc->file) < 0 && 1 == H5F_NREFS(loc->file))
+            HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n", loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
+        else
+            HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
     }
 #endif
 
@@ -2424,7 +2426,7 @@ H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     H5G_loc_reset(&obj_loc);
 
     /* Find the object's location */
-    if (H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
+    if (H5G_loc_find(loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
     loc_found = TRUE;
 
@@ -2436,6 +2438,22 @@ H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     /* (Takes ownership of the obj_loc information) */
     if ((obj_id = H5O_open_by_loc(&obj_loc, lapl_id, dxpl_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+    /* get the native object from the ID created by the object header and create 
+     * a "VOL object" ID
+     */
+    {
+        void  *temp_obj = NULL;
+        H5I_type_t obj_type;
+
+        obj_type = H5I_get_type(obj_id);
+        if (NULL == (temp_obj = H5I_remove(obj_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+        /* Get an atom for the datatype */
+        if ((obj_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    }
 
     /* Make callback for starting object */
     if ((ret_value = op(obj_id, ".", &oinfo, op_data)) < 0)

@@ -40,6 +40,7 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5Tpkg.h"             /* Datatypes                                */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -3096,12 +3097,12 @@ H5T__create(H5T_class_t type, size_t size)
     ret_value = dt;
 
 done:
-    if(NULL == ret_value) {
-        if(dt) {
+    if (NULL == ret_value) {
+        if (dt) {
             dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
             dt = H5FL_FREE(H5T_t, dt);
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__create() */
