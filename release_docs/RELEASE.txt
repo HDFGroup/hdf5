@@ -237,6 +237,13 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2017/12/18, HDFFV-10307)
 
+    - Fix H5Sencode bug when num points selected is >2^32
+
+      Selected and applied coding changes implemented for 1.12
+      H5Sencode to 1.10.
+
+      (HDFFV-9947, VC, 2017/11/28)
+
     - filter plugin handling in H5PL.c and H5Z.c
 
       It was discovered that the dynamic loading process used by
