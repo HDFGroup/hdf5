@@ -15,14 +15,15 @@
 
 
 /* Packages needed by this file... */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
-#include "H5Gprivate.h"		/* Groups				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fpkg.h"             /* File access                              */
+#include "H5Gprivate.h"         /* Groups                                   */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* PRIVATE PROTOTYPES */
 static void H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
@@ -52,16 +53,17 @@ H5F_close_mounts(H5F_t *f)
 
     /* Unmount all child files.  Loop backwards to avoid having to adjust u when
      * a file is unmounted.  Note that we rely on unsigned u "wrapping around"
-     * to terminate the loop. */
+     * to terminate the loop.
+     */
     for (u = f->shared->mtab.nmounts - 1; u < f->shared->mtab.nmounts; u--) {
         /* Only unmount children mounted to this top level file structure */
-        if(f->shared->mtab.child[u].file->parent == f) {
+        if (f->shared->mtab.child[u].file->parent == f) {
             /* Detach the child file from the parent file */
             f->shared->mtab.child[u].file->parent = NULL;
 
             /* Close the internal group maintaining the mount point */
             if(H5G_close(f->shared->mtab.child[u].group) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close child group")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close child group")
 
             /* Close the child file */
             if(H5F_try_close(f->shared->mtab.child[u].file, NULL) < 0)
@@ -73,7 +75,7 @@ H5F_close_mounts(H5F_t *f)
             f->shared->mtab.nmounts--;
             f->nmounts--;
         }
-    } /* end if */
+    }
 
     HDassert(f->nmounts == 0);
 
@@ -159,9 +161,9 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     mp_loc.path = H5G_nameof(mount_point);
     HDassert(mp_loc.path);
     for(ancestor = parent; ancestor; ancestor = ancestor->parent) {
-	if(ancestor->shared == child->shared)
-	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
-    } /* end for */
+        if(ancestor->shared == child->shared)
+            HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
+    }
 
     /* Make certain that the parent & child files have the same "file close degree" */
     if(parent->shared->fc_degree != child->shared->fc_degree)
@@ -178,29 +180,29 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     while(lt < rt && cmp) {
         H5O_loc_t	*oloc;		/*temporary symbol table entry	*/
 
-	md = (lt + rt) / 2;
-	oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-	cmp = H5F_addr_cmp(mp_loc.oloc->addr, oloc->addr);
-	if(cmp < 0)
-	    rt = md;
-	else if(cmp > 0)
-	    lt = md + 1;
-    } /* end while */
+        md = (lt + rt) / 2;
+        oloc = H5G_oloc(parent->shared->mtab.child[md].group);
+        cmp = H5F_addr_cmp(mp_loc.oloc->addr, oloc->addr);
+        if (cmp < 0)
+            rt = md;
+        else if(cmp > 0)
+            lt = md + 1;
+    }
     if(cmp > 0)
         md++;
     if(!cmp)
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
 
     /* Make room in the table */
     if(parent->shared->mtab.nmounts >= parent->shared->mtab.nalloc) {
-	unsigned n = MAX(16, 2 * parent->shared->mtab.nalloc);
-	H5F_mount_t *x = (H5F_mount_t *)H5MM_realloc(parent->shared->mtab.child, n * sizeof(parent->shared->mtab.child[0]));
+        unsigned n = MAX(16, 2 * parent->shared->mtab.nalloc);
+        H5F_mount_t *x = (H5F_mount_t *)H5MM_realloc(parent->shared->mtab.child, n * sizeof(parent->shared->mtab.child[0]));
 
-	if(!x)
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
-	parent->shared->mtab.child = x;
-	parent->shared->mtab.nalloc = n;
-    } /* end if */
+        if(!x)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
+        parent->shared->mtab.child = x;
+        parent->shared->mtab.nalloc = n;
+    }
 
     /* Insert into table */
     HDmemmove(parent->shared->mtab.child + md + 1, parent->shared->mtab.child + md,
@@ -226,19 +228,19 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     if(H5G_name_replace(NULL, H5G_NAME_MOUNT, mp_loc.oloc->file,
             mp_loc.path->full_path_r, root_loc.oloc->file, root_loc.path->full_path_r,
             dxpl_id) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
 
 done:
     if(ret_value < 0) {
         if(mount_point) {
             if(H5G_close(mount_point) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close mounted group")
-        } /* end if */
+        }
         else {
             if(H5G_loc_free(&mp_loc) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free mount location")
-        } /* end else */
-    } /* end if */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mount() */
@@ -302,41 +304,44 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
     if(child->parent && H5F_addr_eq(mp_oloc.addr, mnt_oloc->addr)) {
         unsigned	u;		/*counters			*/
 
-	/*
-	 * We've been given the root group of the child.  We do a reverse
-	 * lookup in the parent's mount table to find the correct entry.
-	 */
-	parent = child->parent;
-	for(u = 0; u < parent->shared->mtab.nmounts; u++) {
-	    if(parent->shared->mtab.child[u].file->shared == child->shared) {
+        /*
+         * We've been given the root group of the child.  We do a reverse
+         * lookup in the parent's mount table to find the correct entry.
+         */
+        parent = child->parent;
+        for(u = 0; u < parent->shared->mtab.nmounts; u++) {
+            if(parent->shared->mtab.child[u].file->shared == child->shared) {
                 /* Found the correct index */
                 child_idx = (int)u;
                 break;
-	    } /* end if */
-	} /* end for */
-    } else {
+            }
+        }
+    }
+    else {
         unsigned lt, rt, md = 0;        /*binary search indices		*/
         int 	cmp;		        /*binary search comparison value*/
 
-	/*
-	 * We've been given the mount point in the parent.  We use a binary
-	 * search in the parent to locate the mounted file, if any.
-	 */
-	parent = child; /*we guessed wrong*/
-	lt = 0;
-	rt = parent->shared->mtab.nmounts;
-	cmp = -1;
-	while(lt < rt && cmp) {
-	    md = (lt + rt) / 2;
-	    mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-	    cmp = H5F_addr_cmp(mp_oloc.addr, mnt_oloc->addr);
-	    if (cmp<0)
-		rt = md;
-	    else
-		lt = md + 1;
-	} /* end while */
-	if(cmp)
-	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "not a mount point")
+        /*
+         * We've been given the mount point in the parent.  We use a binary
+         * search in the parent to locate the mounted file, if any.
+         */
+        parent = child; /*we guessed wrong*/
+        lt = 0;
+        rt = parent->shared->mtab.nmounts;
+        cmp = -1;
+
+        while(lt < rt && cmp) {
+            md = (lt + rt) / 2;
+            mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
+            cmp = H5F_addr_cmp(mp_oloc.addr, mnt_oloc->addr);
+            if (cmp<0)
+                rt = md;
+            else
+                lt = md + 1;
+        }
+
+        if(cmp)
+            HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "not a mount point")
 
         /* Found the correct index, set the info about the child */
         child_idx = (int)md;
@@ -557,7 +562,7 @@ H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_obj
 
             H5F_mount_count_ids_recurse(f->shared->mtab.child[u].file, nopen_files, nopen_objs);
         }
-    } /* end for */
+    }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_mount_count_ids_recurse() */
@@ -706,22 +711,22 @@ H5F_traverse_mount(H5O_loc_t *oloc/*in,out*/)
      * of file2, which is mounted somewhere in file3.
      */
     do {
-	/*
-	 * Use a binary search to find the potential mount point in the mount
-	 * table for the parent
-	 */
-	lt = 0;
-	rt = parent->shared->mtab.nmounts;
-	cmp = -1;
-	while(lt < rt && cmp) {
-	    md = (lt + rt) / 2;
-	    mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-	    cmp = H5F_addr_cmp(oloc->addr, mnt_oloc->addr);
-	    if(cmp < 0)
-		rt = md;
-	    else
-		lt = md + 1;
-	} /* end while */
+        /*
+         * Use a binary search to find the potential mount point in the mount
+         * table for the parent
+         */
+        lt = 0;
+        rt = parent->shared->mtab.nmounts;
+        cmp = -1;
+        while(lt < rt && cmp) {
+            md = (lt + rt) / 2;
+            mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
+            cmp = H5F_addr_cmp(oloc->addr, mnt_oloc->addr);
+            if(cmp < 0)
+                rt = md;
+            else
+                lt = md + 1;
+        }
 
         /* Copy root info over to ENT */
         if(0 == cmp) {
