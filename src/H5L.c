@@ -1187,19 +1187,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_name_by_idx
+ * Function:    H5Lget_name_by_idx
  *
- * Purpose:	Gets name for a link, according to the order within an
+ * Purpose:     Gets name for a link, according to the order within an
  *              index.
  *
  *              Same pattern of behavior as H5Iget_name.
  *
- * Return:	Success:	Non-negative length of name, with information
- *				in NAME buffer
- * 		Failure:	Negative
+ * Return:      Success:    Non-negative length of name, with information
+ *                          in NAME buffer
  *
- * Programmer:	Quincey Koziol
- *              Saturday, November 11, 2006
+ *              Failure:	-1
  *
  *-------------------------------------------------------------------------
  */
@@ -1208,45 +1206,44 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id)
 {
-    H5G_loc_t	loc;            /* Location of group */
-    H5L_trav_gnbi_t udata;      /* User data for callback */
+    H5VL_object_t    *obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
     hid_t   dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value = -1;          /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API((-1))
     H5TRACE8("Zs", "i*sIiIohxzi", loc_id, group_name, idx_type, order, n, name, size,
              lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid iteration order specified")
 
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, (-1), "can't set access and transfer property lists")
 
-    /* Set up user data for callback */
-    udata.idx_type = idx_type;
-    udata.order = order;
-    udata.n = n;
-    udata.dxpl_id = dxpl_id;
-    udata.name = name;
-    udata.size = size;
-    udata.name_len = -1;
+    /* Fill in location struct fields */
+    loc_params.type                         = H5VL_OBJECT_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name     = group_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order    = order;
+    loc_params.loc_data.loc_by_idx.n        = n;
+    loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
 
-    /* Traverse the group hierarchy to locate the link to get name of */
-    if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, 
-                    H5L_get_name_by_idx_cb, &udata, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "name doesn't exist")
+    /* Get the location object */
+    if (NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
-    /* Set the return value */
-    ret_value = udata.name_len;
+    /* Get the link info through the VOL */
+    if (H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_NAME, 
+                     dxpl_id, H5_REQUEST_NULL, name, size, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, (-1), "unable to get link name")
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -3597,7 +3597,7 @@ check_external_link_open_tags(void)
     /* =========================== */
     /* Close open objects and file */
     /* =========================== */
-    if ( (H5Gclose(xid)) < 0 ) TEST_ERROR;
+    if ( H5Gclose(xid) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid2) < 0 ) TEST_ERROR;
 
