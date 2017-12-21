@@ -18,6 +18,7 @@
 #include "H5Fpkg.h"
 #include "H5FDpkg.h"
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Filename: this is the same as the define in accum.c used by test_swmr_write_big() */
 #define SWMR_FILENAME "accum_swmr_big.h5"
@@ -71,7 +72,7 @@ main(void)
 	    FAIL_STACK_ERROR
 
     /* Get H5F_t * to internal file structure */
-    if(NULL == (f = (H5F_t *)H5I_object(fid))) 
+    if(NULL == (f = (H5F_t *)H5VL_object(fid))) 
 	    FAIL_STACK_ERROR
 
     /* Should read in [1024, 2024] with buf data */
