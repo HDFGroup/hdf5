@@ -224,9 +224,8 @@ Attribute H5Object::openAttribute(const unsigned int idx) const
 ///\par Description
 ///             The signature of user_op is
 ///             void (*)(H5::H5Location&, H5std_string, void*).
-///             For information, please refer to the C layer Reference Manual
-///             at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Iterate
+///             For information, please refer to the H5Aiterate2 API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
@@ -421,7 +420,6 @@ ssize_t H5Object::getObjName(char *obj_name, size_t buf_size) const
 ///\return      Name of the object
 ///\exception   H5::Exception
 // Programmer   Binh-Minh Ribler - Mar, 2014
-// Modification
 //--------------------------------------------------------------------------
 H5std_string H5Object::getObjName() const
 {

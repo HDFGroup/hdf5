@@ -90,9 +90,6 @@ DataSet::DataSet(const DataSet& original) : H5Object(), AbstractDs(), id(origina
 ///             \c loc can be DataSet, Group, H5File, or named DataType, that
 ///             is a datatype that has been named by DataType::commit.
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      Jul, 2008
-//              Added for application convenience.
 //--------------------------------------------------------------------------
 DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), AbstractDs(), id(H5I_INVALID_HID)
 {
@@ -109,9 +106,6 @@ DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, co
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
 ///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      Jul, 2008
-//              Added for application convenience.
 //--------------------------------------------------------------------------
 DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), AbstractDs(), id(H5I_INVALID_HID)
 {
@@ -577,10 +571,8 @@ int DataSet::iterateElems(void* buf, const DataType& type, const DataSpace& spac
 ///\param       size - IN: Array containing the new magnitude of each dimension
 ///\exception   H5::DataSetIException
 ///\par Description
-///             For more information, please see the Description section in
-///             C layer Reference Manual at:
-///\par
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5D.html#Dataset-Extend
+///             For information, please refer to the H5Dset_extent API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSet::extend(const hsize_t* size) const
@@ -600,7 +592,6 @@ void DataSet::extend(const hsize_t* size) const
 ///\param       space - IN: Dataspace describing memory buffer & containing selection to use
 ///\exception   H5::DataSetIException
 // Programmer   Binh-Minh Ribler - 2014
-// Modification
 //--------------------------------------------------------------------------
 void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space) const
 {

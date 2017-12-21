@@ -175,8 +175,8 @@ size_t AtomType::getPrecision() const
 ///\param       precision - IN: Number of bits of precision
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For information, please see C layer Reference Manuat at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetPrecision
+///             For information, please refer to the H5Tset_precision API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::setPrecision(size_t precision) const
@@ -195,8 +195,8 @@ void AtomType::setPrecision(size_t precision) const
 ///\return      Offset value
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For information, please see C layer Reference Manuat at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-GetOffset
+///             For information, please refer to the H5Tget_offset API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //              12/05/00: due to C API change
@@ -222,8 +222,8 @@ int AtomType::getOffset() const
 ///\param       offset - IN: Offset of first significant bit
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For information, please see C layer Reference Manuat at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetOffset
+///             For information, please refer to the H5Tset_offset API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::setOffset(size_t offset) const

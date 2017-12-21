@@ -26,12 +26,9 @@
  *
  * The C++ API provides C++ wrappers for the HDF5 C Library.
  * 
- * It is assumed that the user has knowledge of the 
- * <a href="https://support.hdfgroup.org/HDF5/doc/H5.format.html">
- * HDF5 file format</a> and its components. 
- * For more information on the HDF5 C Library, see the 
- * <a href="https://support.hdfgroup.org/HDF5/doc/index.html"> 
- * HDF5 Software Documentation</a> page.
+ * It is assumed that the user has knowledge of the HDF5 file format and its
+ * components.  For more information on the HDF5 C Library, please refer to
+ * the HDF5 Software Documentation page.
  *
  * Because the HDF5 C Library maps very well to
  * the object oriented design approach, classes in the C++ API can
@@ -51,15 +48,13 @@
     Datatype Interface (H5T)          DataType and subclasses
   \endverbatim
  *
- * This <a href="https://support.hdfgroup.org/HDF5/doc/cpplus_RM/C2Cppfunction_map.mht">
+ * This <a href="./C2Cppfunction_map.mht">
  * table </a> provides a map from the C APIs to the C++ member functions.
  * <br />
  * \section install_sec Installation
  *
  * The HDF5 C++ API is included with the HDF5 source code and can 
  * be obtained from 
- * <a href="https://support.hdfgroup.org/HDF5/release/obtainsrc.html">
- * https://support.hdfgroup.org/HDF5/release/obtainsrc.html</a>.
  * 
  * Please refer to the release_docs/INSTALL file under the top directory 
  * of the HDF5 source code for information about installing, building, 
