@@ -237,6 +237,22 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2017/12/18, HDFFV-10307)
 
+    - Fix H5Sencode() bug when the number of elements selected is > 2^32
+
+      H5Sencode() incorrectly encodes dataspace selection with number of 
+      elements exceeding 2^32.  When decoding such selection via H5Sdecode(), 
+      the number of elements in the decoded dataspace is not the same as
+      what is encoded.  This problem exists for H5S_SEL_HYPER and 
+      H5S_SEL_POINTS encoding.
+
+      The cause of the problem is because the library uses 32 bits to 
+      encode counts and block offsets for the selection.
+      The solution is to use the original 32 bit encodings if possible,
+      but use a different way to encode selection > 32 bits when needed.
+      See details in the RFC: H5Sencode/H5Secode Format Change.
+
+      (VC - 2017/11/28, HDFFV-9947)
+
     - filter plugin handling in H5PL.c and H5Z.c
 
       It was discovered that the dynamic loading process used by
