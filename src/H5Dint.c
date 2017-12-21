@@ -1959,7 +1959,7 @@ H5D_mult_refresh_close(hid_t dset_id, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == (dataset = (H5D_t *)H5VL_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* check args */
@@ -2497,6 +2497,7 @@ H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf)
     HDassert(H5P_isa_class(plist_id, H5P_DATASET_XFER));
     HDassert(buf);
 
+    /* XXX: H5VL? */
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
 
@@ -2582,6 +2583,7 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATT
     HDassert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Check args */
+    /* XXX: H5VL? */
     if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a datatype")
 
