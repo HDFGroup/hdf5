@@ -382,6 +382,22 @@ static H5VL_class_t H5VL_json_g = {
     NULL
 };
 
+//FTW some debugging utils
+void FTW_dump_dataspace(hid_t dataspace, const char* message)
+{
+    printf("__________________________________________________\n");
+    printf("FTW_dump_dataspace(): %s\n", message);
+    printf("FTW_dump_dataspace(): space id = %ld\n", dataspace);
+    int ndims = H5Sget_simple_extent_ndims( dataspace );
+    hsize_t* _dims = malloc(ndims * sizeof(hsize_t));
+    hsize_t* _maxdims = malloc(ndims * sizeof(hsize_t));
+    H5Sget_simple_extent_dims(dataspace, _dims, _maxdims );
+    printf("got ndims = %d, dims[0] = %d, maxdims[0] = %d\n", ndims, _dims[0], _maxdims[0]);
+    free(_dims);
+    free(_maxdims);
+    printf("__________________________________________________\n");
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLjson_init
@@ -1446,10 +1462,14 @@ H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     if (H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property list value for space ID")
 
+printf("FTW-lib: creating dataset with dataspace, hid = %ld", space_id);
+
     if ((new_dataset->u.dataset.dtype_id = H5Tcopy(type_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "failed to copy datatype")
     if ((new_dataset->u.dataset.space_id = H5Scopy(space_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "failed to copy dataspace")
+
+printf("FTW-lib: copied dataspace, hid = %ld", new_dataset->u.dataset.space_id);
 
     /* create a new uuid for this dataset */
     h5json_uuid_generate(new_dataset->object_uuid);
@@ -1676,10 +1696,7 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
 
     /* Get the named dataset in JANSSON */
     json_t* groups = json_object_get(parent->object_json, "groups");
-//printf("groups: >>>%s<<<\n", json_dumps(groups, JSON_INDENT(4)));
-// get the parent group, then search its links
     json_t* parent_group = json_object_get(groups, parent->object_uuid);
-//printf("parent group: >>>%s<<<\n", json_dumps(parent_group, JSON_INDENT(4)));
     json_t* parent_group_links = json_object_get(parent_group, "links");
 
     const char *index;
@@ -1704,19 +1721,13 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
     /* the link is found. Go ahead and open the dataset object. */
     json_t* datasets = json_object_get(dataset->domain->u.file.json_file_object, "datasets");
     dataset->object_json = json_object_get(datasets, uuid);
-//printf("Got dataset json: %s\n", json_dumps(dataset->object_json, JSON_INDENT(4)));
-
-    //FTW WIP
+printf("Got dataset json: %s\n", json_dumps(dataset->object_json, JSON_INDENT(4)));
 
     /* >>>shape<<< Set up a Dataspace for the opened Dataset */
     json_t* shape = json_object_get(dataset->object_json, "shape");
-//printf("dataset shape = '%s'\n", json_dumps(shape, JSON_INDENT(4)));
     json_t* class = json_object_get(shape, "class");
-//printf("dataset class = '%s'\n", json_string_value(class));
     json_t* dims = json_object_get(shape, "dims");
-//printf("dataset dims= '%s'\n", json_dumps(dims, JSON_INDENT(4)));
     json_t* maxdims = json_object_get(shape, "maxdims");
-//printf("dataset maxdims= '%s'\n", json_dumps(maxdims, JSON_INDENT(4)));
 
     /* create the dataspace library object */
     hid_t dataspace; 
@@ -1724,19 +1735,21 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
     if (strcmp(json_string_value(class), "H5S_SIMPLE") == 0)
     {
         hsize_t rank = json_array_size(dims);
-//printf("got rank = %d\n", rank);
         hsize_t* current_dims = H5MM_malloc(sizeof(hsize_t) * rank);
         hsize_t* maximum_dims = H5MM_malloc(sizeof(hsize_t) * rank);
         hsize_t index;
         for (index=0; index<rank; index++) 
         {
             current_dims[index] = json_integer_value(json_array_get(dims, index));
-//printf("Got current_dims[index] = %d\n", current_dims[index]);
             maximum_dims[index] = json_integer_value(json_array_get(maxdims, index));
-//printf("Got maximum_dims[index] = %d\n", maximum_dims[index]);
         }
 
-        dataspace = H5Screate_simple(rank, current_dims, maximum_dims);
+//FTW WIP copy before I free the mem?
+        dataspace = H5Screate_simple((int)rank, current_dims, maximum_dims);
+//        dataset->u.dataset.space_id = H5Scopy(dataspace);
+        dataset->u.dataset.space_id = dataspace;
+FTW_dump_dataspace(dataspace, "dataset_open, just created copy");
+
         H5MM_free(current_dims);
         H5MM_free(maximum_dims);
     }
@@ -1745,20 +1758,18 @@ H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, c
 //FTW other type of dataspace??
     }
 
-    HDassert(dataspace >= 0);
-    dataset->u.dataset.space_id = dataspace;
+//    HDassert(dataspace >= 0);
+//    dataset->u.dataset.space_id = dataspace;
 
-printf("FTW dataspace ok xyz\n");
-    
     json_t* type = json_object_get(dataset->object_json, "type");
-printf("FTW type = %s\n", json_dumps(type, JSON_INDENT(4)));
+//printf("FTW type = %s\n", json_dumps(type, JSON_INDENT(4)));
 
 //    if (H5VL_json_parse_dataspace(dataset) < 0)
 //        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to parse dataset dataspace")
 
     /* >>>type<<< Set up a Datatype for the opened Dataset */
     json_t* datatype_class = json_object_get(type, "class");
-printf("Got datatype_class = %s\n", json_string_value(datatype_class));
+//printf("Got datatype_class = %s\n", json_string_value(datatype_class));
 
     hid_t datatype = NULL;
     char* datatype_class_str = json_string_value(datatype_class);
@@ -2150,8 +2161,17 @@ H5VL_json_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t H5_ATTR_UNUS
         {
             hid_t *ret_id = va_arg(arguments, hid_t *);
 
+printf("H5VL_json_dataset_get: *ret_id = >>%ld<<<\n", *ret_id);
+printf("H5VL_json_dataset_get: dset->u.dataset.space_id = >>%ld<<<\n", dset->u.dataset.space_id);
+//FTW WIP
+// original
+FTW_dump_dataspace(dset->u.dataset.space_id, "dataset_get");
             if ((*ret_id = H5Scopy(dset->u.dataset.space_id)) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get dataspace of dataset")
+// no copy, this one works, actually. 
+//            if ((*ret_id = dset->u.dataset.space_id) < 0)
+//                HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get dataspace of dataset")
+printf("H5VL_json_dataset_get: *ret_id = >>%ld<<<\n", *ret_id);
 
             break;
         } /* H5VL_DATASET_GET_SPACE */
@@ -2244,28 +2264,41 @@ done:
 } /* end H5VL_json_dataset_specific() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_json_dataset_close
+ *
+ * Purpose:     Closing dataset releases resources and renders its hid unusable.
+ *
+ * Return:
+ *
+ * Programmer:  Frank Willmore
+ *              October, 2017
+ *
+ *              XXX: Currently the fcpl, fapl and dxpl are ignored, as the
+ *              JSON API does not have special support for them
+ */
 static herr_t
-H5VL_json_dataset_close(void *dset, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL_json_dataset_close(void *_dataset, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *_dset = (H5VL_json_object_t *) dset;
+    H5VL_json_object_t *dataset = (H5VL_json_object_t *) _dataset;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef PLUGIN_DEBUG
     printf("Received Dataset close call with following parameters:\n");
-//    printf("  - URI: %s\n", _dset->URI);
+    printf("  - UUID: %s\n", dataset->object_uuid);
     printf("  - DXPL: %ld\n\n", dxpl_id);
 #endif
 
-    HDassert(H5I_DATASET == _dset->obj_type && "not a dataset");
+    HDassert(H5I_DATASET == dataset->obj_type && "not a dataset");
 
-    if (_dset->u.dataset.dtype_id != FAIL && H5Tclose(_dset->u.dataset.dtype_id) < 0)
+    if (dataset->u.dataset.dtype_id != FAIL && H5Tclose(dataset->u.dataset.dtype_id) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype")
-    if (_dset->u.dataset.space_id != FAIL && H5Sclose(_dset->u.dataset.space_id) < 0)
+    if (dataset->u.dataset.space_id != FAIL && H5Sclose(dataset->u.dataset.space_id) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close dataspace")
 
-    H5MM_xfree(_dset);
+    H5MM_xfree(dataset);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_dataset_close() */
@@ -5761,7 +5794,7 @@ H5VL_json_parse_dataspace(H5VL_json_object_t *object)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to retrieve dataspace dims")
 
         /* In attribute case, maxdims will default to dims */
-//        if (object->obj_type == H5I_ATTR) maxdims = (hsize_t[DATASPACE_MAX_RANK])NULL; 
+        //if (object->obj_type == H5I_ATTR) maxdims = (hsize_t[DATASPACE_MAX_RANK])NULL; 
 
         /* look for maxdims unless it's attribute */
         if (object->obj_type != H5I_ATTR) {
@@ -5803,7 +5836,7 @@ H5VL_json_parse_dataspace(H5VL_json_object_t *object)
     } /* end if */
 
     if (dataspace >= 0) {
-         if (object->obj_type == H5I_DATASET) object->u.dataset.space_id = dataspace;
+        if (object->obj_type == H5I_DATASET) object->u.dataset.space_id = dataspace;
         if (object->obj_type == H5I_ATTR) object->u.attribute.space_id = dataspace;
     }
 
@@ -6533,4 +6566,5 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_parse_dataset_creation_properties() */
+
 
