@@ -1574,7 +1574,7 @@ H5F__flush_phase2(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closi
  *
  * Purpose:  Flushes cached data.
  *
- * Return:   Non-negative on success/Negative on failure
+ * Return:   SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
