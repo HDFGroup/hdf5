@@ -230,7 +230,6 @@ void H5Location::setComment(const H5std_string& name, const H5std_string& commen
 ///             It differs from the above function in that it doesn't take
 ///             an object name.
 // Programmer   Binh-Minh Ribler - Sep 2013
-// Modification
 //--------------------------------------------------------------------------
 void H5Location::setComment(const char* comment) const
 {
@@ -513,9 +512,6 @@ void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_t
 //              from_func - IN: Name of the calling function
 // Exception    H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//        May 2008 - BMR
-//              Moved from IdComponent.
 //--------------------------------------------------------------------------
 hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type, const PropList& plist, const char* from_func)
 {
@@ -544,9 +540,6 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
 ///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      May, 2008
-//              Corrected missing parameters. - BMR
 //--------------------------------------------------------------------------
 void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist)
 {
@@ -563,8 +556,6 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 // exception    H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
 // Modification
-//      May, 2008
-//              Corrected missing parameters. -BMR
 //      Mar, 2017
 //              Removed in 1.10.1 because H5Location is Attribute's baseclass
 //              now. -BMR
@@ -955,9 +946,8 @@ DataSet H5Location::openDataSet(const H5std_string& name) const
 ///             Note that both names are interpreted relative to the
 ///             specified location.
 ///             For information on creating hard link and soft link, please
-///             refer to the C layer Reference Manual at:
-/// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateHard and
-/// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateSoft
+///             refer to the H5Lcreate_hard and H5Lcreate_soft APIs in the
+///             HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //        2007: QAK modified to use H5L APIs - BMR
@@ -1036,8 +1026,7 @@ void H5Location::unlink(const H5std_string& name) const
 ///\note
 ///             Exercise care in moving groups as it is possible to render
 ///             data in a file inaccessible with H5Location::move. Please refer
-///             to the Group Interface in the HDF5 User's Guide for details at:
-/// https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html#t=HDF5_Users_Guide%2FGroups%2FHDF5_Groups.htm
+///             to the Group Interface in the HDF5 User's Guide for details.
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //        2007: QAK modified to use H5L APIs - BMR
@@ -1070,9 +1059,8 @@ void H5Location::move(const H5std_string& src, const H5std_string& dst) const
 ///\param       statbuf - OUT: Buffer to return information about the object
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///\par Description
-///             For more information, please refer to the C layer Reference
-///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5G.html#Group-GetObjinfo
+///             For information, please refer to the H5Gget_objinfo API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Location::getObjinfo(const char* name, hbool_t follow_link, H5G_stat_t& statbuf) const
@@ -1435,8 +1423,8 @@ ssize_t H5Location::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size
 ///             \li \c H5O_TYPE_GROUP
 ///             \li \c H5O_TYPE_DATASET
 ///             \li \c H5O_TYPE_NAMED_DATATYPE
-///             Refer to the C API documentation for more details:
-///             http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
+///             For information, please refer to the H5Oget_info_by_name API in
+///             the HDF5 C Reference Manual.
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API
@@ -1501,8 +1489,8 @@ H5O_type_t H5Location::childObjType(const H5std_string& objname) const
 ///             \li \c H5O_TYPE_GROUP
 ///             \li \c H5O_TYPE_DATASET
 ///             \li \c H5O_TYPE_NAMED_DATATYPE
-///             Refer to the C API documentation for more details:
-///             http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
+///             For information, please refer to the H5Oget_info_by_idx API in
+///             the HDF5 C Reference Manual.
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API

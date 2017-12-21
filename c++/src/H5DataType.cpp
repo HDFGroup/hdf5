@@ -96,9 +96,6 @@ DataType::DataType(const H5T_class_t type_class, size_t size) : H5Object(), enco
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
 ///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//        Jul, 2008
-//              Added for application convenience.
 //--------------------------------------------------------------------------
 DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), encoded_buf(NULL), buf_size(0)
 {
@@ -653,8 +650,8 @@ DataType DataType::getSuper() const
 ///             destination datatypes.
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For more information, please see:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-Register
+///             For information, please refer to the H5Tregister API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataType::registerFunc(H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func) const
