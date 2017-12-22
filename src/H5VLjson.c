@@ -1747,7 +1747,7 @@ printf("Got dataset json: %s\n", json_dumps(dataset->object_json, JSON_INDENT(4)
 //FTW WIP copy before I free the mem?
         dataspace = H5Screate_simple((int)rank, current_dims, maximum_dims);
 //        dataset->u.dataset.space_id = H5Scopy(dataspace);
-        dataset->u.dataset.space_id = dataspace;
+//        dataset->u.dataset.space_id = dataspace;
 FTW_dump_dataspace(dataspace, "dataset_open, just created copy");
 
         H5MM_free(current_dims);
@@ -1758,40 +1758,41 @@ FTW_dump_dataspace(dataspace, "dataset_open, just created copy");
 //FTW other type of dataspace??
     }
 
-//    HDassert(dataspace >= 0);
-//    dataset->u.dataset.space_id = dataspace;
+    HDassert(dataspace >= 0);
+    dataset->u.dataset.space_id = dataspace;
+
+    /**** datatype ****/
 
     json_t* type = json_object_get(dataset->object_json, "type");
-//printf("FTW type = %s\n", json_dumps(type, JSON_INDENT(4)));
-
-//    if (H5VL_json_parse_dataspace(dataset) < 0)
-//        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to parse dataset dataspace")
+printf("FTW type = %s\n", json_dumps(type, JSON_INDENT(4)));
 
     /* >>>type<<< Set up a Datatype for the opened Dataset */
     json_t* datatype_class = json_object_get(type, "class");
-//printf("Got datatype_class = %s\n", json_string_value(datatype_class));
+printf("Got datatype_class = %s\n", json_string_value(datatype_class));
 
     hid_t datatype = NULL;
     char* datatype_class_str = json_string_value(datatype_class);
+
+    /* switch over datatypes */
     if (strcmp(datatype_class_str, "H5T_STRING") == 0)
     {
         //datatype = H5Tcopy(H5T_STRING);
         datatype = H5Tcopy(H5T_NATIVE_CHAR);
-        //stuff
-        //break;
     }
     else if (strcmp(datatype_class_str, "H5T_INTEGER") == 0)
     {        
-        //datatype = H5Tcopy(H5T_INTEGER);
-        datatype = H5T_NATIVE_INT;
-        // stuff
-        //break;
+        /* H5T_NATIVE_LLONG storage class will be long long,
+         * the largest supported native type and big enough to store 
+         * any integer value. In JSON, it's rendered in base 10. */
+        datatype = H5Tcopy(H5T_NATIVE_LLONG);
     }
     else
     {
         // default:
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "Unkown datatype.")
     }
+
+    dataset->u.dataset.dtype_id = datatype;
 
 //    if (H5VL_json_parse_datatype(dataset) < 0)
 //        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to parse dataset datatype")
