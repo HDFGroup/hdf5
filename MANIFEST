@@ -1430,12 +1430,6 @@
 ./tools/test/h5ls/h5ls_plugin.sh.in
 ./tools/test/h5ls/testh5ls.sh.in
 ./tools/test/h5ls/testh5lsvds.sh.in
-./tools/test/h5ls/vds_prefix/tvds-1.ls
-./tools/test/h5ls/vds_prefix/tvds-2.ls
-./tools/test/h5ls/vds_prefix/tvds-3_1.ls
-./tools/test/h5ls/vds_prefix/tvds-3_2.ls
-./tools/test/h5ls/vds_prefix/tvds-4.ls
-./tools/test/h5ls/vds_prefix/tvds-5.ls
 
 # h5copy sources
 ./tools/src/h5copy/Makefile.am
