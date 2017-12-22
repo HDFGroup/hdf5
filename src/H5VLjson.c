@@ -55,40 +55,6 @@
  */
 static hid_t H5VL_JSON_g = -1;
 
-/*
- * The CURL pointer used for all cURL operations.
- */
-//static CURL *curl = NULL;
-
-/*
- * The result returned by and checked after each CURL operation.
- */
-//static CURLcode result;
-
-/*
- * cURL error message buffer.
- */
-//static char curl_err_buf[CURL_ERROR_SIZE];
-
-/*
- * cURL header list
- */
-//struct curl_slist *curl_headers = NULL;
-
-/*
- * Saved copy of the base URL for operating on
- */
-//static char base_URL[URL_MAX_LENGTH];
-
-/* XXX: Eventually pass these around instead of using a global one */
-/*
-static struct {
-    char   *buffer;
-    char   *curr_buf_ptr;
-    size_t  buffer_size;
-} response_buffer;
-*/
-
 /* Internal initialization/termination functions which are called by
  * the public functions H5VLjson_init() and H5VLjson_term() */
 static herr_t H5VL_json_init(void);
@@ -104,15 +70,15 @@ static herr_t H5VL_json_attr_specific(void *obj, H5VL_loc_params_t loc_params, H
 static herr_t H5VL_json_attr_close(void *attr, hid_t dxpl_id, void **req);
 
 /* JSON VOL Dataset callbacks */
-static void  *H5VL_json_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
-static void  *H5VL_json_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_json_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
+static void  *H5VL_json_dataset_create(void *_dataset, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+static void  *H5VL_json_dataset_open(void *_dataset, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL_json_dataset_read(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
                                        hid_t file_space_id, hid_t dxpl_id, void *buf, void **req);
-static herr_t H5VL_json_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
+static herr_t H5VL_json_dataset_write(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
                                       hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req);
-static herr_t H5VL_json_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_json_dataset_specific(void *dset, H5VL_dataset_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_json_dataset_close(void *dset, hid_t dxpl_id, void **req);
+static herr_t H5VL_json_dataset_get(void *_dataset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_json_dataset_specific(void *_dataset, H5VL_dataset_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_json_dataset_close(void *_dataset, hid_t dxpl_id, void **req);
 
 /* JSON VOL Datatype callbacks */
 static void  *H5VL_json_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
@@ -123,10 +89,10 @@ static herr_t H5VL_json_datatype_close(void *dt, hid_t dxpl_id, void **req);
 /* JSON VOL File callbacks */
 static void  *H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
 static void  *H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_json_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_json_file_specific(void *file, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_json_file_optional(void *file, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_json_file_close(void *file, hid_t dxpl_id, void **req);
+static herr_t H5VL_json_file_get(void *_file, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_json_file_specific(void *_file, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_json_file_optional(void *_file, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_json_file_close(void *_file, hid_t dxpl_id, void **req);
 
 /* JSON VOL Group callbacks */
 static void  *H5VL_json_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
@@ -1279,10 +1245,10 @@ H5VL_json_datatype_close(void *dt, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
  *
  */
 static void *
-H5VL_json_dataset_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name, hid_t dcpl_id,
+H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name, hid_t dcpl_id,
                          hid_t dapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t* parent = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t* parent = (H5VL_json_object_t *) _parent;
     H5VL_json_object_t* new_dataset = NULL;
     H5P_genplist_t*     plist = NULL;
     hid_t               space_id, type_id;
@@ -1503,10 +1469,10 @@ done:
  *
  */
 static void *
-H5VL_json_dataset_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name,
+H5VL_json_dataset_open(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name,
                        hid_t dapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *parent = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *parent = (H5VL_json_object_t *) _parent;
     H5VL_json_object_t *dataset = NULL;
     htri_t              search_ret;
     void               *ret_value = NULL;
@@ -1653,10 +1619,10 @@ done:
  *
  */
 static herr_t
-H5VL_json_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
+H5VL_json_dataset_read(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
                        hid_t file_space_id, hid_t dxpl_id, void *buf, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *dataset = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *dataset = (H5VL_json_object_t *) _dataset;
     H5T_class_t         dtype_class;
     hssize_t            mem_select_npoints, file_select_npoints;
     hbool_t             must_close_memspace = FALSE, must_close_filespace = FALSE;
@@ -1799,10 +1765,10 @@ done:
  *
  */
 static herr_t
-H5VL_json_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
+H5VL_json_dataset_write(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
                         hid_t file_space_id, hid_t dxpl_id, const void *buf, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *dataset = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *dataset = (H5VL_json_object_t *) _dataset;
     H5T_class_t         dtype_class;
     hssize_t            mem_select_npoints, file_select_npoints;
     hbool_t             must_close_memspace = FALSE, must_close_filespace = FALSE;
@@ -1954,10 +1920,10 @@ done:
 
 
 static herr_t
-H5VL_json_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t H5_ATTR_UNUSED dxpl_id,
+H5VL_json_dataset_get(void *_dataset, H5VL_dataset_get_t get_type, hid_t H5_ATTR_UNUSED dxpl_id,
                       void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_json_object_t *dset = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *dataset = (H5VL_json_object_t *) _dataset;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1965,10 +1931,10 @@ H5VL_json_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t H5_ATTR_UNUS
 #ifdef PLUGIN_DEBUG
     printf("Received Dataset get call with following parameters:\n");
     printf("  - Get Type: %d\n", get_type);
-    printf("  - Dataset object UUID: %s\n", dset->object_uuid);
+    printf("  - Dataset object UUID: %s\n", dataset->object_uuid);
 #endif
 
-    HDassert(H5I_DATASET == dset->obj_type && "not a dataset");
+    HDassert(H5I_DATASET == dataset->obj_type && "not a dataset");
 
     switch (get_type) {
         /* H5Dget_access_plist */
@@ -1987,7 +1953,7 @@ H5VL_json_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t H5_ATTR_UNUS
         {
             hid_t *ret_id = va_arg(arguments, hid_t *);
 
-            if ((*ret_id = H5Scopy(dset->u.dataset.space_id)) < 0)
+            if ((*ret_id = H5Scopy(dataset->u.dataset.space_id)) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get dataspace of dataset")
 
             break;
@@ -2006,7 +1972,7 @@ H5VL_json_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t H5_ATTR_UNUS
         {
             hid_t *ret_id = va_arg(arguments, hid_t *);
 
-            if ((*ret_id = H5Tcopy(dset->u.dataset.dtype_id)) < 0)
+            if ((*ret_id = H5Tcopy(dataset->u.dataset.dtype_id)) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype of dataset")
 
             break;
@@ -2022,10 +1988,10 @@ done:
 
 
 static herr_t
-H5VL_json_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
+H5VL_json_dataset_specific(void *_dataset, H5VL_dataset_specific_t specific_type,
                           hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_json_object_t *dset = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *dataset = (H5VL_json_object_t *) _dataset;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2033,14 +1999,14 @@ H5VL_json_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
 #ifdef PLUGIN_DEBUG
     printf("Received Dataset-specific call with following parameters:\n");
     printf("  - Specific type: %d\n", specific_type);
-    printf("  - Dataset object UUID: %s\n", dset->object_uuid);
+    printf("  - Dataset object UUID: %s\n", dataset->object_uuid);
 #endif
 
     /* Check for write access */
-    if(!(dset->domain->u.file.intent & H5F_ACC_RDWR))
+    if(!(dataset->domain->u.file.intent & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no write intent on file")
 
-    HDassert(H5I_DATASET == dset->obj_type && "not a dataset");
+    HDassert(H5I_DATASET == dataset->obj_type && "not a dataset");
 
     switch (specific_type) {
         /* H5Dset_extent */
@@ -2530,11 +2496,11 @@ H5VL_json_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
  */
 
 static void *
-H5VL_json_group_create(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, 
+H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, 
                        const char *name, hid_t gcpl_id, hid_t gapl_id,
                        hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t* parent = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t* parent = (H5VL_json_object_t *) _parent;
     H5VL_json_object_t* new_group = NULL;
     void*               ret_value = NULL;
     h5json_uuid_t*      current_uuid = NULL;
@@ -2715,16 +2681,16 @@ done:
 
 
 static void *
-H5VL_json_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name,
+H5VL_json_group_open(void *_parent, H5VL_loc_params_t loc_params, const char *name,
                      hid_t gapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *parent = (H5VL_json_object_t *) obj;
-    H5VL_json_object_t *group = NULL;
+    H5VL_json_object_t* parent = (H5VL_json_object_t *) _parent;
+    H5VL_json_object_t* group = NULL;
     htri_t              search_ret;
-    void               *ret_value = NULL;
-    json_t*            groups_in_file;
-    h5json_uuid_t*     current_uuid;
-    json_t*            current_group;
+    void*               ret_value = NULL;
+    json_t*             groups_in_file;
+    h5json_uuid_t*      current_uuid;
+    json_t*             current_group;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2848,9 +2814,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_json_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL_json_group_get(void *_group, H5VL_group_get_t get_type, hid_t dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_json_object_t *group = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *group = (H5VL_json_object_t *) _group;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2895,26 +2861,26 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_json_group_close(void *grp, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL_json_group_close(void *_group, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *_grp = (H5VL_json_object_t *) grp;
+    H5VL_json_object_t *group = (H5VL_json_object_t *) _group;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef PLUGIN_DEBUG
     printf("Received Group close call with following parameters:\n");
     printf("  - DXPL: %ld\n", dxpl_id);
-    printf("  - UUID: %s\n", _grp->object_uuid);
+    printf("  - UUID: %s\n", group->object_uuid);
 #endif
 
     /* checking group is group */
-    HDassert(H5I_GROUP == _grp->obj_type && "not a group");
+    HDassert(H5I_GROUP == group->obj_type && "not a group");
 
     /* Lifecycle: Free JANSSON group_uuid object */
-    json_decref(_grp->object_uuid);
+    json_decref(group->object_uuid);
 
     /* free the library object */
-    H5MM_xfree(_grp);
+    H5MM_xfree(group);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_json_group_close() */

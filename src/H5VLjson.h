@@ -114,18 +114,13 @@ extern "C" {
 
 // FTW replace this with json_t* that wraps it. Easier to manipulate/compare.
 typedef char h5json_uuid_t[37];
-
-//FTW this can be wrapped into struct def below
 typedef struct H5VL_json_object_t H5VL_json_object_t;
-// FTW : This can go away once we eliminate attribute as an object type 
 typedef struct H5VL_json_attr_t H5VL_json_attr_t;
 
 typedef struct H5VL_json_file_t {
     unsigned  intent;   
-//    char*     filepath_name;
     json_t*   json_file_object;         /* represents in-memory structure */
     FILE*     filesystem_file_object;   /* holds object place on filesystem */
-//    json_t*   root_group_uuid;        /* do we need this? */
 } H5VL_json_file_t;
 
 typedef struct H5VL_json_datatype_t {
@@ -134,7 +129,6 @@ typedef struct H5VL_json_datatype_t {
 } H5VL_json_datatype_t;
 
 typedef struct H5VL_json_group_t {
-//FTW    char               basename[GROUP_BASENAME_MAX_LENGTH];
 } H5VL_json_group_t;
 
 typedef struct H5VL_json_dataset_t {
@@ -160,10 +154,8 @@ typedef struct object_union_t {
 typedef struct H5VL_json_object_t {
     H5VL_json_object_t *domain; /* containing_file */ 
     H5I_type_t          obj_type;
-//    json_t*             object_uuid; /* identify the object within type lists in file */
     h5json_uuid_t       object_uuid; /* identify the object within type lists in file */
     json_t*             object_json; /* a pointer into the object within the file object */
-//    char                URI[URI_MAX_LENGTH]; //FTW: URI will go away, functionally replaced by object_uuid
     object_union_t      u;
 } H5VL_json_object_t;
 
