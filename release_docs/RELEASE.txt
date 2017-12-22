@@ -58,21 +58,7 @@ New Features
 
     Library:
     --------
-    - Add prefix option to VDS files.
-
-      Currently, VDS source files must be in the active directory to be
-      found by the virtual file. Adding the option of a prefix to be set
-      on the virtual file, using a data access property list (DAPL),
-      allows the source files to located at an absolute or relative path
-      to the virtual file.
-
-      New public APIs:
-            herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char* prefix);
-            ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
-      The prefix can also be set with an environment variable, HDF5_VDS_PREFIX.
-
-      (ADB - 2017/12/12, HDFFV-9724)
-
+    -
 
     Parallel Library:
     -----------------
@@ -132,18 +118,6 @@ New Features
     C++ Library:
     ------------
     -
-
-    Java Library:
-    ----------------
-    - Wrappers added for the following APIs:
-      H5Pset_evict_on_close
-      H5Pget_evict_on_close
-      H5Pset_chunk_opts
-      H5Pget_chunk_opts
-      H5Pset_efile_prefix
-      H5Pget_efile_prefix
-      H5Pset_virtual_prefix
-      H5Pget_virtual_prefix
 
     Tools:
     ------
@@ -239,7 +213,7 @@ Bug Fixes since HDF5-1.10.1 release
       CMake implementation for MPI was problematic and would create incorrect
       MPI library references in the hdf5 libraries.
 
-      Reworked the CMake MPI code to properly create CMake targets. Also merged
+      Reworked the CMake MPI code to properly create CMake targets.Also merged
       the latest CMake FindMPI.cmake changes to the local copy. This is necessary
       until HDF changes the CMake minimum to 3.9 or greater.
 
