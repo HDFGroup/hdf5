@@ -455,10 +455,10 @@ done:
  */
 //FTW not done for JSON
 static void *
-H5VL_json_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id,
+H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id,
                       hid_t H5_ATTR_UNUSED aapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *parent = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *parent = (H5VL_json_object_t *) _parent;
     H5VL_json_object_t *attribute = NULL;
     H5P_genplist_t     *plist = NULL;
     htri_t              search_ret;
@@ -509,7 +509,8 @@ H5VL_json_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_
     HDassert (attr_name_len < ATTR_NAME_MAX_LENGTH);
     strncpy(attribute->u.attribute.attr_name, attr_name, attr_name_len);
 
-    /* finish setting up the client-side attribute object */
+    ///* finish setting up the client-side attribute object */
+    /* finish setting up the library object */
 
     /* Get the type ID */
     if (H5Pget(acpl_id, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
@@ -523,14 +524,118 @@ H5VL_json_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_
     if ((attribute->u.attribute.space_id = H5Scopy(space_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "failed to copy dataspace")
 
-//FTW
+    /*** JANSSON object ***/
+
+    //FTW verify parent is group or dataset, attribute is not implemented for other types yet
+    /* get the attribute_collection from the parent object */
+
+    json_t* attribute_collection = json_object_get(parent->object_json, "attributes");
+    json_t* attribute_json = json_object();
+    json_array_append_new(attribute_collection, attribute_json);
+
+    /* flesh up the attribute_json object */
+
+// FTW need type, shape from dataset code
+    
+    /* fill in the dataset fields */
+    json_t* shape = json_object();
+    json_t* type = json_object();
+    json_t* value = json_null();
+
+    json_object_set_new(attribute_json, "name", json_string(attr_name));
+    json_object_set_new(attribute_json, "shape", shape);
+    json_object_set_new(attribute_json, "type", type);
+    json_object_set_new(attribute_json, "value", value);
+
+    /* shape:  First get the dataspace class/type */
+    htri_t is_simple = H5Sis_simple( space_id );
+    HDassert(is_simple >= 0);
+
+    if (is_simple) 
+    {
+        /* insert the class */
+        json_object_set_new(shape, "class", json_string("H5S_SIMPLE"));
+
+        /* get the dims and max dims */
+        hsize_t  ndims   = H5Sget_simple_extent_ndims(space_id);
+        hsize_t* dims    = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
+        hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
+        H5Sget_simple_extent_dims(space_id, dims, maxdims);
+
+        json_t* dims_json_array = json_array();
+        json_object_set_new(shape, "dims", dims_json_array);
+        json_t* maxdims_json_array = json_array();
+        json_object_set_new(shape, "maxdims", maxdims_json_array);
+
+        unsigned i = 0;
+        for (i=0; i<ndims; i++) 
+        {
+            json_array_append(dims_json_array, json_integer(dims[i]));
+            json_array_append(maxdims_json_array, json_integer(maxdims[i]));
+        }
+
+        H5MM_free(dims);
+        H5MM_free(maxdims);
+    } 
+    else /* null or scalar */
+    {
+        printf("FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
+    }
+
+//FTW WIP
+             
+    /* type: get the datatype info */
+    H5T_class_t type_class = H5Tget_class(type_id);
+    
+    switch (type_class)
+    {
+        case H5T_INTEGER:
+            json_object_set_new(type, "class", json_string("H5T_INTEGER")); 
+            break;
+
+        case H5T_FLOAT:
+            json_object_set_new(type, "class", json_string("H5T_FLOAT")); 
+            break;
+            
+        case H5T_STRING:
+            json_object_set_new(type, "class", json_string("H5T_STRING")); 
+            break;
+            
+        case H5T_BITFIELD:
+            json_object_set_new(type, "class", json_string("H5T_BITFIELD")); 
+            break;
+            
+        case H5T_OPAQUE:
+            json_object_set_new(type, "class", json_string("H5T_OPAQUE")); 
+            break;
+            
+        case H5T_COMPOUND:
+            json_object_set_new(type, "class", json_string("H5T_COMPOUND")); 
+            break;
+            
+        case H5T_REFERENCE:
+            json_object_set_new(type, "class", json_string("H5T_REFERENCE")); 
+            break;
+            
+        case H5T_ENUM:
+            json_object_set_new(type, "class", json_string("H5T_ENUM")); 
+            break;
+            
+        case H5T_VLEN:
+            json_object_set_new(type, "class", json_string("H5T_VLEN")); 
+            break;
+            
+        case H5T_ARRAY:
+            json_object_set_new(type, "class", json_string("H5T_ARRAY")); 
+            break;
+        
+        default:
+            //printf("Type class %d not supported.\n", type_class);
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "Type class not supported.");
+    }
+
+
 #if 0
-    /* Form the request */
-
-    /* allocate space for request body */
-    if (NULL == (create_request_body = (char *) H5MM_malloc(REQUEST_BODY_MAX_LENGTH)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate space for attribute create request body")
-
     /* Form the Datatype portion of the Dataset create request */
     if (H5VL_json_convert_datatype_to_string(type_id, &datatype_body, NULL, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "unable to parse Datatype")
@@ -572,12 +677,6 @@ H5VL_json_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_
 
     } /* end switch */
 
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, create_request_body);
-    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
-
-    CURL_PERFORM(curl, H5E_ATTR, H5E_CANTCREATE, NULL);
 #endif
 
     /* all is okay after request so set the return value */
