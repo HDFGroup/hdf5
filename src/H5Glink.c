@@ -569,7 +569,7 @@ H5G__link_name_replace(H5F_t *file, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
         obj_path_r = H5G_build_fullpath_refstr_str(grp_full_path_r, lnk->name);
         if(H5G_name_replace(lnk, H5G_NAME_DELETE, file, obj_path_r, NULL, NULL, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name")
-    } /* end if */
+    }
 
 done:
     if(obj_path_r)

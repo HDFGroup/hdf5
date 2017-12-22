@@ -1159,7 +1159,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
         else {
             /* We pass NULL as link pointer when we need to search all IDs */
             search_group = search_dataset = search_datatype = TRUE;
-        } /* end else */
+        }
 
         /* Check if we need to operate on the objects affected */
         if(search_group || search_dataset || search_datatype) {
@@ -1170,26 +1170,26 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
                 src_file = H5F_PARENT(src_file);
 
             /* Set up common information for callback */
-            names.src_file = src_file;
-            names.src_full_path_r = src_full_path_r;
-            names.dst_file = dst_file;
-            names.dst_full_path_r = dst_full_path_r;
-            names.op = op;
+            names.src_file          = src_file;
+            names.src_full_path_r   = src_full_path_r;
+            names.dst_file          = dst_file;
+            names.dst_full_path_r   = dst_full_path_r;
+            names.op                = op;
 
             /* Search through group IDs */
             if(search_group)
                 if(H5I_iterate(H5I_GROUP, H5G_name_replace_cb, &names, FALSE) < 0)
-		    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over groups")
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over groups")
 
             /* Search through dataset IDs */
             if(search_dataset)
                 if(H5I_iterate(H5I_DATASET, H5G_name_replace_cb, &names, FALSE) < 0)
-		    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datasets")
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datasets")
 
             /* Search through datatype IDs */
             if(search_datatype)
                 if(H5I_iterate(H5I_DATATYPE, H5G_name_replace_cb, &names, FALSE) < 0)
-		    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datatypes")
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datatypes")
         } /* end if */
     } /* end if */
 
