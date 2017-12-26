@@ -485,6 +485,8 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
             || H5I_DATASET == parent->obj_type) 
             && "parent object not a dataset, file, datatype, or group");
 
+printf("FTW\n");
+
  /* Get the acpl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
@@ -529,7 +531,9 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     /* get the attribute_collection from the parent object */
 
 //FTW WIP
+printf("FTW breaking here?\n");
 printf("parent_json: ***%s***\n", json_dumps(parent->object_json, JSON_INDENT(4)));
+printf("FTW breaking here?\n");
     json_t* attribute_collection = json_object_get(parent->object_json, "attributes");
 printf("attributes: ***%s***\n", json_dumps(attribute_collection, JSON_INDENT(4)));
     json_t* attribute_json = json_object();
@@ -2745,6 +2749,9 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
  
     /* copy the final current_uuid and pointer to current_group into the VOL object */
     strncpy(new_group->object_uuid, current_uuid, sizeof(h5json_uuid_t));
+
+    /* set the pointer into the JANSSON object from the VOL object */
+    new_group->object_json = new_group_json;
 
 #ifdef PLUGIN_DEBUG
     printf("  - Finished adding group %s... \n", name);
