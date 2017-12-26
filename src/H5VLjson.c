@@ -478,6 +478,9 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     printf("  - Parent Object Type: %d\n", parent->obj_type);
 #endif
 
+    /* There's always one... */
+    HDassert(strlen(attr_name) < ATTR_NAME_MAX_LENGTH);
+
     /* Check for write access */
     if(!(parent->domain->u.file.intent & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "no write intent on file")
@@ -487,8 +490,6 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     HDassert(( H5I_GROUP == parent->obj_type 
             || H5I_DATASET == parent->obj_type) 
             && "parent object not a dataset, file, datatype, or group");
-
-printf("FTW\n");
 
  /* Get the acpl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
@@ -515,7 +516,6 @@ printf("FTW\n");
     /* Store the attribute name in the newly allocated object. */
     size_t attr_name_len = strlen(attr_name);
     HDassert (attr_name_len < ATTR_NAME_MAX_LENGTH);
-//FTW
     strcpy(attribute->u.attribute.attr_name, attr_name);
 
     ///* finish setting up the client-side attribute object */
@@ -536,16 +536,9 @@ printf("FTW\n");
     /*** JANSSON object ***/
 
     /* get the attribute_collection from the parent object */
-
-//FTW WIP
-printf("FTW breaking here?\n");
-printf("parent_json: ***%s***\n", json_dumps(parent->object_json, JSON_INDENT(4)));
-printf("FTW breaking here?\n");
     json_t* attribute_collection = json_object_get(parent->object_json, "attributes");
-printf("attributes: ***%s***\n", json_dumps(attribute_collection, JSON_INDENT(4)));
     json_t* attribute_json = json_object();
     json_array_append_new(attribute_collection, attribute_json);
-printf("FTW \n");
 
     /* flesh up the attribute_json object */
     json_t* shape = json_object();
@@ -556,13 +549,11 @@ printf("FTW \n");
     json_object_set_new(attribute_json, "shape", shape);
     json_object_set_new(attribute_json, "type", type);
     json_object_set_new(attribute_json, "value", value);
-printf("FTW \n");
 
     /* shape:  First get the dataspace class/type */
     htri_t is_simple = H5Sis_simple( space_id );
     HDassert(is_simple >= 0);
 
-printf("FTW \n");
     if (is_simple) 
     {
         /* insert the class */
@@ -595,7 +586,6 @@ printf("FTW \n");
         "FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
     }
 
-printf("FTW got space\n");
     /* type: get the datatype info */
     H5T_class_t type_class = H5Tget_class(type_id);
     
@@ -645,7 +635,6 @@ printf("FTW got space\n");
             //printf("Type class %d not supported.\n", type_class);
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "Type class not supported.");
     }
-printf("FTW got type\n");
 
     /*** value ***/
 
@@ -691,10 +680,6 @@ printf("FTW got type\n");
     printf("  - Attribute UUID: %s\n", attribute->object_uuid);
     printf("  - Attribute Object type: %d\n", attribute->obj_type);
 #endif
-
-//FTW WIP
-// Attribute should or should not have UUID? Use parent? 
-
 
     /* all is okay after request so set the return value */
     ret_value = (void *) attribute;
@@ -759,19 +744,16 @@ H5VL_json_attr_open(void *_parent, H5VL_loc_params_t loc_params, const char *att
     /* Store the attribute name in the newly allocated object. */
     size_t attr_name_len = strlen(attr_name);
     HDassert (attr_name_len < ATTR_NAME_MAX_LENGTH);
-//FTW
     strcpy(attribute->u.attribute.attr_name, attr_name);
 
 #ifdef PLUGIN_DEBUG
-    /* Attribute requires the parent URI and attribute name to do it's business */
-//FTW now uuid    printf("Got URI for attribute parent: %s\n", attribute->u.attribute.parent_obj->URI);
+    /* Attribute requires the parent UUID and attribute name to do it's business */
+    printf("Got UUID for attribute parent: %s\n", attribute->u.attribute.parent_obj->object_uuid);
     printf("Got attribute_name for attribute: %s\n", attribute->u.attribute.attr_name);
 #endif
 
-//FTW WIP first look up the attribute in the JANSSON and save a pointer to it, then parse the dataspace and datatype
-
-    /*** Set a pointer to the attribute in JANSSON ***/
-    /* iterate the colection to find the named attribute */
+    /* iterate the colection to find the named attribute 
+     * and set a pointer to it in JANSSON */
     json_t* attribute_collection = json_object_get(parent->object_json, "attributes");
     const char* index;
     json_t* value_in_array;
@@ -790,7 +772,6 @@ H5VL_json_attr_open(void *_parent, H5VL_loc_params_t loc_params, const char *att
 
     if (!found) HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "Unable to locate attribute.")
 
-printf("attribute->object_json = %s\n", json_dumps( attribute->object_json , JSON_INDENT(4)));
     json_t* type = json_object_get(attribute->object_json, "type");
     HDassert(type != NULL);
     json_t* shape = json_object_get(attribute->object_json, "shape");
@@ -800,7 +781,6 @@ printf("attribute->object_json = %s\n", json_dumps( attribute->object_json , JSO
 
     attribute->u.attribute.space_id = H5VL_json_jansson_to_dataspace(shape);
     attribute->u.attribute.dtype_id = H5VL_json_jansson_to_datatype(type);
-    //FTWstrncpy(attribute->u.attribute.attr_name, attr_name, strlen(attr_name));
     strcpy(attribute->u.attribute.attr_name, attr_name);
 
     ret_value = (void *) attribute;
