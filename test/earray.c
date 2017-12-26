@@ -26,6 +26,7 @@
 
 /* Other private headers that this test requires */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 #include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 
@@ -299,7 +300,7 @@ create_file(unsigned flags, hid_t fapl, hid_t *file, H5F_t **f)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (*f = (H5F_t *)H5I_object(*file)))
+    if(NULL == (*f = (H5F_t *)H5VL_object(*file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -432,7 +433,7 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl, hid_t dxpl,
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (*f = (H5F_t *)H5I_object(*file)))
+        if(NULL == (*f = (H5F_t *)H5VL_object(*file)))
             FAIL_STACK_ERROR
 
         /* Ignore metadata tags in the file's cache */
@@ -942,7 +943,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5I_object(file2)))
+    if(NULL == (f2 = (H5F_t *)H5VL_object(file2)))
         FAIL_STACK_ERROR
 
     /* Open the extensible array through the second file handle */
@@ -1088,7 +1089,7 @@ test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tpa
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5I_object(file2)))
+    if(NULL == (f2 = (H5F_t *)H5VL_object(file2)))
         FAIL_STACK_ERROR
 
     /* Open the extensible array through the second file handle */

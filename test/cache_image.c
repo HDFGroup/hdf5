@@ -720,7 +720,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 
@@ -6732,7 +6732,7 @@ cache_image_api_error_check_4(void)
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 
@@ -6882,7 +6882,7 @@ cache_image_api_error_check_4(void)
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 
@@ -6960,7 +6960,7 @@ cache_image_api_error_check_4(void)
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 

@@ -225,29 +225,6 @@ H5F_get_nopen_objs(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->nopen_objs)
 } /* end H5F_get_nopen_objs() */
 
-/* XXX: Consider reinstating after hax */
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function: H5F_get_file_id
- *
- * Purpose:  Retrieve the file's 'file_id' value
- *
- * Return:   'file_id' on success/abort on failure (shouldn't fail)
- *-------------------------------------------------------------------------
- */
-hid_t
-H5F_get_file_id(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(f);
-
-    FUNC_LEAVE_NOAPI(f->file_id)
-} /* end H5F_get_file_id() */
-#endif
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_file_id_exists
@@ -255,10 +232,6 @@ H5F_get_file_id(const H5F_t *f)
  * Purpose:     Determines if a file ID exists for this file struct
  *
  * Return:      'file_id' on success/abort on failure (shouldn't fail)
- *              XXX: It is a *terrible* idea to use a boolean for the
- *                   return value. Semantically, this is wildly incorrect.
- *
- * Programmer:	Quincey Koziol, July 20, 2011
  *
  *-------------------------------------------------------------------------
  */

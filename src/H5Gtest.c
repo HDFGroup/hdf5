@@ -28,12 +28,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5HLprivate.h"	/* Local Heaps				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Gpkg.h"             /* Groups                                   */
+#include "H5HLprivate.h"        /* Local Heaps                              */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+
 
 /****************/
 /* Local Macros */
@@ -101,7 +103,7 @@ H5G__is_empty_test(hid_t gid)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* "New format" checks */
@@ -213,7 +215,7 @@ H5G__has_links_test(hid_t gid, unsigned *nmsgs)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Check if the group has any link messages */
@@ -272,7 +274,7 @@ H5G__has_stab_test(hid_t gid)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Check if the group has a symbol table message */
@@ -323,7 +325,7 @@ H5G__is_new_dense_test(hid_t gid)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Check if the group has a symbol table message */
@@ -394,7 +396,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set metadata tag in dxpl_id */
@@ -475,7 +477,7 @@ H5G__lheap_size_test(hid_t gid, size_t *lheap_size)
     FUNC_ENTER_PACKAGE
 
     /* Get group structure */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Make certain the group has a symbol table message */
@@ -527,7 +529,7 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
     HDassert(obj_hidden);
 
     /* Get pointer to object for ID */
-    if(NULL == (obj_ptr = H5I_object(obj_id)))
+    if(NULL == (obj_ptr = H5VL_object(obj_id)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get object for ID")
 
     /* Get the symbol table entry */
@@ -775,7 +777,7 @@ H5G__verify_cached_stabs_test(hid_t gid)
     HDassert(gid >= 0);
 
     /* Check args */
-    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5VL_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set up metadata tagging */

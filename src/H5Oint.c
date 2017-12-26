@@ -584,8 +584,7 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
 
 #ifdef H5O_DEBUG
     if (H5DEBUG(O)) {
-        /* XXX: That weird boolean ID thing gets flagged here... */
-        if (H5F_FILE_ID(loc->file) < 0 && 1 == H5F_NREFS(loc->file))
+        if (FALSE == H5F_ID_EXISTS(loc->file) && 1 == H5F_NREFS(loc->file))
             HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n", loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
         else
             HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
