@@ -479,15 +479,15 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     if(!(parent->domain->u.file.intent & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "no write intent on file")
 
+    //FTW verify parent is group or dataset, attribute is not implemented for other types yet
+    /*  || H5I_FILE == parent->obj_type || H5I_DATATYPE == parent->obj_type */
+    HDassert(( H5I_GROUP == parent->obj_type 
+            || H5I_DATASET == parent->obj_type) 
+            && "parent object not a dataset, file, datatype, or group");
+
  /* Get the acpl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
-
-    HDassert(( H5I_FILE == parent->obj_type 
-            || H5I_GROUP == parent->obj_type 
-            || H5I_DATATYPE == parent->obj_type 
-            || H5I_DATASET == parent->obj_type) 
-            && "parent object not a dataset, file, datatype, or group");
 
     /* Allocate and setup internal Attribute struct */
     if (NULL == (attribute = (H5VL_json_object_t *) H5MM_malloc(sizeof(*attribute))))
@@ -526,18 +526,17 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
 
     /*** JANSSON object ***/
 
-    //FTW verify parent is group or dataset, attribute is not implemented for other types yet
     /* get the attribute_collection from the parent object */
 
+//FTW WIP
+printf("parent_json: ***%s***\n", json_dumps(parent->object_json, JSON_INDENT(4)));
     json_t* attribute_collection = json_object_get(parent->object_json, "attributes");
+printf("attributes: ***%s***\n", json_dumps(attribute_collection, JSON_INDENT(4)));
     json_t* attribute_json = json_object();
     json_array_append_new(attribute_collection, attribute_json);
+printf("FTW \n");
 
     /* flesh up the attribute_json object */
-
-// FTW need type, shape from dataset code
-    
-    /* fill in the dataset fields */
     json_t* shape = json_object();
     json_t* type = json_object();
     json_t* value = json_null();
@@ -546,11 +545,13 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     json_object_set_new(attribute_json, "shape", shape);
     json_object_set_new(attribute_json, "type", type);
     json_object_set_new(attribute_json, "value", value);
+printf("FTW \n");
 
     /* shape:  First get the dataspace class/type */
     htri_t is_simple = H5Sis_simple( space_id );
     HDassert(is_simple >= 0);
 
+printf("FTW \n");
     if (is_simple) 
     {
         /* insert the class */
@@ -579,11 +580,11 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     } 
     else /* null or scalar */
     {
-        printf("FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+        "FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
     }
 
-//FTW WIP
-             
+printf("FTW got space\n");
     /* type: get the datatype info */
     H5T_class_t type_class = H5Tget_class(type_id);
     
@@ -633,80 +634,65 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
             //printf("Type class %d not supported.\n", type_class);
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "Type class not supported.");
     }
+printf("FTW got type\n");
 
+    /*** value ***/
 
-#if 0
-    /* Form the Datatype portion of the Dataset create request */
-    if (H5VL_json_convert_datatype_to_string(type_id, &datatype_body, NULL, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "unable to parse Datatype")
+    /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
+     * implemented, a fill value *could* be provided here. */
 
-    /* specify NULL dataspace for attribute creation */
-    char *shape_body = "\"shape\": \"H5S_NULL\"";
-
-    /* generate the request body */
-    snprintf(create_request_body, REQUEST_BODY_MAX_LENGTH, "{ %s, %s }", datatype_body, shape_body);
-
-    /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(create_request_host_header, parent->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
-
-    /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
-
-    /* Redirect from base URL based on type to create the attribute */
+    /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
+    json_t* parent_uuid;
     switch (parent->obj_type)
     {
-        case H5I_FILE:
-                /* get the groupID for root group */
-                snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/attributes/%s", 
-                         base_URL, parent->URI, attr_name);
-            break;
+//FTW        case H5I_FILE:
+            /* if starting with file, grab id of the root group, and move on. */
+//FTW            parent_uuid = json_string_value(json_object_get(new_dataset->domain->u.file.json_file_object, "root"));
+//FTW            break;
         case H5I_GROUP:
-                snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/attributes/%s", 
-                         base_URL, parent->URI, attr_name);
+            parent_uuid = parent->object_uuid;
             break;
-        case H5I_DATASET: 
-                snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/attributes/%s", 
-                         base_URL, parent->URI, attr_name);
+        case H5I_DATASET:
+            parent_uuid = parent->object_uuid;
             break;
-        case H5I_DATATYPE: 
-                snprintf(temp_url, URL_MAX_LENGTH, "%s/datatypes/%s/attributes/%s", 
-                         base_URL, parent->URI, attr_name);
-            break;
-         default:
-                HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype of attribute parent")
-
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype of attribute parent")
     } /* end switch */
 
+    /* insert a new link into the groups linklist */
+    
+    json_t* group_hashtable = json_object_get(attribute->domain->u.file.json_file_object, "groups");
+    json_t* group = json_object_get(group_hashtable, parent_uuid);
+
+    /* create the link */
+    json_t* link = json_object();
+    json_object_set_new(link, "class", json_string("H5L_TYPE_HARD"));
+    json_object_set_new(link, "title", json_string(attr_name));
+    json_object_set_new(link, "collection", json_string("datasets"));
+    json_object_set_new(link, "id", json_string(attribute->object_uuid)); 
+
+    /* add the link to the group's link collection */
+    json_t* link_collection = json_object_get(group, "links");
+    json_array_append(link_collection, link); 
+
+#ifdef PLUGIN_DEBUG
+    printf("Dataset H5VL_json_object_t fields:\n");
+    printf("  - Attribute UUID: %s\n", attribute->object_uuid);
+    printf("  - Attribute Object type: %d\n", attribute->obj_type);
 #endif
+
+//FTW WIP
+
 
     /* all is okay after request so set the return value */
     ret_value = (void *) attribute;
 
 done:
     
-    /* clean up allocated stringspace */
-
-/* FTW
-    if (create_request_body)
-        H5MM_xfree(create_request_body);
-    if (datatype_body)
-        H5MM_xfree(datatype_body);
-*/
-
     /* Clean up allocated dataset object if there was an issue */
     if (attribute && !ret_value)
         if (H5VL_json_attr_close(attribute, FAIL, NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "unable to close attribute")
-    
-#if 0
-    /* Restore cURL URL to the base URL */
-    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-    
-    if (curl_headers) {
-        curl_slist_free_all(curl_headers);
-        curl_headers = NULL;
-    } /* end if */
-#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -1412,9 +1398,11 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     json_t* shape = json_object();
     json_t* type = json_object();
     json_t* value = json_null();
+    json_t* attributes = json_array();
     json_object_set_new(new_dataset->object_json, "shape", shape);
     json_object_set_new(new_dataset->object_json, "type", type);
     json_object_set_new(new_dataset->object_json, "value", value);
+    json_object_set_new(new_dataset->object_json, "attributes", attributes);
 
     /* flesh out these fields */
 
@@ -2745,6 +2733,9 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
             json_t *creationProperties = json_object(); /* create new, empty array */
             json_object_set_new(new_group_json, "creationProperties",creationProperties);
             
+            /* attributes */ 
+            json_object_set_new(new_group_json, "attributes", json_array());
+
             /* set the current group pointer to point to the next one before moving to the next token */
             current_uuid = &new_group_uuid; 
 
@@ -5047,8 +5038,9 @@ H5VL_json_convert_string_to_datatype(const char *type)
 #endif
 
             /* Grow the temporary buffer if needed */
-            if (type_section_len + 1 > tmp_cmpd_type_buffer_size)
-                CHECKED_REALLOC_NO_PTR(tmp_cmpd_type_buffer, tmp_cmpd_type_buffer_size, type_section_len + 1, H5E_DATATYPE, FAIL);
+//FTW            if (type_section_len + 1 > tmp_cmpd_type_buffer_size)
+//FTW                CHECKED_REALLOC_NO_PTR(tmp_cmpd_type_buffer, tmp_cmpd_type_buffer_size, type_section_len + 1, H5E_DATATYPE, FAIL);
+//FTW this call is suddenly causing problems... 26.12.2017
 
 #ifdef PLUGIN_DEBUG
             printf("  - After re-alloc check, buffer is size %zu\n", tmp_cmpd_type_buffer_size);
