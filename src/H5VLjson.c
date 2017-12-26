@@ -126,6 +126,9 @@ static herr_t h5json_uuid_generate(h5json_uuid_t uuid);
 /* helper function to express time as UTC */
 static herr_t h5json_get_utc_string_from_time(time_t t, char *time_buf);
 
+/* helper functions to convert dataspace and datatype */
+static hid_t H5VL_json_jansson_to_dataspace(json_t* shape);
+static hid_t H5VL_json_jansson_to_datatype(json_t* type);
 
 /* cURL write function callback */
 static size_t write_data_callback(void *buffer, size_t size, size_t nmemb, void *userp);
@@ -716,10 +719,10 @@ j *
  */
 
 static void *
-H5VL_json_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name,
+H5VL_json_attr_open(void *_parent, H5VL_loc_params_t loc_params, const char *attr_name,
                     hid_t H5_ATTR_UNUSED aapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *parent = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *parent = (H5VL_json_object_t *) _parent;
     H5VL_json_object_t *attribute = NULL;
     htri_t              search_ret;
     void               *ret_value = NULL;
@@ -733,7 +736,8 @@ H5VL_json_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_na
     printf("  - Parent Object Type: %d\n", parent->obj_type);
 #endif
 
-    HDassert((H5I_FILE == parent->obj_type || H5I_GROUP == parent->obj_type || H5I_DATASET == parent->obj_type) 
+//FTW HDassert((H5I_FILE == parent->obj_type || H5I_GROUP == parent->obj_type || H5I_DATASET == parent->obj_type) 
+    HDassert((H5I_GROUP == parent->obj_type || H5I_DATASET == parent->obj_type) 
             && "parent object not a dataset, file, or group");
 
     /* Allocate and setup internal Attribute struct */
@@ -758,14 +762,39 @@ H5VL_json_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_na
     printf("Got attribute_name for attribute: %s\n", attribute->u.attribute.attr_name);
 #endif
 
-    /* Set up a Dataspace for the opened Attribute */
-    if (H5VL_json_parse_dataspace(attribute) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_NONE_MINOR, NULL, "unable to parse attribute dataspace")
+//FTW WIP first look up the attribute in the JANSSON and save a pointer to it, then parse the dataspace and datatype
 
-    /* Set up a Datatype for the opened Attribute */
-    /* XXX: Error code */
-    if (H5VL_json_parse_datatype(attribute) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_NONE_MINOR, NULL, "unable to parse attribute datatype")
+    /*** Set a pointer to the attribute in JANSSON ***/
+    /* iterate the colection to find the named attribute */
+    json_t* attribute_collection = json_object_get(parent->object_json, "attributes");
+    const char* index;
+    json_t* value_in_array;
+    hbool_t found = false;
+    json_array_foreach(attribute_collection, index, value_in_array) 
+    {
+        /* block of code that uses key and value */
+        char* name = json_string_value(json_object_get(value_in_array, "name"));
+        if (strcmp(attr_name, name) == 0) 
+        {
+            attribute->object_json = value_in_array;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "Unable to locate attribute.")
+
+printf("attribute->object_json = %s\n", json_dumps( attribute->object_json , JSON_INDENT(4)));
+    json_t* type = json_object_get(attribute->object_json, "type");
+    HDassert(type != NULL);
+    json_t* shape = json_object_get(attribute->object_json, "shape");
+    HDassert(shape != NULL);
+    json_t* value = json_object_get(attribute->object_json, "value");
+    HDassert(value != NULL);
+
+    attribute->u.attribute.space_id = H5VL_json_jansson_to_dataspace(shape);
+    attribute->u.attribute.dtype_id = H5VL_json_jansson_to_datatype(type);
+    strncpy(attribute->u.attribute.attr_name, attr_name, strlen(attr_name));
 
     ret_value = (void *) attribute;
 
@@ -777,7 +806,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5VL_json_attr_open() */
-
 
 
 static herr_t
@@ -1619,11 +1647,14 @@ H5VL_json_dataset_open(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     /*** Set up a library object Dataspace for the opened Dataset ***/
 
     json_t* shape = json_object_get(dataset->object_json, "shape");
-    json_t* class = json_object_get(shape, "class");
-    json_t* dims = json_object_get(shape, "dims");
-    json_t* maxdims = json_object_get(shape, "maxdims");
+//FTW begin dataspace function
+
+//    json_t* class = json_object_get(shape, "class");
+//    json_t* dims = json_object_get(shape, "dims");
+//    json_t* maxdims = json_object_get(shape, "maxdims");
     hid_t dataspace = NULL; 
 
+/*
     if (strcmp(json_string_value(class), "H5S_SIMPLE") == 0)
     {
         hsize_t rank = json_array_size(dims);
@@ -1645,21 +1676,29 @@ H5VL_json_dataset_open(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     {
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "non-simple dataspace classes not implemented. ");
     }
+*/
+dataspace = H5VL_json_jansson_to_dataspace(shape);
 
     HDassert(dataspace >= 0);
     dataset->u.dataset.space_id = dataspace;
+// FTW end dataspace function
 
     /**** datatype ****/
+
+//FTW begin datatype function
 
     json_t* type = json_object_get(dataset->object_json, "type");
 
     /* >>>type<<< Set up a Datatype for the opened Dataset */
-    json_t* datatype_class = json_object_get(type, "class");
+//    json_t* datatype_class = json_object_get(type, "class");
 
     hid_t datatype = NULL;
-    char* datatype_class_str = json_string_value(datatype_class);
+//    char* datatype_class_str = json_string_value(datatype_class);
+
+datatype = H5VL_json_jansson_to_datatype(type);
 
     /* switch over datatypes */
+/*
     if (strcmp(datatype_class_str, "H5T_STRING") == 0)
     {
         //datatype = H5Tcopy(H5T_STRING);
@@ -1670,13 +1709,16 @@ H5VL_json_dataset_open(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
         /* H5T_NATIVE_LLONG storage class will be long long,
          * the largest supported native type and big enough to store 
          * any integer value. In JSON, it's rendered in base 10. */
-        datatype = H5Tcopy(H5T_NATIVE_LLONG);
+/*        datatype = H5Tcopy(H5T_NATIVE_LLONG);
     }
     else
     {
         // default:
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "Unkown datatype.")
     }
+*/
+
+//FTW end datatype function
 
     dataset->u.dataset.dtype_id = datatype;
 
@@ -6329,4 +6371,69 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_parse_dataset_creation_properties() */
 
+hid_t H5VL_json_jansson_to_dataspace(json_t* shape)
+{
+    json_t* class = json_object_get(shape, "class");
+    json_t* dims = json_object_get(shape, "dims");
+    json_t* maxdims = json_object_get(shape, "maxdims");
+    hid_t dataspace = NULL; 
 
+    if (strcmp(json_string_value(class), "H5S_SIMPLE") == 0)
+    {
+        hsize_t rank = json_array_size(dims);
+        hsize_t* current_dims = H5MM_malloc(sizeof(hsize_t) * rank);
+        hsize_t* maximum_dims = H5MM_malloc(sizeof(hsize_t) * rank);
+        hsize_t index;
+        for (index=0; index<rank; index++) 
+        {
+            current_dims[index] = json_integer_value(json_array_get(dims, index));
+            maximum_dims[index] = json_integer_value(json_array_get(maxdims, index));
+        }
+
+        dataspace = H5Screate_simple((int)rank, current_dims, maximum_dims);
+
+        H5MM_free(current_dims);
+        H5MM_free(maximum_dims);
+    }
+    else
+    {
+        //FTW HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "non-simple dataspace classes not implemented. ");
+        printf("non-simple dataspace classes not implemented. \n");
+        dataspace = NULL;
+    }
+
+    HDassert(dataspace >= 0);
+    return dataspace;
+} /* end dataspace function */
+
+hid_t H5VL_json_jansson_to_datatype(json_t* type)
+{
+    json_t* datatype_class = json_object_get(type, "class");
+
+    hid_t datatype = NULL;
+    char* datatype_class_str = json_string_value(datatype_class);
+
+    /* switch over datatypes */
+    if (strcmp(datatype_class_str, "H5T_STRING") == 0)
+    {
+        //datatype = H5Tcopy(H5T_STRING);
+        datatype = H5Tcopy(H5T_NATIVE_CHAR);
+    }
+    else if (strcmp(datatype_class_str, "H5T_INTEGER") == 0)
+    {        
+        /* H5T_NATIVE_LLONG storage class will be long long,
+         * the largest supported native type and big enough to store 
+         * any integer value. In JSON, it's rendered in base 10. */
+        datatype = H5Tcopy(H5T_NATIVE_LLONG);
+    }
+    else
+    {
+        // default:
+        //FTW HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "Unkown datatype.")
+        printf("Unkown datatype. \n");
+        datatype = NULL;
+    }
+
+    HDassert(datatype >= 0);
+    return datatype;
+} /* end datatype function */
