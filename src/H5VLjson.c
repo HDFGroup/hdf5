@@ -499,6 +499,9 @@ printf("FTW\n");
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "couldn't allocate attribute object")
     attribute->obj_type = H5I_ATTR;
 
+    /* Attribute is not first-class object and has no UUID */
+    strcpy(attribute->object_uuid, "attributes have no UUID"); 
+
     /* Store pointer to domain/file that the opened Attribute is within */
     attribute->domain = parent->domain; 
 
@@ -512,7 +515,8 @@ printf("FTW\n");
     /* Store the attribute name in the newly allocated object. */
     size_t attr_name_len = strlen(attr_name);
     HDassert (attr_name_len < ATTR_NAME_MAX_LENGTH);
-    strncpy(attribute->u.attribute.attr_name, attr_name, attr_name_len);
+//FTW
+    strcpy(attribute->u.attribute.attr_name, attr_name);
 
     ///* finish setting up the client-side attribute object */
     /* finish setting up the library object */
@@ -689,6 +693,7 @@ printf("FTW got type\n");
 #endif
 
 //FTW WIP
+// Attribute should or should not have UUID? Use parent? 
 
 
     /* all is okay after request so set the return value */
@@ -754,7 +759,8 @@ H5VL_json_attr_open(void *_parent, H5VL_loc_params_t loc_params, const char *att
     /* Store the attribute name in the newly allocated object. */
     size_t attr_name_len = strlen(attr_name);
     HDassert (attr_name_len < ATTR_NAME_MAX_LENGTH);
-    strncpy(attribute->u.attribute.attr_name, attr_name, attr_name_len);
+//FTW
+    strcpy(attribute->u.attribute.attr_name, attr_name);
 
 #ifdef PLUGIN_DEBUG
     /* Attribute requires the parent URI and attribute name to do it's business */
@@ -794,7 +800,8 @@ printf("attribute->object_json = %s\n", json_dumps( attribute->object_json , JSO
 
     attribute->u.attribute.space_id = H5VL_json_jansson_to_dataspace(shape);
     attribute->u.attribute.dtype_id = H5VL_json_jansson_to_datatype(type);
-    strncpy(attribute->u.attribute.attr_name, attr_name, strlen(attr_name));
+    //FTWstrncpy(attribute->u.attribute.attr_name, attr_name, strlen(attr_name));
+    strcpy(attribute->u.attribute.attr_name, attr_name);
 
     ret_value = (void *) attribute;
 
@@ -1063,7 +1070,7 @@ H5VL_json_attr_close(void *attr, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUS
 
 #ifdef PLUGIN_DEBUG
     printf("Received Attribute close call with following parameters:\n");
-//    printf("  - parent URI: %s\n", _attr->u.attribute.parent_obj->URI);
+    printf("  - parent UUID: %s\n", _attr->u.attribute.parent_obj->object_uuid);
     printf("  - attribute name: %s\n", _attr->u.attribute.attr_name);
     printf("  - DXPL: %ld\n\n", dxpl_id);
 #endif
