@@ -6133,6 +6133,10 @@ done:
 
 hid_t H5VL_json_jansson_to_dataspace(json_t* shape)
 {
+    hid_t   ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
     json_t* class = json_object_get(shape, "class");
     json_t* dims = json_object_get(shape, "dims");
     json_t* maxdims = json_object_get(shape, "maxdims");
@@ -6157,17 +6161,24 @@ hid_t H5VL_json_jansson_to_dataspace(json_t* shape)
     }
     else
     {
-        //FTW HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "non-simple dataspace classes not implemented. ");
-        printf("non-simple dataspace classes not implemented. \n");
-        dataspace = NULL;
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "non-simple dataspace classes not implemented. ");
     }
 
     HDassert(dataspace >= 0);
-    return dataspace;
+    ret_value = dataspace;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end dataspace function */
 
 hid_t H5VL_json_jansson_to_datatype(json_t* type)
 {
+    hid_t   ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
     json_t* datatype_class = json_object_get(type, "class");
 
     hid_t datatype = NULL;
@@ -6188,18 +6199,24 @@ hid_t H5VL_json_jansson_to_datatype(json_t* type)
     }
     else
     {
-        // default:
-        //FTW HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "Unkown datatype.")
-        printf("Unkown datatype. \n");
-        datatype = NULL;
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "Unkown datatype.")
     }
 
     HDassert(datatype >= 0);
-    return datatype;
+    ret_value = datatype;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end datatype function */
 
 json_t* H5VL_json_datatype_to_jansson(hid_t type_id)
 {
+    json_t*   ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
     json_t* type = json_object();
     H5T_class_t type_class = H5Tget_class(type_id);
     
@@ -6246,18 +6263,24 @@ json_t* H5VL_json_datatype_to_jansson(hid_t type_id)
             break;
         
         default:
-            printf("Type class %d not supported.\n", type_class);
-            //HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "Type class not supported.");
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "Type class not supported.");
     }
 
-    return type;
+    ret_value = type;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 json_t* H5VL_json_dataspace_to_jansson(hid_t space_id)
 {
+    json_t*   ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
     /* shape:  First get the dataspace class/type */
     json_t* shape = json_object();
-
     htri_t is_simple = H5Sis_simple( space_id );
     HDassert(is_simple >= 0);
 
@@ -6289,10 +6312,13 @@ json_t* H5VL_json_dataspace_to_jansson(hid_t space_id)
     } 
     else /* null or scalar */
     {
-        //HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
-        printf("FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
     }
 
-    return shape;
+    ret_value = shape;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
