@@ -274,6 +274,12 @@ void FTW_dump_dataspace(hid_t dataspace, const char* message)
     printf("__________________________________________________\n");
 }
 
+//FTW WIP, generic to grab object json
+char* H5VLjson_dumps(void* _object)
+{
+    return json_dumps(((H5VL_json_object_t*)_object)->object_json, JSON_INDENT(4));
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLjson_init
@@ -522,7 +528,6 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
 
     /* finish setting up the library object */
 
-printf("FTW pre type\n");
     /* Get the type ID */
     if (H5Pget(acpl_id, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype ID")
@@ -535,13 +540,10 @@ printf("FTW pre type\n");
     if ((attribute->u.attribute.space_id = H5Scopy(space_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "failed to copy dataspace")
 
-printf("FTW pre j\n");
     /*** JANSSON object ***/
 
-printf("FTW parent json = ***%s***\n", json_dumps(parent->object_json, JSON_INDENT(4)));
     /* get the attribute_collection from the parent object */
     json_t* attribute_collection = json_object_get(parent->object_json, "attributes");
-printf("FTW got attributes = ***%s***\n", json_dumps(attribute_collection, JSON_INDENT(4)));
     json_t* attribute_json = json_object();
     json_array_append_new(attribute_collection, attribute_json);
 
@@ -553,7 +555,6 @@ printf("FTW got attributes = ***%s***\n", json_dumps(attribute_collection, JSON_
     /*** value ***/
     json_t* value = json_null();
     json_object_set_new(attribute_json, "value", value);
-printf("FTW now attributes = ***%s***\n", json_dumps(attribute_collection, JSON_INDENT(4)));
 
     /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
      * implemented, a fill value *could* be provided here. */
@@ -563,9 +564,6 @@ printf("FTW now attributes = ***%s***\n", json_dumps(attribute_collection, JSON_
     switch (parent->obj_type)
     {
         case H5I_FILE:
-            /* if starting with file, grab id of the root group, and move on. */
-//FTW            parent_uuid = json_string_value(json_object_get(new_dataset->domain->u.file.json_file_object, "root"));
-printf("\n\n\nFTW got file\n\n\n\n");
             parent_uuid = parent->object_uuid;
             break;
         case H5I_GROUP:
@@ -577,24 +575,6 @@ printf("\n\n\nFTW got file\n\n\n\n");
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype of attribute parent")
     } /* end switch */
-
-//FTW WIP why???   yank this
-    /* insert a new link into the groups linklist */
-#if 0
-    json_t* group_hashtable = json_object_get(attribute->domain->u.file.json_file_object, "groups");
-    json_t* group = json_object_get(group_hashtable, parent_uuid);
-
-    /* create the link */
-    json_t* link = json_object();
-    json_object_set_new(link, "class", json_string("H5L_TYPE_HARD"));
-    json_object_set_new(link, "title", json_string(attr_name));
-    json_object_set_new(link, "collection", json_string("datasets"));
-    json_object_set_new(link, "id", json_string(attribute->object_uuid)); 
-
-    /* add the link to the group's link collection */
-    json_t* link_collection = json_object_get(group, "links");
-    json_array_append(link_collection, link); 
-#endif
 
 #ifdef PLUGIN_DEBUG
     printf("Attribute H5VL_json_object_t fields:\n");
@@ -647,7 +627,6 @@ H5VL_json_attr_open(void *_parent, H5VL_loc_params_t loc_params, const char *att
     printf("  - Parent Object Type: %d\n", parent->obj_type);
 #endif
 
-//FTW HDassert((H5I_FILE == parent->obj_type || H5I_GROUP == parent->obj_type || H5I_DATASET == parent->obj_type) 
     HDassert((H5I_GROUP == parent->obj_type 
             || H5I_DATASET == parent->obj_type 
             || H5I_FILE == parent->obj_type)
@@ -2093,7 +2072,6 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     HDassert(json_object_set_new(new_file_object, "datasets", datasets_hashtable) == 0);
 
     /* create and insert empty attributes collection */
-//FTW    json_t *attribute_collection = json_array(); /* create new, empty array */
     json_object_set_new(new_file_object, "attributes", json_array());
 
     /* create and insert empty datatypes hashtable */
@@ -2116,7 +2094,6 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     /* file contains reference to itself as its own container */
     new_file->domain = new_file;
 
-//FTW WIP
     /* set up the JANSSON file object and store the reference */
     new_file->u.file.json_file_object = new_file_object;
     /* need to set the object_json for VOL object as well */
@@ -3267,12 +3244,25 @@ done:
 
 
 static herr_t
-H5VL_json_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type,
+H5VL_json_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type,
                      hid_t dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
+    H5VL_json_object_t* obj = (H5VL_json_object_t*) _obj;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) 
+    {
+//FTW        case H5VL_DATASET_GET_DCPL:
+//FTW           HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "get DCPL unsupported")
+
+//FTW WIP wrapping it as herr_t, but its really a string
+        case H5VL_REF_GET_CONTENT:
+            ret_value = (herr_t)json_dumps(obj->object_json, JSON_INDENT(4));
+            req = &ret_value; // oh this hurts..
+            break;
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

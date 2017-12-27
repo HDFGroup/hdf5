@@ -161,7 +161,8 @@ typedef enum H5VL_link_specific_t {
 typedef enum H5VL_object_get_t {
     H5VL_REF_GET_NAME,                 /* object name                       */
     H5VL_REF_GET_REGION,               /* dataspace of region               */
-    H5VL_REF_GET_TYPE                  /* type of object                    */
+    H5VL_REF_GET_TYPE,                 /* type of object                    */
+    H5VL_REF_GET_CONTENT               /* content of object (e.g. as JSON)  */
 } H5VL_object_get_t;
 
 /* types for object SPECIFIC callback */
