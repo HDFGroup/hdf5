@@ -126,9 +126,11 @@ static herr_t h5json_uuid_generate(h5json_uuid_t uuid);
 /* helper function to express time as UTC */
 static herr_t h5json_get_utc_string_from_time(time_t t, char *time_buf);
 
-/* helper functions to convert dataspace and datatype */
+/* Helper functions for converting between dataspace/datatype and their jansson representations */
 static hid_t H5VL_json_jansson_to_dataspace(json_t* shape);
 static hid_t H5VL_json_jansson_to_datatype(json_t* type);
+static json_t* H5VL_json_datatype_to_jansson(hid_t datatype);
+static json_t* H5VL_json_dataspace_to_jansson(hid_t dataspace);
 
 /* cURL write function callback */
 static size_t write_data_callback(void *buffer, size_t size, size_t nmemb, void *userp);
@@ -540,53 +542,25 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     json_t* attribute_json = json_object();
     json_array_append_new(attribute_collection, attribute_json);
 
-    /* flesh up the attribute_json object */
-    json_t* shape = json_object();
-    json_t* type = json_object();
-    json_t* value = json_null();
+// moved to helper
+//    json_t* shape = json_object();
+//    json_t* type = json_object();
 
+    /* flesh up the attribute_json object */
     json_object_set_new(attribute_json, "name", json_string(attr_name));
-    json_object_set_new(attribute_json, "shape", shape);
-    json_object_set_new(attribute_json, "type", type);
+    json_t* value = json_null();
     json_object_set_new(attribute_json, "value", value);
 
-    /* shape:  First get the dataspace class/type */
-    htri_t is_simple = H5Sis_simple( space_id );
-    HDassert(is_simple >= 0);
+//FTW combine and eliminate variable
+    json_t* shape = H5VL_json_dataspace_to_jansson(space_id);
+    json_object_set_new(attribute_json, "shape", shape);
 
-    if (is_simple) 
-    {
-        /* insert the class */
-        json_object_set_new(shape, "class", json_string("H5S_SIMPLE"));
+//FTW WIP yank this out to a helper and recycle for datasets 
+//FTW combine and eliminate variable
+    json_t* type = H5VL_json_datatype_to_jansson(type_id);
+    json_object_set_new(attribute_json, "type", type);
 
-        /* get the dims and max dims */
-        hsize_t  ndims   = H5Sget_simple_extent_ndims(space_id);
-        hsize_t* dims    = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
-        hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
-        H5Sget_simple_extent_dims(space_id, dims, maxdims);
-
-        json_t* dims_json_array = json_array();
-        json_object_set_new(shape, "dims", dims_json_array);
-        json_t* maxdims_json_array = json_array();
-        json_object_set_new(shape, "maxdims", maxdims_json_array);
-
-        unsigned i = 0;
-        for (i=0; i<ndims; i++) 
-        {
-            json_array_append(dims_json_array, json_integer(dims[i]));
-            json_array_append(maxdims_json_array, json_integer(maxdims[i]));
-        }
-
-        H5MM_free(dims);
-        H5MM_free(maxdims);
-    } 
-    else /* null or scalar */
-    {
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-        "FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
-    }
-
-    /* type: get the datatype info */
+#if 0
     H5T_class_t type_class = H5Tget_class(type_id);
     
     switch (type_class)
@@ -635,6 +609,7 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
             //printf("Type class %d not supported.\n", type_class);
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "Type class not supported.");
     }
+#endif
 
     /*** value ***/
 
@@ -6424,3 +6399,102 @@ hid_t H5VL_json_jansson_to_datatype(json_t* type)
     HDassert(datatype >= 0);
     return datatype;
 } /* end datatype function */
+
+json_t* H5VL_json_datatype_to_jansson(hid_t type_id)
+{
+    json_t* type = json_object();
+    H5T_class_t type_class = H5Tget_class(type_id);
+    
+    switch (type_class)
+    {
+        case H5T_INTEGER:
+            json_object_set_new(type, "class", json_string("H5T_INTEGER")); 
+            break;
+
+        case H5T_FLOAT:
+            json_object_set_new(type, "class", json_string("H5T_FLOAT")); 
+            break;
+            
+        case H5T_STRING:
+            json_object_set_new(type, "class", json_string("H5T_STRING")); 
+            break;
+            
+        case H5T_BITFIELD:
+            json_object_set_new(type, "class", json_string("H5T_BITFIELD")); 
+            break;
+            
+        case H5T_OPAQUE:
+            json_object_set_new(type, "class", json_string("H5T_OPAQUE")); 
+            break;
+            
+        case H5T_COMPOUND:
+            json_object_set_new(type, "class", json_string("H5T_COMPOUND")); 
+            break;
+            
+        case H5T_REFERENCE:
+            json_object_set_new(type, "class", json_string("H5T_REFERENCE")); 
+            break;
+            
+        case H5T_ENUM:
+            json_object_set_new(type, "class", json_string("H5T_ENUM")); 
+            break;
+            
+        case H5T_VLEN:
+            json_object_set_new(type, "class", json_string("H5T_VLEN")); 
+            break;
+            
+        case H5T_ARRAY:
+            json_object_set_new(type, "class", json_string("H5T_ARRAY")); 
+            break;
+        
+        default:
+            printf("Type class %d not supported.\n", type_class);
+            //HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "Type class not supported.");
+    }
+
+    return type;
+}
+
+json_t* H5VL_json_dataspace_to_jansson(hid_t space_id)
+{
+    /* shape:  First get the dataspace class/type */
+    json_t* shape = json_object();
+
+    htri_t is_simple = H5Sis_simple( space_id );
+    HDassert(is_simple >= 0);
+
+    if (is_simple) 
+    {
+        /* insert the class */
+        json_object_set_new(shape, "class", json_string("H5S_SIMPLE"));
+
+        /* get the dims and max dims */
+        hsize_t  ndims   = H5Sget_simple_extent_ndims(space_id);
+        hsize_t* dims    = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
+        hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
+        H5Sget_simple_extent_dims(space_id, dims, maxdims);
+
+        json_t* dims_json_array = json_array();
+        json_object_set_new(shape, "dims", dims_json_array);
+        json_t* maxdims_json_array = json_array();
+        json_object_set_new(shape, "maxdims", maxdims_json_array);
+
+        unsigned i = 0;
+        for (i=0; i<ndims; i++) 
+        {
+            json_array_append(dims_json_array, json_integer(dims[i]));
+            json_array_append(maxdims_json_array, json_integer(maxdims[i]));
+        }
+
+        H5MM_free(dims);
+        H5MM_free(maxdims);
+    } 
+    else /* null or scalar */
+    {
+        //HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
+        printf("FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
+    }
+
+    return shape;
+}
+
