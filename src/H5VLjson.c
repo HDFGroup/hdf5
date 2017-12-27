@@ -542,10 +542,6 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     json_t* attribute_json = json_object();
     json_array_append_new(attribute_collection, attribute_json);
 
-// moved to helper
-//    json_t* shape = json_object();
-//    json_t* type = json_object();
-
     /* flesh up the attribute_json object */
     json_object_set_new(attribute_json, "name", json_string(attr_name));
     json_t* value = json_null();
@@ -559,57 +555,6 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
 //FTW combine and eliminate variable
     json_t* type = H5VL_json_datatype_to_jansson(type_id);
     json_object_set_new(attribute_json, "type", type);
-
-#if 0
-    H5T_class_t type_class = H5Tget_class(type_id);
-    
-    switch (type_class)
-    {
-        case H5T_INTEGER:
-            json_object_set_new(type, "class", json_string("H5T_INTEGER")); 
-            break;
-
-        case H5T_FLOAT:
-            json_object_set_new(type, "class", json_string("H5T_FLOAT")); 
-            break;
-            
-        case H5T_STRING:
-            json_object_set_new(type, "class", json_string("H5T_STRING")); 
-            break;
-            
-        case H5T_BITFIELD:
-            json_object_set_new(type, "class", json_string("H5T_BITFIELD")); 
-            break;
-            
-        case H5T_OPAQUE:
-            json_object_set_new(type, "class", json_string("H5T_OPAQUE")); 
-            break;
-            
-        case H5T_COMPOUND:
-            json_object_set_new(type, "class", json_string("H5T_COMPOUND")); 
-            break;
-            
-        case H5T_REFERENCE:
-            json_object_set_new(type, "class", json_string("H5T_REFERENCE")); 
-            break;
-            
-        case H5T_ENUM:
-            json_object_set_new(type, "class", json_string("H5T_ENUM")); 
-            break;
-            
-        case H5T_VLEN:
-            json_object_set_new(type, "class", json_string("H5T_VLEN")); 
-            break;
-            
-        case H5T_ARRAY:
-            json_object_set_new(type, "class", json_string("H5T_ARRAY")); 
-            break;
-        
-        default:
-            //printf("Type class %d not supported.\n", type_class);
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "Type class not supported.");
-    }
-#endif
 
     /*** value ***/
 
@@ -1389,18 +1334,25 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     json_object_set_new(dataset_collection, new_dataset->object_uuid, new_dataset->object_json);
 
     /* fill in the dataset fields */
-    json_t* shape = json_object();
-    json_t* type = json_object();
+//FTW json_t* shape = json_object();
+//FTW    json_t* type = json_object();
     json_t* value = json_null();
     json_t* attributes = json_array();
-    json_object_set_new(new_dataset->object_json, "shape", shape);
-    json_object_set_new(new_dataset->object_json, "type", type);
+//FTW json_object_set_new(new_dataset->object_json, "shape", shape);
+//FTW    json_object_set_new(new_dataset->object_json, "type", type);
     json_object_set_new(new_dataset->object_json, "value", value);
     json_object_set_new(new_dataset->object_json, "attributes", attributes);
 
     /* flesh out these fields */
 
     /* shape:  First get the dataspace class/type */
+//FTW WIP
+//    json_t* shape = json_object();
+    json_t* shape = H5VL_json_dataspace_to_jansson(space_id);
+    json_object_set_new(new_dataset->object_json, "shape", shape);
+
+#if 0
+    json_t* shape = json_object();
     htri_t is_simple = H5Sis_simple( space_id );
     HDassert(is_simple >= 0);
 
@@ -1434,8 +1386,15 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     {
         printf("FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
     }
+return shape;
+#endif
         
+//FTW WIP, cut out intermediate var
     /* type: get the datatype info */
+    json_t* type = H5VL_json_datatype_to_jansson(type_id);
+    json_object_set_new(new_dataset->object_json, "type", type);
+    
+#if 0
     H5T_class_t type_class = H5Tget_class(type_id);
     
     switch (type_class)
@@ -1483,6 +1442,7 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
         default:
             printf("Type class %d not supported.\n", type_class);
     }
+#endif
 
     /*** value ***/
 
