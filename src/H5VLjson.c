@@ -174,12 +174,12 @@ static herr_t H5VL_json_convert_dataspace_selection_to_string(hid_t space_id, ch
 static herr_t H5VL_json_convert_data_buffer_to_json_array(const void *buf, hid_t mem_type_id, hid_t mem_space_id, char **out_body, size_t *out_body_len);
 
 /* Helper functions for creating a Dataset */
-static herr_t H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body);
-static herr_t H5VL_json_parse_dataset_create_shape_and_maxdims(hid_t space_id, char *shape_body, char *maxdims_body);
-static herr_t H5VL_json_parse_dataset_creation_properties(hid_t dcpl_id, char *creation_properties_body);
+//static herr_t H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body);
+//static herr_t H5VL_json_parse_dataset_create_shape_and_maxdims(hid_t space_id, char *shape_body, char *maxdims_body);
+//static herr_t H5VL_json_parse_dataset_creation_properties(hid_t dcpl_id, char *creation_properties_body);
 
 /* Helper functions for creating an Attribute */
-static herr_t H5VL_json_parse_attribute_create_options(H5VL_json_object_t *parent_obj, const char *name, hid_t acpl, char *create_request_body);
+//static herr_t H5VL_json_parse_attribute_create_options(H5VL_json_object_t *parent_obj, const char *name, hid_t acpl, char *create_request_body);
 
 
 static H5VL_class_t H5VL_json_g = {
@@ -458,7 +458,6 @@ done:
  * Programmer:  Frank Willmore 
  *              September, 2017
  */
-//FTW not done for JSON
 static void *
 H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id,
                       hid_t H5_ATTR_UNUSED aapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
@@ -493,7 +492,7 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
             || H5I_DATASET == parent->obj_type) 
             && "parent object not a dataset, file, datatype, or group");
 
- /* Get the acpl plist structure */
+    /* Get the acpl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
@@ -544,19 +543,13 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
 
     /* flesh up the attribute_json object */
     json_object_set_new(attribute_json, "name", json_string(attr_name));
-    json_t* value = json_null();
-    json_object_set_new(attribute_json, "value", value);
 
-//FTW combine and eliminate variable
-    json_t* shape = H5VL_json_dataspace_to_jansson(space_id);
-    json_object_set_new(attribute_json, "shape", shape);
-
-//FTW WIP yank this out to a helper and recycle for datasets 
-//FTW combine and eliminate variable
-    json_t* type = H5VL_json_datatype_to_jansson(type_id);
-    json_object_set_new(attribute_json, "type", type);
+    json_object_set_new(attribute_json, "shape", H5VL_json_dataspace_to_jansson(space_id));
+    json_object_set_new(attribute_json, "type", H5VL_json_datatype_to_jansson(type_id));
 
     /*** value ***/
+    json_t* value = json_null();
+    json_object_set_new(attribute_json, "value", value);
 
     /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
      * implemented, a fill value *could* be provided here. */
@@ -1333,121 +1326,23 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     json_t* dataset_collection = json_object_get(new_dataset->domain->u.file.json_file_object, "datasets");
     json_object_set_new(dataset_collection, new_dataset->object_uuid, new_dataset->object_json);
 
-    /* fill in the dataset fields */
-//FTW json_t* shape = json_object();
-//FTW    json_t* type = json_object();
-    json_t* value = json_null();
-    json_t* attributes = json_array();
-//FTW json_object_set_new(new_dataset->object_json, "shape", shape);
-//FTW    json_object_set_new(new_dataset->object_json, "type", type);
-    json_object_set_new(new_dataset->object_json, "value", value);
-    json_object_set_new(new_dataset->object_json, "attributes", attributes);
-
     /* flesh out these fields */
 
+    /* fill in the dataset fields */
+    json_t* attributes = json_array();
+    json_object_set_new(new_dataset->object_json, "attributes", attributes);
+
     /* shape:  First get the dataspace class/type */
-//FTW WIP
-//    json_t* shape = json_object();
-    json_t* shape = H5VL_json_dataspace_to_jansson(space_id);
-    json_object_set_new(new_dataset->object_json, "shape", shape);
+    json_object_set_new(new_dataset->object_json, "shape", H5VL_json_dataspace_to_jansson(space_id));
 
-#if 0
-    json_t* shape = json_object();
-    htri_t is_simple = H5Sis_simple( space_id );
-    HDassert(is_simple >= 0);
-
-    if (is_simple) 
-    {
-        /* insert the class */
-        json_object_set_new(shape, "class", json_string("H5S_SIMPLE"));
-
-        /* get the dims and max dims */
-        hsize_t  ndims   = H5Sget_simple_extent_ndims(space_id);
-        hsize_t* dims    = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
-        hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * ndims);
-        H5Sget_simple_extent_dims(space_id, dims, maxdims);
-
-        json_t* dims_json_array = json_array();
-        json_object_set_new(shape, "dims", dims_json_array);
-        json_t* maxdims_json_array = json_array();
-        json_object_set_new(shape, "maxdims", maxdims_json_array);
-
-        unsigned i = 0;
-        for (i=0; i<ndims; i++) 
-        {
-            json_array_append(dims_json_array, json_integer(dims[i]));
-            json_array_append(maxdims_json_array, json_integer(maxdims[i]));
-        }
-
-        H5MM_free(dims);
-        H5MM_free(maxdims);
-    } 
-    else /* null or scalar */
-    {
-        printf("FTW: datasdet create with null / scalar dataspace not yet implemented.\n");
-    }
-return shape;
-#endif
-        
-//FTW WIP, cut out intermediate var
     /* type: get the datatype info */
-    json_t* type = H5VL_json_datatype_to_jansson(type_id);
-    json_object_set_new(new_dataset->object_json, "type", type);
+    json_object_set_new(new_dataset->object_json, "type", H5VL_json_datatype_to_jansson(type_id));
     
-#if 0
-    H5T_class_t type_class = H5Tget_class(type_id);
-    
-    switch (type_class)
-    {
-        case H5T_INTEGER:
-            json_object_set_new(type, "class", json_string("H5T_INTEGER")); 
-            break;
-
-        case H5T_FLOAT:
-            json_object_set_new(type, "class", json_string("H5T_FLOAT")); 
-            break;
-            
-        case H5T_STRING:
-            json_object_set_new(type, "class", json_string("H5T_STRING")); 
-            break;
-            
-        case H5T_BITFIELD:
-            json_object_set_new(type, "class", json_string("H5T_BITFIELD")); 
-            break;
-            
-        case H5T_OPAQUE:
-            json_object_set_new(type, "class", json_string("H5T_OPAQUE")); 
-            break;
-            
-        case H5T_COMPOUND:
-            json_object_set_new(type, "class", json_string("H5T_COMPOUND")); 
-            break;
-            
-        case H5T_REFERENCE:
-            json_object_set_new(type, "class", json_string("H5T_REFERENCE")); 
-            break;
-            
-        case H5T_ENUM:
-            json_object_set_new(type, "class", json_string("H5T_ENUM")); 
-            break;
-            
-        case H5T_VLEN:
-            json_object_set_new(type, "class", json_string("H5T_VLEN")); 
-            break;
-            
-        case H5T_ARRAY:
-            json_object_set_new(type, "class", json_string("H5T_ARRAY")); 
-            break;
-        
-        default:
-            printf("Type class %d not supported.\n", type_class);
-    }
-#endif
-
     /*** value ***/
-
+    json_t* value = json_null();
     /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
      * implemented, a fill value *could* be provided here. */
+    json_object_set_new(new_dataset->object_json, "value", value);
 
     /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
     json_t* parent_uuid;
@@ -2586,6 +2481,7 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     /* set the domain for the new_group to be same as parent_domain */
     new_group->domain = parent->domain;
     new_group->obj_type = H5I_GROUP;
+    new_group->object_uuid[0] = NULL; 
 
     /* generate the JANSSON representation: */
 
@@ -2645,7 +2541,10 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
 
         /* 1 - last token is found --> group already exists, so fail */
         if((token_index == n_tokens - 1) && found) 
+        {
+            
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "Cannot create link which already exists.")
+        }
 
         /* 2 - intermediate token found, so move on */
         if ((token_index < (n_tokens - 1)) && found)
@@ -5847,6 +5746,7 @@ done:
 } /* end H5VL_json_parse_dataset_create_options() */
 
 
+#if 0
 static herr_t
 H5VL_json_parse_dataset_create_shape_and_maxdims(hid_t space_id, char *shape_body, char *maxdims_body)
 {
@@ -5945,8 +5845,10 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_parse_dataset_create_shape_and_maxdims() */
+#endif
 
 
+#if 0
 static herr_t
 H5VL_json_parse_dataset_creation_properties(hid_t dcpl, char *creation_properties_body)
 {
@@ -6292,6 +6194,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_parse_dataset_creation_properties() */
+#endif
 
 hid_t H5VL_json_jansson_to_dataspace(json_t* shape)
 {
