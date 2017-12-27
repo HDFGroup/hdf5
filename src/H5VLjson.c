@@ -954,28 +954,28 @@ done:
  */
 
 static herr_t
-H5VL_json_attr_close(void *attr, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL_json_attr_close(void *_attr, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *_attr = (H5VL_json_object_t *) attr;
+    H5VL_json_object_t *attr = (H5VL_json_object_t *) _attr;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef PLUGIN_DEBUG
     printf("Received Attribute close call with following parameters:\n");
-    printf("  - parent UUID: %s\n", _attr->u.attribute.parent_obj->object_uuid);
-    printf("  - attribute name: %s\n", _attr->u.attribute.attr_name);
+    printf("  - parent UUID: %s\n", attr->u.attribute.parent_obj->object_uuid);
+    printf("  - attribute name: %s\n", attr->u.attribute.attr_name);
     printf("  - DXPL: %ld\n\n", dxpl_id);
 #endif
 
-    HDassert(H5I_ATTR == _attr->obj_type && "not an attribute");
+    HDassert(H5I_ATTR == attr->obj_type && "not an attribute");
 
-    if (_attr->u.attribute.dtype_id != FAIL && H5Tclose(_attr->u.attribute.dtype_id) < 0)
+    if (attr->u.attribute.dtype_id != FAIL && H5Tclose(attr->u.attribute.dtype_id) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype")
-    if (_attr->u.attribute.space_id != FAIL && H5Sclose(_attr->u.attribute.space_id) < 0)
+    if (attr->u.attribute.space_id != FAIL && H5Sclose(attr->u.attribute.space_id) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close dataspace")
 
-    H5MM_xfree(_attr);
+    H5MM_xfree(attr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_attr_close() */
@@ -1464,79 +1464,14 @@ H5VL_json_dataset_open(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     /*** Set up a library object Dataspace for the opened Dataset ***/
 
     json_t* shape = json_object_get(dataset->object_json, "shape");
-//FTW begin dataspace function
-
-//    json_t* class = json_object_get(shape, "class");
-//    json_t* dims = json_object_get(shape, "dims");
-//    json_t* maxdims = json_object_get(shape, "maxdims");
-    hid_t dataspace = NULL; 
-
-/*
-    if (strcmp(json_string_value(class), "H5S_SIMPLE") == 0)
-    {
-        hsize_t rank = json_array_size(dims);
-        hsize_t* current_dims = H5MM_malloc(sizeof(hsize_t) * rank);
-        hsize_t* maximum_dims = H5MM_malloc(sizeof(hsize_t) * rank);
-        hsize_t index;
-        for (index=0; index<rank; index++) 
-        {
-            current_dims[index] = json_integer_value(json_array_get(dims, index));
-            maximum_dims[index] = json_integer_value(json_array_get(maxdims, index));
-        }
-
-        dataspace = H5Screate_simple((int)rank, current_dims, maximum_dims);
-
-        H5MM_free(current_dims);
-        H5MM_free(maximum_dims);
-    }
-    else
-    {
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "non-simple dataspace classes not implemented. ");
-    }
-*/
-dataspace = H5VL_json_jansson_to_dataspace(shape);
-
+    hid_t dataspace = H5VL_json_jansson_to_dataspace(shape);
     HDassert(dataspace >= 0);
     dataset->u.dataset.space_id = dataspace;
-// FTW end dataspace function
 
     /**** datatype ****/
 
-//FTW begin datatype function
-
     json_t* type = json_object_get(dataset->object_json, "type");
-
-    /* >>>type<<< Set up a Datatype for the opened Dataset */
-//    json_t* datatype_class = json_object_get(type, "class");
-
-    hid_t datatype = NULL;
-//    char* datatype_class_str = json_string_value(datatype_class);
-
-datatype = H5VL_json_jansson_to_datatype(type);
-
-    /* switch over datatypes */
-/*
-    if (strcmp(datatype_class_str, "H5T_STRING") == 0)
-    {
-        //datatype = H5Tcopy(H5T_STRING);
-        datatype = H5Tcopy(H5T_NATIVE_CHAR);
-    }
-    else if (strcmp(datatype_class_str, "H5T_INTEGER") == 0)
-    {        
-        /* H5T_NATIVE_LLONG storage class will be long long,
-         * the largest supported native type and big enough to store 
-         * any integer value. In JSON, it's rendered in base 10. */
-/*        datatype = H5Tcopy(H5T_NATIVE_LLONG);
-    }
-    else
-    {
-        // default:
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "Unkown datatype.")
-    }
-*/
-
-//FTW end datatype function
-
+    hid_t datatype = H5VL_json_jansson_to_datatype(type);
     dataset->u.dataset.dtype_id = datatype;
 
 #ifdef PLUGIN_DEBUG
