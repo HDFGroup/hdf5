@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.3)
 PROJECT (HDF5 C CXX)
 
 #-----------------------------------------------------------------------------
@@ -542,6 +542,7 @@ if (HDF5_ENABLE_PARALLEL)
     # Used by Fortran + MPI
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+    INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_DIRS})
   else ()
     message (STATUS "Parallel libraries not found")
   endif ()
@@ -764,7 +765,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
 
     set (LINK_Fortran_LIBS ${LINK_LIBS})
-    set (LINK_Fortran_SHARED_LIBS ${LINK_SHARED_LIBS})
 
     if (HDF5_ENABLE_F2003)
       if (NOT FORTRAN_HAVE_ISO_C_BINDING)
@@ -775,7 +775,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     # Parallel IO usage requires MPI to be Linked and Included
     if (H5_HAVE_PARALLEL)
       set (LINK_Fortran_LIBS ${LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
-      set (LINK_Fortran_SHARED_LIBS ${LINK_Fortran_SHARED_LIBS} ${MPI_Fortran_LIBRARIES})
       if (MPI_Fortran_LINK_FLAGS)
         set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
       endif ()
