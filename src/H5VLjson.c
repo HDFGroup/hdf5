@@ -710,26 +710,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_attr_read() */
 
-
 
 static herr_t 
-H5VL_json_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL_json_attr_write(void *_attribute, hid_t dtype_id, const void *buf, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *attribute = (H5VL_json_object_t *) attr;
+    H5VL_json_object_t *attribute = (H5VL_json_object_t *) _attribute;
     H5T_class_t         dtype_class;
     htri_t              is_variable_str;
-//FTW    size_t              write_request_body_len = 0;
     size_t              dtype_size;
-//FTW    char                host_header[HOST_HEADER_MAX_LENGTH] = "Host: ";
-//FTW    char               *write_request_body = NULL;
-//FTW    char                temp_url[URL_MAX_LENGTH];
     herr_t              ret_value = SUCCEED;
 //FTW    hbool_t             shape_is_specified = false;
 //FTW    hbool_t             maxdims_is_specified = false;
-//FTW    char                shape_body[ATTRIBUTE_CREATE_SHAPE_BODY_MAX_LENGTH] = "";
-//FTW    char                maxdims_body[ATTRIBUTE_CREATE_MAXDIMS_BODY_MAX_LENGTH] = "";
-//FTW    char                value_body[ATTRIBUTE_CREATE_VALUE_BODY_MAX_LENGTH] = "";
-//FTW    char               *datatype_body = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -764,139 +755,69 @@ H5VL_json_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_id,
     HDassert(space_id);
     H5Sselect_all(space_id);
 
-#if 0
-    /* Form the attribute write request value body */
-    //if (NULL == (write_request_body = (char *) H5MM_malloc(REQUEST_BODY_DEFAULT_LENGTH)))
-    if (NULL == (write_request_body = (char *) H5MM_malloc(REQUEST_BODY_MAX_LENGTH)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "can't allocate space for attribute write body")
-#endif
+    /*** writing the value ***/
 
-    char* json_array;
-//    if (NULL == (json_array) = (char *) H5MM_malloc(REQUEST_BODY_DEFAULT_LENGTH)))
-//            HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "can't allocate space for json_array")
-// FTW: not implemented, just stub
-/*
-    if (H5VL_json_convert_data_buffer_to_json_array(buf, dtype_id, space_id, json_array, write_request_body_len) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "can't convert attribute write buffer into JSON array")
-*/
-    
-// just a hack to get to compile and test
-json_array = "[ 1, 2, 5] ";
+// get the value object out of the json
+printf("attribute value before write = *%s* \n", json_dumps(attribute->object_json, JSON_INDENT(4)));
 
-#if 0
-    /* Form the request */
+//FTW WIP setting a new one because it's created with NULL, should just create an empty one to start?
+//int json_object_set(json_t *object, const char *key, json_t *value)
+json_object_set(attribute->object_json, "value", json_array());
 
-    /* Form the Datatype portion of the Attribute write request */
-    if (H5VL_json_convert_datatype_to_string(dtype_id, &datatype_body, NULL, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL, "unable to parse Datatype")
+json_t* value = json_object_get(attribute->object_json, "value");
+printf("attribute value before write = *%s* \n", json_dumps(value, JSON_INDENT(4)));
+//hid_t space_id = attribute->u.attribute.space_id;
 
-    /* Form the shape portion of the write request */
-    if (H5VL_json_parse_dataset_create_shape_and_maxdims(space_id, shape_body, maxdims_body) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to parse Dataset shape parameters")
+// switch on datatype object, write vals to the json array
+H5T_class_t datatype_class = H5Tget_class(dtype_id);
+size_t datatype_size = H5Tget_size(dtype_id);
 
-    /* Determine whether the Attribute shape and maximum size of each dimension are specified.  */
-//    shape_is_specified = strcmp(shape_body, "");
-//    maxdims_is_specified = strcmp(maxdims_body, "") && NULL == strstr(shape_body, "H5S_NULL");
-//if (!maxdims_is_specified) sprintf(maxdims_body, "maxdims: \"H5S_NULL\"");
-printf("FTW 5, json_array = %s\n", json_array);
+//hsize_t buffer_cursor = buf;
 
-    // json_array from call to rendering subroutine
-    snprintf(value_body, ATTRIBUTE_CREATE_VALUE_BODY_MAX_LENGTH, "\"value\": %s", json_array);
-printf("FTW 6\n");
+// get the dims from the space
+int n_dims = H5Sget_simple_extent_ndims( space_id );
+hsize_t* dims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+H5Sget_simple_extent_dims(space_id, dims, maxdims );
 
-    /* allocate space for Attribute write request body */
-//    if (NULL == (write_request_body = (char *) H5MM_malloc(REQUEST_BODY_MAX_LENGTH)))
-//        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate space for attribute write request body")
-printf("FTW 7\n");
-
-    /* compose the request body */
-    snprintf(write_request_body, REQUEST_BODY_MAX_LENGTH, "{ %s, %s, %s, %s }", datatype_body, shape_body, value_body, maxdims_body);
-printf("FTW 8\n");
-    write_request_body_len = strlen(write_request_body);
-printf("got write_request_body_len = %ld\n", write_request_body_len );
-printf("write_request_body='%s'\n\n", write_request_body);
-
-    /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(host_header, attribute->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
-printf("FTW 9\n");
-
-    /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
-printf("FTW 9.1\n");
-
-    /* Inform the server about the format of the incoming data */
-    curl_headers = curl_slist_append(curl_headers, "Content-Type: application/json");
-printf("FTW 9.2\n");
-
-    /* Redirect from base URL based on type to create the attribute */
-    char *entity; 
-    switch (attribute->u.attribute.parent_obj->obj_type)
+printf("FTW: got n_dims = %lu\n", n_dims);
+    switch (n_dims)
     {
-        case H5I_FILE:
-            entity = "groups"; /* use the groupID for root group */
+        case 1:
+        {
+printf("FTW dims[0] = %ld\n", dims[0]);
+            for (unsigned i = 0; i < dims[0]; i++)
+            {
+                int _value =  ((int*)buf)[i];
+printf("FTW appending %d\n", _value);
+                json_t* int_value = json_integer(_value);
+printf("FTW int_value %s", json_dumps(int_value, JSON_INDENT(4)));
+                json_array_append(value, int_value);
+            }
             break;
-        case H5I_GROUP:
-            entity = "groups";
+        }
+        case 2:
+        {
+            HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "two dimensional spaces not supported.")
             break;
-        case H5I_DATASET: 
-            entity = "datasets";
-            break;
-        case H5I_DATATYPE: 
-            entity = "datatypes";
-            break;
-         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype of attribute parent")
-    } /* end switch */
+        }
+        default:
+            HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "rank > two dimensional spaces not supported.")
+    }
 
-printf("FTW 9.3\n");
-    snprintf(temp_url, URL_MAX_LENGTH, "%s/%s/%s/attributes/%s",
-                                       base_URL,
-                                       entity,
-                                       attribute->u.attribute.parent_obj->URI,
-                                       attribute->u.attribute.attr_name);
+    
 
-    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
-printf("FTW 9.4\n");
-    /* First, DELETE the placeholder attribute */
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-printf("FTW 9.45\n");
-    CURL_PERFORM(curl, H5E_ATTR, H5E_WRITEERROR, FAIL);
-printf("FTW 9.5\n");
+H5MM_xfree(dims);
+H5MM_xfree(maxdims);
 
-    /* Then write the attribute value */
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-printf("FTW 9.6\n");
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, write_request_body);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t) write_request_body_len);
-    CURL_PERFORM(curl, H5E_ATTR, H5E_WRITEERROR, FAIL);
-printf("FTW 10\n");
-#endif
+
+printf("attribute value after write = *%s* \n", json_dumps(value, JSON_INDENT(4)));
 
 done:
-#if 0
-#ifdef PLUGIN_DEBUG
-    printf("Attribute write body: %s.\n\n", write_request_body);
-    printf("Attribute write URL: %s\n\n", temp_url);
-    printf("Attribute write response buffer: %s\n\n", response_buffer.buffer);
-#endif
 
+#if 0
     if (H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "can't close space")
-
-    if (write_request_body)
-        H5MM_xfree(write_request_body);
-
-    /* Restore cURL URL to the base URL */
-    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-
-    /* Reset cURL custom request to prevent issues with future requests */
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, NULL);
-
-    if (curl_headers) {
-        curl_slist_free_all(curl_headers);
-        curl_headers = NULL;
-    } /* end if */
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
