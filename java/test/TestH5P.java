@@ -28,6 +28,7 @@ import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -852,7 +853,7 @@ public class TestH5P {
         }
         catch (Throwable err) {
             err.printStackTrace();
-            fail("H5Pset_est_link_info: " + err);
+            fail("H5Pset_elink_prefix: " + err);
         }
         assertTrue("H5Pset_elink_prefix", ret_val >= 0);
     }
@@ -1232,4 +1233,54 @@ public class TestH5P {
             fail("testH5P_file_space_page_size: " + err);
         }
    }
+
+    @Test
+    public void testH5Pset_efile_prefix() {
+        String prefix = "tmp";
+        try {
+            H5.H5Pset_efile_prefix(lapl_id, prefix);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5Pset_efile_prefix: " + err);
+        }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Pset_efile_prefix_null() throws Throwable{
+        H5.H5Pset_efile_prefix(lapl_id, null);
+    }
+
+    @Test
+    public void testH5Pget_efile_prefix() {
+        String prefix = "tmp";
+        String pre = "";
+
+        try {
+            H5.H5Pset_efile_prefix(lapl_id, prefix);
+            pre = H5.H5Pget_efile_prefix(lapl_id);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5Pget_efile_prefix: " + err);
+        }
+        assertTrue("The prefix: ", prefix.equals(pre));
+    }
+
+    @Ignore
+    public void testH5P_chunk_opts() {
+        int chunk_opts = -1;
+
+        try {
+            chunk_opts = H5.H5Pget_chunk_opts(ocpl_id);
+            assertTrue("chunk_opts: "+chunk_opts, chunk_opts == 0);
+            H5.H5Pset_chunk_opts(ocpl_id, HDF5Constants.H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
+            chunk_opts = H5.H5Pget_chunk_opts(ocpl_id);
+            assertTrue("chunk_opts: "+chunk_opts, chunk_opts == HDF5Constants.H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5Pget_lchunk_opts: " + err);
+        }
+    }
 }

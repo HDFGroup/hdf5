@@ -1533,7 +1533,6 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1metadata_1read_1attempts
 (JNIEnv *, jclass, jlong);
 
-
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_metadata_read_attempts
@@ -1542,6 +1541,78 @@ Java_hdf_hdf5lib_H5_H5Pget_1metadata_1read_1attempts
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts
 (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_virtual_prefix
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1virtual_1prefix
+(JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_virtual_prefix
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_efile_prefix
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1efile_1prefix
+(JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_efile_prefix
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1efile_1prefix
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_evict_on_close
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1evict_1on_1close
+(JNIEnv *, jclass, jlong, jboolean);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_evict_on_close
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1evict_1on_1close
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_chunk_opts
+ * Signature: (JI)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1chunk_1opts
+(JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_chunk_opts
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1chunk_1opts
+(JNIEnv *, jclass, jlong);
 
 
 #ifdef __cplusplus
