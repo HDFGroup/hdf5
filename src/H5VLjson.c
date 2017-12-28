@@ -274,7 +274,7 @@ void FTW_dump_dataspace(hid_t dataspace, const char* message)
     printf("__________________________________________________\n");
 }
 
-//FTW WIP, generic to grab object json
+//FTW generic to grab object json, but needs to get VOL object from library object. 
 char* H5VLjson_dumps(void* _object)
 {
     return json_dumps(((H5VL_json_object_t*)_object)->object_json, JSON_INDENT(4));
@@ -1976,6 +1976,7 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     if (NULL == (new_file = (H5VL_json_object_t *) H5MM_malloc(sizeof(*new_file))))
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate file object")
 
+#ifdef GENERATE_FILESYSTEM_OBJECT
     switch (flags & (H5F_ACC_EXCL | H5F_ACC_TRUNC))
     {
         case H5F_ACC_EXCL:
@@ -1992,6 +1993,7 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
         default:
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "invalid file create flags")
     } /* end switch */
+#endif
 
     new_file->obj_type = H5I_FILE;
     new_file->u.file.intent = H5F_ACC_RDWR;
@@ -2137,6 +2139,10 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
     file->obj_type = H5I_FILE;
     file->u.file.intent = flags;
 
+#ifndef GENERATE_FILESYSTEM_OBJECT
+    HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "Your JSON VOL hasn't been complied to allow interaction with filesystem. ")
+#endif
+
     /* Open FILE object on the filesystem with reqested intent */
     switch (flags & (H5F_ACC_RDWR | H5F_ACC_RDONLY))
     {
@@ -2163,6 +2169,7 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
 #ifdef PLUGIN_DEBUG
     printf("File open json_buffer: \n%s\n", json_buffer);
 #endif
+
 
     /* digest the buffer to form JANSSON object */
     json_error_t error;
@@ -2350,13 +2357,17 @@ H5VL_json_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 
     HDassert(H5I_FILE == _file->obj_type && "not a file");
 
+#ifdef GENERATE_FILESYSTEM_OBJECT
     /* start at the beginning of the file */
     HDassert(fseek(_file->u.file.filesystem_file_object, 0, SEEK_SET) == 0);
     /* now dump/encode: */
     fprintf(_file->u.file.filesystem_file_object, "%s\n", json_dumps(_file->u.file.json_file_object, JSON_INDENT(4)));
 
-    /* close file and free the Jansson ojbect. */ 
+    /* close file. */ 
     fclose(_file->u.file.filesystem_file_object); 
+#endif
+
+    /* free the Jansson ojbect. */ 
     HDassert(json_object_clear(_file->u.file.json_file_object) == 0); 
 
     H5MM_xfree(_file);
@@ -3248,21 +3259,26 @@ H5VL_json_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t
                      hid_t dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5VL_json_object_t* obj = (H5VL_json_object_t*) _obj;
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = FAIL;
+    //herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+//FTW WIP 
     switch (get_type) 
     {
-//FTW        case H5VL_DATASET_GET_DCPL:
-//FTW           HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "get DCPL unsupported")
-
-//FTW WIP wrapping it as herr_t, but its really a string
         case H5VL_REF_GET_CONTENT:
-            ret_value = (herr_t)json_dumps(obj->object_json, JSON_INDENT(4));
-            req = &ret_value; // oh this hurts..
+        {
+            /* json_dumps allocates mem and returns pointer to char* */
+            char* buffer = json_dumps(obj->object_json, JSON_INDENT(4)); 
+            req = (void**)&buffer;
             break;
+        }
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTOPENOBJ, NULL, "invalid object type")
     }
+
+    ret_value = SUCCEED;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

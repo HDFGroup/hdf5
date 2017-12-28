@@ -14,10 +14,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Jordan Henderson
- *              February, 2017
+ * Programmer:  Frank Willmore
+ *              December, 2017
  *
- * Purpose: The public header file for the REST VOL plugin.
+ * Purpose: The public header file for the JSON VOL plugin.
  */
 
 #ifndef H5VLjson_public_H
