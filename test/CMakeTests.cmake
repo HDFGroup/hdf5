@@ -452,7 +452,6 @@ set (test_CLEANFILES
     extlinks19B00026.h5
     extlinks19B00027.h5
     extlinks19B00028.h5
-    tmp
     big.data
     big*.h5
     stdio.h5
@@ -582,6 +581,7 @@ set (test_CLEANFILES
     cache_logging.out
     vds_swmr.h5
     vds_swmr_src_*.h5
+    tmp/vds_src_2.h5
 )
 
 # Remove any output file left over from previous test run
@@ -839,21 +839,28 @@ add_test (NAME H5TEST-clear-error_test-objects
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
-add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
-    -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
-    -D "TEST_ARGS:STRING="
-    -D "TEST_EXPECT=0"
-    -D "TEST_MASK_ERROR=true"
-    -D "TEST_OUTPUT=error_test.txt"
-    -D "TEST_REFERENCE=error_test_1"
-    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-    -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-)
-set_tests_properties (H5TEST-error_test PROPERTIES
-    DEPENDS H5TEST-clear-error_test-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
+if (HDF5_USE_16_API_DEFAULT)
+  add_test (
+      NAME H5TEST-error_test-SKIPPED
+      COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test>"
+  )
+else ()
+  add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_MASK_ERROR=true"
+      -D "TEST_OUTPUT=error_test.txt"
+      -D "TEST_REFERENCE=error_test_1"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+  set_tests_properties (H5TEST-error_test PROPERTIES
+      DEPENDS H5TEST-clear-error_test-objects
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+endif ()
 
 #-- Adding test for links_env
 add_test (NAME H5TEST-clear-links_env-objects
@@ -959,21 +966,28 @@ if (BUILD_SHARED_LIBS)
       WORKING_DIRECTORY
           ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
   )
-  add_test (NAME H5TEST-shared-error_test COMMAND "${CMAKE_COMMAND}"
-      -D "TEST_PROGRAM=$<TARGET_FILE:error_test-shared>"
-      -D "TEST_ARGS:STRING="
-      -D "TEST_EXPECT=0"
-      -D "TEST_MASK_ERROR=true"
-      -D "TEST_OUTPUT=error_test.txt"
-      -D "TEST_REFERENCE=error_test_1"
-      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-  )
-  set_tests_properties (H5TEST-shared-error_test PROPERTIES
-      DEPENDS H5TEST-shared-clear-error_test-objects
-      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5_PLUGIN_PRELOAD=::"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-  )
+  if (HDF5_USE_16_API_DEFAULT)
+    add_test (
+        NAME H5TEST-shared-error_test-SKIPPED
+        COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test-shared>"
+    )
+  else ()
+    add_test (NAME H5TEST-shared-error_test COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:error_test-shared>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_EXPECT=0"
+        -D "TEST_MASK_ERROR=true"
+        -D "TEST_OUTPUT=error_test.txt"
+        -D "TEST_REFERENCE=error_test_1"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+    )
+    set_tests_properties (H5TEST-shared-error_test PROPERTIES
+        DEPENDS H5TEST-shared-clear-error_test-objects
+        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5_PLUGIN_PRELOAD=::"
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
+    )
+  endif ()
 
   #-- Adding test for links_env
   add_test (NAME H5TEST-shared-clear-links_env-objects

@@ -47,12 +47,13 @@
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"                 /* External file list */
 
 /* ========  Dataset access property names ======== */
-#define H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME   "rdcc_nslots"   /* Size of raw data chunk cache(slots) */
-#define H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME   "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
-#define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
-#define H5D_ACS_VDS_VIEW_NAME               "vds_view"      /* VDS view option */
+#define H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME   "rdcc_nslots"    /* Size of raw data chunk cache(slots) */
+#define H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME   "rdcc_nbytes"    /* Size of raw data chunk cache(bytes) */
+#define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"        /* Preemption read chunks first */
+#define H5D_ACS_VDS_VIEW_NAME               "vds_view"       /* VDS view option */
 #define H5D_ACS_VDS_PRINTF_GAP_NAME         "vds_printf_gap" /* VDS printf gap size */
-#define H5D_ACS_APPEND_FLUSH_NAME    "append_flush"         /* Append flush actions */
+#define H5D_ACS_VDS_PREFIX_NAME             "vds_prefix"     /* VDS file prefix */
+#define H5D_ACS_APPEND_FLUSH_NAME           "append_flush"   /* Append flush actions */
 #define H5D_ACS_EFILE_PREFIX_NAME           "external file prefix" /* External file prefix */
 
 /* ======== Data transfer properties ======== */

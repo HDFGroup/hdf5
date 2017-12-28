@@ -47,20 +47,20 @@ which has a method:
 The native method is implemented in C using the
 <a href="http://java.sun.com/javase/6/docs/technotes/guides/jni/index.html">Java
 Native Method Interface </a>(JNI). This is written something like the following:
-<pre><b>JNIEXPORT jint
+<pre><b>JNIEXPORT jlong
 JNICALL Java_hdf_hdf5lib_H5_H5Fopen
 (
 &nbsp;JNIEnv *env,
 &nbsp;jclass class,
 &nbsp;jstring hdfFile,
 &nbsp;jint flags,
-&nbsp;jint access)
+&nbsp;jlong access)
 &nbsp;{
 
 &nbsp;/* ...convert Java String to (char *) */
 
 &nbsp;/* call the HDF library */
-&nbsp;retVal = H5Fopen((char *)file, (unsigned)flags, (hid_t)access );
+&nbsp;retVal = H5Fopen((char *)file, (unsigned)flags, (hid_t)access);
 
 &nbsp;/* ... */
 }</b></pre>

@@ -140,6 +140,8 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5D_1VDS_1FIRST_1MISSING(JNIEnv *env, jclass cls) { return H5D_VDS_FIRST_MISSING; }
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5D_1VDS_1LAST_1AVAILABLE(JNIEnv *env, jclass cls) { return H5D_VDS_LAST_AVAILABLE; }
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5D_1CHUNK_1DONT_1FILTER_1PARTIAL_1CHUNKS(JNIEnv *env, jclass cls) { return H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS; }
 
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1ALIGNMENT(JNIEnv *env, jclass cls) { return H5E_ALIGNMENT; }

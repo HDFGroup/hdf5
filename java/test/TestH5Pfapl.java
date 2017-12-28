@@ -1376,4 +1376,18 @@ public class TestH5Pfapl {
         deleteH5file();
         _deleteLogFile();
     }
+
+    @Test
+    public void testH5P_evict_on_close() {
+        boolean ret_val_id = false;
+        try {
+            H5.H5Pset_evict_on_close(fapl_id, true);
+            ret_val_id = H5.H5Pget_evict_on_close(fapl_id);
+            assertTrue("H5P_evict_on_close", ret_val_id);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5P_evict_on_close: " + err);
+        }
+    }
 }
