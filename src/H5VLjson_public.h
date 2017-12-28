@@ -28,6 +28,7 @@ extern "C" {
 #endif
 
 #define PLUGIN_DEBUG
+//#define GENERATE_FILESYSTEM_OBJECT
 
 H5_DLL herr_t H5VLjson_init(void);
 H5_DLL herr_t H5VLjson_term(void);
