@@ -132,6 +132,9 @@ static hid_t H5VL_json_jansson_to_datatype(json_t* type);
 static json_t* H5VL_json_datatype_to_jansson(hid_t datatype);
 static json_t* H5VL_json_dataspace_to_jansson(hid_t dataspace);
 
+/* write buffered values for an attribute or dataset to a jansson array */
+static herr_t H5VL_json_write_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* buffer);
+
 /* cURL write function callback */
 static size_t write_data_callback(void *buffer, size_t size, size_t nmemb, void *userp);
 
@@ -553,8 +556,9 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     json_object_set_new(attribute_json, "type", H5VL_json_datatype_to_jansson(type_id));
 
     /*** value ***/
-    json_t* value = json_null();
-    json_object_set_new(attribute_json, "value", value);
+
+    /* create an empty array */
+    json_object_set_new(attribute_json, "value", json_array());
 
     /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
      * implemented, a fill value *could* be provided here. */
@@ -726,7 +730,7 @@ H5VL_json_attr_write(void *_attribute, hid_t dtype_id, const void *buf, hid_t dx
 
 #ifdef PLUGIN_DEBUG
     printf("Received Attribute write call with following parameters:\n");
-//FTW    printf("  - Attribute parent URI: %s\n", attribute->u.attribute.parent_obj->URI);
+    printf("  - Attribute parent UUID: %s\n", attribute->u.attribute.parent_obj->object_uuid);
     printf("  - Attribute name: %s\n", attribute->u.attribute.attr_name);
     printf("  - DXPL ID: %ld\n", dxpl_id);
     printf("  - is default dxpl: %s\n", (dxpl_id == H5P_DEFAULT) ? "true" : "false");
@@ -757,60 +761,9 @@ H5VL_json_attr_write(void *_attribute, hid_t dtype_id, const void *buf, hid_t dx
 
     /*** writing the value ***/
 
-// get the value object out of the json
-printf("attribute value before write = *%s* \n", json_dumps(attribute->object_json, JSON_INDENT(4)));
-
-//FTW WIP setting a new one because it's created with NULL, should just create an empty one to start?
-//int json_object_set(json_t *object, const char *key, json_t *value)
-json_object_set(attribute->object_json, "value", json_array());
-
 json_t* value = json_object_get(attribute->object_json, "value");
-printf("attribute value before write = *%s* \n", json_dumps(value, JSON_INDENT(4)));
-//hid_t space_id = attribute->u.attribute.space_id;
-
-// switch on datatype object, write vals to the json array
-H5T_class_t datatype_class = H5Tget_class(dtype_id);
-size_t datatype_size = H5Tget_size(dtype_id);
-
-//hsize_t buffer_cursor = buf;
-
-// get the dims from the space
-int n_dims = H5Sget_simple_extent_ndims( space_id );
-hsize_t* dims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
-hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
-H5Sget_simple_extent_dims(space_id, dims, maxdims );
-
-printf("FTW: got n_dims = %lu\n", n_dims);
-    switch (n_dims)
-    {
-        case 1:
-        {
-printf("FTW dims[0] = %ld\n", dims[0]);
-            for (unsigned i = 0; i < dims[0]; i++)
-            {
-                int _value =  ((int*)buf)[i];
-printf("FTW appending %d\n", _value);
-                json_t* int_value = json_integer(_value);
-printf("FTW int_value %s", json_dumps(int_value, JSON_INDENT(4)));
-                json_array_append(value, int_value);
-            }
-            break;
-        }
-        case 2:
-        {
-            HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "two dimensional spaces not supported.")
-            break;
-        }
-        default:
-            HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "rank > two dimensional spaces not supported.")
-    }
-
-    
-
-H5MM_xfree(dims);
-H5MM_xfree(maxdims);
-
-
+// This function will fill the given array with data from the buffer. Can use it for Fill value as well, just do a memset on the buffer. 
+H5VL_json_write_value(value, dtype_id, space_id, buf);
 printf("attribute value after write = *%s* \n", json_dumps(value, JSON_INDENT(4)));
 
 done:
@@ -6270,4 +6223,69 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+static herr_t 
+H5VL_json_write_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* buffer)
+{
+    herr_t            ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*** writing the value ***/
+
+// get the value object out of the json
+printf("attribute value before write = *%s* \n", json_dumps(value_array, JSON_INDENT(4)));
+
+// switch on datatype object, write vals to the json array
+H5T_class_t datatype_class = H5Tget_class(dtype_id);
+size_t datatype_size = H5Tget_size(dtype_id);
+
+//hsize_t buffer_cursor = buf;
+
+// get the dims from the space
+int n_dims = H5Sget_simple_extent_ndims( space_id );
+hsize_t* dims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+H5Sget_simple_extent_dims(space_id, dims, maxdims );
+
+printf("FTW: got n_dims = %lu\n", n_dims);
+
+//#if 0 // this works... but trying to do better
+    switch (n_dims)
+    {
+        case 1:
+        {
+            for (unsigned i = 0; i < dims[0]; i++)
+            {
+                int _value =  ((int*)buffer)[i];
+                json_t* int_value = json_integer(_value);
+                json_array_append(value_array, int_value);
+
+                //json_t* new_value = H5VL_json_get_new_value(dtype_id, buf, offset);
+                //json_array_append(value_array, new_value);
+            }
+            break;
+        }
+        case 2:
+        {
+            HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "two dimensional spaces not supported.")
+            break;
+        }
+        default:
+            HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "rank > two dimensional spaces not supported.")
+    }
+//#endif
+    
+
+H5MM_xfree(dims);
+H5MM_xfree(maxdims);
+
+    ret_value = SUCCEED;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+}
+
 
