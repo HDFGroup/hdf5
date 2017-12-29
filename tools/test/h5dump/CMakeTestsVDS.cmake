@@ -155,7 +155,10 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
-      set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix")
+      set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES
+          ENVIRONMENT "HDF5_VDS_PREFIX=${PROJECT_BINARY_DIR}/testfiles/vds/"
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
+      )
       if (NOT "${resultcode}" STREQUAL "0")
         set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
