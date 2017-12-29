@@ -1208,7 +1208,54 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     json_t* value = json_array();
     /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
      * implemented, a fill value *could* be provided here. */
-    json_object_set_new(new_dataset->object_json, "value", value);
+
+//FTW WIP fill
+//     H5VL_json_parse_dataset_creation_properties
+H5D_fill_time_t fill_time;
+    if (H5Pget_fill_time(dcpl_id, &fill_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to retrieve fill time property")
+
+#if 0
+    if (H5D_FILL_TIME_IFSET != fill_time)
+        snprintf(fill_time_body, DATASET_CREATE_FILL_TIME_BODY_MAX_LENGTH,
+                 ", \"fillTime\": \"H5D_FILL_TIME_%s\"",
+                 H5D_FILL_TIME_ALLOC == fill_time ? "ALLOC" : "NEVER");
+#endif
+
+printf("FTW got fill_time = %d\n", fill_time);
+    /* Get the fill value property */
+    {
+        H5D_fill_value_t fill_status;
+
+        if (H5Pfill_value_defined(dcpl_id, &fill_status) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to retrieve the fill value defined status")
+
+printf("FTW got fill_status = %d\n", fill_status);
+
+//        if (H5D_FILL_VALUE_DEFAULT != fill_status) {
+//            strcat(fill_value_body, ", \"fillValue\": ");
+
+//            if (H5D_FILL_VALUE_UNDEFINED == fill_status) {
+//                strcat(fill_value_body, "null");
+//            } /* end if */
+//            else {
+                /* XXX: Support for fill values */
+//            } /* end else */
+//        } /* end if */
+    }
+
+long fill_value = NULL;
+herr_t err = H5Pget_fill_value( dcpl_id, H5T_NATIVE_INT, &fill_value );
+
+printf("FTW got fill_value = %d\n", fill_value);
+
+//FTW WIP fill
+
+
+
+
+//    json_object_set_new(new_dataset->object_json, "value", value);
+    json_object_set_new(new_dataset->object_json, "value", json_array());
 
     /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
     json_t* parent_uuid;
@@ -1256,6 +1303,7 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "unable to close dataset")
 
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_dataset_create() */
 
 
