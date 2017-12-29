@@ -1205,7 +1205,7 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     json_object_set_new(new_dataset->object_json, "type", H5VL_json_datatype_to_jansson(type_id));
     
     /*** value ***/
-    json_t* value = json_null();
+    json_t* value = json_array();
     /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
      * implemented, a fill value *could* be provided here. */
     json_object_set_new(new_dataset->object_json, "value", value);
@@ -1505,14 +1505,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_json_dataset_read
+ * Function:    H5VL_json_dataset_write
  *
  * Purpose:     Writes an HDF5 dataset using the JSON API
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Frank Willmore
- *              November, 2017
+ *              December, 2017
  *
  */
 static herr_t
@@ -1523,14 +1523,8 @@ H5VL_json_dataset_write(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
     H5T_class_t         dtype_class;
     hssize_t            mem_select_npoints, file_select_npoints;
     hbool_t             must_close_memspace = FALSE, must_close_filespace = FALSE;
-//FTW    hbool_t             is_transfer_binary = FALSE;
     htri_t              is_variable_str;
-//FTW    size_t              write_body_len = 0;
     size_t              dtype_size;
-    char               *selection_body = NULL;
-//FTW    char                host_header[HOST_HEADER_MAX_LENGTH] = "Host: ";
-//FTW    char               *write_body = NULL;
-//FTW    char                temp_url[URL_MAX_LENGTH];
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1544,7 +1538,7 @@ H5VL_json_dataset_write(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
 
 #ifdef PLUGIN_DEBUG
     printf("Received Dataset write call with following parameters:\n");
-//    printf("  - Dataset URI: %s\n", dataset->URI);
+    printf("  - Dataset UUID: %s\n", dataset->object_uuid);
     printf("  - mem_space_id: %ld\n", mem_space_id);
     printf("  - is all mem: %s\n", (mem_space_id == H5S_ALL) ? "true" : "false");
     printf("  - file_space_id: %ld\n", file_space_id);
@@ -1553,15 +1547,11 @@ H5VL_json_dataset_write(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
     printf("  - is default dxpl: %s\n", (dxpl_id == H5P_DEFAULT) ? "true" : "false");
 #endif
 
-    /* Determine whether it's possible to send the data as a binary blob instead of a JSON array */
-    if (H5T_NO_CLASS == (dtype_class = H5Tget_class(mem_type_id)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
-
-    if ((is_variable_str = H5Tis_variable_str(mem_type_id)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
-
-//FTW    is_transfer_binary = !(H5T_VLEN == dtype_class) && !is_variable_str;
-
+    /* FTW: currently only supporting full writes */
+    if ((mem_space_id != H5S_ALL) || (file_space_id != H5S_ALL))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "invalid dataspace, only H5S_ALL currently supported.")
+        
+#if 0
     if (H5S_ALL == mem_space_id) {
         /* Set up a valid memory dataspace to use for the dataset read */
         mem_space_id = H5Scopy(dataset->u.dataset.space_id);
@@ -1575,16 +1565,6 @@ H5VL_json_dataset_write(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
         H5Sselect_all(file_space_id);
         must_close_filespace = true;
     } /* end if */
-    else {
-        if (NULL == (selection_body = (char *) H5MM_malloc(DIMENSION_ARRAY_MAX_LENGTH)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate space for selection body")
-        selection_body[0] = '\0';
-
-#if 0
-        if (H5VL_json_convert_dataspace_selection_to_string(file_space_id, selection_body, is_transfer_binary) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "can't convert dataspace selection to string")
-#endif
-    } /* end else */
 
     /* Verify that the number of selected points matches */
     if ((mem_select_npoints = H5Sget_select_npoints(mem_space_id)) < 0)
@@ -1592,78 +1572,32 @@ H5VL_json_dataset_write(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
     if ((file_select_npoints = H5Sget_select_npoints(file_space_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "invalid dataspace")
     HDassert((mem_select_npoints == file_select_npoints) && "memory selection num points != file selection num points");
+#endif
+
+    /* get datatype class */
+    if (H5T_NO_CLASS == (dtype_class = H5Tget_class(mem_type_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
 
     if (0 == (dtype_size = H5Tget_size(mem_type_id)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
 
 #if 0
-    /* Form the dataset write request value body */
-    if (!is_transfer_binary) {
-        if (NULL == (write_body = (char *) H5MM_malloc(REQUEST_BODY_DEFAULT_LENGTH)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate space for dataset write body")
-
-        /* XXX: Get the correct write_body_len back */
         if (H5VL_json_convert_data_buffer_to_json_array(buf, mem_type_id, mem_space_id, write_body, write_body_len) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't convert dataset write buffer into JSON array")
-    } /* end if */
-    else
-        write_body_len = (size_t) mem_select_npoints * dtype_size;
-
-    /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(host_header, dataset->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
-
-    /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
-
-    /* Inform the server about the format of the incoming data */
-    curl_headers = curl_slist_append(curl_headers, is_transfer_binary ? "Content-Type: application/octet-stream" : "Content-Type: application/json");
-
-    /* Redirect from base URL to "/datasets/<id>/value" to write the value out */
-    snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/value%s%s",
-                                       base_URL,
-                                       dataset->URI,
-                                       is_transfer_binary && selection_body ? "?select=" : "",
-                                       is_transfer_binary && selection_body ? selection_body : "");
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, is_transfer_binary ? (const char *) buf : write_body);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t) write_body_len);
-    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
-
-    CURL_PERFORM(curl, H5E_DATASET, H5E_WRITEERROR, FAIL);
 #endif
+//FTW WIP: use this same routing from attr_write , add memory_space?
+json_t* value_array = json_object_get(dataset->object_json, "value");
+H5VL_json_write_value(value_array, dataset->u.dataset.dtype_id, dataset->u.dataset.space_id, buf);
 
 done:
 
-#if 0
-#ifdef PLUGIN_DEBUG
-    printf("Dataset write URL: %s\n\n", temp_url);
-    printf("Dataset write response buffer: %s\n\n", response_buffer.buffer);
-#endif
-
+#if 0 
     if (must_close_memspace)
         if (H5Sclose(mem_space_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close memspace")
     if (must_close_filespace)
         if (H5Sclose(file_space_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close filespace")
-
-    if (selection_body)
-        H5MM_free(selection_body);
-    if (write_body)
-        H5MM_xfree(write_body);
-
-    /* Restore cURL URL to the base URL */
-    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-
-    /* Reset cURL custom request to prevent issues with future requests */
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, NULL);
-
-    if (curl_headers) {
-        curl_slist_free_all(curl_headers);
-        curl_headers = NULL;
-    } /* end if */
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6224,6 +6158,9 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+//FTW helper function to write data to a JSON object
+//IN: empty array
+// OUT: array containing data from buffer
 static herr_t 
 H5VL_json_write_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* buffer)
 {
