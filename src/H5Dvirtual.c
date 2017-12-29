@@ -898,7 +898,7 @@ H5D__virtual_open_file(hid_t plist_id, const H5F_t *vdset_file,
         H5E_BEGIN_TRY {
             size = H5Pget_virtual_prefix(plist_id, NULL, 0);
         } H5E_END_TRY;
-        if(size < 0)
+        if(size <= 0)
             my_prefix = NULL;
         else {
             /* Allocate a buffer to hold the filename + prefix + possibly the delimiter + terminating null byte */
