@@ -812,7 +812,7 @@ H5D__virtual_open_file(hid_t plist_id, const H5F_t *vdset_file,
     H5F_t       *src_file = NULL;       /* Source file */
     H5F_t       *ret_value = NULL;      /* Actual return value  */
     char        *full_name = NULL;      /* File name with prefix */
-    char        *my_prefix;             /* Library's copy of the prefix */
+    char        *my_prefix = NULL;      /* Library's copy of the prefix */
     unsigned    intent;                 /* File access permissions */
     char        *actual_file_name = NULL; /* Virtual file's actual name */
     char        *temp_file_name = NULL; /* Temporary pointer to file name */
