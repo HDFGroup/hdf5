@@ -38,7 +38,7 @@ cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION "1.8.21")
-set (CTEST_SOURCE_VERSEXT "-snap2")
+set (CTEST_SOURCE_VERSEXT "-snap3")
 
 ##############################################################################
 # handle input parameters to script.
