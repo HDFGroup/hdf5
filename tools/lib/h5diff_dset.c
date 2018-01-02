@@ -767,12 +767,31 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
         }
     }
 
+    if(tclass1 == H5T_STRING) {
+        hid_t vstrtype1 = -1;
+        hid_t vstrtype2 = -1;
+        h5difftrace("diff_can_type end - H5T_STRING\n");
+
+        vstrtype1 = H5Tis_variable_str(f_tid1);
+        vstrtype2 = H5Tis_variable_str(f_tid2);
+
+        /* no compare if either one but not both are variable string type */
+        if (vstrtype1 != vstrtype2) {
+            if((opts->m_verbose || opts->m_list_not_cmp))
+                parallel_print("Not comparable: <%s> or <%s> is of mixed string type\n",
+                        obj1_name, obj2_name);
+            opts->not_cmp = 1;
+            HGOTO_DONE(0);
+        }
+    }
+
     if(tclass1 == H5T_COMPOUND) {
         int   nmembs1;
         int   nmembs2;
         int   j;
         hid_t memb_type1 = -1;
         hid_t memb_type2 = -1;
+        h5difftrace("diff_can_type end - H5T_COMPOUND\n");
 
         nmembs1 = H5Tget_nmembers(f_tid1);
         nmembs2 = H5Tget_nmembers(f_tid2);
