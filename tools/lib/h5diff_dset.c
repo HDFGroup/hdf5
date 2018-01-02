@@ -192,7 +192,8 @@ hsize_t diff_datasetid(hid_t did1,
     hid_t      sm_space = -1;           /*stripmine data space */
     size_t     need;                    /* bytes needed for malloc */
     int        i;
-    unsigned int  vl_data = 0;          /*contains VL datatypes */
+    unsigned int  vl_data1 = 0;          /*contains VL datatypes */
+    unsigned int  vl_data2 = 0;          /*contains VL datatypes */
 
     h5difftrace("diff_datasetid start\n");
     /* Get the dataspace handle */
@@ -320,7 +321,9 @@ hsize_t diff_datasetid(hid_t did1,
      * VLEN memory buffer later
      */
     if(TRUE == h5tools_detect_vlen(m_tid1))
-        vl_data = TRUE;
+        vl_data1 = TRUE;
+    if(TRUE == h5tools_detect_vlen(m_tid2))
+        vl_data2 = TRUE;
     h5diffdebug2("h5tools_detect_vlen - errstat:%d\n", opts->err_stat);
 
     /*------------------------------------------------------------------------
@@ -411,11 +414,12 @@ hsize_t diff_datasetid(hid_t did1,
             h5diffdebug2("diff_array nfound:%d\n", nfound);
 
             /* reclaim any VL memory, if necessary */
-            if(vl_data) {
-                h5difftrace("check vl_data\n");
+            h5diffdebug2("check vl_data1:%d\n", vl_data1);
+            if(vl_data1)
                 H5Dvlen_reclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
+            h5diffdebug2("check vl_data2:%d\n", vl_data2);
+            if(vl_data2)
                 H5Dvlen_reclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
-            } /* end if */
             if(buf1 != NULL) {
                 HDfree(buf1);
                 buf1 = NULL;
@@ -505,10 +509,10 @@ hsize_t diff_datasetid(hid_t did1,
                         dadims, opts, name1, name2, dam_tid, did1, did2);
 
                 /* reclaim any VL memory, if necessary */
-                if(vl_data) {
+                if(vl_data1)
                     H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf1);
-                    H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf2);
-                } /* end if */
+                if(vl_data2)
+                    H5Dvlen_reclaim(m_tid2, sm_space, H5P_DEFAULT, sm_buf2);
 
                 /* calculate the next hyperslab offset */
                 for(i = rank1, carry = 1; i > 0 && carry; --i) {
@@ -545,29 +549,29 @@ done:
     /* free */
     if(buf1 != NULL) {
         /* reclaim any VL memory, if necessary */
-        if(vl_data)
+        if(vl_data1)
             H5Dvlen_reclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
         HDfree(buf1);
         buf1 = NULL;
     }
     if(buf2 != NULL) {
         /* reclaim any VL memory, if necessary */
-        if(vl_data)
+        if(vl_data2)
             H5Dvlen_reclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
         HDfree(buf2);
         buf2 = NULL;
     }
     if(sm_buf1 != NULL) {
         /* reclaim any VL memory, if necessary */
-        if(vl_data)
+        if(vl_data1)
             H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf1);
         HDfree(sm_buf1);
         sm_buf1 = NULL;
     }
     if(sm_buf2 != NULL) {
         /* reclaim any VL memory, if necessary */
-        if(vl_data)
-            H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf2);
+        if(vl_data2)
+            H5Dvlen_reclaim(m_tid2, sm_space, H5P_DEFAULT, sm_buf2);
         HDfree(sm_buf2);
         sm_buf2 = NULL;
     }
@@ -576,6 +580,7 @@ done:
     H5E_BEGIN_TRY {
         H5Sclose(sid1);
         H5Sclose(sid2);
+        H5Sclose(sm_space);
         H5Tclose(f_tid1);
         H5Tclose(f_tid2);
         H5Tclose(m_tid1);
