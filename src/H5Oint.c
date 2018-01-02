@@ -43,6 +43,8 @@
 #endif /* H5O_ENABLE_BOGUS */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5SMprivate.h"        /* Shared object header messages            */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative.h"         /* Virtual Object Layer (native)            */
 
 
 /****************/
@@ -581,12 +583,11 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
     H5F_DECR_NOPEN_OBJS(loc->file);
 
 #ifdef H5O_DEBUG
-    if(H5DEBUG(O)) {
-        if(H5F_FILE_ID(loc->file)< 0 && 1 == H5F_NREFS(loc->file))
-            HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n",
-                loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
-	else
-	    HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
+    if (H5DEBUG(O)) {
+        if (FALSE == H5F_ID_EXISTS(loc->file) && 1 == H5F_NREFS(loc->file))
+            HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n", loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
+        else
+            HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
     }
 #endif
 
@@ -2368,9 +2369,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_visit
+ * Function:    H5O_visit
  *
- * Purpose:	Recursively visit an object and all the objects reachable
+ * Purpose:     Recursively visit an object and all the objects reachable
  *              from it.  If the starting object is a group, all the objects
  *              linked to from that group will be visited.  Links within
  *              each group are visited according to the order within the
@@ -2386,32 +2387,28 @@ done:
  *              iteration index and iteration order given) will be used to in
  *              the callback about the object.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
- *
- * Programmer:	Quincey Koziol
- *		November 24 2007
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id)
 {
     H5O_iter_visit_ud_t udata;  /* User data for callback */
-    H5G_loc_t	loc;            /* Location of reference object */
     H5G_loc_t   obj_loc;        /* Location used to open object */
     H5G_name_t  obj_path;       /* Opened object group hier. path */
     H5O_loc_t   obj_oloc;       /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     H5O_info_t  oinfo;          /* Object info struct */
-    hid_t       obj_id = (-1);  /* ID of object */
+    hid_t       obj_id = H5I_INVALID_HID;  /* ID of object */
     herr_t      ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2420,8 +2417,7 @@ H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     HDmemset(&udata, 0, sizeof(udata));
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    HDassert(loc);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -2429,30 +2425,47 @@ H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5G_loc_reset(&obj_loc);
 
     /* Find the object's location */
-    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
+    if (H5G_loc_find(loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
     loc_found = TRUE;
 
     /* Get the object's info */
-    if(H5O_get_info(&obj_oloc, dxpl_id, TRUE, &oinfo) < 0)
+    if (H5O_get_info(&obj_oloc, dxpl_id, TRUE, &oinfo) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object info")
 
     /* Open the object */
     /* (Takes ownership of the obj_loc information) */
-    if((obj_id = H5O_open_by_loc(&obj_loc, lapl_id, dxpl_id, TRUE)) < 0)
+    if ((obj_id = H5O_open_by_loc(&obj_loc, lapl_id, dxpl_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
+    /* get the native object from the ID created by the object header and create 
+     * a "VOL object" ID
+     */
+    {
+        void  *temp_obj = NULL;
+        H5I_type_t obj_type;
+
+        obj_type = H5I_get_type(obj_id);
+        if (NULL == (temp_obj = H5I_remove(obj_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+        /* Get an atom for the datatype */
+        if ((obj_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    }
+
     /* Make callback for starting object */
-    if((ret_value = op(obj_id, ".", &oinfo, op_data)) < 0)
+    if ((ret_value = op(obj_id, ".", &oinfo, op_data)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "can't visit objects")
 
     /* Check return value of first callback */
-    if(ret_value != H5_ITER_CONT)
+    if (ret_value != H5_ITER_CONT)
         HGOTO_DONE(ret_value);
 
     /* Check for object being a group */
-    if(oinfo.type == H5O_TYPE_GROUP) {
+    if (oinfo.type == H5O_TYPE_GROUP) {
         H5G_loc_t	start_loc;          /* Location of starting group */
+        H5G_loc_t	vis_loc;            /* Location of visited group */
 
         /* Get the location of the starting group */
         if(H5G_loc(obj_id, &start_loc) < 0)
@@ -2467,16 +2480,16 @@ H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         udata.op_data = op_data;
 
         /* Create skip list to store visited object information */
-        if((udata.visited = H5SL_create(H5SL_TYPE_OBJ, NULL)) == NULL)
+        if ((udata.visited = H5SL_create(H5SL_TYPE_OBJ, NULL)) == NULL)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create skip list for visited objects")
 
         /* If its ref count is > 1, we add it to the list of visited objects */
         /* (because it could come up again during traversal) */
-        if(oinfo.rc > 1) {
+        if (oinfo.rc > 1) {
             H5_obj_t *obj_pos;                  /* New object node for visited list */
 
             /* Allocate new object "position" node */
-            if((obj_pos = H5FL_MALLOC(H5_obj_t)) == NULL)
+            if ((obj_pos = H5FL_MALLOC(H5_obj_t)) == NULL)
                 HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "can't allocate object node")
 
             /* Construct unique "position" for this object */
@@ -2484,23 +2497,28 @@ H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
             obj_pos->addr = oinfo.addr;
 
             /* Add to list of visited objects */
-            if(H5SL_insert(udata.visited, obj_pos, obj_pos) < 0)
+            if (H5SL_insert(udata.visited, obj_pos, obj_pos) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object node into visited list")
-        } /* end if */
+        }
+
+        /* Get the location of the visited group */
+        if (H5G_loc(obj_id, &vis_loc) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
         /* Call internal group visitation routine */
-        if((ret_value = H5G_visit(obj_id, ".", idx_type, order, H5O_visit_cb, &udata, lapl_id, dxpl_id)) < 0)
+        if ((ret_value = H5G_visit(&vis_loc, ".", idx_type, order, H5O_visit_cb, &udata, lapl_id, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
     } /* end if */
 
 done:
-    if(obj_id > 0) {
-        if(H5I_dec_app_ref(obj_id) < 0)
+    if (obj_id != H5I_INVALID_HID) {
+        if (H5I_dec_app_ref(obj_id) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
-    } /* end if */
-    else if(loc_found && H5G_loc_free(&obj_loc) < 0)
+    }
+    else if (loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
-    if(udata.visited)
+
+    if (udata.visited)
         H5SL_destroy(udata.visited, H5O_free_visit_visited, NULL);
 
     FUNC_LEAVE_NOAPI(ret_value)

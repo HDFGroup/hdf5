@@ -27,6 +27,7 @@
 #include "hdf5.h"
 #include "h5test.h"
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /*
  * This file needs to access private information from the H5F package.
@@ -1169,7 +1170,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
             TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if((f = (H5F_t *)H5I_object(fid)) == NULL)
+    if((f = (H5F_t *)H5VL_object(fid)) == NULL)
         FAIL_STACK_ERROR
 
     /*
@@ -1327,7 +1328,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if((f = (H5F_t *)H5I_object(fid)) == NULL)
+    if((f = (H5F_t *)H5VL_object(fid)) == NULL)
         FAIL_STACK_ERROR
 
     /* File's superblock: log retry 1 for 1 time */
@@ -1431,7 +1432,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object for fid */
-    if((f = (H5F_t *)H5I_object(fid)) == NULL)
+    if((f = (H5F_t *)H5VL_object(fid)) == NULL)
         FAIL_STACK_ERROR
 
     /* Re-open fid */
@@ -1439,7 +1440,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object for fid1 */
-    if((f1 = (H5F_t *)H5I_object(fid1)) == NULL)
+    if((f1 = (H5F_t *)H5VL_object(fid1)) == NULL)
         FAIL_STACK_ERROR
 
     /* For fid: fixed array data block page--log retry 9 for 500 times */
@@ -6289,7 +6290,7 @@ test_bug_refresh(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         FAIL_STACK_ERROR
 
     /* Create groups: compact to dense storage */

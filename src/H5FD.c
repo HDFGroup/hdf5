@@ -1340,18 +1340,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FDread
+ * Function:    H5FDread
  *
- * Purpose:	Reads SIZE bytes from FILE beginning at address ADDR
- *		according to the data transfer property list DXPL_ID (which may
- *		be the constant H5P_DEFAULT). The result is written into the
- *		buffer BUF.
+ * Purpose:     Reads SIZE bytes from FILE beginning at address ADDR
+ *              according to the data transfer property list DXPL_ID (which may
+ *              be the constant H5P_DEFAULT). The result is written into the
+ *              buffer BUF.
  *
- * Return:	Success:	Non-negative. The read result is written into
- *				the BUF buffer which should be allocated by
- *				the caller.
+ * Return:      Success:    SUCCEED
+ *                          The read result is written into the BUF buffer
+ *                          which should be allocated by the caller.
  *
- *		Failure:	Negative. The contents of BUF is undefined.
+ *              Failure:	FAIL
+ *                          The contents of BUF are undefined.
  *
  *-------------------------------------------------------------------------
  */
@@ -1359,44 +1360,46 @@ herr_t
 H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	 void *buf/*out*/)
 {
-    H5FD_io_info_t fdio_info;           /* File driver I/O object */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5FD_io_info_t  fdio_info;              /* File driver I/O object   */
+    herr_t          ret_value = SUCCEED;    /* Return value             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "*xMtiazx", file, type, dxpl_id, addr, size, buf);
 
     /* Check args */
-    if(!file || !file->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file class pointer")
+    if (!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "result buffer parameter can't be NULL")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
-    if(H5P_DEFAULT == dxpl_id)
+    if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
-    if(!buf)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer")
 
     /* Set up the file driver I/O info object */
     fdio_info.file = file;
-    if(H5FD_MEM_DRAW == type) {
-        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+    if (H5FD_MEM_DRAW == type) {
+        if (NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        if (NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    } /* end if */
+    }
     else {
-        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        if (NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+        if (NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    } /* end else */
+    }
 
     /* Do the real work */
     /* (Note compensating for base address addition in internal routine) */
-    if(H5FD_read(&fdio_info, type, addr - file->base_addr, size, buf) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed")
+    if (H5FD_read(&fdio_info, type, addr - file->base_addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1404,16 +1407,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FDwrite
+ * Function:    H5FDwrite
  *
- * Purpose:	Writes SIZE bytes to FILE beginning at address ADDR according
- *		to the data transfer property list DXPL_ID (which may be the
- *		constant H5P_DEFAULT). The bytes to be written come from the
- *		buffer BUF.
+ * Purpose:     Writes SIZE bytes to FILE beginning at address ADDR according
+ *              to the data transfer property list DXPL_ID (which may be the
+ *              constant H5P_DEFAULT). The bytes to be written come from the
+ *              buffer BUF.
  *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -1421,43 +1422,46 @@ herr_t
 H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	  const void *buf)
 {
-    H5FD_io_info_t fdio_info;           /* File driver I/O object */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5FD_io_info_t  fdio_info;              /* File driver I/O object   */
+    herr_t          ret_value = SUCCEED;    /* Return value             */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "*xMtiaz*x", file, type, dxpl_id, addr, size, buf);
 
     /* Check args */
-    if(!file || !file->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file class pointer")
+    if (!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "result buffer parameter can't be NULL")
+
     /* Get the default dataset transfer property list if the user didn't provide one */
-    if(H5P_DEFAULT == dxpl_id)
+    if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
-    if(!buf)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer")
 
     /* Set up the file driver I/O info object */
     fdio_info.file = file;
-    if(H5FD_MEM_DRAW == type) {
-        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+    if (H5FD_MEM_DRAW == type) {
+        if (NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        if (NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    } /* end if */
+    }
     else {
-        if(NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        if (NULL == (fdio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-        if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+        if (NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    } /* end else */
+    }
 
     /* The real work */
     /* (Note compensating for base address addition in internal routine) */
-    if(H5FD_write(&fdio_info, type, addr - file->base_addr, size, buf) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed")
+    if (H5FD_write(&fdio_info, type, addr - file->base_addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1465,17 +1469,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FDflush
+ * Function:    H5FDflush
  *
- * Purpose:	Notify driver to flush all cached data.  If the driver has no
- *		flush method then nothing happens.
+ * Purpose:     Notify driver to flush all cached data.  If the driver has no
+ *              flush method then nothing happens.
  *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Thursday, July 29, 1999
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -1488,17 +1487,20 @@ H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
     H5TRACE3("e", "*xib", file, dxpl_id, closing);
 
     /* Check args */
-    if(!file || !file->cls)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    if(H5P_DEFAULT == dxpl_id)
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file class pointer")
+
+    if (H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
 
     /* Do the real work */
-    if(H5FD_flush(file, dxpl_id, closing) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "file flush request failed")
+    if (H5FD_flush(file, dxpl_id, closing) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "file flush request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1893,7 +1895,7 @@ H5FDdriver_query(hid_t driver_id, unsigned long *flags/*out*/)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", driver_id, flags);
 
-    if(NULL == flags)
+    if (NULL == flags)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "flags parameter cannot be NULL")
 
     /* Check for the driver to query and then query it */

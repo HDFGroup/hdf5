@@ -22,7 +22,6 @@
 #include "testhdf5.h"
 #include "cache_common.h"
 
-#include "H5HLprivate.h"
 
 /* ============ */
 /* Test Defines */
@@ -118,7 +117,7 @@ static int dump_cache(hid_t fid)
     H5F_t *f;           /* File Pointer */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
 
     /* Dump the cache */
@@ -158,7 +157,7 @@ verify_no_unknown_tags(hid_t fid)
     int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -206,7 +205,7 @@ mark_all_entries_investigated(hid_t fid)
     int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -252,7 +251,7 @@ reset_all_entries_investigated(hid_t fid)
     int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -300,7 +299,7 @@ verify_tag(hid_t fid, int id, haddr_t tag)
     int i;                      /* Iterator */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
     cache_ptr = f->shared->cache;
 
@@ -340,7 +339,7 @@ evict_entries(hid_t fid)
     H5F_t *f;         /* File Pointer */
 
     /* Get Internal File / Cache Pointers */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         TEST_ERROR;
 
     /* Mark all entries investigated */
@@ -3598,7 +3597,7 @@ check_external_link_open_tags(void)
     /* =========================== */
     /* Close open objects and file */
     /* =========================== */
-    if ( (H5Gclose(xid)) < 0 ) TEST_ERROR;
+    if ( H5Gclose(xid) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid2) < 0 ) TEST_ERROR;
 
@@ -3648,7 +3647,7 @@ check_invalid_tag_application(void)
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Get internal file pointer*/
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5VL_object(fid)) ) TEST_ERROR;
 
     /* Create dxpl */
     if ( (dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;

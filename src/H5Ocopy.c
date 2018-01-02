@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Ocopy.c
- *			Nov  6 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5Ocopy.c
  *
- * Purpose:		Object copying routines.
+ * Purpose:     Object copying routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -32,18 +30,18 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Aprivate.h"         /* Attributes                           */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5HGprivate.h"        /* Global Heaps                         */
-#include "H5FOprivate.h"        /* File objects                         */
-#include "H5Lprivate.h"         /* Links			  	*/
-#include "H5MFprivate.h"	/* File memory management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Aprivate.h"         /* Attributes                               */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free lists                               */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5HGprivate.h"        /* Global Heaps                             */
+#include "H5FOprivate.h"        /* File objects                             */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MFprivate.h"        /* File memory management                   */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Opkg.h"             /* Object headers                           */
+#include "H5Pprivate.h"         /* Property lists                           */
 
 
 /****************/
@@ -193,10 +191,7 @@ H5FL_DEFINE(haddr_t);
  *             hid_t lcpl_id            IN: Properties which apply to the new hard link
  *
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              June 4, 2005
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -204,80 +199,53 @@ herr_t
 H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id)
 {
-    H5G_loc_t	loc;                    /* Source group group location */
-    H5G_loc_t	src_loc;                /* Source object group location */
-    H5G_loc_t	dst_loc;                /* Destination group location */
-
-    /* for opening the destination object */
-    H5G_name_t  src_path;               /* Opened source object hier. path */
-    H5O_loc_t   src_oloc;               /* Opened source object object location */
-    htri_t      dst_exists;             /* Does destination name exist already? */
-    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
-    hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t    *obj1 = NULL;        /* object token of src_id */
+    H5VL_loc_params_t loc_params1;
+    H5VL_object_t    *obj2 = NULL;        /* object token of dst_id */
+    H5VL_loc_params_t loc_params2;
+    herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name,
              ocpypl_id, lcpl_id);
-
-    /* Check arguments */
-    if(H5G_loc(src_loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(H5G_loc(dst_loc_id, &dst_loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!src_name || !*src_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no source name specified")
-    if(!dst_name || !*dst_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
-
-    /* check if destination name already exists */
-    if((dst_exists = H5L_exists_tolerant(&dst_loc, dst_name, H5P_DEFAULT, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check if destination name exists")
-    if(TRUE == dst_exists)
-        HGOTO_ERROR(H5E_OHDR, H5E_EXISTS, FAIL, "destination object already exists")
-
-    /* Set up opened group location to fill in */
-    src_loc.oloc = &src_oloc;
-    src_loc.path = &src_path;
-    H5G_loc_reset(&src_loc);
-
-    /* Find the source object to copy */
-    if(H5G_loc_find(&loc, src_name, &src_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
-    loc_found = TRUE;
-
-    /* Open source object's object header */
-    if(H5O_open(&src_oloc) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
-    obj_open = TRUE;
+    
+    /* XXX: Check source and destination names */
 
     /* Get correct property lists */
-    if(H5P_DEFAULT == lcpl_id) {
-        if((lcpl_id = H5L_get_default_lcpl()) < 0)
+    if (H5P_DEFAULT == lcpl_id) {
+        if ((lcpl_id = H5L_get_default_lcpl()) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to get default lcpl")
-    } /* end if */
+    }
     else
-        if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+        if (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
 
     /* Get object copy property list */
-    if(H5P_DEFAULT == ocpypl_id)
+    if (H5P_DEFAULT == ocpypl_id)
         ocpypl_id = H5P_OBJECT_COPY_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
+        if (TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
 
-    /* Do the actual copying of the object */
-    if(H5O_copy_obj(&src_loc, &dst_loc, dst_name, ocpypl_id, lcpl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+    /* get the object */
+    if (NULL == (obj1 = (H5VL_object_t *)H5I_object(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    loc_params1.type        = H5VL_OBJECT_BY_SELF;
+    loc_params1.obj_type    = H5I_get_type(src_loc_id);
+
+    /* get the object */
+    if (NULL == (obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    loc_params2.type        = H5VL_OBJECT_BY_SELF;
+    loc_params2.obj_type    = H5I_get_type(dst_loc_id);
+
+    /* Copy the object through the VOL */
+    if ((ret_value = H5VL_object_copy(obj1->vol_obj, loc_params1, obj1->vol_info->vol_cls, src_name,
+                                     obj2->vol_obj, loc_params2, obj2->vol_info->vol_cls, dst_name,
+                                     ocpypl_id, lcpl_id, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to copy object")
 
 done:
-    if(loc_found && H5G_loc_free(&src_loc) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
-    if(obj_open && H5O_close(&src_oloc, NULL) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ocopy() */
 
@@ -1549,7 +1517,7 @@ H5O_copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get attribute datatype")
 
     /* Check if the datatype is committed and search the skip list if so */
-    if(H5T_committed(dt)) {
+    if (H5T_is_named(dt)) {
         /* Allocate key */
         if(NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1571,8 +1539,8 @@ H5O_copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
             if(H5SL_insert(udata->dst_dt_list, addr, key) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
             obj_inserted = TRUE;
-        } /* end if */
-    } /* end if */
+        }
+    }
 
 done:
     /* Release resources */
@@ -1670,9 +1638,8 @@ H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
         if(NULL == (key->dt = (H5T_t *)H5O_msg_read(obj_oloc, H5O_DTYPE_ID, NULL, udata->dxpl_id)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read DTYPE message")
 
-        /* Check if the datatype is committed and search the skip list if so
-            */
-        if(H5T_committed(key->dt)) {
+        /* Check if the datatype is committed and search the skip list if so */
+        if (H5T_is_named(key->dt)) {
             /* Get datatype object fileno */
             H5F_GET_FILENO(obj_oloc->file, key->fileno);
 
@@ -1706,12 +1673,13 @@ done:
             if(key->dt)
                 key->dt = (H5T_t *)H5O_msg_free(H5O_DTYPE_ID, key->dt);
             key = H5FL_FREE(H5O_copy_search_comm_dt_key_t, key);
-        } /* end if */
+        }
+
         if(addr) {
             HDassert(ret_value < 0);
             addr = H5FL_FREE(haddr_t, addr);
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_copy_search_comm_dt_check */
@@ -1810,7 +1778,7 @@ H5O_copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src,
     HDassert(oh_src);
     HDassert(oloc_dst);
     HDassert(oloc_dst->file);
-    HDassert(H5F_FILE_ID(oloc_dst->file) >= 0);
+    HDassert(H5F_ID_EXISTS(oloc_dst->file));
     HDassert(cpy_info);
 
     /* Allocate key */
@@ -1922,7 +1890,7 @@ H5O_copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src,
 
                 /* Traverse the destination file, adding committed datatypes to the skip
                 * list */
-                if(H5G_visit(H5F_FILE_ID(oloc_dst->file), "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O_copy_search_comm_dt_cb, &udata, H5P_LINK_ACCESS_DEFAULT, dxpl_id) < 0)
+                if(H5G_visit(&dst_root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O_copy_search_comm_dt_cb, &udata, H5P_LINK_ACCESS_DEFAULT, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 cpy_info->dst_dt_list_complete = TRUE;
             } /* end if */

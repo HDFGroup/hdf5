@@ -278,8 +278,6 @@ test_classes(void)
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -324,11 +322,6 @@ test_copy(void)
  * Programmer:  Quincey Koziol
  *              Saturday, August 30, 2003
  *
- * Modifications:
- *              Raymond Lu
- *              8 December 2009
- *              I added a field of VL string in the compound type to test
- *              H5Tdetect_class correctly detect it as string type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -500,8 +493,6 @@ error:
  * Programmer:  Robb Matzke
  *              Wednesday, January  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -666,8 +657,6 @@ error:
  * Programmer:	Robb Matzke
  *              Thursday, June 17, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -797,8 +786,6 @@ error:
  * Programmer:	Robb Matzke
  *              Thursday, June 17, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -923,8 +910,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Thursday, June 17, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1060,8 +1045,6 @@ error:
  * Programmer:	Robb Matzke
  *              Thursday, June 17, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1163,8 +1146,6 @@ test_compound_5(void)
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, December 13, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1276,11 +1257,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, December 18, 2001
- *
- * Modifications:
- *              The size of compound datatype can be expanded now.
- *              Raymond Lu
- *              Wednesday, September 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1423,11 +1399,6 @@ error:
  * Programmer:  Robb Matzke
  *              Wednesday, January  7, 1998
  *
- * Modifications:
- *              Raymond Lu
- *              27 June 2008
- *              Added verification of compound type size for H5Tpack and
- *              test for array of nested compound type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -1669,8 +1640,6 @@ test_compound_8(void)
  * Programmer:  Raymond Lu
  *              Wednesday, June 9, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1891,8 +1860,6 @@ test_compound_9(void)
  * Programmer:  Raymond Lu
  *              Tuesday, June 15, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2086,8 +2053,6 @@ test_compound_10(void)
  *
  * Programmer:  Quincey Koziol
  *              Saturday, August 7, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2330,8 +2295,6 @@ error:
  * Programmer:  Raymond Lu
  *              Wednesday, September 29, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2515,8 +2478,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              Monday, August 25, 2008
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2907,8 +2868,6 @@ test_compound_14(void)
  * Programmer:  Neil Fortner
  *              Friday, September 19, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3066,8 +3025,6 @@ test_compound_15(void)
  * Programmer:  Neil Fortner
  *              Friday, October 3, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3158,8 +3115,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              Tuesday, January 13, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3405,11 +3360,6 @@ error:
  * Programmer:  Raymond Lu
  *              Thursday, April 4, 2002
  *
- * Modifications:
- *              Raymond Lu
- *              Wednesday, Febuary 9, 2005
- *              Added test for H5Tenum_valueof, H5Tenum_nameof, and
- *              H5Tget_member_value.
  *-------------------------------------------------------------------------
  */
 static int
@@ -3651,8 +3601,6 @@ test_query(void)
  * Programmer:	Robb Matzke
  *              Thursday, June  4, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3780,8 +3728,6 @@ test_transient (hid_t fapl)
  * Programmer:	Robb Matzke
  *              Monday, June  1, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3797,116 +3743,131 @@ test_named (hid_t fapl)
     TESTING("named datatypes");
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
-	goto error;
-    }
-    if ((space = H5Screate_simple (2, ds_size, ds_size)) < 0) goto error;
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+    if ((space = H5Screate_simple (2, ds_size, ds_size)) < 0)
+        goto error;
 
     /* Predefined types cannot be committed */
     H5E_BEGIN_TRY {
-	status = H5Tcommit2(file, "test_named_1 (should not exist)", H5T_NATIVE_INT, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Tcommit2(file, "test_named_1 (should not exist)", H5T_NATIVE_INT, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    if(status >= 0) {
-	H5_FAILED();
-	HDputs ("    Predefined types should not be committable!");
-	goto error;
+    if (status >= 0) {
+        H5_FAILED();
+        HDputs("    Predefined types should not be committable!");
+        goto error;
     }
 
     /* Copy a predefined datatype and commit the copy */
-    if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) goto error;
-    if(H5Tcommit2(file, "native-int", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) goto error;
-    if((status = H5Tcommitted(type)) < 0) goto error;
-    if(0 == status) {
-	H5_FAILED();
-	HDputs ("    H5Tcommitted() returned false!");
-	goto error;
+    if ((type = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        goto error;
+    if (H5Tcommit2(file, "native-int", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto error;
+    if ((status = H5Tcommitted(type)) < 0)
+        goto error;
+    if (0 == status) {
+        H5_FAILED();
+        HDputs("    H5Tcommitted() returned false!");
+        goto error;
     }
 
     /* We should not be able to modify a type after it has been committed. */
     H5E_BEGIN_TRY {
-	status = H5Tset_precision (type, (size_t)256);
+        status = H5Tset_precision(type, (size_t)256);
     } H5E_END_TRY;
-    if (status>=0) {
-	H5_FAILED();
-	HDputs ("    Committed type is not constant!");
-	goto error;
+    if (status >= 0) {
+        H5_FAILED();
+        HDputs("    Committed type is not constant!");
+        goto error;
     }
 
     /* We should not be able to re-commit a committed type */
     H5E_BEGIN_TRY {
-	status = H5Tcommit2(file, "test_named_2 (should not exist)", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Tcommit2(file, "test_named_2 (should not exist)", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    if(status >= 0) {
-	H5_FAILED();
-	HDputs ("    Committed types should not be recommitted!");
-	goto error;
+    if (status >= 0) {
+        H5_FAILED();
+        HDputs("    Committed types should not be recommitted!");
+        goto error;
     }
 
     /* It should be possible to define an attribute for the named type */
-    if((attr1 = H5Acreate2(type, "attr1", H5T_NATIVE_UCHAR, space,
-			  H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
-    for(i = 0; i < (size_t)ds_size[0]; i++)
-        for(j = 0; j < (size_t)ds_size[1]; j++)
+    if ((attr1 = H5Acreate2(type, "attr1", H5T_NATIVE_UCHAR, space, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+    for (i = 0; i < (size_t)ds_size[0]; i++)
+        for (j = 0; j < (size_t)ds_size[1]; j++)
             attr_data[i][j] = (unsigned)(i * ds_size[1] + j);
-    if(H5Awrite(attr1, H5T_NATIVE_UINT, attr_data) < 0) goto error;
-    if(H5Aclose(attr1) < 0) goto error;
+    if (H5Awrite(attr1, H5T_NATIVE_UINT, attr_data) < 0)
+        goto error;
+    if (H5Aclose(attr1) < 0)
+        goto error;
 
-    /*
-     * Copying a committed type should result in a transient type which is
+    /* Copying a committed type should result in a transient type which is
      * not locked.
      */
-    if((t2 = H5Tcopy(type)) < 0) goto error;
-    if((status = H5Tcommitted(t2)) < 0) goto error;
-    if(status) {
-	H5_FAILED();
-	HDputs ("    Copying a named type should result in a transient type!");
-	goto error;
+    if ((t2 = H5Tcopy(type)) < 0)
+        goto error;
+    if ((status = H5Tcommitted(t2)) < 0)
+        goto error;
+    if (status) {
+        H5_FAILED();
+        HDputs("    Copying a named type should result in a transient type!");
+        goto error;
     }
-    if(H5Tset_precision(t2, (size_t)256) < 0) goto error;
-    if(H5Tclose(t2) < 0) goto error;
+    if (H5Tset_precision(t2, (size_t)256) < 0)
+        goto error;
+    if (H5Tclose(t2) < 0)
+        goto error;
 
-    /*
-     * Close the committed type and reopen it.  It should return a named type.
+    /* Close the committed type and reopen it.  It should return a named type.
      */
-    if(H5Tclose(type) < 0) goto error;
-    if((type = H5Topen2(file, "native-int", H5P_DEFAULT)) < 0)
+    if (H5Tclose(type) < 0)
+        goto error;
+    if ((type = H5Topen2(file, "native-int", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((status = H5Tcommitted(type)) < 0) goto error;
-    if(!status) {
-	H5_FAILED();
-	HDputs ("    Opened named types should be named types!");
-	goto error;
+    if ((status = H5Tcommitted(type)) < 0)
+        goto error;
+    if (!status) {
+        H5_FAILED();
+        HDputs("    Opened named types should be named types!");
+        goto error;
     }
 
     /* Create a dataset that uses the named type */
-    if((dset = H5Dcreate2(file, "dset1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	goto error;
+    if ((dset = H5Dcreate2(file, "dset1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Get the dataset's datatype and make sure it's a named type */
-    if((t2 = H5Dget_type(dset)) < 0) goto error;
-    if((status = H5Tcommitted(t2)) < 0) goto error;
-    if(!status) {
-	H5_FAILED();
-	HDputs ("    Dataset type should be a named type!");
-	goto error;
+    if ((t2 = H5Dget_type(dset)) < 0)
+        goto error;
+    if ((status = H5Tcommitted(t2)) < 0)
+        goto error;
+    if (!status) {
+        H5_FAILED();
+        HDputs("    Dataset type should be a named type!");
+        goto error;
     }
 
     /* Close the dataset, then close its type, then reopen the dataset */
-    if(H5Dclose(dset) < 0) goto error;
-    if(H5Tclose(t2) < 0) goto error;
-    if((dset = H5Dopen2(file, "dset1", H5P_DEFAULT)) < 0) goto error;
+    if (H5Dclose(dset) < 0)
+        goto error;
+    if (H5Tclose(t2) < 0)
+        goto error;
+    if ((dset = H5Dopen2(file, "dset1", H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Get the dataset's type and make sure it's named */
-    if((t2 = H5Dget_type(dset)) < 0) goto error;
-    if((status = H5Tcommitted(t2)) < 0) goto error;
-    if(!status) {
-	H5_FAILED();
-	HDputs ("    Dataset type should be a named type!");
-	goto error;
+    if ((t2 = H5Dget_type(dset)) < 0)
+        goto error;
+    if ((status = H5Tcommitted(t2)) < 0)
+        goto error;
+    if (!status) {
+        H5_FAILED();
+        HDputs("    Dataset type should be a named type!");
+        goto error;
     }
 
-    /*
-     * Close the dataset and create another with the type returned from the
+    /* Close the dataset and create another with the type returned from the
      * first dataset.
      */
     if(H5Dclose(dset) < 0) goto error;
@@ -4567,8 +4528,6 @@ error:
  * Programmer:	Robb Matzke
  *              Tuesday, January  5, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4728,8 +4687,6 @@ test_conv_enum_2(void)
  * Programmer:	Robb Matzke
  *              Thursday, May 20, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4825,8 +4782,6 @@ error:
  *
  * Programmer:	Raymond Lu
  *              Wednesday, April 5, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4954,8 +4909,6 @@ error:
  * Programmer:	Robb Matzke
  *              Friday, June  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4980,8 +4933,6 @@ convert_opaque(hid_t H5_ATTR_UNUSED st, hid_t H5_ATTR_UNUSED dt, H5T_cdata_t *cd
  *
  * Programmer:	Raymond Lu
  *              June 2, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5150,8 +5101,6 @@ error:
  * Programmer:	Raymond Lu
  *              Wednesday, April 5, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5265,13 +5214,6 @@ opaque_funcs(void)
  * Programmer:  Raymond Lu
  *              July 14, 2004
  *
- * Modifications: Raymond Lu
- *              July 13, 2009
- *              Added the test for VL string types.
- *
- *              Raymond Lu
- *              17 February 2011
- *              I added the test of reference count for decoded datatypes.
  *-------------------------------------------------------------------------
  */
 static int
@@ -6055,8 +5997,6 @@ conv_except(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
  *              make it portable to other architectures, but further
  *              input and changes are welcome.  -QAK
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6492,8 +6432,6 @@ error:
  * Programmer:	Neil Fortner
  *              Thursday, June 4, 2009
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6681,8 +6619,9 @@ error:
     return 1;
 } /* end test_named_indirect_reopen() */
 
-static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
-    hbool_t new_format)
+/* XXX: FIX THIS - assert 'error checking', no return type, no ID init = badness! */
+static void
+create_del_obj_named_test_file(const char *filename, hid_t fapl, hbool_t new_format)
 {
     hid_t file;         /* File ID */
     hid_t type;         /* Datatype ID */
@@ -6809,65 +6748,84 @@ test_delete_obj_named(hid_t fapl)
     TESTING("deleting objects that use named datatypes");
 
     /* Set up filenames & FAPLs */
-    if((fapl2 = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
-    h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
-    h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
+    if ((fapl2 = H5Pcopy(fapl)) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[8], fapl, filename, sizeof(filename));
+    h5_fixname(FILENAME[9], fapl2, filename2, sizeof(filename2));
 
     /* Loop over old & new format files */
-    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = FALSE; new_format <= TRUE; new_format++) {
         /* Create test file, with attribute that uses committed datatype */
         create_del_obj_named_test_file(filename, fapl, new_format);
 
-/* Test deleting dataset opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        /* Test deleting dataset opened through different file ID */
+        if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
+        if ((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
 
-        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+        if ((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+        if (H5Dclose(dset) < 0)
+            TEST_ERROR;
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+        if (H5Fclose(filea1) < 0)
+            TEST_ERROR;
 
-        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+        if ((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0)
+            TEST_ERROR;
 
-        if(H5Ldelete(filea2, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if (H5Ldelete(filea2, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT) < 0)
+            TEST_ERROR;
 
-        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
-
+        if (H5Fclose(filea2) < 0)
+            TEST_ERROR;
+        if (H5Fclose(fileb) < 0)
+            TEST_ERROR;
 
         /* Create test file, with attribute that uses committed datatype */
         create_del_obj_named_test_file(filename, fapl, new_format);
 
 /* Test deleting attribute opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
+        if ((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR;
 
-        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+        if ((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+        if (H5Aclose(attr) < 0)
+            TEST_ERROR;
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+        if (H5Fclose(filea1) < 0)
+            TEST_ERROR;
 
-        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+        if ((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0)
+            TEST_ERROR;
 
-        if(H5Adelete_by_name(filea2, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if (H5Adelete_by_name(filea2, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT) < 0)
+            TEST_ERROR;
 
-        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
-    } /* end for */
+        if (H5Fclose(filea2) < 0)
+            TEST_ERROR;
+        if (H5Fclose(fileb) < 0)
+            TEST_ERROR;
+    }
 
-    if(H5Pclose(fapl2) < 0) FAIL_STACK_ERROR
+    if (H5Pclose(fapl2) < 0)
+        TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-	H5Tclose(attr);
-	H5Dclose(dset);
-	H5Pclose(fapl2);
-	H5Fclose(filea1);
-	H5Fclose(filea2);
-	H5Fclose(fileb);
+        H5Tclose(attr);
+        H5Dclose(dset);
+        H5Pclose(fapl2);
+        H5Fclose(filea1);
+        H5Fclose(filea2);
+        H5Fclose(fileb);
     } H5E_END_TRY;
     return 1;
 } /* end test_delete_obj_named() */

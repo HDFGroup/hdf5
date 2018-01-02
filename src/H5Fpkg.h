@@ -368,7 +368,7 @@ struct H5F_t {
     unsigned		    nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
     hbool_t             id_exists;      /* Whether an ID for this struct exists                         */
-    hid_t               file_id;        /* ID of this file                                              */
+//    hid_t               file_id;        /* ID of this file                                              */
     hbool_t             closing;        /* File is in the process of being closed                       */
     struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
     unsigned            nmounts;        /* Number of children mounted to this file                      */
@@ -402,6 +402,7 @@ typedef struct {
 } H5F_trav_obj_cnt_t;
 
 /* User data for traversal routine to get ID lists */
+/* XXX: Type of obj_count and max_objs should be identical! */
 typedef struct {
     size_t max_objs;
     hid_t *oid_list;
@@ -430,7 +431,7 @@ H5F_t *H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, H5FD_t *lf);
 H5_DLL herr_t H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush);
 H5_DLL herr_t H5F__flush(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing);
-H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t meta_dxpl_id, hid_t raw_dxpl_id);
+H5_DLL htri_t H5F_is_hdf5(const char *name, hid_t fapl_id, hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len, hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 H5_DLL herr_t H5F_close(H5F_t *f);

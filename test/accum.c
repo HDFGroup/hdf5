@@ -21,6 +21,7 @@
 #include "H5Fpkg.h"
 #include "H5FDpkg.h"
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Filename */
 #define FILENAME "accum.h5"
@@ -99,7 +100,7 @@ main(void)
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Get H5F_t * to internal file structure */
-    if(NULL == (f = (H5F_t *)H5I_object(fid))) FAIL_STACK_ERROR
+    if(NULL == (f = (H5F_t *)H5VL_object(fid))) FAIL_STACK_ERROR
 
     /* We'll be writing lots of garbage data, so extend the
         file a ways. 10MB should do. */
@@ -1872,7 +1873,7 @@ test_swmr_write_big(hbool_t newest_format)
         FAIL_STACK_ERROR
 
     /* Get H5F_t * to internal file structure */
-    if(NULL == (rf = (H5F_t *)H5I_object(fid))) FAIL_STACK_ERROR
+    if(NULL == (rf = (H5F_t *)H5VL_object(fid))) FAIL_STACK_ERROR
 
     /* Set up I/O info for operation */
     fio_info.f = rf;

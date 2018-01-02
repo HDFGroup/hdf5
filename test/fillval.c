@@ -762,15 +762,17 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     comp_datatype	*buf_c=NULL;
     H5D_space_status_t  allocation;
 
-    if(datatype==H5T_INTEGER)
+    if(datatype==H5T_INTEGER) {
         fillval = *(int*)_fillval;
+    }
     else if(datatype==H5T_COMPOUND) {
-	fill_c.a=((comp_datatype*)_fillval)->a;
+        fill_c.a=((comp_datatype*)_fillval)->a;
         fill_c.x=((comp_datatype*)_fillval)->x;
         fill_c.y=((comp_datatype*)_fillval)->y;
         fill_c.z=((comp_datatype*)_fillval)->z;
-    } else {
-        puts("Invalid type for test");
+    }
+    else {
+        HDputs("Invalid type for test");
         goto error;
     }
 
@@ -806,7 +808,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 	        goto error;
 	    }
 	/* case for compound datatype */
-	} else if(datatype==H5T_COMPOUND) {
+	}
+    else if(datatype==H5T_COMPOUND) {
             if(H5Dread(dset2, ctype_id, mspace, fspace, H5P_DEFAULT,
                 &rd_c) < 0) goto error;
             if(fill_time != H5D_FILL_TIME_NEVER && (!H5_FLT_ABS_EQUAL(rd_c.a, fill_c.a) ||
@@ -828,10 +831,10 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 
     /* Select all odd data locations in the file dataset */
     for (i=0, nelmts=1; i<5; i++) {
-	hs_size[i] = cur_size[i]/2;
-	hs_offset[i] = 0;
-	hs_stride[i] = 2;
-	nelmts *= hs_size[i];
+        hs_size[i] = cur_size[i]/2;
+        hs_offset[i] = 0;
+        hs_stride[i] = 2;
+        nelmts *= hs_size[i];
     }
     if((mspace=H5Screate_simple(5, hs_size, hs_size)) < 0) goto error;
     if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, hs_stride,
@@ -1092,14 +1095,20 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
 
-    if((dcpl=H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if(H5D_CHUNKED==layout) {
-        if(H5Pset_chunk(dcpl, 5, ch_size) < 0) goto error;
-    } else if(H5D_COMPACT==layout) {
-        if(H5Pset_layout(dcpl, H5D_COMPACT) < 0) goto error;
-    }
-    if((ctype_id=create_compound_type()) < 0) goto error;
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
 
+    if(H5D_CHUNKED==layout) {
+        if(H5Pset_chunk(dcpl, 5, ch_size) < 0)
+            goto error;
+    }
+    else if(H5D_COMPACT==layout) {
+        if(H5Pset_layout(dcpl, H5D_COMPACT) < 0)
+            goto error;
+    }
+
+    if((ctype_id=create_compound_type()) < 0)
+        goto error;
 
     /* I. Test H5D_ALLOC_TIME_LATE space allocation cases */
     if(H5D_COMPACT != layout) {
@@ -2359,8 +2368,6 @@ test_partalloc(hid_t fapl, const char *base_name)
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2380,8 +2387,8 @@ main(int argc, char *argv[])
             else if(!strcmp(argv[argno], "compact"))
                 test_compact =1;
             else {
-                fprintf(stderr, "usage: %s [contiguous] [chunked] [compact]\n", argv[0]);
-                exit(EXIT_FAILURE);
+                HDfprintf(stderr, "usage: %s [contiguous] [chunked] [compact]\n", argv[0]);
+                HDexit(EXIT_FAILURE);
             }
         } /* end for */
     } /* end if */
@@ -2444,15 +2451,15 @@ main(int argc, char *argv[])
 
     if(nerrors)
         goto error;
-    puts("All fill value tests passed.");
+    HDputs("All fill value tests passed.");
 
     if(h5_cleanup(FILENAME, fapl))
         HDremove(FILE_NAME_RAW);
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
-    puts("***** FILL VALUE TESTS FAILED *****");
-    return 1;
+    HDputs("***** FILL VALUE TESTS FAILED *****");
+    HDexit(EXIT_FAILURE);
 }
 

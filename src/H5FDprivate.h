@@ -22,13 +22,13 @@
 #include "H5FDpublic.h"
 
 /* Private headers needed by this file */
-#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Pprivate.h"         /* Property lists                           */
 
 /*
  * The MPI drivers are needed because there are
  * places where we check for things that aren't handled by these drivers.
  */
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
+#include "H5FDmpi.h"            /* MPI-based file drivers                   */
 
 
 /**************************/

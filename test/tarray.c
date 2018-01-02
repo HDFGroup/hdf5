@@ -1343,7 +1343,7 @@ test_array_vlen_array(void)
             for(k=0; k<(i+j+1); k++)
                 for(l=0; l<ARRAY1_DIM1; l++)
                     ((unsigned int *)wdata[i][j].p)[k*ARRAY1_DIM1+l] = (unsigned int)(i*1000+j*100+k*10+l);
-        } /* end for */
+        }
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

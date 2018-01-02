@@ -116,7 +116,7 @@ static const H5I_class_t H5I_DATASET_CLS[1] = {{
     H5I_DATASET,        /* ID class value */
     0,                  /* Class flags */
     0,                  /* # of reserved IDs for class */
-    (H5I_free_t)H5D_close       /* Callback routine for closing objects of this class */
+    (H5I_free_t)H5D__close_dataset       /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */
@@ -1959,7 +1959,7 @@ H5D_mult_refresh_close(hid_t dset_id, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == (dataset = (H5D_t *)H5VL_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* check args */
@@ -2423,13 +2423,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5D__get_offset
+ * Function:    H5D__get_offset
  *
- * Purpose:  Private function for H5D__get_offset.  Returns the address
- *           of dataset in file.
+ * Purpose:     Private function for H5D__get_offset.  Returns the address
+ *              of dataset in file.
  *
- * Return:   Success:        the address of dataset
- *           Failure:    HADDR_UNDEF
+ * Return:      Success:    The address of dataset
+ *
+ *              Failure:    HADDR_UNDEF (but also a valid value)
+ *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -2441,7 +2443,7 @@ H5D__get_offset(const H5D_t *dset)
 
     HDassert(dset);
 
-    switch(dset->shared->layout.type) {
+    switch (dset->shared->layout.type) {
         case H5D_VIRTUAL:
         case H5D_CHUNKED:
         case H5D_COMPACT:
@@ -2449,8 +2451,9 @@ H5D__get_offset(const H5D_t *dset)
 
         case H5D_CONTIGUOUS:
             /* If dataspace hasn't been allocated or dataset is stored in
-             * an external file, the value will be HADDR_UNDEF. */
-            if(dset->shared->dcpl_cache.efl.nused == 0 || H5F_addr_defined(dset->shared->layout.storage.u.contig.addr))
+             * an external file, the value will be HADDR_UNDEF.
+             */
+            if (dset->shared->dcpl_cache.efl.nused == 0 || H5F_addr_defined(dset->shared->layout.storage.u.contig.addr))
                 /* Return the absolute dataset offset from the beginning of file. */
                 ret_value = dset->shared->layout.storage.u.contig.addr + H5F_BASE_ADDR(dset->oloc.file);
             break;
@@ -2459,7 +2462,7 @@ H5D__get_offset(const H5D_t *dset)
         case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "unknown dataset layout type")
-    } /*lint !e788 All appropriate cases are covered */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2494,6 +2497,7 @@ H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf)
     HDassert(H5P_isa_class(plist_id, H5P_DATASET_XFER));
     HDassert(buf);
 
+    /* XXX: H5VL? */
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
 
@@ -2568,7 +2572,9 @@ herr_t
 H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)op_data;
+    H5VL_object_t *dset = (H5VL_object_t *)vlen_bufsize->dset;
     H5T_t *dt;                          /* Datatype for operation */
+    H5S_t *fspace;                      /* File dataspace for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2577,6 +2583,7 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATT
     HDassert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Check args */
+    /* XXX: H5VL? */
     if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a datatype")
 
@@ -2585,11 +2592,16 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATT
         HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't resize tbuf")
 
     /* Select point to read in */
-    if(H5S_select_elements(vlen_bufsize->fspace, H5S_SELECT_SET, (size_t)1, point) < 0)
+    if(NULL == (fspace = (H5S_t *)H5I_object_verify(vlen_bufsize->fspace_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(H5S_select_elements(fspace, H5S_SELECT_SET, (size_t)1, point) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5D__read(vlen_bufsize->dset, type_id, vlen_bufsize->mspace, vlen_bufsize->fspace, vlen_bufsize->xfer_pid, vlen_bufsize->fl_tbuf) < 0)
+    if(H5VL_dataset_read(dset->vol_obj, dset->vol_info->vol_cls, 
+                         type_id, vlen_bufsize->mspace_id, 
+                         vlen_bufsize->fspace_id, vlen_bufsize->xfer_pid, 
+                         vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
 
 done:

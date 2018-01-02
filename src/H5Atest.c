@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Atest.c
- *			Dec 18 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5Atest.c
  *
- * Purpose:		Attribute testing routines.
+ * Purpose:     Attribute testing routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -33,12 +31,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Apkg.h"		/* Attributes	  			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5SMprivate.h"        /* Shared object header messages        */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Apkg.h"             /* Attributes                               */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5SMprivate.h"        /* Shared object header messages            */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -77,15 +76,12 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_is_shared_test
+ * Function:    H5A_is_shared_test
  *
  * Purpose:     Check if an attribute is shared
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Dec 19, 2006
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
@@ -98,8 +94,8 @@ H5A_is_shared_test(hid_t attr_id)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    if (NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not an attribute")
 
     /* Check if attribute is shared */
     ret_value = H5O_msg_is_shared(H5O_ATTR_ID, attr);
@@ -110,15 +106,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_shared_rc_test
+ * Function:    H5A_get_shared_rc_test
  *
  * Purpose:     Retrieve the refcount for a shared attribute
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Dec 19, 2006
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -131,14 +123,14 @@ H5A_get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if (NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Sanity check */
     HDassert(H5O_msg_is_shared(H5O_ATTR_ID, attr));
 
     /* Retrieve ref count for shared or shareable attribute */
-    if(H5SM_get_refcount(attr->oloc.file, H5AC_ind_read_dxpl_id, H5O_ATTR_ID,
+    if (H5SM_get_refcount(attr->oloc.file, H5AC_ind_read_dxpl_id, H5O_ATTR_ID,
             &attr->sh_loc, ref_count) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")
 

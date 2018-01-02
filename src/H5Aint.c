@@ -244,11 +244,11 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
      * (to maintain ref. count incr/decr similarity with "shared message"
      *      type of datatype sharing)
      */
-    if(H5T_committed(attr->shared->dt)) {
+    if (H5T_is_named(attr->shared->dt)) {
         /* Increment the reference count on the shared datatype */
-        if(H5T_link(attr->shared->dt, 1, dxpl_id) < 0)
+        if (H5T_link(attr->shared->dt, 1, dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, NULL, "unable to adjust shared datatype link count")
-    } /* end if */
+    }
 
     /* Compute the size of pieces on disk.  This is either the size of the
      * datatype and dataspace messages themselves, or the size of the "shared"
@@ -814,12 +814,23 @@ H5A_get_type(H5A_t *attr)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to lock transient datatype")
 
     /* Atomize */
-    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
+    if (H5T_is_named(dt)) {
+        /* If this is a committed datatype, we need to recreate the
+         * two level IDs, where the VOL object is a copy of the
+         * returned datatype
+         */
+        if ((ret_value = H5VL_native_register(H5I_DATATYPE, dt, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+    }
+    else {
+        if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype")
+    }
 
 done:
-    if (H5I_INVALID_HID == ret_value && dt && (H5T_close(dt) < 0))
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
+    if (H5I_INVALID_HID == ret_value)
+        if (dt && H5T_close(dt) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_type() */
@@ -1977,14 +1988,14 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     if(H5T_set_loc(attr_dst->shared->dt, file_dst, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "cannot mark datatype on disk")
 
-    if(!H5T_committed(attr_src->shared->dt)) {
+    if (!H5T_is_named(attr_src->shared->dt)) {
         /* If the datatype is not named, it may have been shared in the
          * source file's heap.  Un-share it for now. We'll try to shared
          * it in the destination file below.
          */
-        if(H5O_msg_reset_share(H5O_DTYPE_ID, attr_dst->shared->dt) < 0)
+        if (H5O_msg_reset_share(H5O_DTYPE_ID, attr_dst->shared->dt) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset datatype sharing")
-    } /* end if */
+    }
 
     /* Copy the dataspace for the attribute. Make sure the maximal dimension is also copied.
      * Otherwise the comparison in the test may complain about it. SLU 2011/4/12 */
@@ -2219,7 +2230,7 @@ H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
     HDassert(file_src);
     HDassert(file_dst);
 
-    if(H5T_committed(attr_src->shared->dt)) {
+    if (H5T_is_named(attr_src->shared->dt)) {
         H5O_loc_t         *src_oloc_dt;           /* Pointer to source datatype's object location */
         H5O_loc_t         *dst_oloc_dt;           /* Pointer to dest. datatype's object location */
 
@@ -2239,7 +2250,7 @@ H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
 
         /* Update shared message info from named datatype info */
         H5T_update_shared(attr_dst->shared->dt);
-    } /* end if */
+    }
 
     /* Try to share both the datatype and dataset.  This does nothing if the
      * datatype is committed or sharing is disabled.
@@ -2644,7 +2655,7 @@ H5A_close_attr(void *_attr)
                                     H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to close attribute")
 
-    /* free attribute */
+    /* Free attribute */
     if (H5VL_free_object(attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to free VOL object")
 

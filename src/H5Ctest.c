@@ -40,6 +40,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -142,7 +143,7 @@ H5C__verify_cork_tag_test(hid_t fid, haddr_t tag, hbool_t status)
     FUNC_ENTER_PACKAGE
 
     /* Get file pointer */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object_verify(fid, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Get cache pointer */
