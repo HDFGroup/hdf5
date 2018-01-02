@@ -63,8 +63,6 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/compounds_array_vlen2.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/non_comparables1.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmptest.he5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmptest2.he5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.reference.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.output.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tudfilter.h5
