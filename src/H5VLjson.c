@@ -756,8 +756,6 @@ H5VL_json_attr_write(void *_attribute, hid_t dtype_id, const void *buf, hid_t dx
     htri_t              is_variable_str;
     size_t              dtype_size;
     herr_t              ret_value = SUCCEED;
-//FTW    hbool_t             shape_is_specified = false;
-//FTW    hbool_t             maxdims_is_specified = false;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -794,17 +792,14 @@ H5VL_json_attr_write(void *_attribute, hid_t dtype_id, const void *buf, hid_t dx
 
     /*** writing the value ***/
 
-json_t* value = json_object_get(attribute->object_json, "value");
-// This function will fill the given array with data from the buffer. Can use it for Fill value as well, just do a memset on the buffer. 
-H5VL_json_write_value(value, dtype_id, space_id, buf);
-printf("attribute value after write = *%s* \n", json_dumps(value, JSON_INDENT(4)));
+    json_t* value = json_object_get(attribute->object_json, "value");
+//FTW WIP This function will fill the given array with data from the buffer. Can use it for Fill value as well, just do a memset on the buffer. 
+    H5VL_json_write_value(value, dtype_id, space_id, buf);
 
 done:
 
-#if 0
     if (H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "can't close space")
-#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -1456,11 +1451,8 @@ H5VL_json_dataset_read(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_json_object_t *dataset = (H5VL_json_object_t *) _dataset;
     H5T_class_t         dtype_class;
-//    hssize_t            mem_select_npoints, file_select_npoints;
     hbool_t             must_close_memspace = FALSE;//, must_close_filespace = FALSE;
-//    hbool_t             is_variable_str;
     size_t              read_data_size, dtype_size;
-//    char               *selection_body = NULL;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1484,18 +1476,15 @@ H5VL_json_dataset_read(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
     if (0 == (dtype_size = H5Tget_size(mem_type_id)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
 
-    /* for now, the mem_space selection is always H5S_ALL */
-//    hid_t space_id = H5Scopy(attribute->u.attribute.space_id);
-//    HDassert(space_id);
-//    H5Sselect_all(space_id);
-
-if (H5S_ALL == mem_space_id) {
+    if (H5S_ALL == mem_space_id) 
+    {
         /* Set up a valid memory dataspace to use for the dataset read */
         mem_space_id = H5Scopy(dataset->u.dataset.space_id);
         H5Sselect_all(mem_space_id);
         must_close_memspace = true;
     } /* end if */
-    else {
+    else 
+    {
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "only H5S_ALL supported.")
     }
 
@@ -1629,13 +1618,8 @@ H5VL_json_dataset_write(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
     if (0 == (dtype_size = H5Tget_size(mem_type_id)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
 
-#if 0
-        if (H5VL_json_convert_data_buffer_to_json_array(buf, mem_type_id, mem_space_id, write_body, write_body_len) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't convert dataset write buffer into JSON array")
-#endif
-//FTW WIP: use this same routing from attr_write , add memory_space?
-json_t* value_array = json_object_get(dataset->object_json, "value");
-H5VL_json_write_value(value_array, dataset->u.dataset.dtype_id, dataset->u.dataset.space_id, buf);
+    json_t* value_array = json_object_get(dataset->object_json, "value");
+    H5VL_json_write_value(value_array, dataset->u.dataset.dtype_id, dataset->u.dataset.space_id, buf);
 
 done:
 
@@ -1900,7 +1884,6 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     json_t* hdf5_path_name_array = json_array();
     json_object_set_new(root_group, "alias", hdf5_path_name_array);
 
-//FTW    json_t* attribute_collection = json_array();
     json_object_set_new(root_group, "attributes", json_array());
 
     json_t* link_collection = json_array();
@@ -2647,6 +2630,7 @@ H5VL_json_group_close(void *_group, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
 } /* end H5VL_json_group_close() */
 
 
+//FTW not yet implemented
 static herr_t
 H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params,
                       hid_t lcpl_id, hid_t lapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
@@ -2669,6 +2653,9 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
     printf("  - Link_loc obj type: %d\n", loc_params.obj_type);
 #endif
 
+HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "not yet implemented ")
+
+#if 0
     /* Check for write access */
     if(!(link_new_loc_obj->domain->u.file.intent & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no write intent on file")
@@ -2794,6 +2781,7 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
 //    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
 
 //    CURL_PERFORM(curl, H5E_LINK, H5E_CANTCREATE, FAIL);
+#endif
 
 done:
 #ifdef PLUGIN_DEBUG
@@ -2802,11 +2790,13 @@ done:
 //    printf("Link create response buffer: %s\n\n", response_buffer.buffer);
 #endif
 
+#if 0
     if (link_path_copy)
         H5MM_xfree(link_path_copy);
 
     if (create_request_body)
         H5MM_xfree(create_request_body);
+#endif
 
     /* Restore cURL URL to the base URL */
 //    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
@@ -3120,7 +3110,6 @@ H5VL_json_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t
 
     FUNC_ENTER_NOAPI_NOINIT
 
-//FTW WIP 
     switch (get_type) 
     {
         case H5VL_REF_GET_CONTENT:
@@ -3192,7 +3181,6 @@ herr_t h5json_get_utc_string_from_time(time_t t, char *time_buf)
     char *days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-//    time_t t = time(NULL);
     struct tm gmt = *gmtime(&t);
     sprintf(time_buf, "%s %s %d %d:%d:%d UTC %d", days[gmt.tm_wday], months[gmt.tm_mon], gmt.tm_mday, gmt.tm_hour, gmt.tm_min, gmt.tm_sec, gmt.tm_year + 1900);
 
@@ -3262,36 +3250,6 @@ static json_t* h5json_new_uuid_json_object()
 }
 
 
-static size_t
-write_data_callback(void *buffer, size_t size, size_t nmemb, void H5_ATTR_UNUSED *userp)
-{
-    size_t data_size = size * nmemb;
-    size_t positive_ptrdiff;
-
-//    H5_CHECKED_ASSIGN(positive_ptrdiff, size_t, (response_buffer.curr_buf_ptr + data_size) - response_buffer.buffer, ptrdiff_t);
-//    while (positive_ptrdiff + 1 > response_buffer.buffer_size) {
-//        char *tmp_realloc;
-
-//        if (NULL == (tmp_realloc = (char *) H5MM_realloc(response_buffer.buffer, 2 * response_buffer.buffer_size)))
-//            return 0;
-
-//        response_buffer.curr_buf_ptr = tmp_realloc + (response_buffer.curr_buf_ptr - response_buffer.buffer);
-//        response_buffer.buffer = tmp_realloc;
-//        response_buffer.buffer_size *= 2;
-
-#ifdef PLUGIN_DEBUG
-//        printf("  - Re-alloced response buffer to size %zu\n\n", response_buffer.buffer_size);
-#endif
-//    } /* end while */
-
-//    HDmemcpy(response_buffer.curr_buf_ptr, buffer, data_size);
-//    response_buffer.curr_buf_ptr += data_size;
-//    *response_buffer.curr_buf_ptr = '\0';
-
-    return data_size;
-} /* end write_data_callback() */
-
-
 /* XXX: Potentially modify to deal with the trailing slash case */
 static const char*
 get_basename(const char *path)
@@ -3299,164 +3257,6 @@ get_basename(const char *path)
     char *substr = strrchr(path, '/');
     return substr ? substr + 1 : path;
 } /* end get_basename() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    dataset_read_scatter_callback
- *
- * Purpose:     Callback for H5Dscatter() to scatter the read data into the
- *              supplied buffer
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Jordan Henderson
- *              July, 2017
- *
- */
-static herr_t
-dataset_read_scatter_op(const void **src_buf, size_t *src_buf_bytes_used, void *op_data)
-{
-//    *src_buf = response_buffer.buffer;
-//    *src_buf_bytes_used = *((size_t *) op_data);
-
-#ifdef PLUGIN_DEBUG
-//    printf("Src_buf_bytes_used: %zu.\n", *src_buf_bytes_used);
-#endif
-
-    return 0;
-} /* end dataset_read_scatter_op() */
-
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:    H5VL_json_parse_response
- *
- * Purpose:     Helper function to parse an HTTP response for an API call
- *              and look for a specific set of keys. If the keys are found,
- *              non-negative is returned indicating this. If the keys are
- *              not found, negative is returned. Optionally, a pointer to
- *              a H5VL_json_object_t object and a callback operating on
- *              this object may be supplied in order to do some
- *              post-processing with the parsed result from the supplied
- *              keys.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Jordan Henderson
- *              July, 2017
- *
- */
-static herr_t
-H5VL_json_parse_response(char *HTTP_response, void *callback_data_in, void *callback_data_out, herr_t (*parse_callback)(char *, void *, void *))
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(HTTP_response);
-
-    if (parse_callback && parse_callback(HTTP_response, callback_data_in, callback_data_out) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CALLBACK, FAIL, "unable to perform callback operation")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_json_parse_response() */
-#endif
-
-
-static herr_t
-yajl_copy_object_URI_parse_callback(char *HTTP_response, void H5_ATTR_UNUSED *callback_data_in, void *callback_data_out)
-{
-    const char *soft_link_class_keys[] = { "link", "class", (const char *) 0 };
-    const char *hard_link_keys[] = { "link", "id", (const char *) 0 };
-    const char *object_create_keys[] = { "id", (const char *) 0 };
-    const char *root_group_keys[] = { "root", (const char *) 0 };
-    yajl_val    parse_tree, key_obj;
-    char       *parsed_string;
-
-    if (NULL == (parse_tree = yajl_tree_parse(HTTP_response, NULL, 0))) return FAIL;
-
-    /* To handle the awkward case of soft and external links, which do not return an "ID",
-     * first check for the link class field and short circuit if it is found to be
-     * equal to "H5L_TYPE_SOFT"
-     */
-    if (NULL != (key_obj = yajl_tree_get(parse_tree, soft_link_class_keys, yajl_t_string))) {
-        char *link_type;
-
-        if (NULL == (link_type = YAJL_GET_STRING(key_obj))) {
-            yajl_tree_free(parse_tree);
-            return FAIL;
-        } /* end if */
-
-        if (!strcmp(link_type, "H5L_TYPE_SOFT") || !strcmp(link_type, "H5L_TYPE_EXTERNAL") ||
-                !strcmp(link_type, "H5L_TYPE_UD")) {
-            yajl_tree_free(parse_tree);
-            return SUCCEED;
-        } /* end if */
-    } /* end if */
-
-    /* First attempt to retrieve the URI of the object by using the JSON key sequence
-     * "link" -> "id", which is returned when making a GET Link request.
-     */
-    key_obj = yajl_tree_get(parse_tree, hard_link_keys, yajl_t_string);
-    if (key_obj) {
-        if (!YAJL_IS_STRING(key_obj)) {
-            yajl_tree_free(parse_tree);
-            return FAIL;
-        } /* end if */
-
-        if (NULL == (parsed_string = YAJL_GET_STRING(key_obj))) {
-            yajl_tree_free(parse_tree);
-            return FAIL;
-        } /* end if */
-    } /* end if */
-    else {
-        /* Could not find the object's URI by the sequence "link" -> "id". Try looking
-         * for just the JSON key "id", which would generally correspond to trying to
-         * retrieve the URI of a newly-created or opened object that isn't a file.
-         */
-        key_obj = yajl_tree_get(parse_tree, object_create_keys, yajl_t_string);
-        if (key_obj) {
-            if (!YAJL_IS_STRING(key_obj)) {
-                yajl_tree_free(parse_tree);
-                return FAIL;
-            } /* end if */
-
-            if (NULL == (parsed_string = YAJL_GET_STRING(key_obj))) {
-                yajl_tree_free(parse_tree);
-                return FAIL;
-            } /* end if */
-        } /* end if */
-        else {
-            /* Could not find the object's URI by the JSON key "id". Try looking for
-             * just the JSON key "root", which would generally correspond to trying to
-             * retrieve the URI of a newly-created or opened file, or to a search for
-             * the root group of a file.
-             */
-            if (NULL == (key_obj = yajl_tree_get(parse_tree, root_group_keys, yajl_t_string))) {
-                yajl_tree_free(parse_tree);
-                return FAIL;
-            } /* end if */
-
-            if (!YAJL_IS_STRING(key_obj)) {
-                yajl_tree_free(parse_tree);
-                return FAIL;
-            } /* end if */
-
-            if (NULL == (parsed_string = YAJL_GET_STRING(key_obj))) {
-                yajl_tree_free(parse_tree);
-                return FAIL;
-            } /* end if */
-        } /* end else */
-    } /* end else */
-
-    if (callback_data_out)
-        strncpy((char *) callback_data_out, parsed_string, URI_MAX_LENGTH);
-
-    yajl_tree_free(parse_tree);
-
-    return SUCCEED;
-} /* end yajl_copy_object_URI_parse_callback() */
 
 
 static herr_t
@@ -5452,26 +5252,6 @@ done:
 
 
 static herr_t
-H5VL_json_convert_data_buffer_to_json_array(const void *buf, hid_t mem_type_id, hid_t mem_space_id, char **out_body, size_t *out_body_len)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* if (H5Dgather(mem_space_id, data, mem_type_id, , out_body, test_gather_op, NULL) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_NONE_MINOR, FAIL, "couldn't gather data from write buffer") */
-
-
-//FTW just a hack to check functionality of attr_write for array of int
-buf = "\"[5, 7, 13]\"";
-
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_json_convert_data_buffer_to_json_array() */
-
-
-static herr_t
 H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body)
 {
     H5VL_json_object_t *pobj = (H5VL_json_object_t *) parent_obj;
@@ -5563,108 +5343,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_parse_dataset_create_options() */
-
-
-#if 0
-static herr_t
-H5VL_json_parse_dataset_create_shape_and_maxdims(hid_t space_id, char *shape_body, char *maxdims_body)
-{
-    hsize_t *dims = NULL;
-    hsize_t *maxdims = NULL;
-    char     shape_dims[DIMENSION_ARRAY_MAX_LENGTH] = "";
-    char     max_dims[DIMENSION_ARRAY_MAX_LENGTH] = "";
-    herr_t   ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(shape_body);
-    HDassert(maxdims_body);
-
-    switch (H5Sget_simple_extent_type(space_id)) {
-        case H5S_NULL:
-            strcat(shape_dims, "\"H5S_NULL\"");
-            break;
-
-        case H5S_SCALAR:
-        case H5S_SIMPLE:
-        {
-            size_t  i;
-            char   *shape_dims_curr_pos;
-            char   *max_dims_curr_pos;
-            int     space_ndims;
-            int     bytes_printed;
-
-            if ((space_ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "unable to get number of dimensions in dataspace")
-
-            if (NULL == (dims = (hsize_t *) malloc((size_t) space_ndims * sizeof(*dims))))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "unable to allocate memory for dataspace dimensions")
-
-            if (NULL == (maxdims = (hsize_t *) malloc((size_t) space_ndims * sizeof(*dims))))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "unable to allocate memory for dataspace maximum dimension sizes")
-
-            if (H5Sget_simple_extent_dims(space_id, dims, maxdims) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "unable to retrieve dataspace dimensions and maximum dimension sizes")
-
-            /* XXX: Need to detect if maxdims is specified or not */
-            strcat(shape_dims, "[ ");
-            strcat(max_dims, "[ ");
-            shape_dims_curr_pos = shape_dims + 2;
-            max_dims_curr_pos = max_dims + 2;
-
-            for (i = 0; i < (size_t) space_ndims; i++) {
-                if (i > 0) {
-                    strcat(shape_dims, ", ");
-                    strcat(max_dims, ", ");
-                    shape_dims_curr_pos += 2;
-                    max_dims_curr_pos += 2;
-                } /* end if */
-
-                if ((bytes_printed = sprintf(shape_dims_curr_pos, "%llu", dims[i])) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_SYSERRSTR, FAIL, "sprintf error")
-                shape_dims_curr_pos += bytes_printed;
-
-                if (H5S_UNLIMITED == maxdims[i]){
-                    strcat(max_dims, "0");
-                    max_dims_curr_pos++;
-                } /* end if */
-                else {
-                    if ((bytes_printed = sprintf(max_dims_curr_pos, "%llu", maxdims[i])) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_SYSERRSTR, FAIL, "sprintf error")
-                    max_dims_curr_pos += bytes_printed;
-                }
-            } /* end for */
-
-            strcat(shape_dims, " ]");
-            strcat(max_dims, " ]");
-
-            break;
-        } /* H5S_SCALAR H5S_SIMPLE */
-
-        case H5S_NO_CLASS:
-        default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "unable to get dataspace type")
-    } /* end switch */
-
-    /* Build the Dataset shape specification body by appending H5S_NULL for Datasets with
-     * null dataspaces, or by appending an integer array describing the shape of the Dataset
-     */
-    snprintf(shape_body, DATASET_CREATE_SHAPE_BODY_MAX_LENGTH,
-             "\"shape\": %s", shape_dims);
-
-    if (strcmp(max_dims, ""))
-        snprintf(maxdims_body, DATASET_CREATE_MAXDIMS_BODY_MAX_LENGTH,
-                 "\"maxdims\": %s", max_dims);
-
-done:
-    if (dims)
-        free(dims);
-    if (maxdims)
-        free(maxdims);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_json_parse_dataset_create_shape_and_maxdims() */
-#endif
 
 
 #if 0
