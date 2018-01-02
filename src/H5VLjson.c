@@ -1233,15 +1233,33 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     json_object_set_new(new_dataset->object_json, "type", H5VL_json_datatype_to_jansson(type_id));
     
     /*** value ***/
-    json_t* value = json_array();
-    /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
-     * implemented, a fill value *could* be provided here. */
+    json_t* value_array = json_array();
+    json_object_set_new(new_dataset->object_json, "value", value_array);
+
+    /* default value is empty array. If H5D_FILL_TIME_IFSET then 
+     * use the fill value provided. */
 
 //FTW WIP fill
-//     H5VL_json_parse_dataset_creation_properties
-H5D_fill_time_t fill_time;
+
+    /* get the dims from the space */
+    int n_dims = H5Sget_simple_extent_ndims( space_id );
+    hsize_t* dims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+    hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+    H5Sget_simple_extent_dims(space_id, dims, maxdims );
+
+    unsigned long n_points = dims[0];
+    for (unsigned d=1; d<n_dims; d++) n_points *= dims[d];
+
+printf("Got n_points = %lu\n", n_points);
+    int* buffer = (int*)H5MM_malloc(n_points * sizeof(int));
+
+    H5MM_xfree(dims);
+    H5MM_xfree(maxdims);
+
+    H5D_fill_time_t fill_time;
     if (H5Pget_fill_time(dcpl_id, &fill_time) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to retrieve fill time property")
+printf("FTW got fill_time = %d\n", fill_time);
 
 #if 0
     if (H5D_FILL_TIME_IFSET != fill_time)
@@ -1249,16 +1267,24 @@ H5D_fill_time_t fill_time;
                  ", \"fillTime\": \"H5D_FILL_TIME_%s\"",
                  H5D_FILL_TIME_ALLOC == fill_time ? "ALLOC" : "NEVER");
 #endif
-
-printf("FTW got fill_time = %d\n", fill_time);
-    /* Get the fill value property */
+    
+    if (fill_time != H5D_FILL_TIME_NEVER)
     {
+printf("Fill time not never, so filling.\n");
+
         H5D_fill_value_t fill_status;
 
         if (H5Pfill_value_defined(dcpl_id, &fill_status) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to retrieve the fill value defined status")
 
 printf("FTW got fill_status = %d\n", fill_status);
+
+        long fill_value = NULL;
+        herr_t err = H5Pget_fill_value( dcpl_id, H5T_NATIVE_INT, &fill_value );
+        
+printf("FTW got fill_value = %d\n", fill_value);
+
+        for (unsigned i=0; i<n_points; i++) buffer[i] = fill_value;
 
 //        if (H5D_FILL_VALUE_DEFAULT != fill_status) {
 //            strcat(fill_value_body, ", \"fillValue\": ");
@@ -1270,20 +1296,16 @@ printf("FTW got fill_status = %d\n", fill_status);
                 /* XXX: Support for fill values */
 //            } /* end else */
 //        } /* end if */
+
+        /* write the fill value */
+        H5VL_json_write_value(value_array, type_id, space_id, buffer);
     }
-
-long fill_value = NULL;
-herr_t err = H5Pget_fill_value( dcpl_id, H5T_NATIVE_INT, &fill_value );
-
-printf("FTW got fill_value = %d\n", fill_value);
-
-//FTW WIP fill
+/*** done with fill value ***/
 
 
+    H5MM_xfree(buffer);
 
 
-//    json_object_set_new(new_dataset->object_json, "value", value);
-    json_object_set_new(new_dataset->object_json, "value", json_array());
 
     /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
     json_t* parent_uuid;
@@ -5961,7 +5983,6 @@ H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* 
     herr_t            ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
-
 
     H5T_class_t datatype_class = H5Tget_class(dtype_id);
     size_t datatype_size = H5Tget_size(dtype_id);
