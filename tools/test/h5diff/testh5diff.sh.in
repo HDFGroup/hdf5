@@ -118,8 +118,6 @@ $SRC_H5DIFF_TESTFILES/h5diff_attr_v_level2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_enum_invalid_values.h5
 $SRC_H5DIFF_TESTFILES/non_comparables1.h5
 $SRC_H5DIFF_TESTFILES/non_comparables2.h5
-$SRC_H5DIFF_TESTFILES/tmptest.he5
-$SRC_H5DIFF_TESTFILES/tmptest2.he5
 $SRC_H5DIFF_TESTFILES/tmpSingleSiteBethe.reference.h5
 $SRC_H5DIFF_TESTFILES/tmpSingleSiteBethe.output.h5
 $SRC_H5DIFF_TESTFILES/diff_strings1.h5
