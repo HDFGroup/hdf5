@@ -5944,7 +5944,10 @@ printf("FTW: got n_dims = %lu\n", n_dims);
             {
                 int _value =  ((int*)buffer)[i];
                 json_t* int_value = json_integer(_value);
-                json_array_append(value_array, int_value);
+                json_array_remove(value_array, i);
+                json_array_insert_new(value_array, i, int_value);
+//                json_array_set_new(value_array, i, int_value);
+//                json_array_append(value_array, int_value);
 
                 //json_t* new_value = H5VL_json_get_new_value(dtype_id, buf, offset);
                 //json_array_append(value_array, new_value);
