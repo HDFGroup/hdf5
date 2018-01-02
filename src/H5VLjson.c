@@ -134,6 +134,7 @@ static json_t* H5VL_json_dataspace_to_jansson(hid_t dataspace);
 
 /* write buffered values for an attribute or dataset to a jansson array */
 static herr_t H5VL_json_write_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* buffer);
+static herr_t H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* _buffer);
 
 /* cURL write function callback */
 static size_t write_data_callback(void *buffer, size_t size, size_t nmemb, void *userp);
@@ -702,13 +703,45 @@ done:
 
 
 static herr_t
-H5VL_json_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL_json_attr_read(void *_attribute, hid_t dtype_id, void *buf, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    herr_t ret_value = SUCCEED;
-
-printf("FTW: rst_attr_read() not yet implemented.\n");
+    H5VL_json_object_t *attribute = (H5VL_json_object_t *) _attribute;
+    H5T_class_t         dtype_class;
+    size_t              dtype_size;
+    herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef PLUGIN_DEBUG
+    printf("Received Attribute read call with following parameters:\n");
+    printf("  - Attribute parent UUID: %s\n", attribute->u.attribute.parent_obj->object_uuid);
+    printf("  - Attribute name: %s\n", attribute->u.attribute.attr_name);
+    printf("  - DXPL ID: %ld\n", dxpl_id);
+    printf("  - is default dxpl: %s\n", (dxpl_id == H5P_DEFAULT) ? "true" : "false");
+#endif
+
+    /* check for valid datatype */
+    if (H5T_NO_CLASS == (dtype_class = H5Tget_class(dtype_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
+
+//FTW    if ((is_variable_str = H5Tis_variable_str(dtype_id)) < 0)
+//FTW        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
+
+    if (0 == (dtype_size = H5Tget_size(dtype_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
+
+    /* for attribute, the mem_space selection is always H5S_ALL */
+    hid_t space_id = H5Scopy(attribute->u.attribute.space_id);
+    HDassert(space_id);
+    H5Sselect_all(space_id);
+
+    /*** reading the value ***/
+
+json_t* value = json_object_get(attribute->object_json, "value");
+// This function will fill the given buffer with data from the value array.
+printf("FTW attribute json value = %s\n", json_dumps(value, JSON_INDENT(4)));
+H5VL_json_read_value(value, dtype_id, space_id, buf);
+printf("FTW after H5VL_json_read_value\n");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6273,4 +6306,70 @@ done:
 
 }
 
+/* helper function to read data from a JSON object into a buffer
+ * IN: pointer to value array, pointer to allocated buffer 
+ *  OUT: buffer containing data from array
+ */
+static herr_t 
+H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* _buffer)
+{
+    herr_t            ret_value = FAIL;
 
+    FUNC_ENTER_NOAPI_NOINIT
+
+
+    H5T_class_t datatype_class = H5Tget_class(dtype_id);
+    size_t datatype_size = H5Tget_size(dtype_id);
+
+    /* get the dims from the space */
+    int n_dims = H5Sget_simple_extent_ndims( space_id );
+    hsize_t* dims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+    hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+    H5Sget_simple_extent_dims(space_id, dims, maxdims );
+
+    /*** reading the value ***/
+    if (datatype_class = H5T_NATIVE_INT)
+    {
+       int* buffer = (int*)_buffer; 
+
+// FTW this works... but should generalize for multidimensional array 
+        switch (n_dims)
+        {
+            case 1:
+            {
+                /* array is a JSON array */
+                size_t index;
+                json_t *_value;
+
+                json_array_foreach(value_array, index, _value) 
+                {
+                    json_int_t value = json_integer_value(_value);
+                    buffer[index] = (int)value;
+//FTW need to handle datatypes, but can't do datatype = int;
+                }
+                break;
+            }
+            case 2:
+            {
+                HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "two dimensional spaces not supported.")
+                break;
+            }
+            default:
+                HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "rank > two dimensional spaces not supported.")
+        } /* end switch(n_dims) */
+    }
+    else
+    {
+           HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "Datatype not supported.")
+    } /* end if-else(datatype_class) */
+
+    H5MM_xfree(dims);
+    H5MM_xfree(maxdims);
+
+    ret_value = SUCCEED;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+}
