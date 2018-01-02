@@ -121,7 +121,7 @@
       add_test (NAME H5LS_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES
           ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN}"
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES WILL_FAIL "true")
