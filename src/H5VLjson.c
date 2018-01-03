@@ -137,16 +137,16 @@ static herr_t H5VL_json_write_value(json_t* value_array, hid_t dtype_id, hid_t s
 static herr_t H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* _buffer);
 
 /* cURL write function callback */
-static size_t write_data_callback(void *buffer, size_t size, size_t nmemb, void *userp);
+//static size_t write_data_callback(void *buffer, size_t size, size_t nmemb, void *userp);
 
 /* Alternate, more portable version of the basename function which doesn't modify its argument */
 static const char *get_basename(const char *path);
 
 /* H5Dscatter() callback for dataset reads */
-static herr_t dataset_read_scatter_op(const void **src_buf, size_t *src_buf_bytes_used, void *op_data);
+//static herr_t dataset_read_scatter_op(const void **src_buf, size_t *src_buf_bytes_used, void *op_data);
 
 /* Helper function to parse an HTTP response according to the parse callback function */
-static herr_t H5VL_json_parse_response(char *HTTP_response, void *callback_data_in, void *callback_data_out, herr_t (*parse_callback)(char *, void *, void *));
+//static herr_t H5VL_json_parse_response(char *HTTP_response, void *callback_data_in, void *callback_data_out, herr_t (*parse_callback)(char *, void *, void *));
 
 /* Set of callbacks for H5VL_json_parse_response() */
 static herr_t yajl_copy_object_URI_parse_callback(char *HTTP_response, void *callback_data_in, void *callback_data_out);
@@ -2652,46 +2652,43 @@ H5VL_json_group_close(void *_group, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
 } /* end H5VL_json_group_close() */
 
 
-//FTW not yet implemented
 static herr_t
 H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params,
                       hid_t lcpl_id, hid_t lapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *link_new_loc_obj = (H5VL_json_object_t *) obj;
-    H5P_genplist_t     *lcpl = NULL;
+//    H5VL_json_object_t *link_new_loc_obj = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t* existing_object = (H5VL_json_object_t *) obj;
+    H5P_genplist_t*     lcpl = NULL;
     size_t              link_path_length;
-    char                create_request_host_header[HOST_HEADER_MAX_LENGTH] = "Host: ";
-    char               *create_request_body = NULL;
-    char               *link_path_copy = NULL;
-    char                temp_url[URL_MAX_LENGTH];
+    char*               link_path_copy = NULL;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef PLUGIN_DEBUG
     printf("Received Link create call with following parameters:\n");
-    printf("  - Link Name: %s\n", loc_params.loc_data.loc_by_name.name);
-    printf("  - Link Type: %d\n", create_type);
-    printf("  - Link_loc obj type: %d\n", loc_params.obj_type);
+    printf("  - existing_object UUID: %s\n", existing_object->object_uuid);
+    printf("  - New Link is of create_type: %d (hard = %d, soft = %d)\n", create_type, H5VL_LINK_CREATE_HARD, H5VL_LINK_CREATE_SOFT);
+    printf("  - New Link Location is of object type: %d (group = %d/file = %d)\n", loc_params.obj_type, H5I_GROUP, H5I_FILE);
+    printf("  - New Link Name: %s\n", loc_params.loc_data.loc_by_name.name);
 #endif
 
-HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "not yet implemented ")
-
-#if 0
     /* Check for write access */
-    if(!(link_new_loc_obj->domain->u.file.intent & H5F_ACC_RDWR))
+    if(!(existing_object->domain->u.file.intent & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no write intent on file")
 
-    HDassert((H5I_FILE == link_new_loc_obj->obj_type || H5I_GROUP == link_new_loc_obj->obj_type)
+    HDassert((H5I_FILE == existing_object->obj_type || H5I_GROUP == existing_object->obj_type)
             && "link location object not a file or group");
-    HDassert(loc_params.loc_data.loc_by_name.name);
+    HDassert((loc_params.loc_data.loc_by_name.name)
+            && "link name not specified ");
 
     /* Check to make sure that a soft or hard link is being created in the same file as
      * the target object
      */
     if (H5VL_LINK_CREATE_SOFT == create_type || H5VL_LINK_CREATE_HARD == create_type) {
-
+//FTW ?? 
     } /* end if */
+
 
     if (NULL == (lcpl = (H5P_genplist_t *) H5I_object(lcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
@@ -2701,10 +2698,6 @@ HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "not yet implemented ")
     if (NULL == (link_path_copy = (char *) H5MM_malloc(link_path_length + 1)))
         HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't allocate space for link path copy")
     strncpy(link_path_copy, loc_params.loc_data.loc_by_name.name, link_path_length + 1);
-
-    /* Form the request body to create the Link */
-    if (NULL == (create_request_body = (char *) H5MM_malloc(REQUEST_BODY_MAX_LENGTH)))
-        HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't allocate space for link create request body")
 
     switch (create_type) {
         case H5VL_LINK_CREATE_HARD:
@@ -2729,6 +2722,7 @@ HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "not yet implemented ")
             printf("  - Link target loc params by name: %s\n", target_loc_params.loc_data.loc_by_name.name);
 #endif
 
+// FTW WIP
 //            search_ret = H5VL_json_find_link_by_path((H5VL_json_object_t *) link_loc_obj, target_loc_params.loc_data.loc_by_name.name, yajl_copy_object_URI_parse_callback, NULL, &link_target.URI);
 
             if (!search_ret || search_ret < 0)
@@ -2742,6 +2736,8 @@ HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "not yet implemented ")
             break;
         } /* H5VL_LINK_CREATE_HARD */
 
+    }// end switch
+#if 0
         case H5VL_LINK_CREATE_SOFT:
         {
             const char *link_target;
@@ -2788,50 +2784,12 @@ HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "not yet implemented ")
             HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "Invalid link create type")
     } /* end switch */
 
-    /* Setup the "Host: " header */
-//    curl_headers = curl_slist_append(curl_headers, strncat(create_request_host_header, link_new_loc_obj->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
-
-    /* Disable use of Expect: 100 Continue HTTP response */
-//    curl_headers = curl_slist_append(curl_headers, "Expect:");
-
-    /* Redirect from base URL to "/groups/<id>/links/<name>" to create the link */
-//    snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/links/%s", base_URL, link_new_loc_obj->URI, get_basename(link_path_copy));
-
-//    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-//    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-//    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, create_request_body);
-//    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
-
-//    CURL_PERFORM(curl, H5E_LINK, H5E_CANTCREATE, FAIL);
 #endif
 
 done:
-#ifdef PLUGIN_DEBUG
-//    printf("Link create URL: %s\n\n", temp_url);
-//    printf("Link create body: %s.\n\n", create_request_body);
-//    printf("Link create response buffer: %s\n\n", response_buffer.buffer);
-#endif
 
-#if 0
     if (link_path_copy)
         H5MM_xfree(link_path_copy);
-
-    if (create_request_body)
-        H5MM_xfree(create_request_body);
-#endif
-
-    /* Restore cURL URL to the base URL */
-//    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-
-    /* Reset cURL custom request to prevent issues with future requests */
-//curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, NULL);
-
-/*
-    if (curl_headers) {
-        curl_slist_free_all(curl_headers);
-        curl_headers = NULL;
-    } /* end if */
-/**/
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_link_create() */
@@ -3406,27 +3364,12 @@ H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_pat
     target_link_name = get_basename(link_path);
 
 #if 0
-    /* Setup cURL for making the GET requests */
-
-    /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(host_header, parent_obj->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
-//printf("Got parent_obj->domain->filepath_name = %s\n", parent_obj->domain->filepath_name);
-
-    /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
-
     /* Use the parent object URI as the first URI to start iterating through links from */
 //    strncpy(curr_obj_URI, parent_obj->URI, URI_MAX_LENGTH);
 //printf("not getting value for curr_obj_URI here:  %s\n", curr_obj_URI);
     /* Handle the case where the root group is being searched for */
     if (!strcmp(temp_path, "/")) {
         snprintf(temp_URL, URL_MAX_LENGTH, "%s/groups/%s", base_URL, parent_obj->domain->URI);
-        curl_easy_setopt(curl, CURLOPT_URL, temp_URL);
-
-        CURL_PERFORM(curl, H5E_LINK, H5E_PATH, FALSE);
 
         if (link_found_callback && H5VL_json_parse_response(response_buffer.buffer,
                 callback_data_in, callback_data_out, link_found_callback) < 0)
@@ -3454,26 +3397,6 @@ H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_pat
     current_link_name = strtok(temp_path, "./\\");
 #if 0
     while (current_link_name) {
-#ifdef PLUGIN_DEBUG
-        printf("Locating link by name: %s\n\n", current_link_name);
-#endif
-
-        /* Redirect cURL to "/groups/<id>/links/name" to get the information about the current
-         * link name being searched for
-         */
-        snprintf(temp_URL, URL_MAX_LENGTH, "%s/groups/%s/links/%s", base_URL, curr_URI, current_link_name);
-        curl_easy_setopt(curl, CURLOPT_URL, temp_URL);
-
-#ifdef PLUGIN_DEBUG
-        printf("Accessing link: %s\n\n", temp_URL);
-#endif
-
-        /* XXX: If there is some server error, this will have the incorrect ret_value */
-        CURL_PERFORM(curl, H5E_LINK, H5E_PATH, FALSE);
-
-#ifdef PLUGIN_DEBUG
-        printf("Link Traversal response buffer: %s\n\n", response_buffer.buffer);
-#endif
 
         /* At this point, iteration could either be in the middle of the link path, or
          * could have arrived at the last link name in the path.
@@ -3527,16 +3450,6 @@ H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_pat
 done:
     if (temp_path)
         H5MM_free(temp_path);
-
-#if 0
-    /* Reset cURL URL to base URL */
-    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-
-    if (curl_headers) {
-        curl_slist_free_all(curl_headers);
-        curl_headers = NULL;
-    } /* end if */
-#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_find_link_by_path() */
@@ -5273,6 +5186,7 @@ done:
 } /* end H5VL_json_convert_dataspace_selection_to_string() */
 
 
+#if 0
 static herr_t
 H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body)
 {
@@ -5365,6 +5279,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_parse_dataset_create_options() */
+#endif
 
 
 #if 0
