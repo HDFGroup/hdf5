@@ -179,6 +179,7 @@ static herr_t H5VL_json_convert_data_buffer_to_json_array(const void *buf, hid_t
 
 /* Helper function to locate a group */
 static herr_t H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate);
+static json_t* H5VL_json_find_link_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid);
 
 /* Helper functions for creating a Dataset */
 //static herr_t H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body);
@@ -2308,6 +2309,10 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     }
     HDassert(current_uuid && "parent uuid not found. ");
 
+//FTW for fun, see if we can find the link with new function:
+json_t* linkylink = H5VL_json_find_link_by_name(new_group->domain, name, current_uuid);
+printf("linkylink = >%s<\n", json_dumps(linkylink, JSON_INDENT(4))); 
+
     /* create the JANSSON representation */
     hbool_t create_intermediate = TRUE;
     H5VL_json_create_new_group(new_group->domain, name, current_uuid, create_intermediate);
@@ -2317,7 +2322,7 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
 
     /* set the pointer into the JANSSON object from the VOL object */
 //    new_group->object_json = new_group_json;
-new_group->object_json = json_object_get(groups_in_file, new_group->object_uuid);
+    new_group->object_json = json_object_get(groups_in_file, new_group->object_uuid);
 
 #ifdef PLUGIN_DEBUG
     printf("  - Finished adding group %s... \n", name);
@@ -5852,7 +5857,6 @@ H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 }
 
 
@@ -5866,7 +5870,6 @@ done:
  *            and will return contiaing the uuid of the new group. 
  *            It is NOT CONSTANT!
 */
-//static herr_t H5VL_json_locate_group(json_t* groups_in_file, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate)
 static 
 herr_t H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate)
 {
@@ -5884,8 +5887,7 @@ herr_t H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, 
     printf("  - Creating intermediate groups:   %d\n", create_intermediate);
 #endif
 
-json_t* groups_in_file = json_object_get(domain->u.file.json_file_object, "groups");
-//    H5VL_json_locate_group(groups_in_file, name, current_uuid, create_intermediate);
+    json_t* groups_in_file = json_object_get(domain->u.file.json_file_object, "groups");
 
     /* group-spotting: search the path/tokens provided, create as needed and allowed. 
        The last token is our target, and library object for it created and returned. */
@@ -6005,3 +6007,98 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 }
+
+//FTW WIP 
+// This should return the uuid of the requested link, as well as its type
+// returns FAIL if not found
+// can it return an object hid? group, dataset, datatype
+// if it exists in the jansson, then it can return a pointer to the link object in jansson, which contains it's type and uuid. sufficient. if it returns a VOL object, it needs additional mem resources to be allocated/managed. 
+// try it as json_t*
+static 
+json_t* H5VL_json_find_link_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid)
+{
+    json_t*            ret_value = NULL;
+    json_t*            current_group = NULL;
+//    h5json_uuid_t       new_group_uuid;
+//    json_t*             new_group_json;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef PLUGIN_DEBUG
+    printf("H5VL_json_locate_group():\n");
+    printf("  - Locating group:                 %s\n", name);
+    printf("  - Starting from group with uuid:  %s\n", current_uuid);
+#endif
+
+    json_t* groups_in_file = json_object_get(domain->u.file.json_file_object, "groups");
+
+    /* group-spotting: search the path/tokens provided, create as needed and allowed. 
+       The last token is our target, and library object for it created and returned. */
+
+    /* get the list of tokens in the provided name/path */
+    const char s[2] = "/";
+    unsigned token_index = 0;
+    char copy_of_name[1024];
+    char *tokens[256];
+    strcpy(copy_of_name, name);
+    for (tokens[token_index] = strtok(copy_of_name, s); 
+         tokens[token_index++] != NULL; 
+         tokens[token_index] = strtok(NULL, s));
+    unsigned n_tokens = token_index - 1;
+
+    for(token_index=0; token_index<n_tokens; token_index++)
+    {
+        /* Locate the current/cursor group in Jansson and get links */
+        current_group = json_object_get(groups_in_file, current_uuid);
+
+        /* search links of current group for current token */
+        char *current_token = tokens[token_index];
+        json_t* links_for_current_group = json_object_get(current_group, "links");
+        size_t index;
+        json_t *link;
+        hbool_t found = FALSE;
+        json_array_foreach(links_for_current_group, index, link) 
+        {
+            /* block of code that uses index and link */
+            json_t* title = json_object_get(link, "title");
+            if (!strcmp(json_string_value(title), current_token))
+            {
+                found = TRUE; /* found it. */
+                break; /* break out of enclosing json_array_foreach() macro */
+            }
+        } /* end of loop over link array */
+
+        /* after searching all links, these are the scenarios: */
+
+        /* 1 - last token is found --> link exists so return */
+        if((token_index == n_tokens - 1) && found) 
+        {
+            ret_value = link;
+            break;
+        }
+
+        /* 2 - intermediate token found, so move on to next token */
+        if ((token_index < (n_tokens - 1)) && found)
+        {
+            current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(link, "id"));
+            continue; 
+        }
+
+        /* 3 - intermediate or final token not found. */
+        if (!found)       
+        {
+
+HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "Cannot find link.")
+
+        } /* end of !found */
+
+    } /* end of tokens */
+
+//    ret_value = SUCCEED;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+}
+
