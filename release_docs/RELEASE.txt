@@ -270,9 +270,9 @@ Bug Fixes since HDF5-1.10.1 release
     -----
     - h5diff
 
-      h5diff seg faulted if comparing VL strings against fixed strigs.
+      h5diff seg faulted if comparing VL strings against fixed strings.
 
-      Reworked solution for HDFFV-8625 and 8639. Implemented the check
+      Reworked solution for HDFFV-8625 and HDFFV-8639. Implemented the check
       for string objects of same type in the diff_can_type function by
       adding an if(tclass1 == H5T_STRING) block. This if block moves the
       same check that was added for attributes to this function, which is
