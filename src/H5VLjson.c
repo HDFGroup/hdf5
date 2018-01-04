@@ -178,7 +178,7 @@ static herr_t H5VL_json_convert_dataspace_selection_to_string(hid_t space_id, ch
 static herr_t H5VL_json_convert_data_buffer_to_json_array(const void *buf, hid_t mem_type_id, hid_t mem_space_id, char **out_body, size_t *out_body_len);
 
 /* Helper function to locate a group */
-static json_t* H5VL_json_locate_group(json_t* groups_in_file, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate);
+static herr_t H5VL_json_locate_group(json_t* groups_in_file, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate);
 
 /* Helper functions for creating a Dataset */
 //static herr_t H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body);
@@ -2262,7 +2262,8 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     H5VL_json_object_t* parent = (H5VL_json_object_t *) _parent;
     H5VL_json_object_t* new_group = NULL;
     void*               ret_value = NULL;
-    h5json_uuid_t*      current_uuid = NULL;
+//FTW    h5json_uuid_t*      current_uuid = NULL;
+    h5json_uuid_t      current_uuid;
     json_t*             current_group = NULL;
     json_t*             groups_in_file = NULL;    
     h5json_uuid_t       new_group_uuid;
@@ -2297,10 +2298,15 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     {
         case H5I_FILE:
             /* if starting with a file, look up the id of the root group. */
-            current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(new_group->domain->u.file.json_file_object, "root"));
+//            current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(new_group->domain->u.file.json_file_object, "root"));
+            strncpy(current_uuid, json_string_value(json_object_get(new_group->domain->u.file.json_file_object, "root")), sizeof(h5json_uuid_t));
+printf("FTW: case H5I_FILE, uuid = %s\n", current_uuid);
             break;
         case H5I_GROUP:
-            current_uuid = &(parent->object_uuid);
+//FTW            current_uuid = &(parent->object_uuid);
+//            current_uuid = (parent->object_uuid);
+            strncpy(current_uuid, parent->object_uuid, sizeof(h5json_uuid_t));
+printf("FTW: case H5I_GROUP, uuid = %s\n", current_uuid);
             break;
         default:
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "Not a valid parent object type.")
@@ -2312,6 +2318,8 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
 printf("FTW woot current uuid %s\n", current_uuid);
 hbool_t create_intermediate = TRUE;
 H5VL_json_locate_group(groups_in_file, name, current_uuid, create_intermediate);
+
+#if 0
 
     /* group-spotting: search the path/tokens provided, create as needed and allowed. 
        The last token is our target, and library object for it created and returned. */
@@ -2420,7 +2428,8 @@ H5VL_json_locate_group(groups_in_file, name, current_uuid, create_intermediate);
         } /* end of !found */
 
     } /* end of tokens */
- 
+#endif
+
     /* copy the final current_uuid and pointer to current_group into the VOL object */
     strncpy(new_group->object_uuid, current_uuid, sizeof(h5json_uuid_t));
 
@@ -5966,13 +5975,138 @@ done:
 
 /* Helper function to traverse links and find the group of interest */
 //static herr_t H5VL_json_locate_group(json_t* groups_in_file, json_t** group_of_interest, hbool_t create_intermediate)
-static json_t* H5VL_json_locate_group(json_t* groups_in_file, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate)
+// IN-OUT: current_uuid will contain location to start search, and will return contiaing the uuid of the new group. 
+//         It is NOT CONSTANT!
+static herr_t H5VL_json_locate_group(json_t* groups_in_file, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate)
 {
+    herr_t            ret_value = FAIL;
+    json_t*         current_group = NULL;
+    h5json_uuid_t       new_group_uuid;
+    json_t*             new_group_json;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
 #ifdef PLUGIN_DEBUG
     printf("  - Locating group:                 %s\n", name);
     printf("  - Starting from group with uuid:  %s\n", current_uuid);
     printf("  - Creating intermediate groups:   %d\n", create_intermediate);
 #endif
 
-    return NULL;
+    /* group-spotting: search the path/tokens provided, create as needed and allowed. 
+       The last token is our target, and library object for it created and returned. */
+
+    /* get the list of tokens in the provided name/path */
+    const char s[2] = "/";
+    unsigned token_index = 0;
+    char copy_of_name[1024];
+    char *tokens[256];
+    strcpy(copy_of_name, name);
+    for (tokens[token_index] = strtok(copy_of_name, s); 
+         tokens[token_index++] != NULL; 
+         tokens[token_index] = strtok(NULL, s));
+    unsigned n_tokens = token_index - 1;
+
+    for(token_index=0; token_index<n_tokens; token_index++)
+    {
+        /* Locate the current/cursor group in Jansson and get links */
+        current_group = json_object_get(groups_in_file, current_uuid);
+
+        /* search links of current group for current token */
+        char *current_token = tokens[token_index];
+        json_t* links_for_current_group = json_object_get(current_group, "links");
+        size_t index;
+        json_t *link;
+        hbool_t found = FALSE;
+        json_array_foreach(links_for_current_group, index, link) 
+        {
+            /* block of code that uses index and link */
+            json_t* title = json_object_get(link, "title");
+            if (!strcmp(json_string_value(title), current_token))
+            {
+                found = TRUE; /* found it. */
+                break; /* break out of enclosing json_array_foreach() macro */
+            }
+        } /* end of loop over link array */
+
+        /* after searching all links, these are the scenarios: */
+
+        /* 1 - last token is found --> group already exists, so fail */
+        if((token_index == n_tokens - 1) && found) 
+        {
+printf("Found link %s, should fail here.\n", current_token);
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "Cannot create link which already exists.")
+        }
+
+        /* 2 - intermediate token found, so move on */
+        if ((token_index < (n_tokens - 1)) && found)
+        {
+            current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(link, "id"));
+            continue; 
+        }
+
+        /* 3 - intermediate or final token not found, so create the group in JANSSON. 
+               (or fail for intermediate, depending on gcpl, when implemented) */
+        if (!found)       
+        {
+            /* generate uuid for the new or intermediate group */
+            h5json_uuid_generate(new_group_uuid);
+
+            /* create a new group in the groups hashtable */ 
+            new_group_json = json_object();
+            json_object_set_new(groups_in_file, new_group_uuid, new_group_json);
+
+            /* grab the links from current group, insert a new/empty link object to the new group */
+            json_t* link_list = json_object_get(current_group, "links");
+            HDassert(link_list != NULL);
+            json_t* new_link = json_object();
+            HDassert((json_array_append(link_list, new_link) == 0));
+
+            json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD")); /* FTW: need to get link class from pl? */
+            json_object_set_new(new_link, "title", json_string(tokens[token_index]));
+            json_object_set_new(new_link, "collection", json_string("groups"));
+            json_object_set_new(new_link, "id", json_string(new_group_uuid));
+
+             /* populate fields in that new group */
+            json_t *hdf5_path_name_array = json_array(); /* create new, empty array */ 
+            json_object_set_new(new_group_json, "alias", hdf5_path_name_array);
+
+            json_t *attribute_collection = json_array(); /* create new, empty array */
+            json_object_set_new(new_group_json, "attributes", attribute_collection);
+
+            json_t *link_collection = json_array(); /* create new, empty array */ 
+            json_object_set_new(new_group_json, "links", link_collection);
+
+            time_t t = time(NULL);
+
+            /* created */
+            char created_UTC_string[64];
+            HDassert(h5json_get_utc_string_from_time(t, created_UTC_string) >= 0);
+            HDassert(json_object_set_new(new_group_json, "created", json_string(created_UTC_string)) == 0);
+
+            /* lastModified */
+            char lastModified_UTC_string[64];
+            HDassert(h5json_get_utc_string_from_time(t, lastModified_UTC_string) >= 0);
+            HDassert(json_object_set_new(new_group_json, "lastModified", json_string(lastModified_UTC_string)) == 0);
+
+            json_t *creationProperties = json_object(); /* create new, empty array */
+            json_object_set_new(new_group_json, "creationProperties",creationProperties);
+            
+            /* attributes */ 
+            json_object_set_new(new_group_json, "attributes", json_array());
+
+            /* set the current group pointer to point to the next one before moving to the next token */
+//            current_uuid = &new_group_uuid; 
+//FTW WIP
+strncpy(current_uuid, new_group_uuid, sizeof(h5json_uuid_t));
+
+        } /* end of !found */
+
+    } /* end of tokens */
+
+    ret_value = SUCCEED;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
 }
