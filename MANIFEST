@@ -2382,6 +2382,7 @@
 
 ./tools/test/h5diff/testfiles/h5diff_attr1.h5
 ./tools/test/h5diff/testfiles/h5diff_attr2.h5
+./tools/test/h5diff/testfiles/h5diff_attr3.h5
 ./tools/test/h5diff/testfiles/h5diff_attr_v_level1.h5
 ./tools/test/h5diff/testfiles/h5diff_attr_v_level2.h5
 ./tools/test/h5diff/testfiles/h5diff_basic1.h5
@@ -2423,10 +2424,8 @@
 ./tools/test/h5diff/testfiles/compounds_array_vlen2.h5
 ./tools/test/h5diff/testfiles/non_comparables1.h5
 ./tools/test/h5diff/testfiles/non_comparables2.h5
-./tools/test/h5diff/testfiles/tmpSingleSiteBethe.reference.h5
 ./tools/test/h5diff/testfiles/h5diff_8625.txt
-./tools/test/h5diff/testfiles/h5diff_tmp2.txt
-./tools/test/h5diff/testfiles/tmpSingleSiteBethe.output.h5
+./tools/test/h5diff/testfiles/h5diff_8639.txt
 ./tools/test/h5diff/testfiles/tudfilter.h5
 ./tools/test/h5diff/testfiles/tudfilter2.h5
 ./tools/test/h5diff/testfiles/h5diff_ud.txt
