@@ -214,7 +214,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * exception handlers to print out the HDF-5 error stack.
  * <hr>
  *
- * @version HDF5 1.11.0 <BR>
+ * @version HDF5 1.11.2 <BR>
  *          <b>See also: <a href ="./hdf.hdf5lib.HDFArray.html"> hdf.hdf5lib.HDFArray</a> </b><BR>
  *          <a href ="./hdf.hdf5lib.HDF5Constants.html"> hdf.hdf5lib.HDF5Constants</a><BR>
  *          <a href ="./hdf.hdf5lib.HDF5CDataTypes.html"> hdf.hdf5lib.HDF5CDataTypes</a><BR>
@@ -237,7 +237,7 @@ public class H5 implements java.io.Serializable {
      *
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = { 1, 11, 0 };
+    public final static int LIB_VERSION[] = { 1, 11, 2 };
 
     public final static String H5PATH_PROPERTY_KEY = "hdf.hdf5lib.H5.hdf5lib";
 
@@ -4451,7 +4451,7 @@ public class H5 implements java.io.Serializable {
     // //
     // ////////////////////////////////////////////////////////////
 
-    // Generic property list routines
+    // /////// Generic property list routines ///////
 
     /**
      * H5Pget_class_name retrieves the name of a generic property list class
@@ -4767,7 +4767,7 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static native int H5Piterate(long plist, int[] idx, H5P_iterate_cb op, H5P_iterate_t op_data) throws HDF5LibraryException;
 
-    // Object creation property list (OCPL) routines
+    // /////// Object creation property list (OCPL) routines ///////
 
     /**
      * H5Pget_attr_phase_change retrieves attribute storage phase change thresholds.
@@ -5071,7 +5071,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fletcher32(long plist) throws HDF5LibraryException,
     NullPointerException;
 
-    // File creation property list (FCPL) routines
+    // /////// File creation property list (FCPL) routines ///////
 
     /**
      * H5Pget_userblock retrieves the size of a user block in a file creation property list.
@@ -5480,7 +5480,7 @@ public class H5 implements java.io.Serializable {
            throws HDF5LibraryException, IllegalArgumentException;
 
 
-    // File access property list (FAPL) routines
+    // /////// File access property list (FAPL) routines ///////
 
     /**
      * H5Pget_alignment retrieves the current settings for alignment properties from a file access property list.
@@ -5860,6 +5860,37 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Pset_metadata_read_attempts(long plist_id, long attempts)
             throws HDF5LibraryException;
 
+    /**
+     * H5Pget_evict_on_close retrieves the file access property list setting that determines whether an HDF5 object
+     * will be evicted from the library's metadata cache when it is closed.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     *
+     * @return indication if the object will be evicted on close.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native boolean H5Pget_evict_on_close(long fapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pset_evict_on_close controls the library's behavior of evicting metadata associated with a closed object.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     * @param evict_on_close
+     *            IN: Whether the HDF5 object should be evicted on close.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native void H5Pset_evict_on_close(long fapl_id, boolean evict_on_close)
+            throws HDF5LibraryException;
+
     // Dataset creation property list (DCPL) routines //
 
     /**
@@ -6065,6 +6096,36 @@ public class H5 implements java.io.Serializable {
      *                - An id is &lt;=0
      **/
     public synchronized static native String H5Pget_virtual_dsetname(long dcpl_id, long index) throws HDF5LibraryException, IllegalArgumentException;
+
+//    /////  unimplemented /////
+//    /**
+//     * H5Pget_vds_file_cache_size retrieves the size of the vds link open file cache.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     *
+//     * @return VDS link open file cache size in number of files.
+//     *
+//     * @exception HDF5LibraryException
+//     *                - Error from the HDF-5 Library.
+//     *
+//     **/
+//    public synchronized static native int H5Pget_vds_file_cache_size(long fapl_id) throws HDF5LibraryException;
+//
+//    /**
+//     * H5Pset_vds_file_cache_size sets the number of files that can be held open in an vds link open file cache.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     * @param efc_size
+//     *            IN: VDS link open file cache size in number of files.
+//     *
+//     * @exception HDF5LibraryException
+//     *                - Error from the HDF-5 Library.
+//     *
+//     **/
+//    public synchronized static native void H5Pset_vds_file_cache_size(long fapl_id, int efc_size)
+//            throws HDF5LibraryException;
 
     /**
      * H5Pget_external returns information about an external file.
@@ -6285,7 +6346,37 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fill_time(long plist_id, int fill_time) throws HDF5LibraryException,
     NullPointerException;
 
-    // Dataset access property list (DAPL) routines //
+    // /////// Dataset creation property list (DCPL) routines ///////
+
+    /**
+     * H5Pset_chunk_opts Sets the edge chunk option in a dataset creation property list.
+     *
+     * @param dcpl_id
+     *            IN: Dataset creation property list identifier
+     * @param opts
+     *            IN: Edge chunk option flag. Valid values are:
+     *                H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS - filters are not applied to partial edge chunks.
+     *                0 - Disables option; partial edge chunks will be compressed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library
+     **/
+    public synchronized static native void H5Pset_chunk_opts(long dcpl_id, int opts) throws HDF5LibraryException;
+
+    /**
+     * H5Pget_chunk_opts retrieves the edge chunk option setting stored in the dataset creation property list .
+     *
+     * @param dcpl_id
+     *            IN: Dataset creation property list
+
+     * @return The edge chunk option setting.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library
+     **/
+    public synchronized static native int H5Pget_chunk_opts(long dcpl_id) throws HDF5LibraryException;
+
+    // /////// Dataset access property list (DAPL) routines ///////
 
     /**
      * Retrieves the maximum possible number of elements in the meta data cache and the maximum possible number of bytes
@@ -6388,12 +6479,76 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native long H5Pget_virtual_printf_gap(long dapl_id) throws HDF5LibraryException;
 
+    /**
+     * H5Pget_virtual_prefix Retrieves prefix applied to virtual file paths.
+     *
+     * @param dapl_id
+     *            IN: Link access property list identifier
+     *
+     * @return the prefix to be applied to virtual file paths.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native String H5Pget_virtual_prefix(long dapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pset_virtual_prefix Sets prefix to be applied to virtual file paths.
+     *
+     * @param dapl_id
+     *            IN: Dataset access property list identifier
+     * @param prefix
+     *            IN: Prefix to be applied to virtual file paths
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - prefix is null.
+     *
+     **/
+    public synchronized static native void H5Pset_virtual_prefix(long dapl_id, String prefix)
+            throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Pget_efile_prefix Retrieves prefix applied to external file paths.
+     *
+     * @param dapl_id
+     *            IN: Link access property list identifier
+     *
+     * @return the prefix to be applied to external file paths.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native String H5Pget_efile_prefix(long dapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pset_efile_prefix Sets prefix to be applied to external file paths.
+     *
+     * @param dapl_id
+     *            IN: Dataset access property list identifier
+     * @param prefix
+     *            IN: Prefix to be applied to external file paths
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - prefix is null.
+     *
+     **/
+    public synchronized static native void H5Pset_efile_prefix(long dapl_id, String prefix)
+            throws HDF5LibraryException, NullPointerException;
+
     // public synchronized static native void H5Pset_append_flush(long plist_id, int ndims, long[] boundary, H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
 
     // public synchronized static native void H5Pget_append_flush(long plist_id, int dims, long[] boundary, H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
 
 
-    // Dataset xfer property list (DXPL) routines //
+    // /////// Dataset xfer property list (DXPL) routines ///////
 
     /**
      * H5Pget_data_transform retrieves the data transform expression previously set in the dataset transfer property
@@ -6544,7 +6699,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_hyper_vector_size(long dxpl_id, long vector_size)
             throws HDF5LibraryException, NullPointerException;
 
-    // Link creation property list (LCPL) routines //
+    // /////// Link creation property list (LCPL) routines ///////
 
     /**
      * H5Pget_create_intermediate_group determines whether property is set to enable creating missing intermediate
@@ -6579,7 +6734,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_create_intermediate_group(long lcpl_id, boolean crt_intermed_group)
             throws HDF5LibraryException;
 
-    // Group creation property list (GCPL) routines //
+    // /////// Group creation property list (GCPL) routines ///////
 
     /**
      * H5Pget_local_heap_size_hint Retrieves the anticipated size of the local heap for original-style groups.
@@ -6736,14 +6891,14 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_link_creation_order(long gcpl_id, int crt_order_flags)
             throws HDF5LibraryException;
 
-    // String creation property list (STRCPL) routines //
+    // /////// String creation property list (STRCPL) routines ///////
 
     public synchronized static native int H5Pget_char_encoding(long plist_id) throws HDF5LibraryException;
 
     public synchronized static native void H5Pset_char_encoding(long plist_id, int encoding)
             throws HDF5LibraryException;
 
-    // Link access property list (LAPL) routines //
+    // /////// Link access property list (LAPL) routines ///////
 
     /**
      * H5Pget_nlinks retrieves the maximum number of soft or user-defined link traversals allowed, nlinks, before the
@@ -6896,7 +7051,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_elink_acc_flags(long lapl_id, int flags) throws HDF5LibraryException,
     IllegalArgumentException;
 
-    // Object copy property list (OCPYPL) routines //
+    // /////// Object copy property list (OCPYPL) routines ///////
 
     /**
      * H5Pget_copy_object retrieves the properties to be used when an object is copied.
@@ -6927,7 +7082,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Pset_copy_object(long ocp_plist_id, int copy_options)
             throws HDF5LibraryException;
 
-    // Other/Older property list routines //
+    // /////// Other/Older property list routines ///////
 
     /**
      * H5Pget_version retrieves the version information of various objects for a file creation property list.
@@ -6955,7 +7110,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pget_version(long plist, int[] version_info) throws HDF5LibraryException,
     NullPointerException, IllegalArgumentException;
 
-    // file drivers property list routines //
+    // /////// file drivers property list routines ///////
 
     public synchronized static native void H5Pget_fapl_core(long fapl_id, long[] increment, boolean[] backing_store)
             throws HDF5LibraryException, NullPointerException;
@@ -7102,20 +7257,28 @@ public class H5 implements java.io.Serializable {
     // File creation property list (FCPL) routines //
 
     // File access property list (FAPL) routines //
-    // herr_t H5Pset_driver( hid_t plist_id, hid_t new_driver_id, const void *new_driver_info )
-    // const void *H5Pget_driver_info( hid_t plist_id )
-    // herr_t H5Pget_multi_type ( hid_t fapl_id, H5FD_mem_t *type )
-    // herr_t H5Pset_multi_type ( hid_t fapl_id, H5FD_mem_t type )
+    // herr_t H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
+    // const void *H5Pget_driver_info(hid_t plist_id)
+    // herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
+    // herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
     // herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr);
     // herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
     // herr_t H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
     // herr_t H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
     // herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size);
     // herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, size_t *page_size);
+    // herr_t H5Pset_all_coll_metadata_ops(hid_t accpl_id, hbool_t is_collective);
+    // herr_t H5Pset_coll_metadata_write(hid_t fapl_id, hbool_t is_collective);
+    // herr_t H5Pget_coll_metadata_write(hid_t fapl_id, hbool_t *is_collective);
+    // herr_t H5Pget_page_buffer_size(hid_t fapl_id, size_t *buf_size, unsigned *min_meta_perc, unsigned *min_raw_perc);
+    // herr_t H5Pset_object_flush_cb (hid_t fapl_id, H5F_flush_cb_t func, void *user_data);
+    // herr_t H5Pget_object_flush_cb (hid_t fapl_id, H5F_flush_cb_t *func, void **user_data);
 
     // Dataset creation property list (DCPL) routines //
 
     // Dataset access property list (DAPL) routines //
+    // herr_t H5Pset_append_flush (hid_t dapl_id, int ndims, const hsize_t boundary[], H5D_append_cb_t func, void *user_data);
+    // herr_t H5Pget_append_flush(hid_t dapl_id, int ndims, hsize_t boundary[], H5D_append_cb_t *func, void **user_data)
 
     // Dataset xfer property list (DXPL) routines //
     // herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);

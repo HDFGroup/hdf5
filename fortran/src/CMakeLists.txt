@@ -95,6 +95,18 @@ add_custom_command (
 )
 set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5f90i_gen.h PROPERTIES GENERATED TRUE)
 set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
+if (BUILD_SHARED_LIBS)
+  set (CMDSH $<TARGET_FILE:H5match_types>)
+  add_custom_command (
+      OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
+             ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
+      COMMAND ${CMDSH}
+      WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
+      DEPENDS H5match_types
+  )
+  set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h PROPERTIES GENERATED TRUE)
+  set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
+endif ()
 
 #-----------------------------------------------------------------------------
 # f90CStub lib
@@ -223,7 +235,7 @@ set (f90_F_SOURCES
 if (BUILD_SHARED_LIBS)
   set (f90_F_SOURCES_SHARED
       # generated file
-      ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+      ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
 
       ${f90_F_BASE_SOURCES}
 
@@ -243,6 +255,7 @@ set (SHARED_LINK_FLAGS " ")
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_LIB_TARGET} PUBLIC ${HDF5_F90_C_LIB_TARGET})
 target_link_libraries (${HDF5_F90_LIB_TARGET} PRIVATE ${LINK_Fortran_LIBS})
+target_include_directories (${HDF5_F90_LIB_TARGET} PUBLIC ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   target_include_directories (${HDF5_F90_LIB_TARGET} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
 endif ()
@@ -271,6 +284,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_FORTRAN_PROPERTIES (${HDF5_F90_LIBSH_TARGET} SHARED " " ${SHARED_LINK_FLAGS})
   target_link_libraries (${HDF5_F90_LIBSH_TARGET} PUBLIC ${HDF5_F90_C_LIBSH_TARGET})
   target_link_libraries (${HDF5_F90_LIBSH_TARGET} PRIVATE ${LINK_Fortran_LIBS})
+  target_include_directories (${HDF5_F90_LIBSH_TARGET} PUBLIC ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
   if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
     target_include_directories (${HDF5_F90_LIBSH_TARGET} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
   endif ()
