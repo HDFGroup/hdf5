@@ -6097,6 +6097,36 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native String H5Pget_virtual_dsetname(long dcpl_id, long index) throws HDF5LibraryException, IllegalArgumentException;
 
+//    /////  unimplemented /////
+//    /**
+//     * H5Pget_vds_file_cache_size retrieves the size of the vds link open file cache.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     *
+//     * @return VDS link open file cache size in number of files.
+//     *
+//     * @exception HDF5LibraryException
+//     *                - Error from the HDF-5 Library.
+//     *
+//     **/
+//    public synchronized static native int H5Pget_vds_file_cache_size(long fapl_id) throws HDF5LibraryException;
+//
+//    /**
+//     * H5Pset_vds_file_cache_size sets the number of files that can be held open in an vds link open file cache.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     * @param efc_size
+//     *            IN: VDS link open file cache size in number of files.
+//     *
+//     * @exception HDF5LibraryException
+//     *                - Error from the HDF-5 Library.
+//     *
+//     **/
+//    public synchronized static native void H5Pset_vds_file_cache_size(long fapl_id, int efc_size)
+//            throws HDF5LibraryException;
+
     /**
      * H5Pget_external returns information about an external file.
      *
@@ -6448,6 +6478,38 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library
      **/
     public synchronized static native long H5Pget_virtual_printf_gap(long dapl_id) throws HDF5LibraryException;
+
+    /**
+     * H5Pget_virtual_prefix Retrieves prefix applied to virtual file paths.
+     *
+     * @param dapl_id
+     *            IN: Link access property list identifier
+     *
+     * @return the prefix to be applied to virtual file paths.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native String H5Pget_virtual_prefix(long dapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pset_virtual_prefix Sets prefix to be applied to virtual file paths.
+     *
+     * @param dapl_id
+     *            IN: Dataset access property list identifier
+     * @param prefix
+     *            IN: Prefix to be applied to virtual file paths
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - prefix is null.
+     *
+     **/
+    public synchronized static native void H5Pset_virtual_prefix(long dapl_id, String prefix)
+            throws HDF5LibraryException, NullPointerException;
 
     /**
      * H5Pget_efile_prefix Retrieves prefix applied to external file paths.

@@ -1544,6 +1544,24 @@ Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_virtual_prefix
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1virtual_1prefix
+(JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_virtual_prefix
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_efile_prefix
  * Signature: (JLjava/lang/String;)V
  */
