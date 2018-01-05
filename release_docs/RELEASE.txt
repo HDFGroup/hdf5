@@ -65,13 +65,15 @@ New Features
       on the virtual file, using a data access property list (DAPL),
       allows the source files to located at an absolute or relative path
       to the virtual file.
+      Private utility functions in H5D and H5L packages merged into single
+      function in H5F package.
 
       New public APIs:
             herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char* prefix);
             ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
       The prefix can also be set with an environment variable, HDF5_VDS_PREFIX.
 
-      (ADB - 2017/12/12, HDFFV-9724)
+      (ADB - 2017/12/12, HDFFV-9724, HDFFV-10361)
 
 
     Parallel Library:
