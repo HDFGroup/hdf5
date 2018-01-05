@@ -57,7 +57,7 @@ const char *FILENAME[] = {
 
 #define TMPDIR          "tmp/"
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    vds_select_equal
  *
@@ -209,7 +209,7 @@ error:
     return -1;
 } /* end vds_select_equal() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    vds_check_mapping
  *
@@ -298,7 +298,7 @@ error:
     return -1;
 } /* end vds_check_mapping() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_api_get_ex_dcpl
  *
@@ -1561,7 +1561,7 @@ test_vds_prefix(unsigned config, hid_t fapl)
     return 1;
 } /* end vds_link_prefix() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_basic_io
  *
@@ -3721,7 +3721,7 @@ error:
      return 1;
 } /* end test_basic_io() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_unlim
  *
@@ -6743,7 +6743,7 @@ error:
      return 1;
 } /* end test_unlim() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_printf
  *
@@ -10434,7 +10434,7 @@ error:
      return 1;
 } /* end test_printf() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_all
  *
@@ -11459,7 +11459,7 @@ error:
      return 1;
 } /* end test_all() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_dapl_values
  *
@@ -11601,7 +11601,7 @@ test_dapl_values(hid_t fapl_id)
     return 1;
 } /* end test_dapl_values() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
