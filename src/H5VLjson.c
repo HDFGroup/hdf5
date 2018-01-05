@@ -2551,11 +2551,22 @@ H5VL_json_group_close(void *_group, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
 } /* end H5VL_json_group_close() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_json_link_create
+ *
+ * Purpose: Create hard and soft links
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ * Programmer:  Frank Willmore
+ *              November, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params,
                       hid_t lcpl_id, hid_t lapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-//    H5VL_json_object_t *link_new_loc_obj = (H5VL_json_object_t *) obj;
     H5VL_json_object_t* new_link_location = (H5VL_json_object_t *) obj;
     H5P_genplist_t*     lcpl = NULL;
     size_t              link_path_length;
@@ -2569,9 +2580,9 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
     printf("  - New Link create_type: %d (hard = %d, soft = %d)\n", create_type, H5VL_LINK_CREATE_HARD, H5VL_LINK_CREATE_SOFT);
     printf("  - New link to be placed in location (group or file) with UUID: %s\n", new_link_location->object_uuid);
     printf("  - New link location has loc_params.obj_type: %d (H5I_type_t group = %d/file = %d)\n", loc_params.obj_type, H5I_GROUP, H5I_FILE);
-    printf("  - loc_params.type: %d (H5VL_loc_type_t)\n", loc_params.type);
-    printf("  - H5VL_loc_type_t values are: H5VL_OBJECT_BY_SELF = %d, H5VL_OBJECT_BY_NAME = %d, H5VL_OBJECT_BY_IDX = %d, H5VL_OBJECT_BY_ADDR = %d\n", 
-           H5VL_OBJECT_BY_SELF, H5VL_OBJECT_BY_NAME, H5VL_OBJECT_BY_IDX, H5VL_OBJECT_BY_ADDR );
+//    printf("  - loc_params.type: %d (H5VL_loc_type_t)\n", loc_params.type);
+//    printf("  - H5VL_loc_type_t values are: H5VL_OBJECT_BY_SELF = %d, H5VL_OBJECT_BY_NAME = %d, H5VL_OBJECT_BY_IDX = %d, H5VL_OBJECT_BY_ADDR = %d\n", 
+//           H5VL_OBJECT_BY_SELF, H5VL_OBJECT_BY_NAME, H5VL_OBJECT_BY_IDX, H5VL_OBJECT_BY_ADDR );
     printf("  - New Link Name/loc_params.loc_data.loc_by_name.name: %s\n", loc_params.loc_data.loc_by_name.name);
 #endif
 
@@ -2591,20 +2602,19 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
 //FTW ?? 
     } /* end if */
 
-
     if (NULL == (lcpl = (H5P_genplist_t *) H5I_object(lcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Make a copy of the link path for future use, since basename may modify its argument */
+/*//FTW this shouldn't be necessary as my helper fn takes const, doesn't modify
     link_path_length = strlen(loc_params.loc_data.loc_by_name.name);
     if (NULL == (link_path_copy = (char *) H5MM_malloc(link_path_length + 1)))
         HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't allocate space for link path copy")
     strncpy(link_path_copy, loc_params.loc_data.loc_by_name.name, link_path_length + 1);
-
+*/
     switch (create_type) {
         case H5VL_LINK_CREATE_HARD:
         {
-// FTW create hard link, will: use the provided group or file uuid to locate the existing object (using helper function) and then locate the group (using the helper function) where the new link is to be placed, and finally insert a json_t* link object into that group's link collection.   
             H5VL_json_object_t  link_target;
             H5VL_loc_params_t   target_loc_params;
             htri_t              search_ret;
@@ -2630,18 +2640,46 @@ printf("FTW: Got H5VL_LINK_CREATE_HARD\n");
 #endif
 
 // FTW WIP
+// use the provided group or file uuid and name of object to locate the UUID 
+//json_t* the_object = H5VL_json_find_object_by_name(new_link_location->domain, name, new_link_location->object_uuid );
+json_t* the_object = H5VL_json_find_object_by_name(new_link_location->domain, target_loc_params.loc_data.loc_by_name.name, ((H5VL_json_object_t *) link_loc_obj)->object_uuid);
+h5json_uuid_t the_object_uuid; 
+strncpy(the_object_uuid, json_string_value(json_object_get(the_object, "id")), sizeof(h5json_uuid_t));
+printf("Got UUID of the object of interest = %s\n", the_object_uuid);
+printf("Wubba Lubba Dub Dub!\n");
+
+// locate the group (using the helper function) where the new link is to be placed
+json_t* groups_in_file = json_object_get(new_link_location->domain->object_json, "groups");
+printf("dumping  groups in file = *%s*\n", json_dumps(groups_in_file, JSON_INDENT(4))); 
+printf("new_link_location->object_uuid = %s", new_link_location->object_uuid);
+json_t* destination_group = json_object_get(groups_in_file, new_link_location->object_uuid);
+printf("dumping destination group = *%s*\n", json_dumps(destination_group, JSON_INDENT(4))); 
+    printf("  - New link to be placed in location (group or file) with UUID: %s\n", new_link_location->object_uuid);
+    printf("  - New Link Name/loc_params.loc_data.loc_by_name.name: %s\n", loc_params.loc_data.loc_by_name.name);
+json_t* destination_group_links = json_object_get(destination_group, "links");
+
+printf("dumping destination group links = *%s*\n", json_dumps(destination_group_links, JSON_INDENT(4))); 
+
+// insert a json_t* link object into that group's link collection.   
+json_t* new_link = json_object();
+json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD"));
+json_object_set_new(new_link, "title", json_string(loc_params.loc_data.loc_by_name.name));
+json_t* collection;
+//FTW if ("datasets" | "datatypes" | "groups" )
+    collection = json_string("datasets");
+json_object_set_new(new_link, "collection", collection);
+json_object_set_new(new_link, "id", json_string(the_object_uuid));
+json_array_append_new(destination_group_links, new_link);
+
 //            search_ret = H5VL_json_find_link_by_path((H5VL_json_object_t *) link_loc_obj, target_loc_params.loc_data.loc_by_name.name, yajl_copy_object_URI_parse_callback, NULL, &link_target.URI);
 
-const char* name = NULL;// existing_objectname of link
+//const char* name = NULL;// existing_objectname of link
 // this is the function to find it. what are we finding? 
 
 // This is the container for new lnk
-json_t* the_link = H5VL_json_find_object_by_name(new_link_location->domain, name, new_link_location->object_uuid );
 
-
-
-            if (!search_ret || search_ret < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to locate link target object")
+//            if (!search_ret || search_ret < 0)
+//                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to locate link target object")
 
 #ifdef PLUGIN_DEBUG
 //            printf("  - Target object URI: %s\n", link_target.URI);
