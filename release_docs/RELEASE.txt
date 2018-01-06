@@ -85,6 +85,21 @@ New Features
 
     Library:
     --------
+    - Add prefix option to VDS files.
+
+      Currently, VDS source files must be in the active directory to be
+      found by the virtual file. Adding the option of a prefix to be set
+      on the virtual file, using a data access property list (DAPL),
+      allows the source files to located at an absolute or relative path
+      to the virtual file.
+
+      New public APIs:
+            herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char* prefix);
+            ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
+      The prefix can also be set with an environment variable, HDF5_VDS_PREFIX.
+
+      (ADB - 2017/12/12, HDFFV-9724)
+
     - H5FDdriver_query() API call added to the C library.
 
       This new library call allows the user to query a virtual file driver
@@ -118,6 +133,7 @@ New Features
       The code will remain unchanged in the HDF5 1.10.x branches.
 
       (HDFFV-10252, DER, 2017/04/05)
+
 
     Parallel Library:
     -----------------
@@ -179,7 +195,18 @@ New Features
     -
 
     Java Library:
-    -------------
+    ----------------
+    - Wrappers added for the following APIs:
+      H5Pset_evict_on_close
+      H5Pget_evict_on_close
+      H5Pset_chunk_opts
+      H5Pget_chunk_opts
+      H5Pset_efile_prefix
+      H5Pget_efile_prefix
+      H5Pset_virtual_prefix
+      H5Pget_virtual_prefix
+
+      (ADB - 2017/12/20)
 
     - The H5I_REFERENCE value in the H5I_type_t enum (defined in H5Ipublic.h)
       has been marked as deprectated.
@@ -239,13 +266,13 @@ Bug Fixes since HDF5-1.10.1 release
 
     - Fix H5Sencode() bug when the number of elements selected is > 2^32
 
-      H5Sencode() incorrectly encodes dataspace selection with number of 
-      elements exceeding 2^32.  When decoding such selection via H5Sdecode(), 
+      H5Sencode() incorrectly encodes dataspace selection with number of
+      elements exceeding 2^32.  When decoding such selection via H5Sdecode(),
       the number of elements in the decoded dataspace is not the same as
-      what is encoded.  This problem exists for H5S_SEL_HYPER and 
+      what is encoded.  This problem exists for H5S_SEL_HYPER and
       H5S_SEL_POINTS encoding.
 
-      The cause of the problem is because the library uses 32 bits to 
+      The cause of the problem is because the library uses 32 bits to
       encode counts and block offsets for the selection.
       The solution is to use the original 32 bit encodings if possible,
       but use a different way to encode selection > 32 bits when needed.

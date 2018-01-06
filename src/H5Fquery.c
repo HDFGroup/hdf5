@@ -144,7 +144,7 @@ H5F_get_actual_name(const H5F_t *f)
  * Function: H5F_get_extpath
  *
  * Purpose:  Retrieve the file's 'extpath' flags
- *           This is used by H5L_extern_traverse() and H5D_build_extfile_prefix() to retrieve the main file's location
+ *           This is used by H5L_extern_traverse() and H5D_build_file_prefix() to retrieve the main file's location
  *           when searching the target file.
  *
  * Return:   'extpath' on success/abort on failure (shouldn't fail)
@@ -686,16 +686,12 @@ H5F_gc_ref(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_use_latest_flags
+ * Function: H5F_use_latest_flags
  *
- * Purpose:	    Retrieve the requested 'latest version support' for the file.
+ * Purpose:  Retrieve the requested 'latest version support' for the file.
  *
- * Return:	    Success:	Non-negative, the requested 'version support'
- *              Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Mar  5 2007
+ * Return:   Success:    Non-negative, the requested 'version support'
+ *           Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
 unsigned
