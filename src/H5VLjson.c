@@ -3227,6 +3227,7 @@ get_link_type_callback(char *HTTP_response, void H5_ATTR_UNUSED *callback_data_i
  *              March, 2017
  */
 /* XXX: If leading slash not supplied, loop is skipped and wrong ID is returned */
+#if 0
 static htri_t
 H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_path,
     herr_t (*link_found_callback)(char *, void *, void *), void *callback_data_in, void *callback_data_out)
@@ -3257,6 +3258,7 @@ H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_pat
 
     /* Get the basename of the link path to find the actual name of the link being searched for */
     target_link_name = get_basename(link_path);
+#endif
 
 #if 0
     /* Use the parent object URI as the first URI to start iterating through links from */
@@ -3286,11 +3288,9 @@ H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_pat
     else
         /* Use the parent object's URI as the first URI to start iterating through links from */
         strncpy(curr_URI, parent_obj->URI, URI_MAX_LENGTH);
-#endif
-
 
     current_link_name = strtok(temp_path, "./\\");
-#if 0
+
     while (current_link_name) {
 
         /* At this point, iteration could either be in the middle of the link path, or
@@ -3340,7 +3340,6 @@ H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_pat
     } /* end while */
 //printf("Got link_data = %d\n", link_data);
 //printf("Got curr_obj_URI = %s\n", curr_obj_URI);
-#endif
 
 done:
     if (temp_path)
@@ -3348,6 +3347,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_find_link_by_path() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -4726,214 +4726,6 @@ done:
 } /* end H5VL_json_parse_datatype() */
 
 
-/*-------------------------------------------------------------------------
- * Function:    H5VL_json_parse_dataspace
- *
- * Purpose:     Given an existing H5VL_json_object_t object, retrieves its
- *              dataspace properties using the JSON API and sets up a
- *              dataspace for internal client-side use
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Jordan Henderson
- *              May, 2017
- *
- */
-static herr_t
-H5VL_json_parse_dataspace(H5VL_json_object_t *object)
-{
-    const char *class_keys[] = { "shape", "class", (const char *) 0 };
-    yajl_val    parse_tree = NULL, key_obj = NULL;
-    hid_t       dataspace = FAIL;
-    char        temp_url[URL_MAX_LENGTH];
-    char       *dataspace_type = NULL;
-    char        host_header[HOST_HEADER_MAX_LENGTH] = "Host: ";
-    herr_t      ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(object);
-
-    /* Setup the "Host: " header */
-//    curl_headers = curl_slist_append(curl_headers, strncat(host_header, object->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
-
-    /* Disable use of Expect: 100 Continue HTTP response */
-//    curl_headers = curl_slist_append(curl_headers, "Expect:");
-
-    switch (object->obj_type) {
-        case H5I_DATASET:
-            /* Redirect cURL to "/datasets/<id>/shape" to get the shape of the dataset's dataspace */
-//            snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/shape", base_URL, object->URI);
-            break;
-
-        case H5I_ATTR:
-            /* Redirect cURL to either
-             * "/groups/<id>/attributes/<name>",
-             * "/datasets/<id>/attributes/<name>", or
-             * "/datatypes/<id>/attributes/<name>" depending on the type of
-             * object the attribute is attached to in order to get the shape
-             * of the attribute's dataspace.
-             */
-            /* XXX: Determine best way to add in attribute name below */
-            switch (object->u.attribute.parent_obj->obj_type) {
-                case H5I_GROUP:
-//                    snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/attributes/%s", base_URL, object->u.attribute.parent_obj->URI, object->u.attribute.attr_name);
-                    break;
-
-                case H5I_DATASET:
-//                    snprintf(temp_url, URL_MAX_LENGTH, "%s/datasets/%s/attributes/%s", base_URL, object->u.attribute.parent_obj->URI, object->u.attribute.attr_name);
-                    break;
-
-                case H5I_DATATYPE:
-//                    snprintf(temp_url, URL_MAX_LENGTH, "%s/datatypes/%s/attributes/%s", base_URL, object->u.attribute.parent_obj->URI, object->u.attribute.attr_name);
-                    break;
-
-                case H5I_UNINIT:
-                case H5I_BADID:
-                case H5I_ATTR:
-                case H5I_FILE:
-                case H5I_DATASPACE:
-                case H5I_REFERENCE:
-                case H5I_VFL:
-                case H5I_VOL:
-                case H5I_GENPROP_CLS:
-                case H5I_GENPROP_LST:
-                case H5I_ERROR_CLASS:
-                case H5I_ERROR_MSG:
-                case H5I_ERROR_STACK:
-                case H5I_NTYPES:
-                default:
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid parent object type")
-            } /* end switch */
-
-            break;
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_FILE:
-        case H5I_GROUP:
-        case H5I_DATASPACE:
-        case H5I_DATATYPE:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid object type")
-    } /* end switch */
-
-#ifdef PLUGIN_DEBUG
-    printf("Accessing link: %s\n\n", temp_url);
-#endif
-
-//    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-//    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
-//    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
-
- //   CURL_PERFORM(curl, H5E_DATASET, H5E_CANTGET, FAIL);
-
-//    if (NULL == (parse_tree = yajl_tree_parse(response_buffer.buffer, NULL, 0)))
-//        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to parse response")
-
-    /* Retrieve the Dataspace type */
-    if (NULL == (key_obj = yajl_tree_get(parse_tree, class_keys, yajl_t_string)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to retrieve dataspace class")
-
-    if (NULL == (dataspace_type = YAJL_GET_STRING(key_obj)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to retrieve dataspace class")
-
-    /* Create the appropriate type of Dataspace */
-    if (!strcmp(dataspace_type, "H5S_NULL")) {
-        if ((dataspace = H5Screate(H5S_NULL)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create null dataspace")
-    } /* end if */
-    else if (!strcmp(dataspace_type, "H5S_SCALAR")) {
-        if ((dataspace = H5Screate(H5S_SCALAR)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create scalar dataspace")
-    } /* end if */
-    else if (!strcmp(dataspace_type, "H5S_SIMPLE")) {
-        const char *dims_keys[] =    { "shape", "dims", (const char *) 0 };
-        const char *maxdims_keys[] = { "shape", "maxdims", (const char *) 0 };
-        yajl_val    dims_obj = NULL, maxdims_obj = NULL;
-        hsize_t     dims[DATASPACE_MAX_RANK];
-        hsize_t     maxdims[DATASPACE_MAX_RANK];
-        size_t      i;
-
-        if (NULL == (dims_obj = yajl_tree_get(parse_tree, dims_keys, yajl_t_array)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to retrieve dataspace dims")
-
-        /* In attribute case, maxdims will default to dims */
-        //if (object->obj_type == H5I_ATTR) maxdims = (hsize_t[DATASPACE_MAX_RANK])NULL; 
-
-        /* look for maxdims unless it's attribute */
-        if (object->obj_type != H5I_ATTR) {
-            if (NULL == (maxdims_obj = yajl_tree_get(parse_tree, maxdims_keys, yajl_t_array)))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to retrieve dataspace maxdims")
-        }
-
-        for (i = 0; i < dims_obj->u.array.len; i++) {
-            long long val = YAJL_GET_INTEGER(dims_obj->u.array.values[i]);
-
-            dims[i] = (hsize_t) val;
-
-            if (object->obj_type != H5I_ATTR) {
-                val = YAJL_GET_INTEGER(maxdims_obj->u.array.values[i]);
-                maxdims[i] = (val == 0) ? H5S_UNLIMITED : (hsize_t) val;
-            }
-            else maxdims[i] = dims[i];
-
-        } /* end for */
-
-#ifdef PLUGIN_DEBUG
-        printf("Creating Simple dataspace with following: \n");
-        printf("  - Dims: [ ");
-        for (i = 0; i < dims_obj->u.array.len; i++) {
-            if (i > 0) printf(", ");
-            printf("%llu", dims[i]);
-        }
-        printf(" ]\n");
-        printf("  - MaxDims: [ ");
-        for (i = 0; i < ((object->obj_type == H5I_ATTR) ? dims_obj->u.array.len : maxdims_obj->u.array.len); i++) {
-            if (i > 0) printf(", ");
-            printf("%llu", maxdims[i]);
-        }
-        printf(" ]\n\n");
-#endif
-
-        if ((dataspace = H5Screate_simple((int) dims_obj->u.array.len, dims, maxdims)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
-    } /* end if */
-
-    if (dataspace >= 0) {
-        if (object->obj_type == H5I_DATASET) object->u.dataset.space_id = dataspace;
-        if (object->obj_type == H5I_ATTR) object->u.attribute.space_id = dataspace;
-    }
-
-done:
-#ifdef PLUGIN_DEBUG
-//    printf("Link access response buffer: %s\n\n", response_buffer.buffer);
-#endif
-
-//    if (parse_tree)
-//        yajl_tree_free(parse_tree);
-
-//    if (curl_headers) {
-//        curl_slist_free_all(curl_headers);
-//        curl_headers = NULL;
-//    } /* end if */
-
-    /* Reset cURL URL to base URL */
-//    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_json_parse_dataspace() */
-
-
 static herr_t
 H5VL_json_convert_dataspace_selection_to_string(hid_t space_id, char *selection_string, hbool_t req_param)
 {
@@ -5728,24 +5520,21 @@ H5VL_json_write_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void*
 
     /*** writing the value ***/
 
-// get the value object out of the json
-printf("attribute value before write = *%s* \n", json_dumps(value_array, JSON_INDENT(4)));
+    // get the value object out of the json
+    printf("attribute value before write = *%s* \n", json_dumps(value_array, JSON_INDENT(4)));
 
-// switch on datatype object, write vals to the json array
-H5T_class_t datatype_class = H5Tget_class(dtype_id);
-size_t datatype_size = H5Tget_size(dtype_id);
+    // switch on datatype object, write vals to the json array
+    H5T_class_t datatype_class = H5Tget_class(dtype_id);
+    size_t datatype_size = H5Tget_size(dtype_id);
 
-//hsize_t buffer_cursor = buf;
+    //hsize_t buffer_cursor = buf;
 
-// get the dims from the space
-int n_dims = H5Sget_simple_extent_ndims( space_id );
-hsize_t* dims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
-hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
-H5Sget_simple_extent_dims(space_id, dims, maxdims );
+    // get the dims from the space
+    int n_dims = H5Sget_simple_extent_ndims( space_id );
+    hsize_t* dims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+    hsize_t* maxdims = (hsize_t*)H5MM_malloc(sizeof(hsize_t) * n_dims);
+    H5Sget_simple_extent_dims(space_id, dims, maxdims );
 
-printf("FTW: got n_dims = %lu\n", n_dims);
-
-//#if 0 // this works... but trying to do better
     switch (n_dims)
     {
         case 1:
@@ -5756,11 +5545,6 @@ printf("FTW: got n_dims = %lu\n", n_dims);
                 json_t* int_value = json_integer(_value);
                 json_array_remove(value_array, i);
                 json_array_insert_new(value_array, i, int_value);
-//                json_array_set_new(value_array, i, int_value);
-//                json_array_append(value_array, int_value);
-
-                //json_t* new_value = H5VL_json_get_new_value(dtype_id, buf, offset);
-                //json_array_append(value_array, new_value);
             }
             break;
         }
@@ -5772,11 +5556,9 @@ printf("FTW: got n_dims = %lu\n", n_dims);
         default:
             HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "rank > two dimensional spaces not supported.")
     }
-//#endif
-    
 
-H5MM_xfree(dims);
-H5MM_xfree(maxdims);
+    H5MM_xfree(dims);
+    H5MM_xfree(maxdims);
 
     ret_value = SUCCEED;
 
@@ -5786,9 +5568,22 @@ done:
 
 }
 
-/* helper function to read data from a JSON object into a buffer
- * IN: pointer to value array, pointer to allocated buffer 
- *  OUT: buffer containing data from array
+
+/* ----------------------------------------------------------------------------
+ * Function:    H5VL_json_read_value
+ *
+ * Purpose:     Helper function to read data from a JSON object into a buffer
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * IN:          pointer to value array
+ *              pointer to allocated buffer 
+ *
+ * OUT:         _buffer containing the data read from array
+ *
+ * Programmer:  Frank Willmore 
+ *              November, 2017
+ *
  */
 static herr_t 
 H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* _buffer)
@@ -5809,9 +5604,9 @@ H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* 
     /*** reading the value ***/
     if (datatype_class = H5T_NATIVE_INT)
     {
-       int* buffer = (int*)_buffer; 
+        int* buffer = (int*)_buffer; 
 
-// FTW this works... but should generalize for multidimensional array 
+    /* XXX:FTW this works... but should generalize for multidimensional array */
         switch (n_dims)
         {
             case 1:
@@ -5824,7 +5619,7 @@ H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* 
                 {
                     json_int_t value = json_integer_value(_value);
                     buffer[index] = (int)value;
-//FTW need to handle datatypes, but can't do datatype = int;
+                    /* XXX:FTW need to handle datatypes, but can't do datatype = int; */
                 }
                 break;
             }
@@ -5850,21 +5645,30 @@ H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* H5VL_json_read_value() */
 
 
-/* H5VL_json_locate_group()
- * Helper function to traverse links and find the group of interest 
+/* ----------------------------------------------------------------------------
+ * Function:    H5VL_json_create_new_group
  *
- * IN:      - groups_in_file / contains json for groups collection
- *          - name / name of group to be located/created 
- *          - create_intermediate / whether intermediate groups are created
- * IN-OUT:  - current_uuid / will contain location to start search, 
- *            and will return contiaing the uuid of the new group. 
- *            It is NOT CONSTANT!
+ * Purpose:     Helper function to traverse links and find group of interest 
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * IN:          groups_in_file / contains json for groups collection
+ *              name / name of group to be located/created 
+ *              create_intermediate / whether intermediate groups are created
+ *
+ * IN-OUT:      current_uuid / will contain location from whichto start search,
+ *              and will return contiaing the uuid of the new group. 
+ *              It is NOT CONSTANT!
+ *
+ * Programmer:  Frank Willmore 
+ *              November, 2017
+ * 
 */
-static 
-herr_t H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate)
+static herr_t 
+H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate)
 {
     herr_t            ret_value = FAIL;
     json_t*         current_group = NULL;
@@ -5999,7 +5803,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-}
+} /* H5VL_json_create_new_group() */
 
 
 /* H5VL_json_find_object_by_name()
@@ -6020,8 +5824,6 @@ json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* na
 {
     json_t*            ret_value = NULL;
     json_t*            current_group = NULL;
-//    h5json_uuid_t       new_group_uuid;
-//    json_t*             new_group_json;
 
     FUNC_ENTER_NOAPI_NOINIT
 
