@@ -179,7 +179,7 @@ static herr_t H5VL_json_convert_data_buffer_to_json_array(const void *buf, hid_t
 
 /* Helper function to locate a group */
 static herr_t H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate);
-static json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection, void** test_ptr);
+static json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection);
 
 /* Helper functions for creating a Dataset */
 //static herr_t H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body);
@@ -2307,7 +2307,7 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     HDassert(current_uuid && "parent uuid not found. ");
 
 //FTW for fun, see if we can find the link with new function:
-json_t* linkylink = H5VL_json_find_object_by_name(new_group->domain, name, current_uuid, NULL, NULL);
+json_t* linkylink = H5VL_json_find_object_by_name(new_group->domain, name, current_uuid, NULL);
 printf("linkylink = >%s<\n", json_dumps(linkylink, JSON_INDENT(4))); 
 
     /* create the JANSSON representation */
@@ -2605,13 +2605,6 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
     if (NULL == (lcpl = (H5P_genplist_t *) H5I_object(lcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Make a copy of the link path for future use, since basename may modify its argument */
-/*//FTW this shouldn't be necessary as my helper fn takes const, doesn't modify
-    link_path_length = strlen(loc_params.loc_data.loc_by_name.name);
-    if (NULL == (link_path_copy = (char *) H5MM_malloc(link_path_length + 1)))
-        HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't allocate space for link path copy")
-    strncpy(link_path_copy, loc_params.loc_data.loc_by_name.name, link_path_length + 1);
-*/
     switch (create_type) {
         case H5VL_LINK_CREATE_HARD:
         {
@@ -2619,12 +2612,6 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
             H5VL_loc_params_t   target_loc_params;
             htri_t              search_ret;
             void               *link_loc_obj;
-
-printf("FTW: Got H5VL_LINK_CREATE_HARD\n");
-
-            /* XXX: May need to populate an H5VL_json_object_t * when the link created
-             * is a hard link; avoid repeat trips to server
-             */
 
             /* Retrieve the target object and loc params from the LCPL */
             if (H5P_get(lcpl, H5VL_PROP_LINK_TARGET, &link_loc_obj) < 0)
@@ -2635,26 +2622,17 @@ printf("FTW: Got H5VL_LINK_CREATE_HARD\n");
 #ifdef PLUGIN_DEBUG
             printf("The following two pieces of information identify the link source:\n");
             printf("  - UUID for location containing link source: %s\n", ((H5VL_json_object_t *) link_loc_obj)->object_uuid);
-            //FTW printf("  - Link target loc params by name: %s\n", target_loc_params.loc_data.loc_by_name.name);
             printf("  - Name of source for Link: %s\n", target_loc_params.loc_data.loc_by_name.name);
 #endif
 
             /* use the provided group or file uuid and name of object to locate the UUID */
-//char collection[24];
-json_t* collection;
-void* test_ptr = (void*)6789;
-printf("FTW value of collection = %ld\n", collection);
-printf("FTW pre-value of test_ptr = %ld\n", test_ptr);
-            json_t* the_object = H5VL_json_find_object_by_name(new_link_location->domain, target_loc_params.loc_data.loc_by_name.name, ((H5VL_json_object_t *) link_loc_obj)->object_uuid, &collection, &test_ptr);
-printf("FTW post-value of test_ptr = %ld\n", test_ptr);
-printf("FTW value of collection = %ld\n", collection);
-printf("FTW returned, found object in collection *%s*\n", json_string_value(collection));
+            json_t* collection; /* get collection from the link to the original */
+            /* get the collection type for the source, use the original link: */
+            json_t* the_object = H5VL_json_find_object_by_name(new_link_location->domain, target_loc_params.loc_data.loc_by_name.name, ((H5VL_json_object_t *) link_loc_obj)->object_uuid, &collection);
             h5json_uuid_t the_object_uuid; 
             strncpy(the_object_uuid, json_string_value(json_object_get(the_object, "id")), sizeof(h5json_uuid_t));
             printf("Got UUID of the object of interest = %s\n", the_object_uuid);
             printf("Wubba Lubba Dub Dub!\n");
-//FTW get collection from the link to the original             
-//json_t* object_collection = json_object_get(
 
             /* locate the group (using the helper function) where the new link is to be placed */
             json_t* groups_in_file = json_object_get(new_link_location->domain->object_json, "groups");
@@ -2665,12 +2643,7 @@ printf("FTW returned, found object in collection *%s*\n", json_string_value(coll
             json_t* new_link = json_object();
             json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD"));
             json_object_set_new(new_link, "title", json_string(loc_params.loc_data.loc_by_name.name));
-// FTW WIP
-// get the collection type for the source, use the original link: 
-
-//FTW if ("datasets" | "datatypes" | "groups" )
-//    collection = json_string("datasets");
-// increase the ref count, since we're increasing the ref count to the object.
+            /* increase the ref count, since we're increasing the ref count to the object. */
             json_object_set_new(new_link, "collection", json_incref(collection));
             json_object_set_new(new_link, "id", json_string(the_object_uuid));
             json_array_append_new(destination_group_links, new_link);
@@ -2679,6 +2652,8 @@ printf("FTW returned, found object in collection *%s*\n", json_string_value(coll
         } /* H5VL_LINK_CREATE_HARD */
 
     }// end switch
+
+// FTW WIP soft links
 #if 0
         case H5VL_LINK_CREATE_SOFT:
         {
@@ -6048,9 +6023,22 @@ done:
 
 }
 
-/* FTW WIP need OUT: object type (collection). */
+
+/* H5VL_json_find_object_by_name()
+ * Helper function to traverse links and find the group of interest 
+ *
+ * IN:      - domain
+ *          - name / name of object to be located
+ * IN-OUT:  - current_uuid / uuid of group to begin search / may be modified
+ *          - collection / pointer to json_t* which upon return contains a jansson string,
+ *            the value of which is "datasets", "datatypes", or "groups".
+ *            If a NULL value is supplied, no action
+ * returns:   pointer to the jansson object 
+ *
+*/
+
 static 
-json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection, void** test_ptr)
+json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection)
 {
     json_t*            ret_value = NULL;
     json_t*            current_group = NULL;
@@ -6110,11 +6098,7 @@ json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* na
         {
             if (collection != NULL) 
             {
-printf("FTW in value of collection = %ld\n", collection);
-*collection = json_object_get(link, "collection");
-printf("FTW lookup found object in collection *%s*\n", json_string_value(*collection));
-printf("FTW in value of collection = %ld\n", collection);
-printf("assigned test_ptr val of %ld\n", *test_ptr = (void*) 12345);
+                *collection = json_object_get(link, "collection");
             }
             ret_value = link;
             break;
@@ -6131,7 +6115,7 @@ printf("assigned test_ptr val of %ld\n", *test_ptr = (void*) 12345);
         if (!found)       
         {
 
-HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "Cannot find link.")
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "Cannot find link.")
 
         } /* end of !found */
 
