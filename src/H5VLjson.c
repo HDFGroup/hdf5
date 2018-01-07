@@ -5508,9 +5508,24 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-//FTW helper function to write data to a JSON object
-//IN: empty array
 // OUT: array containing data from buffer
+
+/* ----------------------------------------------------------------------------
+ * Function:    H5VL_json_write_value
+ *
+ * Purpose:     Helper function to write data from a buffer to a JANSSON object
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * IN:          pointer to JANSSON value array
+ *              pointer to allocated buffer 
+ *
+ * OUT:         value_array containing the data written from buffer
+ *
+ * Programmer:  Frank Willmore 
+ *              December, 2017
+ *
+ */
 static herr_t 
 H5VL_json_write_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* buffer)
 {
@@ -5566,7 +5581,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-}
+} /* H5VL_json_write_value() */
 
 
 /* ----------------------------------------------------------------------------
@@ -5582,7 +5597,7 @@ done:
  * OUT:         _buffer containing the data read from array
  *
  * Programmer:  Frank Willmore 
- *              November, 2017
+ *              December, 2017
  *
  */
 static herr_t 
@@ -5645,6 +5660,7 @@ H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5VL_json_read_value() */
 
 
