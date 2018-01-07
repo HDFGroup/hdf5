@@ -2559,7 +2559,7 @@ H5VL_json_group_close(void *_group, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
  * Return:  Non-negative on success/Negative on failure
  *
  * Programmer:  Frank Willmore
- *              November, 2017
+ *              January, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2595,13 +2595,6 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
     HDassert((loc_params.loc_data.loc_by_name.name)
             && "link name not specified ");
 
-    /* Check to make sure that a soft or hard link is being created in the same file as
-     * the target object
-     */
-    if (H5VL_LINK_CREATE_SOFT == create_type || H5VL_LINK_CREATE_HARD == create_type) {
-//FTW ?? 
-    } /* end if */
-
     if (NULL == (lcpl = (H5P_genplist_t *) H5I_object(lcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
@@ -2625,9 +2618,8 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
             printf("  - Name of source for Link: %s\n", target_loc_params.loc_data.loc_by_name.name);
 #endif
 
-            /* use the provided group or file uuid and name of object to locate the UUID */
-            json_t* collection; /* get collection from the link to the original */
-            /* get the collection type for the source, use the original link: */
+            /* use the provided group or file UUID and name of object to locate the object */
+            json_t* collection; /* determine collection from the link to the original */
             json_t* the_object = H5VL_json_find_object_by_name(new_link_location->domain, target_loc_params.loc_data.loc_by_name.name, ((H5VL_json_object_t *) link_loc_obj)->object_uuid, &collection);
             h5json_uuid_t the_object_uuid; 
             strncpy(the_object_uuid, json_string_value(json_object_get(the_object, "id")), sizeof(h5json_uuid_t));
@@ -2651,10 +2643,6 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
             break;
         } /* H5VL_LINK_CREATE_HARD */
 
-    }// end switch
-
-// FTW WIP soft links
-#if 0
         case H5VL_LINK_CREATE_SOFT:
         {
             const char *link_target;
@@ -2663,45 +2651,35 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for link target")
 
 #ifdef PLUGIN_DEBUG
-            printf("    Soft link target: %s\n", link_target);
+            printf("  - Soft link target: %s\n", link_target);
 #endif
 
-            snprintf(create_request_body, REQUEST_BODY_MAX_LENGTH, "{\"h5path\": \"%s\"}", link_target);
+            /* locate the group (using the helper function) where the new link is to be placed */
+            json_t* groups_in_file = json_object_get(new_link_location->domain->object_json, "groups");
+            json_t* destination_group = json_object_get(groups_in_file, new_link_location->object_uuid);
+            json_t* destination_group_links = json_object_get(destination_group, "links");
+
+            /* insert a json_t* link object into that group's link collection. */
+            json_t* new_link = json_object();
+            json_object_set_new(new_link, "class", json_string("H5L_TYPE_SOFT"));
+            json_object_set_new(new_link, "title", json_string(loc_params.loc_data.loc_by_name.name));
+            json_object_set_new(new_link, "h5path", json_string(link_target));
+            json_array_append_new(destination_group_links, new_link);
+
             break;
+
         } /* H5VL_LINK_CREATE_SOFT */
 
         case H5VL_LINK_CREATE_UD:
         {
-            H5L_type_t  link_type;
-            const char *file_path, *link_target;
-            size_t      link_target_buf_size;
-            void       *link_target_buf;
-
-            if (H5P_get(lcpl, H5VL_PROP_LINK_TYPE, &link_type) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for link type")
-
-            /* XXX: For now, no support for user-defined links, beyond external links */
-            if (H5L_TYPE_EXTERNAL != link_type)
-                HGOTO_ERROR(H5E_LINK, H5E_UNSUPPORTED, FAIL, "unsupported link type")
-
-            /* Retrieve the buffer containing the external link's information */
-            if (H5P_get(lcpl, H5VL_PROP_LINK_UDATA_SIZE, &link_target_buf_size) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for external link information buffer size")
-            if (H5P_get(lcpl, H5VL_PROP_LINK_UDATA, &link_target_buf) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for external link information buffer")
-
-            file_path = (const char *) link_target_buf + 1;
-            link_target = file_path + (strlen(file_path) + 1);
-
-            snprintf(create_request_body, REQUEST_BODY_MAX_LENGTH, "{\"h5domain\": \"%s\", \"h5path\": \"%s\"}", file_path, link_target);
+            HGOTO_ERROR(H5E_LINK, H5E_UNSUPPORTED, FAIL, "unsupported link type")
             break;
+
         } /* H5VL_LINK_CREATE_UD */
 
         default:
             HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "Invalid link create type")
     } /* end switch */
-
-#endif
 
 done:
 
