@@ -153,8 +153,8 @@ static herr_t yajl_copy_object_URI_parse_callback(char *HTTP_response, void *cal
 static herr_t get_link_type_callback(char *HTTP_response, void *callback_data_in, void *callback_data_out);
 
 /* Helper function to traverse links, starting from parent_obj, until the named link is found */
-static htri_t H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_path,
-       herr_t (*link_found_callback)(char *, void *, void *), void *callback_data_in, void *callback_data_out);
+//static htri_t H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_path,
+//FTW       herr_t (*link_found_callback)(char *, void *, void *), void *callback_data_in, void *callback_data_out);
 
 /* Conversion functions to convert a JSON-format string to an HDF5 Datatype or vice versa */
 static const char *H5VL_json_convert_predefined_datatype_to_string(hid_t type_id);
@@ -2672,7 +2672,7 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
 
         case H5VL_LINK_CREATE_UD:
         {
-            HGOTO_ERROR(H5E_LINK, H5E_UNSUPPORTED, FAIL, "unsupported link type")
+            HGOTO_ERROR(H5E_LINK, H5E_UNSUPPORTED, FAIL, "User-Defined/External links are unsupported.")
             break;
 
         } /* H5VL_LINK_CREATE_UD */
@@ -2805,16 +2805,15 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
                         hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5VL_json_object_t *loc_obj = (H5VL_json_object_t *) obj;
-//FTW    char                specific_request_header[HOST_HEADER_MAX_LENGTH] = "Host: ";
-//FTW    char                temp_url[URL_MAX_LENGTH];
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef PLUGIN_DEBUG
-    printf("Received Link-specific call with following parameters:\n");
+    printf("FTW Received Link-specific call with following parameters:\n");
     printf("  - Specific type: %d\n", specific_type);
-//    printf("  - Link URI: %s\n", loc_obj->URI);
+    printf("  - Link UUID: %s\n", loc_obj->object_uuid);
+    printf("  - loc_obj: %ld\n", loc_obj);
 #endif
 
     HDassert((H5I_FILE == loc_obj->obj_type || H5I_GROUP == loc_obj->obj_type)
@@ -2823,27 +2822,6 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
     switch (specific_type) {
         /* H5Ldelete */
         case H5VL_LINK_DELETE:
-#if 0
-            /* Redirect from base URL to "/groups/<id>/links/<name>" to delete link */
-            snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/links/%s", base_URL, loc_obj->URI, get_basename(loc_params.loc_data.loc_by_name.name));
-
-#ifdef PLUGIN_DEBUG
-            printf("    Delete URL: %s\n", temp_url);
-#endif
-
-            /* Setup the "Host: " header */
-            curl_headers = curl_slist_append(curl_headers, strncat(specific_request_header, loc_obj->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH - 7));
-
-            /* Disable use of Expect: 100 Continue HTTP response */
-            curl_headers = curl_slist_append(curl_headers, "Expect:");
-
-            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-            curl_easy_setopt(curl, CURLOPT_URL, temp_url);
-
-            CURL_PERFORM(curl, H5E_LINK, H5E_CANTREMOVE, FAIL);
-#endif
-
             break;
 
         /* H5Lexists */
@@ -2851,18 +2829,23 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
         {
             htri_t *ret = va_arg (arguments, htri_t *);
 
-            if ((*ret = H5VL_json_find_link_by_path(loc_obj, loc_params.loc_data.loc_by_name.name, NULL, NULL, NULL)) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't locate link by path")
+//FTW WIP
+json_t* collection; /*unused*/
+json_t* link = H5VL_json_find_object_by_name(loc_obj->domain, loc_params.loc_data.loc_by_name.name, loc_obj->object_uuid, &collection);
+*ret = (link != NULL);
 
-            break;
+//            if ((*ret = H5VL_json_find_link_by_path(loc_obj, loc_params.loc_data.loc_by_name.name, NULL, NULL, NULL)) < 0)
+//                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't locate link by path")
+
+//            break;
         } /* H5VL_LINK_EXISTS */
 
         /* H5Literate/visit (_by_name) */
-        case H5VL_LINK_ITER:
-            HGOTO_ERROR(H5E_LINK, H5E_UNSUPPORTED, FAIL, "unsupported operation")
-            break;
-        default:
-            HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "unknown operation");
+//        case H5VL_LINK_ITER:
+//            HGOTO_ERROR(H5E_LINK, H5E_UNSUPPORTED, FAIL, "unsupported operation")
+//            break;
+//        default:
+//            HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "unknown operation");
     } /* end switch */
 
 done:
@@ -2880,8 +2863,10 @@ done:
         curl_headers = NULL;
     } /* end if */
 #endif
+printf("FTW here leaving _link_specific with ret_value = %ld\n", ret_value);
 
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_link_specific() */
 
 
@@ -2909,8 +2894,8 @@ H5VL_json_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opene
     /* XXX: Currently only opening objects by name is supported */
     HDassert(H5VL_OBJECT_BY_NAME == loc_params.type && "loc_params type not H5VL_OBJECT_BY_NAME");
 
-    search_ret = H5VL_json_find_link_by_path(parent, loc_params.loc_data.loc_by_name.name,
-            get_link_type_callback, NULL, &obj_type);
+//    search_ret = H5VL_json_find_link_by_path(parent, loc_params.loc_data.loc_by_name.name,
+//            get_link_type_callback, NULL, &obj_type);
     if (!search_ret || search_ret < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, NULL, "unable to find object by name")
 
