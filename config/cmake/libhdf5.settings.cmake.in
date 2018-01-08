@@ -1,5 +1,5 @@
-	    SUMMARY OF THE HDF5 CONFIGURATION
-	    =================================
+        SUMMARY OF THE HDF5 CONFIGURATION
+        =================================
 
 General Information:
 -------------------
@@ -13,7 +13,7 @@ General Information:
 
 Compiling Options:
 ------------------
-                     Build Mode: @CMAKE_BUILD_TYPE@
+                     Build Mode: @HDF5_BUILD_TYPE@
               Debugging Symbols: @SYMBOLS@
                         Asserts: @ASSERTS@
                       Profiling: @PROFILING@
