@@ -179,7 +179,7 @@ static herr_t H5VL_json_convert_data_buffer_to_json_array(const void *buf, hid_t
 
 /* Helper function to locate a group */
 static herr_t H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate);
-static json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection);
+static json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection, h5json_uuid_t *containing_group_uuid);
 
 /* Helper functions for creating a Dataset */
 //static herr_t H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body);
@@ -2307,7 +2307,7 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     HDassert(current_uuid && "parent uuid not found. ");
 
 //FTW for fun, see if we can find the link with new function:
-json_t* linkylink = H5VL_json_find_object_by_name(new_group->domain, name, current_uuid, NULL);
+json_t* linkylink = H5VL_json_find_object_by_name(new_group->domain, name, current_uuid, NULL, NULL);
 printf("linkylink = >%s<\n", json_dumps(linkylink, JSON_INDENT(4))); 
 
     /* create the JANSSON representation */
@@ -2620,7 +2620,7 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
 
             /* use the provided group or file UUID and name of object to locate the object */
             json_t* collection; /* determine collection from the link to the original */
-            json_t* the_object = H5VL_json_find_object_by_name(new_link_location->domain, target_loc_params.loc_data.loc_by_name.name, ((H5VL_json_object_t *) link_loc_obj)->object_uuid, &collection);
+            json_t* the_object = H5VL_json_find_object_by_name(new_link_location->domain, target_loc_params.loc_data.loc_by_name.name, ((H5VL_json_object_t *) link_loc_obj)->object_uuid, &collection, NULL);
             h5json_uuid_t the_object_uuid; 
             strncpy(the_object_uuid, json_string_value(json_object_get(the_object, "id")), sizeof(h5json_uuid_t));
             printf("Got UUID of the object of interest = %s\n", the_object_uuid);
@@ -2819,51 +2819,71 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
     HDassert((H5I_FILE == loc_obj->obj_type || H5I_GROUP == loc_obj->obj_type)
                 && "parent object not a file or group");
 
-    switch (specific_type) {
+    switch (specific_type) 
+    {
         /* H5Ldelete */
         case H5VL_LINK_DELETE:
+        {
+//FTW WIP
+            /* find the link */
+            h5json_uuid_t current_uuid;
+            h5json_uuid_t containing_group_uuid;
+            strncpy(current_uuid, loc_obj->object_uuid, sizeof(current_uuid));
+            json_t* link = H5VL_json_find_object_by_name(loc_obj->domain, loc_params.loc_data.loc_by_name.name, current_uuid, NULL, &containing_group_uuid);
+            /* if it exists, delete it, otherwise fail */
+            if (link != NULL)
+            {
+               // I need to get the final group that contains the uuid (name is a path here) in order to delete the link. need a new helper function or to generalize the helpers. 
+                
+printf("FTW group containing link of interest: \n %s \n", json_dumps(loc_obj->object_json, JSON_INDENT(4))); 
+json_t* group_links = json_object_get(loc_obj->object_json, "links");
+printf("FTW group links: \n %s \n", json_dumps(group_links, JSON_INDENT(4))); 
+
+                /* iterate the link array to find the link to be deleted */
+                size_t index;
+                json_t *value;
+                json_array_foreach(group_links, index, value) 
+                {
+//                    h5json_uuid_t link_uuidj = 
+                    /* block of code that uses index and value */
+                    if (strcmp(json_string_value(value), current_uuid) == 0) 
+                    {
+                        /* found link; delete it and break loop */
+printf("FTW removing link %s\n", json_dumps(value, JSON_INDENT(4)));
+                        json_array_remove(group_links, index);
+                        break;
+                    }
+                }
+            }
+            else
+                HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "Can not delete link which does not exist.");
+             
             break;
+        }
 
         /* H5Lexists */
         case H5VL_LINK_EXISTS:
         {
             htri_t *ret = va_arg (arguments, htri_t *);
-
-//FTW WIP
-json_t* collection; /*unused*/
-json_t* link = H5VL_json_find_object_by_name(loc_obj->domain, loc_params.loc_data.loc_by_name.name, loc_obj->object_uuid, &collection);
-*ret = (link != NULL);
-
-//            if ((*ret = H5VL_json_find_link_by_path(loc_obj, loc_params.loc_data.loc_by_name.name, NULL, NULL, NULL)) < 0)
-//                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't locate link by path")
-
-//            break;
+            json_t* collection; /*unused*/
+            h5json_uuid_t current_uuid;
+            strncpy(current_uuid, loc_obj->object_uuid, sizeof(current_uuid));
+            json_t* link = H5VL_json_find_object_by_name(loc_obj->domain, loc_params.loc_data.loc_by_name.name, current_uuid, &collection, NULL);
+            *ret = (link != NULL);
+            break;
         } /* H5VL_LINK_EXISTS */
 
         /* H5Literate/visit (_by_name) */
-//        case H5VL_LINK_ITER:
-//            HGOTO_ERROR(H5E_LINK, H5E_UNSUPPORTED, FAIL, "unsupported operation")
-//            break;
-//        default:
-//            HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "unknown operation");
+        case H5VL_LINK_ITER:
+            HGOTO_ERROR(H5E_LINK, H5E_UNSUPPORTED, FAIL, "unsupported operation")
+            break;
+
+        default:
+            HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "unknown operation");
+
     } /* end switch */
 
 done:
-#if 0
-    /* Restore cURL URL to the base URL */
-    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-
-    /* In case a custom DELETE request was made, reset the request to NULL
-     * to prevent any possible future issues with requests
-     */
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, NULL);
-
-    if (curl_headers) {
-        curl_slist_free_all(curl_headers);
-        curl_headers = NULL;
-    } /* end if */
-#endif
-printf("FTW here leaving _link_specific with ret_value = %ld\n", ret_value);
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -5816,12 +5836,14 @@ done:
  *          - collection / pointer to json_t* which upon return contains a jansson string,
  *            the value of which is "datasets", "datatypes", or "groups".
  *            If a NULL value is supplied, no action
+ *          - containing_group_uuid / if a valid pointer is supplied, the uuid for the 
+ *            group containing the object of interest will be returned.
  * returns:   pointer to the jansson object 
  *
 */
 
 static 
-json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection)
+json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection, h5json_uuid_t *containing_group_uuid)
 {
     json_t*            ret_value = NULL;
     json_t*            current_group = NULL;
@@ -5835,6 +5857,9 @@ json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* na
 #endif
 
     json_t* groups_in_file = json_object_get(domain->u.file.json_file_object, "groups");
+
+    /* pointer to the containing group */
+    json_t* containing_group_uuid_json = groups_in_file;
 
     /* group-spotting: search the path/tokens provided, create as needed and allowed. 
        The last token is our target, and library object for it created and returned. */
@@ -5861,6 +5886,7 @@ json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* na
         size_t index;
         json_t *link;
         hbool_t found = FALSE;
+
         json_array_foreach(links_for_current_group, index, link) 
         {
             /* block of code that uses index and link */
@@ -5877,10 +5903,17 @@ json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* na
         /* 1 - last token is found --> link exists so return */
         if((token_index == n_tokens - 1) && found) 
         {
+//FTW WIP add return value for the final containing group, e.g. /path/to/dataset will return uuid for 'to'
+            if (containing_group_uuid != NULL)
+            {
+                strncpy(containing_group_uuid, json_string_value(containing_group_uuid_json), sizeof(h5json_uuid_t));
+            }
+
             if (collection != NULL) 
             {
                 *collection = json_object_get(link, "collection");
             }
+
             ret_value = link;
             break;
         }
@@ -5888,7 +5921,9 @@ json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* na
         /* 2 - intermediate token found, so move on to next token */
         if ((token_index < (n_tokens - 1)) && found)
         {
-            current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(link, "id"));
+            containing_group_uuid_json = json_object_get(link, "id");
+//            current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(link, "id"));
+            current_uuid = (h5json_uuid_t*)json_string_value(containing_group_uuid_json);
             continue; 
         }
 
