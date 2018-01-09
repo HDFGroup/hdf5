@@ -5979,7 +5979,31 @@ H5VL_json_delete_link_from_containing_group(H5VL_json_object_t* domain, h5json_u
     FUNC_ENTER_NOAPI_NOINIT
 
 printf("Deleting link %s from group %s\n", json_dumps(link, JSON_INDENT(4)), containing_group_uuid);
-printf("<<<not yet implemented>>>\n");
+//printf("<<<not yet implemented>>>\n");
+
+    json_t* groups_in_file = json_object_get(domain->object_json, "groups");
+    json_t* group_of_interest = json_object_get(groups_in_file, containing_group_uuid);
+    json_t* links_in_group = json_object_get(group_of_interest, "links");
+
+printf("links_in_group originally reads *%s*\n", json_dumps(links_in_group, JSON_INDENT(4)));
+
+    /* array is a JSON array */
+    size_t index;
+    json_t *value;
+
+    json_array_foreach(links_in_group, index, value) 
+    {
+        /* block of code that uses index and value */
+        if (json_equal(value, link)) 
+        {
+printf("breaking out of loop at index = %ld, value = %s\n", index, json_dumps(value, JSON_INDENT(4)));
+            break;    
+        }
+    }
+
+    json_array_remove(links_in_group, index);
+
+printf("links_in_group now reads *%s*\n", json_dumps(links_in_group, JSON_INDENT(4)));
 
     ret_value = SUCCEED;
 
