@@ -1943,7 +1943,7 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
             }
         case H5VL_FILE_SET_MDC_CONFIG:
             {
-                H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
+                H5AC_cache_config_t *config_ptr = va_arg(arguments, H5AC_cache_config_t *);
 
                 f = (H5F_t *)obj;
                 /* set the resize configuration  */
@@ -2002,10 +2002,36 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
             }
         case H5VL_FILE_RESET_PAGE_BUFFERING_STATS:
             {
+                f = (H5F_t *)obj;
+
+                /* Sanity check */
+                if (NULL == f->shared->page_buf)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
+
+                /* Reset the statistics */
+                if (H5PB_reset_stats(f->shared->page_buf) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't reset stats for page buffering")
+
                 break;
             }
         case H5VL_FILE_GET_PAGE_BUFFERING_STATS:
             {
+                unsigned *accesses      = va_arg(arguments, unsigned *);
+                unsigned *hits          = va_arg(arguments, unsigned *);
+                unsigned *misses        = va_arg(arguments, unsigned *);
+                unsigned *evictions     = va_arg(arguments, unsigned *);
+                unsigned *bypasses      = va_arg(arguments, unsigned *);
+                
+                f = (H5F_t *)obj;
+
+                /* Sanity check */
+                if (NULL == f->shared->page_buf)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
+
+                /* Get the statistics */
+                if (H5PB_get_stats(f->shared->page_buf, accesses, hits, misses, evictions, bypasses) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stats for page buffering")
+
                 break;
             }
         case H5VL_FILE_GET_MDC_IMAGE_INFO:
