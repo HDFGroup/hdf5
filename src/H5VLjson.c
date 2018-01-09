@@ -138,6 +138,7 @@ static herr_t H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t sp
 
 /* delete a link */
 static herr_t H5VL_json_delete_link_from_containing_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link);
+static herr_t H5VL_json_insert_link_into_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link);
 
 //FTW Jordan's stuff
 
@@ -2626,7 +2627,7 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
             json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD"));
             json_object_set_new(new_link, "title", json_string(loc_params.loc_data.loc_by_name.name));
             /* increase the ref count, since we're increasing the ref count to the object. */
-//FTW something fishy, make sure I'm incref'ing correct object
+//FTW something may be fishy, make sure I'm incref'ing correct object
             json_object_set_new(new_link, "collection", json_incref(collection));
             json_object_set_new(new_link, "id", json_string(the_object_uuid));
             json_array_append_new(destination_group_links, new_link);
@@ -2682,30 +2683,96 @@ done:
 
 
 static herr_t
-H5VL_json_link_copy(void *src_obj, H5VL_loc_params_t loc_params1,
-                    void *dst_obj, H5VL_loc_params_t loc_params2,
+H5VL_json_link_copy(void *_src_obj, H5VL_loc_params_t loc_params1,
+                    void *_dst_obj, H5VL_loc_params_t loc_params2,
                     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED;
+    H5VL_json_object_t*   src_obj = (H5VL_json_object_t*)_src_obj;
+    H5VL_json_object_t*   dst_obj = (H5VL_json_object_t*)_dst_obj;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#ifdef PLUGIN_DEBUG
+            printf("Received link_copy request with the following:\n");
+            printf("  - UUID for location containing link source: %s\n", src_obj->object_uuid);
+            printf("  - UUID for location containing link dest: %s\n", dst_obj->object_uuid);
+            printf("  - Name from loc_params1 (src): %s\n", loc_params1.loc_data.loc_by_name.name);
+            printf("  - Name from loc_params2 (dst): %s\n", loc_params2.loc_data.loc_by_name.name);
+#endif
+
+    /* find the link */
+    h5json_uuid_t current_uuid;
+    h5json_uuid_t containing_group_uuid;
+    strncpy(current_uuid, src_obj->object_uuid, sizeof(current_uuid));
+    json_t* link = H5VL_json_find_object_by_name(src_obj->domain, loc_params1.loc_data.loc_by_name.name, &current_uuid, NULL, &containing_group_uuid);
+
+    /* need a deep copy because new link will have different name */
+    json_t* copy_of_link = json_deep_copy(link); 
+
+    /* if it exists, move it, otherwise fail */
+    if (link != NULL)
+    {
+        /* change name of link */
+        json_object_del(copy_of_link, "title");
+        json_object_set_new(copy_of_link, "title", json_string(loc_params2.loc_data.loc_by_name.name));
+
+        /* add link to new group */
+        H5VL_json_insert_link_into_group(dst_obj->domain, dst_obj->object_uuid, copy_of_link);
+    }
+    else
+        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "Can not move link which does not exist.");
+
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_link_copy() */
 
 
 static herr_t
-H5VL_json_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
-                    void *dst_obj, H5VL_loc_params_t loc_params2,
+H5VL_json_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
+                    void *_dst_obj, H5VL_loc_params_t loc_params2,
                     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED;
+    H5VL_json_object_t*   src_obj = (H5VL_json_object_t*)_src_obj;
+    H5VL_json_object_t*   dst_obj = (H5VL_json_object_t*)_dst_obj;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#ifdef PLUGIN_DEBUG
+            printf("Received link_move request with the following:\n");
+            printf("  - UUID for location containing link source: %s\n", src_obj->object_uuid);
+            printf("  - UUID for location containing link dest: %s\n", dst_obj->object_uuid);
+            printf("  - Name from loc_params1 (src): %s\n", loc_params1.loc_data.loc_by_name.name);
+            printf("  - Name from loc_params2 (dst): %s\n", loc_params2.loc_data.loc_by_name.name);
+#endif
+
+    /* find the link */
+    h5json_uuid_t current_uuid;
+    h5json_uuid_t containing_group_uuid;
+    strncpy(current_uuid, src_obj->object_uuid, sizeof(current_uuid));
+    json_t* link = H5VL_json_find_object_by_name(src_obj->domain, loc_params1.loc_data.loc_by_name.name, &current_uuid, NULL, &containing_group_uuid);
+
+    /* if it exists, move it, otherwise fail */
+    if (link != NULL)
+    {
+        /* change name of link */
+        json_object_del(link, "title");
+        json_object_set_new(link, "title", json_string(loc_params2.loc_data.loc_by_name.name));
+
+        /* move link to new group */
+        H5VL_json_insert_link_into_group(dst_obj->domain, dst_obj->object_uuid, link);
+        H5VL_json_delete_link_from_containing_group(src_obj->domain, containing_group_uuid, link);
+    }
+    else
+        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "Can not move link which does not exist.");
+
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_link_move() */
 
 
@@ -2816,44 +2883,27 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
         /* H5Ldelete */
         case H5VL_LINK_DELETE:
         {
+
 #ifdef PLUGIN_DEBUG
     printf("FTW Link-specific call is delete, with following parameters:\n");
     printf("  - Link container UUID: %s\n", loc_obj->object_uuid);
+    printf("  - Link name:           %s\n", loc_params.loc_data.loc_by_name.name);
 #endif
             /* find the link */
             h5json_uuid_t current_uuid;
             h5json_uuid_t containing_group_uuid;
             strncpy(current_uuid, loc_obj->object_uuid, sizeof(current_uuid));
             json_t* link = H5VL_json_find_object_by_name(loc_obj->domain, loc_params.loc_data.loc_by_name.name, &current_uuid, NULL, &containing_group_uuid);
-printf("FTW link to be deleted: \n %s \n", json_dumps(link, JSON_INDENT(4))); 
-printf("FTW in containing group %s\n", containing_group_uuid);
-H5VL_json_delete_link_from_containing_group(loc_obj->domain, containing_group_uuid, link);
+
             /* if it exists, delete it, otherwise fail */
             if (link != NULL)
             {
-                
-//FTW WIP above is finding the correct link. 
-printf("FTW group containing link of interest: \n %s \n", json_dumps(loc_obj->object_json, JSON_INDENT(4))); 
-json_t* group_links = json_object_get(loc_obj->object_json, "links");
-printf("FTW group links: \n %s \n", json_dumps(group_links, JSON_INDENT(4))); 
-
-                /* iterate the link array to find the link to be deleted */
-                size_t index;
-                json_t *value;
-                json_array_foreach(group_links, index, value) 
-                {
-                    /* block of code that uses index and value */
-                    if (strcmp(json_string_value(value), current_uuid) == 0) 
-                    {
-                        /* found link; delete it and break loop */
-printf("FTW removing link %s\n", json_dumps(value, JSON_INDENT(4)));
-                        json_array_remove(group_links, index);
-                        break;
-                    }
-                }
+                H5VL_json_delete_link_from_containing_group(loc_obj->domain, containing_group_uuid, link);
             }
             else
+            {
                 HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "Can not delete link which does not exist.");
+            }
              
             break;
         }
@@ -2865,7 +2915,6 @@ printf("FTW removing link %s\n", json_dumps(value, JSON_INDENT(4)));
             json_t* collection; /*unused*/
             h5json_uuid_t current_uuid;
             strncpy(current_uuid, loc_obj->object_uuid, sizeof(current_uuid));
-//            json_t* link = H5VL_json_find_object_by_name(loc_obj->domain, loc_params.loc_data.loc_by_name.name, current_uuid, &collection, NULL);
             json_t* link = H5VL_json_find_object_by_name(loc_obj->domain, loc_params.loc_data.loc_by_name.name, &current_uuid, &collection, NULL);
             *ret = (link != NULL);
             break;
@@ -5852,13 +5901,9 @@ json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* na
     printf("H5VL_json_find_object_by_name():      \n");
     printf("  - Locating object:                %s\n", name);
     printf("  - Starting from group with uuid:  %s\n", current_uuid);
-//    printf("  - File currently reads:\n\n");
-//    json_dumpf(domain->u.file.json_file_object, stdout, JSON_INDENT(4));
-//    printf("  - domain->u.file.json_file_object %s\n", json_dumps(domain->u.file.json_file_object, JSON_INDENT(4)));
 #endif
 
     json_t* groups_in_file = json_object_get(domain->u.file.json_file_object, "groups");
-//    printf("  - groups_in_file:                 %s\n", json_dumps(groups_in_file, JSON_INDENT(4)));
 
     /* pointer to the containing group's json uuid */
     json_t* containing_group_uuid_json = NULL;
@@ -5881,8 +5926,6 @@ json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* na
     {
         /* Locate the current/cursor group in Jansson and get links */
         current_group = json_object_get(groups_in_file, current_uuid);
-printf("current group uuid = *%s*\n", current_uuid);
-//FTW WIP find the link in the group and remove it?? why am I in this routine?
 
         /* search links of current group for current token */
         char *current_token = tokens[token_index];
@@ -5892,53 +5935,39 @@ printf("current group uuid = *%s*\n", current_uuid);
         json_t* link;
         json_array_foreach(links_for_current_group, index, link) 
         {
-            /* block of code that uses index and link */
-//json_object_set_new(link, "ftw", json_string("woowee!"));            
-//json_t* ftw = json_object_get(link, "ftw");
-printf("iterating links: link = *%s*\n", json_dumps(link, JSON_INDENT(4)));
-//printf("ftw = *%s*\n", json_dumps(ftw, JSON_INDENT(4)));
-//FTW this is giving null. WTF?
+            /* iterate over links */
 
-//printf("link = *%s*\n", json_dumps(link, JSON_INDENT(4)));
             json_t* title = json_object_get(link, "title");
-printf("string value of title = *%s*\n", json_string_value(title));
-// null avove is causing this to fail.
             if (!strcmp(json_string_value(title), current_token))
             {
-printf("Found link of interest, token = %s\n", current_token);
                 found = TRUE; /* found it. */
                 break; /* break out of enclosing json_array_foreach() macro */
             }
         } /* end of loop over link array */
 
-json_t* title = json_object_get(link, "title");
-printf("After link loop, left with string value of title = *%s*\n", json_string_value(title));
-// got this far
-
-        /* after searching all links, these are the scenarios: */
+        /*** after searching all links, there are three scenarios: ***/
 
         /* 1 - last token is found --> link exists so return */
         if((token_index == n_tokens - 1) && found) 
         {
-printf("last token %s found.\n", tokens[token_index]);
             if (containing_group_uuid != NULL)
             {
-printf("here 1 %s\n", json_string_value(containing_group_uuid_json));
-if (containing_group_uuid_json == NULL) // this means it was found on first pass
-{
-    strncpy(containing_group_uuid, current_uuid, sizeof(h5json_uuid_t));
-    printf("copying current_uuid to containing: %s\n", containing_group_uuid);
-}
-else
-                strncpy(containing_group_uuid, json_string_value(containing_group_uuid_json), sizeof(h5json_uuid_t));
-printf("here 2\n");
+                if (containing_group_uuid_json == NULL) 
+                {
+                    /* this means it was found on first pass 
+                     * so copy the current_uuid IN param */
+                    strncpy(containing_group_uuid, current_uuid, sizeof(h5json_uuid_t));
+                    printf("copying current_uuid to containing: %s\n", containing_group_uuid);
+                }
+                else
+                {
+                    strncpy(containing_group_uuid, json_string_value(containing_group_uuid_json), sizeof(h5json_uuid_t));
+                }
             }
 
             if (collection != NULL) 
             {
-printf("here 3\n");
                 *collection = json_object_get(link, "collection");
-printf("here 4\n");
             }
 
             ret_value = link;
@@ -5948,9 +5977,7 @@ printf("here 4\n");
         /* 2 - intermediate token found, so move on to next token */
         if ((token_index < (n_tokens - 1)) && found)
         {
-printf("intermediate token %s found.\n", tokens[token_index]);
             containing_group_uuid_json = json_object_get(link, "id");
-//            current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(link, "id"));
             current_uuid = (h5json_uuid_t*)json_string_value(containing_group_uuid_json);
             continue; /* go on to next token */
         }
@@ -5979,7 +6006,6 @@ H5VL_json_delete_link_from_containing_group(H5VL_json_object_t* domain, h5json_u
     FUNC_ENTER_NOAPI_NOINIT
 
 printf("Deleting link %s from group %s\n", json_dumps(link, JSON_INDENT(4)), containing_group_uuid);
-//printf("<<<not yet implemented>>>\n");
 
     json_t* groups_in_file = json_object_get(domain->object_json, "groups");
     json_t* group_of_interest = json_object_get(groups_in_file, containing_group_uuid);
@@ -6002,6 +6028,33 @@ printf("breaking out of loop at index = %ld, value = %s\n", index, json_dumps(va
     }
 
     json_array_remove(links_in_group, index);
+
+printf("links_in_group now reads *%s*\n", json_dumps(links_in_group, JSON_INDENT(4)));
+
+    ret_value = SUCCEED;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+}
+
+static herr_t
+H5VL_json_insert_link_into_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link)
+{
+    herr_t ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+printf("Inserting link %s into group %s\n", json_dumps(link, JSON_INDENT(4)), containing_group_uuid);
+
+    json_t* groups_in_file = json_object_get(domain->object_json, "groups");
+    json_t* group_of_interest = json_object_get(groups_in_file, containing_group_uuid);
+    json_t* links_in_group = json_object_get(group_of_interest, "links");
+
+printf("links_in_group originally reads *%s*\n", json_dumps(links_in_group, JSON_INDENT(4)));
+
+    json_array_append(links_in_group, link);
 
 printf("links_in_group now reads *%s*\n", json_dumps(links_in_group, JSON_INDENT(4)));
 
