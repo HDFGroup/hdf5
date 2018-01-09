@@ -325,8 +325,6 @@ hsize_t diff_attr(hid_t loc1_id,
     hid_t      space2_id = -1;    /* space ID */
     hid_t      ftype1_id = -1;    /* file data type ID */
     hid_t      ftype2_id = -1;    /* file data type ID */
-    int        vstrtype1 = 0;     /* ftype1 is a variable string */
-    int        vstrtype2 = 0;     /* ftype2 is a variable string */
     hid_t      mtype1_id = -1;    /* memory data type ID */
     hid_t      mtype2_id = -1;    /* memory data type ID */
     size_t     msize1;            /* memory size of memory type */
