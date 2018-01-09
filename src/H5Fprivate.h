@@ -864,9 +864,7 @@ H5_DLL H5F_t *H5F_efc_open(H5F_t *parent, const char *name, unsigned flags,
 H5_DLL herr_t H5F_efc_close(H5F_t *parent, H5F_t *file);
 
 /* File prefix routines */
-H5_DLL herr_t H5F_build_name(char *prefix, char *file_name, char **full_name);
-H5_DLL char * H5F_getenv_prefix_name(char **env_prefix);
-H5F_t *H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_type,
+H5_DLL H5F_t *H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_type,
         const char *file_name, unsigned file_intent, hid_t fapl_id, hid_t dxpl_id);
 
 /* Global heap CWFS routines */

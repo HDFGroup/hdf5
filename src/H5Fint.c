@@ -481,20 +481,20 @@ done:
 } /* end H5F_get_objects_cb() */
 
 /*--------------------------------------------------------------------------
- * Function: H5F_build_name
+ * Function: H5F__build_name
  *
  * Purpose:  Prepend PREFIX to FILE_NAME and store in FULL_NAME
  *
  * Return:   Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
-herr_t
-H5F_build_name(char *prefix, char *file_name, char **full_name/*out*/)
+static herr_t
+H5F__build_name(char *prefix, char *file_name, char **full_name/*out*/)
 {
     size_t      prefix_len;             /* length of prefix */
     size_t      fname_len;              /* Length of external link file name */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     prefix_len = HDstrlen(prefix);
     fname_len = HDstrlen(file_name);
@@ -509,11 +509,11 @@ H5F_build_name(char *prefix, char *file_name, char **full_name/*out*/)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_build_name() */
+} /* H5F__build_name() */
 
 
 /*--------------------------------------------------------------------------
- * Function: H5F_getenv_prefix_name --
+ * Function: H5F__getenv_prefix_name --
  *
  * Purpose:  Get the first pathname in the list of pathnames stored in env_prefix,
  *           which is separated by the environment delimiter.
@@ -522,13 +522,13 @@ done:
  *
  * Return:   A pointer to a pathname
 --------------------------------------------------------------------------*/
-char *
-H5F_getenv_prefix_name(char **env_prefix/*in,out*/)
+static char *
+H5F__getenv_prefix_name(char **env_prefix/*in,out*/)
 {
     char        *retptr=NULL;
     char        *strret=NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC
 
     strret = HDstrchr(*env_prefix, H5_COLON_SEPC);
     if (strret == NULL) {
@@ -541,7 +541,7 @@ H5F_getenv_prefix_name(char **env_prefix/*in,out*/)
     }
 
     FUNC_LEAVE_NOAPI(retptr)
-} /* end H5F_getenv_prefix_name() */
+} /* end H5F__getenv_prefix_name() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_prefix_open_file
@@ -563,7 +563,7 @@ H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_typ
     char        *temp_file_name = NULL; /* Temporary pointer to file name */
     size_t      temp_file_name_len;     /* Length of temporary file name */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Simplify intent flags for open calls */
     file_intent &= (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ);
@@ -624,9 +624,9 @@ H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_typ
             while((tmp_env_prefix) && (*tmp_env_prefix)) {
                 char *out_prefix_name;
 
-                out_prefix_name = H5F_getenv_prefix_name(&tmp_env_prefix/*in,out*/);
+                out_prefix_name = H5F__getenv_prefix_name(&tmp_env_prefix/*in,out*/);
                 if(out_prefix_name && (*out_prefix_name)) {
-                    if(H5F_build_name(out_prefix_name, temp_file_name, &full_name/*out*/) < 0) {
+                    if(H5F__build_name(out_prefix_name, temp_file_name, &full_name/*out*/) < 0) {
                         saved_env = (char *)H5MM_xfree(saved_env);
                         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
                     } /* end if */
@@ -664,7 +664,7 @@ H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_typ
             if(size < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file prefix")
             if(my_prefix) {
-                if(H5F_build_name(my_prefix, temp_file_name, &full_name/*out*/) < 0)
+                if(H5F__build_name(my_prefix, temp_file_name, &full_name/*out*/) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
                 my_prefix = (char *)H5MM_xfree(my_prefix);
                 if(NULL == (src_file = H5F_efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
@@ -679,7 +679,7 @@ H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_typ
         char *dspath;
 
         if(NULL != (dspath = H5F_EXTPATH(primary_file))) {
-            if(H5F_build_name(dspath, temp_file_name, &full_name/*out*/) < 0)
+            if(H5F__build_name(dspath, temp_file_name, &full_name/*out*/) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
             if(NULL == (src_file = H5F_efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
                 H5E_clear_stack(NULL);
@@ -710,7 +710,7 @@ H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_typ
         *ptr = '\0';
 
         /* Build new file name for the external file */
-        if(H5F_build_name(actual_file_name, temp_file_name, &full_name/*out*/) < 0)
+        if(H5F__build_name(actual_file_name, temp_file_name, &full_name/*out*/) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
         actual_file_name = (char *)H5MM_xfree(actual_file_name);
 
