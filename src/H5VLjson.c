@@ -136,25 +136,17 @@ static json_t* H5VL_json_dataspace_to_jansson(hid_t dataspace);
 static herr_t H5VL_json_write_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* buffer);
 static herr_t H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t space_id, void* _buffer);
 
-/* cURL write function callback */
-//static size_t write_data_callback(void *buffer, size_t size, size_t nmemb, void *userp);
+/* delete a link */
+static herr_t H5VL_json_delete_link_from_containing_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link);
+
+//FTW Jordan's stuff
 
 /* Alternate, more portable version of the basename function which doesn't modify its argument */
 static const char *get_basename(const char *path);
 
-/* H5Dscatter() callback for dataset reads */
-//static herr_t dataset_read_scatter_op(const void **src_buf, size_t *src_buf_bytes_used, void *op_data);
-
-/* Helper function to parse an HTTP response according to the parse callback function */
-//static herr_t H5VL_json_parse_response(char *HTTP_response, void *callback_data_in, void *callback_data_out, herr_t (*parse_callback)(char *, void *, void *));
-
 /* Set of callbacks for H5VL_json_parse_response() */
 static herr_t yajl_copy_object_URI_parse_callback(char *HTTP_response, void *callback_data_in, void *callback_data_out);
 static herr_t get_link_type_callback(char *HTTP_response, void *callback_data_in, void *callback_data_out);
-
-/* Helper function to traverse links, starting from parent_obj, until the named link is found */
-//static htri_t H5VL_json_find_link_by_path(H5VL_json_object_t *parent_obj, const char *link_path,
-//FTW       herr_t (*link_found_callback)(char *, void *, void *), void *callback_data_in, void *callback_data_out);
 
 /* Conversion functions to convert a JSON-format string to an HDF5 Datatype or vice versa */
 static const char *H5VL_json_convert_predefined_datatype_to_string(hid_t type_id);
@@ -2634,6 +2626,7 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
             json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD"));
             json_object_set_new(new_link, "title", json_string(loc_params.loc_data.loc_by_name.name));
             /* increase the ref count, since we're increasing the ref count to the object. */
+//FTW something fishy, make sure I'm incref'ing correct object
             json_object_set_new(new_link, "collection", json_incref(collection));
             json_object_set_new(new_link, "id", json_string(the_object_uuid));
             json_array_append_new(destination_group_links, new_link);
@@ -2823,7 +2816,6 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
         /* H5Ldelete */
         case H5VL_LINK_DELETE:
         {
-//FTW WIP
 #ifdef PLUGIN_DEBUG
     printf("FTW Link-specific call is delete, with following parameters:\n");
     printf("  - Link container UUID: %s\n", loc_obj->object_uuid);
@@ -2833,12 +2825,14 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
             h5json_uuid_t containing_group_uuid;
             strncpy(current_uuid, loc_obj->object_uuid, sizeof(current_uuid));
             json_t* link = H5VL_json_find_object_by_name(loc_obj->domain, loc_params.loc_data.loc_by_name.name, &current_uuid, NULL, &containing_group_uuid);
-printf("FTW uuid of link to be deleted: \n %s \n", json_dumps(link, JSON_INDENT(4))); 
+printf("FTW link to be deleted: \n %s \n", json_dumps(link, JSON_INDENT(4))); 
+printf("FTW in containing group %s\n", containing_group_uuid);
+H5VL_json_delete_link_from_containing_group(loc_obj->domain, containing_group_uuid, link);
             /* if it exists, delete it, otherwise fail */
             if (link != NULL)
             {
-               // I need to get the final group that contains the uuid (name is a path here) in order to delete the link. need a new helper function or to generalize the helpers. 
                 
+//FTW WIP above is finding the correct link. 
 printf("FTW group containing link of interest: \n %s \n", json_dumps(loc_obj->object_json, JSON_INDENT(4))); 
 json_t* group_links = json_object_get(loc_obj->object_json, "links");
 printf("FTW group links: \n %s \n", json_dumps(group_links, JSON_INDENT(4))); 
@@ -2848,7 +2842,6 @@ printf("FTW group links: \n %s \n", json_dumps(group_links, JSON_INDENT(4)));
                 json_t *value;
                 json_array_foreach(group_links, index, value) 
                 {
-//                    h5json_uuid_t link_uuidj = 
                     /* block of code that uses index and value */
                     if (strcmp(json_string_value(value), current_uuid) == 0) 
                     {
@@ -5971,6 +5964,24 @@ printf("intermediate token %s found.\n", tokens[token_index]);
         } /* end of !found */
 
     } /* end of tokens */
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+}
+
+static herr_t
+H5VL_json_delete_link_from_containing_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link)
+{
+    herr_t ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+printf("Deleting link %s from group %s\n", json_dumps(link, JSON_INDENT(4)), containing_group_uuid);
+printf("<<<not yet implemented>>>\n");
+
+    ret_value = SUCCEED;
 
 done:
 
