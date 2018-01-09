@@ -736,6 +736,7 @@ typedef enum H5F_mem_page_t {
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
+H5_DLL herr_t H5F_start_swmr_write(H5F_t *file);
 
 /* Functions than retrieve values from the file struct */
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);

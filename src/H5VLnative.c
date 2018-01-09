@@ -1964,6 +1964,11 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
             }
         case H5VL_FILE_START_SWMR_WRITE:
             {
+                f = (H5F_t *)obj;
+
+                if (H5F_start_swmr_write(f) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't start SWMR write")
+
                 break;
             }
         case H5VL_FILE_START_MDC_LOGGING:
