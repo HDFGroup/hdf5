@@ -493,6 +493,21 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5diff
+
+      h5diff seg faulted if comparing VL strings against fixed strings.
+
+      Reworked solution for HDFFV-8625 and HDFFV-8639. Implemented the check
+      for string objects of same type in the diff_can_type function by
+      adding an if(tclass1 == H5T_STRING) block. This if block moves the
+      same check that was added for attributes to this function, which is
+      used by all object types. This function also handles complex type
+      structures.
+      Also added a new test file in h5diffgenttest for testing this issue
+      and removed the temporary files used in the test scripts.
+
+      (ADB - 2018/01/04, HDFFV-8745)
+
     - h5repack
 
       h5repack failed to copy a dataset with existing filter.
