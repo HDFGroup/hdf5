@@ -2006,10 +2006,12 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
             }
         case H5VL_FILE_SET_LATEST_FORMAT:
             {
+                HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
                 break;
             }
         case H5VL_FILE_FORMAT_CONVERT_SUPER:
             {
+                HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
                 break;
             }
         case H5VL_FILE_RESET_PAGE_BUFFERING_STATS:
@@ -2048,6 +2050,7 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
             }
         case H5VL_FILE_GET_MDC_IMAGE_INFO:
             {
+                HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
                 break;
             }
 
