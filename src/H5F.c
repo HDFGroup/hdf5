@@ -1517,7 +1517,6 @@ H5Fclear_elink_file_cache(hid_t file_id)
                           H5_REQUEST_NULL, H5VL_FILE_CLEAR_ELINK_CACHE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
 
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclear_elink_file_cache() */
@@ -1769,18 +1768,19 @@ done:
 herr_t
 H5Fstart_mdc_logging(hid_t file_id)
 {
-    H5F_t *file;                   /* File info */
-    herr_t ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t   *file;                          /* File info */
+    herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Sanity check */
-    if (NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Call mdc logging function */
-    if (H5C_start_logging(file->shared->cache) < 0)
+    if (H5VL_file_optional(file->vol_obj, file->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, H5VL_FILE_START_MDC_LOGGING) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to start mdc logging")
 
 done:
@@ -1802,18 +1802,19 @@ done:
 herr_t
 H5Fstop_mdc_logging(hid_t file_id)
 {
-    H5F_t *file;                   /* File info */
-    herr_t ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t   *file;                          /* File info */
+    herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Sanity check */
-    if (NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Call mdc logging function */
-    if (H5C_stop_logging(file->shared->cache) < 0)
+    if (H5VL_file_optional(file->vol_obj, file->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, H5VL_FILE_STOP_MDC_LOGGING) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to stop mdc logging")
 
 done:
@@ -1836,18 +1837,19 @@ herr_t
 H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
                           hbool_t *is_currently_logging)
 {
-    H5F_t *file;                   /* File info */
-    herr_t ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t   *file;                          /* File info */
+    herr_t          ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*b*b", file_id, is_enabled, is_currently_logging);
 
     /* Sanity check */
-    if (NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
 
     /* Call mdc logging function */
-    if (H5C_get_logging_status(file->shared->cache, is_enabled, is_currently_logging) < 0)
+    if (H5VL_file_optional(file->vol_obj, file->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                          H5_REQUEST_NULL, H5VL_FILE_GET_MDC_LOGGING_STATUS, is_enabled, is_currently_logging) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to get logging status")
 
 done:

@@ -40,8 +40,8 @@ test_logging_api(void)
     char        *location = NULL;
     size_t      size;
 
-    hid_t       fid;
-    hid_t       gid;
+    hid_t       fid = -1;
+    hid_t       gid = -1;
     hbool_t     is_currently_logging;
     char        group_name[8];
     char        filename[1024];
@@ -159,17 +159,17 @@ main(void)
     /* Reset library */
     h5_reset();
 
-    printf("Testing basic metadata cache logging functionality.\n");
+    HDprintf("Testing basic metadata cache logging functionality.\n");
 
     nerrors += test_logging_api();
 
-    if(nerrors) {
-        printf("***** %d Metadata cache logging TEST%s FAILED! *****\n",
+    if (nerrors) {
+        HDprintf("***** %d Metadata cache logging TEST%s FAILED! *****\n",
                nerrors, nerrors > 1 ? "S" : "");
-        return 1;
+        HDexit(EXIT_SUCCESS);
     }
 
-    printf("All Metadata Cache Logging tests passed.\n");
-    return 0;
+    HDprintf("All Metadata Cache Logging tests passed.\n");
+    HDexit(EXIT_FAILURE);
 }
 

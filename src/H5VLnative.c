@@ -1776,9 +1776,9 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         /* H5Fget_file_image */
         case H5VL_FILE_GET_FILE_IMAGE:
             {
-                void       *buf_ptr   = va_arg (arguments, void *);
-                ssize_t    *ret       = va_arg (arguments, ssize_t *);
-                size_t      buf_len   = va_arg (arguments, size_t );
+                void       *buf_ptr   = va_arg(arguments, void *);
+                ssize_t    *ret       = va_arg(arguments, ssize_t *);
+                size_t      buf_len   = va_arg(arguments, size_t );
 
                 f = (H5F_t *)obj;
                 /* Do the actual work */
@@ -1801,10 +1801,10 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
             }
         case H5VL_FILE_GET_FREE_SECTIONS:
             {
-                H5F_sect_info_t *sect_info = va_arg (arguments, H5F_sect_info_t *);
-                ssize_t         *ret       = va_arg (arguments, ssize_t *);
-                H5F_mem_t       type       = va_arg (arguments, H5F_mem_t);
-                size_t          nsects     = va_arg (arguments, size_t);
+                H5F_sect_info_t *sect_info = va_arg(arguments, H5F_sect_info_t *);
+                ssize_t         *ret       = va_arg(arguments, ssize_t *);
+                H5F_mem_t       type       = va_arg(arguments, H5F_mem_t);
+                size_t          nsects     = va_arg(arguments, size_t);
 
                 f = (H5F_t *)obj;
                 /* Go get the free-space section information in the file */
@@ -1875,10 +1875,10 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         /* H5Fget_mdc_size */
         case H5VL_FILE_GET_MDC_SIZE:
             {
-                size_t *max_size_ptr        = va_arg (arguments, size_t *);
-                size_t *min_clean_size_ptr  = va_arg (arguments, size_t *);
-                size_t *cur_size_ptr        = va_arg (arguments, size_t *); 
-                int    *cur_num_entries_ptr = va_arg (arguments, int *); 
+                size_t *max_size_ptr        = va_arg(arguments, size_t *);
+                size_t *min_clean_size_ptr  = va_arg(arguments, size_t *);
+                size_t *cur_size_ptr        = va_arg(arguments, size_t *); 
+                int    *cur_num_entries_ptr = va_arg(arguments, int *); 
                 uint32_t cur_num_entries;
 
                 f = (H5F_t *)obj;
@@ -1894,8 +1894,8 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         /* H5Fget_vfd_handle */
         case H5VL_FILE_GET_VFD_HANDLE:
             {
-                void **file_handle  = va_arg (arguments, void **);
-                hid_t  fapl_id      = va_arg (arguments, hid_t);
+                void **file_handle  = va_arg(arguments, void **);
+                hid_t  fapl_id      = va_arg(arguments, hid_t);
 
                 f = (H5F_t *)obj;
 
@@ -1951,6 +1951,68 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
                 break;
             }
+        case H5VL_FILE_GET_METADATA_READ_RETRY_INFO:
+            {
+                break;
+            }
+        case H5VL_FILE_START_SWMR_WRITE:
+            {
+                break;
+            }
+        case H5VL_FILE_START_MDC_LOGGING:
+            {
+                f = (H5F_t *)obj;
+
+				/* Call mdc logging function */
+				if (H5C_start_logging(f->shared->cache) < 0)
+					HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to start mdc logging")
+
+                break;
+            }
+        case H5VL_FILE_STOP_MDC_LOGGING:
+            {
+                f = (H5F_t *)obj;
+
+				/* Call mdc logging function */
+				if (H5C_stop_logging(f->shared->cache) < 0)
+					HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to stop mdc logging")
+
+                break;
+            }
+        case H5VL_FILE_GET_MDC_LOGGING_STATUS:
+            {
+				hbool_t *is_enabled				= va_arg(arguments, hbool_t *);
+                hbool_t *is_currently_logging	= va_arg(arguments, hbool_t *);
+
+                f = (H5F_t *)obj;
+
+				/* Call mdc logging function */
+				if (H5C_get_logging_status(f->shared->cache, is_enabled, is_currently_logging) < 0)
+					HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to get logging status")
+
+                break;
+            }
+        case H5VL_FILE_SET_LATEST_FORMAT:
+            {
+                break;
+            }
+        case H5VL_FILE_FORMAT_CONVERT_SUPER:
+            {
+                break;
+            }
+        case H5VL_FILE_RESET_PAGE_BUFFERING_STATS:
+            {
+                break;
+            }
+        case H5VL_FILE_GET_PAGE_BUFFERING_STATS:
+            {
+                break;
+            }
+        case H5VL_FILE_GET_MDC_IMAGE_INFO:
+            {
+                break;
+            }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
     }
