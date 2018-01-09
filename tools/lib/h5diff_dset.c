@@ -773,8 +773,8 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
     }
 
     if(tclass1 == H5T_STRING) {
-        hid_t vstrtype1 = -1;
-        hid_t vstrtype2 = -1;
+        htri_t vstrtype1 = -1;
+        htri_t vstrtype2 = -1;
         h5difftrace("diff_can_type end - H5T_STRING\n");
 
         vstrtype1 = H5Tis_variable_str(f_tid1);
@@ -782,7 +782,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
 
         /* no compare if either one but not both are variable string type */
         if (vstrtype1 != vstrtype2) {
-            if((opts->m_verbose || opts->m_list_not_cmp))
+            if((opts->m_verbose || opts->m_list_not_cmp) && obj1_name && obj2_name)
                 parallel_print("Not comparable: <%s> or <%s> is of mixed string type\n",
                         obj1_name, obj2_name);
             opts->not_cmp = 1;
