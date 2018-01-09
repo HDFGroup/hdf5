@@ -2730,3 +2730,92 @@ H5F_set_latest_flags(H5F_t *f, unsigned flags)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_latest_flags() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_metadata_read_retry_info
+ *
+ * Purpose:     Private function to retrieve the collection of read retries
+ *              for metadata items with checksum.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info)
+{
+    unsigned     i, j;            /* Local index variable */
+    size_t       tot_size;        /* Size of each retries[i] */
+    herr_t       ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check args */
+    HDassert(file);
+    HDassert(info);
+
+    /* Copy the # of bins for "retries" array */
+    info->nbins = file->shared->retries_nbins;
+
+    /* Initialize the array of "retries" */
+    HDmemset(info->retries, 0, sizeof(info->retries));
+
+    /* Return if there are no bins -- no retries */
+    if (!info->nbins)
+        HGOTO_DONE(SUCCEED);
+
+    /* Calculate size for each retries[i] */
+    tot_size = info->nbins * sizeof(uint32_t);
+
+    /* Map and copy information to info's retries for metadata items with tracking for read retries */
+    j = 0;
+    for (i = 0; i < H5AC_NTYPES; i++) {
+        switch (i) {
+            case H5AC_OHDR_ID:
+            case H5AC_OHDR_CHK_ID:
+            case H5AC_BT2_HDR_ID:
+            case H5AC_BT2_INT_ID:
+            case H5AC_BT2_LEAF_ID:
+            case H5AC_FHEAP_HDR_ID:
+            case H5AC_FHEAP_DBLOCK_ID:
+            case H5AC_FHEAP_IBLOCK_ID:
+            case H5AC_FSPACE_HDR_ID:
+            case H5AC_FSPACE_SINFO_ID:
+            case H5AC_SOHM_TABLE_ID:
+            case H5AC_SOHM_LIST_ID:
+            case H5AC_EARRAY_HDR_ID:
+            case H5AC_EARRAY_IBLOCK_ID:
+            case H5AC_EARRAY_SBLOCK_ID:
+            case H5AC_EARRAY_DBLOCK_ID:
+            case H5AC_EARRAY_DBLK_PAGE_ID:
+            case H5AC_FARRAY_HDR_ID:
+            case H5AC_FARRAY_DBLOCK_ID:
+            case H5AC_FARRAY_DBLK_PAGE_ID:
+            case H5AC_SUPERBLOCK_ID:
+                HDassert(j < H5F_NUM_METADATA_READ_RETRY_TYPES);
+                if (file->shared->retries[i] != NULL) {
+                    /* Allocate memory for retries[i]
+                     *
+                     * This memory should be released by the user with
+                     * the H5free_memory() call.
+                     */
+                    if (NULL == (info->retries[j] = (uint32_t *)H5MM_malloc(tot_size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+                    /* Copy the information */
+                    HDmemcpy(info->retries[j], file->shared->retries[i], tot_size);
+                }
+
+                /* Increment location in info->retries[] array */
+                j++;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_metadata_read_retry_info() */
+

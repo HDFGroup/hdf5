@@ -1948,11 +1948,18 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
                 f = (H5F_t *)obj;
                 /* set the resize configuration  */
                 if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed")
                 break;
             }
         case H5VL_FILE_GET_METADATA_READ_RETRY_INFO:
             {
+                H5F_retry_info_t *info = va_arg(arguments, H5F_retry_info_t *);
+
+                f = (H5F_t *)obj;
+
+                if (H5F_get_metadata_read_retry_info(f, info) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't get metadata read retry info")
+
                 break;
             }
         case H5VL_FILE_START_SWMR_WRITE:
