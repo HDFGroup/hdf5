@@ -61,7 +61,7 @@ endforeach ()
 add_custom_target(H5Ex_G_Visit_files ALL COMMENT "Copying files needed by H5Ex_G_Visit tests" DEPENDS ${H5Ex_G_Visit_files_list})
 
 MACRO (ADD_H5_TEST resultfile resultcode)
-  if (CMAKE_BUILD_TYPE MATCHES Debug)
+  if (HDF5_BUILD_TYPE MATCHES Debug)
     if (WIN32)
       set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
     else ()
