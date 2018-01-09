@@ -33,12 +33,11 @@ set_target_properties (H5_test_buildiface PROPERTIES
 )
 
 if (BUILD_SHARED_LIBS)
-  file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/shared")
-  CREATE_CONFIG_DIR(${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
-  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF5_BUILD_TYPE})
+  file (MAKE_DIRECTORY "${HDF5_HL_F90_SRC_BINARY_DIR}/shared")
+  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF5_CFG_BUILD_TYPE})
 endif ()
-CREATE_CONFIG_DIR(${CMAKE_Fortran_MODULE_DIRECTORY}/static)
-set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF5_BUILD_TYPE})
+file (MAKE_DIRECTORY "${HDF5_HL_F90_SRC_BINARY_DIR}/static")
+set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF5_CFG_BUILD_TYPE})
 
 INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${MOD_BUILD_DIR})
 
@@ -47,6 +46,7 @@ INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${MOD_BUILD_DIR})
 #-----------------------------------------------------------------------------
 add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c)
 set_source_files_properties (t.c PROPERTIES LANGUAGE C)
+target_include_directories(${HDF5_F90_C_TEST_LIB_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/static)
 TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_F90_C_LIB_TARGET}
@@ -60,6 +60,7 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
 )
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c)
+target_include_directories(${HDF5_F90_C_TEST_LIBSH_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/shared)
   TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_F90_C_TEST_LIBSH_TARGET}
       ${HDF5_F90_C_LIBSH_TARGET}
@@ -77,16 +78,16 @@ endif ()
 
 set (CMD $<TARGET_FILE:H5_test_buildiface>)
 add_custom_command (
-    OUTPUT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+    OUTPUT ${HDF5_F90_BINARY_DIR}/static/tf_gen.F90
     COMMAND ${CMD}
-    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
     DEPENDS H5_test_buildiface
     COMMENT "Generating the tf_gen.F90 file"
 )
 add_custom_target (H5testgen ALL
-    DEPENDS ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+    DEPENDS ${HDF5_F90_BINARY_DIR}/static/tf_gen.F90
 )
-set_source_files_properties (${HDF5_F90_BINARY_DIR}/tf_gen.F90 PROPERTIES GENERATED TRUE)
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/tf_gen.F90 PROPERTIES GENERATED TRUE)
 
 if (BUILD_SHARED_LIBS)
   set (CMDSH $<TARGET_FILE:H5_test_buildiface>)
@@ -105,7 +106,7 @@ endif ()
 
 set (HDF5_F90_TF_SOURCES
     # generated files
-    ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+    ${HDF5_F90_BINARY_DIR}/static/tf_gen.F90
 
     # normal distribution
     tf.F90
