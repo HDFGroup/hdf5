@@ -6002,10 +6002,27 @@ static herr_t
 H5VL_json_delete_link_from_containing_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link)
 {
     herr_t ret_value = FAIL;
+char* object_collection_name;
+h5json_uuid_t object_uuid;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 printf("Deleting link %s from group %s\n", json_dumps(link, JSON_INDENT(4)), containing_group_uuid);
+
+
+/* manage reference count */
+object_collection_name = json_string_value(json_object_get(link, "collection"));
+printf("got collection = %s\n", object_collection_name);
+
+strncpy(object_uuid, json_string_value(json_object_get(link, "id")), sizeof(h5json_uuid_t)); 
+printf("got object_uuid = %s\n", object_uuid);
+
+json_t* object_collection = json_object_get(domain->object_json, object_collection_name);
+printf("got object_collection = %s\n", json_dumps(object_collection, JSON_INDENT(4)));
+json_t* object_of_interest = json_object_get(object_collection, object_uuid);
+printf("got object_of_interest = %s\n", json_dumps(object_of_interest, JSON_INDENT(4)));
+
+json_decref(object_of_interest);
 
     json_t* groups_in_file = json_object_get(domain->object_json, "groups");
     json_t* group_of_interest = json_object_get(groups_in_file, containing_group_uuid);
@@ -6043,10 +6060,27 @@ static herr_t
 H5VL_json_insert_link_into_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link)
 {
     herr_t ret_value = FAIL;
+char* object_collection_name;
+h5json_uuid_t object_uuid;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 printf("Inserting link %s into group %s\n", json_dumps(link, JSON_INDENT(4)), containing_group_uuid);
+
+/* manage reference count */
+object_collection_name = json_string_value(json_object_get(link, "collection"));
+printf("got collection = %s\n", object_collection_name);
+
+strncpy(object_uuid, json_string_value(json_object_get(link, "id")), sizeof(h5json_uuid_t)); 
+printf("got object_uuid = %s\n", object_uuid);
+
+json_t* object_collection = json_object_get(domain->object_json, object_collection_name);
+printf("got object_collection = %s\n", json_dumps(object_collection, JSON_INDENT(4)));
+json_t* object_of_interest = json_object_get(object_collection, object_uuid);
+printf("got object_of_interest = %s\n", json_dumps(object_of_interest, JSON_INDENT(4)));
+
+json_incref(object_of_interest);
+
 
     json_t* groups_in_file = json_object_get(domain->object_json, "groups");
     json_t* group_of_interest = json_object_get(groups_in_file, containing_group_uuid);
