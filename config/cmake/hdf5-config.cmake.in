@@ -49,14 +49,18 @@ set (${HDF5_PACKAGE_NAME}_TOOLSET "@CMAKE_GENERATOR_TOOLSET@")
 # Dependencies
 #-----------------------------------------------------------------------------
 if (${HDF5_PACKAGE_NAME}_ENABLE_PARALLEL)
-  set (${HDF5_PACKAGE_NAME}_MPI_C_INCLUDE_PATH "@MPI_C_INCLUDE_PATH@")
+  set (${HDF5_PACKAGE_NAME}_MPI_C_INCLUDE_PATH "@MPI_C_INCLUDE_DIRS@")
   set (${HDF5_PACKAGE_NAME}_MPI_C_LIBRARIES    "@MPI_C_LIBRARIES@")
+  if (${HDF5_PACKAGE_NAME}_BUILD_FORTRAN)
+    set (${HDF5_PACKAGE_NAME}_MPI_Fortran_INCLUDE_PATH "@MPI_Fortran_INCLUDE_DIRS@")
+    set (${HDF5_PACKAGE_NAME}_MPI_Fortran_LIBRARIES    "@MPI_Fortran_LIBRARIES@")
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
 # Directories
 #-----------------------------------------------------------------------------
-set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@" "${${HDF5_PACKAGE_NAME}_MPI_C_INCLUDE_PATH}")
+set (${HDF5_PACKAGE_NAME}_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@" "${${HDF5_PACKAGE_NAME}_MPI_C_INCLUDE_DIRS}")
 
 set (${HDF5_PACKAGE_NAME}_SHARE_DIR "@PACKAGE_SHARE_INSTALL_DIR@")
 set_and_check (${HDF5_PACKAGE_NAME}_BUILD_DIR "@PACKAGE_CURRENT_BUILD_DIR@")
@@ -90,12 +94,6 @@ set (HDF5_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 # project which has already built hdf5 as a subproject
 #-----------------------------------------------------------------------------
 if (NOT TARGET "@HDF5_PACKAGE@")
-  if (${HDF5_PACKAGE_NAME}_ENABLE_Z_LIB_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND NOT TARGET "zlib")
-    include (@PACKAGE_SHARE_INSTALL_DIR@/@ZLIB_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
-  endif ()
-  if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND NOT TARGET "szip")
-    include (@PACKAGE_SHARE_INSTALL_DIR@/@SZIP_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
-  endif ()
   include (@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake)
 endif ()
 

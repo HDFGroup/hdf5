@@ -810,7 +810,7 @@ if (HDF5_TEST_VFD)
   macro (CHECK_VFD_TEST vfdtest vfdname resultcode)
     if ("${vfdtest}" STREQUAL "flush1" OR "${vfdtest}" STREQUAL "flush2")
       if ("${vfdname}" STREQUAL "multi" OR "${vfdname}" STREQUAL "split")
-        if (NOT BUILD_SHARED_LIBS AND NOT CMAKE_BUILD_TYPE MATCHES Debug)
+        if (NOT BUILD_SHARED_LIBS AND NOT HDF5_BUILD_TYPE MATCHES Debug)
           add_test (NAME VFD-${vfdname}-${vfdtest}
               COMMAND "${CMAKE_COMMAND}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}>"
