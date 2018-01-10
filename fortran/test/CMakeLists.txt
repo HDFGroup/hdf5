@@ -58,7 +58,7 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
 )
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c)
-target_include_directories(${HDF5_F90_C_TEST_LIBSH_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/shared)
+  target_include_directories(${HDF5_F90_C_TEST_LIBSH_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/shared)
   TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_F90_C_TEST_LIBSH_TARGET}
       ${HDF5_F90_C_LIBSH_TARGET}
