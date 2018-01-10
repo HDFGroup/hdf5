@@ -2614,23 +2614,23 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
             json_t* the_object = H5VL_json_find_object_by_name(new_link_location->domain, target_loc_params.loc_data.loc_by_name.name, &copy_of_uuid, &collection, NULL);
             h5json_uuid_t the_object_uuid; 
             strncpy(the_object_uuid, json_string_value(json_object_get(the_object, "id")), sizeof(h5json_uuid_t));
-            printf("Got UUID of the object of interest = %s\n", the_object_uuid);
-            printf("Wubba Lubba Dub Dub!\n");
 
-            /* locate the group (using the helper function) where the new link is to be placed */
-            json_t* groups_in_file = json_object_get(new_link_location->domain->object_json, "groups");
-            json_t* destination_group = json_object_get(groups_in_file, new_link_location->object_uuid);
-            json_t* destination_group_links = json_object_get(destination_group, "links");
+//FTW moved to helper
+//            /* locate the group (using the helper function) where the new link is to be placed */
+//            json_t* groups_in_file = json_object_get(new_link_location->domain->object_json, "groups");
+//            json_t* destination_group = json_object_get(groups_in_file, new_link_location->object_uuid);
+//            json_t* destination_group_links = json_object_get(destination_group, "links");
 
-            /* insert a json_t* link object into that group's link collection. */
+            /* create a new link object */
             json_t* new_link = json_object();
             json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD"));
             json_object_set_new(new_link, "title", json_string(loc_params.loc_data.loc_by_name.name));
-            /* increase the ref count, since we're increasing the ref count to the object. */
-//FTW something may be fishy, make sure I'm incref'ing correct object
-            json_object_set_new(new_link, "collection", json_incref(collection));
+            json_object_set_new(new_link, "collection", collection);
             json_object_set_new(new_link, "id", json_string(the_object_uuid));
-            json_array_append_new(destination_group_links, new_link);
+//            json_array_append_new(destination_group_links, new_link);
+
+            /* insert the link */
+            herr_t err = H5VL_json_insert_link_into_group(new_link_location->domain, new_link_location->object_uuid, new_link);
 
             break;
         } /* H5VL_LINK_CREATE_HARD */
