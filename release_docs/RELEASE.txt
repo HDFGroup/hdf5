@@ -234,6 +234,19 @@ Bug Fixes since HDF5-1.10.1 release
     -------------
     - CMake
 
+      Correct usuage of CMAKE_BUILD_TYPE variable.
+
+      The use of the CMAKE_BUILD_TYPE is incorrect for multi-config
+      generators (Visual Studio and XCode) and is optional for single
+      config generators. Created a new macro to check
+        GLOBAL PROPERTY -> GENERATOR_IS_MULTI_CONFIG
+      Created two new HDF variable, HDF5_BUILD_TYPE and HDF5_CFG_BUILD_TYPE.
+      Defaults for these variables is "Release".
+
+      (ADB - 2018/01/10, HDFFV-10385)
+
+    - CMake
+
       Add replacement of fortran flags if using static CRT.
 
       Added TARGET_STATIC_CRT_FLAGS call to HDFUseFortran.cmake file in
