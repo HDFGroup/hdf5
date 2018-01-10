@@ -4,7 +4,7 @@ PROJECT (HDF5_FORTRAN_TESTS C CXX Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
+INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
@@ -38,8 +38,6 @@ if (BUILD_SHARED_LIBS)
 endif ()
 file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/static")
 set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF5_CFG_BUILD_TYPE})
-
-INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${MOD_BUILD_DIR})
 
 #-----------------------------------------------------------------------------
 # Add Test Lib
