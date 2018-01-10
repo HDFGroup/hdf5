@@ -4,7 +4,7 @@ PROJECT (HDF5_FORTRAN_TESTS C CXX Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
+INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
@@ -39,8 +39,6 @@ endif ()
 file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/static")
 set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF5_CFG_BUILD_TYPE})
 
-INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${MOD_BUILD_DIR})
-
 #-----------------------------------------------------------------------------
 # Add Test Lib
 #-----------------------------------------------------------------------------
@@ -60,7 +58,7 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
 )
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c)
-target_include_directories(${HDF5_F90_C_TEST_LIBSH_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/shared)
+  target_include_directories(${HDF5_F90_C_TEST_LIBSH_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/shared)
   TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_F90_C_TEST_LIBSH_TARGET}
       ${HDF5_F90_C_LIBSH_TARGET}
