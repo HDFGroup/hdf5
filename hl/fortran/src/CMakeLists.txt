@@ -38,10 +38,10 @@ set_target_properties (H5HL_buildiface PROPERTIES
 
 if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_HL_F90_SRC_BINARY_DIR}/shared")
-  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF5_CFG_BUILD_TYPE})
+  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
 endif ()
 file (MAKE_DIRECTORY "${HDF5_HL_F90_SRC_BINARY_DIR}/static")
-set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF5_CFG_BUILD_TYPE})
+set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 
 #-----------------------------------------------------------------------------
 # Setup include Directories
