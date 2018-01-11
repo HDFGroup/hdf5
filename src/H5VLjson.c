@@ -1127,7 +1127,7 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     new_dataset->object_json = json_object();
 
     /* grab the dataset collection from the Domain/File */
-    json_t* dataset_collection = json_object_get(new_dataset->domain->u.file.json_file_object, "datasets");
+    json_t* dataset_collection = json_object_get(new_dataset->domain->object_json, "datasets");
     json_object_set_new(dataset_collection, new_dataset->object_uuid, new_dataset->object_json);
 
     /* flesh out these fields */
@@ -1193,7 +1193,7 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     {
         case H5I_FILE:
             /* if starting with file, grab id of the root group, and move on. */
-            parent_uuid = json_string_value(json_object_get(new_dataset->domain->u.file.json_file_object, "root"));
+            parent_uuid = json_string_value(json_object_get(new_dataset->domain->object_json, "root"));
             break;
         case H5I_GROUP:
             parent_uuid = parent->object_uuid;
@@ -1204,7 +1204,7 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
 
     /* insert a new link into the groups linklist */
     
-    json_t* group_hashtable = json_object_get(new_dataset->domain->u.file.json_file_object, "groups");
+    json_t* group_hashtable = json_object_get(new_dataset->domain->object_json, "groups");
     json_t* group = json_object_get(group_hashtable, parent_uuid);
 
     /* create the link */
@@ -1302,7 +1302,7 @@ H5VL_json_dataset_open(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to locate link to dataset")
 
     /* the link is found. Go ahead and open the dataset object. */
-    json_t* datasets = json_object_get(dataset->domain->u.file.json_file_object, "datasets");
+    json_t* datasets = json_object_get(dataset->domain->object_json, "datasets");
     dataset->object_json = json_object_get(datasets, uuid);
 
     /*** Set up a library object Dataspace for the opened Dataset ***/
@@ -1715,7 +1715,7 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
 
     json_t* new_file_object = json_object();
     HDassert(new_file_object);
-    new_file->u.file.json_file_object = new_file_object;
+    new_file->object_json = new_file_object;
 
     /* create an uuid for the file object itself */
     h5json_uuid_generate(new_file->object_uuid);
@@ -1809,7 +1809,7 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     new_file->domain = new_file;
 
     /* set up the JANSSON file object and store the reference */
-    new_file->u.file.json_file_object = new_file_object;
+//FTW WIP this gets cut    new_file->u.file.json_file_object = new_file_object;
     /* need to set the object_json for VOL object as well */
     new_file->object_json = new_file_object;
 
@@ -1883,8 +1883,8 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
 #endif
 
     /* digest the buffer to form JANSSON object */
-    json_error_t error;
-    json_t* document = json_loads(json_buffer, 0, &error);
+    json_error_t err;
+    json_t* document = json_loads(json_buffer, 0, &err);
     HDassert(document); /* make sure it worked */
     H5MM_xfree(json_buffer);
 
@@ -1914,7 +1914,7 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
 #endif
 
     /* set up the JANSSON file object and store the reference */
-    file->u.file.json_file_object = document;
+//FTW WIP this gets cut    file->object_json = document;
     /* need to set the object_json for VOL object as well */
     file->object_json = document;
 
@@ -2174,7 +2174,7 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     printf("  - Finished adding group %s... \n", name);
     printf("  - With uuid %s... \n", (new_group->object_uuid));
     printf("  - File now reads:\n\n");
-    json_dumpf(parent->domain->u.file.json_file_object, stdout, JSON_INDENT(4));
+    json_dumpf(parent->domain->object_json, stdout, JSON_INDENT(4));
 #endif
 
     /* Everything is happy thus far, so go ahead and set ret_value */
@@ -2229,7 +2229,7 @@ H5VL_json_group_open(void *_parent, H5VL_loc_params_t loc_params, const char *na
     group->domain = parent->domain; /* Store pointer to file that the opened Group is within */ 
 
     /* handle the JANSSON representation: */
-    groups_in_file = json_object_get(parent->domain->u.file.json_file_object, "groups"); 
+    groups_in_file = json_object_get(parent->domain->object_json, "groups"); 
 
     /* get the list of tokens in the provided name/path */
     const char s[2] = "/";
@@ -2246,7 +2246,7 @@ H5VL_json_group_open(void *_parent, H5VL_loc_params_t loc_params, const char *na
     if ((parent->obj_type == H5I_FILE) || (n_tokens == 0)) 
     {
         /* borrow reference to root group as starting point */
-        current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(parent->domain->u.file.json_file_object, "root"));
+        current_uuid = (h5json_uuid_t*)json_string_value(json_object_get(parent->domain->object_json, "root"));
     }
     else /* borrow reference to provided group */
     {
@@ -3425,7 +3425,7 @@ H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_
     printf("  - Create intermediate groups?:    %d\n", create_intermediate);
 #endif
 
-    json_t* groups_in_file = json_object_get(domain->u.file.json_file_object, "groups");
+    json_t* groups_in_file = json_object_get(domain->object_json, "groups");
 
     /* group-spotting: search the path/tokens provided, create as needed and allowed. 
        The last token is our target, and library object for it created and returned. */
@@ -3582,7 +3582,7 @@ H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5js
     printf("  - Starting from group with uuid:  %s\n", current_uuid);
 #endif
 
-    json_t* groups_in_file = json_object_get(domain->u.file.json_file_object, "groups");
+    json_t* groups_in_file = json_object_get(domain->object_json, "groups");
 
     /* pointer to the containing group's json uuid */
     json_t* containing_group_uuid_json = NULL;
