@@ -1052,7 +1052,7 @@ H5VL_json_datatype_close(void *_dtype, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATT
 } /* end H5VL_json_datatype_close() */
 
 
-/*** Dataset API ***/
+/*** Datasets API ***/
 
 
 
@@ -1650,6 +1650,10 @@ H5VL_json_dataset_close(void *_dataset, hid_t H5_ATTR_UNUSED dxpl_id, void H5_AT
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_dataset_close() */
 
+
+/*** File API ***/
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_json_file_create
@@ -1880,7 +1884,6 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
     printf("File open json_buffer: \n%s\n", json_buffer);
 #endif
 
-
     /* digest the buffer to form JANSSON object */
     json_error_t error;
     json_t* document = json_loads(json_buffer, 0, &error);
@@ -1958,7 +1961,6 @@ H5VL_json_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED dxp
     HDassert(H5I_FILE == file->obj_type && "not a file");
 
     switch (get_type) {
-        /* XXX: Unable to support until property lists are ironed out with HSDS */
         /* H5Fget_access_plist */
         case H5VL_FILE_GET_FAPL:
             HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "get FAPL unsupported")
@@ -1999,7 +2001,9 @@ H5VL_json_file_get(void *obj, H5VL_file_get_t get_type, hid_t H5_ATTR_UNUSED dxp
     } /* end switch */
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_file_get() */
 
 
@@ -2085,6 +2089,10 @@ H5VL_json_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_json_file_close() */
 
+
+/*** Groups API ***/
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_json_group_create
@@ -2096,8 +2104,6 @@ H5VL_json_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
  * Programmer:  Frank Willmore
  *              November, 2017
  *
- *              FTW: Implement the case of (not) creating intermediate
- *              groups if this property is set in the LCPL
  */
 
 static void *
@@ -2162,7 +2168,6 @@ H5VL_json_group_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_param
     strncpy(new_group->object_uuid, current_uuid, sizeof(h5json_uuid_t));
 
     /* set the pointer into the JANSSON object from the VOL object */
-//    new_group->object_json = new_group_json;
     new_group->object_json = json_object_get(groups_in_file, new_group->object_uuid);
 
 #ifdef PLUGIN_DEBUG
@@ -2317,8 +2322,8 @@ done:
  *
  * Return:  Non-negative on success/Negative on failure
  *
- * Programmer:  Jordan Henderson
- *              March, 2017
+ * Programmer: ??? 
+ *             Month, Year
  *
  *-------------------------------------------------------------------------
  */
@@ -2385,14 +2390,15 @@ H5VL_json_group_close(void *_group, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
     /* checking group is group */
     HDassert(H5I_GROUP == group->obj_type && "not a group");
 
-    /* Lifecycle: Free JANSSON group_uuid object */
-    json_decref(group->object_uuid);
-
     /* free the library object */
     H5MM_xfree(group);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_json_group_close() */
+
+
+/*** Links API ***/
+
 
 
 /*-------------------------------------------------------------------------
@@ -2470,19 +2476,12 @@ H5VL_json_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_p
             h5json_uuid_t the_object_uuid; 
             strncpy(the_object_uuid, json_string_value(json_object_get(the_object, "id")), sizeof(h5json_uuid_t));
 
-//FTW moved to helper
-//            /* locate the group (using the helper function) where the new link is to be placed */
-//            json_t* groups_in_file = json_object_get(new_link_location->domain->object_json, "groups");
-//            json_t* destination_group = json_object_get(groups_in_file, new_link_location->object_uuid);
-//            json_t* destination_group_links = json_object_get(destination_group, "links");
-
             /* create a new link object */
             json_t* new_link = json_object();
             json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD"));
             json_object_set_new(new_link, "title", json_string(loc_params.loc_data.loc_by_name.name));
             json_object_set_new(new_link, "collection", collection);
             json_object_set_new(new_link, "id", json_string(the_object_uuid));
-//            json_array_append_new(destination_group_links, new_link);
 
             /* insert the link */
             herr_t err = H5VL_json_insert_link_into_group(new_link_location->domain, new_link_location->object_uuid, new_link);
@@ -2636,9 +2635,6 @@ H5VL_json_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                    hid_t dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5VL_json_object_t *link = (H5VL_json_object_t *) obj;
-//FTW    hbool_t             curl_perform = FALSE;
-//FTW    char                get_request_header[HOST_HEADER_MAX_LENGTH] = "Host: ";
-//FTW    char                temp_url[URL_MAX_LENGTH];
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2646,27 +2642,6 @@ H5VL_json_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 #ifdef PLUGIN_DEBUG
     printf("Received Link get call with following parameters:\n");
     printf("  - Get type: %d\n", get_type);
-//    printf("  - Link URI: %s\n", link->URI);
-//    printf("  - Link File: %s\n\n", link->domain->u.file.filepath_name);
-#endif
-
-#if 0
-    if (curl_perform) {
-        /* Setup the "Host: " header */
-        curl_headers = curl_slist_append(curl_headers, strncat(get_request_header, link->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH - 7));
-
-        /* Disable use of Expect: 100 Continue HTTP response */
-        curl_headers = curl_slist_append(curl_headers, "Expect:");
-
-        /* Redirect from base URL to "/groups/<>/links/<name>" to get information about the link */
-        /* snprintf(temp_url, URL_MAX_LENGTH, "%s/groups/%s/links/%s", base_URL, link->obj.); */
-
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-        curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
-        curl_easy_setopt(curl, CURLOPT_URL, temp_url);
-
-        CURL_PERFORM(curl, H5E_LINK, H5E_CANTGET, FAIL);
-    } /* end if */
 #endif
 
     switch (get_type) {
@@ -2693,23 +2668,9 @@ H5VL_json_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
     } /* end switch */
 
 done:
-#ifdef PLUGIN_DEBUG
-//    printf("Link Get response buffer: %s\n\n", response_buffer.buffer);
-#endif
-
-#if 0
-    if (curl_perform) {
-        /* Restore cURL URL to the base URL */
-        curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-
-        if (curl_headers) {
-            curl_slist_free_all(curl_headers);
-            curl_headers = NULL;
-        } /* end if */
-    } /* end if */
-#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_link_get() */
 
 
@@ -2791,6 +2752,10 @@ done:
 
 } /* end H5VL_json_link_specific() */
 
+
+/*** Objects API ***/
+
+
 
 static void *
 H5VL_json_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type,
@@ -2816,8 +2781,8 @@ H5VL_json_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opene
     /* XXX: Currently only opening objects by name is supported */
     HDassert(H5VL_OBJECT_BY_NAME == loc_params.type && "loc_params type not H5VL_OBJECT_BY_NAME");
 
-//    search_ret = H5VL_json_find_link_by_path(parent, loc_params.loc_data.loc_by_name.name,
-//            get_link_type_callback, NULL, &obj_type);
+    //    search_ret = H5VL_json_find_link_by_path(parent, loc_params.loc_data.loc_by_name.name,
+    //            get_link_type_callback, NULL, &obj_type);
     if (!search_ret || search_ret < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, NULL, "unable to find object by name")
 
@@ -2935,6 +2900,7 @@ H5VL_json_object_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_object_optional() */
+
 
 /************************************
  *         Helper functions         *
