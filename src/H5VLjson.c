@@ -2053,36 +2053,38 @@ done:
 
 
 static herr_t
-H5VL_json_file_close(void *file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL_json_file_close(void *_file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *_file = (H5VL_json_object_t *) file;
+    H5VL_json_object_t *file = (H5VL_json_object_t *) _file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef PLUGIN_DEBUG
     printf("Received File close call with following parameters:\n");
     printf("  - DXPL: %ld\n", dxpl_id);
-    printf("  - UUID: %s\n", _file->object_uuid);
-    printf("  - JSON content begin: \n\n%s\n\n", json_dumps(_file->u.file.json_file_object, JSON_INDENT(4)));
+    printf("  - UUID: %s\n", file->object_uuid);
+    printf("  - JSON content begin: \n\n%s\n\n", json_dumps(file->object_json, JSON_INDENT(4)));
+//FTW WIP    printf("  - JSON content begin: \n\n%s\n\n", json_dumps(_file->u.file.json_file_object, JSON_INDENT(4)));
     printf("  - JSON content end. \n\n");
 #endif
 
-    HDassert(H5I_FILE == _file->obj_type && "not a file");
+    HDassert(H5I_FILE == file->obj_type && "not a file");
 
 #ifdef GENERATE_FILESYSTEM_OBJECT
     /* start at the beginning of the file */
-    HDassert(fseek(_file->u.file.filesystem_file_object, 0, SEEK_SET) == 0);
+    HDassert(fseek(file->u._file.filesystem_file_object, 0, SEEK_SET) == 0);
     /* now dump/encode: */
-    fprintf(_file->u.file.filesystem_file_object, "%s\n", json_dumps(_file->u.file.json_file_object, JSON_INDENT(4)));
+    fprintf(file->u.file.filesystem_file_object, "%s\n", json_dumps(file->u.file.json_file_object, JSON_INDENT(4)));
 
     /* close file. */ 
-    fclose(_file->u.file.filesystem_file_object); 
+    fclose(file->u.file.filesystem_file_object); 
 #endif
 
     /* free the Jansson ojbect. */ 
-    HDassert(json_object_clear(_file->u.file.json_file_object) == 0); 
+//FTW WIP    HDassert(json_object_clear(file->u.file.json_file_object) == 0); 
+    HDassert(json_object_clear(file->object_json) == 0); 
 
-    H5MM_xfree(_file);
+    H5MM_xfree(file);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_json_file_close() */
