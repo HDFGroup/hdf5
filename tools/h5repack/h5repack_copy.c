@@ -882,7 +882,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                         HDfree(buf);
                                         buf = NULL;
                                     }
-                                 }
+                                }
                                 else { /* possibly not enough memory, read/write by hyperslabs */
                                     size_t p_type_nbytes = msize; /*size of memory type */
                                     hsize_t p_nelmts = nelmts; /*total elements */

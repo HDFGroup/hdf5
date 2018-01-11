@@ -26,6 +26,7 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dtypes.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr3.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset2.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset3.h5
@@ -263,6 +264,8 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_800.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_801.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8625.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8639.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_ud.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_udfail.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_vlstr.txt
@@ -978,6 +981,10 @@
           h5diff_800.out.err
           h5diff_801.out
           h5diff_801.out.err
+          h5diff_8625.out
+          h5diff_8625.out.err
+          h5diff_8639.out
+          h5diff_8639.out.err
           h5diff_90.out
           h5diff_90.out.err
           h5diff_vlstr.out
@@ -1551,7 +1558,11 @@ ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
-ADD_H5_TEST (h5diff_530 0 -v  ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
+ADD_H5_TEST (h5diff_530 0 -v ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
+# test to verify HDFFV-8625
+ADD_H5_TEST (h5diff_8625 0 -v --enable-error-stack ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group/Compound_dset1 /group_copy/Compound_dset3)
+# test to verify HDFFV-8639
+ADD_H5_TEST (h5diff_8639 0 -v h5diff_attr3.h5 h5diff_attr2.h5 /g1)
 ADD_H5_TEST (h5diff_vlstr 0 -v tvlstr.h5 tvlstr2.h5)
 
 # ##############################################################################
