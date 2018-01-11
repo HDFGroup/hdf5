@@ -54,7 +54,15 @@ New Features
 
     Configuration:
     -------------
-    -
+    - CMake
+
+      Refactor use of CMAKE_BUILD_TYPE for new variable, which understands
+      the type of generator in use.
+
+      Added new configuration macros to use new HDF5_BUILD_TYPE variable. This
+      variable is set correctly for the type of generator being used for the build.
+
+      (ADB - 2018/01/08, HDFFV-10385, HDFFV-10296)
 
     Library:
     --------
@@ -226,7 +234,29 @@ Bug Fixes since HDF5-1.10.1 release
 
     Configuration
     -------------
-    - cmake
+    - CMake
+
+      Correct usuage of CMAKE_BUILD_TYPE variable.
+
+      The use of the CMAKE_BUILD_TYPE is incorrect for multi-config
+      generators (Visual Studio and XCode) and is optional for single
+      config generators. Created a new macro to check
+        GLOBAL PROPERTY -> GENERATOR_IS_MULTI_CONFIG
+      Created two new HDF variable, HDF5_BUILD_TYPE and HDF5_CFG_BUILD_TYPE.
+      Defaults for these variables is "Release".
+
+      (ADB - 2018/01/10, HDFFV-10385)
+
+    - CMake
+
+      Add replacement of fortran flags if using static CRT.
+
+      Added TARGET_STATIC_CRT_FLAGS call to HDFUseFortran.cmake file in
+      config/cmake_ext_mod folder.
+
+      (ADB - 2018/01/08, HDFFV-10334)
+
+    - CMake
 
       The hdf5 library used shared szip and zlib, which needlessly required
       applications to link with the same szip and zlib libraries.
@@ -238,7 +268,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2017/11/14, HDFFV-10329)
 
-    - cmake MPI
+    - CMake MPI
 
       CMake implementation for MPI was problematic and would create incorrect
       MPI library references in the hdf5 libraries.
@@ -249,7 +279,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2017/11/02, HDFFV-10321)
 
-    - cmake
+    - CMake
 
       Too many commands for POST_BUILD step caused command line to be
       too big on windows.

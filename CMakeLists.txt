@@ -233,7 +233,7 @@ if (NOT HDF5_INSTALL_DATA_DIR)
       set (HDF5_INSTALL_FWRK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
     endif ()
     set (HDF5_INSTALL_DATA_DIR share)
-    set (HDF5_INSTALL_CMAKE_DIR share/cmake)
+    set (HDF5_INSTALL_CMAKE_DIR share/cmake/hdf5)
   else ()
     set (HDF5_INSTALL_DATA_DIR ".")
     set (HDF5_INSTALL_CMAKE_DIR cmake)
@@ -409,6 +409,8 @@ include (${HDF_RESOURCES_EXT_DIR}/HDFMacros.cmake)
 include (${HDF_RESOURCES_EXT_DIR}/HDFLibMacros.cmake)
 include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
 
+SET_HDF5_BUILD_TYPE()
+
 #-----------------------------------------------------------------------------
 # Setup output Directories
 #-----------------------------------------------------------------------------
@@ -426,12 +428,12 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
       ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
   )
   if (WIN32)
-    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
+    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
     set (CMAKE_PDB_OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
     )
   else ()
-    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
   endif ()
 else ()
   # if we are externally configured, but the project uses old cmake scripts
@@ -582,7 +584,7 @@ option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
 mark_as_advanced (HDF5_ENABLE_TRACE)
-if (CMAKE_BUILD_TYPE MATCHES Debug)
+if (HDF5_BUILD_TYPE MATCHES Debug)
   add_definitions (-DDEBUG)
   # Enable tracing of the API
   if (HDF5_ENABLE_TRACE)
