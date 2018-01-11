@@ -2922,7 +2922,7 @@ done:
  *              will write the *current* time to time_buf in UTC
  *
  */
-herr_t h5json_get_utc_string_from_time(time_t t, char *time_buf)
+static herr_t h5json_get_utc_string_from_time(time_t t, char *time_buf)
 {
     herr_t ret_value = SUCCEED;
 
@@ -2952,8 +2952,6 @@ static herr_t h5json_uuid_generate(h5json_uuid_t uuid)
 { 
     herr_t ret_value = SUCCEED;
 
-//    FUNC_ENTER_NOAPI_NOINIT
-
     FILE* urandom = fopen("/dev/urandom", "r");
 
     unsigned char* buffer = (unsigned char*)malloc(16);
@@ -2972,7 +2970,6 @@ done:
     fclose(urandom);
 
     return SUCCEED;
-//    FUNC_LEAVE_NOAPI(ret_value)
 } 
 
 
@@ -2997,15 +2994,7 @@ static json_t* h5json_new_uuid_json_object()
     return ret_val;
 }
 
-
-/* XXX: Potentially modify to deal with the trailing slash case */
-static const char*
-get_basename(const char *path)
-{
-    char *substr = strrchr(path, '/');
-    return substr ? substr + 1 : path;
-} /* end get_basename() */
-
+#if 0
 
 static herr_t
 get_link_type_callback(char *HTTP_response, void H5_ATTR_UNUSED *callback_data_in, void *callback_data_out)
@@ -3063,6 +3052,10 @@ get_link_type_callback(char *HTTP_response, void H5_ATTR_UNUSED *callback_data_i
 
     return SUCCEED;
 } /* end get_link_type_callback() */
+#endif
+
+#if 0
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -3222,6 +3215,7 @@ done:
 } /* end H5VL_json_find_link_by_path() */
 #endif
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_json_convert_predefined_datatype_to_string
@@ -3270,7 +3264,9 @@ H5VL_json_convert_predefined_datatype_to_string(hid_t type_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_convert_predefined_datatype_to_string() */
+#endif
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_json_convert_datatype_class_to_string
@@ -3312,7 +3308,9 @@ H5VL_json_convert_datatype_class_to_string(hid_t type_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_convert_datatype_class_to_string() */
+#endif
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_json_convert_datatype_to_string
@@ -3794,7 +3792,9 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_convert_datatype_to_string() */
+#endif
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_json_convert_string_to_datatype
@@ -4422,7 +4422,9 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_convert_string_to_datatype() */
+#endif
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_json_parse_datatype
@@ -4597,6 +4599,9 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_parse_datatype() */
+#endif
+
+#if 0
 
 
 static herr_t
@@ -4744,6 +4749,7 @@ H5VL_json_convert_dataspace_selection_to_string(hid_t space_id, char *selection_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_convert_dataspace_selection_to_string() */
+#endif
 
 
 #if 0
