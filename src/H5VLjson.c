@@ -17,8 +17,8 @@
  * Programmer:  Frank Willmore
  *              November, 2017
  *
- * Purpose: An implementation of a VOL plugin to access HDF5 data in a
- *          JSON-oriented manner
+ * Purpose:     An implementation of a VOL plugin to access HDF5 data in a
+ *              JSON-oriented manner
  */
 
 #define H5A_FRIEND      /* Suppress error about including H5Apkg */
@@ -45,8 +45,6 @@
 #include "H5VLjson.h"     /* JSON VOL plugin       */
 
 #include "H5MMprivate.h"  /* Memory management     */
-
-#define PREDEFINED_DATATYPE_NAME_MAX_LENGTH 20
 
 /*
  * The vol identification number.
