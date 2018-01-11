@@ -1809,8 +1809,6 @@ H5VL_json_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     new_file->domain = new_file;
 
     /* set up the JANSSON file object and store the reference */
-//FTW WIP this gets cut    new_file->u.file.json_file_object = new_file_object;
-    /* need to set the object_json for VOL object as well */
     new_file->object_json = new_file_object;
 
     ret_value = (void*) new_file;
@@ -1914,8 +1912,6 @@ H5VL_json_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_
 #endif
 
     /* set up the JANSSON file object and store the reference */
-//FTW WIP this gets cut    file->object_json = document;
-    /* need to set the object_json for VOL object as well */
     file->object_json = document;
 
     /* This uuid gets *copied* to the library object */
@@ -2064,7 +2060,6 @@ H5VL_json_file_close(void *_file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
     printf("  - DXPL: %ld\n", dxpl_id);
     printf("  - UUID: %s\n", file->object_uuid);
     printf("  - JSON content begin: \n\n%s\n\n", json_dumps(file->object_json, JSON_INDENT(4)));
-//FTW WIP    printf("  - JSON content begin: \n\n%s\n\n", json_dumps(_file->u.file.json_file_object, JSON_INDENT(4)));
     printf("  - JSON content end. \n\n");
 #endif
 
@@ -2081,7 +2076,6 @@ H5VL_json_file_close(void *_file, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 #endif
 
     /* free the Jansson ojbect. */ 
-//FTW WIP    HDassert(json_object_clear(file->u.file.json_file_object) == 0); 
     HDassert(json_object_clear(file->object_json) == 0); 
 
     H5MM_xfree(file);
