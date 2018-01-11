@@ -368,7 +368,6 @@ struct H5F_t {
     unsigned		    nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
     hbool_t             id_exists;      /* Whether an ID for this struct exists                         */
-//    hid_t               file_id;        /* ID of this file                                              */
     hbool_t             closing;        /* File is in the process of being closed                       */
     struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
     unsigned            nmounts;        /* Number of children mounted to this file                      */
@@ -392,7 +391,20 @@ typedef enum H5VL_file_optional_t {
     H5VL_FILE_GET_VFD_HANDLE,	        /* file VFD handle       		        */
     H5VL_FILE_REOPEN,                   /* reopen the file                      */
     H5VL_FILE_RESET_MDC_HIT_RATE,       /* get metadata cache hit rate          */
-    H5VL_FILE_SET_MDC_CONFIG            /* set metadata cache configuration     */
+    H5VL_FILE_SET_MDC_CONFIG,           /* set metadata cache configuration     */
+
+    /* XXX: New API calls */
+    H5VL_FILE_GET_METADATA_READ_RETRY_INFO,
+    H5VL_FILE_START_SWMR_WRITE,
+    H5VL_FILE_START_MDC_LOGGING,
+    H5VL_FILE_STOP_MDC_LOGGING,
+    H5VL_FILE_GET_MDC_LOGGING_STATUS,
+    H5VL_FILE_SET_LATEST_FORMAT,
+    H5VL_FILE_FORMAT_CONVERT_SUPER,
+    H5VL_FILE_RESET_PAGE_BUFFERING_STATS,
+    H5VL_FILE_GET_PAGE_BUFFERING_STATS,
+    H5VL_FILE_GET_MDC_IMAGE_INFO
+
 } H5VL_file_optional_t;
 
 /* User data for traversal routine to get ID counts */

@@ -1776,9 +1776,9 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         /* H5Fget_file_image */
         case H5VL_FILE_GET_FILE_IMAGE:
             {
-                void       *buf_ptr   = va_arg (arguments, void *);
-                ssize_t    *ret       = va_arg (arguments, ssize_t *);
-                size_t      buf_len   = va_arg (arguments, size_t );
+                void       *buf_ptr   = va_arg(arguments, void *);
+                ssize_t    *ret       = va_arg(arguments, ssize_t *);
+                size_t      buf_len   = va_arg(arguments, size_t );
 
                 f = (H5F_t *)obj;
                 /* Do the actual work */
@@ -1801,10 +1801,10 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
             }
         case H5VL_FILE_GET_FREE_SECTIONS:
             {
-                H5F_sect_info_t *sect_info = va_arg (arguments, H5F_sect_info_t *);
-                ssize_t         *ret       = va_arg (arguments, ssize_t *);
-                H5F_mem_t       type       = va_arg (arguments, H5F_mem_t);
-                size_t          nsects     = va_arg (arguments, size_t);
+                H5F_sect_info_t *sect_info = va_arg(arguments, H5F_sect_info_t *);
+                ssize_t         *ret       = va_arg(arguments, ssize_t *);
+                H5F_mem_t       type       = va_arg(arguments, H5F_mem_t);
+                size_t          nsects     = va_arg(arguments, size_t);
 
                 f = (H5F_t *)obj;
                 /* Go get the free-space section information in the file */
@@ -1875,10 +1875,10 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         /* H5Fget_mdc_size */
         case H5VL_FILE_GET_MDC_SIZE:
             {
-                size_t *max_size_ptr        = va_arg (arguments, size_t *);
-                size_t *min_clean_size_ptr  = va_arg (arguments, size_t *);
-                size_t *cur_size_ptr        = va_arg (arguments, size_t *); 
-                int    *cur_num_entries_ptr = va_arg (arguments, int *); 
+                size_t *max_size_ptr        = va_arg(arguments, size_t *);
+                size_t *min_clean_size_ptr  = va_arg(arguments, size_t *);
+                size_t *cur_size_ptr        = va_arg(arguments, size_t *); 
+                int    *cur_num_entries_ptr = va_arg(arguments, int *); 
                 uint32_t cur_num_entries;
 
                 f = (H5F_t *)obj;
@@ -1894,8 +1894,8 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
         /* H5Fget_vfd_handle */
         case H5VL_FILE_GET_VFD_HANDLE:
             {
-                void **file_handle  = va_arg (arguments, void **);
-                hid_t  fapl_id      = va_arg (arguments, hid_t);
+                void **file_handle  = va_arg(arguments, void **);
+                hid_t  fapl_id      = va_arg(arguments, hid_t);
 
                 f = (H5F_t *)obj;
 
@@ -1943,14 +1943,117 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
             }
         case H5VL_FILE_SET_MDC_CONFIG:
             {
-                H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
+                H5AC_cache_config_t *config_ptr = va_arg(arguments, H5AC_cache_config_t *);
 
                 f = (H5F_t *)obj;
                 /* set the resize configuration  */
                 if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed")
                 break;
             }
+        case H5VL_FILE_GET_METADATA_READ_RETRY_INFO:
+            {
+                H5F_retry_info_t *info = va_arg(arguments, H5F_retry_info_t *);
+
+                f = (H5F_t *)obj;
+
+                if (H5F_get_metadata_read_retry_info(f, info) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't get metadata read retry info")
+
+                break;
+            }
+        case H5VL_FILE_START_SWMR_WRITE:
+            {
+                f = (H5F_t *)obj;
+
+                if (H5F_start_swmr_write(f) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't start SWMR write")
+
+                break;
+            }
+        case H5VL_FILE_START_MDC_LOGGING:
+            {
+                f = (H5F_t *)obj;
+
+				/* Call mdc logging function */
+				if (H5C_start_logging(f->shared->cache) < 0)
+					HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to start mdc logging")
+
+                break;
+            }
+        case H5VL_FILE_STOP_MDC_LOGGING:
+            {
+                f = (H5F_t *)obj;
+
+				/* Call mdc logging function */
+				if (H5C_stop_logging(f->shared->cache) < 0)
+					HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to stop mdc logging")
+
+                break;
+            }
+        case H5VL_FILE_GET_MDC_LOGGING_STATUS:
+            {
+				hbool_t *is_enabled				= va_arg(arguments, hbool_t *);
+                hbool_t *is_currently_logging	= va_arg(arguments, hbool_t *);
+
+                f = (H5F_t *)obj;
+
+				/* Call mdc logging function */
+				if (H5C_get_logging_status(f->shared->cache, is_enabled, is_currently_logging) < 0)
+					HGOTO_ERROR(H5E_FILE, H5E_LOGFAIL, FAIL, "unable to get logging status")
+
+                break;
+            }
+        case H5VL_FILE_SET_LATEST_FORMAT:
+            {
+                HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
+                break;
+            }
+        case H5VL_FILE_FORMAT_CONVERT_SUPER:
+            {
+                HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
+                break;
+            }
+        case H5VL_FILE_RESET_PAGE_BUFFERING_STATS:
+            {
+                f = (H5F_t *)obj;
+
+                /* Sanity check */
+                if (NULL == f->shared->page_buf)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
+
+                /* Reset the statistics */
+                if (H5PB_reset_stats(f->shared->page_buf) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't reset stats for page buffering")
+
+                break;
+            }
+        case H5VL_FILE_GET_PAGE_BUFFERING_STATS:
+            {
+                unsigned *accesses      = va_arg(arguments, unsigned *);
+                unsigned *hits          = va_arg(arguments, unsigned *);
+                unsigned *misses        = va_arg(arguments, unsigned *);
+                unsigned *evictions     = va_arg(arguments, unsigned *);
+                unsigned *bypasses      = va_arg(arguments, unsigned *);
+                
+                f = (H5F_t *)obj;
+
+                /* Sanity check */
+                if (NULL == f->shared->page_buf)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
+
+                /* Get the statistics */
+                if (H5PB_get_stats(f->shared->page_buf, accesses, hits, misses, evictions, bypasses) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stats for page buffering")
+
+                break;
+            }
+        case H5VL_FILE_GET_MDC_IMAGE_INFO:
+            {
+                HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
+                break;
+            }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
     }

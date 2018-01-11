@@ -88,6 +88,7 @@ public class HDF5Constants {
     public static final int H5D_VDS_ERROR = H5D_VDS_ERROR();
     public static final int H5D_VDS_FIRST_MISSING = H5D_VDS_FIRST_MISSING();
     public static final int H5D_VDS_LAST_AVAILABLE = H5D_VDS_LAST_AVAILABLE();
+    public static final int H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS = H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS();
 
     public static final int H5E_MAJOR = H5E_MAJOR();
     public static final int H5E_MINOR = H5E_MINOR();
@@ -769,6 +770,8 @@ public class HDF5Constants {
     private static native final int H5D_VDS_FIRST_MISSING();
 
     private static native final int H5D_VDS_LAST_AVAILABLE();
+
+    private static native final int H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS();
 
     private static native final long H5E_ALIGNMENT();
 
