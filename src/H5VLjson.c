@@ -20,8 +20,6 @@
  * Purpose: An implementation of a VOL plugin to access HDF5 data in a
  *          JSON-oriented manner
  */
-/* XXX: Replace as much stack-allocated memory with dynamically growing memory as possible */
-/* XXX: Eventually replace CURL PUT calls with CURLOPT_UPLOAD calls */
 
 #define H5A_FRIEND      /* Suppress error about including H5Apkg */
 #define H5D_FRIEND      /* Suppress error about including H5Dpkg */
@@ -121,12 +119,14 @@ static herr_t H5VL_json_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL
 static herr_t H5VL_json_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_json_object_optional(void *obj, hid_t dxpl_id, void **req, va_list arguments);
 
-/* helper function to generate UUIDs */
+/*** Helper functions ***/
+
+/* generate UUIDs */
 static herr_t h5json_uuid_generate(h5json_uuid_t uuid);
-/* helper function to express time as UTC */
+/* express time as UTC */
 static herr_t h5json_get_utc_string_from_time(time_t t, char *time_buf);
 
-/* Helper functions for converting between dataspace/datatype and their jansson representations */
+/* converting between dataspace/datatype and their jansson representations */
 static hid_t H5VL_json_jansson_to_dataspace(json_t* shape);
 static hid_t H5VL_json_jansson_to_datatype(json_t* type);
 static json_t* H5VL_json_datatype_to_jansson(hid_t datatype);
@@ -140,47 +140,19 @@ static herr_t H5VL_json_read_value(json_t* value_array, hid_t dtype_id, hid_t sp
 static herr_t H5VL_json_delete_link_from_containing_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link);
 static herr_t H5VL_json_insert_link_into_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link);
 
-//FTW Jordan's stuff
-
-/* Alternate, more portable version of the basename function which doesn't modify its argument */
-static const char *get_basename(const char *path);
-
-/* Set of callbacks for H5VL_json_parse_response() */
-static herr_t yajl_copy_object_URI_parse_callback(char *HTTP_response, void *callback_data_in, void *callback_data_out);
-static herr_t get_link_type_callback(char *HTTP_response, void *callback_data_in, void *callback_data_out);
-
-/* Conversion functions to convert a JSON-format string to an HDF5 Datatype or vice versa */
-static const char *H5VL_json_convert_predefined_datatype_to_string(hid_t type_id);
-static const char *H5VL_json_convert_datatype_class_to_string(hid_t type_id);
-static herr_t      H5VL_json_convert_datatype_to_string(hid_t type_id, char **type_body, size_t *type_body_len, hbool_t nested);
-static hid_t       H5VL_json_convert_string_to_datatype(const char *type);
-
-/* Helper function to retrieve the datatype properties of the given H5VL_json_object_t
- * and set up a datatype hid_t for the object, which must be a Dataset, Datatype or
- * an Attribute
- */
-static herr_t H5VL_json_parse_datatype(H5VL_json_object_t *object);
-
-/* Helper function to setup a Dataspace when opening an existing Dataset or Attribute */
-static herr_t H5VL_json_parse_dataspace(H5VL_json_object_t *object);
-
-/* Helper function to convert a selection within an HDF5 Dataspace into a JSON-format string */
-static herr_t H5VL_json_convert_dataspace_selection_to_string(hid_t space_id, char *selection_string, hbool_t req_param);
-
-/* Helper function to convert a data buffer into a JSON array when using variable-length types */
-static herr_t H5VL_json_convert_data_buffer_to_json_array(const void *buf, hid_t mem_type_id, hid_t mem_space_id, char **out_body, size_t *out_body_len);
-
-/* Helper function to locate a group */
+/* locate a group */
 static herr_t H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate);
 static json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection, h5json_uuid_t *containing_group_uuid);
 
-/* Helper functions for creating a Dataset */
-//static herr_t H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body);
-//static herr_t H5VL_json_parse_dataset_create_shape_and_maxdims(hid_t space_id, char *shape_body, char *maxdims_body);
-//static herr_t H5VL_json_parse_dataset_creation_properties(hid_t dcpl_id, char *creation_properties_body);
+/* creating a Dataset */
+static herr_t H5VL_json_parse_dataset_create_options(void *parent_obj, const char *name, hid_t dcpl, char *create_request_body);
+static herr_t H5VL_json_parse_dataset_create_shape_and_maxdims(hid_t space_id, char *shape_body, char *maxdims_body);
+static herr_t H5VL_json_parse_dataset_creation_properties(hid_t dcpl_id, char *creation_properties_body);
 
-/* Helper functions for creating an Attribute */
-//static herr_t H5VL_json_parse_attribute_create_options(H5VL_json_object_t *parent_obj, const char *name, hid_t acpl, char *create_request_body);
+/* creating an Attribute */
+static herr_t H5VL_json_parse_attribute_create_options(H5VL_json_object_t *parent_obj, const char *name, hid_t acpl, char *create_request_body);
+
+/*** VOL class ***/
 
 
 static H5VL_class_t H5VL_json_g = {
@@ -259,6 +231,7 @@ static H5VL_class_t H5VL_json_g = {
     NULL
 };
 
+#if 0
 //FTW some debugging utils
 void FTW_dump_dataspace(hid_t dataspace, const char* message)
 {
@@ -280,6 +253,7 @@ char* H5VLjson_dumps(void* _object)
 {
     return json_dumps(((H5VL_json_object_t*)_object)->object_json, JSON_INDENT(4));
 }
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -453,6 +427,10 @@ done:
  *         VOL plugin callbacks         *
  ****************************************/
 
+ /*** Attributes API ***/
+
+
+
 /* -----------------------------------------------------------
  * Function:    H5VL_json_attr_create 
  *
@@ -558,7 +536,7 @@ H5VL_json_attr_create(void *_parent, H5VL_loc_params_t loc_params, const char *a
     /* create an empty array */
     json_object_set_new(attribute_json, "value", json_array());
 
-    /* default value is set to json null. If H5D_FILL_TIME_IFSET were 
+    /* FTW default value is set to json null. If H5D_FILL_TIME_IFSET were 
      * implemented, a fill value *could* be provided here. */
 
     /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
@@ -734,14 +712,13 @@ H5VL_json_attr_read(void *_attribute, hid_t dtype_id, void *buf, hid_t dxpl_id, 
 
     /*** reading the value ***/
 
-json_t* value = json_object_get(attribute->object_json, "value");
-// This function will fill the given buffer with data from the value array.
-printf("FTW attribute json value = %s\n", json_dumps(value, JSON_INDENT(4)));
-H5VL_json_read_value(value, dtype_id, space_id, buf);
-printf("FTW after H5VL_json_read_value\n");
+    json_t* value = json_object_get(attribute->object_json, "value");
+    H5VL_json_read_value(value, dtype_id, space_id, buf);
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_attr_read() */
 
 
@@ -850,25 +827,26 @@ H5VL_json_attr_close(void *_attr, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNU
 
 #ifdef PLUGIN_DEBUG
     printf("Received Attribute close call with following parameters:\n");
-//    printf("  - parent UUID: %s\n", attr->u.attribute.parent_obj->object_uuid);
-//    printf("  - attribute name: %s\n", attr->u.attribute.attr_name);
+    printf("  - parent UUID: %s\n", attr->u.attribute.parent_obj->object_uuid);
+    printf("  - attribute name: %s\n", attr->u.attribute.attr_name);
     printf("  - DXPL: %ld\n\n", dxpl_id);
 #endif
 
-printf("FTW attr = %lu\n", attr);
     HDassert(H5I_ATTR == attr->obj_type && "not an attribute");
-printf("FTW\n");
 
     if (attr->u.attribute.dtype_id != FAIL && H5Tclose(attr->u.attribute.dtype_id) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype")
     if (attr->u.attribute.space_id != FAIL && H5Sclose(attr->u.attribute.space_id) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close dataspace")
-printf("FTW\n");
 
     H5MM_xfree(attr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_json_attr_close() */
+
+
+/*** Datatypes API ***/
+
 
 
 //FTW datatypes not started, 22 Dec 2017
@@ -878,11 +856,6 @@ H5VL_json_datatype_commit(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params
 {
     H5VL_json_object_t *parent = (H5VL_json_object_t *) obj;
     H5VL_json_object_t *new_datatype = NULL;
-//FTW    char                commit_request_host_header[HOST_HEADER_MAX_LENGTH] = "Host: ";
-//FTW    char               *commit_request_body = NULL;
-//FTW    char               *datatype_body = NULL;
-//FTW    char               *link_body = NULL;
-//FTW    char                temp_url[URL_MAX_LENGTH];
     void               *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -895,7 +868,7 @@ H5VL_json_datatype_commit(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params
     printf("  - TCPL: %ld\n", tcpl_id);
     printf("  - TAPL: %ld\n", tapl_id);
     printf("  - DXPL: %ld\n", dxpl_id);
-//FTW    printf("  - Parent Object URI: %s\n", parent->URI);
+    printf("  - Parent Object UUID: %s\n", parent->object_uuid);
     printf("  - Parent Object type: %d\n\n", parent->obj_type);
 #endif
 
@@ -914,99 +887,34 @@ H5VL_json_datatype_commit(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params
     new_datatype->u.datatype.dtype_id = FAIL;
     new_datatype->u.datatype.tcpl_id = FAIL;
 
-#if 0
-    /* Form the request body to commit the Datatype */
-    if (NULL == (commit_request_body = (char *) H5MM_malloc(REQUEST_BODY_MAX_LENGTH)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "can't allocate space for datatype commit request body")
-
-    if (H5VL_json_convert_datatype_to_string(type_id, &datatype_body, NULL, FALSE) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, NULL, "can't convert datatype to string representation")
-
-    /* Only create a link for the Datatype if this isn't an H5Tcommit_anon call */
-    if (name) {
-        if (NULL == (link_body = (char *) H5MM_malloc(DATATYPE_CREATE_LINK_BODY_MAX_LENGTH)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate space for datatype link body")
-
-        snprintf(link_body, DATATYPE_CREATE_LINK_BODY_MAX_LENGTH,
-                 "\"link\": {"
-                     "\"id\": \"%s\", "
-                     "\"name\": \"%s\""
-                 "}",
-                 parent->URI,
-                 get_basename(name));
-    } /* end if */
-    snprintf(commit_request_body, REQUEST_BODY_MAX_LENGTH, "{ %s%s%s }",
-             datatype_body,
-             link_body ? ", " : "",
-             link_body ? link_body : "");
-
-    /* Setup the "Host: " header */
-    curl_headers = curl_slist_append(curl_headers, strncat(commit_request_host_header, parent->domain->u.file.filepath_name, HOST_HEADER_MAX_LENGTH));
-
-    /* Disable use of Expect: 100 Continue HTTP response */
-    curl_headers = curl_slist_append(curl_headers, "Expect:");
-
-    /* Redirect from base URL to "/datatypes" to commit the datatype */
-    snprintf(temp_url, URL_MAX_LENGTH, "%s/datatypes", base_URL);
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_headers);
-    curl_easy_setopt(curl, CURLOPT_POST, 1);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, commit_request_body);
-    curl_easy_setopt(curl, CURLOPT_URL, temp_url);
-
-    CURL_PERFORM(curl, H5E_DATATYPE, H5E_BADVALUE, NULL);
-
-    /* Store the newly-committed Datatype's URI */
-    if (H5VL_json_parse_response(response_buffer.buffer, NULL, new_datatype->URI, yajl_copy_object_URI_parse_callback) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, NULL, "can't parse committed datatype's URI")
-#endif
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "datatype_commit not yet implemented.")
 
 #ifdef PLUGIN_DEBUG
     printf("Datatype H5VL_json_object_t fields:\n");
-//FTW    printf("  - Datatype URI: %s\n", new_datatype->URI);
+    printf("  - Datatype UUID: %s\n", new_datatype->object_uuid);
     printf("  - Datatype Object type: %d\n", new_datatype->obj_type);
-//FTW    printf("  - Datatype Parent Domain path: %s\n", new_datatype->domain->u.file.filepath_name);
+    //printf("  - Datatype Parent Domain path: %s\n", new_datatype->domain->u.file.filepath_name);
 #endif
 
     ret_value = (void *) new_datatype;
 
 done:
-#ifdef PLUGIN_DEBUG
-//FTW    printf("Datatype commit request body: %s\n\n", commit_request_body);
-//FTW    printf("Datatype commit response buffer: %s\n\n", response_buffer.buffer);
-#endif
-
-#if 0
-    if (commit_request_body)
-        H5MM_xfree(commit_request_body);
-    if (datatype_body)
-        H5MM_xfree(datatype_body);
-    if (link_body)
-        H5MM_xfree(link_body);
-#endif
 
     /* Clean up allocated datatype object if there was an issue */
     if (new_datatype && !ret_value)
         if (H5VL_json_datatype_close(new_datatype, FAIL, NULL) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close datatype")
 
-    /* Restore cURL URL to the base URL */
-//    curl_easy_setopt(curl, CURLOPT_URL, base_URL);
-
-//    if (curl_headers) {
-//        curl_slist_free_all(curl_headers);
-//        curl_headers = NULL;
-//    } /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_datatype_commit() */
 
 
 static void *
-H5VL_json_datatype_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name,
+H5VL_json_datatype_open(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name,
                         hid_t tapl_id, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *parent = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *parent = (H5VL_json_object_t *) _parent;
     H5VL_json_object_t *datatype = NULL;
     htri_t              search_ret;
     void               *ret_value = NULL;
@@ -1033,21 +941,22 @@ H5VL_json_datatype_open(void *obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, 
     datatype->u.datatype.dtype_id = FAIL;
     datatype->u.datatype.tcpl_id = FAIL;
 
-    /* Traverse links until the named Datatype is found */
-//    search_ret = H5VL_json_find_link_by_path(parent, name, yajl_copy_object_URI_parse_callback, NULL, datatype->URI);
-//    if (!search_ret || search_ret < 0)
-//        HGOTO_ERROR(H5E_DATATYPE, H5E_PATH, NULL, "unable to locate datatype by path")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, NULL, "datatype open not implemented")
 
+    /* Traverse links until the named Datatype is found */
+    //    search_ret = H5VL_json_find_link_by_path(parent, name, yajl_copy_object_URI_parse_callback, NULL, datatype->URI);
+    //    if (!search_ret || search_ret < 0)
+    //        HGOTO_ERROR(H5E_DATATYPE, H5E_PATH, NULL, "unable to locate datatype by path")
 
     /* Set up the actual datatype by converting the string representation into an hid_t */
-//    if (H5VL_json_parse_datatype(datatype) < 0)
-//        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, NULL, "unable to parse dataset's datatype")
+    //    if (H5VL_json_parse_datatype(datatype) < 0)
+    //        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, NULL, "unable to parse dataset's datatype")
 
 #ifdef PLUGIN_DEBUG
     printf("Datatype H5VL_json_object_t fields:\n");
-//    printf("  - Datatype URI: %s\n", datatype->URI);
+    printf("  - Datatype UUID: %s\n", datatype->object_uuid);
     printf("  - Datatype object type: %d\n", datatype->obj_type);
-//    printf("  - Datatype Parent Domain path: %s\n\n", datatype->domain->u.file.filepath_name);
+    //    printf("  - Datatype Parent Domain path: %s\n\n", datatype->domain->u.file.filepath_name);
 #endif
 
     ret_value = (void *) datatype;
@@ -1063,10 +972,10 @@ done:
 
 
 static herr_t
-H5VL_json_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_t H5_ATTR_UNUSED dxpl_id,
+H5VL_json_datatype_get(void *_dtype, H5VL_datatype_get_t get_type, hid_t H5_ATTR_UNUSED dxpl_id,
                        void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_json_object_t *dtype = (H5VL_json_object_t *) obj;
+    H5VL_json_object_t *dtype = (H5VL_json_object_t *) _dtype;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1112,32 +1021,39 @@ H5VL_json_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_t H5_ATTR_UN
     } /* end switch */
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_datatype_get() */
 
 
 static herr_t
-H5VL_json_datatype_close(void *dt, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL_json_datatype_close(void *_dtype, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5VL_json_object_t *_dtype = (H5VL_json_object_t *) dt;
+    H5VL_json_object_t *dtype = (H5VL_json_object_t *) _dtype;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef PLUGIN_DEBUG
     printf("Received Datatype close call with following parameters:\n");
-//    printf("  - URI: %s\n", _dtype->URI);
+    printf("  - UUID: %s\n", dtype->object_uuid);
 #endif
 
-    HDassert(H5I_DATATYPE == _dtype->obj_type && "not a datatype");
+    HDassert(H5I_DATATYPE == dtype->obj_type && "not a datatype");
 
-    if (_dtype->u.datatype.dtype_id != FAIL && H5Tclose(_dtype->u.datatype.dtype_id) < 0)
+    if (dtype->u.datatype.dtype_id != FAIL && H5Tclose(dtype->u.datatype.dtype_id) < 0)
         HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype")
 
-    H5MM_xfree(_dtype);
+    H5MM_xfree(dtype);
 
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_datatype_close() */
+
+
+/*** Dataset API ***/
+
 
 
 /*-------------------------------------------------------------------------
@@ -1244,7 +1160,6 @@ H5VL_json_dataset_create(void *_parent, H5VL_loc_params_t H5_ATTR_UNUSED loc_par
     unsigned long n_points = dims[0];
     for (unsigned d=1; d<n_dims; d++) n_points *= dims[d];
 
-printf("Got n_points = %lu\n", n_points);
     int* buffer = (int*)H5MM_malloc(n_points * sizeof(int));
 
     H5MM_xfree(dims);
@@ -1253,53 +1168,26 @@ printf("Got n_points = %lu\n", n_points);
     H5D_fill_time_t fill_time;
     if (H5Pget_fill_time(dcpl_id, &fill_time) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to retrieve fill time property")
-printf("FTW got fill_time = %d\n", fill_time);
-
-#if 0
-    if (H5D_FILL_TIME_IFSET != fill_time)
-        snprintf(fill_time_body, DATASET_CREATE_FILL_TIME_BODY_MAX_LENGTH,
-                 ", \"fillTime\": \"H5D_FILL_TIME_%s\"",
-                 H5D_FILL_TIME_ALLOC == fill_time ? "ALLOC" : "NEVER");
-#endif
     
     if (fill_time != H5D_FILL_TIME_NEVER)
     {
-printf("Fill time not never, so filling.\n");
-
         H5D_fill_value_t fill_status;
 
         if (H5Pfill_value_defined(dcpl_id, &fill_status) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to retrieve the fill value defined status")
 
-printf("FTW got fill_status = %d\n", fill_status);
-
         long fill_value = NULL;
         herr_t err = H5Pget_fill_value( dcpl_id, H5T_NATIVE_INT, &fill_value );
         
-printf("FTW got fill_value = %d\n", fill_value);
-
         for (unsigned i=0; i<n_points; i++) buffer[i] = fill_value;
-
-//        if (H5D_FILL_VALUE_DEFAULT != fill_status) {
-//            strcat(fill_value_body, ", \"fillValue\": ");
-
-//            if (H5D_FILL_VALUE_UNDEFINED == fill_status) {
-//                strcat(fill_value_body, "null");
-//            } /* end if */
-//            else {
-                /* XXX: Support for fill values */
-//            } /* end else */
-//        } /* end if */
 
         /* write the fill value */
         H5VL_json_write_value(value_array, type_id, space_id, buffer);
     }
-/*** done with fill value ***/
 
+    /*** done with fill value ***/
 
     H5MM_xfree(buffer);
-
-
 
     /* Use the parent obj to find the group to find the linklist where the new dataset id needs to be added. */
     json_t* parent_uuid;
@@ -1447,6 +1335,7 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "unable to close dataset")
 
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_dataset_open() */
 
 
@@ -1507,41 +1396,7 @@ H5VL_json_dataset_read(void *_dataset, hid_t mem_type_id, hid_t mem_space_id,
     /*** reading the value ***/
 
     json_t* value = json_object_get(dataset->object_json, "value");
-    // This function will fill the given buffer with data from the value array.
-    printf("FTW dataset json value = %s\n", json_dumps(value, JSON_INDENT(4)));
     H5VL_json_read_value(value, mem_type_id, mem_space_id, buf);
-    printf("FTW after H5VL_json_read_value\n");
-
-//FTW ignore file_space for now
-#if 0
-    if (H5S_ALL == file_space_id) {
-        /* Set up a valid file dataspace to use for the dataset read */
-        file_space_id = H5Scopy(dataset->u.dataset.space_id);
-        H5Sselect_all(file_space_id);
-        must_close_filespace = true;
-    } /* end if */
-    else {
-        if (NULL == (selection_body = (char *) H5MM_malloc(DIMENSION_ARRAY_MAX_LENGTH)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate space for selection body")
-        selection_body[0] = '\0';
-
-        if (H5VL_json_convert_dataspace_selection_to_string(file_space_id, selection_body, TRUE) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "can't convert dataspace to string representation")
-    } /* end else */
-
-    /* Verify that the number of selected points matches */
-    if ((mem_select_npoints = H5Sget_select_npoints(mem_space_id)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "invalid dataspace")
-    if ((file_select_npoints = H5Sget_select_npoints(file_space_id)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "invalid dataspace")
-    HDassert((mem_select_npoints == file_select_npoints) && "memory selection num points != file selection num points");
-
-    if (0 == (dtype_size = H5Tget_size(mem_type_id)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
-
-    if ((is_variable_str = H5Tis_variable_str(mem_type_id)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid datatype")
-#endif
 
 done:
     if (must_close_memspace)
