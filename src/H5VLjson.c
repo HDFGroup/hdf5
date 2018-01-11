@@ -3233,7 +3233,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-// OUT: array containing data from buffer
 
 /* ----------------------------------------------------------------------------
  * Function:    H5VL_json_write_value
@@ -3408,6 +3407,7 @@ done:
  *              November, 2017
  * 
 */
+
 static herr_t 
 H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, hbool_t create_intermediate)
 {
@@ -3547,23 +3547,29 @@ done:
 } /* H5VL_json_create_new_group() */
 
 
-/* H5VL_json_find_object_by_name()
- * Helper function to traverse links and find the group of interest 
+/* ----------------------------------------------------------------------------
+ * Function:    H5VL_json_find_object_by_name()
  *
- * IN:      - domain
- *          - name / name of object to be located
- * IN-OUT:  - current_uuid / uuid of group to begin search / may be modified
- *          - collection / pointer to json_t* which upon return contains a jansson string,
- *            the value of which is "datasets", "datatypes", or "groups".
- *            If a NULL value is supplied, no action
- *          - containing_group_uuid / if a valid pointer is supplied, the uuid for the 
- *            group containing the object of interest will be returned.
- * returns:   pointer to the jansson object 
+ * Purpose:     Helper function to traverse links and find the group of interest
  *
-*/
+ * Return:      pointer to the jansson object 
+ **
+ * IN:          - domain
+ *              - name / name of object to be located
+ * IN-OUT:      - current_uuid / uuid of group to begin search / may be modified
+ *              - collection / pointer to json_t* which upon return contains a jansson string,
+ *                the value of which is "datasets", "datatypes", or "groups".
+ *                If a NULL value is supplied, no action
+ *              - containing_group_uuid / if a valid pointer is supplied, the uuid for the 
+ *                group containing the object of interest will be returned.
+ *
+ * Programmer:  Frank Willmore 
+ *              November, 2017
+ * 
+ */
 
-static 
-json_t* H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection, h5json_uuid_t *containing_group_uuid)
+static json_t* 
+H5VL_json_find_object_by_name(H5VL_json_object_t* domain, const char* name, h5json_uuid_t *current_uuid, json_t** collection, h5json_uuid_t *containing_group_uuid)
 {
     json_t*            ret_value = NULL;
     json_t*            current_group = NULL;
@@ -3671,37 +3677,44 @@ done:
 
 }
 
+
+/* ----------------------------------------------------------------------------
+ * Function:    H5VL_json_delete_link_from_containing_group()
+ *
+ * Purpose:     Helper function to locate an object, decrement it's reference
+ *              count, and remove the link from it's containing group.
+ *
+ * Returns:     SUCCESS or FAIL 
+ *
+ * IN:          domain - top-level object container
+ *              containing_group_uuid - UUID of group containing link
+ *              link - link to be deleted
+ *              
+ * Programmer:  Frank Willmore 
+ *              January, 2017
+ * 
+ */
+
 static herr_t
 H5VL_json_delete_link_from_containing_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link)
 {
     herr_t ret_value = FAIL;
-char* object_collection_name;
-h5json_uuid_t object_uuid;
+    char* object_collection_name;
+    h5json_uuid_t object_uuid;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-printf("Deleting link %s from group %s\n", json_dumps(link, JSON_INDENT(4)), containing_group_uuid);
+    /* manage reference count */
+    object_collection_name = json_string_value(json_object_get(link, "collection"));
+    strncpy(object_uuid, json_string_value(json_object_get(link, "id")), sizeof(h5json_uuid_t)); 
+    json_t* object_collection = json_object_get(domain->object_json, object_collection_name);
+    json_t* object_of_interest = json_object_get(object_collection, object_uuid);
 
-
-/* manage reference count */
-object_collection_name = json_string_value(json_object_get(link, "collection"));
-printf("got collection = %s\n", object_collection_name);
-
-strncpy(object_uuid, json_string_value(json_object_get(link, "id")), sizeof(h5json_uuid_t)); 
-printf("got object_uuid = %s\n", object_uuid);
-
-json_t* object_collection = json_object_get(domain->object_json, object_collection_name);
-printf("got object_collection = %s\n", json_dumps(object_collection, JSON_INDENT(4)));
-json_t* object_of_interest = json_object_get(object_collection, object_uuid);
-printf("got object_of_interest = %s\n", json_dumps(object_of_interest, JSON_INDENT(4)));
-
-json_decref(object_of_interest);
+    json_decref(object_of_interest);
 
     json_t* groups_in_file = json_object_get(domain->object_json, "groups");
     json_t* group_of_interest = json_object_get(groups_in_file, containing_group_uuid);
     json_t* links_in_group = json_object_get(group_of_interest, "links");
-
-printf("links_in_group originally reads *%s*\n", json_dumps(links_in_group, JSON_INDENT(4)));
 
     /* array is a JSON array */
     size_t index;
@@ -3712,14 +3725,12 @@ printf("links_in_group originally reads *%s*\n", json_dumps(links_in_group, JSON
         /* block of code that uses index and value */
         if (json_equal(value, link)) 
         {
-printf("breaking out of loop at index = %ld, value = %s\n", index, json_dumps(value, JSON_INDENT(4)));
             break;    
         }
     }
 
+    /* For robustness, remove should be done outside of the loop */
     json_array_remove(links_in_group, index);
-
-printf("links_in_group now reads *%s*\n", json_dumps(links_in_group, JSON_INDENT(4)));
 
     ret_value = SUCCEED;
 
@@ -3729,41 +3740,45 @@ done:
 
 }
 
+
+/* ----------------------------------------------------------------------------
+ * Function:    H5VL_json_insert_link_into_group()
+ *
+ * Purpose:     Helper function to locate an object, increment it's reference
+ *              count, and insert the link into a containing group.
+ *
+ * Returns:     SUCCESS or FAIL 
+ *
+ * IN:          domain - top-level object container
+ *              containing_group_uuid - UUID of group to contain link
+ *              link - link to be inserted
+ *              
+ * Programmer:  Frank Willmore 
+ *              January, 2017
+ * 
+ */
+
 static herr_t
 H5VL_json_insert_link_into_group(H5VL_json_object_t* domain, h5json_uuid_t containing_group_uuid, json_t* link)
 {
     herr_t ret_value = FAIL;
-char* object_collection_name;
-h5json_uuid_t object_uuid;
+    char* object_collection_name;
+    h5json_uuid_t object_uuid;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-printf("Inserting link %s into group %s\n", json_dumps(link, JSON_INDENT(4)), containing_group_uuid);
-
-/* manage reference count */
-object_collection_name = json_string_value(json_object_get(link, "collection"));
-printf("got collection = %s\n", object_collection_name);
-
-strncpy(object_uuid, json_string_value(json_object_get(link, "id")), sizeof(h5json_uuid_t)); 
-printf("got object_uuid = %s\n", object_uuid);
-
-json_t* object_collection = json_object_get(domain->object_json, object_collection_name);
-printf("got object_collection = %s\n", json_dumps(object_collection, JSON_INDENT(4)));
-json_t* object_of_interest = json_object_get(object_collection, object_uuid);
-printf("got object_of_interest = %s\n", json_dumps(object_of_interest, JSON_INDENT(4)));
-
-json_incref(object_of_interest);
-
+    /* manage reference count */
+    object_collection_name = json_string_value(json_object_get(link, "collection"));
+    strncpy(object_uuid, json_string_value(json_object_get(link, "id")), sizeof(h5json_uuid_t)); 
+    json_t* object_collection = json_object_get(domain->object_json, object_collection_name);
+    json_t* object_of_interest = json_object_get(object_collection, object_uuid);
+    json_incref(object_of_interest);
 
     json_t* groups_in_file = json_object_get(domain->object_json, "groups");
     json_t* group_of_interest = json_object_get(groups_in_file, containing_group_uuid);
     json_t* links_in_group = json_object_get(group_of_interest, "links");
 
-printf("links_in_group originally reads *%s*\n", json_dumps(links_in_group, JSON_INDENT(4)));
-
     json_array_append(links_in_group, link);
-
-printf("links_in_group now reads *%s*\n", json_dumps(links_in_group, JSON_INDENT(4)));
 
     ret_value = SUCCEED;
 
