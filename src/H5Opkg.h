@@ -63,8 +63,8 @@
     )
 #define H5O_ALIGN_OH(O, X)						      \
      H5O_ALIGN_VERS((O)->version, X)
-#define H5O_ALIGN_F(F, X)						      \
-     H5O_ALIGN_VERS(((H5F_LOW_BOUND(F) >= H5F_LIBVER_V18) ? H5O_VERSION_LATEST : H5O_VERSION_1), X)
+#define H5O_ALIGN_F(F, X)                             \
+     H5O_ALIGN_VERS(MAX(H5O_VERSION_1, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(F)]), X)
 
 /* Size of checksum (on disk) */
 #define H5O_SIZEOF_CHKSUM               4
@@ -136,7 +136,7 @@
 #define H5O_SIZEOF_MSGHDR_OH(O)						      \
     H5O_SIZEOF_MSGHDR_VERS((O)->version, (O)->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
 #define H5O_SIZEOF_MSGHDR_F(F, C)						      \
-    H5O_SIZEOF_MSGHDR_VERS(((H5F_LOW_BOUND(F) >= H5F_LIBVER_V18) || H5F_STORE_MSG_CRT_IDX(F)) ? H5O_VERSION_LATEST : H5O_VERSION_1, (C))
+    H5O_SIZEOF_MSGHDR_VERS(MAX((H5F_STORE_MSG_CRT_IDX(F) ? H5O_VERSION_LATEST : H5O_VERSION_1), (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(F)]), (C))
 
 /*
  * Size of chunk "header" for each chunk
@@ -641,6 +641,8 @@ H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg
 H5_DLL herr_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     hsize_t *nattrs);
 
+/* Arrays of versions for:
+   Object header, Layout/Attribute/Datatype/Fill value/Filter pipeline/Dataspace messages */
 H5_DLLVAR const unsigned H5O_obj_ver_bounds[H5F_LIBVER_NBOUNDS];
 H5_DLLVAR const unsigned H5O_layout_ver_bounds[H5F_LIBVER_NBOUNDS];
 H5_DLLVAR const unsigned H5O_attr_ver_bounds[H5F_LIBVER_NBOUNDS];

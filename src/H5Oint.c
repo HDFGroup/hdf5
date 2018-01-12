@@ -216,18 +216,17 @@ H5O__init_package(void)
  *              Chooses the oldest version possible, unless the file's
  *              low bound indicates otherwise.
  *
- * Return:	Success:    Non-negative
- *		    Failure:	Negative
+ * Return:  Success:    Non-negative
+ *          Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
- *              Jul 17 2007
+ * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx)
 {
+    uint8_t version;            /* Message version */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -238,16 +237,19 @@ H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx
 
     /* Set the correct version to encode object header with */
     if(store_msg_crt_idx || (oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
-        oh->version = H5O_VERSION_2;
+        version = H5O_VERSION_LATEST;
     else
-        oh->version = H5O_VERSION_1;
+        version = H5O_VERSION_1;
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    oh->version = MAX(oh->version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = MAX(version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    /* File bound check */
-    if(oh->version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(f)])
+    /* Version bounds check */
+    if(version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(f)])
         HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "object header version out of bounds")
+
+    /* Set the message version */
+    oh->version = version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

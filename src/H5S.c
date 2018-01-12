@@ -2180,15 +2180,15 @@ H5S_extent_nelem(const H5S_extent_t *ext)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 24, 2007
+ * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5S_set_version(H5F_t *f, H5S_t *ds)
 {
-    herr_t ret_value = SUCCEED;   /* Return value */
+    unsigned version;           /* Message version */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2197,11 +2197,14 @@ H5S_set_version(H5F_t *f, H5S_t *ds)
     HDassert(ds);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    ds->extent.version = MAX(ds->extent.version, H5O_sdspace_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = MAX(ds->extent.version, H5O_sdspace_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    /* File bound check */
-    if(ds->extent.version > H5O_sdspace_ver_bounds[H5F_HIGH_BOUND(f)])
+    /* Version bounds check */
+    if(version > H5O_sdspace_ver_bounds[H5F_HIGH_BOUND(f)])
         HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "Dataspace version out of bounds")
+
+    /* Set the message version */
+    ds->extent.version = version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

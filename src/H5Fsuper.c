@@ -457,23 +457,46 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
     if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, meta_dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw_flags)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
 
-     /* Upgrade low bound to at least V18 when encountering version 2 superblock */
+    /* 
+     * When opening a file with SWMR-write access, the library will first
+     * check to ensure that superblock version 3 is used.  Otherwise fail 
+     * file open.
+     *
+     * Then the library will upgrade the file's low_bound depending on 
+     * superblock version as follows:
+     *      --version 0 or 1: no change to low_bound
+     *      --version 2: upgrade low_bound to at least V18
+     *      --version 3: upgrade low_bound to at least V110
+     *
+     * Upgrading low_bound will give the best format versions available for
+     * that superblock version.  Due to the possible upgrade, the fapl returned
+     * from H5Fget_access_plist() might indicate a low_bound higher than what
+     * the user originally set.
+     *
+     * After upgrading low_bound, the library will check to ensure that the
+     * superblock version does not exceed the version allowed by high_bound.
+     * Otherise fail file open.
+     *
+     * For details, please see RFC:Setting Bounds for Object Creation in HDF5 1.10.0.
+     */
+
+    /* Check to ensure that superblock version 3 is used for SWMR-write access */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
+        if(sblock->super_vers  < HDF5_SUPERBLOCK_VERSION_3)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "superblock version for SWMR is less than 3")
+    }
+
+    /* Upgrade low_bound to at least V18 when encountering version 2 superblock */
     if(sblock->super_vers == HDF5_SUPERBLOCK_VERSION_2)
         f->shared->low_bound = MAX(H5F_LIBVER_V18, f->shared->low_bound);
 
-    /* Upgrade low bound to at least V110 when encountering version 3 superblock or SWMR_WRITE */
-    if((sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3) || (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
+    /* Upgrade low_bound to at least V110 when encountering version 3 superblock */
+    if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
         f->shared->low_bound = MAX(H5F_LIBVER_V110, f->shared->low_bound);
 
-    /* File bound check */
+    /* Version bounds check */
     if(sblock->super_vers > HDF5_superblock_ver_bounds[f->shared->high_bound])
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "superblock version out of bounds (high bound)")
-
-    /* SWMR requires at least superblock version 3 */
-    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
-        if(sblock->super_vers  < HDF5_superblock_ver_bounds[f->shared->low_bound])
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "superblock version out of bounds (low bound)")
-    }
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "superblock version exceeds high bound")
 
     /* Pin the superblock in the cache */
     if(H5AC_pin_protected_entry(sblock) < 0)
@@ -833,9 +856,9 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
             hbool_t     rw = ((rw_flags & H5AC__READ_ONLY_FLAG) == 0);
             H5O_mdci_t  mdci_msg;
 
-            /* Message exists but file format version high bound does not allow it */
+            /* Message exists but version high bound does not allow it */
             if(f->shared->high_bound < H5F_LIBVER_V110)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file format version out of bound for metadata cache image")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "format version out of bound for metadata cache image")
 
             /* if the metadata cache image superblock extension message exists,
              * read its contents and pass the data on to the metadata cache.
@@ -1037,6 +1060,36 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
 	    f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF))
         non_default_fs_settings = TRUE;
 
+    /* 
+     * When creating a file with write access, the library will:
+     *      -- set superblock version to 0, 1 or 2 based on feature enabled
+     *      -- no change to low_bound
+     * When creating a file with SWMR-write access, the library will:
+     * (See explanation (#) below.)
+     *      -- set superblock version to 3
+     *      -- upgrade low_bound to at least V110
+     *
+     * Then the library will finalize superblock version to that allowed by 
+     * low_bound if that is higher.
+     * Lastly, the library will check to ensure the superblock version does not 
+     * exceed the version allowed by high_bound. Otherwise fail file open.
+     *
+     * For details, please see RFC:Setting Bounds for Object Creation in HDF5 1.10.0.
+     *
+     * (#)
+     * Version 3 superblock is introduced in 1.10 for SWMR due to the problem of
+     * the status_flags field in the superblock. The problem is discussed in
+     * jira issue SWMR-79 and also in the RFC: File Format Changes in HDF5 1.10.0.
+     * The file's low_bound is upgraded for SWMR so that the library will
+     * use the best format versions available in 1.10.  
+     * Due to the possible upgrade, the fapl returned from H5Fget_access_plist() 
+     * might indicate a low_bound higher than what the user originally set.
+     */
+
+    /* 
+     * Creating a file with SWMR-write access will
+     * upgrade superblock version and low_bound
+     */
     if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
         super_vers = HDF5_SUPERBLOCK_VERSION_3;
         f->shared->low_bound = MAX(H5F_LIBVER_V110, f->shared->low_bound);
@@ -1060,10 +1113,10 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
     else if(sblock->btree_k[H5B_CHUNK_ID] != HDF5_BTREE_CHUNK_IK_DEF)
         super_vers = HDF5_SUPERBLOCK_VERSION_1;
 
-    /* Upgrade to the version indicated by the file's low bound if higher */
+    /* Finalize superblock version to that allowed by the file's low bound if higher */
     super_vers = MAX(super_vers, HDF5_superblock_ver_bounds[f->shared->low_bound]);
 
-    /* File bound check */
+    /* Version bounds check */
     if(super_vers > HDF5_superblock_ver_bounds[f->shared->high_bound])
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "superblock version out of bounds")
 
@@ -1091,8 +1144,8 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
 
     /* Sanity check the userblock size vs. the file's allocation alignment */
     if(userblock_size > 0) {
-	/* Set up the alignment to use for page or aggr fs */
-	hsize_t alignment = H5F_PAGED_AGGR(f) ? f->shared->fs_page_size : f->shared->alignment;
+        /* Set up the alignment to use for page or aggr fs */
+        hsize_t alignment = H5F_PAGED_AGGR(f) ? f->shared->fs_page_size : f->shared->alignment;
 
         if(userblock_size < alignment)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "userblock size must be > file object alignment")

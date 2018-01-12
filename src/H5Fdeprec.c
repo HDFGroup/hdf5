@@ -143,5 +143,67 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info1() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fset_latest_format
+ *
+ * Purpose:     Enable switching between latest or non-latest format while
+ *              a file is open.
+ *              This is deprecated starting release 1.10.2 and is modified
+ *              to call the private H5F_set_libver_bounds() to set the
+ *              bounds.
+ *
+ *              Before release 1.10.2, the library supports only two
+ *              combinations of low/high bounds: 
+ *                  (earliest, latest)
+ *                  (latest, latest)
+ *              Thus, this public routine does the job in switching 
+ *              between the two combinations listed above.
+ *
+ *              Starting release 1.10.2, we add v18 to the enumerated
+ *              define H5F_libver_t and the library supports five combinations
+ *              as below:
+ *                  (earliest, v18)
+ *                  (earliest, v10)
+ *                  (v18, v18)
+ *                  (v18, v10)
+ *                  (v10, v10)
+ *              So we introduce the new public routine H5Fset_libver_bounds()
+ *              in place of H5Fset_latest_format().
+ *              See also RFC: Setting Bounds for Object Creation in HDF5 1.10.0.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; December 2017
+ *             
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
+{
+    H5F_t *f;                               /* File */
+    H5F_libver_t low  = H5F_LIBVER_LATEST;  /* Low bound */
+    H5F_libver_t high = H5F_LIBVER_LATEST;  /* High bound */
+    herr_t ret_value = SUCCEED;             /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", file_id, latest_format);
+
+    /* Check args */
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* 'low' and 'high' are both initialized to LATEST.
+       If latest format is not expected, set 'low' to EARLIEST */
+    if(!latest_format)
+        low = H5F_LIBVER_EARLIEST;
+
+    /* Call private set_libver_bounds function to set the bounds */
+    if(H5F_set_libver_bounds(f, low, high) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set low/high bounds")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fset_latest_format() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

@@ -46,9 +46,10 @@
 /* Package Variables */
 /*********************/
 
+/* Format version bounds for layout */
 const unsigned H5O_layout_ver_bounds[] = {
     H5O_LAYOUT_VERSION_1,       /* H5F_LIBVER_EARLIEST */
-    H5O_LAYOUT_VERSION_3,       /* H5F_LIBVER_V18 */
+    H5O_LAYOUT_VERSION_3,       /* H5F_LIBVER_V18 */  /* H5O_LAYOUT_VERSION_DEFAULT */
     H5O_LAYOUT_VERSION_LATEST   /* H5F_LIBVER_LATEST */
 };
 
@@ -289,16 +290,15 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 15, 2009
+ * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
 {
-    unsigned vers;
-    herr_t ret_value = SUCCEED;         /* Return value */
+    unsigned version;           /* Message version */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -307,11 +307,14 @@ H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
     HDassert(f);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    layout->version = MAX(layout->version, H5O_layout_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = MAX(layout->version, H5O_layout_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    /* File bound check */
-    if(layout->version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)])
+    /* Version bounds check */
+    if(version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)])
         HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "layout version out of bounds")
+
+    /* Set the message version */
+    layout->version = version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

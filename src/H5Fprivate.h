@@ -769,6 +769,7 @@ H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL unsigned H5F_use_latest_flags(const H5F_t *f, unsigned fl);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL herr_t H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag);
+H5_DLL herr_t H5F_set_libver_bounds(H5F_t * f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL struct H5UC_t *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5UC_t *rc);
 H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);

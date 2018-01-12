@@ -1478,6 +1478,8 @@ H5Fstart_swmr_write(hid_t file_id)
     if(file->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file superblock version should be at least 3")
 
+    HDassert((file->shared->low_bound == H5F_LIBVER_V110) && (file->shared->high_bound == H5F_LIBVER_V110));
+
     /* Should not be marked for SWMR writing mode already */
     if(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file already in SWMR writing mode")
@@ -1739,9 +1741,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:   H5Fset_libver_bounds (Internal library use)
+ * Function:    H5Fset_libver_bounds
  *
- * Purpose:    Set .... the "latest format" flag while a file is open.
+ * Purpose:     Set to a different low and high bounds while a file is open.
+ *              This public routine is introduced in place of 
+ *              H5Fset_latest_format() starting release 1.10.2.
+ *              See explanation for H5Fset_latest_format() in H5Fdeprec.c.
  *
  * Return:     Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
@@ -1759,12 +1764,9 @@ H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
     if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* Call the flush routine, for this file */
-    if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
-
-    f->shared->low_bound = low;
-    f->shared->high_bound = high;
+    /* Call private set_libver_bounds function */
+    if(H5F_set_libver_bounds(f, low, high) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
 done:
     FUNC_LEAVE_API(ret_value)

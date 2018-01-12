@@ -671,9 +671,9 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
 
-        /* File format version high bound does not allow the generation of metadata cache image */
+        /* Format version high bound does not allow the generation of metadata cache image */
         if(f->shared->mdc_initCacheImageCfg.generate_image && f->shared->high_bound < H5F_LIBVER_V110)
-            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "file format version out of bound for cache image")
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "format version out of bound for cache image")
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -2312,6 +2312,38 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_store_msg_crt_idx() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_libver_bounds()
+ *
+ * Purpose:     Set the file's low and high bound to the input parameters
+ *              'low' and 'high' respectively.
+ *              This is done only if the existing setting is different
+ *              from the inputs.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  Vailin Choi; December 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_libver_bounds(H5F_t * f, H5F_libver_t low, H5F_libver_t high)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Set the bounds only if the existing setting is different from the inputs */
+    if(f->shared->low_bound != low || f->shared->high_bound != high) {
+        f->shared->low_bound = low;
+        f->shared->high_bound = high;
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_libver_bounds() */
 
 
 /*-------------------------------------------------------------------------

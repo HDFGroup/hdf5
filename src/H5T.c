@@ -5418,8 +5418,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 19, 2007
+ * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -5442,7 +5441,7 @@ H5T_set_version(H5F_t *f, H5T_t *dt)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade datatype encoding")
     }
     
-    /* File bound check */
+    /* Version bounds check */
     if(dt->shared->version > H5O_dtype_ver_bounds[H5F_HIGH_BOUND(f)])
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "Datatype version out of bounds")
 

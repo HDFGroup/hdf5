@@ -416,6 +416,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Initialize header information */
     oh_dst->version = oh_src->version;
 
+    /* Version bounds check for destination object header */
     if(oh_dst->version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(oloc_dst->file)])
         HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "destination object header version out of bounds")
 
@@ -494,7 +495,12 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
             /* Decode the message if necessary. */
             H5O_LOAD_NATIVE(oloc_src->file, dxpl_id, 0, oh_src, mesg_src, FAIL)
 
+            /* Save destination file pointer in cpy_info so that it can be used
+               in the pre_copy_file callback to obtain the destination file's
+               high bound.  The high bound is used to index into the corresponding
+               message's array of versions for doing version bounds check. */
             cpy_info->file_dst = oloc_dst->file;
+
             /* Perform "pre copy" operation on message */
             if((copy_type->pre_copy_file)(oloc_src->file, mesg_src->native,
                     &(deleted[mesgno]), cpy_info, cpy_udata) < 0)
