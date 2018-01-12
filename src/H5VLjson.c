@@ -2678,7 +2678,7 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
     FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef PLUGIN_DEBUG
-    printf("FTW Received Link-specific call with following parameters:\n");
+    printf("Received Link-specific call with following parameters:\n");
     printf("  - Specific type: %d\n", specific_type);
     printf("  - Link UUID: %s\n", loc_obj->object_uuid);
     printf("  - loc_obj: %ld\n", loc_obj);
@@ -2695,7 +2695,7 @@ H5VL_json_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_speci
         {
 
 #ifdef PLUGIN_DEBUG
-    printf("FTW Link-specific call is delete, with following parameters:\n");
+    printf("Link-specific call is delete, with following parameters:\n");
     printf("  - Link container UUID: %s\n", loc_obj->object_uuid);
     printf("  - Link name:           %s\n", loc_params.loc_data.loc_by_name.name);
 #endif
@@ -2892,7 +2892,9 @@ H5VL_json_object_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req, v
     FUNC_ENTER_NOAPI_NOINIT
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5VL_json_object_optional() */
 
 
@@ -2964,7 +2966,7 @@ done:
     fclose(urandom);
 
     return SUCCEED;
-} 
+} /* h5json_uuid_generate */
 
 
 /*-------------------------------------------------------------------------
@@ -2986,7 +2988,7 @@ static json_t* h5json_new_uuid_json_object()
     json_t* ret_val = json_string(uuid);
     HDassert((ret_val != NULL) && "could not generate new json_string uuid.");
     return ret_val;
-}
+} /* h5json_new_uuid_json_object */
 
 
 /*-------------------------------------------------------------------------
@@ -3040,7 +3042,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end dataspace function */
+} /* H5VL_json_jansson_to_dataspace */
 
 
 /*-------------------------------------------------------------------------
@@ -3090,7 +3092,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end datatype function */
+} /* H5VL_json_jansson_to_datatype */
 
 
 /*-------------------------------------------------------------------------
@@ -3164,7 +3166,7 @@ json_t* H5VL_json_datatype_to_jansson(hid_t type_id)
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* H5VL_json_datatype_to_jansson */
 
 
 /*-------------------------------------------------------------------------
@@ -3225,7 +3227,7 @@ json_t* H5VL_json_dataspace_to_jansson(hid_t space_id)
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* H5VL_json_dataspace_to_jansson */
 
 
 /* ----------------------------------------------------------------------------
@@ -3462,9 +3464,9 @@ H5VL_json_create_new_group(H5VL_json_object_t* domain, const char* name, h5json_
         /* 1 - last token is found --> group already exists, so fail */
         if((token_index == n_tokens - 1) && found) 
         {
-        // FTW outstanding issue: Group create fails silently here, error message not returned. 
-        // FTW This mesage prints but no error handling done. 
-printf("Found link %s, should fail here.\n", current_token);
+            // FTW outstanding issue: Group create fails silently here, error message not returned. 
+            // FTW This printf prints but no error handling done. 
+            // printf("Found link %s, should fail here.\n", current_token);
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "Cannot create link which already exists.")
         }
 
@@ -3492,7 +3494,7 @@ printf("Found link %s, should fail here.\n", current_token);
             json_t* new_link = json_object();
             HDassert((json_array_append(link_list, new_link) == 0));
 
-            json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD")); /* FTW: need to get link class from pl? */
+            json_object_set_new(new_link, "class", json_string("H5L_TYPE_HARD")); 
             json_object_set_new(new_link, "title", json_string(tokens[token_index]));
             json_object_set_new(new_link, "collection", json_string("groups"));
             json_object_set_new(new_link, "id", json_string(new_group_uuid));
@@ -3669,7 +3671,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-}
+} /* H5VL_json_find_object_by_name */
 
 
 /* ----------------------------------------------------------------------------
@@ -3732,7 +3734,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-}
+} /* H5VL_json_delete_link_from_containing_group */
 
 
 /* ----------------------------------------------------------------------------
@@ -3780,5 +3782,5 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-}
+} /* H5VL_json_insert_link_into_group */
 
