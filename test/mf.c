@@ -6920,6 +6920,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     H5FD_mem_t  type;               /* File allocation type */
     H5FS_stat_t fs_stat;                    /* Information for free-space manager */
     haddr_t addr1, addr2, addr3, addr4;     /* File address for H5FD_MEM_SUPER */
+    haddr_t addrx;
     H5FD_mem_t  fs_type; 
     hbool_t contig_addr_vfd;
     hbool_t ran_H5MF_tidy_self_referential_fsm_hack = FALSE;
@@ -7054,6 +7055,12 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(H5MF_xfree(f, type, H5AC_ind_read_dxpl_id, addr4, (hsize_t)TBLOCK_SIZE4) < 0)
             FAIL_STACK_ERROR
 
+        if(!new_format) {
+            /* Need to take up this space so that the free-space manager will go away */
+            if(HADDR_UNDEF == (addrx = H5MF_alloc(f, type, H5AC_ind_read_dxpl_id, (hsize_t)103)))
+                FAIL_STACK_ERROR
+        }
+
         /* The H5FD_MEM_SUPER free-space manager will go away at H5MF_close() */
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
@@ -7065,7 +7072,6 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         /* Get a pointer to the internal file object */
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
-
         /* Verify that the H5FD_MEM_SUPER free-space manager is not there */
         if(H5F_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR
@@ -8936,9 +8942,7 @@ main(void)
 
     /* Temporary: modify to skip testing for multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-#ifdef OUT /* Will take a close look at this later */
     nerrors += test_mf_fs_gone(env_h5_drvr, fapl, FALSE);
-#endif
     nerrors += test_mf_fs_gone(env_h5_drvr, fapl, TRUE);
 
     /* Temporary: modify to skip testing multi/split driver:

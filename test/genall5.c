@@ -1264,7 +1264,7 @@ os_grp_0(hid_t fid, const char *group_name)
         HDassert(fapl > 0);
     }
     
-    if ( pass ) { /* get libver_bounds from fapl */
+    if ( pass ) { /* get low and high bounds from fapl */
 
         ret = H5Pget_libver_bounds(fapl, &low, &high);
         if ( ret < 0 ) {
@@ -1312,7 +1312,7 @@ os_grp_0(hid_t fid, const char *group_name)
         HDassert(ret >= 0);
     }
 
-    if ( pass ) { /* restore libver_bounds */
+    if ( pass ) { /* restore low and high bounds */
 
         if(low >= H5F_LIBVER_V18) {
             ret = H5Fset_libver_bounds(fid, low, high);
@@ -1504,7 +1504,7 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         HDassert(fapl > 0);
     }
 
-    if ( pass ) {  /* get libver_bounds from fapl */
+    if ( pass ) {  /* get low and high bounds from fapl */
     
         ret = H5Pget_libver_bounds(fapl, &low, &high);
         if ( ret < 0 ) {
@@ -1590,7 +1590,7 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         assert(ret >= 0);
     }
 
-    if ( pass ) { /* restore libver_bounds */
+    if ( pass ) { /* restore low and high bounds */
 
         if(low >= H5F_LIBVER_V18) {
             ret = H5Fset_libver_bounds(fid, low, high);

@@ -576,7 +576,7 @@ H5O_pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
 {
     const H5O_pline_t *pline_src = (const H5O_pline_t *)mesg_src;    /* Source pline */
     H5O_copy_file_ud_common_t *udata = (H5O_copy_file_ud_common_t *)_udata; /* Object copying user data */
-    herr_t             ret_value = SUCCEED;                     /* Return value */
+    herr_t ret_value = SUCCEED;                                     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -585,6 +585,8 @@ H5O_pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     HDassert(cpy_info);
     HDassert(cpy_info->file_dst);
 
+    /* Check to ensure that the version of the message to be copied does not exceed
+       the message version allowed by the destination file's high bound */
     if(pline_src->version > H5O_pline_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
         HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "pline message version out of bounds")
 
@@ -681,15 +683,15 @@ H5O_pline_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const voi
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 24, 2007
+ * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
 {
-    herr_t ret_value = SUCCEED;   /* Return value */
+    unsigned version;           /* Message version */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -698,11 +700,14 @@ H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
     HDassert(pline);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    pline->version = MAX(pline->version, H5O_pline_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = MAX(pline->version, H5O_pline_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    /* File bound check */
-    if(pline->version > H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)])
+    /* Version bounds check */
+    if(version > H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)])
         HGOTO_ERROR(H5E_PLINE, H5E_BADRANGE, FAIL, "Filter pipeline version out of bounds")
+
+    /* Set the message version */
+    pline->version = version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

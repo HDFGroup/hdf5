@@ -455,6 +455,8 @@ H5O_sdspace_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     HDassert(cpy_info);
     HDassert(cpy_info->file_dst);
 
+    /* Check to ensure that the version of the message to be copied does not exceed
+       the message version allowed by the destination file's high bound */
     if(src_space_extent->version > H5O_sdspace_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
         HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "dataspace message version out of bounds")
 

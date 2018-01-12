@@ -1863,6 +1863,7 @@ herr_t
 H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
+    uint8_t version;                    /* Message version */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1884,18 +1885,22 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
 
     /* Check which version to encode attribute with */
     if(attr->shared->encoding != H5T_CSET_ASCII)
-        attr->shared->version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+        version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
     else if(type_shared || space_shared)
-        attr->shared->version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
+        version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
     else
-        attr->shared->version = H5O_ATTR_VERSION_1;   /* Write out basic version */
+        version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    attr->shared->version = MAX(attr->shared->version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = MAX(version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    /* File bound check */
-    if(attr->shared->version > H5O_attr_ver_bounds[H5F_HIGH_BOUND(f)])
+    /* Version bounds check */
+    if(version > H5O_attr_ver_bounds[H5F_HIGH_BOUND(f)])
         HGOTO_ERROR(H5E_ATTR, H5E_BADRANGE, FAIL, "attribute version out of bounds")
+
+    /* Set the message version */
+    attr->shared->version = version;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_set_version() */

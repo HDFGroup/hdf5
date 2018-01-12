@@ -717,9 +717,13 @@ H5F_sieve_buf_size(const H5F_t *f)
  *           references flag" now that the generic properties are being used
  *           to store the values.
  *
- * Return:   Success:    The "garbage collect references flag"
- *                              is returned.
- *           Failure:    (should not happen)
+ * Return:  Success:    The "garbage collect references flag" is returned.
+ *          Failure:    (should not happen)
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@ncsa.uiuc.edu
+ *              Jul  8 2005
+ *
  *-------------------------------------------------------------------------
  */
 unsigned

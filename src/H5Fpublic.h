@@ -173,7 +173,7 @@ typedef struct H5F_sect_info_t {
     hsize_t             size;   /* Size of free space section */
 } H5F_sect_info_t;
 
-/* Library's file format versions */
+/* Library's format versions */
 typedef enum H5F_libver_t {
     H5F_LIBVER_ERROR = -1,
     H5F_LIBVER_EARLIEST = 0,    /* Use the earliest possible format for storing objects */
@@ -300,6 +300,7 @@ typedef struct H5F_info1_t {
 
 /* Function prototypes */
 H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo);
+H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

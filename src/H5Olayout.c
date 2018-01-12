@@ -1055,8 +1055,7 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, March  9, 2007
+ * Programmer:  Vailin Choi; Dec 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1073,6 +1072,8 @@ H5O__layout_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     HDassert(cpy_info);
     HDassert(cpy_info->file_dst);
 
+    /* Check to ensure that the version of the message to be copied does not exceed
+       the message version allowed by the destination file's high bound */
     if(layout_src->version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
         HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "layout message version out of bounds")
 

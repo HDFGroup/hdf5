@@ -178,7 +178,11 @@ typedef struct H5O_copy_t {
     hbool_t dst_dt_list_complete;       /* Whether the destination datatype list is complete (i.e. not only populated with "suggestions" from H5Padd_merge_committed_dtype_path) */
     H5O_t   *oh_dst;                    /* The destination object header */
     H5F_t   *file_dst;                  /* The destination file pointer */
-    void    *shared_fo;                 /* The shared pointer for the object */
+                                        /* This is used in the pre_copy_file callback to obtain
+                                           the destination file's high bound.  The high bound
+                                           is used to index into the corresponding message's
+                                           array of versions for doing version bounds check. */
+    void    *shared_fo;                 /* The shared pointer for the src object */
     H5O_mcdt_search_cb_t mcdt_cb;	/* The callback to invoke before searching the global list of committed datatypes at destination */
     void *mcdt_ud;			/* User data passed to callback */
 } H5O_copy_t;

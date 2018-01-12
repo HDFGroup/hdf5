@@ -156,7 +156,7 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
 /* Format version bounds for fill value */
 const unsigned H5O_fill_ver_bounds[] = {
     H5O_FILL_VERSION_1,     /* H5F_LIBVER_EARLIEST */
-    H5O_FILL_VERSION_3,     /* H5F_LIBVER_V18 */
+    H5O_FILL_VERSION_2,     /* H5F_LIBVER_V18 */
     H5O_FILL_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -809,8 +809,7 @@ H5O_fill_free(void *fill)
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, March  9, 2007
+ * Programmer:  Vailin Choi; Dec 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -827,6 +826,8 @@ H5O_fill_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     HDassert(cpy_info);
     HDassert(cpy_info->file_dst);
 
+    /* Check to ensure that the version of the message to be copied does not exceed
+       the message version allowed by the destination file's high bound */
     if(fill_src->version > H5O_fill_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
         HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "fill value message version out of bounds")
 
@@ -1047,15 +1048,15 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 24, 2007
+ * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O_fill_set_version(H5F_t *f, H5O_fill_t *fill)
 {
-    herr_t ret_value = SUCCEED;   /* Return value */
+    unsigned version;           /* Message version */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1064,11 +1065,14 @@ H5O_fill_set_version(H5F_t *f, H5O_fill_t *fill)
     HDassert(fill);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    fill->version = MAX(fill->version, H5O_fill_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = MAX(fill->version, H5O_fill_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    /* File bound check */
-    if(fill->version > H5O_fill_ver_bounds[H5F_HIGH_BOUND(f)])
+    /* Version bounds check */
+    if(version > H5O_fill_ver_bounds[H5F_HIGH_BOUND(f)])
         HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "Filter pipeline version out of bounds")
+
+    /* Set the message version */
+    fill->version = version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
