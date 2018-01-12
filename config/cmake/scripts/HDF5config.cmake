@@ -38,7 +38,7 @@ cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.11.0")
+set (CTEST_SOURCE_VERSION "1.11.2")
 set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################

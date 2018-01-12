@@ -233,7 +233,7 @@ if (NOT HDF5_INSTALL_DATA_DIR)
       set (HDF5_INSTALL_FWRK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
     endif ()
     set (HDF5_INSTALL_DATA_DIR share)
-    set (HDF5_INSTALL_CMAKE_DIR share/cmake)
+    set (HDF5_INSTALL_CMAKE_DIR share/cmake/hdf5)
   else ()
     set (HDF5_INSTALL_DATA_DIR ".")
     set (HDF5_INSTALL_CMAKE_DIR cmake)
@@ -409,6 +409,8 @@ include (${HDF_RESOURCES_EXT_DIR}/HDFMacros.cmake)
 include (${HDF_RESOURCES_EXT_DIR}/HDFLibMacros.cmake)
 include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
 
+SET_HDF5_BUILD_TYPE()
+
 #-----------------------------------------------------------------------------
 # Setup output Directories
 #-----------------------------------------------------------------------------
@@ -426,12 +428,12 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
       ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
   )
   if (WIN32)
-    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
+    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
     set (CMAKE_PDB_OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
     )
   else ()
-    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
   endif ()
 else ()
   # if we are externally configured, but the project uses old cmake scripts
@@ -582,7 +584,7 @@ option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
 mark_as_advanced (HDF5_ENABLE_TRACE)
-if (CMAKE_BUILD_TYPE MATCHES Debug)
+if (HDF5_BUILD_TYPE MATCHES Debug)
   add_definitions (-DDEBUG)
   # Enable tracing of the API
   if (HDF5_ENABLE_TRACE)
@@ -631,6 +633,7 @@ if (HDF5_ENABLE_PARALLEL)
     # Used by Fortran + MPI
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+    INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_DIRS})
   else ()
     message (STATUS "Parallel libraries not found")
   endif ()
@@ -639,7 +642,6 @@ endif ()
 # Parallel IO usage requires MPI to be Linked and Included
 if (H5_HAVE_PARALLEL)
   set (LINK_LIBS ${LINK_LIBS} ${MPI_C_LIBRARIES})
-  set (LINK_SHARED_LIBS ${LINK_SHARED_LIBS} ${MPI_C_LIBRARIES})
   if (MPI_C_LINK_FLAGS)
     set (CMAKE_EXE_LINKER_FLAGS "${MPI_C_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
   endif ()
@@ -864,7 +866,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
 
     include (${HDF_RESOURCES_DIR}/HDF5UseFortran.cmake)
     set (LINK_Fortran_LIBS ${LINK_LIBS})
-    set (LINK_Fortran_SHARED_LIBS ${LINK_SHARED_LIBS})
 
     if (HDF5_ENABLE_F2003)
       if (NOT FORTRAN_HAVE_ISO_C_BINDING)
@@ -875,7 +876,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     # Parallel IO usage requires MPI to be Linked and Included
     if (H5_HAVE_PARALLEL)
       set (LINK_Fortran_LIBS ${LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
-      set (LINK_Fortran_SHARED_LIBS ${LINK_Fortran_SHARED_LIBS} ${MPI_Fortran_LIBRARIES})
       if (MPI_Fortran_LINK_FLAGS)
         set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
       endif ()

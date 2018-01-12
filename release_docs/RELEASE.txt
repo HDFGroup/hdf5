@@ -1,4 +1,4 @@
-HDF5 version 1.11.0 currently under development
+HDF5 version 1.11.2 currently under development
 ================================================================================
 
 
@@ -54,11 +54,35 @@ New Features
 
     Configuration:
     -------------
-    -
+    - CMake
+
+      Refactor use of CMAKE_BUILD_TYPE for new variable, which understands
+      the type of generator in use.
+
+      Added new configuration macros to use new HDF5_BUILD_TYPE variable. This
+      variable is set correctly for the type of generator being used for the build.
+
+      (ADB - 2018/01/08, HDFFV-10385, HDFFV-10296)
 
     Library:
     --------
-    -
+    - Add prefix option to VDS files.
+
+      Currently, VDS source files must be in the active directory to be
+      found by the virtual file. Adding the option of a prefix to be set
+      on the virtual file, using a data access property list (DAPL),
+      allows the source files to located at an absolute or relative path
+      to the virtual file.
+      Private utility functions in H5D and H5L packages merged into single
+      function in H5F package.
+
+      New public APIs:
+            herr_t H5Pset_virtual_prefix(hid_t dapl_id, const char* prefix);
+            ssize_t H5Pget_virtual_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
+      The prefix can also be set with an environment variable, HDF5_VDS_PREFIX.
+
+      (ADB - 2017/12/12, HDFFV-9724, HDFFV-10361)
+
 
     Parallel Library:
     -----------------
@@ -118,6 +142,20 @@ New Features
     C++ Library:
     ------------
     -
+
+    Java Library:
+    ----------------
+    - Wrappers added for the following APIs:
+      H5Pset_evict_on_close
+      H5Pget_evict_on_close
+      H5Pset_chunk_opts
+      H5Pget_chunk_opts
+      H5Pset_efile_prefix
+      H5Pget_efile_prefix
+      H5Pset_virtual_prefix
+      H5Pget_virtual_prefix
+
+      (ADB - 2017/12/20)
 
     Tools:
     ------
@@ -196,7 +234,29 @@ Bug Fixes since HDF5-1.10.1 release
 
     Configuration
     -------------
-    - cmake
+    - CMake
+
+      Correct usuage of CMAKE_BUILD_TYPE variable.
+
+      The use of the CMAKE_BUILD_TYPE is incorrect for multi-config
+      generators (Visual Studio and XCode) and is optional for single
+      config generators. Created a new macro to check
+        GLOBAL PROPERTY -> GENERATOR_IS_MULTI_CONFIG
+      Created two new HDF variable, HDF5_BUILD_TYPE and HDF5_CFG_BUILD_TYPE.
+      Defaults for these variables is "Release".
+
+      (ADB - 2018/01/10, HDFFV-10385)
+
+    - CMake
+
+      Add replacement of fortran flags if using static CRT.
+
+      Added TARGET_STATIC_CRT_FLAGS call to HDFUseFortran.cmake file in
+      config/cmake_ext_mod folder.
+
+      (ADB - 2018/01/08, HDFFV-10334)
+
+    - CMake
 
       The hdf5 library used shared szip and zlib, which needlessly required
       applications to link with the same szip and zlib libraries.
@@ -208,18 +268,18 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2017/11/14, HDFFV-10329)
 
-    - cmake MPI
+    - CMake MPI
 
       CMake implementation for MPI was problematic and would create incorrect
       MPI library references in the hdf5 libraries.
 
-      Reworked the CMake MPI code to properly create CMake targets.Also merged
+      Reworked the CMake MPI code to properly create CMake targets. Also merged
       the latest CMake FindMPI.cmake changes to the local copy. This is necessary
       until HDF changes the CMake minimum to 3.9 or greater.
 
       (ADB - 2017/11/02, HDFFV-10321)
 
-    - cmake
+    - CMake
 
       Too many commands for POST_BUILD step caused command line to be
       too big on windows.
@@ -240,6 +300,21 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5diff
+
+      h5diff seg faulted if comparing VL strings against fixed strings.
+
+      Reworked solution for HDFFV-8625 and HDFFV-8639. Implemented the check
+      for string objects of same type in the diff_can_type function by
+      adding an if(tclass1 == H5T_STRING) block. This if block moves the
+      same check that was added for attributes to this function, which is
+      used by all object types. This function also handles complex type
+      structures.
+      Also added a new test file in h5diffgenttest for testing this issue
+      and removed the temporary files used in the test scripts.
+
+      (ADB - 2018/01/04, HDFFV-8745)
+
     - h5repack
 
       h5repack failed to copy a dataset with existing filter.

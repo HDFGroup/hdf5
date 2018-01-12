@@ -66,19 +66,12 @@ set_target_properties (H5_buildiface PROPERTIES
 
 if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/shared")
-  if (WIN32)
-    set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${CMAKE_BUILD_TYPE})
-  else ()
-    set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
-  endif ()
+  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF5_CFG_BUILD_TYPE})
 endif ()
-if (WIN32)
-  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${CMAKE_BUILD_TYPE})
-else ()
-  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
-endif ()
+file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/static")
+set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF5_CFG_BUILD_TYPE})
 
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
+INCLUDE_DIRECTORIES (${HDF5_F90_SOURCE_DIR} ${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
 
 #-----------------------------------------------------------------------------
 add_executable (H5match_types
@@ -87,14 +80,26 @@ add_executable (H5match_types
 )
 set (CMD $<TARGET_FILE:H5match_types>)
 add_custom_command (
-    OUTPUT ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
-           ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+    OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
+           ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
     COMMAND ${CMD}
-    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
     DEPENDS H5match_types
 )
-set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5f90i_gen.h PROPERTIES GENERATED TRUE)
-set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h PROPERTIES GENERATED TRUE)
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
+if (BUILD_SHARED_LIBS)
+  set (CMDSH $<TARGET_FILE:H5match_types>)
+  add_custom_command (
+      OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
+             ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
+      COMMAND ${CMDSH}
+      WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
+      DEPENDS H5match_types
+  )
+  set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h PROPERTIES GENERATED TRUE)
+  set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
+endif ()
 
 #-----------------------------------------------------------------------------
 # f90CStub lib
@@ -121,10 +126,15 @@ set_source_files_properties (${f90CStub_C_SOURCES} PROPERTIES LANGUAGE C)
 
 set (f90CStub_C_HDRS
     # generated files
-    ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
+    ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
+)
+set (f90CStub_C_SHHDRS
+    # generated files
+    ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
 )
 
 add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS})
+target_include_directories(${HDF5_F90_C_LIB_TARGET} PUBLIC ${HDF5_F90_BINARY_DIR}/static)
 TARGET_C_PROPERTIES (${HDF5_F90_C_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_C_LIB_TARGET} PUBLIC ${HDF5_LIB_TARGET})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIB_TARGET}")
@@ -137,7 +147,8 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 set (install_targets ${HDF5_F90_C_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
-  add_library (${HDF5_F90_C_LIBSH_TARGET} SHARED ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS})
+  add_library (${HDF5_F90_C_LIBSH_TARGET} SHARED ${f90CStub_C_SOURCES} ${f90CStub_C_SHHDRS})
+  target_include_directories(${HDF5_F90_C_LIBSH_TARGET} PUBLIC ${HDF5_F90_BINARY_DIR}/shared)
   TARGET_C_PROPERTIES (${HDF5_F90_C_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_F90_C_LIBSH_TARGET} PUBLIC ${HDF5_LIBSH_TARGET})
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIBSH_TARGET}")
@@ -162,16 +173,16 @@ set (f90_F_GEN_SOURCES
 )
 set (CMD $<TARGET_FILE:H5_buildiface>)
 add_custom_command (
-    OUTPUT ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+    OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
     COMMAND ${CMD}
-    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
     DEPENDS ${f90_F_GEN_SOURCES}
     COMMENT "Generating the H5_gen.F90 file"
 )
 add_custom_target (H5gen ALL
-    DEPENDS ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+    DEPENDS ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
 )
-set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5_gen.F90 PROPERTIES GENERATED TRUE)
 
 if (BUILD_SHARED_LIBS)
   set (CMDSH $<TARGET_FILE:H5_buildiface>)
@@ -210,12 +221,12 @@ set (f90_F_BASE_SOURCES
 
 set (f90_F_SOURCES
     # generated file
-    ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+    ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
 
     ${f90_F_BASE_SOURCES}
 
     # generated file
-    ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+    ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
 
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
@@ -223,7 +234,7 @@ set (f90_F_SOURCES
 if (BUILD_SHARED_LIBS)
   set (f90_F_SOURCES_SHARED
       # generated file
-      ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+      ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
 
       ${f90_F_BASE_SOURCES}
 
@@ -243,6 +254,7 @@ set (SHARED_LINK_FLAGS " ")
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_LIB_TARGET} PUBLIC ${HDF5_F90_C_LIB_TARGET})
 target_link_libraries (${HDF5_F90_LIB_TARGET} PRIVATE ${LINK_Fortran_LIBS})
+target_include_directories (${HDF5_F90_LIB_TARGET} PUBLIC ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   target_include_directories (${HDF5_F90_LIB_TARGET} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
 endif ()
@@ -271,6 +283,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_FORTRAN_PROPERTIES (${HDF5_F90_LIBSH_TARGET} SHARED " " ${SHARED_LINK_FLAGS})
   target_link_libraries (${HDF5_F90_LIBSH_TARGET} PUBLIC ${HDF5_F90_C_LIBSH_TARGET})
   target_link_libraries (${HDF5_F90_LIBSH_TARGET} PRIVATE ${LINK_Fortran_LIBS})
+  target_include_directories (${HDF5_F90_LIBSH_TARGET} PUBLIC ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
   if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
     target_include_directories (${HDF5_F90_LIBSH_TARGET} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
   endif ()
@@ -301,8 +314,8 @@ install (
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
-        ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
-        ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+        ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
+        ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
     DESTINATION
         ${HDF5_INSTALL_INCLUDE_DIR}
     COMPONENT
