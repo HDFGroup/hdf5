@@ -83,10 +83,13 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -v, --verbose           Verbose mode, print object information\n");
     PRINTVALSTREAM(rawoutstream, "   -V, --version           Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
+    PRINTVALSTREAM(rawoutstream, "   -E  --enable-error-stack   Prints messages from the HDF5 error stack as they occur\n");
     PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
     PRINTVALSTREAM(rawoutstream, "                           This option will take precedence over the -j and -k options\n");
-    PRINTVALSTREAM(rawoutstream, "   -j, --low               The low bound as in H5Pset_libver_bounds()\n");
-    PRINTVALSTREAM(rawoutstream, "   -k, --high              The high bound as in H5Pset_libver_bounds()\n");
+    PRINTVALSTREAM(rawoutstream, "   -j BOUND, --low=BOUND   The low bound for library release versions to use when creating\n");
+    PRINTVALSTREAM(rawoutstream, "                           objects in the file\n");
+    PRINTVALSTREAM(rawoutstream, "   -k BOUND, --high=BOUND  The high bound for library release versions to use when creating\n");
+    PRINTVALSTREAM(rawoutstream, "                           objects in the file\n");
     PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
     PRINTVALSTREAM(rawoutstream, "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
     PRINTVALSTREAM(rawoutstream, "   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
@@ -119,8 +122,11 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
     PRINTVALSTREAM(rawoutstream, "        pline|attr>. If F is not specified, S applies to all messages\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
-    PRINTVALSTREAM(rawoutstream, "                          occur.\n");
+    PRINTVALSTREAM(rawoutstream, "    BOUND is an integer indicating the library release versions to use when creating\n");
+    PRINTVALSTREAM(rawoutstream, "          objects in the file (see H5Pset_libver_bounds()):\n");
+    PRINTVALSTREAM(rawoutstream, "        0: This is H5F_LIBVER_EARLIEST in H5F_libver_t struct\n");
+    PRINTVALSTREAM(rawoutstream, "        1: This is H5F_LIBVER_V18 in H5F_libver_t struct\n");
+    PRINTVALSTREAM(rawoutstream, "        2: This is H5F_LIBVER_V110 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    FS_STRATEGY is a string indicating the file space strategy used:\n");
     PRINTVALSTREAM(rawoutstream, "        FSM_AGGR:\n");
@@ -209,6 +215,11 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Using latest file format with maximum compact group size of 10 and\n");
     PRINTVALSTREAM(rawoutstream, "   and minimum shared datatype size of 20\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "5) h5repack -j 0 -k 1 file1 file2\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via H5Pset_libver_bounds() when\n");
+    PRINTVALSTREAM(rawoutstream, "   creating the repacked file: file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -655,7 +666,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'E':
-            enable_error_stack = TRUE;
+                enable_error_stack = TRUE;
             break;
 
             default:
