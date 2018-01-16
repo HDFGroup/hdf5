@@ -63,13 +63,8 @@ foreach (example ${HDF_JAVA_OBJECT_EXAMPLES})
 endforeach ()
 
 MACRO (ADD_H5_TEST resultfile resultcode)
-  if (CMAKE_BUILD_TYPE MATCHES Debug)
-    if (WIN32)
-      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
-    else ()
-      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
-    endif ()
-  endif ()
+  string(TOUPPER ${HDF5_BUILD_TYPE} CMD_BUILD_TYPE)
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET},OUTPUT_NAME_${CMD_BUILD_TYPE}>;")
   add_test (
       NAME JAVA_intro-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
