@@ -37,8 +37,6 @@ set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5unjam")
 
 set (H5_DEP_EXECUTABLES
     h5jam
-    getub
-    tellub
     h5unjam
 )
 
@@ -70,11 +68,13 @@ endif ()
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
-  INSTALL_PROGRAM_PDB (h5jam ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  foreach (exec ${H5_DEP_EXECUTABLES})
+    INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endforeach ()
 
   install (
       TARGETS
-          h5jam h5unjam
+          ${H5_DEP_EXECUTABLES}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications

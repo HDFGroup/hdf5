@@ -25,10 +25,6 @@
 #include "H5private.h"
 #include "hdf5.h"
 
-#ifdef H5_HAVE_PARALLEL
-#include <mpi.h>
-#endif
-
 #include "io_timer.h"
 
 /*

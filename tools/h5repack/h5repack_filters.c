@@ -42,7 +42,7 @@ static int aux_copy_obj(hid_t dcpl_id, /* dataset creation property list */
     H5D_layout_t layout;
     int          rank;           /* rank of dataset */
     hsize_t      chsize[64];     /* chunk size in elements */
-    unsigned int i, j;
+    unsigned int i;
 
     /* get information about input filters */
     if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
@@ -237,7 +237,7 @@ int apply_filters(const char* name, /* object name from traverse list */
     int         nfilters;      /* number of filters in DCPL */
     hsize_t     chsize[64];    /* chunk size in elements */
     H5D_layout_t layout;
-    int         i, j;
+    int         i;
     pack_info_t obj;
     pack_info_t filtobj;
 

@@ -182,9 +182,11 @@ parse_command_line (int argc, const char *argv[])
       case 'h':
           usage (h5tools_getprogname());
           leave (EXIT_SUCCESS);
+          break;
       case 'V':
           print_version (h5tools_getprogname());
           leave (EXIT_SUCCESS);
+          break;
       case '?':
       default:
           usage (h5tools_getprogname());
@@ -200,10 +202,6 @@ parse_command_line (int argc, const char *argv[])
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
