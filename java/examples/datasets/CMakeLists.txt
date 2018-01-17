@@ -62,8 +62,7 @@ foreach (HDFJAVA_JAR ${CMAKE_JAVA_INCLUDE_PATH})
 endforeach ()
 
 MACRO (ADD_H5_TEST resultfile resultcode)
-  string(TOUPPER ${HDF5_BUILD_TYPE} CMD_BUILD_TYPE)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET},OUTPUT_NAME_${CMD_BUILD_TYPE}>;")
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET},OUTPUT_NAME$<$<CONFIG:Debug>:_DEBUG>>;")
   add_test (
       NAME JAVA_datasets-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
