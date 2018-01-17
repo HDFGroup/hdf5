@@ -10,7 +10,6 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
 # Add the h5copy and test executables
 # --------------------------------------------------------------------
 add_executable (h5copy ${HDF5_TOOLS_SRC_H5COPY_SOURCE_DIR}/h5copy.c)
-TARGET_NAMING (h5copy STATIC)
 TARGET_C_PROPERTIES (h5copy STATIC " " " ")
 target_link_libraries (h5copy  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5copy PROPERTIES FOLDER tools)
@@ -20,7 +19,6 @@ set (H5_DEP_EXECUTABLES h5copy)
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5copy-shared ${HDF5_TOOLS_SRC_H5COPY_SOURCE_DIR}/h5copy.c)
-  TARGET_NAMING (h5copy-shared SHARED)
   TARGET_C_PROPERTIES (h5copy-shared SHARED " " " ")
   target_link_libraries (h5copy-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5copy-shared PROPERTIES FOLDER tools)

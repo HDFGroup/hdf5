@@ -16,7 +16,6 @@ add_executable (parallel_test
     hyper.f90
     mdset.f90
 )
-TARGET_NAMING (parallel_test STATIC)
 TARGET_FORTRAN_PROPERTIES (parallel_test STATIC " " " ")
 target_link_libraries (parallel_test
     ${HDF5_F90_TEST_LIB_TARGET}

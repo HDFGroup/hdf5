@@ -14,7 +14,6 @@ add_executable (h5dump
     ${HDF5_TOOLS_SRC_H5DUMP_SOURCE_DIR}/h5dump_ddl.c
     ${HDF5_TOOLS_SRC_H5DUMP_SOURCE_DIR}/h5dump_xml.c
 )
-TARGET_NAMING (h5dump STATIC)
 TARGET_C_PROPERTIES (h5dump STATIC " " " ")
 target_link_libraries (h5dump  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5dump PROPERTIES FOLDER tools)
@@ -28,7 +27,6 @@ if (BUILD_SHARED_LIBS)
       ${HDF5_TOOLS_SRC_H5DUMP_SOURCE_DIR}/h5dump_ddl.c
       ${HDF5_TOOLS_SRC_H5DUMP_SOURCE_DIR}/h5dump_xml.c
   )
-  TARGET_NAMING (h5dump-shared SHARED)
   TARGET_C_PROPERTIES (h5dump-shared SHARED " " " ")
   target_link_libraries (h5dump-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5dump-shared PROPERTIES FOLDER tools)

@@ -14,13 +14,16 @@
 macro (SET_HDF5_BUILD_TYPE)
   get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
   if(_isMultiConfig)
+    set(HDF5_CFG_NAME ${CTEST_CONFIGURATION_TYPE})
     set(HDF5_BUILD_TYPE ${CMAKE_CFG_INTDIR})
     set(HDF5_CFG_BUILD_TYPE \${CMAKE_INSTALL_CONFIG_NAME})
   else()
     set(HDF5_CFG_BUILD_TYPE ".")
     if(CMAKE_BUILD_TYPE)
+      set(HDF5_CFG_NAME ${CMAKE_BUILD_TYPE})
       set(HDF5_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     else()
+      set(HDF5_CFG_NAME "Release")
       set(HDF5_BUILD_TYPE "Release")
     endif()
   endif()
@@ -65,13 +68,6 @@ macro (IDE_SOURCE_PROPERTIES SOURCE_PATH HEADERS SOURCES)
 endmacro ()
 
 #-------------------------------------------------------------------------------
-macro (TARGET_NAMING libtarget libtype)
-  if (${libtype} MATCHES "SHARED")
-    set_target_properties (${libtarget} PROPERTIES OUTPUT_NAME "${libtarget}${ARGN}")
-  endif ()
-endmacro ()
-
-#-------------------------------------------------------------------------------
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
   if (WIN32 AND MSVC)
     get_target_property (target_type ${libtarget} TYPE)
@@ -108,6 +104,12 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
+  set (LIB_DEBUG_PREFIX "")
+  if (WIN32)
+    set (LIB_DEBUG_SUFFIX "_D")
+  else ()
+    set (LIB_DEBUG_SUFFIX "_debug")
+  endif ()
   if (${libtype} MATCHES "SHARED")
     if (WIN32)
       set (LIB_RELEASE_NAME "${libname}")
@@ -118,6 +120,7 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
     endif ()
   else ()
     if (WIN32)
+      set (LIB_DEBUG_PREFIX "lib")
       set (LIB_RELEASE_NAME "lib${libname}")
       set (LIB_DEBUG_NAME "lib${libname}_D")
     else ()
@@ -128,11 +131,16 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
 
   set_target_properties (${libtarget}
       PROPERTIES
-      OUTPUT_NAME                ${LIB_RELEASE_NAME}
-      OUTPUT_NAME_DEBUG          ${LIB_DEBUG_NAME}
-      OUTPUT_NAME_RELEASE        ${LIB_RELEASE_NAME}
-      OUTPUT_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
-      OUTPUT_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
+#         OUTPUT_NAME
+#               ${LIB_DEBUG_PREFIX}${libname}$<$<CONFIG:Debug>:${LIB_DEBUG_SUFFIX}>
+         OUTPUT_NAME_DEBUG
+               ${LIB_DEBUG_NAME}
+         OUTPUT_NAME_RELEASE
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_MINSIZEREL
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_RELWITHDEBINFO
+               ${LIB_RELEASE_NAME}
   )
   if (${libtype} MATCHES "STATIC")
     if (WIN32)
