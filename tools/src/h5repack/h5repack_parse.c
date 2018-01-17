@@ -45,9 +45,9 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     int         f, k, l, p, q, end_obj = -1, no_param = 0;
     unsigned    j, n;
     char        sobj[MAX_NC_NAME];
-    char        scomp[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    char        stype[6] = {0, 0, 0, 0, 0, 0};
-    char        smask[3] = {0, 0, 0};
+    char        scomp[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    char        stype[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    char        smask[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     obj_list_t* obj_list = NULL;
     unsigned    pixels_per_block;
 
@@ -116,7 +116,6 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
         if (c == '=' || i == len - 1) {
             if (c == '=') { /*one more parameter */
                 scomp[k] = '\0'; /*cut space */
-
                 /*-------------------------------------------------------------------------
                 * H5Z_FILTER_SZIP
                 * szip has the format SZIP=<pixels per block,coding>
@@ -236,8 +235,9 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                                 filt->cd_nelmts = HDstrtoull(stype, NULL, 0);
                                 p = 0;
                             }
-                            else
+                            else {
                                 filt->cd_values[j++] = (unsigned)HDstrtoul(stype, NULL, 0);
+                            }
                             q = 0;
                             u++; /* skip ',' */
                         }
@@ -462,7 +462,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     return obj_list;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: parse_layout
  *
