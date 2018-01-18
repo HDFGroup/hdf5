@@ -300,6 +300,32 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5repack
+
+      h5repack incorrectly searched internal object table for name.
+
+      h5repack would search the table of objects for a name, if the
+      name did not match it tried to determine if the name without a
+      leading slash would match. The logic was flawed! The table
+      stored names(paths) without a leading slash and did a strstr
+      of the table path to the name.
+      The assumption was that if there was a difference of one then
+      it was a match, however "pressure" would match "/pressure" as
+      well as "/pressure1", "/pressure2", etc. Changed logic to remove
+      any leading slash and then do a full compare of the name.
+
+      (ADB - 2018/01/18, HDFFV-10393)
+
+    - h5repack
+
+      h5repack failed to handle more then 9 chars for int conversion.
+
+      User defined filter parameter conversions would fail for integers
+      larger then 9 characters. Increased local variable array for storing
+      the current command line parameter to prevent buffer overflows.
+
+      (ADB - 2018/01/17, HDFFV-10392)
+
     - h5diff
 
       h5diff seg faulted if comparing VL strings against fixed strings.
