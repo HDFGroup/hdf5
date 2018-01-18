@@ -584,7 +584,7 @@ option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
 mark_as_advanced (HDF5_ENABLE_TRACE)
-if (CMAKE_BUILD_TYPE MATCHES Debug)
+if (${HDF5_CFG_NAME} MATCHES "Debug")
   add_definitions (-DDEBUG)
   # Enable tracing of the API
   if (HDF5_ENABLE_TRACE)
