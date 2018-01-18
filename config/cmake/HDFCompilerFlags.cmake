@@ -13,7 +13,7 @@
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
 if (CMAKE_COMPILER_IS_GNUCC)
-  if (CMAKE_BUILD_TYPE MATCHES Debug)
+  if (${HDF5_CFG_NAME} MATCHES "Debug")
     set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99")
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ftrapv -fno-common")
@@ -26,7 +26,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
   endif ()
 endif ()
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
-  if (CMAKE_BUILD_TYPE MATCHES Debug)
+  if (${HDF5_CFG_NAME} MATCHES "Debug")
     set (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS}")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
       set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -ftrapv -fno-common")
