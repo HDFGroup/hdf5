@@ -87,9 +87,9 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
     PRINTVALSTREAM(rawoutstream, "                           This option will take precedence over the -j and -k options\n");
     PRINTVALSTREAM(rawoutstream, "   -j BOUND, --low=BOUND   The low bound for library release versions to use when creating\n");
-    PRINTVALSTREAM(rawoutstream, "                           objects in the file\n");
+    PRINTVALSTREAM(rawoutstream, "                           objects in the file (default is H5F_LIBVER_EARLIEST)\n");
     PRINTVALSTREAM(rawoutstream, "   -k BOUND, --high=BOUND  The high bound for library release versions to use when creating\n");
-    PRINTVALSTREAM(rawoutstream, "                           objects in the file\n");
+    PRINTVALSTREAM(rawoutstream, "                           objects in the file (default is H5F_LIBVER_LATEST)\n");
     PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
     PRINTVALSTREAM(rawoutstream, "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
     PRINTVALSTREAM(rawoutstream, "   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
@@ -127,6 +127,7 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "        0: This is H5F_LIBVER_EARLIEST in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        1: This is H5F_LIBVER_V18 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        2: This is H5F_LIBVER_V110 in H5F_libver_t struct\n");
+    PRINTVALSTREAM(rawoutstream, "           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V110 for this release\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    FS_STRATEGY is a string indicating the file space strategy used:\n");
     PRINTVALSTREAM(rawoutstream, "        FSM_AGGR:\n");
