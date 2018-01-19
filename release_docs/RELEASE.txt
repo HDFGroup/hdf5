@@ -59,7 +59,7 @@ New Features
       Refactor use of CMAKE_BUILD_TYPE for new variable, which understands
       the type of generator in use.
 
-      Added new configuration macros to use new HDF5_BUILD_TYPE variable. This
+      Added new configuration macros to use new HDF_BUILD_TYPE variable. This
       variable is set correctly for the type of generator being used for the build.
 
       (ADB - 2018/01/08, HDFFV-10385, HDFFV-10296)
@@ -242,7 +242,7 @@ Bug Fixes since HDF5-1.10.1 release
       generators (Visual Studio and XCode) and is optional for single
       config generators. Created a new macro to check
         GLOBAL PROPERTY -> GENERATOR_IS_MULTI_CONFIG
-      Created two new HDF variable, HDF5_BUILD_TYPE and HDF5_CFG_BUILD_TYPE.
+      Created two new HDF variable, HDF_BUILD_TYPE and HDF_CFG_BUILD_TYPE.
       Defaults for these variables is "Release".
 
       (ADB - 2018/01/10, HDFFV-10385)
