@@ -8,7 +8,6 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
 
 MACRO (ADD_H5_GENERATOR genfile)
   add_executable (${genfile} ${HDF5_TOOLS_TEST_MISC_VDS_SOURCE_DIR}/${genfile}.c)
-  TARGET_NAMING (${genfile} STATIC)
   TARGET_C_PROPERTIES (${genfile} STATIC " " " ")
   target_link_libraries (${genfile} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (${genfile} PROPERTIES FOLDER generator/tools)

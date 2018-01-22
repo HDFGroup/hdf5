@@ -134,7 +134,7 @@ allocate_and_init_2D_array(int ***arr, const hsize_t *sizes, int **initial_value
     return SUCCEED;
 error:
     free_2D_array(arr);
-    
+
     return FAIL;
 } /* end allocate_and_init_2D_array() */
 
@@ -165,7 +165,7 @@ compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ hbool_
             }
 
     return SUCCEED;
-    
+
 } /* end compare_2D_arrays() */
 
 
@@ -612,7 +612,7 @@ test_read_data(hid_t did, int *origin_data)
     free_2D_array(&check);
 
     PASSED();
-    
+
     return SUCCEED;
 
 error:
@@ -943,14 +943,14 @@ error:
  *            paths.
  *
  * Return:    SUCCEED/FAIL
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_path_api_calls(void)
 {
     unsigned int n_starting_paths;
-    unsigned int u;                 
+    unsigned int u;
     unsigned int n_paths;
     herr_t       ret;
     ssize_t      path_len = -1;
@@ -1319,7 +1319,7 @@ error:
  * Purpose:   Turns the chunk cache off
  *
  * Return:    SUCCEED/FAIL
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1360,37 +1360,36 @@ main(void)
     unsigned    new_format;
     int         nerrors = 0;
 
-    /* Testing setup */
-    h5_reset();
-
     /*******************************************************************/
     /* ENSURE THAT WRITING TO DATASETS AND CREATING GROUPS WORKS       */
     /*******************************************************************/
-
-    /* Get a VFD-dependent filename */
-    if ((old_ff_fapl_id = h5_fileaccess()) < 0)
-        TEST_ERROR;
-
-    /* Turn off the chunk cache, so all the chunks are immediately written to disk */
-    if (disable_chunk_cache(old_ff_fapl_id) < 0)
-        TEST_ERROR;
-
-    /* Copy the file access property list and set the latest file format on it */
-    if ((new_ff_fapl_id = H5Pcopy(old_ff_fapl_id)) < 0)
-        TEST_ERROR;
-    if (H5Pset_libver_bounds(new_ff_fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR;
-
-    /* Fix up the filename for the VFD */
-    h5_fixname(FILENAME[0], old_ff_fapl_id, filename, sizeof(filename));
-
     /* Test with old & new format groups */
     for (new_format = FALSE; new_format <= TRUE; new_format++) {
         hid_t my_fapl_id;
 
+        /* Testing setup */
+        h5_reset();
+
+        /* Get a VFD-dependent filename */
+        if ((old_ff_fapl_id = h5_fileaccess()) < 0)
+            TEST_ERROR;
+
+        /* Turn off the chunk cache, so all the chunks are immediately written to disk */
+        if (disable_chunk_cache(old_ff_fapl_id) < 0)
+            TEST_ERROR;
+
+        /* Fix up the filename for the VFD */
+        h5_fixname(FILENAME[0], old_ff_fapl_id, filename, sizeof(filename));
+
         /* Set the FAPL for the type of format */
         if (new_format) {
             HDputs("\nTesting with new file format:");
+            /* Copy the file access property list and set the latest file format on it */
+            if ((new_ff_fapl_id = H5Pcopy(old_ff_fapl_id)) < 0)
+                TEST_ERROR;
+            if (H5Pset_libver_bounds(new_ff_fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+                TEST_ERROR;
+
             my_fapl_id = new_ff_fapl_id;
         }
         else {
@@ -1410,61 +1409,121 @@ main(void)
 
         if (H5Fclose(fid) < 0)
             TEST_ERROR;
+
+        /* Close FAPLs */
+        if (H5Pclose(old_ff_fapl_id) < 0)
+            TEST_ERROR;
+        if (new_format) {
+            if (H5Pclose(new_ff_fapl_id) < 0)
+                TEST_ERROR;
+        }
+
+        /* Restore the default error handler (set in h5_reset()) */
+        h5_restore_err();
+
+        /*******************************************************************/
+        /* ENSURE THAT READING FROM DATASETS AND OPENING GROUPS WORKS      */
+        /*******************************************************************/
+
+        HDputs("\nTesting reading data with with dynamic plugin filters:");
+
+        /* Close the library so that all loaded plugin libraries are unloaded */
+        h5_reset();
+        if ((old_ff_fapl_id = h5_fileaccess()) < 0)
+            TEST_ERROR;
+
+        /* Set the FAPL for the type of format */
+        if (new_format) {
+            /* Copy the file access property list and set the latest file format on it */
+            if ((new_ff_fapl_id = H5Pcopy(old_ff_fapl_id)) < 0)
+                TEST_ERROR;
+            if (H5Pset_libver_bounds(new_ff_fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+                TEST_ERROR;
+
+            my_fapl_id = new_ff_fapl_id;
+        }
+        else
+            my_fapl_id = old_ff_fapl_id;
+
+        /* Reopen the file for testing data reading */
+        if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, my_fapl_id)) < 0)
+            TEST_ERROR;
+
+        /* Read the data with filters */
+        nerrors += (test_dataset_read_with_filters(fid) < 0 ? 1 : 0);
+
+        /* Test creating groups using dynamically-loaded plugin filters */
+        nerrors += (test_opening_groups_using_plugins(fid) < 0  ? 1 : 0);
+
+        /* Close FAPLs */
+        if (H5Pclose(old_ff_fapl_id) < 0)
+            TEST_ERROR;
+        if (new_format) {
+            if (H5Pclose(new_ff_fapl_id) < 0)
+                TEST_ERROR;
+        }
+
+        /* Restore the default error handler (set in h5_reset()) */
+        h5_restore_err();
+
+        /*******************************************************************/
+        /* ENSURE THAT DISABLING FILTER PLUGINS VIA THE FILTER FLAGS WORKS */
+        /*******************************************************************/
+
+        /* Close the library so that all loaded plugin libraries are unloaded */
+        h5_reset();
+        if ((old_ff_fapl_id = h5_fileaccess()) < 0)
+            TEST_ERROR;
+
+        /* Set the FAPL for the type of format */
+        if (new_format) {
+            /* Copy the file access property list and set the latest file format on it */
+            if ((new_ff_fapl_id = H5Pcopy(old_ff_fapl_id)) < 0)
+                TEST_ERROR;
+            if (H5Pset_libver_bounds(new_ff_fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+                TEST_ERROR;
+
+            my_fapl_id = new_ff_fapl_id;
+        }
+        else
+            my_fapl_id = old_ff_fapl_id;
+
+        /* Reopen the file for testing data reading */
+        if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, my_fapl_id)) < 0)
+            TEST_ERROR;
+
+        /* When filters are disabled, make sure we can't read data from a
+        * dataset that requires a filter plugin.
+        */
+        nerrors += (test_no_read_when_plugins_disabled(fid) < 0  ? 1 : 0);
+
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+
+        /*********************/
+        /* CLEAN UP          */
+        /*********************/
+        /* Close FAPLs */
+        if (new_format) {
+            if (H5Pclose(new_ff_fapl_id) < 0)
+                TEST_ERROR;
+        }
+        else {
+            /* Restore the default error handler (set in h5_reset()) */
+            h5_restore_err();
+
+            if (H5Pclose(old_ff_fapl_id) < 0)
+                TEST_ERROR;
+        }
+
+        /* Free up saved arrays */
+        free_2D_array(&orig_deflate_g);
+        free_2D_array(&orig_dynlib1_g);
+        free_2D_array(&orig_dynlib2_g);
+        free_2D_array(&orig_dynlib4_g);
     } /* end for */
 
-    /* Close FAPLs */
-    if (H5Pclose(old_ff_fapl_id) < 0)
-        TEST_ERROR;
-    if (H5Pclose(new_ff_fapl_id) < 0)
-        TEST_ERROR;
-
-    /* Restore the default error handler (set in h5_reset()) */
-    h5_restore_err();
-
-    /*******************************************************************/
-    /* ENSURE THAT READING FROM DATASETS AND OPENING GROUPS WORKS      */
-    /*******************************************************************/
-
-    HDputs("\nTesting reading data with with dynamic plugin filters:");
-
-    /* Close the library so that all loaded plugin libraries are unloaded */
-    h5_reset();
-    if ((old_ff_fapl_id = h5_fileaccess()) < 0)
-        TEST_ERROR;
-
-    /* Reopen the file for testing data reading */
-    if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, old_ff_fapl_id)) < 0)
-        TEST_ERROR;
-
-    /* Read the data with filters */
-    nerrors += (test_dataset_read_with_filters(fid) < 0 ? 1 : 0);
-
-    /* Test creating groups using dynamically-loaded plugin filters */
-    nerrors += (test_opening_groups_using_plugins(fid) < 0  ? 1 : 0);
-
-    /* Restore the default error handler (set in h5_reset()) */
-    h5_restore_err();
-
-    /*******************************************************************/
-    /* ENSURE THAT DISABLING FILTER PLUGINS VIA THE FILTER FLAGS WORKS */
-    /*******************************************************************/
-
-    /* Close the library so that all loaded plugin libraries are unloaded */
-    h5_reset();
-    if ((old_ff_fapl_id = h5_fileaccess()) < 0)
-        TEST_ERROR;
-
-    /* Reopen the file for testing data reading */
-    if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, old_ff_fapl_id)) < 0)
-        TEST_ERROR;
-
-    /* When filters are disabled, make sure we can't read data from a
-     * dataset that requires a filter plugin.
-     */
-    nerrors += (test_no_read_when_plugins_disabled(fid) < 0  ? 1 : 0);
-
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR;
+    h5_cleanup(FILENAME, old_ff_fapl_id);
 
     /************************************/
     /* TEST THE FILTER PLUGIN API CALLS */
@@ -1473,21 +1532,10 @@ main(void)
     /* Test the APIs for access to the filter plugin path table */
     nerrors += (test_path_api_calls() < 0  ? 1 : 0);
 
-    /*********************/
-    /* CLEAN UP AND EXIT */
-    /*********************/
-
-    /* Free up saved arrays */
-    free_2D_array(&orig_deflate_g);
-    free_2D_array(&orig_dynlib1_g);
-    free_2D_array(&orig_dynlib2_g);
-    free_2D_array(&orig_dynlib4_g);
-
     if (nerrors)
         TEST_ERROR;
 
     HDprintf("All plugin tests passed.\n");
-    h5_cleanup(FILENAME, old_ff_fapl_id);
 
     HDexit(EXIT_SUCCESS);
 
