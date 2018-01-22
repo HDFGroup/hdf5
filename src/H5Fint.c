@@ -932,10 +932,6 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
 
-        /* Format version high bound does not allow the generation of metadata cache image */
-        if(f->shared->mdc_initCacheImageCfg.generate_image && f->shared->high_bound < H5F_LIBVER_V110)
-            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "format version out of bound for cache image")
-
         /* Get SWMR delta t property */
         if(H5P_get(plist, H5F_ACS_SWMR_DELTAT_NAME, &(f->shared->swmr_deltat)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get SWMR delta t value")
