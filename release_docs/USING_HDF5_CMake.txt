@@ -37,7 +37,7 @@ I. Preconditions
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
       web site. The HDF5 1.8.x product requires a minimum CMake version
-      of 3.2.2.
+      of 3.10.1.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
@@ -101,10 +101,10 @@ These steps are described in more detail below.
             * Unix Makefiles
             * Visual Studio 12 2013
             * Visual Studio 12 2013 Win64
-            * Visual Studio 11 2012
-            * Visual Studio 11 2012 Win64
             * Visual Studio 14 2015
             * Visual Studio 14 2015 Win64
+            * Visual Studio 15 2017
+            * Visual Studio 15 2017 Win64
 
         <options> is:
             * BUILD_TESTING:BOOL=ON
@@ -180,7 +180,7 @@ Given the preconditions in section I, create a CMakeLists.txt file at the
 source root. Include the following text in the file:
 
 ##########################################################
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10.1)
 project (HDF5MyApp C CXX)
 
 set (LIB_TYPE STATIC) # or SHARED
@@ -194,7 +194,6 @@ set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
 set (example hdf_example)
 
 add_executable (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
-TARGET_NAMING (${example} ${LIB_TYPE})
 TARGET_C_PROPERTIES (${example} ${LIB_TYPE} " " " ")
 target_link_libraries (${example} ${LINK_LIBS})
 

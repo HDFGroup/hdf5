@@ -15,7 +15,7 @@ General Information:
 
 Compiling Options:
 ------------------
-               Compilation Mode: @HDF5_BUILD_TYPE@
+               Compilation Mode: @HDF_BUILD_TYPE@
                      C Compiler: @CMAKE_C_COMPILER@
                          CFLAGS: @CMAKE_C_FLAGS@
                       H5_CFLAGS: @H5_CFLAGS@
