@@ -40,7 +40,6 @@ set (F2003_examples
 
 foreach (example ${examples})
   add_executable (f90_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  TARGET_NAMING (f90_ex_${example} STATIC)
   TARGET_FORTRAN_PROPERTIES (f90_ex_${example} STATIC " " " ")
   target_link_libraries (f90_ex_${example}
       ${HDF5_F90_LIB_TARGET}
@@ -54,7 +53,6 @@ foreach (example ${examples})
   )
   if (BUILD_SHARED_LIBS)
     add_executable (f90_ex_${example}-shared ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-    TARGET_NAMING (f90_ex_${example}-shared SHARED)
     TARGET_FORTRAN_PROPERTIES (f90_ex_${example}-shared SHARED " " " ")
     target_link_libraries (f90_ex_${example}-shared
         ${HDF5_F90_LIBSH_TARGET}
@@ -71,7 +69,6 @@ endforeach ()
 
 foreach (example ${F2003_examples})
   add_executable (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  TARGET_NAMING (f03_ex_${example} STATIC)
   TARGET_FORTRAN_PROPERTIES (f03_ex_${example} STATIC " " " ")
   target_link_libraries (f03_ex_${example}
       ${HDF5_F90_LIB_TARGET}
@@ -85,7 +82,6 @@ foreach (example ${F2003_examples})
   )
   if (BUILD_SHARED_LIBS)
     add_executable (f03_ex_${example}-shared ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-    TARGET_NAMING (f03_ex_${example}-shared SHARED)
     TARGET_FORTRAN_PROPERTIES (f03_ex_${example}-shared SHARED " " " ")
     target_link_libraries (f03_ex_${example}-shared
         ${HDF5_F90_LIBSH_TARGET}
@@ -102,7 +98,6 @@ endforeach ()
 
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   add_executable (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
-  TARGET_NAMING (f90_ex_ph5example STATIC)
   TARGET_FORTRAN_PROPERTIES (f90_ex_ph5example STATIC " " " ")
   target_link_libraries (f90_ex_ph5example
       ${HDF5_F90_LIB_TARGET}
@@ -116,7 +111,6 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   )
   if (BUILD_SHARED_LIBS)
     add_executable (f90_ex_ph5example-shared ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
-    TARGET_NAMING (f90_ex_ph5example-shared SHARED)
     TARGET_FORTRAN_PROPERTIES (f90_ex_ph5example-shared SHARED " " " ")
     target_link_libraries (f90_ex_ph5example-shared
         ${HDF5_F90_LIBSH_TARGET}
