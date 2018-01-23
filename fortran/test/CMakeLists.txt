@@ -34,10 +34,10 @@ set_target_properties (H5_test_buildiface PROPERTIES
 
 if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared")
-  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF5_CFG_BUILD_TYPE})
+  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF_CFG_BUILD_TYPE})
 endif ()
 file (MAKE_DIRECTORY "${HDF5_FORTRAN_TESTS_BINARY_DIR}/static")
-set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF5_CFG_BUILD_TYPE})
+set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF_CFG_BUILD_TYPE})
 
 #-----------------------------------------------------------------------------
 # Add Test Lib
@@ -195,7 +195,6 @@ add_executable (testhdf5_fortran
     tH5Z.F90
     tHDF5.F90
 )
-TARGET_NAMING (testhdf5_fortran STATIC)
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran STATIC " " " ")
 target_link_libraries (testhdf5_fortran
     ${HDF5_F90_TEST_LIB_TARGET}
@@ -231,7 +230,6 @@ if (BUILD_SHARED_LIBS)
       tH5Z.F90
       tHDF5.F90
   )
-  TARGET_NAMING (testhdf5_fortran-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (testhdf5_fortran-shared SHARED " " " ")
   target_link_libraries (testhdf5_fortran-shared
       ${HDF5_F90_TEST_LIBSH_TARGET}
@@ -259,7 +257,6 @@ add_executable (testhdf5_fortran_1_8
     tH5MISC_1_8.F90
     tHDF5_1_8.F90
 )
-TARGET_NAMING (testhdf5_fortran_1_8 STATIC)
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8 STATIC " " " ")
 target_link_libraries (testhdf5_fortran_1_8
     ${HDF5_F90_TEST_LIB_TARGET}
@@ -286,7 +283,6 @@ if (BUILD_SHARED_LIBS)
       tH5MISC_1_8.F90
       tHDF5_1_8.F90
   )
-  TARGET_NAMING (testhdf5_fortran_1_8-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8-shared SHARED " " " ")
   target_link_libraries (testhdf5_fortran_1_8-shared
       ${HDF5_F90_TEST_LIBSH_TARGET}
@@ -316,7 +312,6 @@ add_executable (fortranlib_test_F03
     tH5T_F03.F90
     tHDF5_F03.F90
 )
-TARGET_NAMING (fortranlib_test_F03 STATIC)
 TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 STATIC " " " ")
 target_link_libraries (fortranlib_test_F03
     ${HDF5_F90_TEST_LIB_TARGET}
@@ -345,7 +340,6 @@ if (BUILD_SHARED_LIBS)
       tH5T_F03.F90
       tHDF5_F03.F90
   )
-  TARGET_NAMING (fortranlib_test_F03-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03-shared SHARED " " " ")
   target_link_libraries (fortranlib_test_F03-shared
       ${HDF5_F90_TEST_LIBSH_TARGET}
@@ -367,7 +361,6 @@ endif ()
 
 #-- Adding test for fflush1
 add_executable (fflush1 fflush1.F90)
-TARGET_NAMING (fflush1 STATIC)
 TARGET_FORTRAN_PROPERTIES (fflush1 STATIC " " " ")
 target_link_libraries (fflush1
     ${HDF5_F90_LIB_TARGET}
@@ -387,7 +380,6 @@ add_dependencies (fflush1 ${HDF5_F90_TEST_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
   add_executable (fflush1-shared fflush1.F90)
-  TARGET_NAMING (fflush1-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fflush1-shared SHARED " " " ")
   target_link_libraries (fflush1-shared
       ${HDF5_F90_LIBSH_TARGET}
@@ -408,7 +400,6 @@ endif ()
 
 #-- Adding test for fflush2
 add_executable (fflush2 fflush2.F90)
-TARGET_NAMING (fflush2 STATIC)
 TARGET_FORTRAN_PROPERTIES (fflush2 STATIC " " " ")
 target_link_libraries (fflush2
     ${HDF5_F90_TEST_LIB_TARGET}
@@ -428,7 +419,6 @@ add_dependencies (fflush2 ${HDF5_F90_TEST_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
   add_executable (fflush2-shared fflush2.F90)
-  TARGET_NAMING (fflush2-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fflush2-shared SHARED " " " ")
   target_link_libraries (fflush2-shared
       ${HDF5_F90_TEST_LIBSH_TARGET}

@@ -37,7 +37,6 @@ set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
 add_executable (cpp_testhdf5 ${CPP_TEST_SOURCES} )
-TARGET_NAMING (cpp_testhdf5 STATIC)
 TARGET_C_PROPERTIES (cpp_testhdf5 STATIC " " " ")
 target_link_libraries (cpp_testhdf5
     ${HDF5_CPP_LIB_TARGET}
