@@ -82,7 +82,7 @@ New Features
 
     Tools
     -----
-    - None 
+    - None
 
 
     High-Level APIs
@@ -116,7 +116,7 @@ Bug Fixes since HDF5-1.8.20
     -------------
     - CMake
 
-      Correct usuage of CMAKE_BUILD_TYPE variable.
+      Correct usage of CMAKE_BUILD_TYPE variable.
 
       The use of the CMAKE_BUILD_TYPE is incorrect for multi-config
       generators (Visual Studio and XCode) and is optional for single
@@ -163,7 +163,7 @@ Bug Fixes since HDF5-1.8.20
 
       h5dump would output an indented blank line in the filters section.
 
-      h5dump over used the h5tools_simple_prefix function, which is a
+      h5dump overused the h5tools_simple_prefix function, which is a
       function intended to account for the data index (x,y,z) option.
       Removed the function call for header information.
 
@@ -197,7 +197,7 @@ Bug Fixes since HDF5-1.8.20
 
     - h5diff
 
-      h5diff seg faulted if comparing VL strings against fixed strings.
+      h5diff seg-faulted if comparing VL strings against fixed strings.
 
       Reworked solution for HDFFV-8625 and HDFFV-8639. Implemented the check
       for string objects of same type in the diff_can_type function by
