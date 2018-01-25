@@ -117,12 +117,12 @@ add_custom_command (
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/shared")
-  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF5_CFG_BUILD_TYPE})
+  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF_CFG_BUILD_TYPE})
 endif ()
 file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/static")
-set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF5_CFG_BUILD_TYPE})
+set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF_CFG_BUILD_TYPE})
 
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
+INCLUDE_DIRECTORIES (${HDF5_F90_SOURCE_DIR} ${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
 
 #-----------------------------------------------------------------------------
 add_executable (H5match_types
@@ -185,7 +185,7 @@ set (f90CStub_C_SHHDRS
 )
 
 add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS})
-target_include_directories(${HDF5_F90_C_LIB_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/static)
+target_include_directories(${HDF5_F90_C_LIB_TARGET} PUBLIC ${HDF5_F90_BINARY_DIR}/static)
 TARGET_C_PROPERTIES (${HDF5_F90_C_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_C_LIB_TARGET} PUBLIC ${HDF5_LIB_TARGET})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIB_TARGET}")
@@ -199,7 +199,7 @@ set (install_targets ${HDF5_F90_C_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_F90_C_LIBSH_TARGET} SHARED ${f90CStub_C_SOURCES} ${f90CStub_C_SHHDRS})
-  target_include_directories(${HDF5_F90_C_LIBSH_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/shared)
+  target_include_directories(${HDF5_F90_C_LIBSH_TARGET} PUBLIC ${HDF5_F90_BINARY_DIR}/shared)
   TARGET_C_PROPERTIES (${HDF5_F90_C_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_F90_C_LIBSH_TARGET} PUBLIC ${HDF5_LIBSH_TARGET})
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIBSH_TARGET}")

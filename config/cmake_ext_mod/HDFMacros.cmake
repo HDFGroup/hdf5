@@ -11,17 +11,24 @@
 #
 
 #-------------------------------------------------------------------------------
-macro (SET_HDF5_BUILD_TYPE)
-  if(CMAKE_CONFIGURATION_TYPES)
-    set(HDF5_BUILD_TYPE ${CMAKE_CFG_INTDIR})
-    set(HDF5_CFG_BUILD_TYPE \${CMAKE_INSTALL_CONFIG_NAME})
+macro (SET_HDF_BUILD_TYPE)
+  get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  if(_isMultiConfig)
+    set(HDF_CFG_NAME ${CTEST_CONFIGURATION_TYPE})
+    set(HDF_BUILD_TYPE ${CMAKE_CFG_INTDIR})
+    set(HDF_CFG_BUILD_TYPE \${CMAKE_INSTALL_CONFIG_NAME})
   else()
-    set(HDF5_CFG_BUILD_TYPE ".")
+    set(HDF_CFG_BUILD_TYPE ".")
     if(CMAKE_BUILD_TYPE)
-      set(HDF5_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+      set(HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
+      set(HDF_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     else()
-      set(HDF5_BUILD_TYPE "Release")
+      set(HDF_CFG_NAME "Release")
+      set(HDF_BUILD_TYPE "Release")
     endif()
+  endif()
+  if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
   endif()
 endmacro ()
 
@@ -61,13 +68,6 @@ macro (IDE_SOURCE_PROPERTIES SOURCE_PATH HEADERS SOURCES)
 endmacro ()
 
 #-------------------------------------------------------------------------------
-macro (TARGET_NAMING libtarget libtype)
-  if (${libtype} MATCHES "SHARED")
-    set_target_properties (${libtarget} PROPERTIES OUTPUT_NAME "${libtarget}${ARGN}")
-  endif ()
-endmacro ()
-
-#-------------------------------------------------------------------------------
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
   if (WIN32 AND MSVC)
     get_target_property (target_type ${libtarget} TYPE)
@@ -104,31 +104,36 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
+  if (WIN32)
+    set (LIB_DEBUG_SUFFIX "_D")
+  else ()
+    set (LIB_DEBUG_SUFFIX "_debug")
+  endif ()
   if (${libtype} MATCHES "SHARED")
-    if (WIN32)
-      set (LIB_RELEASE_NAME "${libname}")
-      set (LIB_DEBUG_NAME "${libname}_D")
-    else ()
-      set (LIB_RELEASE_NAME "${libname}")
-      set (LIB_DEBUG_NAME "${libname}_debug")
-    endif ()
+    set (LIB_RELEASE_NAME "${libname}")
+    set (LIB_DEBUG_NAME "${libname}${LIB_DEBUG_SUFFIX}")
   else ()
     if (WIN32)
       set (LIB_RELEASE_NAME "lib${libname}")
-      set (LIB_DEBUG_NAME "lib${libname}_D")
+      set (LIB_DEBUG_NAME "lib${libname}${LIB_DEBUG_SUFFIX}")
     else ()
       set (LIB_RELEASE_NAME "${libname}")
-      set (LIB_DEBUG_NAME "${libname}_debug")
+      set (LIB_DEBUG_NAME "${libname}${LIB_DEBUG_SUFFIX}")
     endif ()
   endif ()
 
   set_target_properties (${libtarget}
       PROPERTIES
-      OUTPUT_NAME                ${LIB_RELEASE_NAME}
-      OUTPUT_NAME_DEBUG          ${LIB_DEBUG_NAME}
-      OUTPUT_NAME_RELEASE        ${LIB_RELEASE_NAME}
-      OUTPUT_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
-      OUTPUT_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
+         OUTPUT_NAME
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_DEBUG
+               ${LIB_DEBUG_NAME}
+         OUTPUT_NAME_RELEASE
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_MINSIZEREL
+               ${LIB_RELEASE_NAME}
+         OUTPUT_NAME_RELWITHDEBINFO
+               ${LIB_RELEASE_NAME}
   )
   if (${libtype} MATCHES "STATIC")
     if (WIN32)
@@ -161,7 +166,7 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
   if (${importtype} MATCHES "IMPORT")
     set (importprefix "${CMAKE_STATIC_LIBRARY_PREFIX}")
   endif ()
-  if (${HDF5_BUILD_TYPE} MATCHES "Debug")
+  if (${HDF_CFG_NAME} MATCHES "Debug")
     set (IMPORT_LIB_NAME ${LIB_DEBUG_NAME})
   else ()
     set (IMPORT_LIB_NAME ${LIB_RELEASE_NAME})
@@ -176,8 +181,8 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
         )
       else ()
         set_target_properties (${libtarget} PROPERTIES
-            IMPORTED_IMPLIB "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF5_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
-            IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF5_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            IMPORTED_IMPLIB "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+            IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
         )
       endif ()
     else ()
@@ -197,7 +202,7 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
   else ()
     if (WIN32 AND NOT MINGW)
       set_target_properties (${libtarget} PROPERTIES
-          IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF5_BUILD_TYPE}/${IMPORT_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE}/${IMPORT_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
           IMPORTED_LINK_INTERFACE_LANGUAGES "C"
       )
     else ()

@@ -4,21 +4,21 @@ PROJECT (HDF5_FORTRAN_TESTS C CXX Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
+INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_FORTRAN_TESTS_SOURCE_DIR} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 
 if (BUILD_SHARED_LIBS)
-  file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/shared")
-  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF5_CFG_BUILD_TYPE})
+  file (MAKE_DIRECTORY "${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared")
+  set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF_CFG_BUILD_TYPE})
 endif ()
-file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/static")
-set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF5_CFG_BUILD_TYPE})
+file (MAKE_DIRECTORY "${HDF5_FORTRAN_TESTS_BINARY_DIR}/static")
+set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF_CFG_BUILD_TYPE})
 
 #-----------------------------------------------------------------------------
 # Add Test Lib
 #-----------------------------------------------------------------------------
 add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c)
 set_source_files_properties (t.c PROPERTIES LANGUAGE C)
-target_include_directories(${HDF5_F90_C_TEST_LIB_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/static)
+target_include_directories(${HDF5_F90_C_TEST_LIB_TARGET} PUBLIC ${HDF5_F90_BINARY_DIR}/static)
 TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_F90_C_LIB_TARGET}
@@ -32,7 +32,7 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
 )
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c)
-  target_include_directories(${HDF5_F90_C_TEST_LIBSH_TARGET} PRIVATE ${HDF5_F90_BINARY_DIR}/shared)
+  target_include_directories(${HDF5_F90_C_TEST_LIBSH_TARGET} PUBLIC ${HDF5_F90_BINARY_DIR}/shared)
   TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_F90_C_TEST_LIBSH_TARGET}
       ${HDF5_F90_C_LIBSH_TARGET}
@@ -138,7 +138,6 @@ add_executable (testhdf5_fortran
     tH5Z.f90
     tHDF5.f90
 )
-TARGET_NAMING (testhdf5_fortran STATIC)
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran STATIC " " " ")
 target_link_libraries (testhdf5_fortran
     ${HDF5_F90_TEST_LIB_TARGET}
@@ -172,7 +171,6 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       tH5Z.f90
       tHDF5.f90
   )
-  TARGET_NAMING (testhdf5_fortran-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (testhdf5_fortran-shared SHARED " " " ")
   target_link_libraries (testhdf5_fortran-shared
       ${HDF5_F90_TEST_LIBSH_TARGET}
@@ -199,7 +197,6 @@ add_executable (testhdf5_fortran_1_8
     tH5MISC_1_8.f90
     tHDF5_1_8.f90
 )
-TARGET_NAMING (testhdf5_fortran_1_8 STATIC)
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8 STATIC " " " ")
 target_link_libraries (testhdf5_fortran_1_8
     ${HDF5_F90_TEST_LIB_TARGET}
@@ -224,7 +221,6 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       tH5MISC_1_8.f90
       tHDF5_1_8.f90
   )
-  TARGET_NAMING (testhdf5_fortran_1_8-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8-shared SHARED " " " ")
   target_link_libraries (testhdf5_fortran_1_8-shared
       ${HDF5_F90_TEST_LIBSH_TARGET}
@@ -254,7 +250,6 @@ if (HDF5_ENABLE_F2003)
       tH5T_F03.f90
       tHDF5_F03.f90
   )
-  TARGET_NAMING (fortranlib_test_F03 STATIC)
   TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 STATIC " " " ")
   target_link_libraries (fortranlib_test_F03
       ${HDF5_F90_TEST_LIB_TARGET}
@@ -264,6 +259,7 @@ if (HDF5_ENABLE_F2003)
   if (WIN32 AND MSVC)
     target_link_libraries (fortranlib_test_F03 "ws2_32.lib")
   endif ()
+  
   target_include_directories (fortranlib_test_F03 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
   set_target_properties (fortranlib_test_F03 PROPERTIES
       LINKER_LANGUAGE Fortran
@@ -281,7 +277,6 @@ if (HDF5_ENABLE_F2003)
         tH5T_F03.f90
         tHDF5_F03.f90
     )
-    TARGET_NAMING (fortranlib_test_F03-shared SHARED)
     TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03-shared SHARED " " " ")
     target_link_libraries (fortranlib_test_F03-shared
         ${HDF5_F90_TEST_LIBSH_TARGET}
@@ -301,8 +296,7 @@ if (HDF5_ENABLE_F2003)
 endif ()
 
 #-- Adding test for fflush1
-add_executable (fflush1 fflush1.f90)
-TARGET_NAMING (fflush1 STATIC)
+add_executable (fflush1 fflush1.F90)
 TARGET_FORTRAN_PROPERTIES (fflush1 STATIC " " " ")
 target_link_libraries (fflush1
     ${HDF5_F90_LIB_TARGET}
@@ -320,7 +314,6 @@ set_target_properties (fflush1 PROPERTIES
 )
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (fflush1-shared fflush1.f90)
-  TARGET_NAMING (fflush1-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fflush1-shared SHARED " " " ")
   target_link_libraries (fflush1-shared
       ${HDF5_F90_LIBSH_TARGET}
@@ -339,8 +332,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 endif ()
 
 #-- Adding test for fflush2
-add_executable (fflush2 fflush2.f90)
-TARGET_NAMING (fflush2 STATIC)
+add_executable (fflush2 fflush2.F90)
 TARGET_FORTRAN_PROPERTIES (fflush2 STATIC " " " ")
 target_link_libraries (fflush2
     ${HDF5_F90_TEST_LIB_TARGET}
@@ -358,7 +350,6 @@ set_target_properties (fflush2 PROPERTIES
 )
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (fflush2-shared fflush2.f90)
-  TARGET_NAMING (fflush2-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fflush2-shared SHARED " " " ")
   target_link_libraries (fflush2-shared
       ${HDF5_F90_TEST_LIBSH_TARGET}

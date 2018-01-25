@@ -728,12 +728,14 @@ if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
 endif ()
 
 ##############################################################################
-###    P L U G I N  T E S T S
+###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
 if (WIN32)
   set (CMAKE_SEP "\;")
+  set (BIN_REL_PATH "../../")
 else ()
   set (CMAKE_SEP ":")
+  set (BIN_REL_PATH "../")
 endif ()
 
 add_test (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:plugin>)
@@ -810,7 +812,7 @@ if (HDF5_TEST_VFD)
   macro (CHECK_VFD_TEST vfdtest vfdname resultcode)
     if ("${vfdtest}" STREQUAL "flush1" OR "${vfdtest}" STREQUAL "flush2")
       if ("${vfdname}" STREQUAL "multi" OR "${vfdname}" STREQUAL "split")
-        if (NOT BUILD_SHARED_LIBS AND NOT HDF5_BUILD_TYPE MATCHES Debug)
+        if (NOT BUILD_SHARED_LIBS AND NOT ${HDF_CFG_NAME} MATCHES "Debug")
           add_test (NAME VFD-${vfdname}-${vfdtest}
               COMMAND "${CMAKE_COMMAND}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}>"
@@ -1028,7 +1030,6 @@ endif ()
 if (HDF5_BUILD_GENERATORS)
   macro (ADD_H5_GENERATOR genfile)
     add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
-    TARGET_NAMING (${genfile} STATIC)
     TARGET_C_PROPERTIES (${genfile} STATIC " " " ")
     target_link_libraries (${genfile} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (${genfile} PROPERTIES FOLDER generator/test)
