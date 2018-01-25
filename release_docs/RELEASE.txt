@@ -508,6 +508,16 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5dump
+
+      h5dump would output an indented blank line in the filters section.
+
+      h5dump over used the h5tools_simple_prefix function, which is a
+      function intended to account for the data index (x,y,z) option.
+      Removed the function call for header information.
+
+      (ADB - 2018/01/25, HDFFV-10396)
+
     - h5repack
 
       h5repack incorrectly searched internal object table for name.
