@@ -259,7 +259,7 @@ if (HDF5_ENABLE_F2003)
   if (WIN32 AND MSVC)
     target_link_libraries (fortranlib_test_F03 "ws2_32.lib")
   endif ()
-  
+
   target_include_directories (fortranlib_test_F03 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
   set_target_properties (fortranlib_test_F03 PROPERTIES
       LINKER_LANGUAGE Fortran
@@ -296,7 +296,7 @@ if (HDF5_ENABLE_F2003)
 endif ()
 
 #-- Adding test for fflush1
-add_executable (fflush1 fflush1.F90)
+add_executable (fflush1 fflush1.f90)
 TARGET_FORTRAN_PROPERTIES (fflush1 STATIC " " " ")
 target_link_libraries (fflush1
     ${HDF5_F90_LIB_TARGET}
@@ -332,7 +332,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 endif ()
 
 #-- Adding test for fflush2
-add_executable (fflush2 fflush2.F90)
+add_executable (fflush2 fflush2.f90)
 TARGET_FORTRAN_PROPERTIES (fflush2 STATIC " " " ")
 target_link_libraries (fflush2
     ${HDF5_F90_TEST_LIB_TARGET}
