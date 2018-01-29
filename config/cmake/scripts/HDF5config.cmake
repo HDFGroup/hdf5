@@ -184,7 +184,7 @@ set (MODEL "Experimental")
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
-set (REPOSITORY_BRANCH "develop")
+set (REPOSITORY_BRANCH "hdf5_1_10_2")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
