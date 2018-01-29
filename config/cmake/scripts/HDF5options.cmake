@@ -21,6 +21,32 @@
 #set(CMAKE_GENERATOR_TOOLSET "Intel C++ Compiler 17.0")
 
 #############################################################################################
+####      Only build static libraries       ####
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
+####      Add PICC option on linux/mac       ####
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
+
+#############################################################################################
+####      fortran enabled      ####
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+    ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
+####      fortran disabled      ####
+set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+    ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
+set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=OFF")
+
+#############################################################################################
+####      java enabled      ####
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
+####      java disabled      ####
+set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
+
+#############################################################################################
+### change install prefix (default use INSTALLDIR value)
+set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALLDIR}")
+
+#############################################################################################
 ####      ext libraries       ####
 
 ### ext libs from tgz
