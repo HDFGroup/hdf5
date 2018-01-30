@@ -853,10 +853,9 @@ if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
 endif ()
 
-set (CMD $<TARGET_FILE:H5detect>)
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5Tinit.c
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5detect>
     ARGS > ${HDF5_BINARY_DIR}/H5Tinit.c
     DEPENDS H5detect
 )
@@ -867,10 +866,9 @@ if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
 endif ()
 
-set (CMD $<TARGET_FILE:H5make_libsettings>)
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5lib_settings.c
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5make_libsettings>
     ARGS > ${HDF5_BINARY_DIR}/H5lib_settings.c
     DEPENDS H5make_libsettings
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
@@ -905,18 +903,16 @@ set (install_targets ${HDF5_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_BINARY_DIR}/shared")
-  set (CMD $<TARGET_FILE:H5detect>)
   add_custom_command (
       OUTPUT ${HDF5_BINARY_DIR}/shared/H5Tinit.c
-      COMMAND ${CMD}
+      COMMAND $<TARGET_FILE:H5detect>
       ARGS > ${HDF5_BINARY_DIR}/shared/H5Tinit.c
       DEPENDS H5detect
       WORKING_DIRECTORY ${HDF5_BINARY_DIR}/shared
   )
-  set (CMD $<TARGET_FILE:H5make_libsettings>)
   add_custom_command (
       OUTPUT ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
-      COMMAND ${CMD}
+      COMMAND $<TARGET_FILE:H5make_libsettings>
       ARGS > ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
       DEPENDS H5make_libsettings
       WORKING_DIRECTORY ${HDF5_BINARY_DIR}
