@@ -4,7 +4,7 @@ PROJECT (HDF5_F90_SRC C CXX Fortran)
 #-----------------------------------------------------------------------------
 # configure def file for shared libs on windows
 if (WIN32)
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     if (MSVC)
       if (NOT H5_HAVE_PARALLEL)
         set (H5_NOPAREXP ";")
@@ -58,7 +58,7 @@ else ()
     endif ()
 endif ()
 if (WIN32 AND MSVC)
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     set_target_properties (H5test_FortranHavekind-shared
         PROPERTIES
             COMPILE_FLAGS "/MT"
@@ -93,7 +93,7 @@ add_executable (H5fortran_detect
     ${HDF5_F90_BINARY_DIR}/H5fortran_detect.f90
 )
 if (WIN32 AND MSVC)
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     set_target_properties (H5fortran_detect
         PROPERTIES
             COMPILE_FLAGS "/MT"
@@ -139,7 +139,7 @@ add_custom_command (
 )
 set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h PROPERTIES GENERATED TRUE)
 set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5fortran_types.f90 PROPERTIES GENERATED TRUE)
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   set (CMDSH $<TARGET_FILE:H5match_types>)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
@@ -197,7 +197,7 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 )
 set (install_targets ${HDF5_F90_C_LIB_TARGET})
 
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_F90_C_LIBSH_TARGET} SHARED ${f90CStub_C_SOURCES} ${f90CStub_C_SHHDRS})
   target_include_directories(${HDF5_F90_C_LIBSH_TARGET} PUBLIC ${HDF5_F90_BINARY_DIR}/shared)
   TARGET_C_PROPERTIES (${HDF5_F90_C_LIBSH_TARGET} SHARED " " " ")
