@@ -22,7 +22,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
     set_target_properties (h5clear_gentest PROPERTIES FOLDER tools)
     #add_test (NAME H5CLEAR-h5clear_gentest COMMAND $<TARGET_FILE:h5clear_gentest>)
 
-    add_subdirectory (${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/vds)
+    add_subdirectory (vds)
 
   endif ()
 

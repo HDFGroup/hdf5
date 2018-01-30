@@ -36,20 +36,20 @@ set (CMAKE_JAVA_INCLUDE_PATH "")
 #-----------------------------------------------------------------------------
 # Traverse source subdirectory
 #-----------------------------------------------------------------------------
-add_subdirectory (${HDF5_JAVA_SOURCE_DIR}/src ${HDF5_JAVA_BINARY_DIR}/src)
+add_subdirectory (src)
 
 #-----------------------------------------------------------------------------
 # Build the Java Examples
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_EXAMPLES)
-  add_subdirectory (${HDF5_JAVA_SOURCE_DIR}/examples ${HDF5_JAVA_BINARY_DIR}/examples)
+  add_subdirectory (examples)
 endif ()
 
 #-----------------------------------------------------------------------------
 # Testing
 #-----------------------------------------------------------------------------
 if (BUILD_TESTING)
-  add_subdirectory (${HDF5_JAVA_SOURCE_DIR}/test ${HDF5_JAVA_BINARY_DIR}/test)
+  add_subdirectory (test)
 endif ()
 
 #-----------------------------------------------------------------------------
