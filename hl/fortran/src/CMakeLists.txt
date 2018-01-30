@@ -109,10 +109,9 @@ set (HDF5_HL_F90_F_BASE_SOURCES
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.F90
 )
 
-set (CMD $<TARGET_FILE:H5HL_buildiface>)
 add_custom_command (
     OUTPUT ${HDF5_HL_F90_SRC_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5HL_buildiface>
     WORKING_DIRECTORY ${HDF5_HL_F90_SRC_BINARY_DIR}/static
     DEPENDS ${HDF5_HL_F90_F_BASE_SOURCES}
     COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 files"
@@ -126,10 +125,9 @@ set_source_files_properties (
     PROPERTIES GENERATED TRUE
 )
 if (BUILD_SHARED_LIBS)
-  set (CMDSH $<TARGET_FILE:H5HL_buildiface>)
   add_custom_command (
       OUTPUT ${HDF5_HL_F90_SRC_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_SRC_BINARY_DIR}/shared/H5TBff_gen.F90
-      COMMAND ${CMD}
+      COMMAND $<TARGET_FILE:H5HL_buildiface>
       WORKING_DIRECTORY ${HDF5_HL_F90_SRC_BINARY_DIR}/shared
       DEPENDS ${HDF5_HL_F90_F_BASE_SOURCES}
       COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 shared files"
