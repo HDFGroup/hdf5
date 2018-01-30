@@ -852,6 +852,9 @@ TARGET_C_PROPERTIES (H5detect STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
 endif ()
+if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set_property(TARGET H5detect PROPERTY LINK_FLAGS "-O0")
+endif ()
 
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5Tinit.c
@@ -864,6 +867,9 @@ add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
 TARGET_C_PROPERTIES (H5make_libsettings STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
+endif ()
+if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set_property(TARGET H5make_libsettings PROPERTY LINK_FLAGS "-O0")
 endif ()
 
 add_custom_command (
