@@ -664,10 +664,6 @@ cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATIC_ONLY  -  Build/use static libraries
-#     FORTRAN_LIBRARIES -  Build/use fortran libraries
-#     JAVA_LIBRARIES -  Build/use java libraries
-#     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION 1.10.2)
@@ -679,10 +675,6 @@ set (CTEST_SOURCE_VERSEXT "")
 #INSTALLDIR - HDF5-1.10.0 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
-#STATIC_ONLY - Default is YES
-#FORTRAN_LIBRARIES - Default is NO
-#JAVA_LIBRARIES - Default is NO
-#NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
