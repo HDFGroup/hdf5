@@ -48,7 +48,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])]) # use silent rules where a
 ##
 ## By default, it is enabled. Users can configure with
 ## --disable-maintainer-mode to prevent running the autotools.
-AM_MAINTAINER_MODE([disable])
+AM_MAINTAINER_MODE([enable])
 
 ## ----------------------------------------------------------------------
 ## Set prefix default (install directory) to a directory in the build area.
