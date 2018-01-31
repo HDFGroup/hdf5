@@ -147,7 +147,7 @@ H5FL_DEFINE(H5O_storage_virtual_name_seg_t);
 H5FL_DEFINE_STATIC(H5D_virtual_held_file_t);
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_check_mapping_pre
  *
@@ -217,7 +217,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_check_mapping_pre() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_check_mapping_post
  *
@@ -285,7 +285,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_check_mapping_post() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_update_min_dims
  *
@@ -344,7 +344,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_update_min_dims() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_check_min_dims
  *
@@ -389,7 +389,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_check_min_dims() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_copy_layout
  *
@@ -553,7 +553,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy_layout() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_reset_layout
  *
@@ -637,7 +637,7 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_reset_layout() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_copy
  *
@@ -683,7 +683,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_delete
  *
@@ -819,7 +819,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_open_source_dset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_reset_source_dset
  *
@@ -906,7 +906,7 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *virtual_ent,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_reset_source_dset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_str_append
  *
@@ -982,7 +982,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D__virtual_str_append() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_parse_source_name
  *
@@ -1098,7 +1098,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_parse_source_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_copy_parsed_name
  *
@@ -1155,7 +1155,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy_parsed_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_free_parsed_name
  *
@@ -1188,7 +1188,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_free_parsed_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_build_source_name
  *
@@ -1290,7 +1290,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_build_source_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_set_extent_unlim
  *
@@ -1718,7 +1718,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_set_extent_unlim() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_init_all
  *
@@ -1942,7 +1942,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_init_all() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_init
  *
@@ -2037,7 +2037,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_is_space_alloc
  *
@@ -2069,7 +2069,7 @@ H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_is_space_alloc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_pre_io
  *
@@ -2310,7 +2310,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_pre_io() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_post_io
  *
@@ -2360,7 +2360,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_post_io() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_read_one
  *
@@ -2417,7 +2417,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_read_one() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_read
  *
@@ -2550,7 +2550,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_read() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_write_one
  *
@@ -2609,7 +2609,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_write_one() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_write
  *
@@ -2686,7 +2686,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_flush
  *
@@ -2734,7 +2734,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_flush() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_hold_source_dset_files
  *
@@ -2812,7 +2812,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_hold_source_dset_files() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_refresh_source_dset
  *
@@ -2852,7 +2852,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_refresh_source_dsets() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_refresh_source_dsets
  *
@@ -2905,7 +2905,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_refresh_source_dsets() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_release_source_dset_files
  *

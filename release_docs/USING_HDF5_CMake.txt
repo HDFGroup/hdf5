@@ -289,9 +289,9 @@ endif()
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 
 #TAR_SOURCE - name of tarfile
-#if (NOT DEFINED TAR_SOURCE)
-#  set (CTEST_USE_TAR_SOURCE "HDF5Examples-1.10.1-Source")
-#endif ()
+#if(NOT DEFINED TAR_SOURCE)
+#  set(CTEST_USE_TAR_SOURCE "HDF5Examples-1.10.5-Source")
+#endif()
 
 ###############################################################################################################
 if(WIN32)

@@ -462,7 +462,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     return obj_list;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: parse_layout
  *
