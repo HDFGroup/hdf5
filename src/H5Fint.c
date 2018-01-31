@@ -99,7 +99,7 @@ H5FL_DEFINE(H5F_t);
 /* Declare a free list to manage the H5F_file_t struct */
 H5FL_DEFINE(H5F_file_t);
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_access_plist
  *
@@ -214,7 +214,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_access_plist() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_obj_count
  *
@@ -242,7 +242,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_obj_count() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_obj_ids
  *
@@ -269,7 +269,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_obj_ids() */
 
-
+
 /*---------------------------------------------------------------------------
  * Function: H5F_get_objects
  *
@@ -371,7 +371,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_objects() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_objects_cb
  *
@@ -787,7 +787,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__is_hdf5() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_new
  *
@@ -1051,7 +1051,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_new() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__dest
  *
@@ -1310,7 +1310,7 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_dest() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_open
  *
@@ -1728,7 +1728,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_flush_phase1
  *
@@ -1765,7 +1765,7 @@ H5F__flush_phase1(H5F_t *f, hid_t meta_dxpl_id)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase1() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__flush_phase2
  *
@@ -1827,7 +1827,7 @@ H5F__flush_phase2(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closi
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__flush
  *
@@ -1859,7 +1859,7 @@ H5F__flush(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_close
  *
@@ -1920,7 +1920,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_try_close
  *
@@ -2093,7 +2093,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_try_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_id
  *
@@ -2129,7 +2129,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_incr_nopen_objs
  *
@@ -2150,7 +2150,7 @@ H5F_incr_nopen_objs(H5F_t *f)
     FUNC_LEAVE_NOAPI(++f->nopen_objs)
 } /* end H5F_incr_nopen_objs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_decr_nopen_objs
  *
@@ -2171,7 +2171,7 @@ H5F_decr_nopen_objs(H5F_t *f)
     FUNC_LEAVE_NOAPI(--f->nopen_objs)
 } /* end H5F_decr_nopen_objs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_build_actual_name
  *
@@ -2293,7 +2293,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_build_actual_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_encode_len
  *
@@ -2330,7 +2330,7 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp/*in,out*/, haddr_t addr)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_encode_len() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_encode
  *
@@ -2354,7 +2354,7 @@ H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_encode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_decode_len
  *
@@ -2418,7 +2418,7 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp/*in,out*/, haddr_t *addr
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_decode_len() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_decode
  *
@@ -2445,7 +2445,7 @@ H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*o
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_decode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_grp_btree_shared
  *
@@ -2471,7 +2471,7 @@ H5F_set_grp_btree_shared(H5F_t *f, H5UC_t *rc)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_grp_btree_shared() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_sohm_addr
  *
@@ -2496,7 +2496,7 @@ H5F_set_sohm_addr(H5F_t *f, haddr_t addr)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_sohm_addr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_sohm_vers
  *
@@ -2521,7 +2521,7 @@ H5F_set_sohm_vers(H5F_t *f, unsigned vers)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_sohm_vers() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_sohm_nindexes
  *
@@ -2546,7 +2546,7 @@ H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_sohm_nindexes() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_store_msg_crt_idx
  *
@@ -2571,7 +2571,7 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_store_msg_crt_idx() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_file_image
  *
@@ -2687,7 +2687,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_file_image() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_track_metadata_read_retries
  *
@@ -2735,7 +2735,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_track_metadata_read_retries() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_set_retries
  *
@@ -2771,7 +2771,7 @@ H5F_set_retries(H5F_t *f)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_retries() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_object_flush_cb
  *
@@ -2801,7 +2801,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_object_flush_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__set_base_addr
  *
@@ -2828,7 +2828,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_base_addr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__set_eoa
  *
@@ -2855,7 +2855,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_eoa() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__set_paged_aggr
  *
@@ -2884,7 +2884,7 @@ done:
 } /* end H5F__set_paged_aggr() */
 
 #ifdef H5_HAVE_PARALLEL
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_coll_md_read
  *
@@ -2909,7 +2909,7 @@ H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
 } /* H5F_set_coll_md_read() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_latest_flags
  *
