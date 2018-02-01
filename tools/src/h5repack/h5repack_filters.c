@@ -84,7 +84,8 @@ static int aux_find_obj(const char* name, /* object name from traverse list */
         pack_opt_t *options,              /* repack options */
         pack_info_t *obj                  /*OUT*/) /* info about object to filter */
 {
-    char         *pdest;
+    char         *pdest = NULL;
+    char         *pname = NULL;
     int          result;
     unsigned int i;
 
@@ -94,11 +95,12 @@ static int aux_find_obj(const char* name, /* object name from traverse list */
             return (int) i;
         }
 
-        pdest = HDstrstr(name, options->op_tbl->objs[i].path);
-        result = (int) (pdest - name);
+        pdest = options->op_tbl->objs[i].path;
+        if (pdest[0] == '/') pdest++;
+        pname = name;
+        if (pname[0] == '/') pname++;
 
-        /* found at position 1, meaning without '/' */
-        if (pdest != NULL && result == 1) {
+        if (HDstrcmp(pdest, pname) == 0) {
             *obj = options->op_tbl->objs[i];
             return (int) i;
         }

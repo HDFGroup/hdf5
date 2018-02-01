@@ -88,14 +88,7 @@ endforeach ()
 set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${HDF5_JAVA_TEST_LIB_TARGET}_JAR_FILE}")
 set (testfilter "OK (598 tests)")
 
-if (HDF5_BUILD_TYPE MATCHES Debug)
-  if (WIN32)
-    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
-  else ()
-    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
-  endif ()
-endif ()
-
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET},OUTPUT_NAME$<$<CONFIG:Debug>:_DEBUG>>;")
 add_test (
   NAME JUnit-interface-clearall-objects
   COMMAND    ${CMAKE_COMMAND}
