@@ -116,6 +116,16 @@ Bug Fixes since HDF5-1.8.20
     -------------
     - CMake
 
+      Update CMake commands configuration.
+
+      A number of improvements were made to the CMake commands. Most
+      changes simplify usage or eliminate unused constructs. Also,
+      some changes support better cross-platform support.
+
+      (ADB - 2018/02/01, HDFFV-10398)
+
+    - CMake
+
       Correct usage of CMAKE_BUILD_TYPE variable.
 
       The use of the CMAKE_BUILD_TYPE is incorrect for multi-config
