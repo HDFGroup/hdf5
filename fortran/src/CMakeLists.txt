@@ -80,10 +80,9 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   )
 endif ()
 
-set (CMD $<TARGET_FILE:H5test_FortranHavekind>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fortran_detect.f90
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5test_FortranHavekind>
     ARGS > ${HDF5_F90_BINARY_DIR}/H5fortran_detect.f90
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5test_FortranHavekind
@@ -106,10 +105,9 @@ if (WIN32 AND MSVC)
 endif ()
 set_target_properties (H5fortran_detect PROPERTIES LINKER_LANGUAGE Fortran)
 
-set (CMD $<TARGET_FILE:H5fortran_detect>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5fortran_detect>
     ARGS > ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5fortran_detect
@@ -129,22 +127,20 @@ add_executable (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
 )
-set (CMD $<TARGET_FILE:H5match_types>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
            ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.f90
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5match_types>
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
     DEPENDS H5match_types
 )
 set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h PROPERTIES GENERATED TRUE)
 set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5fortran_types.f90 PROPERTIES GENERATED TRUE)
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  set (CMDSH $<TARGET_FILE:H5match_types>)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
              ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.f90
-      COMMAND ${CMDSH}
+      COMMAND $<TARGET_FILE:H5match_types>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
       DEPENDS H5match_types
   )
