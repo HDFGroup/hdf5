@@ -74,10 +74,9 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-set (CMD $<TARGET_FILE:H5_test_buildiface>)
 add_custom_command (
     OUTPUT ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5_test_buildiface>
     WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static
     DEPENDS H5_test_buildiface
     COMMENT "Generating the tf_gen.F90 file"
@@ -88,10 +87,9 @@ add_custom_target (H5testgen ALL
 set_source_files_properties (${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90 PROPERTIES GENERATED TRUE)
 
 if (BUILD_SHARED_LIBS)
-  set (CMDSH $<TARGET_FILE:H5_test_buildiface>)
   add_custom_command (
       OUTPUT ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
-      COMMAND ${CMDSH}
+      COMMAND $<TARGET_FILE:H5_test_buildiface>
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared
       DEPENDS H5_test_buildiface
       COMMENT "Generating the tf_gen.F90 shared file"
