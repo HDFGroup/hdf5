@@ -567,7 +567,7 @@ DONE:
  *  dims          - one-demnsional array of size 2
  *  dims[0] = MAXLENGTH
  *  dims[1] = number of elements of VL type
- *  len           - array element lenghts
+ *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -641,7 +641,7 @@ DONE:
  *  dims[1] = number of elements of VL type
  * OUTPUTS
  *  buf           - data buffer
- *  len           - array element lenghts
+ *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -882,7 +882,7 @@ h5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
  *  dims          - one-demnsional array of size 2
  *  dims[0] = MAXLENGTH
  *  dims[1] = number of elements of VL type
- *  len           - array element lenghts
+ *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -956,7 +956,7 @@ DONE:
  *  dims[1] = number of elements of VL type
  * OUTPUTS
  *  buf           - data buffer
- *  len           - array element lenghts
+ *  len           - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -1209,7 +1209,7 @@ h5dwrite_f_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
  *  dims[1] = number of elements of VL type
  * OUTPUTS
  *  buf - data buffer
- *  len - array element lenghts
+ *  len - array element lengths
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
