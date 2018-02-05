@@ -225,7 +225,7 @@ static void gent_compressed(hid_t loc_id)
 /*-------------------------------------------------------------------------
  * Function:    gent_named_vl
  *
- * Purpose:     Generate a variable lenght named datatype for a dataset in
+ * Purpose:     Generate a variable length named datatype for a dataset in
                 LOC_ID
  *
  *-------------------------------------------------------------------------
