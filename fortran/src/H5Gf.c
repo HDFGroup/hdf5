@@ -69,11 +69,11 @@ h5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
     else {
       /* Create the group creation property list */
       if((c_gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
-    goto DONE;
+          goto DONE;
 
       /* Set the local heap size hint */
       if(H5Pset_local_heap_size_hint(c_gcpl_id, (size_t)*size_hint) < 0)
-    goto DONE;
+          goto DONE;
 
       /* Create the group */
       c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name, H5P_DEFAULT, c_gcpl_id, H5P_DEFAULT);
