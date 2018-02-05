@@ -9,9 +9,7 @@ add_definitions (${HDF_EXTRA_C_FLAGS})
 # --------------------------------------------------------------------
 # If testing was NOT enabled, then we need to build the tools library
 # --------------------------------------------------------------------
-if (NOT BUILD_TESTING)
-  add_subdirectory (lib)
-endif ()
+add_subdirectory (lib)
 
 #-----------------------------------------------------------------------------
 # Setup include Directories
