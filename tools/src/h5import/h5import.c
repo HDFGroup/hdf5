@@ -1405,7 +1405,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
     const char *err14a = "COMPRESSION-PARAM keyword appears twice in %s.\n";
     const char *err14b = "Error in retrieving the compression parameter from %s.\n";
     const char *err15a = "EXTERNAL-STORAGE keyword appears twice in %s.\n";
-    const char *err15b = "Error in retrieving the external storage paramters from %s.\n";
+    const char *err15b = "Error in retrieving the external storage parameters from %s.\n";
     const char *err16a = "MAXIMUM-DIMENSIONS keyword appears twice in %s.\n";
     const char *err16b = "MAXIMUM-DIMENSIONS cannot appear before DIMENSION-SIZES are provided.\n";
     const char *err16c = "Error in retrieving the maximum dimension sizes from %s.\n";
@@ -3690,7 +3690,7 @@ static int getCompressionParameter(struct Input *in, FILE *strm)
 {
     /*  currently supports only GZIP */
     /*  can be extended by adding more values to COMPRESSION-TYPE and */
-    /*  handling the paramters here by adding more cases  */
+    /*  handling the parameters here by adding more cases  */
 
     int         ival;
     const char *err1 = "Unable to get integer value.\n";

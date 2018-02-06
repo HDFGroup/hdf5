@@ -725,7 +725,6 @@ if (BUILD_TESTING)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
-      add_subdirectory (tools/lib)
       add_subdirectory (test)
     endif ()
     if (H5_HAVE_PARALLEL)

@@ -303,7 +303,7 @@ h5tbmake_table_c(size_t_f *namelen1,
                   hid_t_f *field_types,
                   hsize_t_f *chunk_size,
                   int_f *compress,
-                  size_t_f *char_len_field_names, /* field_names lenghts */
+                  size_t_f *char_len_field_names, /* field_names lengths */
                   size_t_f *max_char_size_field_names, /* char len of fields */
                   _fcd buf);          /* field_names */
 
@@ -334,7 +334,7 @@ h5tbmake_table_ptr_c(size_t_f *namelen1,
 		     hsize_t_f *chunk_size,
 		     void *fill_data,
 		     int_f *compress,
-		     size_t_f *char_len_field_names, /* field_names lenghts */
+		     size_t_f *char_len_field_names, /* field_names lengths */
 		     size_t_f *max_char_size_field_names, /* char len of fields */
 		     char *field_names, /* field_names */
 		     void *data);
