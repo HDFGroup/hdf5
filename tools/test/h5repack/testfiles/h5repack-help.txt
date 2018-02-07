@@ -6,12 +6,12 @@ usage: h5repack [OPTIONS] file1 file2
    -v, --verbose           Verbose mode, print object information
    -V, --version           Print version number and exit
    -n, --native            Use a native HDF5 type when repacking
-   -E  --enable-error-stack   Prints messages from the HDF5 error stack as they occur
+   --enable-error-stack    Prints messages from the HDF5 error stack as they occur
    -L, --latest            Use latest version of file format
                            This option will take precedence over the -j and -k options
-   -j BOUND, --low=BOUND   The low bound for library release versions to use when creating
+   --low=BOUND             The low bound for library release versions to use when creating
                            objects in the file (default is H5F_LIBVER_EARLIEST)
-   -k BOUND, --high=BOUND  The high bound for library release versions to use when creating
+   --high=BOUND            The high bound for library release versions to use when creating
                            objects in the file (default is H5F_LIBVER_LATEST)
    -c L1, --compact=L1     Maximum number of links in header messages
    -d L2, --indexed=L2     Minimum number of links in the indexed format
@@ -140,7 +140,7 @@ Examples of use:
    Using latest file format with maximum compact group size of 10 and
    and minimum shared datatype size of 20
 
-5) h5repack -j 0 -k 1 file1 file2
+5) h5repack --low=0 --high=1 file1 file2
 
    Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via H5Pset_libver_bounds() when
    creating the repacked file: file2

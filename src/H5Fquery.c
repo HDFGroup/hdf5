@@ -109,7 +109,7 @@ H5F_get_intent(const H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-unsigned
+H5F_libver_t
 H5F_get_low_bound(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -134,7 +134,7 @@ H5F_get_low_bound(const H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-unsigned
+H5F_libver_t
 H5F_get_high_bound(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */

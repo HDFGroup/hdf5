@@ -215,7 +215,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     if(H5T_set_loc(attr->shared->dt, loc->oloc->file, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
-    /* Set the latest format for datatype, if requested */
+    /* Set the version for datatype */
     if(H5T_set_version(loc->oloc->file, attr->shared->dt) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set version of datatype")
 
