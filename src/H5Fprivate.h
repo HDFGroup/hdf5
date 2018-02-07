@@ -484,8 +484,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_FAMILY_NEWSIZE_NAME             "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
 #define H5F_ACS_FAMILY_TO_SEC2_NAME             "family_to_sec2" /* Whether to convert family to sec2 driver.  (private property only used by h5repart) */
 #define H5F_ACS_MULTI_TYPE_NAME                 "multi_type"    /* Data type in multi file driver */
-#define H5F_ACS_FORMAT_LOW_BOUND_NAME           "low_bound"     /* 'low' bound of library format versions */
-#define H5F_ACS_FORMAT_HIGH_BOUND_NAME          "high_bound"    /* 'high' bound of library format versions */
+#define H5F_ACS_LIBVER_LOW_BOUND_NAME           "libver_low_bound"     /* 'low' bound of library format versions */
+#define H5F_ACS_LIBVER_HIGH_BOUND_NAME          "libver_high_bound"    /* 'high' bound of library format versions */
 #define H5F_ACS_WANT_POSIX_FD_NAME              "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address */
 #define H5F_ACS_METADATA_READ_ATTEMPTS_NAME     "metadata_read_attempts" /* # of metadata read attempts */
 #define H5F_ACS_OBJECT_FLUSH_CB_NAME            "object_flush_cb"      /* Object flush callback */
@@ -720,9 +720,9 @@ H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
 
-/* Functions than retrieve values from the file struct */
-H5_DLL unsigned H5F_get_low_bound(const H5F_t *f);
-H5_DLL unsigned H5F_get_high_bound(const H5F_t *f);
+/* Functions that retrieve values from the file struct */
+H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
+H5_DLL H5F_libver_t H5F_get_high_bound(const H5F_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL char *H5F_get_open_name(const H5F_t *f);
 H5_DLL char *H5F_get_actual_name(const H5F_t *f);

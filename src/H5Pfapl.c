@@ -142,16 +142,16 @@
 #define H5F_ACS_MULTI_TYPE_DEC                  H5P__facc_multi_type_dec
 
 /* Definition for "low" bound of library format versions */
-#define H5F_ACS_FORMAT_LOW_BOUND_SIZE       sizeof(H5F_libver_t)
-#define H5F_ACS_FORMAT_LOW_BOUND_DEF        H5F_LIBVER_EARLIEST
-#define H5F_ACS_FORMAT_LOW_BOUND_ENC        H5P__facc_libver_type_enc
-#define H5F_ACS_FORMAT_LOW_BOUND_DEC        H5P__facc_libver_type_dec
+#define H5F_ACS_LIBVER_LOW_BOUND_SIZE       sizeof(H5F_libver_t)
+#define H5F_ACS_LIBVER_LOW_BOUND_DEF        H5F_LIBVER_EARLIEST
+#define H5F_ACS_LIBVER_LOW_BOUND_ENC        H5P__facc_libver_type_enc
+#define H5F_ACS_LIBVER_LOW_BOUND_DEC        H5P__facc_libver_type_dec
 
 /* Definition for "high" bound of library format versions */
-#define H5F_ACS_FORMAT_HIGH_BOUND_SIZE      sizeof(H5F_libver_t)
-#define H5F_ACS_FORMAT_HIGH_BOUND_DEF       H5F_LIBVER_LATEST
-#define H5F_ACS_FORMAT_HIGH_BOUND_ENC       H5P__facc_libver_type_enc
-#define H5F_ACS_FORMAT_HIGH_BOUND_DEC       H5P__facc_libver_type_dec
+#define H5F_ACS_LIBVER_HIGH_BOUND_SIZE      sizeof(H5F_libver_t)
+#define H5F_ACS_LIBVER_HIGH_BOUND_DEF       H5F_LIBVER_LATEST
+#define H5F_ACS_LIBVER_HIGH_BOUND_ENC       H5P__facc_libver_type_enc
+#define H5F_ACS_LIBVER_HIGH_BOUND_DEC       H5P__facc_libver_type_dec
 
 /* Definition for whether to query the file descriptor from the core VFD
  * instead of the memory address.  (Private to library)
@@ -363,8 +363,8 @@ static const hsize_t H5F_def_family_newsize_g = H5F_ACS_FAMILY_NEWSIZE_DEF;     
 static const hbool_t H5F_def_family_to_sec2_g = H5F_ACS_FAMILY_TO_SEC2_DEF;        /* Default ?? for family VFD */
 static const H5FD_mem_t H5F_def_mem_type_g = H5F_ACS_MULTI_TYPE_DEF;               /* Default file space type for multi VFD */
 
-static const H5F_libver_t H5F_def_format_low_bound_g = H5F_ACS_FORMAT_LOW_BOUND_DEF;    /* Default setting for "low" bound of format version */
-static const H5F_libver_t H5F_def_format_high_bound_g = H5F_ACS_FORMAT_HIGH_BOUND_DEF;  /* Default setting for "high" bound of format version */
+static const H5F_libver_t H5F_def_libver_low_bound_g = H5F_ACS_LIBVER_LOW_BOUND_DEF;    /* Default setting for "low" bound of format version */
+static const H5F_libver_t H5F_def_libver_high_bound_g = H5F_ACS_LIBVER_HIGH_BOUND_DEF;  /* Default setting for "high" bound of format version */
 
 static const hbool_t H5F_def_want_posix_fd_g = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
 static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
@@ -505,14 +505,14 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 'low' bound of library format versions */
-    if(H5P_register_real(pclass, H5F_ACS_FORMAT_LOW_BOUND_NAME, H5F_ACS_FORMAT_LOW_BOUND_SIZE, &H5F_def_format_low_bound_g,
-            NULL, NULL, NULL, H5F_ACS_FORMAT_LOW_BOUND_ENC, H5F_ACS_FORMAT_LOW_BOUND_DEC,
+    if(H5P_register_real(pclass, H5F_ACS_LIBVER_LOW_BOUND_NAME, H5F_ACS_LIBVER_LOW_BOUND_SIZE, &H5F_def_libver_low_bound_g,
+            NULL, NULL, NULL, H5F_ACS_LIBVER_LOW_BOUND_ENC, H5F_ACS_LIBVER_LOW_BOUND_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 'high' bound of library format versions */
-    if(H5P_register_real(pclass, H5F_ACS_FORMAT_HIGH_BOUND_NAME, H5F_ACS_FORMAT_HIGH_BOUND_SIZE, &H5F_def_format_high_bound_g,
-            NULL, NULL, NULL, H5F_ACS_FORMAT_HIGH_BOUND_ENC, H5F_ACS_FORMAT_HIGH_BOUND_DEC,
+    if(H5P_register_real(pclass, H5F_ACS_LIBVER_HIGH_BOUND_NAME, H5F_ACS_LIBVER_HIGH_BOUND_SIZE, &H5F_def_libver_high_bound_g,
+            NULL, NULL, NULL, H5F_ACS_LIBVER_HIGH_BOUND_ENC, H5F_ACS_LIBVER_HIGH_BOUND_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -2374,9 +2374,9 @@ H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_t high)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_FORMAT_LOW_BOUND_NAME, &low) < 0)
+    if(H5P_set(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &low) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set low bound for library format versions")
-    if(H5P_set(plist, H5F_ACS_FORMAT_HIGH_BOUND_NAME, &high) < 0)
+    if(H5P_set(plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &high) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set high bound for library format versions")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2412,12 +2412,12 @@ H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low/*out*/,
     
      /* Get values */
     if(low) {
-        if(H5P_get(plist, H5F_ACS_FORMAT_LOW_BOUND_NAME, low) < 0)
+        if(H5P_get(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, low) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get low bound for library format versions")
     }
 
     if(high) {
-        if(H5P_get(plist, H5F_ACS_FORMAT_HIGH_BOUND_NAME, high) < 0)
+        if(H5P_get(plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, high) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get high bound for library format versions")
     }
 
