@@ -929,10 +929,10 @@ H5O_fill_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
     if(fill->type) {
         H5T_debug(fill->type, stream);
-        fprintf(stream, "\n");
+        HDfprintf(stream, "\n");
     } /* end if */
     else
-        fprintf(stream, "<dataset type>\n");
+        HDfprintf(stream, "<dataset type>\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_fill_debug() */
