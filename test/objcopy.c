@@ -18,8 +18,17 @@
  * Purpose:	Test H5Ocopy().
  */
 
+#include "hdf5.h"
 #include "testhdf5.h"
 #include "H5srcdir.h"
+
+#include "H5Bprivate.h"
+#include "H5Iprivate.h"
+#include "H5Pprivate.h"
+
+#define H5F_FRIEND      /*suppress error about including H5Fpkg */
+#define H5F_TESTING
+#include "H5Fpkg.h"     /* File access                          */
 
 /*
  * This file needs to access private information from the H5S package.
@@ -45,12 +54,22 @@
 #define H5D_TESTING
 #include "H5Dpkg.h"		/* Datasets     			*/
 
+/*
+ * This file needs to access private information from the H5O package.
+ * This file also needs to access the dataspace testing code.
+ */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#define H5O_TESTING
+#include "H5Opkg.h"		/* Object header 			*/
+
 
 const char *FILENAME[] = {
     "objcopy_src",
     "objcopy_dst",
     "objcopy_ext",
     "objcopy_src2",
+    "verbound_src",
+    "verbound_dst",
     NULL
 };
 
@@ -127,6 +146,7 @@ const char *FILENAME[] = {
 #define NAME_LINK_EXTERN_DANGLE "/g_links/external_link_to_nowhere"
 #define NAME_LINK_EXTERN_DANGLE2        "/g_links2/external_link_to_nowhere"
 #define NAME_OLD_FORMAT		"/dset1"
+#define NAME_DSET_NULL      "DSET_NULL"
 
 #define NAME_BUF_SIZE   1024
 #define ATTR_NAME_LEN 80
@@ -2086,6 +2106,184 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_simple */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_dataset_versionbounds
+ *
+ * Purpose:     Verify copying dataset works as expected in various version
+ *              bound combination.
+ *
+ * Description:
+ *              Create a simple dataset in SRC file using default versions.
+ *              For each valid version bound combination, create a DST file,
+ *              and attempt to copy the SRC dataset to the DST file.
+ *              When copying fails, verify that the failure is a result of
+ *              the invalid bounds, that is, DST has lower bounds than SRC.
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
+{
+    hid_t fid_src = -1, fid_dst = -1;   /* Source and destination file IDs */
+    hid_t fapl_dst = -1;                /* File access plist for dest file */
+    hid_t sid = -1;                     /* Dataspace ID */
+    hid_t did_src = -1, did_dst = -1;   /* Source and destination dataset IDs */
+    int buf[DIM_SIZE_1][DIM_SIZE_2];    /* Buffer for writing data */
+    hsize_t dim2d[2];                   /* Dataset dimensions */
+    char src_fname[NAME_BUF_SIZE];      /* Name of source file */
+    char dst_fname[NAME_BUF_SIZE];      /* Name of destination file */
+    H5F_libver_t low, high;             /* File format bounds */
+    H5F_libver_t low_src, high_src;     /* Source file format bounds */
+    unsigned srcdset_fillversion;       /* Fill version of source dataset */
+    hbool_t valid_high = FALSE;         /* TRUE if high bound is valid */
+    int i, j;                           /* Local index variables */
+    H5D_t *dsetp = NULL;                /* Pointer to internal dset structure */
+    herr_t ret;                         /* Generic return value */
+
+    TESTING("H5Ocopy(): simple dataset with version bounds");
+
+    /* Initialize write buffer */
+    for (i=0; i<DIM_SIZE_1; i++)
+        for (j=0; j<DIM_SIZE_2; j++)
+            buf[i][j] = 10000 + 100*i+j;
+
+    /* Create a file access property list for destination file */
+    if ((fapl_dst = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[4], fapl_src, src_fname, sizeof src_fname);
+    h5_fixname(FILENAME[5], fapl_dst, dst_fname, sizeof dst_fname);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* Create source file */
+    fid_src = H5Fcreate(src_fname, H5F_ACC_TRUNC, fcpl_src, fapl_src);
+    if (fid_src < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim2d[0] = DIM_SIZE_1;
+    dim2d[1] = DIM_SIZE_2;
+
+    /* Create 2D dataspace */
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+
+    /* Create 2D int dataset in SRC file */
+    did_src = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (did_src < 0) TEST_ERROR
+
+    /* Write data into SRC file */
+    ret = H5Dwrite(did_src, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    if (ret < 0) TEST_ERROR
+
+    /* Get the internal dset ptr to get the fill version for verifying later */
+    if ((dsetp = (H5D_t *)H5I_object(did_src)) == NULL) TEST_ERROR
+    srcdset_fillversion = dsetp->shared->dcpl_cache.fill.version;
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    /* Close the dataset */
+    if(H5Dclose(did_src) < 0) TEST_ERROR
+
+    /* Close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* Open the source file with read-only */
+    fid_src = H5Fopen(src_fname, H5F_ACC_RDONLY, fapl_src);
+    if (fid_src < 0) TEST_ERROR
+
+    /* Loop through all the combinations of low/high library format bounds,
+       skipping invalid combinations.  Create a destination file and copy the
+       source dataset to it, then verify */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+
+            /* Set version bounds */
+            H5E_BEGIN_TRY {
+                ret = H5Pset_libver_bounds(fapl_dst, low, high);
+            } H5E_END_TRY;
+
+            if (ret < 0) /* Invalid low/high combinations */
+                continue;
+
+            /* Create destination file */
+            fid_dst = H5Fcreate(dst_fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_dst);
+            if (fid_dst < 0) TEST_ERROR
+
+            /* Create an uncopied object in destination file so that addresses
+               in source and destination files aren't the same */
+            if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+            /* Try to copy the dataset */
+            H5E_BEGIN_TRY {
+                ret = H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT);
+            } H5E_END_TRY;
+
+            /* If copy failed, check if the failure is expected */
+            if (ret < 0)
+            {
+                /* Failure is valid if fill version of source dataset is
+                   greater than destination */
+                if (srcdset_fillversion <= H5O_fill_ver_bounds[high])
+                    TEST_ERROR
+
+                /* Close the DST file before continue */
+                if(H5Fclose(fid_dst) < 0) TEST_ERROR
+                continue;
+            }
+
+            /* Close the DST file */
+            if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+            /* Open destination file */
+            fid_dst = H5Fopen(dst_fname, H5F_ACC_RDWR, fapl_dst);
+            if (fid_dst < 0) TEST_ERROR
+
+            /* Open the datasets to compare */
+            did_src = H5Dopen2(fid_src, NAME_DATASET_SIMPLE, H5P_DEFAULT);
+            if (did_src < 0) TEST_ERROR
+            did_dst = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT);
+            if (did_dst < 0) TEST_ERROR
+
+            /* Check if the datasets are equal */
+            if (compare_datasets(did_src, did_dst, H5P_DEFAULT, buf) != TRUE)
+                TEST_ERROR
+
+            /* Close the datasets */
+            if(H5Dclose(did_dst) < 0) TEST_ERROR
+            if(H5Dclose(did_src) < 0) TEST_ERROR
+
+            /* Close the DST file */
+            if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+        } /* for high */
+    } /* for low */
+
+    /* Close property list and source file */
+    if (H5Pclose(fapl_dst) < 0) TEST_ERROR
+    if (H5Fclose(fid_src) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Dclose(did_dst);
+    	H5Dclose(did_src);
+    	H5Sclose(sid);
+    	H5Pclose(fapl_dst);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+
+    return 1;
+} /* end test_copy_dataset_versionbounds */
 
 
 /*-------------------------------------------------------------------------
@@ -14017,6 +14215,7 @@ main(void)
 
         /* The tests... */
         nerrors += test_copy_dataset_simple(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
+        nerrors += test_copy_dataset_versionbounds(fcpl_src, src_fapl);
         nerrors += test_copy_dataset_simple_samefile(fcpl_src, src_fapl);
 
         /* Test with dataset opened in the file or not */
