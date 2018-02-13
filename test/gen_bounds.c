@@ -268,8 +268,10 @@ error:
  * gen_latest_latest() creates file "bounds_latest_latest.h5"
  *
  * File contents:
- * - Version 3 superblock (H5Fcreate with H5F_ACC_SWMR_WRITE)
+ * - Version 3 superblock (triggered by H5Fcreate with H5F_ACC_SWMR_WRITE)
  * - A chunked dataset with layout version 4, "DS_chunked_layout_4". (H5Pset_chunk_opts)
+ *
+ * NOTE: As of Feb 2018, latest is 1.10.
  *
  * Return: SUCCEED/FAIL
  *
