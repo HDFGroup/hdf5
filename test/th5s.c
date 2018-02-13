@@ -2400,7 +2400,7 @@ test_h5s_bug1(void)
  *
  *-------------------------------------------------------------------------
  */
-#define VERBFNAME        "tverbounds_dspace.h5"
+#define VERBFNAME       "tverbounds_dspace.h5"
 #define BASIC_DSET      "Basic Dataset"
 #define LATEST_DSET     "Latest Dataset"
 static void
@@ -2415,9 +2415,6 @@ test_versionbounds(void)
     H5F_libver_t low, high; /* File format bounds */
     H5S_t *spacep = NULL;   /* Pointer to internal dataspace */
     herr_t ret = 0;         /* Generic return value */
-hid_t sid = -1;
-H5S_t *spaceptr = NULL;
-
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Version Bounds\n"));
