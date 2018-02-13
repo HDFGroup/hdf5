@@ -4953,6 +4953,134 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     CHECK(ret, FAIL, "H5Pclose");
 } /* end test_libver_bounds_real() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_libver_bounds_open
+ *
+ * Purpose:     Tests opening latest file with various low/high bounds.
+ *
+ * Return:      Success:	0
+ *              Failure:	number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+#define VERBFNAME        "tverbounds_dspace.h5"
+#define VERBDSNAME       "dataset 1"
+#define SPACE1_DIM1     3
+static int
+test_libver_bounds_open(void)
+{
+    hid_t file = -1;    /* File ID */
+    hid_t space = -1;   /* Dataspace ID */
+    hid_t dset = -1;    /* Dataset ID */
+    hid_t fapl = -1;    /* File access property list ID */
+    hid_t new_fapl = -1;/* File access property list ID for reopened file */
+    hid_t dcpl = -1;    /* Dataset creation property list ID */
+    hsize_t dim[1] = {SPACE1_DIM1}; /* Dataset dimensions */
+    H5F_libver_t low, high;         /* File format bounds */
+    hsize_t chunk_dim[1] = {SPACE1_DIM1}; /* Chunk dimensions */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Opening File in Various Version Bounds\n"));
+
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Create dataspace */
+    space = H5Screate_simple(1, dim, NULL);
+    CHECK(space, FAIL, "H5Screate_simple");
+
+    /* Create a dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Create and set chunk plist */
+    ret = H5Pset_chunk(dcpl, 1, chunk_dim);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+    ret = H5Pset_deflate(dcpl, 9);
+    CHECK(ret, FAIL, "H5Pset_deflate");
+    ret = H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
+    CHECK(ret, FAIL, "H5Pset_chunk_opts");
+
+    /* Create a file with (LATEST, LATEST) bounds, create a layout version 4
+       dataset, then close the file */
+
+    /* Set version bounds to (LATEST, LATEST) */
+    low = H5F_LIBVER_LATEST;
+    high = H5F_LIBVER_LATEST;
+    ret = H5Pset_libver_bounds(fapl, low, high);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create the file */
+    file = H5Fcreate(VERBFNAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create dataset */
+    dset = H5Dcreate2(file, VERBDSNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
+
+    /* Close dataset and file */
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Attempt to open latest file with (earliest, v18), should fail */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18);
+    H5E_BEGIN_TRY {
+        file = H5Fopen(VERBFNAME, H5F_ACC_RDONLY, fapl);
+    } H5E_END_TRY;
+    VERIFY(file, FAIL, "Attempted to open latest file with earliest version");
+
+    /* Attempt to open latest file with (v18, v18), should fail */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_V18);
+    H5E_BEGIN_TRY {
+        file = H5Fopen(VERBFNAME, H5F_ACC_RDONLY, fapl);
+    } H5E_END_TRY;
+    VERIFY(file, FAIL, "Attempted to open latest file with v18 bounds");
+
+    /* Opening VERBFNAME in these combination should succeed.
+       For each low bound, verify that it is upgraded properly */
+    high = H5F_LIBVER_LATEST;
+    for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++)
+    {
+        H5F_libver_t new_low = H5F_LIBVER_EARLIEST;
+
+        /* Set version bounds for opening file */
+        ret = H5Pset_libver_bounds(fapl, low, high);
+        CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+        /* Open the file */
+        file = H5Fopen(VERBFNAME, H5F_ACC_RDONLY, fapl);
+        CHECK(file, FAIL, "H5Fopen");
+
+        /* Get the new file access property */
+        new_fapl = H5Fget_access_plist(file);
+        CHECK(new_fapl, FAIL, "H5Fget_access_plist");
+
+        /* Get new low bound and verify that it has been upgraded properly */
+        ret = H5Pget_libver_bounds(new_fapl, &new_low, NULL);
+        CHECK(ret, FAIL, "H5Pget_libver_bounds");
+        VERIFY(new_low, H5F_LIBVER_LATEST, "Low bound should be upgraded to H5F_LIBVER_LATEST");
+
+	    ret = H5Pclose(new_fapl);
+        CHECK(ret, FAIL, "H5Pclose");
+	    ret = H5Fclose(file);
+        CHECK(ret, FAIL, "H5Fclose");
+    } /* for low */
+
+    /* Close dataspace and property lists */
+    ret = H5Sclose(space);
+    CHECK(ret, FAIL, "H5Sclose");
+	ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+	ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+} /* end test_libver_bounds_open() */
+
+
 /****************************************************************
 **
 **  test_libver_bounds():
@@ -4970,6 +5098,7 @@ test_libver_bounds(void)
     /* Run the tests */
     test_libver_bounds_real(H5F_LIBVER_EARLIEST, 1, H5F_LIBVER_LATEST, 2);
     test_libver_bounds_real(H5F_LIBVER_LATEST, 2, H5F_LIBVER_EARLIEST, 2);
+    test_libver_bounds_open();
 } /* end test_libver_bounds() */
 
 /**************************************************************************************
@@ -6249,6 +6378,7 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
      * H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, H5T_BITFIELD, H5T_OPAQUE, H5T_REFERENCE:
      *  --the library will only use basic version 
      */
+
     if(dtype->shared->type == H5T_COMPOUND || 
        dtype->shared->type == H5T_ENUM || 
        dtype->shared->type == H5T_ARRAY) {
