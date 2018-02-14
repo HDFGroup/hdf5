@@ -11,110 +11,108 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:	Robb Matzke <matzke@llnl.gov>
- *		Friday, October 10, 1997
+/* Programmer:    Robb Matzke <matzke@llnl.gov>
+ *        Friday, October 10, 1997
  *
- * Purpose:	Hyperslab operations are rather complex, so this file
- *		attempts to test them extensively so we can be relatively
- *		sure they really work.	We only test 1d, 2d, and 3d cases
- *		because testing general dimensionalities would require us to
- *		rewrite much of the hyperslab stuff.
+ * Purpose:    Hyperslab operations are rather complex, so this file
+ *        attempts to test them extensively so we can be relatively
+ *        sure they really work.    We only test 1d, 2d, and 3d cases
+ *        because testing general dimensionalities would require us to
+ *        rewrite much of the hyperslab stuff.
  */
 #include "h5test.h"
-#include "H5private.h"
-#include "H5Eprivate.h"
 #include "H5VMprivate.h"
 
-#define TEST_SMALL	0x0001
-#define TEST_MEDIUM	0x0002
+#define TEST_SMALL    0x0001
+#define TEST_MEDIUM    0x0002
 
-#define VARIABLE_SRC	0
-#define VARIABLE_DST	1
-#define VARIABLE_BOTH	2
+#define VARIABLE_SRC    0
+#define VARIABLE_DST    1
+#define VARIABLE_BOTH    2
 
 #define ARRAY_FILL_SIZE 4
 #define ARRAY_OFFSET_NDIMS 3
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	init_full
+ * Function:    init_full
  *
- * Purpose:	Initialize full array.
+ * Purpose:    Initialize full array.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	Robb Matzke
- *		Friday, October 10, 1997
+ * Programmer:    Robb Matzke
+ *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
 static unsigned
 init_full(uint8_t *array, size_t nx, size_t ny, size_t nz)
 {
-    uint8_t		    acc = 128;
-    unsigned		    total = 0;
-    size_t		    i, j, k;
+    uint8_t            acc = 128;
+    unsigned            total = 0;
+    size_t            i, j, k;
 
     for(i = 0; i < nx; i++)
-	for(j = 0; j < ny; j++)
-	    for(k = 0; k < nz; k++) {
-		total += acc;
-		*array = acc;
-		acc++;
-		array++;
-	    } /* end for */
+    for(j = 0; j < ny; j++)
+        for(k = 0; k < nz; k++) {
+        total += acc;
+        *array = acc;
+        acc++;
+        array++;
+        } /* end for */
 
     return total;
 } /* end init_full() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	print_array
+ * Function:    print_array
  *
- * Purpose:	Prints the values in an array
+ * Purpose:    Prints the values in an array
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	Robb Matzke
- *		Friday, October 10, 1997
+ * Programmer:    Robb Matzke
+ *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
 static void
 print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
 {
-    size_t	i, j, k;
+    size_t    i, j, k;
 
     for(i = 0; i < nx; i++) {
-	if(nz > 1)
-	    printf("i=%lu:\n", (unsigned long)i);
-	else
-	    printf("%03lu:", (unsigned long)i);
+    if(nz > 1)
+        printf("i=%lu:\n", (unsigned long)i);
+    else
+        printf("%03lu:", (unsigned long)i);
 
-	for(j = 0; j < ny; j++) {
-	    if(nz > 1)
-		printf("%03lu:", (unsigned long)j);
-	    for(k = 0; k < nz; k++)
-		printf(" %3d", *array++);
-	    if(nz > 1)
-		printf("\n");
-	} /* end for */
-	printf("\n");
+    for(j = 0; j < ny; j++) {
+        if(nz > 1)
+        printf("%03lu:", (unsigned long)j);
+        for(k = 0; k < nz; k++)
+        printf(" %3d", *array++);
+        if(nz > 1)
+        printf("\n");
+    } /* end for */
+    printf("\n");
     } /* end for */
 } /* end print_array() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	print_ref
+ * Function:    print_ref
  *
- * Purpose:	Prints the reference value
+ * Purpose:    Prints the reference value
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:
+ *        Failure:
  *
- * Programmer:	Robb Matzke
- *		Friday, October 10, 1997
+ * Programmer:    Robb Matzke
+ *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -131,37 +129,37 @@ print_ref(size_t nx, size_t ny, size_t nz)
     } /* end if */
 } /* end print_ref() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_fill
+ * Function:    test_fill
  *
- * Purpose:	Tests the H5VM_hyper_fill() function.
+ * Purpose:    Tests the H5VM_hyper_fill() function.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:    Robb Matzke
+ *        Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_fill(size_t nx, size_t ny, size_t nz,
-	  size_t di, size_t dj, size_t dk,
-	  size_t ddx, size_t ddy, size_t ddz)
+    size_t di, size_t dj, size_t dk,
+    size_t ddx, size_t ddy, size_t ddz)
 {
-    uint8_t *dst = NULL;        /*destination array		*/
-    hsize_t hs_size[3];         /*hyperslab size		*/
-    hsize_t dst_size[3];        /*destination total size	*/
+    uint8_t *dst = NULL;        /*destination array        */
+    hsize_t hs_size[3];         /*hyperslab size        */
+    hsize_t dst_size[3];        /*destination total size    */
     hsize_t dst_offset[3];      /*offset of hyperslab in dest   */
-    unsigned ref_value;         /*reference value		*/
-    unsigned acc;               /*accumulator		    	*/
-    size_t i, j, k, dx, dy, dz; /*counters		   	*/
+    unsigned ref_value;         /*reference value        */
+    unsigned acc;               /*accumulator                */
+    size_t i, j, k, dx, dy, dz; /*counters               */
     size_t u, v, w;
-    unsigned ndims;             /*hyperslab dimensionality	*/
-    char dim[64], s[256];       /*temp string		    	*/
-    unsigned fill_value;        /*fill value		    	*/
+    unsigned ndims;             /*hyperslab dimensionality    */
+    char dim[64], s[256];       /*temp string                */
+    unsigned fill_value;        /*fill value                */
 
     /*
      * Dimensionality.
@@ -190,7 +188,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
     /* Allocate array */
     if(NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
         TEST_ERROR
-    
+
     init_full(dst, nx, ny, nz);
 
     for(i = 0; i < nx; i += di) {
@@ -279,52 +277,52 @@ error:
     return FAIL;
 } /* end test_fill() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_copy
+ * Function:    test_copy
  *
- * Purpose:	Tests H5VM_hyper_copy().
+ * Purpose:    Tests H5VM_hyper_copy().
  *
- *		The NX, NY, and NZ arguments are the size for the source and
- *		destination arrays.  You may pass zero for NZ or for NY and
- *		NZ to test the 2-d and 1-d cases respectively.
+ *        The NX, NY, and NZ arguments are the size for the source and
+ *        destination arrays.  You may pass zero for NZ or for NY and
+ *        NZ to test the 2-d and 1-d cases respectively.
  *
- *		A hyperslab is copied from/to (depending on MODE) various
- *		places in SRC and DST beginning at 0,0,0 and increasing
- *		location by DI,DJ,DK in the x, y, and z directions.
+ *        A hyperslab is copied from/to (depending on MODE) various
+ *        places in SRC and DST beginning at 0,0,0 and increasing
+ *        location by DI,DJ,DK in the x, y, and z directions.
  *
- *		For each hyperslab location, various sizes of hyperslabs are
- *		tried beginning with 1x1x1 and increasing the size in each
- *		dimension by DDX,DDY,DDZ.
+ *        For each hyperslab location, various sizes of hyperslabs are
+ *        tried beginning with 1x1x1 and increasing the size in each
+ *        dimension by DDX,DDY,DDZ.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Friday, October 10, 1997
+ * Programmer:    Robb Matzke
+ *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_copy(int mode,
-	  size_t nx, size_t ny, size_t nz,
-	  size_t di, size_t dj, size_t dk,
-	  size_t ddx, size_t ddy, size_t ddz)
+    size_t nx, size_t ny, size_t nz,
+    size_t di, size_t dj, size_t dk,
+    size_t ddx, size_t ddy, size_t ddz)
 {
-    uint8_t    *src = NULL;     /*source array			*/
-    uint8_t    *dst = NULL;     /*destination array		*/
-    hsize_t     hs_size[3];     /*hyperslab size		*/
-    hsize_t     dst_size[3];    /*destination total size	*/
-    hsize_t     src_size[3];    /*source total size		*/
-    hsize_t     dst_offset[3];  /*offset of hyperslab in dest	*/
+    uint8_t    *src = NULL;     /*source array            */
+    uint8_t    *dst = NULL;     /*destination array        */
+    hsize_t     hs_size[3];     /*hyperslab size        */
+    hsize_t     dst_size[3];    /*destination total size    */
+    hsize_t     src_size[3];    /*source total size        */
+    hsize_t     dst_offset[3];  /*offset of hyperslab in dest    */
     hsize_t     src_offset[3];  /*offset of hyperslab in source */
-    unsigned    ref_value;      /*reference value		*/
-    unsigned    acc;            /*accumulator			*/
-    hsize_t     i, j, k, dx, dy, dz; /*counters		     	*/
+    unsigned    ref_value;      /*reference value        */
+    unsigned    acc;            /*accumulator            */
+    hsize_t     i, j, k, dx, dy, dz; /*counters                 */
     hsize_t     u, v, w;
-    unsigned    ndims;          /*hyperslab dimensionality	*/
-    char        dim[64], s[256]; /*temp string			*/
+    unsigned    ndims;          /*hyperslab dimensionality    */
+    char        dim[64], s[256]; /*temp string            */
     const char *sub;
 
     /*
@@ -493,7 +491,7 @@ test_copy(int mode,
                                             (unsigned long)dy,
                                             (unsigned long)dz);
                                     print_ref(nx, ny, nz);
-                                    printf("\n	 Destination array is:\n");
+                                    printf("\n     Destination array is:\n");
                                     print_array(dst, nx, ny, nz);
                                 } /* end if */
                                 goto error;
@@ -535,7 +533,7 @@ test_copy(int mode,
                                             (unsigned long)dy,
                                             (unsigned long)dz);
                                     print_ref(nx, ny, nz);
-                                    printf("\n	 Destination array is:\n");
+                                    printf("\n     Destination array is:\n");
                                     print_array(dst, nx, ny, nz);
                                 } /* end if */
                                 goto error;
@@ -563,38 +561,38 @@ error:
     return FAIL;
 } /* end test_copy() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_multifill
+ * Function:    test_multifill
  *
- * Purpose:	Tests the H5VM_stride_copy() function by using it to fill a
- *		hyperslab by replicating a multi-byte sequence.	 This might
- *		be useful to initialize an array of structs with a default
- *		struct value, or to initialize an array of floating-point
- *		values with a default bit-pattern.
+ * Purpose:    Tests the H5VM_stride_copy() function by using it to fill a
+ *        hyperslab by replicating a multi-byte sequence.     This might
+ *        be useful to initialize an array of structs with a default
+ *        struct value, or to initialize an array of floating-point
+ *        values with a default bit-pattern.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:    Robb Matzke
+ *        Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_multifill(size_t nx)
 {
-    hsize_t		    size;
-    hsize_t		    src_stride;
-    hsize_t		    dst_stride;
-    char		    s[64];
+    hsize_t            size;
+    hsize_t            src_stride;
+    hsize_t            dst_stride;
+    char            s[64];
     struct a_struct {
         int left;
         double mid;
         int right;
     } fill, *src = NULL, *dst = NULL;
-    hsize_t		    i, j;
+    hsize_t            i, j;
 
     printf("%-70s", "Testing multi-byte fill value");
     fflush(stdout);
@@ -615,7 +613,7 @@ test_multifill(size_t nx)
     } /* end for */
 
     /*
-     * Describe the fill value.	 The zero stride says to read the same thing
+     * Describe the fill value.     The zero stride says to read the same thing
      * over and over again.
      */
     fill.left = 55555555;
@@ -684,32 +682,32 @@ error:
     return FAIL;
 } /* end test_multifill() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_endian
+ * Function:    test_endian
  *
- * Purpose:	Tests the H5VM_stride_copy() function by using it to copy an
- *		array of integers and swap the byte ordering from little
- *		endian to big endian or vice versa depending on the hardware.
+ * Purpose:    Tests the H5VM_stride_copy() function by using it to copy an
+ *        array of integers and swap the byte ordering from little
+ *        endian to big endian or vice versa depending on the hardware.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:    Robb Matzke
+ *        Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_endian(size_t nx)
 {
-    uint8_t	   *src = NULL;		/*source array			*/
-    uint8_t	   *dst = NULL;		/*destination array		*/
-    hssize_t	src_stride[2];		/*source strides		*/
-    hssize_t	dst_stride[2];		/*destination strides		*/
-    hsize_t	    size[2];		/*size vector			*/
-    hsize_t	    i, j;
+    uint8_t       *src = NULL;        /*source array            */
+    uint8_t       *dst = NULL;        /*destination array        */
+    hssize_t    src_stride[2];        /*source strides        */
+    hssize_t    dst_stride[2];        /*destination strides        */
+    hsize_t        size[2];        /*size vector            */
+    hsize_t        i, j;
 
     printf("%-70s", "Testing endian conversion by stride");
     fflush(stdout);
@@ -747,7 +745,7 @@ test_endian(size_t nx)
                     printf("   i=%lu, j=%lu\n", (unsigned long)i, (unsigned long)j);
                     printf("   Source array is:\n");
                     print_array(src, nx, (size_t)4, (size_t)1);
-                    printf("\n	 Result is:\n");
+                    printf("\n     Result is:\n");
                     print_array(dst, nx, (size_t)4, (size_t)1);
                 } /* end if */
                 goto error;
@@ -771,31 +769,31 @@ error:
     return FAIL;
 } /* end test_endian() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_transpose
+ * Function:    test_transpose
  *
- * Purpose:	Copy a 2d array from here to there and transpose the elements
- *		as it's copied.
+ * Purpose:    Copy a 2d array from here to there and transpose the elements
+ *        as it's copied.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Saturday, October 11, 1997
+ * Programmer:    Robb Matzke
+ *        Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_transpose(size_t nx, size_t ny)
 {
-    int	   *src = NULL;
-    int	   *dst = NULL;
-    hsize_t	src_stride[2], dst_stride[2];
-    hsize_t	size[2];
-    char	s[256];
-    hsize_t	i, j;
+    int       *src = NULL;
+    int       *dst = NULL;
+    hsize_t    src_stride[2], dst_stride[2];
+    hsize_t    size[2];
+    char    s[256];
+    hsize_t    i, j;
 
     sprintf(s, "Testing 2d transpose by stride %4lux%-lud", (unsigned long)nx,
             (unsigned long)ny);
@@ -843,7 +841,7 @@ test_transpose(size_t nx, size_t ny)
                             printf(" %6d", src[i * ny + j]);
                         printf("\n");
                     } /* end for */
-                    printf("\n	 Destination is:\n");
+                    printf("\n     Destination is:\n");
                     for (i = 0; i < ny; i++) {
                         printf("%3lu:", (unsigned long)i);
                         for(j = 0; j < nx; j++)
@@ -872,35 +870,35 @@ error:
     return FAIL;
 } /* end test_transpose() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_sub_super
+ * Function:    test_sub_super
  *
- * Purpose:	Tests H5VM_stride_copy() to reduce the resolution of an image
- *		by copying half the pixels in the X and Y directions.  Then
- *		we use the small image and duplicate every pixel to result in
- *		a 2x2 square.
+ * Purpose:    Tests H5VM_stride_copy() to reduce the resolution of an image
+ *        by copying half the pixels in the X and Y directions.  Then
+ *        we use the small image and duplicate every pixel to result in
+ *        a 2x2 square.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Monday, October 13, 1997
+ * Programmer:    Robb Matzke
+ *        Monday, October 13, 1997
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_sub_super(size_t nx, size_t ny)
 {
-    uint8_t	   *full = NULL;	/*original image		*/
-    uint8_t	   *half = NULL;	/*image at 1/2 resolution	*/
-    uint8_t	   *twice = NULL;	/*2x2 pixels			*/
-    hsize_t	    src_stride[4];	/*source stride info		*/
-    hsize_t	    dst_stride[4];	/*destination stride info	*/
-    hsize_t	    size[4];            /*number of sample points	*/
-    hsize_t	    i, j;
-    char	    s[256];
+    uint8_t       *full = NULL;    /*original image        */
+    uint8_t       *half = NULL;    /*image at 1/2 resolution    */
+    uint8_t       *twice = NULL;    /*2x2 pixels            */
+    hsize_t        src_stride[4];    /*source stride info        */
+    hsize_t        dst_stride[4];    /*destination stride info    */
+    hsize_t        size[4];            /*number of sample points    */
+    hsize_t        i, j;
+    char        s[256];
 
     sprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ",
             (unsigned long)(2 * nx), (unsigned long)(2 * ny),
@@ -942,7 +940,7 @@ test_sub_super(size_t nx, size_t ny)
                             (unsigned long)i, (unsigned long)j);
                     printf("   full is:\n");
                     print_array(full, 2 * nx, 2 * ny, (size_t)1);
-                    printf("\n	 half is:\n");
+                    printf("\n     half is:\n");
                     print_array(half, nx, ny, (size_t)1);
                 } /* end if */
                 goto error;
@@ -1005,7 +1003,7 @@ test_sub_super(size_t nx, size_t ny)
                     AT();
                     printf("   %s\n   Half is:\n", s);
                     print_array(half, nx, ny, (size_t)1);
-                    printf("\n	 Twice is:\n");
+                    printf("\n     Twice is:\n");
                     print_array(twice, 2 * nx, 2 * ny, (size_t)1);
                 } /* end if */
                 goto error;
@@ -1032,20 +1030,20 @@ error:
     return FAIL;
 } /* test_sub_super() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_array_fill
+ * Function:    test_array_fill
  *
- * Purpose:	Tests H5VM_array_fill routine by copying a multibyte value
+ * Purpose:    Tests H5VM_array_fill routine by copying a multibyte value
  *              (an array of ints, in our case) into all the elements of an
  *              array.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, April 21, 2003
+ * Programmer:    Quincey Koziol
+ *        Monday, April 21, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1054,8 +1052,8 @@ test_array_fill(size_t lo, size_t hi)
 {
     int    *dst = NULL;           /* Destination                  */
     int     src[ARRAY_FILL_SIZE]; /* Source to duplicate    */
-    size_t	u, v, w;        /* Local index variables        */
-    char	s[256];
+    size_t    u, v, w;        /* Local index variables        */
+    char    s[256];
 
     sprintf(s, "array filling %4lu-%-4lu elements", (unsigned long)lo,(unsigned long)hi);
     TESTING(s);
@@ -1093,20 +1091,20 @@ error:
     return FAIL;
 } /* end test_array_fill() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_array_offset_n_calc
+ * Function:    test_array_offset_n_calc
  *
- * Purpose:	Tests H5VM_array_offset and H5VM_array_calc routines by comparing
+ * Purpose:    Tests H5VM_array_offset and H5VM_array_calc routines by comparing
  *              computed array offsets against calculated ones and then going
  *              back to the coordinates from the offset and checking those.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, April 21, 2003
+ * Programmer:    Quincey Koziol
+ *        Monday, April 21, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1116,11 +1114,11 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     hsize_t    *a = NULL;
     hsize_t    *temp_a;         /* Array for stored calculated offsets */
     hsize_t     off;            /* Offset in array */
-    size_t	u, v, w;        /* Local index variables        */
+    size_t    u, v, w;        /* Local index variables        */
     hsize_t     dims[ARRAY_OFFSET_NDIMS];        /* X, Y & X coordinates of array to check */
     hsize_t     coords[ARRAY_OFFSET_NDIMS];      /* X, Y & X coordinates to check offset of */
     hsize_t     new_coords[ARRAY_OFFSET_NDIMS];  /* X, Y & X coordinates of offset */
-    char	s[256];
+    char    s[256];
 
     sprintf(s, "array offset %4lux%4lux%4lu elements", (unsigned long)z,(unsigned long)y,(unsigned long)x);
     TESTING(s);
@@ -1178,29 +1176,29 @@ error:
     return FAIL;
 } /* end test_array_offset_n_calc() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Test various hyperslab operations.  Give the words
- *		`small' and/or `medium' on the command line or only `small'
- *		is assumed.
+ * Purpose:    Test various hyperslab operations.  Give the words
+ *        `small' and/or `medium' on the command line or only `small'
+ *        is assumed.
  *
- * Return:	Success:	exit(EXIT_SUCCESS)
+ * Return:    Success:    exit(EXIT_SUCCESS)
  *
- *		Failure:	exit(EXIT_FAILURE)
+ *        Failure:    exit(EXIT_FAILURE)
  *
- * Programmer:	Robb Matzke
- *		Friday, October 10, 1997
+ * Programmer:    Robb Matzke
+ *        Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, char *argv[])
 {
-    herr_t		    status;
-    int			    nerrors = 0;
-    unsigned		size_of_test;
+    herr_t            status;
+    int                nerrors = 0;
+    unsigned        size_of_test;
 
     /* Parse arguments or assume `small' & `medium' */
     if(1 == argc)
