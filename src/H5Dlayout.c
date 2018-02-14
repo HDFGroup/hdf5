@@ -46,6 +46,12 @@
 /* Package Variables */
 /*********************/
 
+/* Format version bounds for layout */
+const unsigned H5O_layout_ver_bounds[] = {
+    H5O_LAYOUT_VERSION_1,       /* H5F_LIBVER_EARLIEST */
+    H5O_LAYOUT_VERSION_3,       /* H5F_LIBVER_V18 */  /* H5O_LAYOUT_VERSION_DEFAULT */
+    H5O_LAYOUT_VERSION_LATEST   /* H5F_LIBVER_LATEST */
+};
 
 /*****************************/
 /* Library Private Variables */
@@ -55,6 +61,7 @@
 /*******************/
 /* Local Variables */
 /*******************/
+
 
 
 
@@ -277,49 +284,47 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__layout_set_latest_version
+ * Function:    H5D__layout_set_version
  *
- * Purpose:     Set the encoding for a layout to the latest version.
- *              Part of the coding in this routine is moved to
- *              H5D__layout_set_latest_indexing().
+ * Purpose:     Set the version to encode a layout with.
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 15, 2009
+ * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space, 
-    const H5D_dcpl_cache_t *dcpl_cache)
+H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    unsigned version;           /* Message version */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(layout);
-    HDassert(space);
-    HDassert(dcpl_cache);
+    HDassert(f);
 
-    /* Set encoding of layout to latest version */
-    layout->version = H5O_LAYOUT_VERSION_LATEST;
+    /* Upgrade to the version indicated by the file's low bound if higher */
+    version = MAX(layout->version, H5O_layout_ver_bounds[H5F_LOW_BOUND(f)]);
 
-    /* Set the latest indexing type for the layout message */
-    if(H5D__layout_set_latest_indexing(layout, space, dcpl_cache) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest indexing type")
+    /* Version bounds check */
+    if(version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "layout version out of bounds")
+
+    /* Set the message version */
+    layout->version = version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__layout_set_latest_version() */
+} /* end H5D__layout_set_version() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_set_latest_indexing
  *
  * Purpose:     Set the latest indexing type for a layout message
- *              This is moved from H5D_layout_set_latest_version().
  *
  * Return:      Non-negative on success/Negative on failure
  *

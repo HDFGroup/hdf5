@@ -142,8 +142,18 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed to close property list");
     }
 
+    if(options->latest)
+        options->low_bound = options->high_bound = H5F_LIBVER_LATEST;
+    /* Create file access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed to create file access property list");
+
+    /* It can be default, latest or other settings by users */
+    if(H5Pset_libver_bounds(fapl, options->low_bound, options->high_bound) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_libver_bounds failed to set format version bounds");
+
     /* Check if we need to create a non-default file creation property list */
-    if (options->latest || ub_size > 0) {
+    if (options->low_bound >= H5F_LIBVER_V18 || ub_size > 0) {
         /* Create file creation property list */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed to create a file creation property list");
@@ -152,7 +162,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
             if (H5Pset_userblock(fcpl, ub_size) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_userblock failed to set non-default userblock size");
 
-        if (options->latest) {
+        if (options->low_bound >= H5F_LIBVER_V18) {
             unsigned i = 0, nindex = 0, mesg_type_flags[5], min_mesg_sizes[5];
 
             /* Adjust group creation parameters for root group */
@@ -203,12 +213,6 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_shared_mesg_index failed to configure the specified shared object header message index");
             } /* if (nindex>0) */
 
-            /* Create file access property list */
-            if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed to create file access property list");
-
-            if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_libver_bounds failed to set property for using latest version of the format");
         } /* end if */
     } /* end if */
 #if defined (H5REPACK_DEBUG_USER_BLOCK)

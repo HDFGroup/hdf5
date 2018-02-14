@@ -102,6 +102,12 @@ static herr_t H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type
 /* Package Variables */
 /*********************/
 
+/* Format version bounds for attribute */
+const unsigned H5O_attr_ver_bounds[] = {
+    H5O_ATTR_VERSION_1,         /* H5F_LIBVER_EARLIEST */
+    H5O_ATTR_VERSION_3,         /* H5F_LIBVER_V18 */
+    H5O_ATTR_VERSION_LATEST     /* H5F_LIBVER_LATEST */
+};
 
 /*****************************/
 /* Library Private Variables */
@@ -209,18 +215,16 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     if(H5T_set_loc(attr->shared->dt, loc->oloc->file, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
-    /* Set the latest format for datatype, if requested */
-    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATATYPE))
-        if(H5T_set_latest_version(attr->shared->dt) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of datatype")
+    /* Set the version for datatype */
+    if(H5T_set_version(loc->oloc->file, attr->shared->dt) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set version of datatype")
 
     /* Copy the dataspace for the attribute */
     attr->shared->ds = H5S_copy(space, FALSE, TRUE);
 
-    /* Set the latest format for dataspace, if requested */
-    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATASPACE))
-        if(H5S_set_latest_version(attr->shared->ds) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of dataspace")
+    /* Set the version for dataspace */
+    if(H5S_set_version(loc->oloc->file, attr->shared->ds) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set version of dataspace")
 
     /* Copy the object header information */
     if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
@@ -1843,11 +1847,11 @@ done:
  * Function:    H5A_set_version
  *
  * Purpose:     Sets the correct version to encode attribute with.
- *              Chooses the oldest version possible, unless the "use the
- *              latest format" flag is set.
+ *              Chooses the oldest version possible, unless the
+ *              file's low bound indicates otherwise.
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:	Success:    Non-negative
+ *          Failure:    Negative
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org
@@ -1859,17 +1863,14 @@ herr_t
 H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
-    hbool_t use_latest_format;          /* Flag indicating the latest attribute version support is enabled */
-    herr_t ret_value = SUCCEED;   /* Return value */
+    uint8_t version;                    /* Message version */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
     HDassert(attr);
-
-    /* Get the file's 'use the latest attribute version support' flag */
-    use_latest_format = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ATTRIBUTE);
 
     /* Check whether datatype and dataspace are shared */
     if(H5O_msg_is_shared(H5O_DTYPE_ID, attr->shared->dt) > 0)
@@ -1883,14 +1884,22 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
         space_shared = FALSE;
 
     /* Check which version to encode attribute with */
-    if(use_latest_format)
-        attr->shared->version = H5O_ATTR_VERSION_LATEST;      /* Write out latest attribute version */
-    else if(attr->shared->encoding != H5T_CSET_ASCII)
-        attr->shared->version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+    if(attr->shared->encoding != H5T_CSET_ASCII)
+        version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
     else if(type_shared || space_shared)
-        attr->shared->version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
+        version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
     else
-        attr->shared->version = H5O_ATTR_VERSION_1;   /* Write out basic version */
+        version = H5O_ATTR_VERSION_1;   /* Write out basic version */
+
+    /* Upgrade to the version indicated by the file's low bound if higher */
+    version = MAX(version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
+
+    /* Version bounds check */
+    if(version > H5O_attr_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_ATTR, H5E_BADRANGE, FAIL, "attribute version out of bounds")
+
+    /* Set the message version */
+    attr->shared->version = version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

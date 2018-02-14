@@ -623,10 +623,10 @@ done:
 static herr_t
 H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
 {
-    htri_t  relocatable;                 /* Flag whether the type is relocatable */
-    htri_t  immutable;                   /* Flag whether the type is immutable */
-    hbool_t use_latest_format;           /* Flag indicating the 'latest datatype version support' is enabled */
-    herr_t  ret_value = SUCCEED;         /* Return value */
+    htri_t relocatable;            /* Flag whether the type is relocatable */
+    htri_t immutable;              /* Flag whether the type is immutable */
+    hbool_t use_at_least_v18;      /* Flag indicating to use at least v18 format versions */
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -643,17 +643,17 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
     if((immutable = H5T_is_immutable(type)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't check datatype?")
 
-    /* Get the file's 'use the latest datatype version support' flag */
-    use_latest_format = H5F_USE_LATEST_FLAGS(file, H5F_LATEST_DATATYPE);
+    /* To use at least v18 format versions or not */
+    use_at_least_v18 = (H5F_LOW_BOUND(file) >= H5F_LIBVER_V18);
 
     /* Copy the datatype if it's a custom datatype or if it'll change when it's location is changed */
-    if(!immutable || relocatable || use_latest_format) {
+    if(!immutable || relocatable || use_at_least_v18) {
         /* Copy datatype for dataset */
         if((dset->shared->type = H5T_copy(type, H5T_COPY_ALL)) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy datatype")
 
-    /* Convert a datatype (if committed) to a transient type if the committed datatype's file
-    location is different from the file location where the dataset will be created */
+        /* Convert a datatype (if committed) to a transient type if the committed datatype's file
+           location is different from the file location where the dataset will be created */
         if(H5T_convert_committed_datatype(dset->shared->type, file) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get shared datatype info")
 
@@ -661,14 +661,13 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
         if(H5T_set_loc(dset->shared->type, file, H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set datatype location")
 
-        /* Set the latest format, if requested */
-        if(use_latest_format)
-            if(H5T_set_latest_version(dset->shared->type) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
+        /* Set the version for datatype */
+       if(H5T_set_version(file, dset->shared->type) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set version of datatype")
 
         /* Get a datatype ID for the dataset's datatype */
-    if((dset->shared->type_id = H5I_register(H5I_DATATYPE, dset->shared->type, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register type")
+        if((dset->shared->type_id = H5I_register(H5I_DATATYPE, dset->shared->type, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register type")
     } /* end if */
     /* Not a custom datatype, just use it directly */
     else {
@@ -738,7 +737,6 @@ done:
 static herr_t
 H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
 {
-    hbool_t use_latest_format;          /* Flag indicating the 'latest dataspace version support' is enabled */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -748,9 +746,6 @@ H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
     HDassert(dset);
     HDassert(space);
 
-    /* Get the file's 'use the latest dataspace version support' flag */
-    use_latest_format = H5F_USE_LATEST_FLAGS(file, H5F_LATEST_DATASPACE);
-
     /* Copy dataspace for dataset */
     if(NULL == (dset->shared->space = H5S_copy(space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataspace")
@@ -759,10 +754,9 @@ H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
     if(H5D__cache_dataspace_info(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't cache dataspace info")
 
-    /* Set the latest format, if requested */
-    if(use_latest_format)
-        if(H5S_set_latest_version(dset->shared->space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
+    /* Set the version for dataspace */
+    if(H5S_set_version(file, dset->shared->space) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
 
     /* Set the dataset's dataspace to 'all' selection */
     if(H5S_select_all(dset->shared->space, TRUE) < 0)
@@ -794,6 +788,7 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     H5D_fill_value_t    fill_status;    /* Fill value status */
     hbool_t             fill_changed = FALSE;   /* Flag indicating the fill value was changed */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
+    hbool_t             use_at_least_v18;       /* Flag indicating to use at least v18 format versions */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -807,6 +802,9 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     layout = &dset->shared->layout;
     type = dset->shared->type;
     fill_prop = &dset->shared->dcpl_cache.fill;
+
+    /* To use at least v18 format versions or not */
+    use_at_least_v18 = (H5F_LOW_BOUND(file) >= H5F_LIBVER_V18);
 
     /* Retrieve "defined" status of fill value */
     if(H5P_is_fill_value_defined(fill_prop, &fill_status) < 0)
@@ -886,8 +884,8 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update new fill value header message")
 
     /* If there is valid information for the old fill value struct, add it */
-    /* (only if we aren't trying to write the 'latest fill message version support') */
-    if(fill_prop->buf && !(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_FILL_MSG))) {
+    /* (only if we aren't using v18 format versions and above */
+    if(fill_prop->buf && !use_at_least_v18) {
         H5O_fill_t old_fill_prop;       /* Copy of fill value property, for writing as "old" fill value */
 
         /* Shallow copy the fill value property */
@@ -922,27 +920,27 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
         (H5P_exist_plist(dc_plist, H5O_BOGUS_MSG_ID_NAME) > 0) ) {
 
         uint8_t bogus_flags = 0;        /* Flags for creating "bogus" message */
-    unsigned bogus_id;        /* "bogus" ID */
+        unsigned bogus_id;        /* "bogus" ID */
 
-    /* Retrieve "bogus" message ID */
+        /* Retrieve "bogus" message ID */
         if(H5P_get(dc_plist, H5O_BOGUS_MSG_ID_NAME, &bogus_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get bogus ID options")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get bogus ID options")
         /* Retrieve "bogus" message flags */
         if(H5P_get(dc_plist, H5O_BOGUS_MSG_FLAGS_NAME, &bogus_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get bogus message options")
 
         /* Add a "bogus" message (for error testing). */
-    if(H5O_bogus_oh(file, dxpl_id, oh, bogus_id, (unsigned)bogus_flags) < 0)
+        if(H5O_bogus_oh(file, dxpl_id, oh, bogus_id, (unsigned)bogus_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create 'bogus' message")
     } /* end if */
 }
 #endif /* H5O_ENABLE_BOGUS */
 
     /* Add a modification time message, if using older format. */
-    /* (If using the latest 'no modification time message' version support, the modification time is part of the object
+    /* (If using v18 format versions and above, the the modification time is part of the object
      *  header and doesn't use a separate message -QAK)
      */
-    if(!(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_NO_MOD_TIME_MSG)))
+    if(!use_at_least_v18)
         if(H5O_touch_oh(file, dxpl_id, oh, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
 
@@ -1174,27 +1172,20 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "compact dataset must have early space allocation")
     } /* end if */
 
-    /* Set the latest version of the layout, pline & fill messages, if requested */
-    if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_DSET_MSG_FLAGS)) {
-        /* Set the latest version for the I/O pipeline message */
-    if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_PLINE_MSG))
-        if(H5O_pline_set_latest_version(&new_dset->shared->dcpl_cache.pline) < 0)
+    /* Set the version for the I/O pipeline message */
+    if(H5O_pline_set_version(file, &new_dset->shared->dcpl_cache.pline) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline")
 
-        /* Set the latest version for the fill message */
-    if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_FILL_MSG))
-        /* Set the latest version for the fill value message */
-        if(H5O_fill_set_latest_version(&new_dset->shared->dcpl_cache.fill) < 0)
+    /* Set the version for the fill message */
+    if(H5O_fill_set_version(file, &new_dset->shared->dcpl_cache.fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value")
 
-        /* Set the latest version for the layout message */
-    if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_LAYOUT_MSG))
-        /* Set the latest version for the layout message */
-        if(H5D__layout_set_latest_version(&new_dset->shared->layout, new_dset->shared->space, &new_dset->shared->dcpl_cache) < 0)
+    /* Set the latest version for the layout message */
+    if(H5D__layout_set_version(file, &new_dset->shared->layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of layout")
-    } /* end if */
-    else if(new_dset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
-    /* Use latest indexing type for layout message version >= 4 */
+
+    if(new_dset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
+        /* Use latest indexing type for layout message version >= 4 */
         if(H5D__layout_set_latest_indexing(&new_dset->shared->layout, new_dset->shared->space, &new_dset->shared->dcpl_cache) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest indexing")
     } /* end if */

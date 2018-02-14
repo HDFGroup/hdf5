@@ -19,8 +19,28 @@
 *
 *************************************************************/
 
+#include "hdf5.h"
 #include "testhdf5.h"
 #include "H5srcdir.h"
+
+#include "H5Bprivate.h"
+#include "H5Iprivate.h"
+#include "H5Pprivate.h"
+
+/*
+ * This file needs to access private information from the H5S package.
+ * This file also needs to access the dataspace testing code.
+ */
+#define H5S_FRIEND      /*suppress error about including H5Spkg   */
+#include "H5Spkg.h"     /* Dataspaces               */
+
+/*
+ * This file needs to access private information from the H5O package.
+ * This file also needs to access the dataspace testing code.
+ */
+#define H5O_FRIEND      /*suppress error about including H5Opkg   */
+#define H5O_TESTING
+#include "H5Opkg.h"     /* Object header            */
 
 #include "H5private.h"
 #include "H5Bprivate.h"
@@ -2364,6 +2384,130 @@ test_h5s_bug1(void)
     CHECK(ret, FAIL, "H5Sclose");
 } /* test_h5s_bug1() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_versionbounds
+ *
+ * Purpose:     Tests version bounds with dataspace.
+ *
+ * Description:
+ *              This function creates a file with lower bounds then later
+ *              reopens it with higher bounds to show that the dataspace
+ *              version is upgraded appropriately.
+ *
+ * Return:      Success:	0
+ *              Failure:	number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+#define VERBFNAME       "tverbounds_dspace.h5"
+#define BASIC_DSET      "Basic Dataset"
+#define LATEST_DSET     "Latest Dataset"
+static void
+test_versionbounds(void)
+{
+    hid_t file = -1;    /* File ID */
+    hid_t space = -1;   /* Dataspace ID */
+    hid_t dset = -1;    /* Dataset ID */
+    hid_t fapl = -1;    /* File access property list ID */
+    hid_t dset_space = -1;  /* Retrieved dataset's dataspace ID */
+    hsize_t dim[1];         /* Dataset dimensions */
+    H5F_libver_t low, high; /* File format bounds */
+    H5S_t *spacep = NULL;   /* Pointer to internal dataspace */
+    herr_t ret = 0;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Version Bounds\n"));
+
+    /* Create a file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Create dataspace */
+    dim[0] = 10;
+    space = H5Screate_simple(1, dim, NULL);
+    CHECK(space, FAIL, "H5Screate");
+
+    /* Its version should be H5O_SDSPACE_VERSION_1 */
+    spacep = (H5S_t *)H5I_object(space);
+    CHECK(spacep, NULL, "H5I_object");
+    VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
+
+    /* Set high bound to V18 */
+    low = H5F_LIBVER_EARLIEST;
+    high = H5F_LIBVER_V18;
+    ret = H5Pset_libver_bounds(fapl, low, high);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create the file */
+    file = H5Fcreate(VERBFNAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create a basic dataset */
+    dset = H5Dcreate2(file, BASIC_DSET, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (dset > 0) /* dataset created successfully */
+    {
+        /* Get the internal dataspace pointer */
+        dset_space = H5Dget_space(dset);
+        CHECK(dset_space, FAIL, "H5Dget_space");
+        spacep = (H5S_t *)H5I_object(dset_space);
+        CHECK(spacep, NULL, "H5I_object");
+
+        /* Dataspace version should remain as H5O_SDSPACE_VERSION_1 */
+        VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
+
+        /* Close dataspace */
+        ret = H5Sclose(dset_space);
+        CHECK(ret, FAIL, "H5Sclose");
+    }
+
+    /* Close basic dataset and the file */
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Set low and high bounds to latest to trigger the increment of the
+       dataspace version */
+    low = H5F_LIBVER_LATEST;
+    high = H5F_LIBVER_LATEST;
+    ret = H5Pset_libver_bounds(fapl, low, high);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Reopen the file with new version bounds, LATEST/LATEST */
+    file = H5Fopen(VERBFNAME, H5F_ACC_RDWR, fapl);
+
+    /* Create another dataset using the same dspace as the previous dataset */
+    dset = H5Dcreate2(file, LATEST_DSET, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
+
+    /* Dataset created successfully.  Verify that dataspace version has been
+       upgraded per the low bound */
+
+    /* Get the internal dataspace pointer */
+    dset_space = H5Dget_space(dset);
+    CHECK(dset_space, FAIL, "H5Dget_space");
+    spacep = (H5S_t *)H5I_object(dset_space);
+    CHECK(spacep, NULL, "H5I_object");
+
+    /* Verify the dataspace version */
+    VERIFY(spacep->extent.version, H5O_sdspace_ver_bounds[low], "upgraded dataspace version");
+
+    /* Close everything */
+    ret = H5Sclose(dset_space);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Sclose(space);
+    CHECK(ret, FAIL, "H5Sclose");
+	ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_versionbounds() */
+
+
 /****************************************************************
 **
 **  test_h5s(): Main H5S (dataspace) testing routine.
@@ -2391,6 +2535,7 @@ test_h5s(void)
     test_h5s_extent_equal();	/* Test extent comparison code */
     test_h5s_extent_copy();     /* Test extent copy code */
     test_h5s_bug1();            /* Test bug in offset initialization */
+    test_versionbounds();       /* Test version bounds with dataspace */
 } /* test_h5s() */
 
 
@@ -2415,4 +2560,5 @@ cleanup_h5s(void)
     remove(NULLFILE);
     remove(BASICFILE);
     remove(ZEROFILE);
+    remove(VERBFNAME);
 }

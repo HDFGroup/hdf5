@@ -75,6 +75,8 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
     options->verbose = verbose;
     options->latest = latest;
     options->layout_g = H5D_LAYOUT_ERROR;
+    options->low_bound = H5F_LIBVER_EARLIEST;
+    options->high_bound = H5F_LIBVER_LATEST;
 
     for (n = 0; n < H5_REPACK_MAX_NFILTERS; n++) {
         options->filter_g[n].filtn = -1;

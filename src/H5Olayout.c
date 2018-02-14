@@ -47,6 +47,8 @@ static herr_t H5O__layout_reset(void *_mesg);
 static herr_t H5O__layout_free(void *_mesg);
 static herr_t H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
+static herr_t H5O__layout_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+    hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O__layout_copy_file(H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
     H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
@@ -69,7 +71,7 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     NULL,                       /* link method                          */
     NULL,                       /* set share method                     */
     NULL,                       /* can share method                     */
-    NULL,                       /* pre copy native value to file        */
+    H5O__layout_pre_copy_file,  /* pre copy native value to file        */
     H5O__layout_copy_file,      /* copy native value to file            */
     NULL,                       /* post copy native value to file       */
     NULL,                       /* get creation index                   */
@@ -1042,6 +1044,42 @@ H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__layout_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__layout_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; Dec 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__layout_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
+    hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
+{
+    const H5O_layout_t *layout_src = (const H5O_layout_t *)mesg_src;  /* Source layout */
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check args */
+    HDassert(cpy_info);
+    HDassert(cpy_info->file_dst);
+
+    /* Check to ensure that the version of the message to be copied does not exceed
+       the message version allowed by the destination file's high bound */
+    if(layout_src->version > H5O_layout_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "layout message version out of bounds")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O__layout_pre_copy_file() */
 
 
 /*-------------------------------------------------------------------------

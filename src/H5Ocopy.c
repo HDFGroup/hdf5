@@ -415,6 +415,11 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
     /* Initialize header information */
     oh_dst->version = oh_src->version;
+
+    /* Version bounds check for destination object header */
+    if(oh_dst->version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(oloc_dst->file)])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "destination object header version out of bounds")
+
     oh_dst->flags = oh_src->flags;
     oh_dst->link_msgs_seen = oh_src->link_msgs_seen;
     oh_dst->attr_msgs_seen = oh_src->attr_msgs_seen;
@@ -489,6 +494,12 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
         if(copy_type->pre_copy_file) {
             /* Decode the message if necessary. */
             H5O_LOAD_NATIVE(oloc_src->file, dxpl_id, 0, oh_src, mesg_src, FAIL)
+
+            /* Save destination file pointer in cpy_info so that it can be used
+               in the pre_copy_file callback to obtain the destination file's
+               high bound.  The high bound is used to index into the corresponding
+               message's array of versions for doing version bounds check. */
+            cpy_info->file_dst = oloc_dst->file;
 
             /* Perform "pre copy" operation on message */
             if((copy_type->pre_copy_file)(oloc_src->file, mesg_src->native,
@@ -871,12 +882,19 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     /* Free destination object header on failure */
-    if(ret_value < 0 && oh_dst && !inserted) {
-        if(H5O__free(oh_dst) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
-        if(H5O_loc_reset(oloc_dst) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
-    } /* end if */
+    if(ret_value < 0) {
+        if(oh_dst && !inserted) {
+            if(H5O__free(oh_dst) < 0)
+                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+            if(H5O_loc_reset(oloc_dst) < 0)
+                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+        } /* end if */
+
+        if(addr_map == NULL && cpy_udata) {
+            if(obj_class && obj_class->free_copy_file_udata)
+                obj_class->free_copy_file_udata(cpy_udata);
+        } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5O_copy_header_real() */

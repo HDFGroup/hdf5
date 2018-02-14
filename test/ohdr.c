@@ -738,6 +738,42 @@ error:
     return FAIL;
 } /* test_unknown() */
 
+#define STR_EARLIEST "earliest"
+#define STR_V18 "v18"
+#define STR_LATEST "latest"
+char *version_string(H5F_libver_t libver)
+{
+    char *str = NULL;
+
+    str = (char *) malloc(20 * sizeof(char));
+    if (str == NULL)
+    {
+        fprintf(stderr, "Allocation failed\n");
+        exit(1);
+    }
+
+    switch(libver) {
+      case H5F_LIBVER_EARLIEST:
+          strcpy(str, STR_EARLIEST);
+          break;
+
+      case H5F_LIBVER_V18:
+          strcpy(str, STR_V18);
+          break;
+
+      case H5F_LIBVER_V110:
+          HDassert(H5F_LIBVER_LATEST == H5F_LIBVER_V110);
+          strcpy(str, STR_LATEST);
+          break;
+
+      case H5F_LIBVER_ERROR:
+      case H5F_LIBVER_NBOUNDS:
+      default:
+          sprintf(str, "%ld", (long)libver);
+          break;
+    } /* end switch */
+} /* end of version_string */
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -755,32 +791,40 @@ error:
 int
 main(void)
 {
-    hid_t	fapl = -1, file = -1;
-    H5F_t	*f = NULL;
-    char	filename[1024];
-    H5O_hdr_info_t hdr_info;            /* Object info */
-    H5O_loc_t	oh_loc;                 /* Object header locations */
-    time_t	time_new, ro;
-    int		i;                      /* Local index variable */
-    unsigned    b;                      /* Index for "new format" loop */
-    herr_t      ret;                    /* Generic return value */
+    hid_t fapl = -1;
+    hid_t file = -1;
+    H5F_t *f = NULL;
+    char  filename[1024];
+    H5O_hdr_info_t hdr_info;  /* Object info */
+    H5O_loc_t      oh_loc;    /* Object header locations */
+    H5F_libver_t low, high;   /* File format bounds */
+    time_t time_new, ro;
+    unsigned b;               /* Index for "new format" loop */
+    char msg[80];             /* Message for file format version */
+    int    i;                 /* Local index variable */
+    herr_t ret;               /* Generic return value */
 
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    /* Loop over old & new formats */
-    for(b = FALSE; b <= TRUE; b++) {
-        /* Display info about testing */
-        if(b)
-            HDputs("Using new file format:");
-        else
-            HDputs("Using default file format:");
+    /* Loop through all the combinations of low/high library format bounds */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+      for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
-        /* Set the format to use for the file */
-        if(H5Pset_libver_bounds(fapl, (b ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST), H5F_LIBVER_LATEST) < 0)
-            FAIL_STACK_ERROR
+        /* Set version bounds before opening the file */
+        H5E_BEGIN_TRY {
+            ret = H5Pset_libver_bounds(fapl, low, high);
+        } H5E_END_TRY;
+
+        if (ret < 0) /* Invalid low/high combinations */
+            continue;
+
+        /* Display info about testing */
+        sprintf(msg, "Using file format version: (%s, %s)", version_string(low),
+                     version_string(high));
+        HDputs(msg);
 
         /* test on object continuation block */
         if(test_cont(filename, fapl) < 0)
@@ -977,7 +1021,9 @@ main(void)
         /* Test object header creation metadata cache issues */
         if(test_ohdr_cache(filename, fapl) < 0)
             TEST_ERROR
-    } /* end for */
+
+      } /* high */
+    } /* low */
 
     /* Verify symbol table messages are cached */
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR

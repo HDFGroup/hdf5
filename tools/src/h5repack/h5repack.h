@@ -101,21 +101,23 @@ typedef struct {
 
 /* all the above, ready to go to the hrepack call */
 typedef struct {
-    pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
-    int             all_layout;  /*apply the layout to all objects */
-    int             all_filter;  /*apply the filter to all objects */
+    pack_opttbl_t   *op_tbl;        /*table with all -c and -f options */
+    int             all_layout;     /*apply the layout to all objects */
+    int             all_filter;     /*apply the filter to all objects */
     filter_info_t   filter_g[H5_REPACK_MAX_NFILTERS];    /*global filter array for the ALL case */
-    int             n_filter_g;  /*number of global filters */
-    chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
-    H5D_layout_t    layout_g;    /*global layout information for the ALL case */
-    int             verbose;     /*verbose mode */
-    hsize_t         min_comp;    /*minimum size to compress, in bytes */
-    int             use_native;  /*use a native type in write */
-    hbool_t         latest;      /*pack file with the latest file format */
-    int             grp_compact; /* Set the maximum number of links to store as header messages in the group */
-    int             grp_indexed; /* Set the minimum number of links to store in the indexed format */
-    int             msg_size[8]; /* Minimum size of shared messages: dataspace,
-                                    datatype, fill value, filter pipleline, attribute */
+    int             n_filter_g;     /*number of global filters */
+    chunk_info_t    chunk_g;        /*global chunk INFO for the ALL case */
+    H5D_layout_t    layout_g;       /*global layout information for the ALL case */
+    int             verbose;        /*verbose mode */
+    hsize_t         min_comp;       /*minimum size to compress, in bytes */
+    int             use_native;     /*use a native type in write */
+    hbool_t         latest;         /*pack file with the latest file format */
+    H5F_libver_t    low_bound;      /* The file's low bound as in H5Fset_libver_bounds() */
+    H5F_libver_t    high_bound;     /* The file's high bound as in H5Fset_libver_bounds() */
+    int             grp_compact;    /* Set the maximum number of links to store as header messages in the group */
+    int             grp_indexed;    /* Set the minimum number of links to store in the indexed format */
+    int             msg_size[8];    /* Minimum size of shared messages: dataspace,
+                                       datatype, fill value, filter pipleline, attribute */
     const char      *ublock_filename;  /* user block file name */
     hsize_t         ublock_size;       /* user block size */
     hsize_t         meta_block_size;   /* metadata aggregation block size (for H5Pset_meta_block_size) */
