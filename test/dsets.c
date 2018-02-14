@@ -24,7 +24,6 @@
 
 #define H5Z_FRIEND        /*suppress error about including H5Zpkg      */
 
-#include "hdf5.h"
 #include "testhdf5.h"
 #include "H5srcdir.h"
 
@@ -316,7 +315,7 @@ const H5Z_class2_t H5Z_COUNT[1] = {{
     filter_count,               /* The actual filter function */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    filter_count
  *
@@ -341,7 +340,7 @@ filter_count(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
     return nbytes;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_create
  *
@@ -488,7 +487,7 @@ test_create(hid_t file)
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   test_simple_io
  *
@@ -624,7 +623,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_userblock_offset
  *
@@ -730,7 +729,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_compact_io
  *
@@ -823,7 +822,7 @@ test_compact_io(hid_t fapl)
      if(H5Fclose(file) < 0) TEST_ERROR
 
     /**************************************
-     * Additional test for version bounds * 
+     * Additional test for version bounds *
      **************************************/
 
     /* Create a copy of file access property list */
@@ -923,7 +922,7 @@ test_compact_io(hid_t fapl)
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_max_compact
  *
@@ -1076,7 +1075,7 @@ error:
      return -1;
 } /* end test_max_compact() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_layout_extend
  *
@@ -1199,7 +1198,7 @@ error:
      return -1;
 } /* end test_layout_extend() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_conv_buffer
  *
@@ -1338,7 +1337,7 @@ error:
   return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_tconv
  *
@@ -1433,7 +1432,7 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
     filter_bogus,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  can_apply_bogus
  *
@@ -1455,7 +1454,7 @@ can_apply_bogus(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSE
         return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  filter_bogus
  *
@@ -1473,7 +1472,7 @@ filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
     return nbytes;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  set_local_bogus2
  *
@@ -1519,7 +1518,7 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
     return(SUCCEED);
 } /* end set_local_bogus2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  filter_bogus2
  *
@@ -1573,7 +1572,7 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
         return(nbytes);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  filter_bogus3
  *
@@ -1602,7 +1601,7 @@ const H5Z_class2_t H5Z_CORRUPT[1] = {{
     filter_corrupt,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  filter_corrupt
  *
@@ -1661,7 +1660,7 @@ error:
     return ret_value;
 } /* end filter_corrupt() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    filter_cb_cont
  *
@@ -1680,7 +1679,7 @@ filter_cb_cont(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNU
         return H5Z_CB_FAIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    filter_cb_fail
  *
@@ -1699,7 +1698,7 @@ filter_cb_fail(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNU
        return H5Z_CB_CONT;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_filter_internal
  *
@@ -2510,7 +2509,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_missing_filter
  *
@@ -2838,7 +2837,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_int
  *
@@ -2956,7 +2955,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_float
  *
@@ -3074,7 +3073,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_double
  *
@@ -3206,7 +3205,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_array
  *
@@ -3333,7 +3332,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_compound
  *
@@ -3550,7 +3549,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_compound_2
  *
@@ -3895,7 +3894,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_compound_3
  *
@@ -4075,7 +4074,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_int_size
  *
@@ -4242,7 +4241,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_flt_size
  *
@@ -4438,7 +4437,7 @@ test_nbit_flt_size(hid_t file)
 error:
     return -1;
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_int
  *
@@ -4550,7 +4549,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_int_2
  *
@@ -4678,7 +4677,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_float
  *
@@ -4791,7 +4790,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_float_2
  *
@@ -4920,7 +4919,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_double
  *
@@ -5033,7 +5032,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_double_2
  *
@@ -5163,7 +5162,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multiopen
  *
@@ -5230,7 +5229,7 @@ test_multiopen (hid_t file)
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_types
  *
@@ -5337,7 +5336,7 @@ const H5Z_class2_t H5Z_CAN_APPLY_TEST[1] = {{
     filter_bogus,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_can_apply
  *
@@ -5518,7 +5517,7 @@ const H5Z_class2_t H5Z_CAN_APPLY_TEST2[1] = {{
     filter_bogus3,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_can_apply2
  *
@@ -5667,7 +5666,7 @@ error:
 } /* end test_can_apply2() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_can_apply_szip
  *
@@ -5872,7 +5871,7 @@ const H5Z_class2_t H5Z_SET_LOCAL_TEST[1] = {{
     filter_bogus2,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_set_local
  *
@@ -6137,7 +6136,7 @@ error:
     return -1;
 } /* end test_set_local() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_compare_dcpl
  *
@@ -6222,7 +6221,7 @@ error:
     return -1;
 } /* end test_compare_dcpl() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dcpl
  *
@@ -6354,7 +6353,7 @@ error:
     return -1;
 } /* end test_copy_dcpl() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_filter_delete
  *
@@ -6481,7 +6480,7 @@ error:
 } /* end test_filter_delete() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function: auxread_fdata
  *
@@ -6565,7 +6564,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_filters_endianess
  *
@@ -6635,7 +6634,7 @@ error:
     return -1;
 } /* end test_filters_endianess() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_zero_dims
  *
@@ -6799,7 +6798,7 @@ error:
     return -1;
 } /* end test_zero_dims() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_missing_chunk
  *
@@ -6991,7 +6990,7 @@ error:
     return -1;
 } /* end test_missing_chunk() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_random_chunks_real
  *
@@ -7359,7 +7358,7 @@ error:
     return -1;
 } /* end test_random_chunks_real() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_random_chunks
  *
@@ -7419,7 +7418,7 @@ const H5Z_class1_t H5Z_DEPREC[1] = {{
     filter_bogus,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_deprec
  *
@@ -7610,7 +7609,7 @@ test_deprec(hid_t file)
 } /* end test_deprec() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_huge_chunks
  *
@@ -7722,7 +7721,7 @@ error:
     return -1;
 } /* end test_huge_chunks() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_chunk_cache
  *
@@ -7930,7 +7929,7 @@ error:
     return -1;
 } /* end test_chunk_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_big_chunks_bypass_cache
  *
@@ -8223,7 +8222,7 @@ error:
     return -1;
 } /* end test_big_chunks_bypass_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_chunk_fast
  *
@@ -8570,7 +8569,7 @@ error:
     return -1;
 } /* end test_chunk_fast() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_reopen_chunk_fast
  *
@@ -8693,7 +8692,7 @@ error:
     return -1;
 } /* end test_reopen_chunk_fast() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_chunk_fast_bug1
  *
@@ -8815,7 +8814,7 @@ const H5Z_class2_t H5Z_EXPAND[1] = {{
 /* Global "expansion factor" for filter_expand() routine */
 static size_t filter_expand_factor_g = 0;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    filter_expand
  *
@@ -8864,7 +8863,7 @@ filter_expand(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
     return ret_value;
 } /* end filter_expand() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_chunk_expand
  *
@@ -9260,7 +9259,7 @@ error:
     return -1;
 } /* end test_chunk_expand() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_fixed_array
  *
@@ -9679,7 +9678,7 @@ error:
     return -1;
 } /* end test_fixed_array() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_single_chunk
  *
@@ -9943,7 +9942,7 @@ error:
     return -1;
 } /* end test_single_chunk() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  *  test_idx_compatible():
@@ -10156,7 +10155,7 @@ error:
     return -1;
 } /* test_unfiltered_edge_chunks */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_large_chunk_shrink
  *
@@ -10271,7 +10270,7 @@ error:
     return -1;
 } /* end test_large_chunk_shrink() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_zero_dim_dset
  *
@@ -10364,7 +10363,7 @@ error:
     return -1;
 } /* end test_zero_dim_dset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_swmr_non_latest
  *
@@ -10613,7 +10612,7 @@ error:
     return -1;
 } /* test_swmr_non_latest() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_earray_hdr_fd
  *
@@ -10733,7 +10732,7 @@ error:
     return -1;
 } /* test_earray_hdr_fd() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_farray_hdr_fd
  *
@@ -10853,7 +10852,7 @@ error:
     return -1;
 } /* test_farray_hdr_fd() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_bt2_hdr_fd
  *
@@ -10973,7 +10972,7 @@ error:
     return -1;
 } /* test_bt2_hdr_fd() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_storage_size
  *
@@ -11367,7 +11366,7 @@ error:
     return -1;
 } /* end test_storage_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_power2up
  *
@@ -11458,7 +11457,7 @@ error:
     return -1;
 } /* end test_power2up() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scatter
  *
@@ -11776,7 +11775,7 @@ error:
     return -1;
 } /* end test_scatter() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_gather
  *
@@ -12138,7 +12137,7 @@ error:
     return -1;
 } /* end test_gather() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scatter_error
  *
@@ -12341,7 +12340,7 @@ error:
     return -1;
 } /* end test_scatter_error() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_gather_error
  *
@@ -12868,7 +12867,7 @@ error:
     return -1;
 } /* test_compact_open_close_dirty() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_versionbounds
  *
@@ -12940,7 +12939,7 @@ test_versionbounds()
 
     /* Loop through all the combinations of low/high library format bounds */
     /* Create a source file and a dataset in it.  Create a virtual file and
-       virtual dataset.  Creation of virtual dataset should only succeed in 
+       virtual dataset.  Creation of virtual dataset should only succeed in
        H5F_LIBVER_V110 */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
         for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
@@ -13021,7 +13020,7 @@ test_versionbounds()
     return -1;
 } /* test_versionbounds() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *

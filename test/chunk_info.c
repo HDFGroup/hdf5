@@ -21,7 +21,6 @@
  */
 
 
-#include "hdf5.h"
 #include "h5test.h"
 
 #define PRINT_DATA

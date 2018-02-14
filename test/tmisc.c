@@ -21,12 +21,11 @@
 *
 *************************************************************/
 
-#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#define H5D_FRIEND        /*suppress error about including H5Dpkg      */
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5D_TESTING
 
-#include "hdf5.h"
 #include "testhdf5.h"
 #include "H5srcdir.h"
 #include "H5Dpkg.h"         /* Datasets                 */
@@ -1816,11 +1815,11 @@ test_misc11(void)
     unsigned    sym_ik;         /* Symbol table B-tree initial 'K' value */
     unsigned    istore_ik;      /* Indexed storage B-tree initial 'K' value */
     unsigned    sym_lk;         /* Symbol table B-tree leaf 'K' value */
-    unsigned 	nindexes;       /* Shared message number of indexes */
+    unsigned     nindexes;       /* Shared message number of indexes */
     H5F_info2_t finfo;          /* global information about file */
     H5F_fspace_strategy_t strategy;  /* File space strategy */
-    hsize_t  	threshold;      /* Free-space section threshold */
-    hbool_t	persist;	/* To persist free-space or not */
+    hsize_t      threshold;      /* Free-space section threshold */
+    hbool_t    persist;    /* To persist free-space or not */
     herr_t      ret;            /* Generic return value */
 
     /* Output message about test being performed */
@@ -1859,7 +1858,7 @@ test_misc11(void)
 
     /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
     H5E_BEGIN_TRY {
-	ret=H5Pset_sym_k(fcpl, 32770, 0);
+    ret=H5Pset_sym_k(fcpl, 32770, 0);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_sym_k");
 
@@ -1868,7 +1867,7 @@ test_misc11(void)
 
     /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
     H5E_BEGIN_TRY {
-	ret=H5Pset_istore_k(fcpl, 32770);
+    ret=H5Pset_istore_k(fcpl, 32770);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_istore_k");
 
@@ -1980,19 +1979,19 @@ test_misc12(void)
        "las palabras del que murio en la cruz."
         };
     char        *rdata [MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE]; /* Information read in */
-    hid_t		fid1;
-    hid_t		dataset;
-    hid_t		sid1, space, memspace;
-    hid_t		tid1, cparms;
-    hsize_t		dims1[] = {MISC12_SPACE1_DIM1};
-    hsize_t		dimsn[] = {MISC12_APPEND_SIZE};
-    hsize_t		maxdims1[1] = {H5S_UNLIMITED};
-    hsize_t		chkdims1[1] = {MISC12_CHUNK_SIZE};
+    hid_t        fid1;
+    hid_t        dataset;
+    hid_t        sid1, space, memspace;
+    hid_t        tid1, cparms;
+    hsize_t        dims1[] = {MISC12_SPACE1_DIM1};
+    hsize_t        dimsn[] = {MISC12_APPEND_SIZE};
+    hsize_t        maxdims1[1] = {H5S_UNLIMITED};
+    hsize_t        chkdims1[1] = {MISC12_CHUNK_SIZE};
     hsize_t     newsize[1] = {MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE};
-    hsize_t    	offset[1] = {MISC12_SPACE1_DIM1};
+    hsize_t        offset[1] = {MISC12_SPACE1_DIM1};
     hsize_t     count[1] = {MISC12_APPEND_SIZE};
     int         i;          /* counting variable */
-    herr_t		ret;		/* Generic return value  */
+    herr_t        ret;        /* Generic return value  */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing VL-type in chunked dataset\n"));
@@ -2746,10 +2745,10 @@ test_misc16(void)
     herr_t ret;         /* Generic return value */
     char wdata[MISC16_SPACE_DIM][MISC16_STR_SIZE];
     char rdata[MISC16_SPACE_DIM][MISC16_STR_SIZE];  /* Information read in */
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid;       /* Dataspace ID			*/
-    hid_t		tid;       /* Datatype ID			*/
-    hsize_t		dims[] = {MISC16_SPACE_DIM};
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid;       /* Dataspace ID            */
+    hid_t        tid;       /* Datatype ID            */
+    hsize_t        dims[] = {MISC16_SPACE_DIM};
     int                 i;
 
     /* Initialize the data */
@@ -2831,10 +2830,10 @@ test_misc17(void)
     herr_t ret;         /* Generic return value */
     char wdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2];
     char rdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2];  /* Information read in */
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid;       /* Dataspace ID			*/
-    hid_t		tid;       /* Datatype ID			*/
-    hsize_t		dims[] = {MISC17_SPACE_DIM1, MISC17_SPACE_DIM2};
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid;       /* Dataspace ID            */
+    hid_t        tid;       /* Datatype ID            */
+    hsize_t        dims[] = {MISC17_SPACE_DIM1, MISC17_SPACE_DIM2};
     int                 i;
 
     /* Initialize the data */
@@ -3798,13 +3797,13 @@ test_misc22(void)
 
                 /* compute the correct PPB that should be set by SZIP */
                 if(offsets[k] == 0)
-            	    correct = prec[j];
+                    correct = prec[j];
                 else
                     correct = H5Tget_size(idts[i]) * 8;
                 if(correct > 24) {
-            	    if(correct <= 32)
+                    if(correct <= 32)
                         correct = 32;
-            	    else if(correct <= 64)
+                    else if(correct <= 64)
                         correct = 64;
                 } /* end if */
 
@@ -4757,7 +4756,7 @@ test_misc25b(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25b() */
 
-
+
 /****************************************************************
 **
 **  test_misc25c(): Exercise another null object header message merge bug.
@@ -4891,7 +4890,7 @@ test_misc25c(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25c() */
 
-
+
 /****************************************************************
 **
 **  test_misc26(): Regression test: ensure that copying filter
@@ -4977,7 +4976,7 @@ test_misc26(void)
     CHECK_I(ret, "H5Pclose");
 }
 
-
+
 /****************************************************************
 **
 **  test_misc27(): Ensure that objects with incorrect # of object
@@ -5022,7 +5021,7 @@ test_misc27(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc27() */
 
-
+
 /****************************************************************
 **
 **  test_misc28(): Ensure that the dataset chunk cache will hold
@@ -5199,7 +5198,7 @@ test_misc28(void)
     CHECK_I(ret, "H5Pclose");
 } /* end test_misc28() */
 
-
+
 /****************************************************************
 **
 **  test_misc29(): Ensure that speculative metadata reads don't
@@ -5239,7 +5238,7 @@ test_misc30_get_info_cb(hid_t loc_id, const char *name, const H5L_info_t H5_ATTR
 {
     H5O_info_t object_info;
 
-    return H5Oget_info_by_name(loc_id, name, &object_info, H5P_DEFAULT);  
+    return H5Oget_info_by_name(loc_id, name, &object_info, H5P_DEFAULT);
 }
 
 static int
@@ -5248,7 +5247,7 @@ test_misc30_get_info(hid_t loc_id)
     return H5Literate(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, test_misc30_get_info_cb, NULL);
 }
 
-
+
 /****************************************************************
 **
 **  test_misc30(): Exercise local heap code that loads prefix
@@ -5280,15 +5279,15 @@ test_misc30(void)
         CHECK(ret, FAIL, "H5Gclose");
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
-        
+
         for(i = 0; i < 20; i++) {
             char gname[32];
 
             fid = H5Fopen(MISC30_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
             CHECK(fid, FAIL, "H5Fopen");
-    
+
             if(get_info) {
-                ret = test_misc30_get_info(fid);      
+                ret = test_misc30_get_info(fid);
                 CHECK(ret, FAIL, "test_misc30_get_info");
             }
 
@@ -5300,20 +5299,20 @@ test_misc30(void)
             CHECK(ret, FAIL, "H5Gclose");
             ret = H5Fclose(fid);
             CHECK(ret, FAIL, "H5Fclose");
-        } 
-        
+        }
+
         fid = H5Fopen(MISC30_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
         CHECK(fid, FAIL, "H5Fopen");
         ret = H5Fget_filesize(fid, &file_size[get_info]);
         CHECK(fid, FAIL, "H5Fget_filesize");
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
-    } 
-    
+    }
+
     VERIFY(file_size[0], file_size[1], "test_misc30");
 } /* end test_misc30() */
 
-
+
 /****************************************************************
 **
 **  test_misc31(): Test reentering library through deprecated
@@ -5404,14 +5403,14 @@ test_misc31(void)
     CHECK(ret, FAIL, "H5Fclose");
     ret = H5Tclose(dtype_id);
     CHECK(ret, FAIL, "H5Tclose");
-    
+
 #else /* H5_NO_DEPRECATED_SYMBOLS */
     /* Output message about test being skipped */
     MESSAGE(5, (" ...Skipped"));
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end test_misc31() */
 
-
+
 /****************************************************************
  *
  *  test_misc32(): Simple test of filter memory allocation
@@ -5475,7 +5474,7 @@ test_misc32(void)
     resized = H5resize_memory(NULL, 0);
     CHECK_PTR_NULL(resized, "H5resize_memory"); /*BAD*/
 #endif /* NDEBUG */
-    
+
 } /* end test_misc32() */
 
 /****************************************************************
@@ -5585,7 +5584,7 @@ test_misc34(void)
 
 } /* end test_misc34() */
 
-
+
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
@@ -5638,15 +5637,15 @@ test_misc(void)
 
 } /* test_misc() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_misc
+ * Function:    cleanup_misc
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	Albert Cheng
+ * Programmer:    Albert Cheng
  *              July 2, 1998
  *
  * Modifications:
