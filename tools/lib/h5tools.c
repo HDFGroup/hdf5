@@ -43,7 +43,7 @@ unsigned    packed_bits_num;    /* number of packed bits to display */
 unsigned    packed_data_offset; /* offset of packed bits to display */
 unsigned    packed_data_length; /* length of packed bits to display */
 unsigned long long packed_data_mask;  /* mask in which packed bits to display */
-int          enable_error_stack= FALSE; /* re-enable error stack */
+int         enable_error_stack = 0;   /* re-enable error stack; disable=0 enable=1 */
 
 /* sort parameters */
 H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
@@ -548,9 +548,15 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
         if ((my_fapl = h5tools_get_fapl(fapl, driver, &drivernum)) < 0)
             goto done;
 
-        H5E_BEGIN_TRY {
+        /* allow error stack display if enable-error-stack has optional arg number */
+        if (enable_error_stack > 1) {
             fid = H5Fopen(fname, flags, my_fapl);
-        } H5E_END_TRY;
+        }
+        else {
+            H5E_BEGIN_TRY {
+                fid = H5Fopen(fname, flags, my_fapl);
+            } H5E_END_TRY;
+        }
 
         if (fid == FAIL)
             goto done;
@@ -563,9 +569,15 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
             if((my_fapl = h5tools_get_fapl(fapl, drivernames[drivernum], NULL)) < 0)
                 goto done;
 
-            H5E_BEGIN_TRY {
+            /* allow error stack display if enable-error-stack has optional arg number */
+            if (enable_error_stack > 1) {
                 fid = H5Fopen(fname, flags, my_fapl);
-            } H5E_END_TRY;
+            }
+            else {
+                H5E_BEGIN_TRY {
+                    fid = H5Fopen(fname, flags, my_fapl);
+                } H5E_END_TRY;
+            }
 
             if (fid != FAIL)
                 break;
