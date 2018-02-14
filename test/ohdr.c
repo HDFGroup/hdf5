@@ -745,7 +745,7 @@ char *version_string(H5F_libver_t libver)
 {
     char *str = NULL;
 
-    str = (char *) malloc(20 * sizeof(char));
+    str = (char *) HDmalloc(20);
     if (str == NULL)
     {
         fprintf(stderr, "Allocation failed\n");
@@ -772,6 +772,9 @@ char *version_string(H5F_libver_t libver)
           sprintf(str, "%ld", (long)libver);
           break;
     } /* end switch */
+ 
+    /* Return the formed version bound string */
+    return(str);
 } /* end of version_string */
 
 
@@ -780,11 +783,15 @@ char *version_string(H5F_libver_t libver)
  *
  * Purpose:     Exercise private object header behavior and routines
  *
- * Return:	Success:        0
- *		Failure:        1
+ * Return:      Success: 0
+ *              Failure: 1
  *
  * Programmer:	Robb Matzke
  *              Tuesday, November 24, 1998
+ *
+ * Modification:
+ *              - Added loop of combinations of low/high library format bounds
+ *                (BMR, Feb 2018)
  *
  *-------------------------------------------------------------------------
  */
