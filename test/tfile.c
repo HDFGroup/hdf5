@@ -5267,7 +5267,7 @@ test_libver_bounds_super(hid_t fapl)
     /* This will result in superblock version 2 */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
     CHECK(fcpl, FAIL, "H5Pcreate");
-    ret = H5Pset_file_space(fcpl, H5F_FILE_SPACE_ALL_PERSIST, (hsize_t)0);
+    ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, 1, (hsize_t)1);
     CHECK(ret, FAIL, "H5Pset_file_space");
 
     /* Verify superblock version when creating a file with input fapl,
