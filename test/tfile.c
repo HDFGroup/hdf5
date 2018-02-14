@@ -5518,7 +5518,12 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr)
             H5E_BEGIN_TRY {
                 fid = H5Fopen(FILE8, H5F_ACC_RDWR | (is_swmr ? H5F_ACC_SWMR_WRITE : 0), new_fapl);
             } H5E_END_TRY;
-            ok = fid >= 0;
+
+            /* Get the internal file pointer if the open succeeds */
+            if((ok = fid >= 0)) {
+                f = (H5F_t *)H5I_object(fid);
+                CHECK(f, NULL, "H5I_object");
+            }
 
             /* Verify the file open succeeds or fails */
             switch(super_vers) {
