@@ -13,7 +13,7 @@
 
 /***********************************************************
 *
-* Test program:	 tarray
+* Test program:     tarray
 *
 * Test the Array Datatype functionality
 *
@@ -22,13 +22,11 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 
-#include "hdf5.h"
-
 #define FILENAME   "tarray1.h5"
 #define TESTFILE   "tarrold.h5"
 
 /* 1-D array datatype */
-#define ARRAY1_RANK	1
+#define ARRAY1_RANK    1
 #define ARRAY1_DIM1 4
 
 /* 3-D array datatype */
@@ -67,7 +65,7 @@ typedef struct
 void *test_array_alloc_custom(size_t size, void *info);
 void test_array_free_custom(void *mem, void *info);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_atomic_1d
  *
@@ -191,7 +189,7 @@ test_array_atomic_1d(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_array_atomic_1d() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_funcs
  *
@@ -254,7 +252,7 @@ test_array_funcs(void)
     CHECK(ret, FAIL, "H5Tclose");
 } /* end test_array_funcs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_atomic_3d
  *
@@ -383,7 +381,7 @@ test_array_atomic_3d(void)
 
 } /* end test_array_atomic_3d() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_array_atomic
  *
@@ -542,7 +540,7 @@ test_array_array_atomic(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_array_array_atomic() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_compound_atomic
  *
@@ -749,7 +747,7 @@ test_array_compound_atomic(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_array_compound_atomic() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_compound_array
  *
@@ -1008,7 +1006,7 @@ test_array_compound_array(void)
 **      allocated.
 **
 ****************************************************************/
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_alloc_custom
  *
@@ -1047,7 +1045,7 @@ test_array_alloc_custom(size_t size, void *info)
     return ret_value;
 } /* end test_array_alloc_custom() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_free_custom
  *
@@ -1083,7 +1081,7 @@ test_array_free_custom(void *_mem, void *info)
     return;
 } /* end test_array_free_custom() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_vlen_atomic
  *
@@ -1298,7 +1296,7 @@ test_array_vlen_atomic(void)
 
 } /* end test_array_vlen_atomic() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_vlen_array
  *
@@ -1553,7 +1551,7 @@ test_array_vlen_array(void)
 
 } /* end test_array_vlen_array() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_bkg
  *
@@ -1582,9 +1580,9 @@ test_array_bkg(void)
     unsigned     ndims[3] = {1,1,1};
 
     typedef struct {
-	  int      a[ALEN];
-	  float    b[ALEN];
-	  double   c[ALEN];
+    int      a[ALEN];
+    float    b[ALEN];
+    double   c[ALEN];
     } CmpField;
 
     CmpField     cf[LENGTH];
@@ -1857,7 +1855,7 @@ test_array_bkg(void)
     HDfree(dtsinfo);
 } /* end test_array_bkg() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_compat
  *
@@ -2152,7 +2150,7 @@ test_compat(void)
 
 } /* end test_compat() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array
  *
@@ -2185,7 +2183,7 @@ test_array(void)
 
 }   /* end test_array() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_array
  *
