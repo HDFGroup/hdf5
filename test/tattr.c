@@ -20,8 +20,6 @@
 *************************************************************/
 
 #include "testhdf5.h"
-#include "h5test.h"
-#include "hdf5.h"
 
 /*
  * This file needs to access private information from the H5O package.
@@ -153,7 +151,7 @@ static herr_t attr_op1(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
     void *op_data);
 
 
-
+
 /****************************************************************
 **
 **  test_attr_basic_write(): Test basic H5A (attribute) code.
@@ -393,7 +391,7 @@ test_attr_basic_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_basic_write() */
 
-
+
 /****************************************************************
 **
 **  test_attr_basic_read(): Test basic H5A (attribute) code.
@@ -484,7 +482,7 @@ test_attr_basic_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_basic_read() */
 
-
+
 /****************************************************************
 **
 **  test_attr_flush(): Test H5A (attribute) code for performing
@@ -551,7 +549,7 @@ test_attr_flush(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_flush() */
 
-
+
 /****************************************************************
 **
 **  test_attr_plist(): Test Attribute Creation Property Lists
@@ -664,7 +662,7 @@ test_attr_plist(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }  /* test_attr_plist() */
 
-
+
 /****************************************************************
 **
 **  test_attr_compound_write(): Test H5A (attribute) code.
@@ -753,7 +751,7 @@ test_attr_compound_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_compound_write() */
 
-
+
 /****************************************************************
 **
 **  test_attr_compound_read(): Test basic H5A (attribute) code.
@@ -903,7 +901,7 @@ test_attr_compound_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_compound_read() */
 
-
+
 /****************************************************************
 **
 **  test_attr_scalar_write(): Test scalar H5A (attribute) writing code.
@@ -969,7 +967,7 @@ test_attr_scalar_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_scalar_write() */
 
-
+
 /****************************************************************
 **
 **  test_attr_scalar_read(): Test scalar H5A (attribute) reading code.
@@ -1040,7 +1038,7 @@ test_attr_scalar_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_scalar_read() */
 
-
+
 /****************************************************************
 **
 **  test_attr_mult_write(): Test basic H5A (attribute) code.
@@ -1161,7 +1159,7 @@ test_attr_mult_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_mult_write() */
 
-
+
 /****************************************************************
 **
 **  test_attr_mult_read(): Test basic H5A (attribute) code.
@@ -1383,7 +1381,7 @@ test_attr_mult_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_mult_read() */
 
-
+
 /****************************************************************
 **
 **  attr_op1(): Attribute operator
@@ -1423,7 +1421,7 @@ attr_op1(hid_t H5_ATTR_UNUSED loc_id, const char *name, const H5A_info_t H5_ATTR
     return(ret);
 } /* end attr_op1() */
 
-
+
 /****************************************************************
 **
 **  test_attr_iterate(): Test H5A (attribute) iterator code.
@@ -1495,7 +1493,7 @@ test_attr_iterate(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_iterate() */
 
-
+
 /****************************************************************
 **
 **  test_attr_delete(): Test H5A (attribute) code for deleting objects.
@@ -1615,7 +1613,7 @@ test_attr_delete(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_delete() */
 
-
+
 /****************************************************************
 **
 **  test_attr_dtype_shared(): Test H5A (attribute) code for using
@@ -1792,7 +1790,7 @@ test_attr_dtype_shared(hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dtype_shared() */
 
-
+
 /****************************************************************
 **
 **  test_attr_duplicate_ids(): Test operations with more than
@@ -2037,7 +2035,7 @@ test_attr_duplicate_ids(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_duplicate_ids() */
 
-
+
 /****************************************************************
 **
 **  test_attr_dense_verify(): Test basic H5A (attribute) code.
@@ -2107,7 +2105,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
         return(-1);
 }   /* test_attr_dense_verify() */
 
-
+
 /****************************************************************
 **
 **  test_attr_dense_create(): Test basic H5A (attribute) code.
@@ -2238,7 +2236,7 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_create() */
 
-
+
 /****************************************************************
 **
 **  test_attr_dense_open(): Test basic H5A (attribute) code.
@@ -2377,7 +2375,7 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_open() */
 
-
+
 /****************************************************************
 **
 **  test_attr_dense_delete(): Test basic H5A (attribute) code.
@@ -2555,7 +2553,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_delete() */
 
-
+
 /****************************************************************
 **
 **  test_attr_dense_rename(): Test basic H5A (attribute) code.
@@ -2714,7 +2712,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_rename() */
 
-
+
 /****************************************************************
 **
 **  test_attr_dense_unlink(): Test basic H5A (attribute) code.
@@ -2844,7 +2842,7 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_unlink() */
 
-
+
 /****************************************************************
 **
 **  test_attr_dense_limits(): Test basic H5A (attribute) code.
@@ -3009,7 +3007,7 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_limits() */
 
-
+
 /****************************************************************
 **
 **  test_attr_dense_dup_ids(): Test operations with multiple ID
@@ -3532,7 +3530,7 @@ test_attr_dense_dup_ids(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_dense_dup_ids() */
 
-
+
 /****************************************************************
 **
 **  test_attr_big(): Test basic H5A (attribute) code.
@@ -3802,7 +3800,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_big() */
 
-
+
 /****************************************************************
 **
 **  test_attr_null_space(): Test basic H5A (attribute) code.
@@ -4020,7 +4018,7 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_null_space() */
 
-
+
 /****************************************************************
 **
 **  test_attr_deprec(): Test basic H5A (attribute) code.
@@ -4129,7 +4127,7 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 }   /* test_attr_deprec() */
 
-
+
 /****************************************************************
 **
 **  test_attr_many(): Test basic H5A (attribute) code.
@@ -4258,7 +4256,7 @@ test_attr_many(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_many() */
 
-
+
 /****************************************************************
 **
 **  test_attr_corder_create_empty(): Test basic H5A (attribute) code.
@@ -4374,7 +4372,7 @@ test_attr_corder_create_basic(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_corder_create_basic() */
 
-
+
 /****************************************************************
 **
 **  test_attr_corder_create_compact(): Test basic H5A (attribute) code.
@@ -4572,7 +4570,7 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_corder_create_compact() */
 
-
+
 /****************************************************************
 **
 **  test_attr_corder_create_dense(): Test basic H5A (attribute) code.
@@ -4799,7 +4797,7 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_corder_create_dense() */
 
-
+
 /****************************************************************
 **
 **  test_attr_corder_create_reopen(): Test basic H5A (attribute) code.
@@ -4907,7 +4905,7 @@ test_attr_corder_create_reopen(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_corder_create_reopen() */
 
-
+
 /****************************************************************
 **
 **  test_attr_corder_transition(): Test basic H5A (attribute) code.
@@ -5313,7 +5311,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_corder_transition() */
 
-
+
 /****************************************************************
 **
 **  test_attr_corder_delete(): Test basic H5A (attribute) code.
@@ -5514,7 +5512,7 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_corder_delete() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    attr_info_by_idx_check
  *
@@ -5661,7 +5659,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
         return(-1);
 } /* end attr_info_by_idx_check() */
 
-
+
 /****************************************************************
 **
 **  test_attr_info_by_idx(): Test basic H5A (attribute) code.
@@ -5871,7 +5869,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_info_by_idx() */
 
-
+
 /****************************************************************
 **
 **  test_attr_delete_by_idx(): Test basic H5A (attribute) code.
@@ -6403,7 +6401,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_delete_by_idx() */
 
-
+
 /****************************************************************
 **
 **  attr_iterate2_cb(): Revised attribute operator
@@ -6477,7 +6475,7 @@ HDfprintf(stderr, "op_data->curr = %Hd\n", op_data->curr);
 } /* end attr_iterate2_cb() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-
+
 /****************************************************************
 **
 **  attr_iterate1_cb(): Attribute operator
@@ -6490,7 +6488,7 @@ attr_iterate1_cb(hid_t loc_id, const char *attr_name, void *_op_data)
 } /* end attr_iterate1_cb() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    attr_iterate2_fail_cb
  *
@@ -6512,7 +6510,7 @@ attr_iterate2_fail_cb(hid_t H5_ATTR_UNUSED group_id, const char H5_ATTR_UNUSED *
     return(H5_ITER_ERROR);
 } /* end attr_iterate2_fail_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    attr_iterate_check
  *
@@ -6812,7 +6810,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id,
         return(-1);
 } /* end attr_iterate_check() */
 
-
+
 /****************************************************************
 **
 **  test_attr_iterate2(): Test basic H5A (attribute) code.
@@ -7116,7 +7114,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
     HDfree(visited);
 }   /* test_attr_iterate2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    attr_open_by_idx_check
  *
@@ -7176,7 +7174,7 @@ attr_open_by_idx_check(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
         return(-1);
 } /* end attr_open_by_idx_check() */
 
-
+
 /****************************************************************
 **
 **  test_attr_open_by_idx(): Test basic H5A (attribute) code.
@@ -7438,7 +7436,7 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_open_by_idx() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    attr_open_check
  *
@@ -7524,7 +7522,7 @@ attr_open_check(hid_t fid, const char *dsetname, hid_t obj_id,
         return(-1);
 } /* end attr_open_check() */
 
-
+
 /****************************************************************
 **
 **  test_attr_open_by_name(): Test basic H5A (attribute) code.
@@ -7779,7 +7777,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_open_by_name() */
 
-
+
 /****************************************************************
 **
 **  test_attr_create_by_name(): Test basic H5A (attribute) code.
@@ -10866,7 +10864,7 @@ test_attr(void)
     CHECK(ret, FAIL, "H5Pclose");
 }   /* test_attr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_attr
  *
