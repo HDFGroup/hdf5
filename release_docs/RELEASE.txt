@@ -312,6 +312,18 @@ Bug Fixes since HDF5-1.10.1 release
     -----
     - h5dump
 
+      the tools library will hide the error stack during file open.
+
+      While this is preferable almost always, there are reasons to enable
+      display of the error stack when a tool will not open a file. Adding an
+      optional argument to the --enable-error-stack will provide this use case.
+      As an optional argument it will not affect the operation of the
+      --enable-error-stack. h5dump is the only tool to implement this change.
+
+      (ADB - 2018/02/15, HDFFV-10384)
+
+    - h5dump
+
       h5dump would output an indented blank line in the filters section.
 
       h5dump overused the h5tools_simple_prefix function, which is a
