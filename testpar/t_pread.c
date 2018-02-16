@@ -16,7 +16,6 @@
  *
  */
 
-#include "h5test.h"
 #include "testpar.h"
 
 /* The collection of files is included below to aid

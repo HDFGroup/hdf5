@@ -21,8 +21,6 @@
 
 #include "testhdf5.h"
 
-#include "hdf5.h"
-
 #define DATAFILE   "titerate.h5"
 
 /* Number of datasets for group iteration test */

@@ -20,9 +20,7 @@
  *		another by anything that appears in the file format.
  */
 #include "h5test.h"
-#include "H5private.h"
 #include "H5ACprivate.h"
-#include "H5Eprivate.h"
 #include "H5Fprivate.h"
 #include "H5Gprivate.h"
 #include "H5HGprivate.h"

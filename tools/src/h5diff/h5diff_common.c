@@ -178,7 +178,7 @@ void parse_command_line(int argc,
             break;
 
         case 'S':
-            enable_error_stack = TRUE;
+            enable_error_stack = 1;
             break;
 
         case 'E':

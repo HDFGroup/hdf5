@@ -26,7 +26,6 @@
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5D_TESTING
 
-#include "hdf5.h"
 #include "testhdf5.h"
 #include "H5srcdir.h"
 #include "H5Dpkg.h"         /* Datasets                 */

@@ -26,7 +26,6 @@
  *  worth keeping around for now.
  */
 
-#include <stdio.h>
 #include "h5test.h"
 
 #define H5FILE_NAME        "data.h5"

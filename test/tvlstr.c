@@ -21,8 +21,6 @@
 
 #include "testhdf5.h"
 
-#include "hdf5.h"
-
 #define DATAFILE   "tvlstr.h5"
 #define DATAFILE2  "tvlstr2.h5"
 

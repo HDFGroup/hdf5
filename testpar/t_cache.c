@@ -16,7 +16,6 @@
  *
  */
 
-#include "h5test.h"
 #include "testpar.h"
 
 #define H5AC_FRIEND		/*suppress error about including H5ACpkg  */

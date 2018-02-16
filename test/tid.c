@@ -14,7 +14,6 @@
 /* Test user-created identifiers (hid_t's) and identifier types. */
 
 #include "testhdf5.h"
-#include "hdf5.h"
 
 /* Include H5Ipkg.h to calculate max number of groups */
 #define H5I_FRIEND		/*suppress error about including H5Ipkg	  */

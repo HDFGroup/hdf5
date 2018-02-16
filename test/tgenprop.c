@@ -25,7 +25,7 @@
 #define H5P_TESTING
 
 #include "testhdf5.h"
-#include "hdf5.h"
+
 #include "H5Dprivate.h"         /* For Dataset creation property list names */
 #include "H5Ppkg.h"		/* Generic Properties			*/
 

@@ -634,7 +634,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'E':
-            enable_error_stack = TRUE;
+            enable_error_stack = 1;
             break;
 
             default:
@@ -727,7 +727,7 @@ int main(int argc, const char **argv)
         }
     }
 
-    if (enable_error_stack) {
+    if (enable_error_stack > 0) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
         H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
     }

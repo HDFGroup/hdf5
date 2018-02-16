@@ -100,7 +100,7 @@ int main(int argc, const char *argv[])
     */
     parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
 
-    if (enable_error_stack) {
+    if (enable_error_stack > 0) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
         H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
     }
