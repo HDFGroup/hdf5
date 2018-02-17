@@ -41,10 +41,6 @@
 #define H5O_TESTING
 #include "H5Opkg.h"     /* Object header            */
 
-#include "H5Bprivate.h"
-#include "H5Sprivate.h"
-#include "H5Pprivate.h"
-
 #define TESTFILE   "th5s.h5"
 #define DATAFILE   "th5s1.h5"
 #define NULLFILE   "th5s2.h5"

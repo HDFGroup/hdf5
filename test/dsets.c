@@ -750,10 +750,10 @@ test_compact_io(hid_t fapl)
     hsize_t     dims[2];
     int         wbuf[16][8], rbuf[16][8];
     char        filename[FILENAME_BUF_SIZE];
-    H5F_libver_t low, high; /* File format bounds */
-    H5F_t *fp;           /* Internal file pointer */
-    H5D_t *dsetp;        /* Internal dataset pointer */
-    int         i, j, n;
+    H5F_libver_t low, high;     /* File format bounds */
+    H5F_t       *fp;            /* Internal file pointer */
+    H5D_t       *dsetp;         /* Internal dataset pointer */
+    int         i, j, n;        /* Indices */
     herr_t      ret;            /* Generic return value */
 
     TESTING("compact dataset I/O");
