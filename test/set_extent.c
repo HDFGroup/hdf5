@@ -427,6 +427,7 @@ error:
 */
 static int do_layouts( hid_t fapl )
 {
+    hid_t new_fapl = -1;
     H5F_libver_t low, high; /* Low and high bounds */
     herr_t ret;      /* Generic return value */
 
@@ -434,8 +435,6 @@ static int do_layouts( hid_t fapl )
     /* Loop through all the combinations of low/high library format bounds */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
         for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
-
-            hid_t new_fapl;
 
             /* Copy plist to use locally to avoid modifying the original */
             new_fapl = H5Pcopy(fapl);
@@ -446,7 +445,11 @@ static int do_layouts( hid_t fapl )
             } H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */
+            {
+                if (H5Pclose(new_fapl) < 0)
+                    goto error;
                 continue;
+            }
 
             if (test_layouts( H5D_COMPACT, new_fapl ) < 0)
                 goto error;
@@ -454,6 +457,8 @@ static int do_layouts( hid_t fapl )
             if (test_layouts( H5D_CONTIGUOUS, new_fapl ) < 0)
                 goto error;
 
+            if (H5Pclose(new_fapl) < 0)
+                goto error;
         } /* end for high */
     } /* end for low */
 
@@ -462,6 +467,10 @@ static int do_layouts( hid_t fapl )
     return 0;
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(new_fapl);
+    } H5E_END_TRY;
     return -1;
 }
 
