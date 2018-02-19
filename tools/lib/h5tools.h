@@ -573,7 +573,7 @@ H5TOOLS_DLLVAR H5_index_t   sort_by;        /*sort_by [creation_order | name]  *
 H5TOOLS_DLLVAR H5_iter_order_t sort_order;  /*sort_order [ascending | descending]   */
 
 /* things to display or which are set via command line parameters */
-H5TOOLS_DLLVAR int     enable_error_stack; /* re-enable error stack */
+H5TOOLS_DLLVAR int     enable_error_stack; /* re-enable error stack; disable=0 enable=1 */
 
 /* Strings for output */
 #define H5_TOOLS_GROUP           "GROUP"
