@@ -21,7 +21,6 @@
 
 #include "testhdf5.h"
 
-#include "hdf5.h"
 #include "H5Dprivate.h"
 
 #define FILENAME   "tvltypes.h5"

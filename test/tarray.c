@@ -22,8 +22,6 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 
-#include "hdf5.h"
-
 #define FILENAME   "tarray1.h5"
 #define TESTFILE   "tarrold.h5"
 

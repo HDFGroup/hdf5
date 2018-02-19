@@ -21,7 +21,6 @@
  *		calling _exit(0) since this doesn't flush HDF5 caches but
  *		still exits with success.
  */
-#include <mpi.h>
 #include "h5test.h"
 
 const char *FILENAME[] = {

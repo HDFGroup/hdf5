@@ -21,8 +21,6 @@
  *		rewrite much of the hyperslab stuff.
  */
 #include "h5test.h"
-#include "H5private.h"
-#include "H5Eprivate.h"
 #include "H5VMprivate.h"
 
 #define TEST_SMALL	0x0001

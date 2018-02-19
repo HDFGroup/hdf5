@@ -1,5 +1,5 @@
 
-#include "testpar.h"
+#include "hdf5.h"
 #include "testphdf5.h"
 #include "H5Dprivate.h"	            /* For Chunk tests */
 

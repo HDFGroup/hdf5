@@ -15,10 +15,9 @@
  * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
  *              Tuesday, May 13, 2003
  *
- * Purpose:	Test dangling IDs
+ * Purpose:    Test dangling IDs
  */
 #include "h5test.h"
-#include "H5private.h"
 
 const char *FILENAME[] = {
     "dangle",

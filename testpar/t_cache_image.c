@@ -17,9 +17,8 @@
  *              This file contains tests specific to the cache image 
  *		feature implemented in H5C.c
  */
-#include "h5test.h"
 #include "testphdf5.h"
-#include "testpar.h"
+
 #include "cache_common.h"
 #include "genall5.h"
 

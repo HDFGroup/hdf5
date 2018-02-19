@@ -22,8 +22,6 @@
 #define H5S_TESTING
 
 
-#include "hdf5.h"
-#include "H5private.h"
 #include "testphdf5.h"
 #include "H5Spkg.h"             /* Dataspaces                           */
 

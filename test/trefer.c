@@ -21,8 +21,6 @@
 
 #include "testhdf5.h"
 
-#include "hdf5.h"
-
 #define FILE1   "trefer1.h5"
 #define FILE2	"trefer2.h5"
 #define FILE3	"trefer3.h5"
