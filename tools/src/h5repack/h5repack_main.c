@@ -667,8 +667,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'E':
-            enable_error_stack = 1;
-            break;
+                enable_error_stack = 1;
+                break;
 
             default:
                 break;
