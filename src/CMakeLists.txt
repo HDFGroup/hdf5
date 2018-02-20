@@ -852,11 +852,13 @@ TARGET_C_PROPERTIES (H5detect STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
 endif ()
+if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set_property(TARGET H5detect PROPERTY LINK_FLAGS "-O0")
+endif ()
 
-set (CMD $<TARGET_FILE:H5detect>)
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5Tinit.c
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5detect>
     ARGS > ${HDF5_BINARY_DIR}/H5Tinit.c
     DEPENDS H5detect
 )
@@ -866,11 +868,13 @@ TARGET_C_PROPERTIES (H5make_libsettings STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
 endif ()
+if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set_property(TARGET H5make_libsettings PROPERTY LINK_FLAGS "-O0")
+endif ()
 
-set (CMD $<TARGET_FILE:H5make_libsettings>)
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5lib_settings.c
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5make_libsettings>
     ARGS > ${HDF5_BINARY_DIR}/H5lib_settings.c
     DEPENDS H5make_libsettings
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
@@ -905,18 +909,16 @@ set (install_targets ${HDF5_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_BINARY_DIR}/shared")
-  set (CMD $<TARGET_FILE:H5detect>)
   add_custom_command (
       OUTPUT ${HDF5_BINARY_DIR}/shared/H5Tinit.c
-      COMMAND ${CMD}
+      COMMAND $<TARGET_FILE:H5detect>
       ARGS > ${HDF5_BINARY_DIR}/shared/H5Tinit.c
       DEPENDS H5detect
       WORKING_DIRECTORY ${HDF5_BINARY_DIR}/shared
   )
-  set (CMD $<TARGET_FILE:H5make_libsettings>)
   add_custom_command (
       OUTPUT ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
-      COMMAND ${CMD}
+      COMMAND $<TARGET_FILE:H5make_libsettings>
       ARGS > ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
       DEPENDS H5make_libsettings
       WORKING_DIRECTORY ${HDF5_BINARY_DIR}

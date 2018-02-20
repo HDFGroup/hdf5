@@ -32,10 +32,6 @@ cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATIC_ONLY  -  Build/use static libraries
-#     FORTRAN_LIBRARIES -  Build/use fortran libraries
-#     JAVA_LIBRARIES -  Build/use java libraries
-#     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION "1.11.2")
@@ -47,10 +43,6 @@ set (CTEST_SOURCE_VERSEXT "")
 #INSTALLDIR - HDF5-1.10.0 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
-#STATIC_ONLY - Default is YES
-#FORTRAN_LIBRARIES - Default is NO
-#JAVA_LIBRARIES - Default is NO
-#NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -70,6 +62,7 @@ endif ()
 
 ###################################################################
 ### Following Line is one of [Release, RelWithDebInfo, Debug] #####
+###        (default use command line -C value)
 set (CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
 ###################################################################
 
@@ -85,21 +78,6 @@ if (NOT DEFINED CTEST_CONFIGURATION_TYPE)
 endif ()
 if (NOT DEFINED CTEST_SOURCE_NAME)
   set (CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
-endif ()
-if (NOT DEFINED STATIC_ONLY)
-  set (STATICONLYLIBRARIES "YES")
-else ()
-  set (STATICONLYLIBRARIES "NO")
-endif ()
-if (NOT DEFINED FORTRAN_LIBRARIES)
-  set (FORTRANLIBRARIES "NO")
-else ()
-  set(FORTRANLIBRARIES "YES")
-endif ()
-if (NOT DEFINED JAVA_LIBRARIES)
-  set (JAVALIBRARIES "NO")
-else ()
-  set (JAVALIBRARIES "YES")
 endif ()
 
 set (CTEST_BINARY_NAME "build")
@@ -212,34 +190,6 @@ set (REPOSITORY_BRANCH "develop")
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
 ###################################################################
 
-###################################################################
-if (${STATICONLYLIBRARIES})
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
-  #########       Following describes computer           ############
-  ## following is optional to describe build                       ##
-  set (SITE_BUILDNAME_SUFFIX "STATIC")
-endif ()
-###################################################################
-####      fortran       ####
-if (${FORTRANLIBRARIES})
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
-  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
-else ()
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
-  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=OFF")
-endif ()
-####      java       ####
-if (${JAVALIBRARIES})
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
-else ()
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
-endif ()
-
-### change install prefix
-set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALLDIR}")
-set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCTEST_CONFIGURATION_TYPE:STRING=$ENV{CMAKE_CONFIG_TYPE}")
 
 ###################################################################
 

@@ -78,22 +78,20 @@ add_executable (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
 )
-set (CMD $<TARGET_FILE:H5match_types>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
            ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5match_types>
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
     DEPENDS H5match_types
 )
 set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h PROPERTIES GENERATED TRUE)
 set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
 if (BUILD_SHARED_LIBS)
-  set (CMDSH $<TARGET_FILE:H5match_types>)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
              ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
-      COMMAND ${CMDSH}
+      COMMAND $<TARGET_FILE:H5match_types>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
       DEPENDS H5match_types
   )
@@ -171,10 +169,9 @@ set (f90_F_GEN_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Pff.F90
 )
-set (CMD $<TARGET_FILE:H5_buildiface>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
-    COMMAND ${CMD}
+    COMMAND $<TARGET_FILE:H5_buildiface>
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
     DEPENDS ${f90_F_GEN_SOURCES}
     COMMENT "Generating the H5_gen.F90 file"
@@ -185,10 +182,9 @@ add_custom_target (H5gen ALL
 set_source_files_properties (${HDF5_F90_BINARY_DIR}/static/H5_gen.F90 PROPERTIES GENERATED TRUE)
 
 if (BUILD_SHARED_LIBS)
-  set (CMDSH $<TARGET_FILE:H5_buildiface>)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
-      COMMAND ${CMDSH}
+      COMMAND $<TARGET_FILE:H5_buildiface>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
       DEPENDS ${f90_F_GEN_SOURCES}
       COMMENT "Generating the H5_gen.F90 shared file"

@@ -199,51 +199,6 @@ set (HDF5_JAVA_LOGGING_JAR         ${HDF5_SOURCE_DIR}/java/lib/slf4j-api-1.7.5.j
 set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-1.7.5.jar)
 set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-1.7.5.jar)
 
-if (APPLE)
-  option (HDF5_BUILD_FRAMEWORKS "TRUE to build as frameworks libraries, FALSE to build according to BUILD_SHARED_LIBS" FALSE)
-endif ()
-
-if (NOT HDF5_INSTALL_BIN_DIR)
-  set (HDF5_INSTALL_BIN_DIR bin)
-endif ()
-if (NOT HDF5_INSTALL_LIB_DIR)
-  if (APPLE)
-    if (HDF5_BUILD_FRAMEWORKS)
-      set (HDF5_INSTALL_JAR_DIR ../Java)
-    else ()
-      set (HDF5_INSTALL_JAR_DIR lib)
-    endif ()
-    set (HDF5_INSTALL_FMWK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
-  else ()
-    set (HDF5_INSTALL_JAR_DIR lib)
-  endif ()
-  set (HDF5_INSTALL_LIB_DIR lib)
-endif ()
-if (NOT HDF5_INSTALL_INCLUDE_DIR)
-  set (HDF5_INSTALL_INCLUDE_DIR include)
-endif ()
-if (NOT HDF5_INSTALL_DATA_DIR)
-  if (NOT WIN32)
-    if (APPLE)
-      if (HDF5_BUILD_FRAMEWORKS)
-        set (HDF5_INSTALL_EXTRA_DIR ../SharedSupport)
-      else ()
-        set (HDF5_INSTALL_EXTRA_DIR share)
-      endif ()
-      set (HDF5_INSTALL_FWRK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
-    endif ()
-    set (HDF5_INSTALL_DATA_DIR share)
-    set (HDF5_INSTALL_CMAKE_DIR share/cmake/hdf5)
-  else ()
-    set (HDF5_INSTALL_DATA_DIR ".")
-    set (HDF5_INSTALL_CMAKE_DIR cmake)
-  endif ()
-endif ()
-
-if (DEFINED ADDITIONAL_CMAKE_PREFIX_PATH AND EXISTS "${ADDITIONAL_CMAKE_PREFIX_PATH}")
-  set (CMAKE_PREFIX_PATH ${ADDITIONAL_CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
-endif ()
-
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
 #-----------------------------------------------------------------------------
@@ -406,46 +361,15 @@ set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 include (${HDF_RESOURCES_EXT_DIR}/HDFMacros.cmake)
+
+HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
+
 include (${HDF_RESOURCES_EXT_DIR}/HDFLibMacros.cmake)
 include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
 
-SET_HDF_BUILD_TYPE()
-
-#-----------------------------------------------------------------------------
-# Setup output Directories
-#-----------------------------------------------------------------------------
-if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  set (CMAKE_RUNTIME_OUTPUT_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Executables."
-  )
-  set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Libraries"
-  )
-  set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
-  )
-  set (CMAKE_Fortran_MODULE_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
-  )
-  if (WIN32)
-    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
-    set (CMAKE_PDB_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
-    )
-  else ()
-    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CTEST_CONFIGURATION_TYPE})
-  endif ()
-else ()
-  # if we are externally configured, but the project uses old cmake scripts
-  # this may not be set and utilities like H5detect will fail
-  if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
-  endif ()
-endif ()
-
 #-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
-# by other projects using FindHDF5.
+# by other projects.
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXPORTED_TARGETS)
   set (HDF5_EXPORTED_TARGETS "hdf5-targets")
@@ -604,9 +528,13 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to embed library info into executables
 #-----------------------------------------------------------------------------
-option (HDF5_ENABLE_EMBEDDED_LIBINFO "embed library info into executables" ON)
-if (HDF5_ENABLE_EMBEDDED_LIBINFO)
-  set (H5_HAVE_EMBEDDED_LIBINFO 1)
+if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set (H5_HAVE_EMBEDDED_LIBINFO 0)
+else ()
+  option (HDF5_ENABLE_EMBEDDED_LIBINFO "embed library info into executables" ON)
+  if (HDF5_ENABLE_EMBEDDED_LIBINFO)
+    set (H5_HAVE_EMBEDDED_LIBINFO 1)
+  endif ()
 endif ()
 
 include (${HDF_RESOURCES_DIR}/HDFCompilerFlags.cmake)
@@ -752,17 +680,17 @@ endif ()
 #-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
-add_subdirectory (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
+add_subdirectory (src)
 
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
-    ADD_DEPENDENCIES (${HDF5_LIB_TARGET} ZLIB)
+    add_dependencies (${HDF5_LIB_TARGET} ZLIB)
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} ZLIB)
     endif ()
   endif ()
   if (SZIP_FOUND AND SZIP_USE_EXTERNAL)
-    ADD_DEPENDENCIES (${HDF5_LIB_TARGET} SZIP)
+    add_dependencies (${HDF5_LIB_TARGET} SZIP)
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} SZIP)
     endif ()
@@ -797,12 +725,11 @@ if (BUILD_TESTING)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
-      add_subdirectory (${HDF5_SOURCE_DIR}/tools/lib ${PROJECT_BINARY_DIR}/tools/lib)
-      add_subdirectory (${HDF5_SOURCE_DIR}/test      ${PROJECT_BINARY_DIR}/test)
+      add_subdirectory (test)
     endif ()
     if (H5_HAVE_PARALLEL)
       if (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
-        add_subdirectory (${HDF5_SOURCE_DIR}/testpar ${PROJECT_BINARY_DIR}/testpar)
+        add_subdirectory (testpar)
       endif ()
     endif ()
   endif ()
@@ -814,7 +741,7 @@ endif ()
 if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
   option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
   if (HDF5_BUILD_TOOLS)
-    add_subdirectory (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
+    add_subdirectory (tools)
   endif ()
 endif ()
 
@@ -824,7 +751,7 @@ endif ()
 if (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
   option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
   if (HDF5_BUILD_EXAMPLES)
-    add_subdirectory (${HDF5_SOURCE_DIR}/examples ${PROJECT_BINARY_DIR}/examples)
+    add_subdirectory (examples)
   endif ()
 endif ()
 
@@ -835,7 +762,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
   option (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" ON)
   if (HDF5_BUILD_HL_LIB)
     set (H5_INCLUDE_HL 1)
-    add_subdirectory (${HDF5_SOURCE_DIR}/hl ${PROJECT_BINARY_DIR}/hl)
+    add_subdirectory (hl)
   endif ()
 endif ()
 
@@ -884,11 +811,11 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     #
 #    set (FCFLAGS "${Fortran_DEFINES}")
 
-    add_subdirectory (${HDF5_SOURCE_DIR}/fortran ${PROJECT_BINARY_DIR}/fortran)
+    add_subdirectory (fortran)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
         #-- Build the High Level Fortran source codes
-        add_subdirectory (${HDF5_SOURCE_DIR}/hl/fortran ${PROJECT_BINARY_DIR}/hl/fortran)
+        add_subdirectory (hl/fortran)
       endif ()
     endif ()
   endif ()
@@ -911,11 +838,11 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
     if (CMAKE_NO_STD_NAMESPACE)
       set (H5_NO_STD 1)
     endif ()
-    add_subdirectory (${HDF5_SOURCE_DIR}/c++ ${PROJECT_BINARY_DIR}/c++)
+    add_subdirectory (c++)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/c++")
         #-- Build the High Level Fortran source codes
-        add_subdirectory (${HDF5_SOURCE_DIR}/hl/c++ ${PROJECT_BINARY_DIR}/hl/c++)
+        add_subdirectory (hl/c++)
       endif ()
     endif ()
   endif ()
@@ -937,7 +864,7 @@ endif ()
 if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
   option (HDF5_BUILD_JAVA  "Build Java HDF5 Library" OFF)
   if (HDF5_BUILD_JAVA)
-    add_subdirectory (${HDF5_SOURCE_DIR}/java ${PROJECT_BINARY_DIR}/java)
+    add_subdirectory (java)
   endif ()
 endif ()
 

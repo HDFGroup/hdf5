@@ -177,7 +177,12 @@ typedef struct H5O_copy_t {
     H5SL_t  *dst_dt_list;               /* Skip list to hold committed datatypes in dest file */
     hbool_t dst_dt_list_complete;       /* Whether the destination datatype list is complete (i.e. not only populated with "suggestions" from H5Padd_merge_committed_dtype_path) */
     H5O_t   *oh_dst;                    /* The destination object header */
-    void    *shared_fo;                 /* The shared pointer for the object */
+    H5F_t   *file_dst;                  /* The destination file pointer */
+                                        /* This is used in the pre_copy_file callback to obtain
+                                           the destination file's high bound.  The high bound
+                                           is used to index into the corresponding message's
+                                           array of versions for doing version bounds check. */
+    void    *shared_fo;                 /* The shared pointer for the src object */
     H5O_mcdt_search_cb_t mcdt_cb;	/* The callback to invoke before searching the global list of committed datatypes at destination */
     void *mcdt_ud;			/* User data passed to callback */
 } H5O_copy_t;
@@ -967,14 +972,14 @@ H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
 /* Fill value operators */
 H5_DLL herr_t H5O_fill_reset_dyn(H5O_fill_t *fill);
 H5_DLL herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type, hbool_t *fill_changed, hid_t dxpl_id);
-H5_DLL herr_t H5O_fill_set_latest_version(H5O_fill_t *fill);
+H5_DLL herr_t H5O_fill_set_version(H5F_t * f, H5O_fill_t *fill);
 
 /* Link operators */
 H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
 
 /* Filter pipeline operators */
-H5_DLL herr_t H5O_pline_set_latest_version(H5O_pline_t *pline);
+H5_DLL herr_t H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline);
 
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);

@@ -19,7 +19,6 @@
 *
 *************************************************************/
 
-#include "hdf5.h"
 #include "testhdf5.h"
 
 /* macros definitions */
@@ -40,22 +39,22 @@
 /* Needs this extra step so that we can print the macro name. */
 #define vrfy_macrosize(type, macro, macroname) \
     if (sizeof(type) != macro) \
-	TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", \
-	    #type, sizeof(type), macroname, (int)macro);
+    TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", \
+        #type, sizeof(type), macroname, (int)macro);
 
 /* local routine prototypes */
 void test_config_ctypes(void);
 void test_exit_definitions(void);
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_configure
+ * Function:    test_configure
  *
- * Purpose:	Main configure definitions testing routine
+ * Purpose:    Main configure definitions testing routine
  *
- * Return:	none (error is fed back via global variable num_errs)
+ * Return:    none (error is fed back via global variable num_errs)
  *
- * Programmer:	Albert Cheng
+ * Programmer:    Albert Cheng
  *              September 25, 2001
  *
  *-------------------------------------------------------------------------
@@ -69,15 +68,15 @@ test_configure(void)
     test_exit_definitions();
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_configure
+ * Function:    cleanup_configure
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	Albert Cheng
+ * Programmer:    Albert Cheng
  *              September 25, 2001
  *
  * Modifications:
@@ -90,20 +89,20 @@ cleanup_configure(void)
     /* no file to clean */
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_config_ctypes
+ * Function:    test_config_ctypes
  *
- * Purpose:	test C language data type sizes
+ * Purpose:    test C language data type sizes
  *
- * Return:	none (error is fed back via global variable num_errs)
+ * Return:    none (error is fed back via global variable num_errs)
  *
- * Programmer:	Albert Cheng
+ * Programmer:    Albert Cheng
  *              September 25, 2001
  *
  * Modifications:
- *	Albert Cheng, 2004/10/14
- *	Verified both signed and unsigned int types.
+ *    Albert Cheng, 2004/10/14
+ *    Verified both signed and unsigned int types.
  *
  *-------------------------------------------------------------------------
  */
@@ -201,15 +200,15 @@ test_config_ctypes(void)
 
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_exit_definitions
+ * Function:    test_exit_definitions
  *
- * Purpose:	test the exit macros values
+ * Purpose:    test the exit macros values
  *
- * Return:	none (error is fed back via global variable num_errs)
+ * Return:    none (error is fed back via global variable num_errs)
  *
- * Programmer:	Albert Cheng
+ * Programmer:    Albert Cheng
  *              October 12, 2009
  *
  * Modifications:
@@ -222,9 +221,9 @@ test_exit_definitions(void)
     /* Verify the EXIT_SUCCESS and EXIT_FAILURE are 0 and 1 respectively. */
     /* This should be true for POSIX compliant systems. */
     if (EXIT_SUCCESS != 0) \
-	TestErrPrintf("Error: EXIT_SUCCESS is %d, should be %d\n", \
-	    EXIT_SUCCESS, 0);
+    TestErrPrintf("Error: EXIT_SUCCESS is %d, should be %d\n", \
+        EXIT_SUCCESS, 0);
     if (EXIT_FAILURE != 1) \
-	TestErrPrintf("Error: EXIT_FAILURE is %d, should be %d\n", \
-	    EXIT_FAILURE, 1);
+    TestErrPrintf("Error: EXIT_FAILURE is %d, should be %d\n", \
+        EXIT_FAILURE, 1);
 }

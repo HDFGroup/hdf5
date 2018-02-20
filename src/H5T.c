@@ -510,6 +510,12 @@ double H5T_NATIVE_DOUBLE_NEG_INF_g          = (double)0.0f;
 H5FL_DEFINE(H5T_t);
 H5FL_DEFINE(H5T_shared_t);
 
+/* Format version bounds for datatype */
+const unsigned H5O_dtype_ver_bounds[] = {
+    H5O_DTYPE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
+    H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V18 */
+    H5O_DTYPE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
+};
 
 /*******************/
 /* Local Variables */
@@ -538,6 +544,7 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     8,                   /* # of reserved IDs for class */
     (H5I_free_t)H5T_close    /* Callback routine for closing objects of this class */
 }};
+
 
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5T_top_package_initialize_s = FALSE;
@@ -5403,34 +5410,44 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5T_set_latest_version
+ * Function:    H5T_set_version
  *
- * Purpose:     Set the encoding for a datatype to the latest version.
+ * Purpose:     Set the encoding for a datatype to the version indicated by
+ *              the file's low bound if that is higher than the datatype's 
+ *              version.
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 19, 2007
+ * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_set_latest_version(H5T_t *dt)
+H5T_set_version(H5F_t *f, H5T_t *dt)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    unsigned vers;                  /* The version */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
+    HDassert(f);
     HDassert(dt);
 
-    /* Upgrade the format version for the datatype to the latest */
-    if(H5T__upgrade_version(dt, H5O_DTYPE_VERSION_LATEST) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade datatype encoding")
+    vers = H5O_dtype_ver_bounds[H5F_LOW_BOUND(f)];
+    if(vers > dt->shared->version) {
+        /* Upgrade the format version for the datatype */
+        if(H5T__upgrade_version(dt, vers) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade datatype encoding")
+    }
+    
+    /* Version bounds check */
+    if(dt->shared->version > H5O_dtype_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "Datatype version out of bounds")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_set_latest_version() */
+} /* end H5T_set_version() */
 
 
 /*-------------------------------------------------------------------------

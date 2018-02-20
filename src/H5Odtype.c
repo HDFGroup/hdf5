@@ -15,16 +15,16 @@
 #define H5T_FRIEND		/*prevent warning from including H5Tpkg   */
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* Files				*/
-#include "H5FLprivate.h"	/* Free Lists				*/
-#include "H5Gprivate.h"		/* Groups				*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5Tpkg.h"		/* Datatypes				*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5private.h"		/* Generic Functions    */
+#include "H5Dprivate.h"		/* Datasets	            */
+#include "H5Eprivate.h"		/* Error handling       */
+#include "H5Fprivate.h"		/* Files                */
+#include "H5FLprivate.h"	/* Free Lists           */
+#include "H5Gprivate.h"		/* Groups               */
+#include "H5MMprivate.h"	/* Memory management    */
+#include "H5Opkg.h"         /* Object headers       */
+#include "H5Tpkg.h"         /* Datatypes            */
+#include "H5VMprivate.h"    /* Vectors and arrays   */
 
 
 /* PRIVATE PROTOTYPES */
@@ -1516,7 +1516,7 @@ done:
  */
 static herr_t
 H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
-    hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t H5_ATTR_UNUSED *cpy_info,
+    hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t *cpy_info,
     void *_udata)
 {
     const H5T_t	*dt_src = (const H5T_t *)mesg_src;  /* Source datatype */
@@ -1528,6 +1528,13 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     /* check args */
     HDassert(file_src);
     HDassert(dt_src);
+    HDassert(cpy_info);
+    HDassert(cpy_info->file_dst);
+
+    /* Check to ensure that the version of the message to be copied does not exceed
+       the message version as indicated by the destination file's high bound */
+    if(dt_src->shared->version > H5O_dtype_ver_bounds[H5F_HIGH_BOUND(cpy_info->file_dst)])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "datatype message version out of bounds")
 
     /* If the user data is non-NULL, assume we are copying a dataset
      * and check if we need to make a copy of the datatype for later in

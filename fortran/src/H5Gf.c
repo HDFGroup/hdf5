@@ -47,7 +47,7 @@
 */
 int_f
 h5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
-	     hid_t_f *grp_id, hid_t_f *lcpl_id, hid_t_f *gcpl_id, hid_t_f *gapl_id )
+        hid_t_f *grp_id, hid_t_f *lcpl_id, hid_t_f *gcpl_id, hid_t_f *gapl_id )
 /******/
 {
     hid_t c_gcpl_id = -1;          /* Group creation property list */
@@ -69,11 +69,11 @@ h5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
     else {
       /* Create the group creation property list */
       if((c_gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
-	goto DONE;
+          goto DONE;
 
       /* Set the local heap size hint */
       if(H5Pset_local_heap_size_hint(c_gcpl_id, (size_t)*size_hint) < 0)
-	goto DONE;
+          goto DONE;
 
       /* Create the group */
       c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name, H5P_DEFAULT, c_gcpl_id, H5P_DEFAULT);
@@ -308,9 +308,9 @@ h5gclose_c(hid_t_f *grp_id)
  *  link_type - link type
  *  current_name - name of the existing object for hard link,
  *  anything for the soft link
- *  current_namelen - current name lenghth
+ *  current_namelen - current name length
  *  new_name - new name for the object
- *  new_namelen - new_name lenghth
+ *  new_namelen - new_name length
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -365,7 +365,7 @@ h5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name,
                 goto DONE;
             break;
     /* End of the warnings fix */
- 
+
         default:        /* Unknown/unhandled link type */
             goto DONE;
     } /* end switch */
@@ -390,12 +390,12 @@ DONE:
  *  cur_name - name of the existing object for hard link releative
  *  to cur_loc_id location,
  *  anything for the soft link
- *  current_namelen - current name lenghth
+ *  current_namelen - current name length
  *  link_type - link type
  *  new_loc_id - location identifier
  *  new_name - new name for the object releative to the new_loc_id
  *  location
- *  new_namelen - new_name lenghth
+ *  new_namelen - new_name length
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -515,9 +515,9 @@ DONE:
  * INPUTS
  *  loc_id - identifier of file or group
  *  src_name - name of the original object
- *  src_namelen - original name lenghth
+ *  src_namelen - original name length
  *  dst_name - new name for the object
- *  dst_namelen - new name lenghth
+ *  dst_namelen - new name length
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -565,10 +565,10 @@ DONE:
  * INPUTS
  *  src_loc_id - identifier of file or group
  *  src_name - name of the original object relative to src_loc_id
- *  src_namelen - original name lenghth
+ *  src_namelen - original name length
  *  dst_loc_id - new location identifier
  *  dst_name - new name for the object relative to dst_loc_id
- *  dst_namelen - new name lenghth
+ *  dst_namelen - new name length
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -617,8 +617,8 @@ DONE:
  * INPUTS
  *  loc_id - identifier of file or group
  *  name - name of the object that symbolic link points to
- *  namelen - the name lenghth
- *  size - lenghth of retrurned value
+ *  namelen - the name length
+ *  size - length of retrurned value
  * OUTPUTS
  *  value - name to be returned
  * RETURNS
@@ -681,9 +681,9 @@ DONE:
  * INPUTS
  *  loc_id - identifier of file or group
  *  name - name of object whose comment is to be set or reset
- *  namelen - the name lenghth
+ *  namelen - the name length
  *  comment - the new comment
- *  commentlen - new comment lenghth
+ *  commentlen - new comment length
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -732,7 +732,7 @@ DONE:
  * INPUTS
  *  loc_id - identifier of file or group
  *  name - name of object whose comment is to be set or reset
- *  namelen - the name lenghth
+ *  namelen - the name length
  *  bufsize - at most bufsize characters
  *  comment - the new comment
  * RETURNS
@@ -948,8 +948,8 @@ done:
 */
 int_f
 h5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
-		      int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id,
-		      int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted )
+            int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id,
+            int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted )
 /******/
 {
   char *c_group_name = NULL;          /* Buffer to hold group name C string */
@@ -965,7 +965,7 @@ h5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
    * Call H5Gget_info_by_idx function.
    */
   if(H5Gget_info_by_idx((hid_t)*loc_id,c_group_name, (H5_index_t)*index_type,(H5_iter_order_t)*order,(hsize_t)*n,
-			&ginfo, (hid_t)*lapl_id) < 0)
+            &ginfo, (hid_t)*lapl_id) < 0)
     HGOTO_DONE(FAIL);
 
   /* Unpack the structure */
@@ -1018,7 +1018,7 @@ h5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 */
 int_f
 h5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, hid_t_f *lapl_id,
-		       int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted)
+            int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted)
 /******/
 {
   char *c_group_name = NULL;          /* Buffer to hold group name C string */

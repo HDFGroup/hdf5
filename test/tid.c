@@ -14,10 +14,9 @@
 /* Test user-created identifiers (hid_t's) and identifier types. */
 
 #include "testhdf5.h"
-#include "hdf5.h"
 
 /* Include H5Ipkg.h to calculate max number of groups */
-#define H5I_FRIEND		/*suppress error about including H5Ipkg	  */
+#define H5I_FRIEND        /*suppress error about including H5Ipkg      */
 #include "H5Ipkg.h"
 
 /* Test basic functionality of registering and deleting types and IDs */
@@ -238,97 +237,97 @@ out:
 }
 
 
-	/* A dummy search function for the next test */
+    /* A dummy search function for the next test */
 static int test_search_func(void H5_ATTR_UNUSED * ptr1, void H5_ATTR_UNUSED * ptr2) { return 0; }
 
-	/* Ensure that public functions cannot access "predefined" ID types */
+    /* Ensure that public functions cannot access "predefined" ID types */
 static int id_predefined_test(void )
 {
-	void * testObj;
-	hid_t testID;
-	hid_t typeID = H5I_INVALID_HID;
-	void * testPtr;
-	herr_t testErr;
+    void * testObj;
+    hid_t testID;
+    hid_t typeID = H5I_INVALID_HID;
+    void * testPtr;
+    herr_t testErr;
 
-	testObj = HDmalloc(sizeof(int));
+    testObj = HDmalloc(sizeof(int));
 
-	/* Try to perform illegal functions on various predefined types */
-	H5E_BEGIN_TRY
-		testID = H5Iregister(H5I_FILE, testObj);
-	H5E_END_TRY
+    /* Try to perform illegal functions on various predefined types */
+    H5E_BEGIN_TRY
+        testID = H5Iregister(H5I_FILE, testObj);
+    H5E_END_TRY
 
-	VERIFY(testID, H5I_INVALID_HID, "H5Iregister");
-	if(testID != H5I_INVALID_HID)
-		goto out;
+    VERIFY(testID, H5I_INVALID_HID, "H5Iregister");
+    if(testID != H5I_INVALID_HID)
+        goto out;
 
-	H5E_BEGIN_TRY
-		testPtr = H5Isearch(H5I_GENPROP_LST, (H5I_search_func_t) test_search_func, testObj);
-	H5E_END_TRY
+    H5E_BEGIN_TRY
+        testPtr = H5Isearch(H5I_GENPROP_LST, (H5I_search_func_t) test_search_func, testObj);
+    H5E_END_TRY
 
-	CHECK_PTR_NULL(testPtr, "H5Isearch");
-	if(testPtr != NULL)
-		goto out;
+    CHECK_PTR_NULL(testPtr, "H5Isearch");
+    if(testPtr != NULL)
+        goto out;
 
-	H5E_BEGIN_TRY
-		testErr = H5Inmembers(H5I_ERROR_STACK, NULL);
-	H5E_END_TRY
+    H5E_BEGIN_TRY
+        testErr = H5Inmembers(H5I_ERROR_STACK, NULL);
+    H5E_END_TRY
 
-	VERIFY(testErr, -1, "H5Inmembers");
-	if(testErr != -1)
-		goto out;
+    VERIFY(testErr, -1, "H5Inmembers");
+    if(testErr != -1)
+        goto out;
 
-	H5E_BEGIN_TRY
-		testErr = H5Iclear_type(H5I_FILE, 0);
-	H5E_END_TRY
+    H5E_BEGIN_TRY
+        testErr = H5Iclear_type(H5I_FILE, 0);
+    H5E_END_TRY
 
-	VERIFY((testErr >= 0), 0, "H5Iclear_type");
-	if(testErr >= 0)
-		goto out;
+    VERIFY((testErr >= 0), 0, "H5Iclear_type");
+    if(testErr >= 0)
+        goto out;
 
-	H5E_BEGIN_TRY
-		testErr = H5Idestroy_type(H5I_DATASET);
-	H5E_END_TRY
+    H5E_BEGIN_TRY
+        testErr = H5Idestroy_type(H5I_DATASET);
+    H5E_END_TRY
 
-	VERIFY((testErr >= 0), 0, "H5Idestroy_type");
-	if(testErr >= 0)
-		goto out;
+    VERIFY((testErr >= 0), 0, "H5Idestroy_type");
+    if(testErr >= 0)
+        goto out;
 
-	/* Create a datatype ID and try to perform illegal functions on it */
-	typeID = H5Tcreate(H5T_OPAQUE, (size_t)42);
-	CHECK(typeID, H5I_INVALID_HID, "H5Tcreate");
-	if(typeID == H5I_INVALID_HID)
-		goto out;
+    /* Create a datatype ID and try to perform illegal functions on it */
+    typeID = H5Tcreate(H5T_OPAQUE, (size_t)42);
+    CHECK(typeID, H5I_INVALID_HID, "H5Tcreate");
+    if(typeID == H5I_INVALID_HID)
+        goto out;
 
-	H5E_BEGIN_TRY
-		testPtr = H5Iremove_verify(typeID, H5I_DATATYPE);
-	H5E_END_TRY
+    H5E_BEGIN_TRY
+        testPtr = H5Iremove_verify(typeID, H5I_DATATYPE);
+    H5E_END_TRY
 
-	CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
-	if(testPtr != NULL)
-		goto out;
+    CHECK_PTR_NULL(testPtr, "H5Iremove_verify");
+    if(testPtr != NULL)
+        goto out;
 
-	H5E_BEGIN_TRY
-		testPtr = H5Iobject_verify(typeID, H5I_DATATYPE);
-	H5E_END_TRY
+    H5E_BEGIN_TRY
+        testPtr = H5Iobject_verify(typeID, H5I_DATATYPE);
+    H5E_END_TRY
 
-	CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
-	if(testPtr != NULL)
-		goto out;
+    CHECK_PTR_NULL(testPtr, "H5Iobject_verify");
+    if(testPtr != NULL)
+        goto out;
 
-	H5Tclose(typeID);
+    H5Tclose(typeID);
 
-	/* testObj was never registered as an atom, so it will not be
+    /* testObj was never registered as an atom, so it will not be
          * automatically freed. */
-	HDfree(testObj);
-	return 0;
+    HDfree(testObj);
+    return 0;
 
 out:
-	if(typeID != H5I_INVALID_HID)
-		H5Tclose(typeID);
+    if(typeID != H5I_INVALID_HID)
+        H5Tclose(typeID);
         if(testObj != NULL)
-		HDfree(testObj);
+        HDfree(testObj);
 
-	return -1;
+    return -1;
 }
 
 
@@ -444,12 +443,12 @@ static int test_get_type(void)
 
 out:
     if(dtype != H5I_INVALID_HID)
-	H5Tclose(dtype);
+    H5Tclose(dtype);
 
     return -1;
 }
 
-	/* Test boundary cases with lots of types */
+    /* Test boundary cases with lots of types */
 
 /* Type IDs range from H5I_NTYPES to H5I_MAX_NUM_TYPES.  The system will assign */
 /* IDs in sequential order until H5I_MAX_NUM_TYPES IDs have been given out, at which */
@@ -459,78 +458,78 @@ out:
 /* to low values successfully, ensure that an error is thrown when all possible */
 /* type IDs are taken, then ensure that deleting types frees up their IDs. */
 /* Note that this test depends on the implementation of IDs, so may break */
-/*		if the implementation changes. */
+/*        if the implementation changes. */
 /* Also note that if someone else registered a user-defined type and forgot to */
 /* destroy it, this test will mysteriously fail (because it will expect there to */
 /* be one more "free" type ID than there is). */
 /* H5I_NTYPES is defined in h5public.h, H5I_MAX_NUM_TYPES is defined in h5pkg.h */
 static int test_id_type_list(void)
 {
-	H5I_type_t startType;	/* The first type ID we were assigned in this test */
-	H5I_type_t currentType;
-	H5I_type_t testType;
-	int i;	/* Just a counter variable */
+    H5I_type_t startType;    /* The first type ID we were assigned in this test */
+    H5I_type_t currentType;
+    H5I_type_t testType;
+    int i;    /* Just a counter variable */
 
-	startType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
-	CHECK(startType, H5I_BADID, "H5Iregister_type");
-	if(startType == H5I_BADID)
-		goto out;
+    startType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
+    CHECK(startType, H5I_BADID, "H5Iregister_type");
+    if(startType == H5I_BADID)
+        goto out;
 
-	/* Sanity check */
-	if(startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES)
-	{
-		/* Error condition, throw an error */
-		CHECK(1, 1, "H5Iregister_type");
-		goto out;
-	}
-	/* Create types up to H5I_MAX_NUM_TYPES */
-	for(i = startType + 1; i < H5I_MAX_NUM_TYPES; i++)
-	{
-		currentType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
-		CHECK(currentType, H5I_BADID, "H5Iregister_type");
-		if(currentType == H5I_BADID)
-			goto out;
-	}
+    /* Sanity check */
+    if(startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES)
+    {
+        /* Error condition, throw an error */
+        CHECK(1, 1, "H5Iregister_type");
+        goto out;
+    }
+    /* Create types up to H5I_MAX_NUM_TYPES */
+    for(i = startType + 1; i < H5I_MAX_NUM_TYPES; i++)
+    {
+        currentType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
+        CHECK(currentType, H5I_BADID, "H5Iregister_type");
+        if(currentType == H5I_BADID)
+            goto out;
+    }
 
-	/* Wrap around to low type ID numbers */
-	for(i = H5I_NTYPES; i < startType; i++)
-	{
-		currentType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
-		CHECK(currentType, H5I_BADID, "H5Iregister_type");
-		if(currentType == H5I_BADID)
-			goto out;
-	}
+    /* Wrap around to low type ID numbers */
+    for(i = H5I_NTYPES; i < startType; i++)
+    {
+        currentType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
+        CHECK(currentType, H5I_BADID, "H5Iregister_type");
+        if(currentType == H5I_BADID)
+            goto out;
+    }
 
-	/* There should be no room at the inn for a new ID type*/
-	H5E_BEGIN_TRY
-		testType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
-	H5E_END_TRY
+    /* There should be no room at the inn for a new ID type*/
+    H5E_BEGIN_TRY
+        testType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
+    H5E_END_TRY
 
-	VERIFY(testType, H5I_BADID, "H5Iregister_type");
-	if(testType != H5I_BADID)
-		goto out;
+    VERIFY(testType, H5I_BADID, "H5Iregister_type");
+    if(testType != H5I_BADID)
+        goto out;
 
-	/* Now delete a type and try to insert again */
-	H5Idestroy_type(H5I_NTYPES);
-	testType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
+    /* Now delete a type and try to insert again */
+    H5Idestroy_type(H5I_NTYPES);
+    testType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
 
-	VERIFY(testType, H5I_NTYPES, "H5Iregister_type");
-	if(testType != H5I_NTYPES)
-		goto out;
+    VERIFY(testType, H5I_NTYPES, "H5Iregister_type");
+    if(testType != H5I_NTYPES)
+        goto out;
 
-	/* Cleanup.  Destroy all types. */
-	for(i = H5I_NTYPES; i < H5I_MAX_NUM_TYPES; i++)
-		H5Idestroy_type((H5I_type_t) i);
+    /* Cleanup.  Destroy all types. */
+    for(i = H5I_NTYPES; i < H5I_MAX_NUM_TYPES; i++)
+        H5Idestroy_type((H5I_type_t) i);
 
-	return 0;
+    return 0;
 
 out:
     /* Cleanup.  For simplicity, just destroy all types and ignore errors. */
-	H5E_BEGIN_TRY
-		for(i = H5I_NTYPES; i < H5I_MAX_NUM_TYPES; i++)
-			H5Idestroy_type((H5I_type_t) i);
-	H5E_END_TRY
-	return -1;
+    H5E_BEGIN_TRY
+        for(i = H5I_NTYPES; i < H5I_MAX_NUM_TYPES; i++)
+            H5Idestroy_type((H5I_type_t) i);
+    H5E_END_TRY
+    return -1;
 }
 
     /* Test removing ids in callback for H5Iclear_type */
@@ -733,11 +732,11 @@ void test_ids(void)
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
 
-	if (basic_id_test() < 0) TestErrPrintf("Basic ID test failed\n");
-	if (id_predefined_test() < 0) TestErrPrintf("Predefined ID type test failed\n");
-	if (test_is_valid() < 0) TestErrPrintf("H5Iis_valid test failed\n");
-	if (test_get_type() < 0) TestErrPrintf("H5Iget_type test failed\n");
-	if (test_id_type_list() < 0) TestErrPrintf("ID type list test failed\n");
-	if (test_remove_clear_type() < 0) TestErrPrintf("ID remove during H5Iclear_type test failed\n");
+    if (basic_id_test() < 0) TestErrPrintf("Basic ID test failed\n");
+    if (id_predefined_test() < 0) TestErrPrintf("Predefined ID type test failed\n");
+    if (test_is_valid() < 0) TestErrPrintf("H5Iis_valid test failed\n");
+    if (test_get_type() < 0) TestErrPrintf("H5Iget_type test failed\n");
+    if (test_id_type_list() < 0) TestErrPrintf("ID type list test failed\n");
+    if (test_remove_clear_type() < 0) TestErrPrintf("ID remove during H5Iclear_type test failed\n");
 
 }

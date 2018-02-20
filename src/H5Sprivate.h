@@ -219,7 +219,7 @@ H5_DLL herr_t H5S_set_extent_simple(H5S_t *space, unsigned rank,
 H5_DLL H5S_t *H5S_create(H5S_class_t type);
 H5_DLL H5S_t *H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
     const hsize_t maxdims[/*rank*/]);
-H5_DLL herr_t H5S_set_latest_version(H5S_t *ds);
+H5_DLL herr_t H5S_set_version(H5F_t *f, H5S_t *ds);
 H5_DLL herr_t H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc);
 H5_DLL H5S_t *H5S_decode(const unsigned char **p);
 H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,

@@ -275,6 +275,8 @@ typedef struct H5F_t H5F_t;
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_MODULE
+#define H5F_LOW_BOUND(F)        ((F)->shared->low_bound)
+#define H5F_HIGH_BOUND(F)       ((F)->shared->high_bound)
 #define H5F_INTENT(F)           ((F)->shared->flags)
 #define H5F_OPEN_NAME(F)        ((F)->open_name)
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
@@ -311,14 +313,12 @@ typedef struct H5F_t H5F_t;
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
-#define H5F_USE_LATEST_FLAGS(F,FL)  ((F)->shared->latest_flags & (FL))
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    ((F)->shared->store_msg_crt_idx = (FL))
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (((F)->shared->grp_btree_shared = (RC)) ? SUCCEED : FAIL)
 #define H5F_USE_TMP_SPACE(F)    ((F)->shared->fs.use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
-#define H5F_SET_LATEST_FLAGS(F, FL)  ((F)->shared->latest_flags = (FL))
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
@@ -332,6 +332,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_FIRST_ALLOC_DEALLOC(F) ((F)->shared->first_alloc_dealloc)
 #define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
 #else /* H5F_MODULE */
+#define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
+#define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
 #define H5F_ACTUAL_NAME(F)      (H5F_get_actual_name(F))
@@ -368,14 +370,12 @@ typedef struct H5F_t H5F_t;
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
 #define H5F_SIEVE_BUF_SIZE(F)   (H5F_sieve_buf_size(F))
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
-#define H5F_USE_LATEST_FLAGS(F,FL) (H5F_use_latest_flags(F,FL))
 #define H5F_STORE_MSG_CRT_IDX(F) (H5F_store_msg_crt_idx(F))
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    (H5F_set_store_msg_crt_idx((F), (FL)))
 #define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (H5F_set_grp_btree_shared((F), (RC)))
 #define H5F_USE_TMP_SPACE(F)    (H5F_use_tmp_space(F))
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_is_tmp_addr((F), (ADDR)))
-#define H5F_SET_LATEST_FLAGS(F, FL)  (H5F_set_latest_flags((F), (FL)))
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     (H5F_coll_md_read(F))
 #endif /* H5_HAVE_PARALLEL */
@@ -484,7 +484,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_FAMILY_NEWSIZE_NAME             "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
 #define H5F_ACS_FAMILY_TO_SEC2_NAME             "family_to_sec2" /* Whether to convert family to sec2 driver.  (private property only used by h5repart) */
 #define H5F_ACS_MULTI_TYPE_NAME                 "multi_type"    /* Data type in multi file driver */
-#define H5F_ACS_LATEST_FORMAT_NAME              "latest_format" /* 'Use latest format version' flag */
+#define H5F_ACS_LIBVER_LOW_BOUND_NAME           "libver_low_bound"     /* 'low' bound of library format versions */
+#define H5F_ACS_LIBVER_HIGH_BOUND_NAME          "libver_high_bound"    /* 'high' bound of library format versions */
 #define H5F_ACS_WANT_POSIX_FD_NAME              "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address */
 #define H5F_ACS_METADATA_READ_ATTEMPTS_NAME     "metadata_read_attempts" /* # of metadata read attempts */
 #define H5F_ACS_OBJECT_FLUSH_CB_NAME            "object_flush_cb"      /* Object flush callback */
@@ -629,23 +630,6 @@ typedef struct H5F_t H5F_t;
 #define H5SM_TABLE_MAGIC                "SMTB"          /* Shared Message Table */
 #define H5SM_LIST_MAGIC                 "SMLI"          /* Shared Message List */
 
-
-/* Latest format will activate the following latest version support */
-/* "latest_flags" in H5F_file_t */
-#define H5F_LATEST_DATATYPE             0x0001
-#define H5F_LATEST_DATASPACE            0x0002
-#define H5F_LATEST_ATTRIBUTE            0x0004
-#define H5F_LATEST_FILL_MSG             0x0008
-#define H5F_LATEST_PLINE_MSG            0x0010
-#define H5F_LATEST_LAYOUT_MSG           0x0020
-#define H5F_LATEST_NO_MOD_TIME_MSG      0x0040
-#define H5F_LATEST_STYLE_GROUP          0x0080
-#define H5F_LATEST_OBJ_HEADER           0x0100
-#define H5F_LATEST_SUPERBLOCK           0x0200
-#define H5F_LATEST_ALL_FLAGS            (H5F_LATEST_DATATYPE | H5F_LATEST_DATASPACE | H5F_LATEST_ATTRIBUTE | H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG | H5F_LATEST_NO_MOD_TIME_MSG | H5F_LATEST_STYLE_GROUP | H5F_LATEST_OBJ_HEADER | H5F_LATEST_SUPERBLOCK)
-
-#define H5F_LATEST_DSET_MSG_FLAGS    (H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG)
-
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -736,7 +720,9 @@ H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
 
-/* Functions than retrieve values from the file struct */
+/* Functions that retrieve values from the file struct */
+H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
+H5_DLL H5F_libver_t H5F_get_high_bound(const H5F_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL char *H5F_get_open_name(const H5F_t *f);
 H5_DLL char *H5F_get_actual_name(const H5F_t *f);
@@ -783,11 +769,11 @@ H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL unsigned H5F_use_latest_flags(const H5F_t *f, unsigned fl);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL herr_t H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag);
+H5_DLL herr_t H5F_set_libver_bounds(H5F_t * f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL struct H5UC_t *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5UC_t *rc);
 H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
-H5_DLL herr_t H5F_set_latest_flags(H5F_t *f, unsigned flags);
 H5_DLL hsize_t H5F_get_alignment(const H5F_t *f);
 H5_DLL hsize_t H5F_get_threshold(const H5F_t *f);
 #ifdef H5_HAVE_PARALLEL

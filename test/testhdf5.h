@@ -18,13 +18,6 @@
 #ifndef TESTHDF5_H
 #define TESTHDF5_H
 
-/*
- * Include required headers.  This file tests internal library functions,
- * so we include the private headers here.
- */
-#include "H5private.h"
-#include "H5Eprivate.h"
-
 /* Include generic testing header also */
 #include "h5test.h"
 
@@ -204,12 +197,12 @@ void                    test_vlstrings(void);
 void                    test_iterate(void);
 void                    test_array(void);
 void                    test_genprop(void);
-void			test_configure(void);
-void			test_misc(void);
-void			test_ids(void);
-void			test_skiplist(void);
-void			test_sohm(void);
-void			test_unicode(void);
+void            test_configure(void);
+void            test_misc(void);
+void            test_ids(void);
+void            test_skiplist(void);
+void            test_sohm(void);
+void            test_unicode(void);
 
 /* Prototypes for the cleanup routines */
 void                    cleanup_metadata(void);
@@ -227,10 +220,10 @@ void                    cleanup_vlstrings(void);
 void                    cleanup_iterate(void);
 void                    cleanup_array(void);
 void                    cleanup_genprop(void);
-void			cleanup_configure(void);
-void			cleanup_sohm(void);
-void			cleanup_misc(void);
-void			cleanup_unicode(void);
+void            cleanup_configure(void);
+void            cleanup_sohm(void);
+void            cleanup_misc(void);
+void            cleanup_unicode(void);
 
 #ifdef __cplusplus
 }

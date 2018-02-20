@@ -2638,7 +2638,7 @@ h5pget_hyper_vector_size_c ( hid_t_f *prp_id , size_t_f *size)
  * INPUTS
  *  parent - property list class identifier
  *  name   - name of the new class
- *  name_len - lenght of the "name" buffer
+ *  name_len - length of the "name" buffer
  * OUTPUTS
  *  class - new class identifier
  * RETURNS
@@ -3415,8 +3415,8 @@ h5pset_family_offset_c ( hid_t_f *prp_id , hsize_t_f *offset)
  *  mem_map - memory mapping array
  *  memb_fapl - property list for each memory usage type
  *  memb_name - array with members names
- *  len - array with the lenght of each name
- *  lenmax - lenght of the name a sdeclared in Fortran
+ *  len - array with the length of each name
+ *  lenmax - length of the name a sdeclared in Fortran
  *  flag - flag allowing partila access when one of the files is missing
  * RETURNS
  *  0 on success, -1 on failure
@@ -3537,12 +3537,12 @@ h5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag)
  *  Call H5Pget_fapl_multi to set multi file dirver
  * INPUTS
  *  prp_id - file_creation property list identifier
- *  lenmax - lenght of the name a sdeclared in Fortran
+ *  lenmax - length of the name a sdeclared in Fortran
  * OUTPUTS
  *  memb_map - memory mapping array
  *  memb_fapl - property list for each memory usage type
  *  memb_name - array with members names
- *  len - array with the lenght of each name
+ *  len - array with the length of each name
  *  flag - flag allowing partila access when one of the files is missing
  * RETURNS
  *  0 on success, -1 on failure

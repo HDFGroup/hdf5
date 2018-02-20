@@ -44,7 +44,7 @@ GEN_TEST=h5watchgentest	      	# Generate HDF5 file with various datasets
 GEN_TEST_BIN=`pwd`/$GEN_TEST 	# Path of the binary GEN_TEST
 WATCHFILE=`pwd`/WATCH.h5        # The HDF5 file generated to test h5watch
 TESTFILE=TEST.h5                # The temporary file (a copy of WATCH.h5) used by tests
-TRY_MAX=20                      # Try running the test again 
+TRY_MAX=30                      # Try running the test again 
 #
 # These 3 defines should be the same as the defines in ./extend_dset.c
 WRITER_MESSAGE=writer_message   # The message file created by the "extend" process

@@ -5313,7 +5313,7 @@ CONTAINS
 !  
 !  expression - buffer to hold transform expression
 !  hdferr     - Error code
-!                 Success:  Actual lenght of the expression
+!                 Success:  Actual length of the expression
 !                           If provided buffer "expression" is 
 !                           smaller, than expression will be 
 !                           truncated to fit into

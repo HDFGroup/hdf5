@@ -2080,7 +2080,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         ctx->indent_level++;
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(buffer);
 
@@ -2091,7 +2090,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(buffer);
 
@@ -2131,7 +2129,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(buffer);
 
@@ -2170,7 +2167,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(buffer);
 
@@ -2245,7 +2241,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         ctx->indent_level--;
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(buffer);
         if(H5Tclose(str_type) < 0)
@@ -2288,7 +2283,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
               H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_tag failed");
 
            ctx->need_prefix = TRUE;
-           h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
            h5tools_str_reset(buffer);
            h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";", ttag);
@@ -2299,7 +2293,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         ctx->indent_level--;
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(buffer);
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->structblockend);
@@ -2318,7 +2311,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
             mname = H5Tget_member_name(type, i);
             if((mtype = H5Tget_member_type(type, i)) >= 0) {
                 ctx->need_prefix = TRUE;
-                h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
                 h5tools_str_reset(buffer);
                 h5tools_print_datatype(stream, buffer, info, ctx, mtype, TRUE);
@@ -2335,7 +2327,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         ctx->indent_level--;
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(buffer);
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->structblockend);
@@ -2360,7 +2351,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         ctx->indent_level++;
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(buffer);
         h5tools_print_datatype(stream, buffer, info, ctx, super, TRUE);
@@ -2376,7 +2366,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         ctx->indent_level--;
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(buffer);
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->enumblockend);
@@ -2792,7 +2781,6 @@ h5tools_dump_oid(FILE *stream, const h5tool_format_t *info,
         ncols = info->line_ncols;
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s %s %d %s", OBJID, BEGIN, oid, END);
@@ -2820,7 +2808,6 @@ h5tools_print_virtual_selection(hid_t vspace,
     switch(H5Sget_select_type(vspace)) {
         case H5S_SEL_NONE:    /* Nothing selected         */
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, *curr_pos, 0);
 
             h5tools_str_reset(buffer);
             h5tools_str_append(buffer, "%s", VDS_NONE);
@@ -2833,7 +2820,6 @@ h5tools_print_virtual_selection(hid_t vspace,
             break;
         case H5S_SEL_HYPERSLABS:    /* "New-style" hyperslab selection defined  */
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, *curr_pos, 0);
 
             h5tools_str_reset(buffer);
             if (H5Sis_regular_hyperslab(vspace)) {
@@ -2856,14 +2842,12 @@ h5tools_print_virtual_selection(hid_t vspace,
             }
             h5tools_render_element(stream, info, ctx, buffer, curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, *curr_pos, 0);
 
             h5tools_str_reset(buffer);
             h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionblockend);
             break;
         case H5S_SEL_ALL:    /* Entire extent selected   */
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, *curr_pos, 0);
 
             h5tools_str_reset(buffer);
             h5tools_str_append(buffer, "%s", VDS_ALL);
@@ -2956,7 +2940,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     *-------------------------------------------------------------------------
     */
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s %s", STORAGE_LAYOUT, BEGIN);
@@ -2967,7 +2950,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         case H5D_CHUNKED:
             ctx->indent_level++;
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "%s ", CHUNKED);
@@ -2980,7 +2962,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
             h5tools_str_reset(&buffer);
 
@@ -3036,14 +3017,12 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         case H5D_COMPACT:
             ctx->indent_level++;
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "%s", COMPACT);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
@@ -3063,14 +3042,12 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 ctx->indent_level++;
                 if (next) {
                     ctx->need_prefix = TRUE;
-                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "%s", CONTIGUOUS);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
                     ctx->need_prefix = TRUE;
-                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "%s %s", EXTERNAL, BEGIN);
@@ -3081,7 +3058,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         H5Pget_external(dcpl_id, j, sizeof(name), name, &offset, &size);
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "FILENAME %s SIZE " HSIZE_T_FORMAT, name, size);
@@ -3091,7 +3067,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     ctx->indent_level--;
 
                     ctx->need_prefix = TRUE;
-                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "%s", END);
@@ -3101,21 +3076,18 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     haddr_t ioffset;
 
                     ctx->need_prefix = TRUE;
-                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "%s", CONTIGUOUS);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
                     ctx->need_prefix = TRUE;
-                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer,"SIZE " HSIZE_T_FORMAT, storage_size);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
                     ctx->need_prefix = TRUE;
-                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                     h5tools_str_reset(&buffer);
                     ioffset = H5Dget_offset(obj_id);
@@ -3143,7 +3115,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         hid_t virtual_srcspace = H5Pget_virtual_srcspace(dcpl_id, next);
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s %ld %s ", VDS_MAPPING, next, BEGIN);
@@ -3152,7 +3123,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         ctx->indent_level++;
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s %s", VDS_VIRTUAL, BEGIN);
@@ -3165,14 +3135,12 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         ctx->indent_level--;
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s", END);
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s %s", VDS_SOURCE, BEGIN);
@@ -3190,7 +3158,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         H5Pget_virtual_dsetname(dcpl_id, next, dsetname, sizeof(dsetname));
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s %s", VDS_SRC_FILE, h5tools_dump_header_format->virtualfilenamebegin);
@@ -3199,7 +3166,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s %s", VDS_SRC_DATASET, h5tools_dump_header_format->virtualdatasetnamebegin);
@@ -3212,7 +3178,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         ctx->indent_level--;
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s", END);
@@ -3221,7 +3186,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         ctx->indent_level--;
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s", END);
@@ -3241,7 +3205,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     }/*switch*/
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s", END);
@@ -3253,7 +3216,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     */
     if (H5D_VIRTUAL != stl) {
     ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, "%s %s", FILTERS, BEGIN);
@@ -3271,7 +3233,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     continue; /* nothing to print for invalid filter */
 
                 ctx->need_prefix = TRUE;
-                h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                 h5tools_str_reset(&buffer);
                 switch(filtn) {
@@ -3297,14 +3258,12 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         ctx->indent_level++;
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "PIXELS_PER_BLOCK %d", szip_pixels_per_block);
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         if(szip_options_mask & H5_SZIP_CHIP_OPTION_MASK)
@@ -3314,7 +3273,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         if(szip_options_mask & H5_SZIP_EC_OPTION_MASK)
@@ -3324,7 +3282,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         if(szip_options_mask & H5_SZIP_LSB_OPTION_MASK)
@@ -3335,7 +3292,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
                         if(szip_options_mask & H5_SZIP_RAW_OPTION_MASK) {
                             ctx->need_prefix = TRUE;
-                            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                             h5tools_str_reset(&buffer);
                             h5tools_str_append(&buffer, "HEADER %s", "RAW");
@@ -3345,7 +3301,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         ctx->indent_level--;
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s", END);
@@ -3366,7 +3321,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         ctx->indent_level++;
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "FILTER_ID %d", filtn);
@@ -3374,7 +3328,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
                         if(f_name[0] != '\0') {
                             ctx->need_prefix = TRUE;
-                            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                             h5tools_str_reset(&buffer);
                             h5tools_str_append(&buffer, "COMMENT %s", f_name);
@@ -3382,7 +3335,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         }
                         if (cd_nelmts) {
                             ctx->need_prefix = TRUE;
-                            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                             h5tools_str_reset(&buffer);
                             h5tools_str_append(&buffer, "%s %s ","PARAMS", BEGIN);
@@ -3394,7 +3346,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         ctx->indent_level--;
 
                         ctx->need_prefix = TRUE;
-                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s",END);
@@ -3406,7 +3357,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         else {
 
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "NONE");
@@ -3415,7 +3365,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         ctx->indent_level--;
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, "%s",END);
@@ -3427,7 +3376,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     *-------------------------------------------------------------------------
     */
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s %s", FILLVALUE, BEGIN);
@@ -3436,7 +3384,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     ctx->indent_level++;
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "FILL_TIME ");
@@ -3460,7 +3407,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s ", "VALUE ");
@@ -3486,7 +3432,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     ctx->indent_level--;
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s", END);
@@ -3498,7 +3443,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     */
     if (H5D_VIRTUAL != stl) {
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, "ALLOCATION_TIME %s", BEGIN);
@@ -3507,7 +3451,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         ctx->indent_level++;
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
         h5tools_str_reset(&buffer);
         H5Pget_alloc_time(dcpl_id, &at);
@@ -3532,7 +3475,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         ctx->indent_level--;
 
         ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, "%s", END);
@@ -3626,7 +3568,6 @@ h5tools_dump_attribute(FILE *stream, const h5tool_format_t *info,
         ncols = info->line_ncols;
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s \"%s\" %s",
@@ -3663,7 +3604,6 @@ h5tools_dump_attribute(FILE *stream, const h5tool_format_t *info,
     }
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
     h5tools_str_reset(&buffer);
 
@@ -3782,7 +3722,6 @@ h5tools_dump_subsetting_header(FILE *stream, const h5tool_format_t *info,
         ncols = info->line_ncols;
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s %s", h5tools_dump_header_format->subsettingbegin, h5tools_dump_header_format->subsettingblockbegin);
@@ -3791,7 +3730,6 @@ h5tools_dump_subsetting_header(FILE *stream, const h5tool_format_t *info,
     ctx->indent_level++;
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s %s ", h5tools_dump_header_format->startbegin, h5tools_dump_header_format->startblockbegin);
@@ -3800,7 +3738,6 @@ h5tools_dump_subsetting_header(FILE *stream, const h5tool_format_t *info,
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s %s ", h5tools_dump_header_format->stridebegin, h5tools_dump_header_format->strideblockbegin);
@@ -3809,7 +3746,6 @@ h5tools_dump_subsetting_header(FILE *stream, const h5tool_format_t *info,
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s %s ", h5tools_dump_header_format->countbegin, h5tools_dump_header_format->countblockbegin);
@@ -3823,7 +3759,6 @@ h5tools_dump_subsetting_header(FILE *stream, const h5tool_format_t *info,
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
     ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
 
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s %s ", h5tools_dump_header_format->blockbegin, h5tools_dump_header_format->blockblockbegin);
