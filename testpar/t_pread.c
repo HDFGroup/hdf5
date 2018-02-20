@@ -17,6 +17,7 @@
  */
 
 #include "testpar.h"
+#include <stdlib.h>
 
 /* The collection of files is included below to aid
  * an external "cleanup" process if required.
@@ -55,7 +56,25 @@ static int generate_test_file(MPI_Comm comm, int mpi_rank, int group);
 static int test_parallel_read(MPI_Comm comm, int mpi_rank, int group);
 
 static char *test_argv0 = NULL;
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+
+static char *dirname(char *path)
+{
+	char drive[_MAX_DRIVE];
+	char dir[_MAX_DIR];
+	char directory[_MAX_PATH];
+
+	assert(path != NULL);
+	_fullpath(directory, path, _MAX_FNAME);
+	_splitpath_s(directory, drive, _MAX_DRIVE, dir, _MAX_DIR, NULL, 0, NULL, 0);
+	sprintf_s(directory, _MAX_PATH, "%s%s", drive, dir);
+	return _strdup(directory);
+}
+#else
 extern char *dirname(char *path); /* Avoids additional includes */
+
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -393,9 +412,14 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         }
 
         if ( pass ) {
-            char cmd[256];
+            char execmd[256];
+			char syscmd[256];
             char exe_path[256];
-            char *relative_path = "../tools/src/h5jam";
+#if defined(_WIN32) || defined(_WIN64)
+			char *relative_path = "..\\tools\\src\\h5jam\\h5jam.exe";
+#else
+            char *relative_path = "../tools/src/h5jam/h5jam";
+#endif
             char *exe_dirname = relative_path;
 
             /* We're checking for the existance of the h5jam utility
@@ -406,19 +430,30 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
              * put things into directories, hence the relative path.
              */
 	    if (test_argv0 != NULL) {
-                HDstrncpy(exe_path, test_argv0, sizeof(exe_path));
+                HDstrcpy(exe_path, test_argv0);
                 if ( (exe_dirname = (char *)dirname(exe_path)) != NULL) {
-                    HDsprintf(cmd, "%s/h5jam", exe_dirname);
-                    if ( HDaccess(cmd, F_OK) != 0)
-                        exe_dirname = relative_path;
+#if defined(_WIN32) || defined(_WIN64)
+					/* The dirname substitute (above) returns the
+					 * directory name with a trailing slash so
+					 * don't add another path seperator.
+					 * The posix library version doesn't have
+					 * the trailing slash, so we add it between
+					 * the directory name and the excutable.
+					 */
+					HDsprintf(execmd, "%sh5jam.exe", exe_dirname);
+#else
+                    HDsprintf(execmd, "%s/h5jam", exe_dirname);
+#endif
+					if (HDaccess(execmd, F_OK) != 0)
+						HDstrcpy(execmd, relative_path);
                 }
             }
-            HDsprintf(cmd, "%s/h5jam -i %s -u %s -o %s",
-                      exe_dirname,
+            HDsprintf(syscmd, "%s -i %s -u %s -o %s",
+                      execmd,
                       data_filename,
                       prolog_filename, reloc_data_filename);
 
-            if ( system(cmd) != 0 ) {
+            if ( system(syscmd) != 0 ) {
                 pass = FALSE;
                 failure_mssg = "invocation of h5jam failed.\n";
             }
@@ -781,7 +816,7 @@ main( int argc, char **argv)
     int mpi_rank;
     int mpi_size;
     int split_size;
-    MPI_Comm group_comm = MPI_COMM_WORLD;
+    MPI_Comm group_comm = MPI_COMM_NULL;
 
     /* I don't believe that argv[0] can ever be NULL.
      * It should thus be safe to dup and save as a check
@@ -821,7 +856,7 @@ main( int argc, char **argv)
     if ( mpi_size < 3 ) {
 
         if ( mpi_rank == 0 ) {
-
+			nerrs--;
             HDprintf("    Need at least 3 processes.  Exiting.\n");
         }
         goto finish;
@@ -926,7 +961,7 @@ finish:
     }
 
     /* close HDF5 library */
-    if (H5close() != SUCCEED) {
+    if ((nerrs >= 0) && H5close() != SUCCEED) {
         HDfprintf(stdout, "H5close() failed. (Ignoring)\n");
     }
 
