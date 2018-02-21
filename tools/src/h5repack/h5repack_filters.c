@@ -282,7 +282,7 @@ int apply_filters(const char* name, /* object name from traverse list */
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Premove_filter failed");
     }
     else if(nfilters) {
-       *has_filter = 1;
+        *has_filter = 1;
         if (aux_copy_obj(dcpl_id, name, &filtobj) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "aux_copy_obj failed");
     }
