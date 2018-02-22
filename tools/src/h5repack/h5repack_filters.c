@@ -280,30 +280,30 @@ int apply_filters(const char* name, /* object name from traverse list */
         *has_filter = 1;
         if (H5Premove_filter(dcpl_id, H5Z_FILTER_ALL) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Premove_filter failed");
-
-        /*-------------------------------------------------------------------------
-         * check if there is an existent chunk
-         * read it only if there is not a requested layout
-         *-------------------------------------------------------------------------
-         */
-        if (obj.layout == -1) {
-            if ((layout = H5Pget_layout(dcpl_id)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_layout failed");
-
-            if (layout == H5D_CHUNKED) {
-                if ((rank = H5Pget_chunk(dcpl_id, NELMTS(chsize), chsize/*out*/)) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_chunk failed");
-                obj.layout = H5D_CHUNKED;
-                obj.chunk.rank = rank;
-                for (i = 0; i < rank; i++)
-                    obj.chunk.chunk_lengths[i] = chsize[i];
-            }
-        }
     }
     else if(nfilters) {
         *has_filter = 1;
         if (aux_copy_obj(dcpl_id, name, &filtobj) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "aux_copy_obj failed");
+    }
+
+    /*-------------------------------------------------------------------------
+     * check if there is an existent chunk
+     * read it only if there is not a requested layout
+     *-------------------------------------------------------------------------
+     */
+    if (obj.layout == -1) {
+        if ((layout = H5Pget_layout(dcpl_id)) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_layout failed");
+
+        if (layout == H5D_CHUNKED) {
+            if ((rank = H5Pget_chunk(dcpl_id, NELMTS(chsize), chsize/*out*/)) < 0)
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_chunk failed");
+            obj.layout = H5D_CHUNKED;
+            obj.chunk.rank = rank;
+            for (i = 0; i < rank; i++)
+                obj.chunk.chunk_lengths[i] = chsize[i];
+        }
     }
 
     /*-------------------------------------------------------------------------
