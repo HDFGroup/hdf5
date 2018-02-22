@@ -25,8 +25,6 @@ usage: h5dump [OPTIONS] files
                           P can be the absolute path or just a relative path.
      -A,   --onlyattr     Print the header and value of attributes
                           Optional value 0 suppresses printing attributes.
-     --vds-view-first-missing Set the VDS bounds to first missing mapped elements.
-     --vds-gap-size=N     Set the missing file gap size, N=non-negative integers
 --------------- Object Property Options ---------------
      -i,   --object-ids   Print the object ids
      -p,   --properties   Print dataset filters, storage layout and fill value
