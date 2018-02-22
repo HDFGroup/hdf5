@@ -76,8 +76,8 @@ GROUP "/" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 40, 20 )
-         SIZE 1150 (2.783:1 COMPRESSION)
+         CHUNKED ( 20, 10 )
+         SIZE 1283 (2.494:1 COMPRESSION)
       }
       FILTERS {
          COMPRESSION DEFLATE { LEVEL 1 }
