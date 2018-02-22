@@ -518,6 +518,18 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5repack
+
+      h5repack changes the chunk parameters when a change of layout is not
+      specified and a filter is applied.
+
+      HDFFV-10297, HDFFV-10319 reworked code for h5repack and h5diff code
+      in the tools library. The check for an existing layout was incorrectly
+      placed into an if block and not executed. The check was moved into
+      the normal path of the function.
+
+      (ADB - 2018/02/21, HDFFV-10412)
+
     - h5dump
 
       the tools library will hide the error stack during file open.
