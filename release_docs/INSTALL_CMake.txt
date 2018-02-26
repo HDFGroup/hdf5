@@ -564,7 +564,6 @@ if (HDF5_BUILD_FORTRAN)
 ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"          OFF
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                    OFF
 HDF5_Enable_Clear_File_Buffers "Securely clear file buffers before writing to file"           ON
-HDF5_Enable_Instrument         "Instrument The library"                                       OFF
 HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)." OFF
 HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"              OFF
 HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"                         ON
@@ -580,6 +579,8 @@ HDF5_METADATA_TRACE_FILE       "Enable metadata trace file collection"          
 HDF5_NO_PACKAGES               "Do not include CPack Packaging"                               OFF
 HDF5_PACK_EXAMPLES             "Package the HDF5 Library Examples Compressed File"            OFF
 HDF5_PACK_MACOSX_FRAMEWORK     "Package the HDF5 Library in a Frameworks"                     OFF
+HDF5_BUILD_FRAMEWORKS          "TRUE to build as frameworks libraries,
+                                FALSE to build according to BUILD_SHARED_LIBS"                FALSE
 HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                           OFF
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                 OFF
 HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "0"
@@ -593,7 +594,7 @@ SKIP_HDF5_FORTRAN_SHARED       "Do not build the fortran shared libraries"      
 if (APPLE)
     HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    HDF5_ENABLE_TRACE          "Enable API tracing capability"               ON
+    HDF5_ENABLE_INSTRUMENT     "Instrument The library"                      OFF
 if (HDF5_TEST_VFD)
     HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"      ON
 
