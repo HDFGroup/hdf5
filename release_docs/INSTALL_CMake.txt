@@ -563,6 +563,7 @@ if (HDF5_BUILD_FORTRAN)
 ---------------- HDF5 Advanced Options ---------------------
 ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"          OFF
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                    OFF
+HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                          OFF
 HDF5_Enable_Clear_File_Buffers "Securely clear file buffers before writing to file"           ON
 HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)." OFF
 HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"              OFF
