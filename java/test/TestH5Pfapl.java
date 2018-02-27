@@ -1385,6 +1385,13 @@ public class TestH5Pfapl {
             ret_val_id = H5.H5Pget_evict_on_close(fapl_id);
             assertTrue("H5P_evict_on_close", ret_val_id);
         }
+        catch (HDF5PropertyListInterfaceException err) {
+            // parallel is not supported
+            if (err.getMinorErrorNumber() != HDF5Constants.H5E_CANTSET) {
+                err.printStackTrace();
+                fail("H5P_evict_on_close: " + err);
+            }
+        }
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5P_evict_on_close: " + err);
