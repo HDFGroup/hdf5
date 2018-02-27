@@ -232,6 +232,29 @@ Bug Fixes since HDF5-1.10.1 release
 
       (DER - 2017/11/21, HDFFV-10330)
 
+    - If an HDF5 file contains a filter pipeline message with a 'number of
+      filters' field that exceeds the maximum number of allowed filters,
+      the error handling code will attempt to dereference a NULL pointer.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17505.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      This problem arose because the error handling code assumed that
+      the 'number of filters' field implied that a dynamic array of that
+      size had already been created and that the cleanup code should
+      iterate over that array and clean up each element's resources. If
+      an error occurred before the array has been allocated, this will
+      not be true.
+
+      This has been changed so that the number of filters is set to
+      zero on errors. Additionally, the filter array traversal in the
+      error handling code now requires that the filter array not be NULL.
+
+      (DER - 2018/02/06, HDFFV-10354)
+
     - If an HDF5 file contains a filter pipeline message which contains
       a 'number of filters' field that exceeds the actual number of
       filters in the message, the HDF5 C library will read off the end of
@@ -250,6 +273,21 @@ Bug Fixes since HDF5-1.10.1 release
       error handling.
 
       (DER - 2018/02/26, HDFFV-10355)
+
+    - If an HDF5 file contains a malformed compound type which contains
+      a member of size zero, a division by zero error will occur while
+      processing the type.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17508.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      Checking for zero before dividing fixes the problem. Instead of the
+      division by zero, the normal HDF5 error handling is invoked.
+
+      (DER - 2018/02/26, HDFFV-10357)
 
     Configuration
     -------------
