@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.3.2)
 PROJECT (HDF5_TEST)
 
 #-----------------------------------------------------------------------------
@@ -13,9 +13,9 @@ set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file (${HDF5_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
 
-#-----------------------------------------------------------------------------
+#################################################################################
 # Define Test Library Sources
-#-----------------------------------------------------------------------------
+#################################################################################
 set (TEST_LIB_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/h5test.c
     ${HDF5_TEST_SOURCE_DIR}/testframe.c
@@ -71,9 +71,9 @@ if (BUILD_SHARED_LIBS)
   endif ()
 endif ()
 
-#-----------------------------------------------------------------------------
+#################################################################################
 # If filter plugin tests can be tested
-#-----------------------------------------------------------------------------
+#################################################################################
   # make plugins dir
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/filter_plugin_dir1")
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/filter_plugin_dir2")
@@ -116,7 +116,7 @@ endif ()
     )
   endforeach ()
 
-  foreach ( plugin_name ${FILTER_PLUGINS_FOR_DIR2})
+  foreach (plugin_name ${FILTER_PLUGINS_FOR_DIR2})
     set (HDF5_TEST_PLUGIN_CORENAME          "${plugin_name}")
     set (HDF5_TEST_PLUGIN_NAME              "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_PLUGIN_CORENAME}")
     set (HDF5_TEST_PLUGIN_TARGET            ${HDF5_TEST_PLUGIN_CORENAME})
@@ -141,6 +141,10 @@ endif ()
           "${CMAKE_BINARY_DIR}/filter_plugin_dir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_TARGET}>"
     )
   endforeach ()
+
+#################################################################################
+#  Test program sources
+#################################################################################
 
 set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/testhdf5.c
@@ -170,34 +174,24 @@ set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/tvlstr.c
 )
 
-#-- Adding test for testhdf5
-add_executable (testhdf5 ${testhdf5_SOURCES})
-TARGET_C_PROPERTIES (testhdf5 STATIC " " " ")
-target_link_libraries (testhdf5 ${HDF5_TEST_LIB_TARGET})
-set_target_properties (testhdf5 PROPERTIES FOLDER test)
-if (BUILD_SHARED_LIBS)
-  add_executable (testhdf5-shared ${testhdf5_SOURCES})
-  TARGET_C_PROPERTIES (testhdf5-shared SHARED " " " ")
-  target_link_libraries (testhdf5-shared PUBLIC ${HDF5_TEST_LIBSH_TARGET})
-  set_target_properties (testhdf5-shared PROPERTIES FOLDER test)
-endif ()
+set (cache_image_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/cache_image.c
+    ${HDF5_TEST_SOURCE_DIR}/genall5.c
+)
 
-MACRO (ADD_H5_EXE file)
-  add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
-  TARGET_C_PROPERTIES (${file} STATIC " " " ")
-  target_link_libraries (${file} PUBLIC ${HDF5_TEST_LIB_TARGET})
-  set_target_properties (${file} PROPERTIES FOLDER test)
-  if (BUILD_SHARED_LIBS)
-    add_executable (${file}-shared ${HDF5_TEST_SOURCE_DIR}/${file}.c)
-    TARGET_C_PROPERTIES (${file}-shared SHARED " " " ")
-    target_link_libraries (${file}-shared PUBLIC ${HDF5_TEST_LIBSH_TARGET})
-    set_target_properties (${file}-shared PROPERTIES FOLDER test)
-  endif ()
-ENDMACRO ()
+set (ttsafe_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
+)
 
 set (H5_TESTS
+    testhdf5 # multiple source
     cache
     cache_api
+    cache_image # multiple source
     cache_tagging
     lheap
     ohdr
@@ -210,9 +204,11 @@ set (H5_TESTS
     fheap
     pool
     accum
+    hyperslab
     istore
     bittests
     dt_arith
+    page_buffer
     dtypes
     dsets
     cmpd_dset
@@ -233,6 +229,7 @@ set (H5_TESTS
     app_ref
     enum
     set_extent
+    ttsafe # multiple source
     enc_dec_plist
     enc_dec_plist_cross_platform
     getname
@@ -244,7 +241,6 @@ set (H5_TESTS
     cross_read
     freespace
     mf
-    page_buffer
     vds
     file_image
     unregister
@@ -253,9 +249,112 @@ set (H5_TESTS
     swmr
 )
 
+macro (ADD_H5_EXE file)
+  add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
+  TARGET_C_PROPERTIES (${file} STATIC " " " ")
+  target_link_libraries (${file} PUBLIC ${HDF5_TEST_LIB_TARGET})
+  set_target_properties (${file} PROPERTIES FOLDER test)
+  if (BUILD_SHARED_LIBS)
+    add_executable (${file}-shared ${HDF5_TEST_SOURCE_DIR}/${file}.c)
+    TARGET_C_PROPERTIES (${file}-shared SHARED " " " ")
+    target_link_libraries (${file}-shared PUBLIC ${HDF5_TEST_LIBSH_TARGET})
+    set_target_properties (${file}-shared PROPERTIES FOLDER test)
+  endif ()
+endmacro ()
+
+set (H5_TESTS_MULTIPLE
+    testhdf5
+    cache_image
+    ttsafe
+)
+# Only build single source tests here
 foreach (test ${H5_TESTS})
+  if (NOT "${test}" IN_LIST ${H5_TESTS_MULTIPLE})
+    ADD_H5_EXE(${test})
+  endif ()
+endforeach ()
+
+##############################################################################
+###           M U L T I P L E  S O U R C E   T E S T S                     ###
+##############################################################################
+
+#-- Adding test for testhdf5
+add_executable (testhdf5 ${testhdf5_SOURCES})
+TARGET_C_PROPERTIES (testhdf5 STATIC " " " ")
+target_link_libraries (testhdf5 ${HDF5_TEST_LIB_TARGET})
+set_target_properties (testhdf5 PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (testhdf5-shared ${testhdf5_SOURCES})
+  TARGET_C_PROPERTIES (testhdf5-shared SHARED " " " ")
+  target_link_libraries (testhdf5-shared PUBLIC ${HDF5_TEST_LIBSH_TARGET})
+  set_target_properties (testhdf5-shared PROPERTIES FOLDER test)
+endif ()
+
+#-- Adding test for cache_image
+add_executable (cache_image ${cache_image_SOURCES})
+TARGET_C_PROPERTIES (cache_image STATIC " " " ")
+target_link_libraries (cache_image ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (cache_image PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (cache_image-shared ${cache_image_SOURCES})
+  TARGET_C_PROPERTIES (cache_image-shared SHARED " " " ")
+  target_link_libraries (cache_image-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (cache_image-shared PROPERTIES FOLDER test)
+endif ()
+
+#-- Adding test for ttsafe
+add_executable (ttsafe ${ttsafe_SOURCES})
+TARGET_C_PROPERTIES (ttsafe STATIC " " " ")
+target_link_libraries (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (ttsafe PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (ttsafe-shared ${ttsafe_SOURCES})
+  TARGET_C_PROPERTIES (ttsafe-shared SHARED " " " ")
+  target_link_libraries (ttsafe-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (ttsafe-shared PROPERTIES FOLDER test)
+  if (HDF5_ENABLE_THREADSAFE)
+    set_property (TARGET ttsafe-shared
+        APPEND PROPERTY COMPILE_DEFINITIONS
+            "H5_HAVE_THREADSAFE"
+    )
+  endif ()
+endif ()
+
+##############################################################################
+###           A D D I T I O N A L   T E S T S                              ###
+##############################################################################
+
+set (H5_CHECK_TESTS
+    error_test
+    err_compat
+    tcheck_version
+    testmeta
+    atomic_writer
+    atomic_reader
+    links_env
+    filenotclosed
+    flushrefresh
+)
+
+foreach (test ${H5_CHECK_TESTS})
   ADD_H5_EXE(${test})
 endforeach ()
+
+#-- Adding test for libinfo
+set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
+file (WRITE ${GREP_RUNNER}
+  "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
+if (\${TEST_RESULT} STREQUAL \"0\")
+  message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
+else ()
+  message (STATUS \"COMMAND Result: \${TEST_RESULT}\")
+endif ()
+"
+)
+
+##############################################################################
+###                S W I M M E R   T E S T S                              ###
+##############################################################################
 
 set (H5_SWMR_TESTS
     swmr_addrem_writer
@@ -284,94 +383,6 @@ foreach (test ${H5_VDS_SWMR_TESTS})
   ADD_H5_EXE(${test})
 endforeach ()
 
-##############################################################################
-##############################################################################
-###           A D D I T I O N A L   T E S T S                              ###
-##############################################################################
-##############################################################################
-
-#-- Adding test for cache_image
-add_executable (cache_image
-    ${HDF5_TEST_SOURCE_DIR}/cache_image.c
-    ${HDF5_TEST_SOURCE_DIR}/genall5.c
-)
-TARGET_C_PROPERTIES (cache_image STATIC " " " ")
-target_link_libraries (cache_image ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-set_target_properties (cache_image PROPERTIES FOLDER test)
-if (BUILD_SHARED_LIBS)
-  add_executable (cache_image-shared
-    ${HDF5_TEST_SOURCE_DIR}/cache_image.c
-    ${HDF5_TEST_SOURCE_DIR}/genall5.c
-  )
-  TARGET_C_PROPERTIES (cache_image-shared SHARED " " " ")
-  target_link_libraries (cache_image-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (cache_image-shared PROPERTIES FOLDER test)
-endif ()
-
-#-- Adding test for hyperslab
-add_executable (hyperslab ${HDF5_TEST_SOURCE_DIR}/hyperslab.c)
-TARGET_C_PROPERTIES (hyperslab STATIC " " " ")
-target_link_libraries (hyperslab ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-set_target_properties (hyperslab PROPERTIES FOLDER test)
-if (BUILD_SHARED_LIBS)
-  add_executable (hyperslab-shared ${HDF5_TEST_SOURCE_DIR}/hyperslab.c)
-  TARGET_C_PROPERTIES (hyperslab-shared SHARED " " " ")
-  target_link_libraries (hyperslab-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (hyperslab-shared PROPERTIES FOLDER test)
-  if (HDF5_ENABLE_THREADSAFE)
-    set_property (TARGET hyperslab-shared
-        APPEND PROPERTY COMPILE_DEFINITIONS
-            "H5_HAVE_THREADSAFE"
-    )
-  endif ()
-endif ()
-
-#-- Adding test for ttsafe
-add_executable (ttsafe
-    ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
-    ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
-    ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
-    ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
-    ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
-)
-TARGET_C_PROPERTIES (ttsafe STATIC " " " ")
-target_link_libraries (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-set_target_properties (ttsafe PROPERTIES FOLDER test)
-if (BUILD_SHARED_LIBS)
-  add_executable (ttsafe-shared
-      ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
-      ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
-      ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
-      ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
-      ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
-  )
-  TARGET_C_PROPERTIES (ttsafe-shared SHARED " " " ")
-  target_link_libraries (ttsafe-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (ttsafe-shared PROPERTIES FOLDER test)
-  if (HDF5_ENABLE_THREADSAFE)
-    set_property (TARGET ttsafe-shared
-        APPEND PROPERTY COMPILE_DEFINITIONS
-            "H5_HAVE_THREADSAFE"
-    )
-  endif ()
-endif ()
-
-set (H5_CHECK_TESTS
-    error_test
-    err_compat
-    tcheck_version
-    testmeta
-    atomic_writer
-    atomic_reader
-    links_env
-    flushrefresh
-    filenotclosed
-)
-
-foreach (test ${H5_CHECK_TESTS})
-  ADD_H5_EXE(${test})
-endforeach ()
-
 #-- Adding test for accum_swmr_reader
 #   This has to be copied to the test directory for execve() to find it
 #   and it can't be renamed (i.e., no <foo>-shared).
@@ -385,18 +396,6 @@ set_target_properties (accum PROPERTIES DEPENDS accum_swmr_reader)
 if (BUILD_SHARED_LIBS)
   set_target_properties (accum-shared PROPERTIES DEPENDS accum_swmr_reader)
 endif ()
-
-#-- Adding test for libinfo
-set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
-file (WRITE ${GREP_RUNNER}
-  "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
-if (\${TEST_RESULT} STREQUAL \"0\")
-  message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
-else ()
-  message (STATUS \"COMMAND Result: \${TEST_RESULT}\")
-endif ()
-"
-)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
