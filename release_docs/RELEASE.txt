@@ -174,6 +174,21 @@ Bug Fixes since HDF5-1.8.20
 
       (DER - 2018/02/26, HDFFV-10355)
 
+    - If an HDF5 file contains a malformed compound type which contains
+      a member of size zero, a division by zero error will occur while
+      processing the type.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17508.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      Checking for zero before dividing fixes the problem. Instead of the
+      division by zero, the normal HDF5 error handling is invoked.
+
+      (DER - 2018/02/26, HDFFV-10357)
+
     Configuration
     -------------
     - CMake
