@@ -1515,7 +1515,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                 H5O_cont_t *cont;
 
                 /* Decode continuation message */
-                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw);
+                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw_size, mesg->raw);
                 H5_CHECKED_ASSIGN(cont->chunkno, unsigned, udata->cont_msg_info->nmsgs + 1, size_t); /* the next continuation message/chunk */
 
                 /* Save 'native' form of continuation message */
@@ -1531,7 +1531,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
                 /* Decode ref. count message */
                 HDassert(oh->version > H5O_VERSION_1);
-                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw);
+                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw_size, mesg->raw);
 
                 /* Save 'native' form of ref. count message */
                 mesg->native = refcount;

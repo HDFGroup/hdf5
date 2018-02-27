@@ -1115,7 +1115,7 @@ H5P__dcrt_fill_value_dec(const void **_pp, void *_value)
         dt_size = (size_t)enc_value;
 
         /* Decode type */
-        if(NULL == (fill->type = H5T_decode(*pp)))
+        if(NULL == (fill->type = H5T_decode(dt_size, *pp)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode fill value datatype")
         *pp += dt_size;
     } /* end if */
