@@ -159,7 +159,7 @@ const H5B2_class_t H5G_BT2_CORDER[1]={{ /* B-tree class information */
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_dense_fh_name_cmp(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
+H5G_dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
 {
     H5G_fh_ud_cmp_t *udata = (H5G_fh_ud_cmp_t *)_udata;         /* User data for 'op' callback */
     H5O_link_t *lnk;    /* Pointer to link created from heap object */
@@ -168,7 +168,7 @@ H5G_dense_fh_name_cmp(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_uda
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Decode link information */
-    if(NULL == (lnk = (H5O_link_t *)H5O_msg_decode(udata->f, udata->dxpl_id, NULL, H5O_LINK_ID, (const unsigned char *)obj)))
+    if(NULL == (lnk = (H5O_link_t *)H5O_msg_decode(udata->f, udata->dxpl_id, NULL, H5O_LINK_ID, obj_len, (const unsigned char *)obj)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Compare the string values */

@@ -1821,7 +1821,7 @@ done:
  */
 void *
 H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
-    const unsigned char *buf)
+    size_t buf_size, const unsigned char *buf)
 {
     const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
     void *ret_value;                    /* Return value */
@@ -1836,7 +1836,7 @@ H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
     HDassert(type);
 
     /* decode */
-    if((ret_value = (type->decode)(f, dxpl_id, open_oh, 0, &ioflags, buf)) == NULL)
+    if((ret_value = (type->decode)(f, dxpl_id, open_oh, 0, &ioflags, buf_size, buf)) == NULL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message")
 
 done:
