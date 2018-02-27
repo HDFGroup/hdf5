@@ -237,7 +237,7 @@ endif ()
 
   macro (ADD_VFD_TEST vfdname resultcode)
     foreach (test ${H5_TESTS})
-      if (NOT "${test}" IN_LIST ${H5_VFD_SKIP_TESTS})
+      if (NOT "${test}" IN_LIST H5_VFD_SKIP_TESTS)
         if (WIN32)
           CHECK_VFD_TEST (${test} ${vfdname} ${resultcode})
         else ()
