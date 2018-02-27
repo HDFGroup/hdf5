@@ -9,7 +9,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.3.2 FATAL_ERROR)
 ########################################################
 # For any comments please contact cdashhelp@hdfgroup.org
 #
