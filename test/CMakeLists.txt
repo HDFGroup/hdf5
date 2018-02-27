@@ -269,7 +269,7 @@ set (H5_TESTS_MULTIPLE
 )
 # Only build single source tests here
 foreach (test ${H5_TESTS})
-  if (NOT "${test}" IN_LIST H5_TESTS_MULTIPLE)
+  if (NOT ${test} IN_LIST H5_TESTS_MULTIPLE)
     ADD_H5_EXE(${test})
   endif ()
 endforeach ()
