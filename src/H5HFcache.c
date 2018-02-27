@@ -572,7 +572,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
         UINT32DECODE(image, hdr->pline_root_direct_filter_mask);
 
         /* Decode I/O filter information */
-        if(NULL == (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, udata->dxpl_id, NULL, H5O_PLINE_ID, image)))
+        if(NULL == (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, udata->dxpl_id, NULL, H5O_PLINE_ID, len, image)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode I/O pipeline filters")
 
         /* Advance past filter info to checksum */

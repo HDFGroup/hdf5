@@ -2822,8 +2822,13 @@ H5Tdecode(const void *buf)
     if(buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
 
-    /* Create datatype by decoding buffer */
-    if(NULL == (dt = H5T_decode((const unsigned char *)buf)))
+    /* Create datatype by decoding buffer
+     * There is no way to get the size of the buffer, so we pass in
+     * SIZE_MAX and assume the caller knows what they are doing.
+     * Really fixing this will require an H5Tdecode2() call that
+     * takes a size parameter.
+     */
+    if(NULL == (dt = H5T_decode(SIZE_MAX, (const unsigned char *)buf)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object")
 
     /* Register the type and return the ID */
@@ -2912,7 +2917,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_decode(const unsigned char *buf)
+H5T_decode(size_t buf_size, const unsigned char *buf)
 {
     H5F_t *f = NULL;            /* Fake file structure*/
     H5T_t *ret_value = NULL;    /* Return value */
@@ -2932,7 +2937,7 @@ H5T_decode(const unsigned char *buf)
         HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype")
 
     /* Decode the serialized datatype message */
-    if(NULL == (ret_value = (H5T_t *)H5O_msg_decode(f, H5AC_noio_dxpl_id, NULL, H5O_DTYPE_ID, buf)))
+    if(NULL == (ret_value = (H5T_t *)H5O_msg_decode(f, H5AC_noio_dxpl_id, NULL, H5O_DTYPE_ID, buf_size, buf)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object")
 
     /* Mark datatype as being in memory now */

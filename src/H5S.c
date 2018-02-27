@@ -1730,8 +1730,8 @@ H5S_decode(const unsigned char **p)
 
     /* Decode the extent part of dataspace */
     /* (pass mostly bogus file pointer and bogus DXPL) */
-    if((extent = (H5S_extent_t *)H5O_msg_decode(f, H5P_DEFAULT, NULL, H5O_SDSPACE_ID, pp))==NULL)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object")
+    if((extent = (H5S_extent_t *)H5O_msg_decode(f, H5P_DEFAULT, NULL, H5O_SDSPACE_ID, extent_size, pp)) == NULL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object")
     pp += extent_size;
 
     /* Copy the extent into dataspace structure */
