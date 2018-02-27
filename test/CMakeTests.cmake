@@ -544,11 +544,12 @@ add_test (NAME H5TEST-clear-objects
 )
 
 set (H5TEST_SEPARATE_TESTS
+    testhdf5
     cache
     cache_image
 )
-foreach (test ${H5TEST_TESTS})
-  if (NOT "${test}" IN_LIST H5TEST_SEPARATE_TESTS)
+foreach (test ${H5_TESTS})
+  if (NOT ${test} IN_LIST H5TEST_SEPARATE_TESTS)
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5TEST-${test} COMMAND $<TARGET_FILE:${test}>)
       set_tests_properties (H5TEST-${test} PROPERTIES
@@ -598,8 +599,8 @@ if (BUILD_SHARED_LIBS)
           ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
   )
 
-  foreach (test ${H5TEST_TESTS})
-    if (NOT "${test}" IN_LIST H5TEST_SEPARATE_TESTS)
+  foreach (test ${H5_TESTS})
+    if (NOT ${test} IN_LIST H5TEST_SEPARATE_TESTS)
       if ("${test}" STREQUAL "big" AND CYGWIN)
         add_test (NAME H5TEST-shared-${test}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}-shared"
