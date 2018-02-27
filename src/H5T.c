@@ -5211,6 +5211,11 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
                             /* Check if the field changed size */
                             if(old_size != memb_type->shared->size) {
+
+                                /* Fail if the old_size is zero */
+                                if (0 == old_size)
+                                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "old_size of zero would cause division by zero");
+
                                 /* Adjust the size of the member */
                                 dt->shared->u.compnd.memb[i].size = (dt->shared->u.compnd.memb[i].size*memb_type->shared->size)/old_size;
 
