@@ -26,6 +26,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
+import hdf.hdf5lib.exceptions.HDF5PropertyListInterfaceException;
 import hdf.hdf5lib.structs.H5AC_cache_config_t;
 
 import org.junit.After;
