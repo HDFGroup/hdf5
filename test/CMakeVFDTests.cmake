@@ -88,7 +88,7 @@ endif ()
       links_env
   )
   if (NOT CYGWIN)
-    list(REMOVE_ITEM ${H5_VFD_SKIP_TESTS} big cache)
+    list (REMOVE_ITEM H5_VFD_SKIP_TESTS big cache)
   endif ()
 
   # Windows only macro
