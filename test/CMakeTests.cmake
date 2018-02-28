@@ -1018,7 +1018,6 @@ if (HDF5_BUILD_GENERATORS)
       gen_bad_offset
       gen_bad_ohdr
       gen_bogus
-      gen_bounds
       gen_cross
       gen_deflate
       gen_filters
