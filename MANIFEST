@@ -2447,6 +2447,7 @@
 
 #test files for h5repack
 ./tools/test/h5repack/testfiles/README
+./tools/test/h5repack/testfiles/bounds_latest_latest.h5
 ./tools/test/h5repack/testfiles/h5repack_aggr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr_refs.h5

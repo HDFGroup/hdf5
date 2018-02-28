@@ -82,6 +82,7 @@ test -d $TESTDIR || mkdir $TESTDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
+$SRC_H5REPACK_TESTFILES/bounds_latest_latest.h5
 $SRC_H5REPACK_TESTFILES/h5repack_attr.h5
 $SRC_H5REPACK_TESTFILES/h5repack_attr_refs.h5
 $SRC_H5REPACK_TESTFILES/h5repack_deflate.h5
@@ -534,7 +535,6 @@ VERIFY_SUPERBLOCK()
     (
         cd $TESTDIR
         $RUNSERIAL $H5REPACK_BIN -j $lowbound -k $highbound $infile $outfile
-echo "$RUNSERIAL $H5REPACK_BIN -j $lowbound -k $highbound $infile $outfile"
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -575,6 +575,8 @@ VERIFY_INVALIDBOUNDS()
     infile=$3
     outfile=out-verbounds-low$lowbound-high$highbound.$infile
 
+    #--------------------------------------
+    # check for failure with invalid bounds
     TESTING  $H5REPACK $@
     (
         cd $TESTDIR
