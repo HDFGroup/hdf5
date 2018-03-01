@@ -244,55 +244,55 @@ endif ()
           DO_VFD_TEST (${test} ${vfdname} ${resultcode})
         endif ()
       endif ()
-      set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES DEPENDS VFD-${vfdname}-flush1)
-      set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
-      set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES TIMEOUT 10)
-      set_tests_properties (VFD-${vfdname}-istore PROPERTIES TIMEOUT 1800)
-      if (NOT CYGWIN)
-        set_tests_properties (VFD-${vfdname}-cache PROPERTIES TIMEOUT 1800)
+    endforeach ()
+    set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES DEPENDS VFD-${vfdname}-flush1)
+    set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
+    set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES TIMEOUT 10)
+    set_tests_properties (VFD-${vfdname}-istore PROPERTIES TIMEOUT 1800)
+    if (NOT CYGWIN)
+      set_tests_properties (VFD-${vfdname}-cache PROPERTIES TIMEOUT 1800)
+    endif ()
+    if (BUILD_SHARED_LIBS)
+      set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES DEPENDS VFD-${vfdname}-flush1-shared)
+      set_tests_properties (VFD-${vfdname}-flush1-shared PROPERTIES TIMEOUT 10)
+      set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES TIMEOUT 10)
+      set_tests_properties (VFD-${vfdname}-istore-shared PROPERTIES TIMEOUT 1800)
+      if (NOT CYGWIN AND NOT WIN32)
+        set_tests_properties (VFD-${vfdname}-cache-shared PROPERTIES TIMEOUT 1800)
       endif ()
+    endif ()
+    if (HDF5_TEST_FHEAP_VFD)
+      add_test (NAME VFD-${vfdname}-fheap
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:fheap>"
+              -D "TEST_ARGS:STRING="
+              -D "TEST_VFD:STRING=${vfdname}"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_OUTPUT=${vfdname}-fheap"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
+              -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
+      )
+      set_tests_properties (VFD-${vfdname}-fheap PROPERTIES
+          TIMEOUT 1800
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
+          WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
+      )
       if (BUILD_SHARED_LIBS)
-        set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES DEPENDS VFD-${vfdname}-flush1-shared)
-        set_tests_properties (VFD-${vfdname}-flush1-shared PROPERTIES TIMEOUT 10)
-        set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES TIMEOUT 10)
-        set_tests_properties (VFD-${vfdname}-istore-shared PROPERTIES TIMEOUT 1800)
-        if (NOT CYGWIN AND NOT WIN32)
-          set_tests_properties (VFD-${vfdname}-cache-shared PROPERTIES TIMEOUT 1800)
-        endif ()
-      endif ()
-      if (HDF5_TEST_FHEAP_VFD)
-        add_test (NAME VFD-${vfdname}-fheap
+        add_test (NAME VFD-${vfdname}-fheap-shared
             COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:fheap>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:fheap-shared>"
                 -D "TEST_ARGS:STRING="
                 -D "TEST_VFD:STRING=${vfdname}"
                 -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_OUTPUT=${vfdname}-fheap"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
+                -D "TEST_OUTPUT=${vfdname}-fheap-shared"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}-shared"
                 -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
-        set_tests_properties (VFD-${vfdname}-fheap PROPERTIES
+        set_tests_properties (VFD-${vfdname}-fheap-shared PROPERTIES
             TIMEOUT 1800
-            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
-            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
+            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
+            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}-shared
         )
-        if (BUILD_SHARED_LIBS)
-          add_test (NAME VFD-${vfdname}-fheap-shared
-              COMMAND "${CMAKE_COMMAND}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:fheap-shared>"
-                  -D "TEST_ARGS:STRING="
-                  -D "TEST_VFD:STRING=${vfdname}"
-                  -D "TEST_EXPECT=${resultcode}"
-                  -D "TEST_OUTPUT=${vfdname}-fheap-shared"
-                  -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}-shared"
-                  -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
-          )
-          set_tests_properties (VFD-${vfdname}-fheap-shared PROPERTIES
-              TIMEOUT 1800
-              ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
-              WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}-shared
-          )
-        endif ()
       endif ()
     endif ()
   endmacro ()
