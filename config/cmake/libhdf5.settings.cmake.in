@@ -15,7 +15,7 @@ General Information:
 
 Compiling Options:
 ------------------
-               Compilation Mode: @CMAKE_BUILD_TYPE@
+               Compilation Mode: @CMAKE_BUILD_TYPE@ @CMAKE_C_COMPILER_VERSION@
                      C Compiler: @CMAKE_C_COMPILER@
                          CFLAGS: @CMAKE_C_FLAGS@
                       H5_CFLAGS: @H5_CFLAGS@
@@ -37,7 +37,7 @@ Compiling Options:
 Languages:
 ----------
                         Fortran: @HDF5_BUILD_FORTRAN@
-@BUILD_FORTRAN_CONDITIONAL_TRUE@               Fortran Compiler: @CMAKE_Fortran_COMPILER@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               Fortran Compiler: @CMAKE_Fortran_COMPILER@ @CMAKE_Fortran_COMPILER_VERSION@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@          Fortran 2003 Compiler: @HDF5_ENABLE_F2003@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@                  Fortran Flags: @CMAKE_Fortran_FLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               H5 Fortran Flags: @H5_FCFLAGS@
@@ -46,7 +46,7 @@ Languages:
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Static Fortran Library: YES
 
                             C++: @HDF5_BUILD_CPP_LIB@
-@BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CMAKE_CXX_COMPILER@
+@BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CMAKE_CXX_COMPILER@ @CMAKE_CXX_COMPILER_VERSION@
 @BUILD_CXX_CONDITIONAL_TRUE@                      C++ Flags: @CMAKE_CXX_FLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @H5_CXXFLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@                   AM C++ Flags: @AM_CXXFLAGS@
