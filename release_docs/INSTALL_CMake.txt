@@ -571,7 +571,6 @@ HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"           
 HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"                     OFF
 HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                          ON
 HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"                           ON
-HDF5_ENABLE_LARGE_FILE         "Enable support for large (64-bit) files on Linux."            ON
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
