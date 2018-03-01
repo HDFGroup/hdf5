@@ -43,6 +43,7 @@
 
 /* Predefined VOL plugins */
 #include "H5VLnative.h"		/* Native HDF5 plugin           	*/
+#include "H5VLrados_public.h"   /* DAOS-M VOL plugin                    */
 
 /* Predefined file drivers */
 #include "H5FDcore.h"		/* Files stored entirely in memory	*/
