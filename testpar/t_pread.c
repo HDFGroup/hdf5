@@ -17,7 +17,6 @@
  */
 
 #include "testpar.h"
-#include <stdlib.h>
 
 /* The collection of files is included below to aid
  * an external "cleanup" process if required.
@@ -26,16 +25,10 @@
  * since each set of three is used by the tests either to construct
  * or to read and validate.
  */
-#define NFILENAME 9
-const char *FILENAMES[NFILENAME + 1]={"t_pread_data_file",
-                                      "reloc_t_pread_data_file",
-                                      "prefix_file",
-                                      "t_pread_group_0_file",
+#define NFILENAME 3
+const char *FILENAMES[NFILENAME + 1]={"reloc_t_pread_data_file",
                                       "reloc_t_pread_group_0_file",
-                                      "prefix_file_0",
-                                      "t_pread_group_1_file",
                                       "reloc_t_pread_group_1_file",
-                                      "prefix_file_1",
                                       NULL};
 #define FILENAME_BUF_SIZE 1024
 
@@ -56,36 +49,14 @@ static int generate_test_file(MPI_Comm comm, int mpi_rank, int group);
 static int test_parallel_read(MPI_Comm comm, int mpi_rank, int group);
 
 static char *test_argv0 = NULL;
-#if defined(_WIN32) || defined(_WIN64)
-#include <Windows.h>
-
-static char *dirname(char *path)
-{
-	char drive[_MAX_DRIVE];
-	char dir[_MAX_DIR];
-	char directory[_MAX_PATH];
-
-	assert(path != NULL);
-	_fullpath(directory, path, _MAX_FNAME);
-	_splitpath_s(directory, drive, _MAX_DRIVE, dir, _MAX_DIR, NULL, 0, NULL, 0);
-	sprintf_s(directory, _MAX_PATH, "%s%s", drive, dir);
-	return _strdup(directory);
-}
-#else
-extern char *dirname(char *path); /* Avoids additional includes */
-
-#endif
+// extern char *dirname(char *path); /* Avoids additional includes */
 
 
 /*-------------------------------------------------------------------------
  * Function:    generate_test_file
  *
  * Purpose:     This function is called to produce an HDF5 data file
- *              whose superblock is relocated to a non-zero offset by
- *              utilizing the 'h5jam' utility to write random text
- *              at the start of the file.  Unlike simple concatenation
- *              of files, h5jam is used to place the superblock on a
- *              power-of-2 boundary.
+ *              whose superblock is relocated to a power-of-2 boundary.
  *
  *              Since data will be read back and validated, we generate
  *              data in a predictable manner rather than randomly.
@@ -117,13 +88,13 @@ extern char *dirname(char *path); /* Avoids additional includes */
 static int
 generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 {
-    FILE *header = NULL;
+    int header = -1;
     const char *fcn_name = "generate_test_file()";
     const char *failure_mssg = NULL;
     char *group_filename = NULL;
     char data_filename[FILENAME_BUF_SIZE];
-    char reloc_data_filename[FILENAME_BUF_SIZE];
-    char prolog_filename[FILENAME_BUF_SIZE];
+    // char reloc_data_filename[FILENAME_BUF_SIZE];
+    // char prolog_filename[FILENAME_BUF_SIZE];
     int file_index = 0;
     int group_size;
     int group_rank;
@@ -135,7 +106,8 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     hsize_t dims[1] = {0};
     hid_t file_id   = -1;
     hid_t memspace  = -1; 
-    hid_t filespace = -1; 
+    hid_t filespace = -1;
+	hid_t fctmpl    = -1;
     hid_t fapl_id   = -1;
     hid_t dxpl_id   = -1;
     hid_t dset_id   = -1;
@@ -173,10 +145,10 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
             file_index = 0;
         } 
         else if ( group_id == 0 ) {     /* Test 2 group 0 */
-            file_index = 3;
+            file_index = 1;
         }
         else {                          /* Test 2 group 1 */
-            file_index = 6;
+            file_index = 2;
         }
 
         /* The 'group_filename' is just a temp variable and 
@@ -191,32 +163,6 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
                         sizeof(data_filename)) == NULL ) {
             pass = FALSE;
             failure_mssg = "h5_fixname(0) failed.\n";
-        }
-    }
-
-    if ( pass ) {
-
-        group_filename = FILENAMES[file_index+1];
-        HDassert( group_filename );
-
-        /* Assign the 'reloc_data_filename' */
-        if ( h5_fixname(group_filename, H5P_DEFAULT, reloc_data_filename,
-                        sizeof(reloc_data_filename)) == NULL ) {
-
-            pass = FALSE;
-            failure_mssg = "h5_fixname(1) failed.\n";
-        }
-    }
-
-    if ( pass ) {
-        group_filename = FILENAMES[file_index+2];
-        HDassert( group_filename );
-
-        /* Assign the 'prolog_filename' */
-        if ( h5_fixname(group_filename, H5P_DEFAULT, prolog_filename,
-                        sizeof(prolog_filename)) == NULL ) {
-            pass = FALSE;
-            failure_mssg = "h5_fixname(2) failed.\n";
         }
     }
 
@@ -237,6 +183,17 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         }
     }
 
+	/* Initialize a file creation template */
+	if (pass) {
+		if ((fctmpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
+			pass = FALSE;
+			failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.\n";
+		}
+		else if (H5Pset_userblock(fctmpl, 512) != SUCCEED) {
+			pass = FALSE;
+			failure_mssg = "H5Pset_userblock(,size) failed.\n";
+		}
+	}
     /* setup FAPL */
     if ( pass ) {
         if ( (fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0 ) {
@@ -255,7 +212,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     /* create the data file */ 
     if ( pass ) {
         if ( (file_id = H5Fcreate(data_filename, H5F_ACC_TRUNC, 
-                                  H5P_DEFAULT, fapl_id)) < 0 ) {
+                                  fctmpl, fapl_id)) < 0 ) {
             pass = FALSE;
             failure_mssg = "H5Fcreate() failed.\n";
         }
@@ -361,6 +318,13 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         }
     }
 
+    if (pass || (fctmpl != -1)) {
+       	if (H5Pclose(fctmpl) < 0) {
+       	    pass = false;
+       	    failure_mssg = "H5Pclose(fctmpl) failed.\n";
+        }
+    }
+
     /* Add a userblock to the head of the datafile.
      * We will use this to for a functional test of the 
      * file open optimization.  This is superblock
@@ -373,94 +337,39 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
      * group_rank(0) processes. Each parallel group 
      * will create a unique file with different text
      * headers and different data.
-     *
-     * We also delete files that are no longer needed.
      */
-    if ( group_rank == 0 ) {
-
+    if (group_rank == 0) {
         const char *text_to_write;
-        size_t bytes_to_write; 
+       	size_t bytes_to_write;
 
-        if (group_id == 0)
-            text_to_write = random_hdf5_text;
+       	if (group_id == 0)
+       	    text_to_write = random_hdf5_text;
         else
             text_to_write = hitchhiker_quote;
 
-        bytes_to_write = strlen(text_to_write);
+       	bytes_to_write = HDstrlen(text_to_write);
 
-        if ( pass ) {
-            if ( (header = HDfopen(prolog_filename, "w+")) == NULL ) {
+        if (pass) {
+	    if ((header = HDopen(data_filename, O_WRONLY)) < 0) {
                 pass = FALSE;
-                failure_mssg = "HDfopen(prolog_filename, \"w+\") failed.\n";
+                failure_mssg = "HDopen(data_filename, O_WRONLY) failed.\n";
             }
         }
 
-        if ( pass ) {
-
-            if ( HDfwrite(text_to_write, 1, bytes_to_write, header) !=
-                 bytes_to_write ) {
+        if (pass) {
+            HDlseek(header, 0, SEEK_SET);
+            if (HDwrite(header, text_to_write, bytes_to_write) < 0) {
                 pass = FALSE;
-                failure_mssg = "Unable to write header file.\n";
-            }
+                failure_mssg = "Unable to write user text into file.\n";
+		}
         }
 
-        if ( pass || (header != NULL) ) {
-            if ( HDfclose(header) != 0 ) {
+        if (pass || (header > 0)) {
+            if (HDclose(header) < 0) {
                 pass = FALSE;
-                failure_mssg = "HDfclose() failed.\n";
+                failure_mssg = "HDclose() failed.\n";
             }
         }
-
-        if ( pass ) {
-            char execmd[256];
-			char syscmd[256];
-            char exe_path[256];
-#if defined(_WIN32) || defined(_WIN64)
-			char *relative_path = "..\\tools\\src\\h5jam\\h5jam.exe";
-#else
-            char *relative_path = "../tools/src/h5jam/h5jam";
-#endif
-            char *exe_dirname = relative_path;
-
-            /* We're checking for the existance of the h5jam utility
-             * With Cmake testing, all binaries are in the same directory
-             * e.g. the same location where this executable is found.
-             * We've copied the argv[0] argument and check to see
-             * if h5jam is co-located here. Otherwise, the autotools
-             * put things into directories, hence the relative path.
-             */
-	    if (test_argv0 != NULL) {
-                HDstrcpy(exe_path, test_argv0);
-                if ( (exe_dirname = (char *)dirname(exe_path)) != NULL) {
-#if defined(_WIN32) || defined(_WIN64)
-					/* The dirname substitute (above) returns the
-					 * directory name with a trailing slash so
-					 * don't add another path seperator.
-					 * The posix library version doesn't have
-					 * the trailing slash, so we add it between
-					 * the directory name and the excutable.
-					 */
-					HDsprintf(execmd, "%sh5jam.exe", exe_dirname);
-#else
-                    HDsprintf(execmd, "%s/h5jam", exe_dirname);
-#endif
-					if (HDaccess(execmd, F_OK) != 0)
-						HDstrcpy(execmd, relative_path);
-                }
-            }
-            HDsprintf(syscmd, "%s -i %s -u %s -o %s",
-                      execmd,
-                      data_filename,
-                      prolog_filename, reloc_data_filename);
-
-            if ( system(syscmd) != 0 ) {
-                pass = FALSE;
-                failure_mssg = "invocation of h5jam failed.\n";
-            }
-        }
-
-        HDremove(prolog_filename);
-        HDremove(data_filename);
     }
 
     /* collect results from other processes.
@@ -599,11 +508,11 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
     if ( pass ) {
 
         if ( comm == MPI_COMM_WORLD )       /* test 1 */
-            group_filename = FILENAMES[1];
+            group_filename = FILENAMES[0];
         else if ( group_id == 0 )           /* test 2 group 0 */
-            group_filename = FILENAMES[4];
+            group_filename = FILENAMES[1];
         else                                /* test 2 group 1 */
-            group_filename = FILENAMES[7];
+            group_filename = FILENAMES[2];
 
         HDassert(group_filename);
         if ( h5_fixname(group_filename, H5P_DEFAULT, reloc_data_filename,
@@ -856,7 +765,7 @@ main( int argc, char **argv)
     if ( mpi_size < 3 ) {
 
         if ( mpi_rank == 0 ) {
-			nerrs--;
+
             HDprintf("    Need at least 3 processes.  Exiting.\n");
         }
         goto finish;
@@ -940,7 +849,6 @@ finish:
         HDfprintf(stderr, "MPI_Comm_free failed!\n");
     }
 
-
     /* make sure all processes are finished before final report, cleanup
      * and exit.
      */
@@ -961,7 +869,7 @@ finish:
     }
 
     /* close HDF5 library */
-    if ((nerrs >= 0) && H5close() != SUCCEED) {
+    if (H5close() != SUCCEED) {
         HDfprintf(stdout, "H5close() failed. (Ignoring)\n");
     }
 
