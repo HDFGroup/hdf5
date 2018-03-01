@@ -49,7 +49,6 @@ static int generate_test_file(MPI_Comm comm, int mpi_rank, int group);
 static int test_parallel_read(MPI_Comm comm, int mpi_rank, int group);
 
 static char *test_argv0 = NULL;
-// extern char *dirname(char *path); /* Avoids additional includes */
 
 
 /*-------------------------------------------------------------------------
@@ -93,8 +92,6 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     const char *failure_mssg = NULL;
     char *group_filename = NULL;
     char data_filename[FILENAME_BUF_SIZE];
-    // char reloc_data_filename[FILENAME_BUF_SIZE];
-    // char prolog_filename[FILENAME_BUF_SIZE];
     int file_index = 0;
     int group_size;
     int group_rank;
