@@ -305,7 +305,7 @@ CONTENTS
         to enable symbolic debugging of a production version of HDF5, one
         might say:
 
-            $ CFLAGS=-g ./configure --enable-production
+            $ CFLAGS=-g ./configure --enable-build-mode=production
 
 4.3.5. Compiling HDF5 wrapper libraries
         One can optionally build the Fortran and/or C++ interfaces to the
@@ -414,35 +414,35 @@ CONTENTS
         The library can be compiled to provide symbolic debugging support
         so it can be debugged with gdb, dbx, ddd, etc., or it can be
         compiled with various optimizations. To compile for symbolic
-        debugging (the default for snapshots), say `--disable-production';
-        to compile with optimizations (the default for supported public
-        releases), say `--enable-production'. On some systems the library
-        can also be compiled for profiling with gprof by saying
+        debugging (the default for snapshots), say 
+        `--enable-build-mode=production'; to compile with optimizations 
+        (the default for supported public releases), 
+        say `--enable-build-mode=production'. On some systems the 
+        library can also be compiled for profiling with gprof by saying
         `--enable-production=profile'.
 
-            $ ./configure --disable-production         #symbolic debugging
-            $ ./configure --enable-production          #optimized code
-            $ ./configure --enable-production=profile  #for use with gprof
+            $ ./configure --enable-build-mode=debug       #symbolic debugging
+            $ ./configure --enable-build-mode=production  #optimized code
+            $ ./configure --enable-production=profile     #for use with gprof
 
         Regardless of whether support for symbolic debugging is enabled,
         the library can also perform runtime debugging of certain packages 
         (such as type conversion execution times and extensive invariant 
-        condition checking). To enable this debugging, supply a
-        comma-separated list of package names to to the `--enable-debug'
-        switch.  See "Debugging HDF5 Applications" for a list of package 
-        names:
+        condition checking). To enable this debugging, supply a 
+        comma-separated list of package names to the `--enable-internal-debug' 
+        switch.  See "Debugging HDF5 Applications" for a list of package names:
 
             http://www.hdfgroup.org/HDF5/doc/H5.user/Debugging.html
 
-        Debugging can be disabled by saying `--disable-debug'. 
+        Debugging can be disabled by saying `--disable-internal-debug'. 
         The default debugging level for snapshots is a subset of the
         available packages; the default for supported releases is no
         debugging (debugging can incur a significant runtime penalty).
 
-            $ ./configure --enable-debug=s,t  #debug only H5S and H5T
-            $ ./configure --enable-debug      #debug normal packages
-            $ ./configure --enable-debug=all  #debug all packages
-            $ ./configure --disable-debug     #no debugging
+            $ ./configure --enable-internal-debug=s,t  #debug only H5S and H5T
+            $ ./configure --enable-internal-debug      #debug normal packages
+            $ ./configure --enable-internal-debug=all  #debug all packages
+            $ ./configure --disable-internal-debug     #no debugging
 
         HDF5 can also print a trace of all API function calls, their 
         arguments, and the return values. To enable or disable the
@@ -466,15 +466,17 @@ CONTENTS
             http://www.hdfgroup.org/HDF5/doc/TechNotes/ThreadSafeLibrary.html
 
 4.3.12. Backward compatibility
-        The 1.8 version of the HDF5 Library can be configured to operate
-        identically to the v1.6 library with the 
+        The 1.10 version of the HDF5 Library can be configured to operate
+        identically to the v1.8 library with the 
+            --with-default-api-version=v18
+        configure flag, or identically to the v1.6 library with the 
             --with-default-api-version=v16
         configure flag. This allows existing code to be compiled with the
-        v1.8 library without requiring immediate changes to the application 
+        v1.10 library without requiring immediate changes to the application 
         source code.  For addtional configuration options and other details, 
         see "API Compatibility Macros in HDF5":
 
-            http://www.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html 
+            https://support.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html 
 
 4.4. Building
         The library, confidence tests, and programs can be built by
