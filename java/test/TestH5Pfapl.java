@@ -1388,7 +1388,7 @@ public class TestH5Pfapl {
         }
         catch (HDF5PropertyListInterfaceException err) {
             // parallel is not supported
-            if (err.getMinorErrorNumber() != HDF5Constants.H5E_CANTSET) {
+            if (err.getMinorErrorNumber() != HDF5Constants.H5E_UNSUPPORTED) {
                 err.printStackTrace();
                 fail("H5P_evict_on_close: " + err);
             }
