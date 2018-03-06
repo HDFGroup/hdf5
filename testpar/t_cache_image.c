@@ -1882,6 +1882,14 @@ par_delete_dataset(int dset_num,
 } /* par_delete_dataset() */
 
 
+/* This test uses many POSIX things that are not available on
+ * Windows. We're using a check for fork(2) here as a proxy for
+ * all POSIX/Unix/Linux things until this test can be made
+ * more platform-independent.
+ */
+#ifdef H5_HAVE_FORK
+
+
 /*-------------------------------------------------------------------------
  * Function:    par_insert_cache_image()
  *
@@ -1907,6 +1915,10 @@ par_delete_dataset(int dset_num,
  *
  *              None.
  *
+ *--------------------------------------
+    return;
+
+} /* par_insert_cache_image() */
  *-------------------------------------------------------------------------
  */
 
@@ -1990,6 +2002,15 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size )
     return;
 
 } /* par_insert_cache_image() */
+#else /* H5_HAVE_FORK */
+
+static void
+par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size )
+{
+    return;
+} /* par_insert_cache_image() */
+
+#endif /* H5_HAVE_FORK */
 
 
 /*-------------------------------------------------------------------------
