@@ -7444,15 +7444,14 @@ error:
  *          the library will only use basic version
  *
  *************************************************************************/
-static herr_t verify_version(hid_t dtype, H5F_libver_t low, H5F_libver_t f_shared_low_bound, unsigned *highest_version)
+static herr_t verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
 {
-    H5T_t *dtypep = NULL;    /* Internal structure of a datatype */
-    H5T_class_t type_cls = H5T_NO_CLASS; /* Temporary var for datatype class */
     hid_t base_dtype = -1;
     hid_t mem_dtype = -1;
+    H5T_t *dtypep = NULL;    /* Internal structure of a datatype */
+    H5T_class_t type_cls = H5T_NO_CLASS; /* Temporary var for datatype class */
     int nmembers = 0;
     unsigned i;
-    H5F_libver_t highest = H5F_LIBVER_EARLIEST;
     herr_t ret = SUCCEED;         /* Generic return value */
 
     dtypep = (H5T_t *)H5I_object(dtype);
@@ -7465,6 +7464,8 @@ static herr_t verify_version(hid_t dtype, H5F_libver_t low, H5F_libver_t f_share
     switch (type_cls)
     {
       case H5T_ARRAY:
+      {
+        H5T_t *base_dtypep = NULL;    /* Internal structure of a datatype */
 
         if (low == H5F_LIBVER_EARLIEST)
             VERIFY(dtypep->shared->version, H5O_DTYPE_VERSION_2, "H5O_dtype_ver_bounds");
@@ -7475,8 +7476,17 @@ static herr_t verify_version(hid_t dtype, H5F_libver_t low, H5F_libver_t f_share
         base_dtype = H5Tget_super(dtype);
         CHECK(base_dtype, FAIL, "H5Tget_super");
 
+        /* Get the base type's internal structure for version */
+        base_dtypep = (H5T_t *)H5I_object(base_dtype);
+        if (base_dtypep == NULL) TEST_ERROR
+
+            /* Reset highest version if this datatype has higher version than
+               its outer type */
+        if (*highest_version < base_dtypep->shared->version)
+            *highest_version = base_dtypep->shared->version;
+
         /* Verify the base datatype recursively */
-        ret = verify_version(base_dtype, low, f_shared_low_bound, highest_version);
+        ret = verify_version(base_dtype, low, highest_version);
 
         /* Close the member datatype before checking for failure */
         if ((H5Tclose(base_dtype)) < 0) TEST_ERROR
@@ -7485,17 +7495,31 @@ static herr_t verify_version(hid_t dtype, H5F_libver_t low, H5F_libver_t f_share
         if (ret < 0) TEST_ERROR
 
         break;
+      }
       case H5T_COMPOUND:
+      {
+        H5T_t *mem_dtypep = NULL;    /* Internal structure of a datatype */
         /* Get the number of members of this compound type */
         if ((nmembers = H5Tget_nmembers(dtype)) < 0) TEST_ERROR
 
         /* Go through all its member datatypes */
         for (i = 0; i < (unsigned)nmembers; i++)
         {
-            /* Get the member datatype and verify it recursively */
+            /* Get the member datatype to verify it recursively */
             mem_dtype = H5Tget_member_type(dtype, i);
             if (mem_dtype < 0) TEST_ERROR
-            ret = verify_version(mem_dtype, low, f_shared_low_bound, highest_version);
+
+            /* Get the member type's internal structure for version */
+            mem_dtypep = (H5T_t *)H5I_object(mem_dtype);
+            if (mem_dtypep == NULL) TEST_ERROR
+
+            /* Reset highest version if this datatype has higher version than
+               its outer type */
+            if (*highest_version < mem_dtypep->shared->version)
+            *highest_version = mem_dtypep->shared->version;
+
+            /* Verify the datatype recursively */
+            ret = verify_version(mem_dtype, low, highest_version);
 
             /* Close the member datatype before checking for failure */
             if ((H5Tclose(mem_dtype)) < 0) TEST_ERROR
@@ -7504,12 +7528,13 @@ static herr_t verify_version(hid_t dtype, H5F_libver_t low, H5F_libver_t f_share
             if (ret < 0) TEST_ERROR
         }
         /* If this compound datatype contains a datatype of higher version, it
-           will be promoted to that version */
+           will be promoted to that version, thus, verify with highest version */
         if (*highest_version > H5O_dtype_ver_bounds[low])
             VERIFY(dtypep->shared->version, *highest_version, "verify_version");
         else
             VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[low], "verify_version");
         break;
+      }
       case H5T_ENUM:
         VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[low], "verify_version");
         break;
@@ -7733,7 +7758,7 @@ test_versionbounds(void)
             highest_version = dtypep->shared->version;
 
             /* Verify version of the datatype recursevily */
-            ret = verify_version(dset_dtype, low, filep->shared->low_bound, &highest_version);
+            ret = verify_version(dset_dtype, low, &highest_version);
 
             /* Close the dataset's datatype */
             if (H5Tclose(dset_dtype) < 0) TEST_ERROR
