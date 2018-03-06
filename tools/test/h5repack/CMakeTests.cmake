@@ -149,8 +149,6 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_version_test
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_zero
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.UD.h5-plugin_none
-      # versionbounds
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/bounds_latest_latest.h5
       # fsm
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/STG.h5repack_none.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/SPT.h5repack_aggr.h5
