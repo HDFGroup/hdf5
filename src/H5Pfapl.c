@@ -2338,7 +2338,7 @@ done:
  *      5) H5F_LIBVER_LATEST, H5F_LIBVER_LATEST
  *      See detailed description in the RFC: Setting Bounds for Object Creation in HDF5 1.10.0.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
  *              Sunday, December 30, 2007
@@ -2386,7 +2386,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_libver_bounds
  *
- * Purpose:	Returns the current settings for the library version format bounds
+ * Purpose:    Returns the current settings for the library version format bounds
  *          from a file access property list.
  *
  * Return:    Non-negative on success/Negative on failure
@@ -2409,7 +2409,7 @@ H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low/*out*/,
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-    
+
      /* Get values */
     if(low) {
         if(H5P_get(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, low) < 0)
@@ -3798,7 +3798,7 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_multi_type_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_multi_type_dec
  *
@@ -3841,10 +3841,10 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
  *                 'high' bound of library format versions property in the
  *                 file access property list is encoded.
  *
- * Return:	   Success:	Non-negative
- *		   Failure:	Negative
+ * Return:       Success:    Non-negative
+ *           Failure:    Negative
  *
- * Programmer 
+ * Programmer
  *
  *-------------------------------------------------------------------------
  */
@@ -3878,10 +3878,10 @@ H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
  *                 'high' bound of library format versions property in the
  *                 file access property list is decoded.
  *
- * Return:	   Success:	Non-negative
- *		   Failure:	Negative
+ * Return:       Success:    Non-negative
+ *           Failure:    Negative
  *
- * Programmer:     
+ * Programmer:
  *
  *-------------------------------------------------------------------------
  */
@@ -3906,7 +3906,7 @@ H5P__facc_libver_type_dec(const void **_pp, void *_value)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_core_write_tracking
+ * Function:    H5Pset_core_write_tracking
  *
  * Purpose:    Enables/disables core VFD write tracking and page
  *              aggregation size.
@@ -4509,7 +4509,7 @@ H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close)
 #ifndef H5_HAVE_PARALLEL
     /* Set value */
     if(H5P_set(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property")
+        HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "can't set evict on close property")
 #else
     HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "evict on close is currently not supported in parallel HDF5")
 #endif /* H5_HAVE_PARALLEL */

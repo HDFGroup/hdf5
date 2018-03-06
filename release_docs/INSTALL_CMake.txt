@@ -165,8 +165,9 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 III. Quick Step Building HDF5 C Static Libraries and Tools with CMake
 ========================================================================
 Notes: This short set of instructions is written for users who want to
-       quickly build the just the HDF5 C static library and tools from
+       quickly build just the HDF5 C static library and tools from
        the HDF5 source code package using the CMake command line tools.
+       Avoid the use of drive letters in paths on Windows.
 
    Go through these steps:
 
