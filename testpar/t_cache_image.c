@@ -4056,6 +4056,13 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
 } /* smoke_check_1() */
 
 
+/* This test uses many POSIX things that are not available on
+ * Windows. We're using a check for fork(2) here as a proxy for
+ * all POSIX/Unix/Linux things until this test can be made
+ * more platform-independent.
+ */
+#ifdef H5_HAVE_FORK
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -4271,4 +4278,14 @@ finish:
     return(nerrs > 0);
 
 } /* main() */
+#else /* H5_HAVE_FORK */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_FORK */
 
