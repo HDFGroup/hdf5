@@ -18,10 +18,6 @@
 
 add_test (NAME TEST_PAR_testphdf5 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:testphdf5> ${MPIEXEC_POSTFLAGS})
 
-if (WIN32)
-  # t_cache_imagee uses fork() and execve(), will not run on Windows
-  list (REMOVE_ITEM H5P_TESTS t_cache_image)
-endif ()
 foreach (testp ${H5P_TESTS})
   add_test (NAME TEST_PAR_${testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${testp}> ${MPIEXEC_POSTFLAGS})
 endforeach ()

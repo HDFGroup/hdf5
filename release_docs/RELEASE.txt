@@ -270,6 +270,12 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - H5Pset_evict_on_close in H5Pfapl.c
+
+      Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
+      parallel library.
+             (ADB - 2018/03/6, HDFFV-10414)
+
     - Utility function can not handle lowercase Windows drive letters
 
       Added call to toupper function for drive letter.

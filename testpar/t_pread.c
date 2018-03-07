@@ -370,7 +370,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     }
 
     /* collect results from other processes.
-     * Only overwrite the failure message if no preveious error 
+     * Only overwrite the failure message if no previous error
      * has been detected
      */
     local_failure = ( pass ? 0 : 1 );

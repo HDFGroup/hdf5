@@ -4396,9 +4396,9 @@ H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close)
 #ifndef H5_HAVE_PARALLEL
     /* Set value */
     if(H5P_set(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "can't set evict on close property")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property")
 #else
-    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "evict on close is currently not supported in parallel HDF5")
+    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "evict on close is currently not supported in parallel HDF5")
 #endif /* H5_HAVE_PARALLEL */
 
 done:
