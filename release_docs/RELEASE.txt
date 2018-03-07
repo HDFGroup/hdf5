@@ -199,7 +199,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
       parallel library.
-             (ADB - 2018/03/6, HDFFV-104148)
+             (ADB - 2018/03/6, HDFFV-10414)
 
     - filter plugin handling in H5PL.c and H5Z.c
 
