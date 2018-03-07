@@ -629,7 +629,7 @@
         set_tests_properties (ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       endif ()
       add_test (
-          NAME ADD_H5_VERIFY_INVALIDBOUNDS-${testname}
+          NAME ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}
           COMMAND $<TARGET_FILE:h5repack> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (
@@ -637,7 +637,6 @@
               DEPENDS ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects
               WILL_FAIL "true"
       )
-    endif ()
   endmacro ()
 
   macro (ADD_H5_TEST_META testname testfile)
