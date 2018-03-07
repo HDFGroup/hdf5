@@ -1438,7 +1438,7 @@ ADD_H5_VERIFY_SUPERBLOCK (SB_IS_2 h5repack_layout.h5 1 2 2)
 # -j 2 -k 2, superblock will be 3
 ADD_H5_VERIFY_SUPERBLOCK (SB_IS_3 h5repack_layout.h5 2 2 3)
 # -j 0 -k 1, file cannot be opened
-ADD_H5_VERIFY_INVALIDBOUNDS latest_latest_invalid bounds_latest_latest.h5 0 1
+ADD_H5_VERIFY_INVALIDBOUNDS (latest_latest_invalid bounds_latest_latest.h5 0 1)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
