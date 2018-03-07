@@ -82,6 +82,7 @@ test -d $TESTDIR || mkdir $TESTDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
+$SRC_H5REPACK_TESTFILES/bounds_latest_latest.h5
 $SRC_H5REPACK_TESTFILES/h5repack_attr.h5
 $SRC_H5REPACK_TESTFILES/h5repack_attr_refs.h5
 $SRC_H5REPACK_TESTFILES/h5repack_deflate.h5
@@ -340,8 +341,8 @@ VERIFY_LAYOUT_DSET()
     fi
 
     # clean up tmp files
-    rm -f $outfile
-    rm -f $layoutfile
+#    rm -f $outfile
+#    rm -f $layoutfile
 }
 
 #------------------------------------------
@@ -512,6 +513,87 @@ VERIFY_LAYOUT_ALL()
     rm -f $outfile
     rm -f $layoutfile
 }
+
+#--------------------------------------------------------------
+# Verifying superblock of a file with different version bounds
+VERIFY_SUPERBLOCK()
+{
+    lowbound=$1
+    highbound=$2
+    superblock=$3
+    infile=$4
+    layoutfile=verbounds-low$lowbound-high$highbound.$4
+    outfile=out-verbounds-low$lowbound-high$highbound.$infile
+    expectedsuperblock="SUPERBLOCK_VERSION $superblock"
+
+    shift
+    shift
+    shift
+    shift
+
+    TESTING  $H5REPACK $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5REPACK_BIN -j $lowbound -k $highbound $infile $outfile
+    )
+    RET=$?
+    if [ $RET != 0 ] ; then
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+    else
+        echo " PASSED"
+        DIFFTEST $infile $outfile
+    fi
+
+    #---------------------------------
+    # check the layout from a dataset
+    VERIFY  "superblock"
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5DUMP_BIN -H -B $outfile > $layoutfile
+    )
+    $GREP "$expectedsuperblock" $TESTDIR/$layoutfile > /dev/null
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # clean up tmp files
+    rm -f $outfile
+    rm -f $layoutfile
+
+} # end of VERIFY_SUPERBLOCK
+
+#------------------------------------------------------------------
+# Verifying that a latest file cannot be opened with earlier bounds
+VERIFY_INVALIDBOUNDS()
+{
+    lowbound=$1
+    highbound=$2
+    infile=$3
+    outfile=out-verbounds-low$lowbound-high$highbound.$infile
+
+    #--------------------------------------
+    # check for failure with invalid bounds
+    TESTING  $H5REPACK $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5REPACK_BIN -j $lowbound -k $highbound $infile $outfile
+    )
+    RET=$?
+    if [ $RET != 0 ] ; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # clean up tmp files
+    rm -f $outfile
+
+} # end of VERIFY_INVALIDBOUNDS
 
 # same as TOOLTEST, but it uses the old syntax -i input_file -o output_file
 #
@@ -1364,6 +1446,18 @@ if test  $USE_FILTER_DEFLATE != "yes" ; then
 else
  VERIFY_LAYOUT_VDS vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
 fi
+
+#########################################################
+# Testing version bounds
+#########################################################
+# -j 0 -k 2, superblock will be 0
+VERIFY_SUPERBLOCK 0 2 0 h5repack_layout.h5 -j 0 -k 2 h5repack_layout.h5
+# -j 1 -k 2, superblock will be 2
+VERIFY_SUPERBLOCK 1 2 2 h5repack_layout.h5 -j 1 -k 2 h5repack_layout.h5
+# -j 2 -k 2, superblock will be 3
+VERIFY_SUPERBLOCK 2 2 3 h5repack_layout.h5 -j 2 -k 2 h5repack_layout.h5
+# -j 0 -k 1, file cannot be opened
+VERIFY_INVALIDBOUNDS 0 1 bounds_latest_latest.h5 
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

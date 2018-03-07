@@ -14271,10 +14271,10 @@ main(void)
                     FALSE, "H5Ocopy(): expand soft link");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                     H5O_COPY_EXPAND_EXT_LINK_FLAG,
-                    FALSE, "H5Ocopy: expand external link");
+                    FALSE, "H5Ocopy(): expand external link");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                     H5O_COPY_EXPAND_SOFT_LINK_FLAG | H5O_COPY_EXPAND_EXT_LINK_FLAG,
-                    FALSE, "H5Ocopy: expand soft and external links");
+                    FALSE, "H5Ocopy(): expand soft and external links");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                     H5O_COPY_SHALLOW_HIERARCHY_FLAG,
                     FALSE, "H5Ocopy(): shallow group copy");

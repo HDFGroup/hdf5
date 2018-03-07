@@ -4966,7 +4966,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
 #define VERBFNAME        "tverbounds_dspace.h5"
 #define VERBDSNAME       "dataset 1"
 #define SPACE1_DIM1     3
-static int
+static void
 test_libver_bounds_open(void)
 {
     hid_t file = -1;    /* File ID */
