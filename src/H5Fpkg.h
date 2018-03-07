@@ -300,7 +300,8 @@ struct H5F_file_t {
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
-    unsigned	latest_flags;	/* The latest version support */
+    H5F_libver_t    low_bound;  /* The 'low' bound of library format versions */
+    H5F_libver_t    high_bound; /* The 'high' bound of library format versions */
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/
     unsigned	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/

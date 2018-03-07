@@ -981,6 +981,7 @@
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c
+./test/gen_bounds.c
 ./test/gen_cross.c
 ./test/gen_deflate.c
 ./test/gen_file_image.c
