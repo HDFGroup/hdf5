@@ -144,24 +144,6 @@ install (
 )
 
 #-----------------------------------------------------------------------------
-# Create pkgconfig files
-#-----------------------------------------------------------------------------
-#foreach (libs ${LINK_LIBS})
-#  set (LIBS "${LIBS} -l${libs}")
-#endforeach ()
-#foreach (libs ${HDF5_LIBRARIES_TO_EXPORT})
-#  set (HDF5LIBS "${HDF5LIBS} -l${libs}")
-#endforeach ()
-#configure_file (
-#    ${HDF_RESOURCES_DIR}/libhdf5.pc.in
-#    ${HDF5_BINARY_DIR}/CMakeFiles/libhdf5.pc @ONLY
-#)
-#install (
-#    FILES ${HDF5_BINARY_DIR}/CMakeFiles/libhdf5.pc
-#    DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
-#)
-
-#-----------------------------------------------------------------------------
 # Configure the HDF518_Examples.cmake file and the examples
 #-----------------------------------------------------------------------------
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
