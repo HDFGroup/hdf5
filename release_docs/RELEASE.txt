@@ -56,6 +56,16 @@ New Features
     -------------
     - CMake
 
+      Add pkg-config file generation
+
+      Added pkg-config file generation for the C, C++, HL, and HL C++ libraries.
+      In addition, builds on linux will create h5cXXX scripts that use the pkg-config
+      files. This is a limited implementation of a script like autotools h5cc.
+
+      (ADB - 2018/03/08, HDFFV-4359)
+
+    - CMake
+
       Refactor use of CMAKE_BUILD_TYPE for new variable, which understands
       the type of generator in use.
 
