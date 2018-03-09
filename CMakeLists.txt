@@ -671,12 +671,6 @@ if (HDF5_ENABLE_THREADSAFE)
   endif ()
 endif ()
 
-# -----------------------------------------------------------------------
-# wrapper script variables
-#
-#set (CFLAGS "${C_DEFINES}")
-#set (CXXFLAGS "${CXX_DEFINES}")
-
 #-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
@@ -805,11 +799,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
         set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
       endif ()
     endif ()
-
-    # -----------------------------------------------------------------------
-    # wrapper script variables
-    #
-#    set (FCFLAGS "${Fortran_DEFINES}")
 
     add_subdirectory (fortran)
     if (HDF5_BUILD_HL_LIB)
