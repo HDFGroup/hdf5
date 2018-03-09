@@ -842,7 +842,8 @@ H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
     H5P_genplist_t	*plist;         /* Property list to query */
     H5P_genplist_t *fapl_plist;
     hid_t new_fapl_id;
-    hbool_t latest_format = TRUE;
+    H5F_libver_t low_bound = H5F_LIBVER_V110;
+    H5F_libver_t high_bound = H5F_LIBVER_V110;
     herr_t ret_value = SUCCEED;          /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -860,8 +861,10 @@ H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
 
     /* Set latest format in fapl_plist */
     /* This will eventually be used by VDS to encode datasets via H5P__dcrt_layout_enc() */
-    if(H5P_set(fapl_plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+    if(H5P_set(fapl_plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &low_bound) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'low' bound for library format versions")
+    if(H5P_set(fapl_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &high_bound) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'high' bound for library format versions")
 
     /* Call the internal encode routine */
     if((ret_value = H5P__encode(plist, TRUE, buf, nalloc, new_fapl_id)) < 0)

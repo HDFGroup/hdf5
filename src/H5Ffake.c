@@ -40,9 +40,10 @@
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_fake_alloc(uint8_t sizeof_size)
+H5F_fake_alloc(uint8_t sizeof_size, hid_t fapl_id)
 {
     H5F_t *f = NULL;            /* Pointer to fake file struct */
+    H5P_genplist_t *plist;      /* Property list */
     H5F_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -58,6 +59,14 @@ H5F_fake_alloc(uint8_t sizeof_size)
         f->shared->sizeof_size = H5F_OBJ_SIZE_SIZE;
     else
         f->shared->sizeof_size = sizeof_size;
+
+    /* Set low/high bounds according to the setting in fapl_id */
+    /* See H5F_new() in H5Fint.c */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
+    f->shared->low_bound = H5F_LOW_BOUND(f);
+    f->shared->high_bound = H5F_HIGH_BOUND(f);
 
     /* Set return value */
     ret_value = f;
