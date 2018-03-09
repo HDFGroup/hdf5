@@ -15,7 +15,7 @@
 ### ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201264 -C Release -VV -O hdf518.log     ###
 #############################################################################################
 
-cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.10)
 ############################################################################
 # Usage:
 #     ctest -S HDF518config.cmake,OPTION=VALUE -C Release -VV -O test.log
