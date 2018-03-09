@@ -39,7 +39,7 @@
 
 /* PRIVATE PROTOTYPES */
 static void *H5O__layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
+    unsigned mesg_flags, unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O__layout_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O__layout_copy(const void *_mesg, void *_dest);
 static size_t H5O__layout_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -99,7 +99,8 @@ H5FL_DEFINE(H5O_layout_t);
  */
 static void *
 H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
-    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, 
+    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_layout_t           *mesg = NULL;
     uint8_t                *heap_block = NULL;
@@ -549,11 +550,11 @@ done:
 static herr_t
 H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
-    const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    uint8_t                *heap_block = NULL;
+    const H5O_layout_t      *mesg = (const H5O_layout_t *) _mesg;
+    uint8_t                 *heap_block = NULL;
     size_t                  *str_size = NULL;
-    unsigned               u;
-    unsigned saved_latest_flags = H5F_GET_LATEST_FLAGS(f);
+    unsigned                u;
+    H5F_libver_t            saved_low, saved_high;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -569,6 +570,9 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
 
     /* Layout class */
     *p++ = mesg->type;
+
+    saved_low = H5F_LOW_BOUND(f);
+    saved_high  = H5F_HIGH_BOUND(f);
 
     /* Write out layout class specific information */
     switch(mesg->type) {
@@ -691,7 +695,8 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 uint32_t chksum;
                 size_t i;
 
-                H5F_SET_LATEST_FLAGS(f, H5F_LATEST_ALL_FLAGS);
+                 if(H5F_set_libver_bounds(f, H5F_LIBVER_V110, H5F_LIBVER_V110) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
                 /* Allocate array for caching results of strlen */
                 if(NULL == (str_size = (size_t *)H5MM_malloc(2 * mesg->storage.u.virt.list_nused *sizeof(size_t))))
@@ -789,7 +794,8 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     } /* end switch */
 
 done:
-    H5F_SET_LATEST_FLAGS(f, saved_latest_flags);
+    if(H5F_set_libver_bounds(f, saved_low, saved_high) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot reset low/high bounds")
 
     heap_block = (uint8_t *)H5MM_xfree(heap_block);
     str_size = (size_t *)H5MM_xfree(str_size);

@@ -2039,7 +2039,7 @@ H5S_hyper_set_version(const H5S_t *space, hsize_t block_count, hsize_t bounds_en
     }
 
     if(H5S_hyper_is_regular(space)) {
-        if((H5F_USE_LATEST_FLAGS(f, H5F_LATEST_DATASPACE_SELECTION) && block_count > 4) ||
+        if(((H5F_LOW_BOUND(f) >= H5F_LIBVER_V110) && block_count > 4) ||
            count_up_version || bound_up_version)
             *version = H5S_HYPER_VERSION_2;
     } else { /* Fail for irregular hyperslab if exceeds 32 bits */
