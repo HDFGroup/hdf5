@@ -740,12 +740,12 @@ H5F_gc_ref(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_get_fc_degree
+ * Function: H5F_get_fc_degree
  *
- * Purpose:     Retrieve the 'file close degree' for the file.
+ * Purpose:  Retrieve the 'file close degree' for the file.
  *
- * Return:      Success:    Non-negative, the 'file close degree'
- *              Failure:    (can't happen)
+ * Return:   Success:    Non-negative, the 'file close degree'
+ *           Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
 H5F_close_degree_t

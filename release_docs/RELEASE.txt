@@ -56,6 +56,16 @@ New Features
     -------------
     - CMake
 
+      Add pkg-config file generation
+
+      Added pkg-config file generation for the C, C++, HL, and HL C++ libraries.
+      In addition, builds on linux will create h5cXXX scripts that use the pkg-config
+      files. This is a limited implementation of a script like autotools h5cc.
+
+      (ADB - 2018/03/08, HDFFV-4359)
+
+    - CMake
+
       Refactor use of CMAKE_BUILD_TYPE for new variable, which understands
       the type of generator in use.
 
@@ -297,6 +307,12 @@ Bug Fixes since HDF5-1.10.1 release
       Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
       parallel library.
              (ADB - 2018/03/6, HDFFV-10414)
+
+    - Utility function can not handle lowercase Windows drive letters
+
+      Added call to toupper function for drive letter.
+
+      (ADB - 2017/12/18, HDFFV-10307)
 
     - filter plugin handling in H5PL.c and H5Z.c
 
