@@ -785,3 +785,51 @@ if (HDF5_EXPORTED_TARGETS)
       INCLUDES DESTINATION include
   )
 endif ()
+
+#-----------------------------------------------------------------------------
+# Create pkgconfig files
+#-----------------------------------------------------------------------------
+set (_PKG_CONFIG_PREFIX ${CMAKE_INSTALL_PREFIX})
+set (_PKG_CONFIG_EXEC_PREFIX \${prefix})
+set (_PKG_CONFIG_LIBDIR \${exec_prefix}/lib)
+set (_PKG_CONFIG_INCLUDEDIR \${prefix}/include)
+set (_PKG_CONFIG_LIBNAME "${HDF5_LIB_CORENAME}")
+set (_PKG_CONFIG_VERSION "${HDF5_PACKAGE_VERSION}")
+
+foreach (libs ${LINK_LIBS} ${LINK_COMP_LIBS})
+  set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} -l${libs}")
+endforeach ()
+
+set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${HDF5_LIB_CORENAME}")
+if (BUILD_SHARED_LIBS)
+  set (_PKG_CONFIG_SH_LIBS "${_PKG_CONFIG_SH_LIBS} -l${HDF5_LIB_CORENAME}")
+endif ()
+
+set (_PKG_CONFIG_REQUIRES)
+set (_PKG_CONFIG_REQUIRES_PRIVATE)
+
+configure_file (
+    ${HDF_RESOURCES_DIR}/libhdf5.pc.in
+    ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}-${HDF5_PACKAGE_VERSION}.pc
+    @ONLY
+)
+install (
+    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}-${HDF5_PACKAGE_VERSION}.pc
+    DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
+    COMPONENT libraries
+)
+
+if (NOT WIN32)
+  set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
+  configure_file (
+      ${HDF_RESOURCES_DIR}/libh5cc.in
+      ${HDF5_BINARY_DIR}/CMakeFiles/h5cc
+      @ONLY
+  )
+  install (
+      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5cc
+      DESTINATION ${HDF5_INSTALL_BIN_DIR}
+      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+      COMPONENT libraries
+  )
+endif ()
