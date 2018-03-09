@@ -7684,7 +7684,7 @@ test_versionbounds(void)
     if (ret < 0) TEST_ERROR
 
     /* Create a enumerate datatype */
-    enum_type = H5Tcreate(H5T_ENUM, sizeof(short));
+    enum_type = H5Tcreate(H5T_ENUM, sizeof(color_t));
     if (enum_type < 0) TEST_ERROR
 
     enum_val = E1_RED;
