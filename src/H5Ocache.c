@@ -262,12 +262,23 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
         uint32_t stored_chksum;     /* Stored metadata checksum value */
         uint32_t computed_chksum;   /* Computed metadata checksum value */
 
-	/* Get stored and computed checksums */
-	H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+        /* Get stored and computed checksums */
+        H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
 
-	if(stored_chksum != computed_chksum)
-	    ret_value = FALSE;
+        if(stored_chksum != computed_chksum) {
+            /* These fields are not deserialized yet in H5O__prefix_deserialize() */
+            HDassert(udata->oh->chunk == NULL);
+            HDassert(udata->oh->mesg == NULL);
+            HDassert(udata->oh->proxy == NULL);
+
+            /* Indicate that udata->oh is to be freed later
+               in H5O__prefix_deserialize() */
+            udata->free_oh = TRUE;
+            ret_value = FALSE;
+        } /* end if */
     } /* end if */
+    else
+        HDassert(!(udata->common.file_intent & H5F_ACC_SWMR_WRITE));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_verify_chksum() */
@@ -1281,8 +1292,22 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
     /* Verify object header prefix length */
     HDassert((size_t)(image - _image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
-    /* Save the object header for later use in 'deserialize' callback */
-    udata->oh = oh;
+    /* If udata->oh is to be freed (see H5O__cache_verify_chksum), 
+       save the pointer to udata->oh and free it later after setting
+       udata->oh with the new object header */
+    if(udata->free_oh) {
+        H5O_t *saved_oh = udata->oh;
+        HDassert(udata->oh); 
+
+        /* Save the object header for later use in 'deserialize' callback */
+        udata->oh = oh;
+        if(H5O__free(saved_oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't destroy object header")
+        udata->free_oh = FALSE;
+    } else 
+        /* Save the object header for later use in 'deserialize' callback */
+        udata->oh = oh;
+
     oh = NULL;
 
 done:

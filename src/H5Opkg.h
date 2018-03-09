@@ -379,6 +379,7 @@ typedef struct H5O_cache_ud_t {
     unsigned v1_pfx_nmesgs;             /* Number of messages from v1 prefix header */
     size_t chunk0_size;                 /* Size of serialized first chunk    */
     H5O_t *oh;                          /* Partially deserialized object header, for later use */
+    hbool_t free_oh;                    /* Whether to free the object header or not */
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_cache_ud_t;
 
