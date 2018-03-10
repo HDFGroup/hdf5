@@ -951,6 +951,9 @@ DataSet H5Location::openDataSet(const H5std_string& name) const
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //        2007: QAK modified to use H5L APIs - BMR
+//        Mar 2018: Inadequate functionality, new hard link is only in
+//              H5L_SAME_LOC.  This function will be retired in favor of
+//              its replacement, Group::newLink(). - BMR
 //--------------------------------------------------------------------------
 void H5Location::link(H5L_type_t link_type, const char* curr_name, const char* new_name) const
 {
