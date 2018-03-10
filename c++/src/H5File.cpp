@@ -72,9 +72,8 @@ H5File::H5File() : Group(), id(H5I_INVALID_HID) {}
 ///                             exists, and fail, otherwise
 ///\par
 ///             For info on file creation in the case of an already-open file,
-///             please refer to the \b Special \b case section in the C layer
-///             Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5F.html#File-Create
+///             please refer to the \b Special \b case section of the H5Fcreate
+///             API in the C Reference Manual.
 // Notes        With a PGI compiler (~2012-2013,) the exception thrown by
 //              p_get_file could not be caught in the applications.  Added try
 //              block here to catch then re-throw it. -BMR 2013/03/21

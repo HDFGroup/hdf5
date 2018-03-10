@@ -281,8 +281,8 @@ H5T_str_t StrType::getStrpad() const
 ///\param       strpad - IN: String padding type
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For detail, please refer to the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetStrpad
+///             For information, please refer to the H5Tset_strpad API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void StrType::setStrpad(H5T_str_t strpad) const
