@@ -56,20 +56,6 @@ static char H5FD_mpi_native_g[] = "native";
  * library to determine whether the file is empty, truncated, or okay. The MPIO
  * driver doesn't bother to keep it updated since it's an expensive operation.
  */
-#if 0 /* original version */ /* JRM */
-typedef struct H5FD_mpio_t {
-    H5FD_t	pub;		/*public stuff, must be first		*/
-    MPI_File	f;		/*MPIO file handle			*/
-    MPI_Comm	comm;		/*communicator				*/
-    MPI_Info	info;		/*file information			*/
-    int         mpi_rank;       /* This process's rank                  */
-    int         mpi_size;       /* Total number of processes            */
-    haddr_t	eof;		/*end-of-file marker			*/
-    haddr_t	eoa;		/*end-of-address marker			*/
-    haddr_t	last_eoa;	/* Last known end-of-address marker	*/
-    haddr_t	local_eof;	/* Local end-of-file address for each process */
-} H5FD_mpio_t;
-#else /* modified version */ /* JRM */
 typedef struct H5FD_mpio_t {
     H5FD_t	pub;		/*public stuff, must be first		*/
     MPI_File	f;		/*MPIO file handle			*/
@@ -88,7 +74,6 @@ typedef struct H5FD_mpio_t {
                                 /* as soon as be make the necessary     */
                                 /* VFD API change.                      */
 } H5FD_mpio_t;
-#endif /* modified version */ /* JRM */
 
 /* Private Prototypes */
 
@@ -1060,10 +1045,8 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->eof = H5FD_mpi_MPIOff_to_haddr(size);
     file->local_eof = file->eof;
 
-#if 1 /* JRM */
     /* Mark initial barriers in H5FD_mpio_truncate() as necessary */
     file->do_pre_trunc_barrier = TRUE;
-#endif /* JRM */
 
     /* Set return value */
     ret_value=(H5FD_t*)file;
@@ -1956,75 +1939,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpio_flush() */
 
-#if 0 /* original version */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_mpio_truncate
- *
- * Purpose:     Make certain the file's size matches it's allocated size
- *
- * Return:      Success:	Non-negative
- * 		Failure:	Negative
- *
- * Programmer:  Quincey Koziol
- *              January 31, 2008
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
-{
-    H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
-    herr_t              ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-#ifdef H5FDmpio_DEBUG
-    if(H5FD_mpio_Debug[(int)'t'])
-    	HDfprintf(stdout, "Entering %s\n", FUNC);
-#endif
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
-
-    /* Extend the file to make sure it's large enough, then sync.
-     * Unfortunately, keeping track of EOF is an expensive operation, so
-     * we can't just check whether EOF<EOA like with other drivers.
-     * Therefore we'll just read the byte at EOA-1 and then write it back. */
-    if(file->eoa > file->last_eoa) {
-        int		mpi_code;	/* mpi return code */
-        MPI_Offset      mpi_off;
-
-        if(H5FD_mpi_haddr_to_MPIOff(file->eoa, &mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
-
-        /* Extend the file's size */
-        if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, mpi_off)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
-
-	/* Don't let any proc return until all have extended the file.
-         * (Prevents race condition where some processes go ahead and write
-         * more data to the file before all the processes have finished making
-         * it the shorter length, potentially truncating the file and dropping
-         * the new data written)
-         */
-        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
-
-        /* Update the 'last' eoa value */
-        file->last_eoa = file->eoa;
-    } /* end if */
-
-done:
-#ifdef H5FDmpio_DEBUG
-    if(H5FD_mpio_Debug[(int)'t'])
-    	HDfprintf(stdout, "Leaving %s\n", FUNC);
-#endif
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mpio_truncate() */
-
-#else /* modified versin */ 
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mark_pre_trunc_barrier_unecessary
@@ -2191,8 +2105,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpio_truncate() */
-
-#endif /* modified version */
 
 
 /*-------------------------------------------------------------------------
