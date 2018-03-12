@@ -28,6 +28,13 @@
 #include "H5Spkg.h"		/* Dataspace functions			*/
 #include "H5VMprivate.h"         /* Vector functions			*/
 
+/* Format version bounds for dataspace hyperslab selection */
+const unsigned H5O_sds_hyper_ver_bounds[] = {
+    H5S_HYPER_VERSION_1,    /* H5F_LIBVER_EARLIEST */
+    H5S_HYPER_VERSION_1,    /* H5F_LIBVER_V18 */
+    H5S_HYPER_VERSION_2     /* H5F_LIBVER_LATEST */
+};
+
 /* Local datatypes */
 
 /* Static function prototypes */
@@ -1993,6 +2000,7 @@ done:
     H5S_hyper_set_version
  PURPOSE
     Determine the version to use for encoding hyperslab selection info
+    See tables 2 & 3 in the RFC: H5Sencode/H5Sdecode Format Change
  USAGE
     hssize_t H5S_hyper_set_version(space, block_count, bounds_end, f, version)
         const H5S_t *space:             IN: The dataspace
@@ -2014,20 +2022,13 @@ done:
 static herr_t
 H5S_hyper_set_version(const H5S_t *space, hsize_t block_count, hsize_t bounds_end[], H5F_t *f, uint32_t *version)
 {
-    hbool_t count_up_version = FALSE;
-    hbool_t bound_up_version = FALSE;
-    unsigned u;
-    herr_t ret_value = SUCCEED; /* return value */
+    hbool_t count_up_version = FALSE;   /* Whether number of blocks exceed (2^32 - 1) */
+    hbool_t bound_up_version = FALSE;   /* Whether high bounds exceed (2^32 - 1) */
+    unsigned u;                         /* Local index veriable */
+    uint32_t tmp_version;               /* Temporay version */
+    herr_t ret_value = SUCCEED;         /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    /* Use version 2 for unlimited selection */
-    if(space->select.sel_info.hslab->unlim_dim >= 0) {
-       *version = H5S_HYPER_VERSION_2;
-       HGOTO_DONE(SUCCEED)
-    }
-
-    *version = H5S_HYPER_VERSION_1;
 
     /* Determine whether the number of blocks or the high bounds in the selection exceed (2^32 - 1) */
     if(block_count > H5S_UINT32_MAX)
@@ -2038,16 +2039,33 @@ H5S_hyper_set_version(const H5S_t *space, hsize_t block_count, hsize_t bounds_en
                 bound_up_version = TRUE;
     }
 
-    if(H5S_hyper_is_regular(space)) {
-        if(((H5F_LOW_BOUND(f) >= H5F_LIBVER_V110) && block_count > 4) ||
-           count_up_version || bound_up_version)
-            *version = H5S_HYPER_VERSION_2;
-    } else { /* Fail for irregular hyperslab if exceeds 32 bits */
+    /* Use version 2 for unlimited selection */
+    if(space->select.sel_info.hslab->unlim_dim >= 0)
+       tmp_version = H5S_HYPER_VERSION_2;
+    else if(H5S_hyper_is_regular(space)) {
+
+        /* If exceed (2^32 -1) */
+        if(count_up_version || bound_up_version)
+            tmp_version = H5S_HYPER_VERSION_2;
+        else 
+            /* block_count < 4: version 1 */
+            /* block_count >= 4: determined by low bound */
+            tmp_version = (block_count < 4) ? H5S_HYPER_VERSION_1 : H5O_sds_hyper_ver_bounds[H5F_LOW_BOUND(f)];
+
+    } else { 
+        /* Fail for irregular hyperslab if exceeds 32 bits */
         if(count_up_version)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "The number of blocks in hyperslab selection exceeds 2^32")
         else if(bound_up_version)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "The end of bounding box in hyperslab selection exceeds 2^32")
+        tmp_version = H5S_HYPER_VERSION_1;
     }
+
+    /* Version bounds check */
+    if(tmp_version > H5O_sds_hyper_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "Dataspace hyperslab selection version out of bounds")
+    
+    *version = tmp_version;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

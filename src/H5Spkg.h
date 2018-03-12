@@ -282,8 +282,9 @@ H5_DLLVAR const H5S_select_class_t H5S_sel_none[1];
  */
 H5_DLLVAR const H5S_select_class_t H5S_sel_point[1];
 
-/* Array of versions for Dataspace */
+/* Array of versions for Dataspace and hyperslab selections */
 H5_DLLVAR const unsigned H5O_sdspace_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_sds_hyper_ver_bounds[H5F_LIBVER_NBOUNDS];
 
 /* Extent functions */
 H5_DLL herr_t H5S_extent_release(H5S_extent_t *extent);
