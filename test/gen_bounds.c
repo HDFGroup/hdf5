@@ -267,11 +267,13 @@ error:
 /***********************************************************************
  * gen_latest_latest() creates file "bounds_latest_latest.h5"
  *
- * File contents:
- * - Version 3 superblock (triggered by H5Fcreate with H5F_ACC_SWMR_WRITE)
- * - A chunked dataset with layout version 4, "DS_chunked_layout_4". (H5Pset_chunk_opts)
+ * NOTE: As of March 2018, latest is 1.10.
  *
- * NOTE: As of Feb 2018, latest is 1.10.
+ * File contents:
+ * - Version 3 superblock (NOTE: this can also be triggered by passing in
+ *   H5F_ACC_SWMR_WRITE, in place of H5F_ACC_TRUNC, to H5Fcreate)
+ * - A chunked dataset with layout version 4, "DS_chunked_layout_4".
+ *   (triggered by H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
  *
  * Return: SUCCEED/FAIL
  *
@@ -279,6 +281,7 @@ error:
 static herr_t gen_latest_latest(void)
 {
     hid_t   fid = -1;      /* File ID */
+    hid_t   fapl = -1;     /* File access property list ID */
     hid_t   dcpl = -1;     /* Dataset creation property list ID */
     hid_t   space = -1;    /* Dataspace ID */
     hid_t   dset = -1;     /* Dataset ID */
@@ -289,8 +292,16 @@ static herr_t gen_latest_latest(void)
     int     i, j;
     herr_t  ret = SUCCEED; /* Generic return value */
 
-    /* Create file with H5F_ACC_SWMR_WRITE, triggers version 3 superblock */
-    fid = H5Fcreate(FILENAME_L_L, H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create file access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
+
+    /* Set the "use the latest/latest version of the format" bounds
+       for creating objects in the file */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
+    /* Create the file with version 3 superblock */
+    fid = H5Fcreate(FILENAME_L_L, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     if (fid < 0) TEST_ERROR;
 
     /*
@@ -350,6 +361,8 @@ error:
 
 /***********************************************************************
  * gen_v18_latest() creates file "bounds_v18_latest.h5"
+ *
+ * NOTE: As of March 2018, latest is 1.10.
  *
  * File contents:
  * - Version 2 superblock
