@@ -853,21 +853,8 @@ H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
-    /* Make a copy of the default file access property list */
-    if(NULL == (fapl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if((new_fapl_id = H5P_copy_plist(fapl_plist, FALSE)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
-
-    /* Set latest format in fapl_plist */
-    /* This will eventually be used by VDS to encode datasets via H5P__dcrt_layout_enc() */
-    if(H5P_set(fapl_plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &low_bound) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'low' bound for library format versions")
-    if(H5P_set(fapl_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &high_bound) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'high' bound for library format versions")
-
     /* Call the internal encode routine */
-    if((ret_value = H5P__encode(plist, TRUE, buf, nalloc, new_fapl_id)) < 0)
+    if((ret_value = H5P__encode(plist, TRUE, buf, nalloc, H5P_FILE_ACCESS_DEFAULT)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
 
 done:

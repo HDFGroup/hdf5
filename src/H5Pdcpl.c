@@ -374,13 +374,32 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size, void *_udata)
     uint8_t *tmp_p;
     size_t tmp_size;
     size_t u;                           /* Local index variable */
+    H5P_genplist_t *fapl_plist;         /* The file access property list */
+    hid_t new_fapl_id;                  /* The file access property list ID */
+    H5F_libver_t low_bound = H5F_LIBVER_V110;   /* Set the low bound in fapl to latest */
+    H5F_libver_t high_bound = H5F_LIBVER_V110;  /* Set the high bound in fapl to latest */
     herr_t ret_value = SUCCEED;         /* Return value */
+
 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(layout);
     HDassert(size);
+
+    /* Make a copy of the default file access property list */
+    if(NULL == (fapl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Set latest format in fapl_plist */
+    /* This will eventually be used by VDS to encode datasets via H5S_encode() */
+    if(H5P_set(fapl_plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &low_bound) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'low' bound for library format versions")
+    if(H5P_set(fapl_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &high_bound) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'high' bound for library format versions")
+
+    if((new_fapl_id = H5P_copy_plist(fapl_plist, FALSE)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
 
     if(NULL != *pp) {
         /* Encode layout type */
@@ -427,14 +446,15 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size, void *_udata)
                  * list before we get here. */
                 tmp_size = (size_t)-1;
                 tmp_p = *pp;
-                if(H5S_encode(layout->storage.u.virt.list[u].source_select, pp, &tmp_size, udata->fapl_id) < 0)
+
+                if(H5S_encode(layout->storage.u.virt.list[u].source_select, pp, &tmp_size, new_fapl_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
                 *size += (size_t)(*pp - tmp_p);
 
                 /* Virtual dataset selection.  Same notes as above apply. */
                 tmp_size = (size_t)-1;
                 tmp_p = *pp;
-                if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, pp, &tmp_size, udata->fapl_id) < 0)
+                if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, pp, &tmp_size, new_fapl_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize virtual selection")
                 *size += (size_t)(*pp - tmp_p);
             } /* end for */
@@ -467,14 +487,14 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size, void *_udata)
                 /* Source selection */
                 tmp_size = (size_t)0;
                 tmp_p = NULL;
-                if(H5S_encode(layout->storage.u.virt.list[u].source_select, &tmp_p, &tmp_size, udata->fapl_id) < 0)
+                if(H5S_encode(layout->storage.u.virt.list[u].source_select, &tmp_p, &tmp_size, new_fapl_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
                 *size += tmp_size;
 
                 /* Virtual dataset selection */
                 tmp_size = (size_t)0;
                 tmp_p = NULL;
-                if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, &tmp_p, &tmp_size, udata->fapl_id) < 0)
+                if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, &tmp_p, &tmp_size, new_fapl_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize virtual selection")
                 *size += tmp_size;
             } /* end for */
