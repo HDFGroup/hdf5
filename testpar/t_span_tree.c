@@ -255,7 +255,7 @@ void coll_write_test(int chunk_factor)
 #endif
 
 
-  int      *matrix_out, *matrix_out1, *vector;
+  int      *matrix_out = NULL, *matrix_out1 = NULL, *vector = NULL;
 
   int      mpi_size,mpi_rank;
 
@@ -661,6 +661,13 @@ void coll_write_test(int chunk_factor)
    */
   ret = H5Fclose(file);
   VRFY((ret >= 0),"");
+
+  if (vector != NULL)
+      HDfree(vector);
+  if (matrix_out != NULL)
+      HDfree(matrix_out);
+  if (matrix_out1 != NULL)
+      HDfree(matrix_out1);
 
   return ;
 }
