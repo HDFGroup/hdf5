@@ -448,7 +448,7 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
  */
 const H5std_string GROUP1NAME("First_group");
 const H5std_string GROUP2NAME("Second_group");
-static int
+static void
 test_lcpl(hid_t fapl_id, hbool_t new_format)
 {
     H5L_info_t linfo;
@@ -456,9 +456,9 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
     hsize_t dims[2];
 
     if(new_format)
-        TESTING("link creation property lists (w/new group format)")
+        SUBTEST("Link creation property lists (w/new group format)")
     else
-        TESTING("link creation property lists")
+        SUBTEST("Link creation property lists")
 
     try
     {
@@ -466,7 +466,7 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
 
         // Create a new file.
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
-        H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_id);
+        H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Create and link a group with the default LCPL.
         Group grp_1(file.createGroup(GROUP1NAME));
@@ -478,12 +478,12 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
             throw InvalidActionException("H5Lget_info", "Character encoding is not default");
 
         // Create and commit a datatype with the default LCPL.
-        IntType dtype;
+        IntType dtype(PredType::NATIVE_INT);
         dtype.commit(file, "/type");
         dtype.close();
 
         // Check that its character encoding is the default.
-        linfo = file.getLinkInfo("type");
+        linfo = file.getLinkInfo("/type");
         verify_val(linfo.cset, H5T_CSET_ASCII, "Character encoding is not default", __LINE__, __FILE__);
 
         // Create a simple dataspace.
@@ -894,6 +894,7 @@ void test_links()
             test_basic_links(my_fapl_id, new_format);
             test_move(my_fapl_id, new_format);
             test_copy(my_fapl_id, new_format);
+            test_lcpl(my_fapl_id, new_format);
         } /* end for */
 
         /* Close 2nd FAPL */
