@@ -41,25 +41,6 @@
 #define H5O_TESTING
 #include "H5Opkg.h"     /* Object header            */
 
-#include "H5Bprivate.h"
-#include "H5Iprivate.h"
-#include "H5Pprivate.h"
-
-/*
- * This file needs to access private information from the H5S package.
- * This file also needs to access the dataspace testing code.
- */
-#define H5S_FRIEND      /*suppress error about including H5Spkg   */
-#include "H5Spkg.h"     /* Dataspaces               */
-
-/*
- * This file needs to access private information from the H5O package.
- * This file also needs to access the dataspace testing code.
- */
-#define H5O_FRIEND      /*suppress error about including H5Opkg   */
-#define H5O_TESTING
-#include "H5Opkg.h"     /* Object header            */
-
 #define TESTFILE   "th5s.h5"
 #define DATAFILE   "th5s1.h5"
 #define NULLFILE   "th5s2.h5"
