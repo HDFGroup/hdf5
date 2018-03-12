@@ -339,8 +339,8 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         const char *text_to_write;
         size_t bytes_to_write;
 
-       	if (group_id == 0)
-       	    text_to_write = random_hdf5_text;
+        if (group_id == 0)
+            text_to_write = random_hdf5_text;
         else
             text_to_write = hitchhiker_quote;
 
