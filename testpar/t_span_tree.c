@@ -662,11 +662,11 @@ void coll_write_test(int chunk_factor)
   ret = H5Fclose(file);
   VRFY((ret >= 0),"");
 
-  if (vector != NULL)
+  if (vector)
       HDfree(vector);
-  if (matrix_out != NULL)
+  if (matrix_out)
       HDfree(matrix_out);
-  if (matrix_out1 != NULL)
+  if (matrix_out1)
       HDfree(matrix_out1);
 
   return ;
