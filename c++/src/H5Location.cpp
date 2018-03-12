@@ -1471,7 +1471,7 @@ void H5Location::getObjinfo(const H5std_string& name, H5G_stat_t& statbuf) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getLinkInfo
-///\brief       Returns the name of the object that the symbolic link points to.
+///\brief       Returns the information of the named link.
 ///\param       link_name  - IN: Symbolic link to the object
 ///\param       size - IN: Maximum number of characters of value to be returned
 ///\return      Name of the object
