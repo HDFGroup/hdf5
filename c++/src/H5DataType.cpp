@@ -28,6 +28,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -244,6 +245,7 @@ void DataType::copy(const DataSet& dset)
         throw DataTypeIException(inMemFunc("copy"), "H5Tcopy failed");
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    DataType::p_decode
 // Purpose      Returns an id of a type by decoding the binary object
@@ -272,6 +274,7 @@ hid_t DataType::p_decode() const
         return(encoded_dtype_id);
     }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    DataType::decode
