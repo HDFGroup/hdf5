@@ -35,7 +35,7 @@ const char *FILENAMES[NFILENAME + 1]={"reloc_t_pread_data_file",
 #define COUNT 1000
 
 hbool_t pass = true;
-static const char *random_hdf5_text = 
+static const char *random_hdf5_text =
 "Now is the time for all first-time-users of HDF5 to read their \
 manual or go thru the tutorials!\n\
 While you\'re at it, now is also the time to read up on MPI-IO.";
@@ -67,7 +67,7 @@ static char *test_argv0 = NULL;
  *              In the overall scheme of running the test, we'll call
  *              this function twice: first as a collection of all MPI
  *              processes and then a second time with the processes split
- *              more or less in half. Each sub group will operate 
+ *              more or less in half. Each sub group will operate
  *              collectively on their assigned file.  This split into
  *              subgroups validates that parallel groups can successfully
  *              open and read data independantly from the other parallel
@@ -81,7 +81,7 @@ static char *test_argv0 = NULL;
  *              10/1/17
  *
  * Modifications:
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static int
@@ -96,13 +96,13 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     int group_size;
     int group_rank;
     int local_failure = 0;
-    int global_failures = 0; 
+    int global_failures = 0;
     hsize_t count = COUNT;
     hsize_t i;
     hsize_t offset;
     hsize_t dims[1] = {0};
     hid_t file_id   = -1;
-    hid_t memspace  = -1; 
+    hid_t memspace  = -1;
     hid_t filespace = -1;
 	hid_t fctmpl    = -1;
     hid_t fapl_id   = -1;
@@ -140,7 +140,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     if ( pass ) {
         if ( comm == MPI_COMM_WORLD ) { /* Test 1 */
             file_index = 0;
-        } 
+        }
         else if ( group_id == 0 ) {     /* Test 2 group 0 */
             file_index = 1;
         }
@@ -148,8 +148,8 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
             file_index = 2;
         }
 
-        /* The 'group_filename' is just a temp variable and 
-         * is used to call into the h5_fixname function. No 
+        /* The 'group_filename' is just a temp variable and
+         * is used to call into the h5_fixname function. No
          * need to worry that we reassign it for each file!
          */
         group_filename = FILENAMES[file_index];
@@ -206,9 +206,9 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         }
     }
 
-    /* create the data file */ 
+    /* create the data file */
     if ( pass ) {
-        if ( (file_id = H5Fcreate(data_filename, H5F_ACC_TRUNC, 
+        if ( (file_id = H5Fcreate(data_filename, H5F_ACC_TRUNC,
                                   fctmpl, fapl_id)) < 0 ) {
             pass = FALSE;
             failure_mssg = "H5Fcreate() failed.\n";
@@ -248,7 +248,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
     if ( pass ) {
         offset = (hsize_t)group_rank * (hsize_t)COUNT;
-        if ( (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, &offset, 
+        if ( (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, &offset,
                                   NULL, &count, NULL)) < 0 ) {
             pass = FALSE;
             failure_mssg = "H5Sselect_hyperslab() failed.\n";
@@ -256,8 +256,8 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     }
 
     if ( pass ) {
-        if ( (dset_id = H5Dcreate2(file_id, "dataset0", H5T_NATIVE_FLOAT, 
-                                   filespace, H5P_DEFAULT, H5P_DEFAULT, 
+        if ( (dset_id = H5Dcreate2(file_id, "dataset0", H5T_NATIVE_FLOAT,
+                                   filespace, H5P_DEFAULT, H5P_DEFAULT,
                                    H5P_DEFAULT)) < 0 ) {
             pass = false;
             failure_mssg = "H5Dcreate2() failed.\n";
@@ -265,7 +265,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     }
 
     if ( pass ) {
-        if ( (H5Dwrite(dset_id, H5T_NATIVE_FLOAT, memspace, 
+        if ( (H5Dwrite(dset_id, H5T_NATIVE_FLOAT, memspace,
                        filespace, dxpl_id, data_slice)) < 0 ) {
             pass = false;
             failure_mssg = "H5Dwrite() failed.\n";
@@ -316,35 +316,35 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     }
 
     if (pass || (fctmpl != -1)) {
-       	if (H5Pclose(fctmpl) < 0) {
-       	    pass = false;
-       	    failure_mssg = "H5Pclose(fctmpl) failed.\n";
+        if (H5Pclose(fctmpl) < 0) {
+            pass = false;
+            failure_mssg = "H5Pclose(fctmpl) failed.\n";
         }
     }
 
     /* Add a userblock to the head of the datafile.
-     * We will use this to for a functional test of the 
+     * We will use this to for a functional test of the
      * file open optimization.  This is superblock
      * relocation is done by the rank 0 process associated
      * with the communicator being used.  For test 1, we
      * utilize MPI_COMM_WORLD, so group_rank 0 is the
      * same as mpi_rank 0.  For test 2 which utilizes
      * two groups resulting from an MPI_Comm_split, we
-     * will have parallel groups and hence two 
-     * group_rank(0) processes. Each parallel group 
+     * will have parallel groups and hence two
+     * group_rank(0) processes. Each parallel group
      * will create a unique file with different text
      * headers and different data.
      */
     if (group_rank == 0) {
         const char *text_to_write;
-       	size_t bytes_to_write;
+        size_t bytes_to_write;
 
-       	if (group_id == 0)
-       	    text_to_write = random_hdf5_text;
+        if (group_id == 0)
+            text_to_write = random_hdf5_text;
         else
             text_to_write = hitchhiker_quote;
 
-       	bytes_to_write = HDstrlen(text_to_write);
+        bytes_to_write = HDstrlen(text_to_write);
 
         if (pass) {
 	    if ((header = HDopen(data_filename, O_WRONLY)) < 0) {
@@ -376,7 +376,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     local_failure = ( pass ? 0 : 1 );
 
     /* This is a global all reduce (NOT group specific) */
-    if ( MPI_Allreduce(&local_failure, &global_failures, 1, 
+    if ( MPI_Allreduce(&local_failure, &global_failures, 1,
                        MPI_INT, MPI_SUM, MPI_COMM_WORLD) != MPI_SUCCESS ) {
         if ( pass ) {
             pass = FALSE;
@@ -451,7 +451,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
     const char *group_filename = NULL;
     char reloc_data_filename[FILENAME_BUF_SIZE];
     int local_failure = 0;
-    int global_failures = 0; 
+    int global_failures = 0;
     int group_size;
     int group_rank;
     hid_t fapl_id   = -1;
@@ -537,7 +537,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
 
     /* open the file -- should have user block, exercising the optimization */
     if ( pass ) {
-        if ( (file_id = H5Fopen(reloc_data_filename, 
+        if ( (file_id = H5Fopen(reloc_data_filename,
                                 H5F_ACC_RDONLY, fapl_id)) < 0 ) {
             pass = FALSE;
             failure_mssg = "H5Fopen() failed\n";
@@ -571,7 +571,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
 
     if ( pass ) {
         offset = (hsize_t)group_rank * count;
-        if ( (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, 
+        if ( (H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                                   &offset, NULL, &count, NULL)) < 0 ) {
             pass = FALSE;
             failure_mssg = "H5Sselect_hyperslab() failed\n";
@@ -580,14 +580,14 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
 
     /* read this processes section of the data */
     if ( pass ) {
-        if ( (H5Dread(dset_id, H5T_NATIVE_FLOAT, memspace, 
+        if ( (H5Dread(dset_id, H5T_NATIVE_FLOAT, memspace,
                       filespace, H5P_DEFAULT, data_slice)) < 0 ) {
             pass = FALSE;
             failure_mssg = "H5Dread() failed\n";
         }
     }
-    
-    /* verify the data */ 
+
+    /* verify the data */
     if ( pass ) {
         nextValue = (float)((hsize_t)mpi_rank * count);
         i = 0;
@@ -648,7 +648,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
      */
     local_failure = ( pass ? 0 : 1 );
 
-    if ( MPI_Allreduce( &local_failure, &global_failures, 1, 
+    if ( MPI_Allreduce( &local_failure, &global_failures, 1,
                         MPI_INT, MPI_SUM, MPI_COMM_WORLD) != MPI_SUCCESS ) {
         if ( pass ) {
             pass = FALSE;
@@ -679,7 +679,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int group_id)
     }
 
 
-    return( ! pass );     
+    return( ! pass );
 
 } /* test_parallel_read() */
 
@@ -770,7 +770,7 @@ main( int argc, char **argv)
 
     /* ------  Create two (2) MPI groups  ------
      *
-     * We split MPI_COMM_WORLD into 2 more or less equal sized 
+     * We split MPI_COMM_WORLD into 2 more or less equal sized
      * groups.  The resulting communicators will be used to generate
      * two HDF files which in turn will be opened in parallel and the
      * contents verified in the second read test below.
@@ -798,7 +798,7 @@ main( int argc, char **argv)
         }
         goto finish;
     }
-    
+
     /* We generate the file used for test 2 */
     nerrs += generate_test_file( group_comm, mpi_rank, which_group );
 
@@ -856,7 +856,6 @@ finish:
 
         HDfprintf(stdout, "===================================\n");
         if ( nerrs > 0 ) {
-            
             HDfprintf(stdout, "***%s detected %d failures***\n", header, nerrs);
         }
         else {

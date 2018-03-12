@@ -78,7 +78,7 @@ int create_szip_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 int create_shuffle_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 int create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_normal_dset
  *
@@ -107,8 +107,8 @@ create_normal_dset(hid_t fid, hid_t fsid, hid_t msid)
      * Data and output buffer initialization.
      */
     for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++)
-	    data[j][i] = ((float)(i + j + 1)) / 3;
+    for (i = 0; i < NY; i++)
+        data[j][i] = ((float)(i + j + 1)) / 3;
     }
     /*
      * 1/3 2/3 3/3 4/3 5/3 6/3
@@ -142,7 +142,7 @@ create_normal_dset(hid_t fid, hid_t fsid, hid_t msid)
     if(H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
         TEST_ERROR
 
-    /* 
+    /*
      * Close dataset
      */
     if(H5Dclose(dataset) < 0)
@@ -162,7 +162,7 @@ create_normal_dset(hid_t fid, hid_t fsid, hid_t msid)
     if(H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
         TEST_ERROR
 
-    /* 
+    /*
      * Close dataset
      */
     if(H5Dclose(dataset) < 0)
@@ -185,7 +185,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dsets_float
  *
@@ -276,7 +276,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dsets_double
  *
@@ -306,8 +306,8 @@ create_scale_offset_dsets_double(hid_t fid, hid_t fsid, hid_t msid)
      * Data and output buffer initialization.
      */
     for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++)
-	    data[j][i] = ((double)(i + j + 1))/3;
+    for (i = 0; i < NY; i++)
+        data[j][i] = ((double)(i + j + 1))/3;
     }
 
     /*
@@ -367,7 +367,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dset_char
  *
@@ -466,7 +466,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dset_short
  *
@@ -565,7 +565,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dset_int
  *
@@ -595,8 +595,8 @@ create_scale_offset_dsets_int(hid_t fid, hid_t fsid, hid_t msid)
      * Data and output buffer initialization.
      */
     for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++)
-	    data[j][i] = i + j;
+    for (i = 0; i < NY; i++)
+        data[j][i] = i + j;
     }
     /*
      * 0 1 2 3 4 5
@@ -664,7 +664,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_scale_offset_dset_long_long
  *
@@ -764,7 +764,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_fletcher_dsets_float
  *
@@ -855,7 +855,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_deflate_dsets_float
  *
@@ -956,7 +956,7 @@ error:
 }
 
 #ifdef H5_HAVE_FILTER_SZIP
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_szip_dsets_float
  *
@@ -1048,7 +1048,7 @@ error:
 }
 #endif /* H5_HAVE_FILTER_SZIP */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_shuffle_dsets_float
  *
@@ -1139,7 +1139,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_nbit_dsets_float
  *
@@ -1224,7 +1224,7 @@ create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
         TEST_ERROR
 
     /* Now create a dataset with a big-endian type */
-    if(H5Tset_order(datatype, H5T_ORDER_BE) < 0) 
+    if(H5Tset_order(datatype, H5T_ORDER_BE) < 0)
         TEST_ERROR
     if((dataset = H5Dcreate2(fid, DATASETNAME23, datatype, fsid,
             H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -1251,7 +1251,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *

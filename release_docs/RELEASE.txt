@@ -56,6 +56,26 @@ New Features
     -------------
     - CMake
 
+      Change minimum version to 3.10.
+
+      This change removes the need to support a copy of the FindMPI.cmake module,
+      which has been removed, along with its subfolder in the config/cmake_ext_mod
+      location.
+
+      (ADB - 2018/03/09)
+
+    - CMake
+
+      Add pkg-config file generation
+
+      Added pkg-config file generation for the C, C++, HL, and HL C++ libraries.
+      In addition, builds on linux will create h5cXXX scripts that use the pkg-config
+      files. This is a limited implementation of a script like autotools h5cc.
+
+      (ADB - 2018/03/08, HDFFV-4359)
+
+    - CMake
+
       Refactor use of CMAKE_BUILD_TYPE for new variable, which understands
       the type of generator in use.
 
@@ -204,7 +224,63 @@ New Features
 
     C++ Library:
     ------------
-    -
+    - The following wrappers are added:
+
+      + H5Lcreate_soft:
+        // Creates a soft link from link_name to target_name.
+        void link(const char *target_name, const char *link_name,...)
+        void link(const H5std_string& target_name,...)
+
+      + H5Lcreate_hard:
+        // Creates a hard link from new_name to curr_name.
+        void link(const char *curr_name, const Group& new_loc,...)
+        void link(const H5std_string& curr_name, const Group& new_loc,...)
+
+        // Creates a hard link from new_name to curr_name in same location.
+        void link(const char *curr_name, const hid_t same_loc,...)
+        void link(const H5std_string& curr_name, const hid_t same_loc,...)
+
+        Note: previous version of H5Location::link will be deprecated.
+
+      + H5Lcopy:
+        // Copy an object from a group of file to another.
+        void copyLink(const char *src_name, const Group& dst,...)
+        void copyLink(const H5std_string& src_name, const Group& dst,...)
+
+        // Copy an object from a group of file to the same location.
+        void copyLink(const char *src_name, const char *dst_name,...)
+        void copyLink(const H5std_string& src_name,...)
+
+      + H5Lmove:
+        // Rename an object in a group or file to a new location.
+        void moveLink(const char* src_name, const Group& dst,...)
+        void moveLink(const H5std_string& src_name, const Group& dst,...)
+
+        // Rename an object in a group or file to the same location.
+        void moveLink(const char* src_name, const char* dst_name,...)
+        void moveLink(const H5std_string& src_name,...)
+
+        Note: previous version H5Location::move will be deprecated.
+
+      + H5Ldelete:
+        // Removes the specified link from this location.
+        void unlink(const char *link_name,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT)
+        void unlink(const H5std_string& link_name,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT)
+
+    - Added class LinkCreatPropList
+
+    - Added overloaded functions H5Location::createGroup to take a link
+      creation property list
+        Group createGroup(const char* name, const LinkCreatPropList& lcpl)
+        Group createGroup(const H5std_string& name, const LinkCreatPropList& lcpl)
+    - Added wrapper for H5Lget_info() to H5Location
+        // Returns the information of the named link.
+        H5L_info_t getLinkInfo(const H5std_string& link_name,...)
+
+      (BMR - 2018/03/11, HDFFV-10149)
+
 
     Java Library:
     ----------------
@@ -297,6 +373,18 @@ Bug Fixes since HDF5-1.10.1 release
       See details in the RFC: H5Sencode/H5Secode Format Change.
 
       (VC - 2017/11/28, HDFFV-9947)
+
+    - H5Pset_evict_on_close in H5Pfapl.c
+
+      Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
+      parallel library.
+             (ADB - 2018/03/6, HDFFV-10414)
+
+    - Utility function can not handle lowercase Windows drive letters
+
+      Added call to toupper function for drive letter.
+
+      (ADB - 2017/12/18, HDFFV-10307)
 
     - filter plugin handling in H5PL.c and H5Z.c
 
@@ -408,6 +496,63 @@ Bug Fixes since HDF5-1.10.1 release
       feature but remained undocumented here.
 
       (RAW - 2017/12/01, HDFFV-10272)
+
+    - If an HDF5 file contains a filter pipeline message with a 'number of
+      filters' field that exceeds the maximum number of allowed filters,
+      the error handling code will attempt to dereference a NULL pointer.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17505.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      This problem arose because the error handling code assumed that
+      the 'number of filters' field implied that a dynamic array of that
+      size had already been created and that the cleanup code should
+      iterate over that array and clean up each element's resources. If
+      an error occurred before the array has been allocated, this will
+      not be true.
+
+      This has been changed so that the number of filters is set to
+      zero on errors. Additionally, the filter array traversal in the
+      error handling code now requires that the filter array not be NULL.
+
+      (DER - 2018/02/06, HDFFV-10354)
+
+    - If an HDF5 file contains a filter pipeline message which contains
+      a 'number of filters' field that exceeds the actual number of
+      filters in the message, the HDF5 C library will read off the end of
+      the read buffer.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17506.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      The problem was fixed by passing the buffer size with the buffer
+      and ensuring that the pointer cannot be incremented off the end
+      of the buffer. A mismatch between the number of filters declared
+      and the actual number of filters will now invoke normal HDF5
+      error handling.
+
+      (DER - 2018/02/26, HDFFV-10355)
+
+    - If an HDF5 file contains a malformed compound type which contains
+      a member of size zero, a division by zero error will occur while
+      processing the type.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17508.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      Checking for zero before dividing fixes the problem. Instead of the
+      division by zero, the normal HDF5 error handling is invoked.
+
+      (DER - 2018/02/26, HDFFV-10357)
 
     Configuration
     -------------

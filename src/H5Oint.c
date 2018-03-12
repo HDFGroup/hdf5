@@ -131,6 +131,13 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
 #endif /* H5O_ENABLE_BOGUS */
 };
 
+/* Format version bounds for object header */
+const unsigned H5O_obj_ver_bounds[] = {
+    H5O_VERSION_1,      /* H5F_LIBVER_EARLIEST */
+    H5O_VERSION_2,      /* H5F_LIBVER_V18 */
+    H5O_VERSION_LATEST  /* H5F_LIBVER_LATEST */
+};
+
 /* Declare a free list to manage the H5O_t struct */
 H5FL_DEFINE(H5O_t);
 
@@ -203,6 +210,53 @@ H5O__init_package(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_set_version
+ *
+ * Purpose:     Sets the correct version to encode the object header.
+ *              Chooses the oldest version possible, unless the file's
+ *              low bound indicates otherwise.
+ *
+ * Return:  Success:    Non-negative
+ *          Failure:    Negative
+ *
+ * Programmer:  Vailin Choi; December 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx)
+{
+    uint8_t version;            /* Message version */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(oh);
+
+    /* Set the correct version to encode object header with */
+    if(store_msg_crt_idx || (oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
+        version = H5O_VERSION_LATEST;
+    else
+        version = H5O_VERSION_1;
+
+    /* Upgrade to the version indicated by the file's low bound if higher */
+    version = MAX(version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]);
+
+    /* Version bounds check */
+    if(version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(f)])
+        HGOTO_ERROR(H5E_OHDR, H5E_BADRANGE, FAIL, "object header version out of bounds")
+
+    /* Set the message version */
+    oh->version = version;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_set_version() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_create
  *
  * Purpose:	Creates a new object header. Allocates space for it and
@@ -263,10 +317,10 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
 
     /* Initialize file-specific information for object header */
     store_msg_crt_idx = H5F_STORE_MSG_CRT_IDX(f);
-    if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_OBJ_HEADER) || store_msg_crt_idx || (oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
-        oh->version = H5O_VERSION_LATEST;
-    else
-        oh->version = H5O_VERSION_1;
+
+    if(H5O_set_version(f, oh, oh_flags, store_msg_crt_idx) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set version of objecdt header")
+
     oh->sizeof_size = H5F_SIZEOF_SIZE(f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
     oh->swmr_write = !!(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE);

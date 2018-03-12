@@ -140,11 +140,19 @@
 #define H5F_ACS_MULTI_TYPE_DEF                  H5FD_MEM_DEFAULT
 #define H5F_ACS_MULTI_TYPE_ENC                  H5P__facc_multi_type_enc
 #define H5F_ACS_MULTI_TYPE_DEC                  H5P__facc_multi_type_dec
-/* Definition for 'use latest format version' flag */
-#define H5F_ACS_LATEST_FORMAT_SIZE              sizeof(hbool_t)
-#define H5F_ACS_LATEST_FORMAT_DEF               FALSE
-#define H5F_ACS_LATEST_FORMAT_ENC               H5P__encode_hbool_t
-#define H5F_ACS_LATEST_FORMAT_DEC               H5P__decode_hbool_t
+
+/* Definition for "low" bound of library format versions */
+#define H5F_ACS_LIBVER_LOW_BOUND_SIZE       sizeof(H5F_libver_t)
+#define H5F_ACS_LIBVER_LOW_BOUND_DEF        H5F_LIBVER_EARLIEST
+#define H5F_ACS_LIBVER_LOW_BOUND_ENC        H5P__facc_libver_type_enc
+#define H5F_ACS_LIBVER_LOW_BOUND_DEC        H5P__facc_libver_type_dec
+
+/* Definition for "high" bound of library format versions */
+#define H5F_ACS_LIBVER_HIGH_BOUND_SIZE      sizeof(H5F_libver_t)
+#define H5F_ACS_LIBVER_HIGH_BOUND_DEF       H5F_LIBVER_LATEST
+#define H5F_ACS_LIBVER_HIGH_BOUND_ENC       H5P__facc_libver_type_enc
+#define H5F_ACS_LIBVER_HIGH_BOUND_DEC       H5P__facc_libver_type_dec
+
 /* Definition for whether to query the file descriptor from the core VFD
  * instead of the memory address.  (Private to library)
  */
@@ -288,6 +296,8 @@ static herr_t H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t 
 static herr_t H5P__facc_fclose_degree_dec(const void **pp, void *value);
 static herr_t H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size, void *udata);
 static herr_t H5P__facc_multi_type_dec(const void **_pp, void *value);
+static herr_t H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__facc_libver_type_dec(const void **_pp, void *value);
 
 /* Metadata cache log location property callbacks */
 static herr_t H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size, void *udata);
@@ -352,7 +362,10 @@ static const hsize_t H5F_def_family_offset_g = H5F_ACS_FAMILY_OFFSET_DEF;       
 static const hsize_t H5F_def_family_newsize_g = H5F_ACS_FAMILY_NEWSIZE_DEF;        /* Default size of new files for family VFD */
 static const hbool_t H5F_def_family_to_sec2_g = H5F_ACS_FAMILY_TO_SEC2_DEF;        /* Default ?? for family VFD */
 static const H5FD_mem_t H5F_def_mem_type_g = H5F_ACS_MULTI_TYPE_DEF;               /* Default file space type for multi VFD */
-static const hbool_t H5F_def_latest_format_g = H5F_ACS_LATEST_FORMAT_DEF;          /* Default setting for "use the latest version of the format" flag */
+
+static const H5F_libver_t H5F_def_libver_low_bound_g = H5F_ACS_LIBVER_LOW_BOUND_DEF;    /* Default setting for "low" bound of format version */
+static const H5F_libver_t H5F_def_libver_high_bound_g = H5F_ACS_LIBVER_HIGH_BOUND_DEF;  /* Default setting for "high" bound of format version */
+
 static const hbool_t H5F_def_want_posix_fd_g = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
 static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
 static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;                 /* Default file image info and callbacks */
@@ -374,7 +387,7 @@ static const size_t H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF;     
 static const unsigned H5F_def_page_buf_min_meta_perc_g = H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF;      /* Default page buffer minimum metadata size */
 static const unsigned H5F_def_page_buf_min_raw_perc_g = H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF;      /* Default page buffer minumum raw data size */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_reg_prop
  *
@@ -491,9 +504,15 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the 'use the latest version of the format' flag */
-    if(H5P_register_real(pclass, H5F_ACS_LATEST_FORMAT_NAME, H5F_ACS_LATEST_FORMAT_SIZE, &H5F_def_latest_format_g,
-            NULL, NULL, NULL, H5F_ACS_LATEST_FORMAT_ENC, H5F_ACS_LATEST_FORMAT_DEC,
+    /* Register the 'low' bound of library format versions */
+    if(H5P_register_real(pclass, H5F_ACS_LIBVER_LOW_BOUND_NAME, H5F_ACS_LIBVER_LOW_BOUND_SIZE, &H5F_def_libver_low_bound_g,
+            NULL, NULL, NULL, H5F_ACS_LIBVER_LOW_BOUND_ENC, H5F_ACS_LIBVER_LOW_BOUND_DEC,
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the 'high' bound of library format versions */
+    if(H5P_register_real(pclass, H5F_ACS_LIBVER_HIGH_BOUND_NAME, H5F_ACS_LIBVER_HIGH_BOUND_SIZE, &H5F_def_libver_high_bound_g,
+            NULL, NULL, NULL, H5F_ACS_LIBVER_HIGH_BOUND_ENC, H5F_ACS_LIBVER_HIGH_BOUND_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -608,7 +627,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_reg_prop() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_alignment
  *
@@ -666,7 +685,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_alignment
  *
@@ -707,7 +726,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_alignment() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_set_driver
  *
@@ -755,7 +774,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_driver() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_driver
  *
@@ -798,7 +817,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_driver() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_peek_driver
  *
@@ -842,7 +861,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_peek_driver() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_driver
  *
@@ -883,7 +902,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_driver() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_peek_driver_info
  *
@@ -925,7 +944,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_peek_driver_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_driver_info
  *
@@ -965,7 +984,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_driver_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_driver_copy
  *
@@ -1031,7 +1050,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_driver_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_driver_free
  *
@@ -1083,7 +1102,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_driver_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_create
  *
@@ -1112,7 +1131,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_set
  *
@@ -1145,7 +1164,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_set() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_get
  *
@@ -1178,7 +1197,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_get() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_del
  *
@@ -1207,7 +1226,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_del() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_copy
  *
@@ -1236,7 +1255,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_file_driver_cmp
  *
@@ -1295,7 +1314,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_close
  *
@@ -1324,7 +1343,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_family_offset
  *
@@ -1363,7 +1382,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_family_offset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_family_offset
  *
@@ -1404,7 +1423,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_family_offset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_multi_type
  *
@@ -1443,7 +1462,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_multi_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_multi_type
  *
@@ -1484,7 +1503,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_multi_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_cache
  *
@@ -1538,7 +1557,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_cache
  *
@@ -1590,7 +1609,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mdc_image_config
  *
@@ -1634,7 +1653,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_mdc_image_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mdc_image_config
  *
@@ -1685,7 +1704,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_mdc_image_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mdc_config
  *
@@ -1729,7 +1748,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_mdc_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mdc_config
  *
@@ -1780,7 +1799,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_mdc_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_gc_references
  *
@@ -1833,7 +1852,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_gc_references
  *
@@ -1876,7 +1895,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fclose_degree
  *
@@ -1912,7 +1931,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fclose_degree() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fclose_degree
  *
@@ -1947,7 +1966,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fclose_degree() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_meta_block_size
  *
@@ -1998,7 +2017,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_meta_block_size
  *
@@ -2042,7 +2061,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_sieve_buf_size
  *
@@ -2093,7 +2112,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_sieve_buf_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_sieve_buf_size
  *
@@ -2136,7 +2155,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_sieve_buf_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_small_data_block_size
  *
@@ -2182,7 +2201,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_small_data_block_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_small_data_block_size
  *
@@ -2221,7 +2240,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_small_data_block_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_libver_bounds
  *
@@ -2301,6 +2320,24 @@ done:
  *      releases and then map down to the previous actual library release which
  *      had a format change.
  *
+ * Note #3: The enumerated define for H5F_libver_t in 1.10 is:
+ *      typedef enum H5F_libver_t {
+ *          H5F_LIBVER_ERROR = -1,
+ *          H5F_LIBVER_EARLIEST = 0,
+ *          H5F_LIBVER_V18 = 1,
+ *          H5F_LIBVER_V110 = 2,
+ *          H5F_LIBVER_NBOUNDS
+ *      } H5F_libver_t;
+ *      #define H5F_LIBVER_LATEST       H5F_LIBVER_V110
+ *
+ *      The library supports five pairs of (low, high) combinations via H5Pset_libver_bounds():
+ *      1) H5F_LIBVER_EARLIEST, H5F_LIBVER_V18
+ *      2) H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST
+ *      4) H5F_LIBVER_V18, H5F_LIBVER_V18
+ *      4) H5F_LIBVER_V18, H5F_LIBVER_LATEST
+ *      5) H5F_LIBVER_LATEST, H5F_LIBVER_LATEST
+ *      See detailed description in the RFC: Setting Bounds for Object Creation in HDF5 1.10.0.
+ *
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
@@ -2309,42 +2346,48 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
-    H5F_libver_t high)
+H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_t high)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iFvFv", plist_id, low, high);
 
     /* Check args */
-    /* (Note that this is _really_ restricted right now, we'll want to loosen
-     *  this up more as we add features - QAK)
-     */
-    if(high != H5F_LIBVER_LATEST)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid high library version bound")
+    if(low < 0 || low > H5F_LIBVER_LATEST)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "low bound is not valid")
+
+    if(high < 0 || high > H5F_LIBVER_LATEST)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "high bound is not valid")
+
+    /* (earliest, earliest), (latest, earliest), (v18, earliest) are not valid combinations */
+    if(high == H5F_LIBVER_EARLIEST)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid (low,high) combination of library version bound")
+
+    /* (latest, v18) is not valid combination */
+    if(high < low)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid (low,high) combination of library version bound")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    latest = (hbool_t)((low == H5F_LIBVER_LATEST) ? TRUE : FALSE);
-    if(H5P_set(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set library version bounds")
-
+    if(H5P_set(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &low) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set low bound for library format versions")
+    if(H5P_set(plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &high) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set high bound for library format versions")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_libver_bounds() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_libver_bounds
  *
  * Purpose:    Returns the current settings for the library version format bounds
- *      from a file access property list.
+ *          from a file access property list.
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -2358,7 +2401,6 @@ H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low/*out*/,
     H5F_libver_t *high/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2368,22 +2410,22 @@ H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low/*out*/,
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Get value */
-    if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get library version bounds")
+     /* Get values */
+    if(low) {
+        if(H5P_get(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, low) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get low bound for library format versions")
+    }
 
-    /* Check for setting values to return */
-    /* (Again, this is restricted now, we'll need to open it up later -QAK) */
-    if(low)
-        *low = latest ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST;
-    if(high)
-        *high = H5F_LIBVER_LATEST;
+    if(high) {
+        if(H5P_get(plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, high) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get high bound for library format versions")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_libver_bounds() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_elink_file_cache_size
  *
@@ -2421,7 +2463,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_elink_file_cache_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_elink_file_cache_size
  *
@@ -2460,7 +2502,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_elink_file_cache_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5Pset_file_image
  *
@@ -2541,7 +2583,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_file_image() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5Pget_file_image
  *
@@ -2630,7 +2672,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_file_image */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5Pset_file_image_callbacks
  *
@@ -2707,7 +2749,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_file_image_callbacks() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5Pget_file_image_callbacks
  *
@@ -2763,7 +2805,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_file_image_callbacks() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_image_info_copy
  *
@@ -2841,7 +2883,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_image_info_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_image_info_free
  *
@@ -2896,7 +2938,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_image_info_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5P__facc_cache_image_config_cmp
  *
@@ -2939,7 +2981,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_image_config_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_image_config_enc
  *
@@ -2985,7 +3027,7 @@ H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size, vo
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_cache_image_config_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_image_config_dec
  *
@@ -3037,7 +3079,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_image_config_dec() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_set
  *
@@ -3070,7 +3112,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_set() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_get
  *
@@ -3103,7 +3145,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_get() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_del
  *
@@ -3134,7 +3176,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_del() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_copy
  *
@@ -3164,7 +3206,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_file_image_info_cmp
  *
@@ -3223,7 +3265,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_close
  *
@@ -3253,7 +3295,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5P__facc_cache_config_cmp
  *
@@ -3365,7 +3407,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_config_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_config_enc
  *
@@ -3510,7 +3552,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size, void H5_
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_cache_config_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_config_dec
  *
@@ -3645,7 +3687,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_config_dec() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_fclose_degree_enc
  *
@@ -3683,7 +3725,7 @@ H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size, void H5
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_fclose_degree_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_fclose_degree_dec
  *
@@ -3718,7 +3760,7 @@ H5P__facc_fclose_degree_dec(const void **_pp, void *_value)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_fclose_degree_dec() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_multi_type_enc
  *
@@ -3756,7 +3798,7 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size, void H5_AT
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_multi_type_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_multi_type_dec
  *
@@ -3791,7 +3833,78 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_multi_type_dec() */
 
-
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_libver_type_enc
+ *
+ * Purpose:        Callback routine which is called whenever the 'low' or
+ *                 'high' bound of library format versions property in the
+ *                 file access property list is encoded.
+ *
+ * Return:       Success:    Non-negative
+ *           Failure:    Negative
+ *
+ * Programmer
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
+{
+    const H5F_libver_t *type = (const H5F_libver_t *)value; /* Create local alias for values */
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(type);
+    HDassert(size);
+
+    /* Encode */
+    if(NULL != *pp)
+        *(*pp)++ = (uint8_t)*type;
+
+    /* Size */
+    (*size)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_libver_type_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_libver_type_dec
+ *
+ * Purpose:        Callback routine which is called whenever the 'low' or
+ *                 'high' bound of library format versions property in the
+ *                 file access property list is decoded.
+ *
+ * Return:       Success:    Non-negative
+ *           Failure:    Negative
+ *
+ * Programmer:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_libver_type_dec(const void **_pp, void *_value)
+{
+    H5F_libver_t *type = (H5F_libver_t *)_value;
+    const uint8_t **pp = (const uint8_t **)_pp;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(type);
+
+    /* Decode */
+    *type = (H5F_libver_t)*(*pp)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_libver_type_dec() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_core_write_tracking
  *
@@ -3832,7 +3945,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_core_write_tracking() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_core_write_tracking
  *
@@ -3874,7 +3987,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_core_write_tracking() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_metadata_read_attempts
  *
@@ -3917,7 +4030,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_metadata_read_attempts() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_metadata_read_attempts
  *
@@ -3958,7 +4071,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_metadata_read_attempts() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_obj_flush_cb
  *
@@ -4002,7 +4115,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_obj_flush_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_obj_flush_cb
  *
@@ -4043,7 +4156,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_obj_flush_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mdc_log_options
  *
@@ -4095,7 +4208,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_mdc_log_options() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mdc_log_options
  *
@@ -4150,7 +4263,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mdc_log_options() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P_facc_mdc_log_location_enc
  *
@@ -4203,7 +4316,7 @@ H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size, void 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_enc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P_facc_mdc_log_location_dec
  *
@@ -4257,7 +4370,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_mdc_log_location_dec() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_facc_mdc_log_location_del
  *
@@ -4280,7 +4393,7 @@ H5P_facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_del() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_facc_mdc_log_location_copy
  *
@@ -4302,7 +4415,7 @@ H5P_facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_U
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P_facc_mdc_log_location_cmp
  *
@@ -4334,7 +4447,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_mdc_log_location_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5P_facc_mdc_log_location_close
  *
@@ -4357,7 +4470,7 @@ H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_evict_on_close
  *
@@ -4405,7 +4518,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_evict_on_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_evict_on_close
  *
@@ -4449,7 +4562,7 @@ done:
 } /* end H5Pget_evict_on_close() */
 
 #ifdef H5_HAVE_PARALLEL
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__encode_coll_md_read_flag_t
  *
@@ -4487,7 +4600,7 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size, voi
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__encode_coll_md_read_flag_t() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__decode_coll_md_read_flag_t
  *
@@ -4521,7 +4634,7 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__decode_coll_md_read_flag_t() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_all_coll_metadata_ops
  *
@@ -4580,7 +4693,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_all_coll_metadata_ops() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_all_coll_metadata_ops
  *
@@ -4638,7 +4751,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_all_coll_metadata_ops */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_coll_metadata_write
  *
@@ -4677,7 +4790,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_coll_metadata_write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_coll_metadata_write
  *
@@ -4715,7 +4828,7 @@ done:
 } /* end H5Pget_coll_metadata_write() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_page_buffer_size
  *
@@ -4763,7 +4876,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_page_buffer_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_page_buffer_size
  *
