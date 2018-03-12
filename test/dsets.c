@@ -24,8 +24,30 @@
 
 #define H5Z_FRIEND        /*suppress error about including H5Zpkg      */
 
-#include "h5test.h"
+#include "testhdf5.h"
 #include "H5srcdir.h"
+
+#include "H5Bprivate.h"
+#include "H5Iprivate.h"
+#include "H5Pprivate.h"
+
+#define H5F_FRIEND      /*suppress error about including H5Fpkg */
+#define H5F_TESTING
+#include "H5Fpkg.h"     /* File access                          */
+
+#define H5S_FRIEND      /*suppress error about including H5Spkg */
+#include "H5Spkg.h"     /* Dataspace                            */
+
+#define H5T_FRIEND      /*suppress error about including H5Tpkg */
+#include "H5Tpkg.h"     /* Datatype                             */
+
+#define H5A_FRIEND      /*suppress error about including H5Apkg     */
+#include "H5Apkg.h"     /* Attributes                   */
+
+/* Use in version bound test */
+#define H5O_FRIEND      /*suppress error about including H5Opkg */
+#include "H5Opkg.h"     /* Object headers                       */
+
 #include "H5Dpkg.h"
 #include "H5FDpkg.h"
 #include "H5VMprivate.h"
@@ -60,8 +82,10 @@ const char *FILENAME[] = {
     "storage_size",     /* 22 */
     "dls_01_strings",   /* 23 */
     "power2up",         /* 24 */
+    "version_bounds",   /* 25 */
     NULL
 };
+
 #define FILENAME_BUF_SIZE       1024
 #define KB                      1024
 
@@ -291,7 +315,7 @@ const H5Z_class2_t H5Z_COUNT[1] = {{
     filter_count,               /* The actual filter function */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    filter_count
  *
@@ -316,7 +340,7 @@ filter_count(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
     return nbytes;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_create
  *
@@ -463,7 +487,7 @@ test_create(hid_t file)
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   test_simple_io
  *
@@ -599,7 +623,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_userblock_offset
  *
@@ -705,7 +729,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_compact_io
  *
@@ -722,10 +746,15 @@ static herr_t
 test_compact_io(hid_t fapl)
 {
     hid_t       file, dataset, space, plist;
+    hid_t verfile = -1, new_fapl = -1;
     hsize_t     dims[2];
     int         wbuf[16][8], rbuf[16][8];
     char        filename[FILENAME_BUF_SIZE];
-    int         i, j, n;
+    H5F_libver_t low, high;     /* File format bounds */
+    H5F_t       *fp;            /* Internal file pointer */
+    H5D_t       *dsetp;         /* Internal dataset pointer */
+    int         i, j, n;        /* Indices */
+    herr_t      ret;            /* Generic return value */
 
     TESTING("compact dataset I/O");
 
@@ -764,8 +793,6 @@ test_compact_io(hid_t fapl)
     if(H5Dget_offset(dataset)!=HADDR_UNDEF) TEST_ERROR
 
     /* Close file */
-    if(H5Sclose(space) < 0) TEST_ERROR
-    if(H5Pclose(plist) < 0) TEST_ERROR
     if(H5Dclose(dataset) < 0) TEST_ERROR
     if(H5Fclose(file) < 0) TEST_ERROR
 
@@ -789,19 +816,113 @@ test_compact_io(hid_t fapl)
                  printf("    wbuf[%d][%d]=%d\n", i, j, wbuf[i][j]);
                  printf("    rbuf[%d][%d]=%d\n", i, j, rbuf[i][j]);
                  goto error;
-             } /* end if */
+             } /* end  */
 
      if(H5Dclose(dataset) < 0) TEST_ERROR
      if(H5Fclose(file) < 0) TEST_ERROR
 
-     PASSED();
-     return 0;
+    /**************************************
+     * Additional test for version bounds *
+     **************************************/
+
+    /* Create a copy of file access property list */
+    if((new_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
+
+    /* Loop through all the combinations of low/high library format bounds,
+       skipping invalid combinations.
+       - Create a file, create and write a compact dataset, and verify its data
+       - Verify the dataset's layout and fill message versions */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+
+            /* Set version bounds */
+            H5E_BEGIN_TRY {
+                ret = H5Pset_libver_bounds(new_fapl, low, high);
+            } H5E_END_TRY;
+
+            if (ret < 0) /* Invalid low/high combinations */
+                continue;
+
+            /* Create a file */
+            h5_fixname(FILENAME[25], new_fapl, filename, sizeof filename);
+            if((verfile = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, new_fapl)) < 0)
+                TEST_ERROR
+
+            /* Create the compact dataset */
+            dataset = H5Dcreate2(verfile, DSET_DEFAULT_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, plist, H5P_DEFAULT);
+            if(dataset < 0) TEST_ERROR
+
+            /* Write the same data as of DSET_COMPACT_IO_NAME */
+            if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+                TEST_ERROR
+
+            /* Close DSET_DEFAULT_NAME, then reopen it to read and verify
+               the data */
+            if(H5Dclose(dataset) < 0) TEST_ERROR
+            if((dataset = H5Dopen2(verfile, DSET_DEFAULT_NAME, H5P_DEFAULT)) < 0)
+                TEST_ERROR
+            if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+                TEST_ERROR
+
+            /* Check that the values read are the same as the values written */
+            for(i = 0; i < 16; i++)
+                for(j = 0; j < 8; j++)
+                    if(rbuf[i][j] != wbuf[i][j]) {
+                        H5_FAILED();
+                        printf("    Read different values than written.\n");
+                        printf("    At index %d,%d\n", i, j);
+                        printf("    wbuf[%d][%d]=%d\n", i, j, wbuf[i][j]);
+                        printf("    rbuf[%d][%d]=%d\n", i, j, rbuf[i][j]);
+                        goto error;
+                    } /* end  */
+
+            /* Get the internal file pointer */
+            if((fp = (H5F_t *)H5I_object(verfile)) == NULL) TEST_ERROR
+
+            /* Get the internal dataset pointer */
+            if((dsetp = (H5D_t *)H5I_object(dataset)) == NULL) TEST_ERROR
+
+            /* Verify the dataset's layout and fill message versions */
+            if(fp->shared->low_bound == H5F_LIBVER_EARLIEST) {
+                VERIFY(dsetp->shared->layout.version, H5O_LAYOUT_VERSION_DEFAULT, "layout_ver_bounds");
+                VERIFY(dsetp->shared->dcpl_cache.fill.version, H5O_FILL_VERSION_2, "fill_ver_bounds");
+            } else {
+                VERIFY(dsetp->shared->layout.version, H5O_layout_ver_bounds[fp->shared->low_bound], "layout_ver_bounds");
+                VERIFY(dsetp->shared->dcpl_cache.fill.version, H5O_fill_ver_bounds[fp->shared->low_bound], "fill_ver_bounds");
+            }
+
+            /* Close the dataset and delete from the file */
+            if(H5Dclose(dataset) < 0) TEST_ERROR
+            if(H5Ldelete(verfile, DSET_DEFAULT_NAME, H5P_DEFAULT) < 0)
+                TEST_ERROR
+
+            /* Close the file */
+            if(H5Fclose(verfile) < 0) TEST_ERROR
+
+        } /* end for high */
+    } /* end for low */
+
+    if(H5Pclose(new_fapl) < 0) TEST_ERROR
+    if(H5Sclose(space) < 0) TEST_ERROR
+    if(H5Pclose(plist) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
 
  error:
-     return -1;
+    H5E_BEGIN_TRY {
+        H5Sclose(space);
+        H5Pclose(plist);
+        H5Pclose(new_fapl);
+        H5Dclose(dataset);
+        H5Fclose(file);
+        H5Fclose(verfile);
+    } H5E_END_TRY;
+
+    return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_max_compact
  *
@@ -954,7 +1075,7 @@ error:
      return -1;
 } /* end test_max_compact() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_layout_extend
  *
@@ -1077,7 +1198,7 @@ error:
      return -1;
 } /* end test_layout_extend() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_conv_buffer
  *
@@ -1216,7 +1337,7 @@ error:
   return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_tconv
  *
@@ -1311,7 +1432,7 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
     filter_bogus,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  can_apply_bogus
  *
@@ -1333,7 +1454,7 @@ can_apply_bogus(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSE
         return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  filter_bogus
  *
@@ -1351,7 +1472,7 @@ filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
     return nbytes;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  set_local_bogus2
  *
@@ -1397,7 +1518,7 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
     return(SUCCEED);
 } /* end set_local_bogus2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  filter_bogus2
  *
@@ -1451,7 +1572,7 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
         return(nbytes);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  filter_bogus3
  *
@@ -1480,7 +1601,7 @@ const H5Z_class2_t H5Z_CORRUPT[1] = {{
     filter_corrupt,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  filter_corrupt
  *
@@ -1539,7 +1660,7 @@ error:
     return ret_value;
 } /* end filter_corrupt() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    filter_cb_cont
  *
@@ -1558,7 +1679,7 @@ filter_cb_cont(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNU
         return H5Z_CB_FAIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    filter_cb_fail
  *
@@ -1577,7 +1698,7 @@ filter_cb_fail(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNU
        return H5Z_CB_CONT;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_filter_internal
  *
@@ -2388,7 +2509,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  test_missing_filter
  *
@@ -2716,7 +2837,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_int
  *
@@ -2834,7 +2955,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_float
  *
@@ -2952,7 +3073,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_double
  *
@@ -3084,7 +3205,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_array
  *
@@ -3211,7 +3332,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_compound
  *
@@ -3428,7 +3549,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_compound_2
  *
@@ -3773,7 +3894,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_compound_3
  *
@@ -3953,7 +4074,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_int_size
  *
@@ -4120,7 +4241,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_flt_size
  *
@@ -4316,7 +4437,7 @@ test_nbit_flt_size(hid_t file)
 error:
     return -1;
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_int
  *
@@ -4428,7 +4549,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_int_2
  *
@@ -4556,7 +4677,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_float
  *
@@ -4669,7 +4790,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_float_2
  *
@@ -4798,7 +4919,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_double
  *
@@ -4911,7 +5032,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scaleoffset_double_2
  *
@@ -5041,20 +5162,20 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multiopen
  *
- * Purpose:    Tests that a bug no longer exists.  If a dataset is opened
- *        twice and one of the handles is used to extend the dataset,
- *        then the other handle should return the new size when
- *        queried.
+ * Purpose:     Tests that a bug no longer exists.  If a dataset is opened
+ *              twice and one of the handles is used to extend the dataset,
+ *              then the other handle should return the new size when
+ *              queried.
  *
- * Return:    Success:    0
+ * Return:      Success:    0
  *
- *        Failure:    -1
+ *              Failure:    -1
  *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, June  9, 1998
  *
  *-------------------------------------------------------------------------
@@ -5062,10 +5183,10 @@ error:
 static herr_t
 test_multiopen (hid_t file)
 {
-    hid_t        dcpl = -1, space = -1, dset1 = -1, dset2 = -1;
-    hsize_t        cur_size[1] = {10};
-    static hsize_t    max_size[1] = {H5S_UNLIMITED};
-    hsize_t        tmp_size[1];
+    hid_t   dcpl = -1, space = -1, dset1 = -1, dset2 = -1;
+    hsize_t cur_size[1] = {10};
+    hsize_t tmp_size[1];
+    static hsize_t max_size[1] = {H5S_UNLIMITED};
 
     TESTING("multi-open with extending");
 
@@ -5085,9 +5206,9 @@ test_multiopen (hid_t file)
     if((space = H5Dget_space(dset2)) < 0) goto error;
     if(H5Sget_simple_extent_dims(space, tmp_size, NULL) < 0) goto error;
     if(cur_size[0] != tmp_size[0]) {
-    H5_FAILED();
-    printf("    Got %d instead of %d!\n", (int)tmp_size[0], (int)cur_size[0]);
-    goto error;
+        H5_FAILED();
+        printf("    Got %d instead of %d!\n", (int)tmp_size[0], (int)cur_size[0]);
+        goto error;
     } /* end if */
 
     if(H5Dclose(dset1) < 0) goto error;
@@ -5108,7 +5229,7 @@ test_multiopen (hid_t file)
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_types
  *
@@ -5215,7 +5336,7 @@ const H5Z_class2_t H5Z_CAN_APPLY_TEST[1] = {{
     filter_bogus,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_can_apply
  *
@@ -5396,7 +5517,7 @@ const H5Z_class2_t H5Z_CAN_APPLY_TEST2[1] = {{
     filter_bogus3,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_can_apply2
  *
@@ -5545,7 +5666,7 @@ error:
 } /* end test_can_apply2() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_can_apply_szip
  *
@@ -5750,7 +5871,7 @@ const H5Z_class2_t H5Z_SET_LOCAL_TEST[1] = {{
     filter_bogus2,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_set_local
  *
@@ -6015,7 +6136,7 @@ error:
     return -1;
 } /* end test_set_local() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_compare_dcpl
  *
@@ -6100,7 +6221,7 @@ error:
     return -1;
 } /* end test_compare_dcpl() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dcpl
  *
@@ -6232,7 +6353,7 @@ error:
     return -1;
 } /* end test_copy_dcpl() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_filter_delete
  *
@@ -6359,7 +6480,7 @@ error:
 } /* end test_filter_delete() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function: auxread_fdata
  *
@@ -6443,7 +6564,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_filters_endianess
  *
@@ -6513,7 +6634,7 @@ error:
     return -1;
 } /* end test_filters_endianess() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_zero_dims
  *
@@ -6677,7 +6798,7 @@ error:
     return -1;
 } /* end test_zero_dims() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_missing_chunk
  *
@@ -6869,7 +6990,7 @@ error:
     return -1;
 } /* end test_missing_chunk() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_random_chunks_real
  *
@@ -7237,7 +7358,7 @@ error:
     return -1;
 } /* end test_random_chunks_real() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_random_chunks
  *
@@ -7297,7 +7418,7 @@ const H5Z_class1_t H5Z_DEPREC[1] = {{
     filter_bogus,        /* The actual filter function    */
 }};
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_deprec
  *
@@ -7488,7 +7609,7 @@ test_deprec(hid_t file)
 } /* end test_deprec() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_huge_chunks
  *
@@ -7600,7 +7721,7 @@ error:
     return -1;
 } /* end test_huge_chunks() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_chunk_cache
  *
@@ -7808,7 +7929,7 @@ error:
     return -1;
 } /* end test_chunk_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_big_chunks_bypass_cache
  *
@@ -8101,7 +8222,7 @@ error:
     return -1;
 } /* end test_big_chunks_bypass_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_chunk_fast
  *
@@ -8448,7 +8569,7 @@ error:
     return -1;
 } /* end test_chunk_fast() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_reopen_chunk_fast
  *
@@ -8571,7 +8692,7 @@ error:
     return -1;
 } /* end test_reopen_chunk_fast() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_chunk_fast_bug1
  *
@@ -8693,7 +8814,7 @@ const H5Z_class2_t H5Z_EXPAND[1] = {{
 /* Global "expansion factor" for filter_expand() routine */
 static size_t filter_expand_factor_g = 0;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    filter_expand
  *
@@ -8742,7 +8863,7 @@ filter_expand(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
     return ret_value;
 } /* end filter_expand() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_chunk_expand
  *
@@ -9138,7 +9259,7 @@ error:
     return -1;
 } /* end test_chunk_expand() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_fixed_array
  *
@@ -9557,7 +9678,7 @@ error:
     return -1;
 } /* end test_fixed_array() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_single_chunk
  *
@@ -9790,6 +9911,7 @@ test_single_chunk(hid_t fapl)
     } /* end for */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
+
     /* Release buffers */
     HDfree(wbuf);
     HDfree(rbuf);
@@ -9820,7 +9942,7 @@ error:
     return -1;
 } /* end test_single_chunk() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  *  test_idx_compatible():
@@ -10033,7 +10155,7 @@ error:
     return -1;
 } /* test_unfiltered_edge_chunks */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_large_chunk_shrink
  *
@@ -10148,11 +10270,11 @@ error:
     return -1;
 } /* end test_large_chunk_shrink() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_zero_dim_dset
  *
- * Purpose:     Tests support for reading a 1D chunled dataset with
+ * Purpose:     Tests support for reading a 1D chunked dataset with
  *              dimension size = 0.
  *
  * Return:      Success: 0
@@ -10173,40 +10295,59 @@ test_zero_dim_dset(hid_t fapl)
     hid_t       dsid = -1;      /* Dataset ID */
     hsize_t     dim, chunk_dim; /* Dataset and chunk dimensions */
     int         data[1];
+    H5F_libver_t low, high; /* File format bounds */
+    herr_t      ret;                /* Generic return value */
 
-    TESTING("shrinking large chunk");
+    TESTING("chunked dataset with zero dimension");
 
-    h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
+    /* Loop through all the combinations of low/high library format bounds,
+       skipping invalid combination, and verify support for reading a 1D
+       chunked dataset with dimension size = 0 */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
-    /* Create file */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+            /* Set version bounds before opening the file */
+            H5E_BEGIN_TRY {
+                ret = H5Pset_libver_bounds(fapl, low, high);
+            } H5E_END_TRY;
 
-    /* Create dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+            if (ret < 0) /* Invalid low/high combinations */
+                continue;
 
-    /* Set 1 chunk size */
-    chunk_dim = 1;
-    if(H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
+            h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
 
-    /* Create 1D dataspace with 0 dim size */
-    dim = 0;
-    if((sid = H5Screate_simple(1, &dim, NULL)) < 0) FAIL_STACK_ERROR
+            /* Create file */
+            if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
-    /* Create chunked dataset */
-    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+            /* Create dataset creation property list */
+            if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
 
-    /* write 0 elements from dataset */
-    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
+            /* Set 1 chunk size */
+            chunk_dim = 1;
+            if(H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
 
-    /* Read 0 elements from dataset */
-    if(H5Dread(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
+            /* Create 1D dataspace with 0 dim size */
+            dim = 0;
+            if((sid = H5Screate_simple(1, &dim, NULL)) < 0) FAIL_STACK_ERROR
 
-    /* Close everything */
-    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
-    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+            /* Create chunked dataset */
+            if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+            /* write 0 elements from dataset */
+            if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
+
+            /* Read 0 elements from dataset */
+            if(H5Dread(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
+
+            /* Close everything */
+            if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+            if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+            if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+        } /* end for high */
+    } /* end for low */
 
     PASSED();
 
@@ -10222,7 +10363,7 @@ error:
     return -1;
 } /* end test_zero_dim_dset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_swmr_non_latest
  *
@@ -10471,7 +10612,7 @@ error:
     return -1;
 } /* test_swmr_non_latest() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_earray_hdr_fd
  *
@@ -10591,7 +10732,7 @@ error:
     return -1;
 } /* test_earray_hdr_fd() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_farray_hdr_fd
  *
@@ -10711,7 +10852,7 @@ error:
     return -1;
 } /* test_farray_hdr_fd() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_bt2_hdr_fd
  *
@@ -10831,7 +10972,7 @@ error:
     return -1;
 } /* test_bt2_hdr_fd() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_storage_size
  *
@@ -11225,7 +11366,7 @@ error:
     return -1;
 } /* end test_storage_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_power2up
  *
@@ -11316,7 +11457,7 @@ error:
     return -1;
 } /* end test_power2up() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scatter
  *
@@ -11634,7 +11775,7 @@ error:
     return -1;
 } /* end test_scatter() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_gather
  *
@@ -11996,7 +12137,7 @@ error:
     return -1;
 } /* end test_gather() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_scatter_error
  *
@@ -12199,7 +12340,7 @@ error:
     return -1;
 } /* end test_scatter_error() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_gather_error
  *
@@ -12726,36 +12867,188 @@ error:
     return -1;
 } /* test_compact_open_close_dirty() */
 
-
+
+/*-------------------------------------------------------------------------
+ * Function:    test_versionbounds
+ *
+ * Purpose:     Tests various format versions.
+ *              (Currently, only virtual dataset feature)
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ * Description:
+ *              This function attempts to create a virtual dataset in all
+ *              valid combinations of low/high library format bounds.  Creation
+ *              of virtual dataset should only succeed in H5F_LIBVER_V110.
+ *              -BMR, January 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+#define VDS_FNAME1  "virtual_file1"
+#define VDS_FNAME2  "virtual_file2"
+#define SRC_FNAME   "source_file"
+#define SRC_DSET    "src_dset"
+#define V_DSET      "v_dset"
+static herr_t
+test_versionbounds()
+{
+    hid_t fapl = -1;
+    hid_t srcfile = -1;   /* Files with source dsets */
+    hid_t vfile = -1;     /* File with virtual dset */
+    hid_t dcpl = -1;      /* Dataset creation property list */
+    hid_t srcspace = -1;  /* Source dataspaces */
+    hid_t vspace = -1;    /* Virtual dset dataspaces */
+    hid_t srcdset = -1;   /* Source datset */
+    hid_t vdset = -1;     /* Virtual dataset */
+    hid_t null_dspace = -1;     /* Data space of H5S_NULL */
+    hsize_t dims[1] = {3};      /* Data space current size */
+    char  srcfilename[FILENAME_BUF_SIZE];
+    char  vfilename1[FILENAME_BUF_SIZE];
+    char  vfilename2[FILENAME_BUF_SIZE];
+    H5F_libver_t low, high;     /* File format bounds */
+    herr_t ret;                 /* Generic return value */
+
+    TESTING("version bounds of datasets");
+
+    /* Create a copy of file access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
+
+    h5_fixname(VDS_FNAME1, fapl, vfilename1, sizeof vfilename1);
+    h5_fixname(VDS_FNAME2, fapl, vfilename2, sizeof vfilename2);
+    h5_fixname(SRC_FNAME, fapl, srcfilename, sizeof srcfilename);
+
+    /* Create DCPL */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR
+
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create source dataspace */
+    if((srcspace = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspace */
+    if((vspace = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mapping */
+    if(H5Pset_virtual(dcpl, vspace, srcfilename, SRC_DSET, srcspace) < 0)
+        TEST_ERROR
+
+    /* Loop through all the combinations of low/high library format bounds */
+    /* Create a source file and a dataset in it.  Create a virtual file and
+       virtual dataset.  Creation of virtual dataset should only succeed in
+       H5F_LIBVER_V110 */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+
+            /* Set version bounds, skip for invalid low/high combination */
+            H5E_BEGIN_TRY {
+                ret = H5Pset_libver_bounds(fapl, low, high);
+            } H5E_END_TRY;
+
+            if (ret < 0) /* Invalid low/high combinations */
+                continue;
+
+            /* Create a source file and dataset */
+            if((srcfile = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+                TEST_ERROR
+            if((srcdset = H5Dcreate2(srcfile, SRC_DSET, H5T_NATIVE_INT, srcspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                TEST_ERROR
+
+            /* Create a virtual file */
+            if((vfile = H5Fcreate(vfilename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+                TEST_ERROR
+
+            /* Create the virtual dataset */
+            H5E_BEGIN_TRY {
+                vdset = H5Dcreate2(vfile, V_DSET, H5T_NATIVE_INT, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+            } H5E_END_TRY;
+
+            if (vdset > 0) /* dataset created successfully */
+            {
+                /* Virtual dataset is only available starting in V110 */
+                VERIFY(high, H5F_LIBVER_V110, "virtual dataset");
+
+                if(H5Dclose(vdset) < 0) TEST_ERROR
+                vdset = -1;
+            }
+
+            /* Close virtual file */
+            if(H5Fclose(vfile) < 0) TEST_ERROR
+            vfile = -1;
+
+            /* Close srcdset and srcfile */
+            if(H5Dclose(srcdset) < 0) TEST_ERROR
+            srcdset = -1;
+
+            if(H5Fclose(srcfile) < 0) TEST_ERROR
+            srcfile = -1;
+
+        } /* for high */
+    } /* for low */
+
+    /* Close dataspaces and properties */
+    if(H5Sclose(srcspace) < 0)
+        TEST_ERROR
+    srcspace = -1;
+    if(H5Sclose(vspace) < 0)
+        TEST_ERROR
+    vspace = -1;
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR
+    fapl = -1;
+    if(H5Pclose(dcpl) < 0)
+        TEST_ERROR
+    dcpl = -1;
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Sclose(srcspace);
+        H5Sclose(vspace);
+        H5Pclose(dcpl);
+        H5Pclose(fapl);
+        H5Dclose(srcdset);
+        H5Dclose(vdset);
+        H5Fclose(srcfile);
+        H5Fclose(vfile);
+    } H5E_END_TRY;
+    return -1;
+} /* test_versionbounds() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:    Tests the dataset interface (H5D)
+ * Purpose:     Tests the dataset interface (H5D)
  *
- * Return:    Success:    exit(EXIT_SUCCESS)
+ * Return:      Success:    exit(EXIT_SUCCESS)
+ *              Failure:    exit(EXIT_FAILURE)
  *
- *        Failure:    exit(EXIT_FAILURE)
- *
- * Programmer:    Robb Matzke
- *        Tuesday, December  9, 1997
+ * Programmer:  Robb Matzke
+ *              Tuesday, December  9, 1997
  *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    char        filename[FILENAME_BUF_SIZE];
-    hid_t        file, grp, fapl, fapl2;
-    hid_t fcpl = -1, fcpl2 = -1;
+    char     filename[FILENAME_BUF_SIZE];
+    hid_t    file, grp, fapl, fapl2;
+    hid_t    fcpl = -1, fcpl2 = -1;
     unsigned new_format;
     unsigned paged;
-    int mdc_nelmts;
-    size_t rdcc_nelmts;
-    size_t rdcc_nbytes;
-    double rdcc_w0;
-    int    nerrors = 0;
+    int      mdc_nelmts;
+    size_t   rdcc_nelmts;
+    size_t   rdcc_nbytes;
+    double   rdcc_w0;
+    int      nerrors = 0;
     const char *envval;
-    hbool_t contig_addr_vfd;    /* Whether VFD used has a contigous address space */
+    hbool_t  contig_addr_vfd;    /* Whether VFD used has a contigous address space */
 
     /* Don't run this test using certain file drivers */
     envval = HDgetenv("HDF5_DRIVER");
@@ -12923,6 +13216,9 @@ main(void)
     nerrors += (test_gather() < 0                           ? 1 : 0);
     nerrors += (test_scatter_error() < 0                    ? 1 : 0);
     nerrors += (test_gather_error() < 0                     ? 1 : 0);
+
+    /* Tests version bounds using its own file */
+    nerrors += (test_versionbounds() < 0             ? 1 : 0);
 
     /* Run misc tests */
     nerrors += dls_01_main();

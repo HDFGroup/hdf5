@@ -374,6 +374,8 @@
 ./c++/src/H5IntType.h
 ./c++/src/H5LaccProp.cpp
 ./c++/src/H5LaccProp.h
+./c++/src/H5LcreatProp.cpp
+./c++/src/H5LcreatProp.h
 ./c++/src/H5Library.cpp
 ./c++/src/H5Library.h
 ./c++/src/H5Location.cpp
@@ -981,6 +983,7 @@
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c
+./test/gen_bounds.c
 ./test/gen_cross.c
 ./test/gen_deflate.c
 ./test/gen_file_image.c
@@ -2440,6 +2443,7 @@
 
 #test files for h5repack
 ./tools/test/h5repack/testfiles/README
+./tools/test/h5repack/testfiles/bounds_latest_latest.h5
 ./tools/test/h5repack/testfiles/h5repack_aggr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr_refs.h5
@@ -3082,6 +3086,8 @@
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/jrunTest.cmake
+./config/cmake/libh5cc.in
+./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml

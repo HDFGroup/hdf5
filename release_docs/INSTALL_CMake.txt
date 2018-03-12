@@ -165,8 +165,9 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 III. Quick Step Building HDF5 C Static Libraries and Tools with CMake
 ========================================================================
 Notes: This short set of instructions is written for users who want to
-       quickly build the just the HDF5 C static library and tools from
+       quickly build just the HDF5 C static library and tools from
        the HDF5 source code package using the CMake command line tools.
+       Avoid the use of drive letters in paths on Windows.
 
    Go through these steps:
 
@@ -571,7 +572,6 @@ HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"           
 HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"                     OFF
 HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                          ON
 HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"                           ON
-HDF5_ENABLE_LARGE_FILE         "Enable support for large (64-bit) files on Linux."            ON
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
@@ -648,7 +648,7 @@ adding an option (${CTEST_SCRIPT_ARG}) to the platform configuration script.
 ### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
-cmake_minimum_required (VERSION 3.3.2 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.10)
 ############################################################################
 # Usage:
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log

@@ -13,7 +13,7 @@
 
 /***********************************************************
 *
-* Test program:	 ttime
+* Test program:     ttime
 *
 * Test the Time Datatype functionality
 *
@@ -213,15 +213,15 @@ test_time(void)
 
 }   /* test_time() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_time
+ * Function:    cleanup_time
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              October 19, 2000
  *
  * Modifications:
