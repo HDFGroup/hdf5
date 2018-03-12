@@ -324,7 +324,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial_read)
+H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hid_t fapl_id, hbool_t initial_read)
 {
     H5P_genplist_t     *dxpl = NULL;        /* DXPL object */
     H5AC_ring_t         ring, orig_ring = H5AC_RING_INV;
@@ -337,7 +337,8 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
     haddr_t             eof;                /* End of file address */
     unsigned            rw_flags;           /* Read/write permissions for file */
     hbool_t             skip_eof_check = FALSE; /* Whether to skip checking the EOF value */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t      *a_plist;               /* File access property list */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 #ifdef H5_HAVE_PARALLEL
     int                 mpi_rank = 0, mpi_size = 1;
     int                 mpi_result;
@@ -595,6 +596,20 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
      * as the file can appear truncated if only part of it has been
      * been flushed to disk by the SWMR writer process.
      */
+    /* The EOF check is also skipped when the private property 
+     * H5F_ACS_SKIP_EOF_CHECK_NAME exists in the fapl.  
+     * This property is enabled by the tool h5clear with these
+     * two options: (1) --filesize (2) --increment
+     */
+
+    /* Check if this private property exists in fapl */
+    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+    if(H5P_exist_plist(a_plist, H5F_ACS_SKIP_EOF_CHECK_NAME) > 0) {
+        if(H5P_get(a_plist, H5F_ACS_SKIP_EOF_CHECK_NAME, &skip_eof_check) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get clearance for persisting fsm addr")
+    }
+
     if(H5F_INTENT(f) & H5F_ACC_SWMR_READ) {
         /* 
          * When the file is opened for SWMR read access, skip the check if:
@@ -757,6 +772,7 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
         if(status) {
             H5O_fsinfo_t fsinfo;   /* File space info message from superblock extension */
             uint8_t flags;          /* Message flags */
+            hbool_t null_fsm_addr = FALSE;  /* Whether to drop free-space to the floor */
 
             /* Get message flags */
             if(H5O_msg_get_flags(&ext_loc, H5O_FSINFO_ID, meta_dxpl_id, &flags) < 0)
@@ -764,6 +780,13 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
 
             /* If message is NOT marked "unknown"--set up file space info  */
             if(!(flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
+
+                /* The tool h5clear uses this property to tell the library
+                   to drop free-space to the floor */
+                if(H5P_exist_plist(a_plist, H5F_ACS_NULL_FSM_ADDR_NAME) > 0) {
+                    if(H5P_get(a_plist, H5F_ACS_NULL_FSM_ADDR_NAME, &null_fsm_addr) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get clearance for persisting fsm addr")
+                }
 
                 /* Retrieve the 'file space info' structure */
                 if(NULL == H5O_msg_read(&ext_loc, H5O_FSINFO_ID, &fsinfo, meta_dxpl_id))
@@ -808,13 +831,30 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
                 if(f->shared->eoa_pre_fsm_fsalloc != fsinfo.eoa_pre_fsm_fsalloc)
                     f->shared->eoa_pre_fsm_fsalloc = fsinfo.eoa_pre_fsm_fsalloc;
 
-                /* f->shared->eoa_pre_fsm_fsalloc must always be HADDR_UNDEF
-                 * in the absence of persistant free space managers.
+               /* f->shared->eoa_pre_fsm_fsalloc must always be HADDR_UNDEF
+                * in the absence of persistant free space managers.
+                */
+                /* If the following two conditions are true:
+                 *       (1) skipping EOF check (skip_eof_check)
+                 *       (2) dropping free-space to the floor (null_fsm_addr)
+                 *  skip the asserts as "eoa_pre_fsm_fsalloc" may be undefined
+                 *  for a crashed file with persistant free space managers.
+                 *  #1 and #2 are enabled when the tool h5clear --increment
+                 *  option is used.
                  */
-                HDassert((!f->shared->fs_persist) || (f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF));
-                HDassert(!f->shared->first_alloc_dealloc);
+                if(!skip_eof_check && !null_fsm_addr) {
+                     HDassert((!f->shared->fs_persist) || (f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF));
+                     HDassert(!f->shared->first_alloc_dealloc);
+                }
 
-                if((f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF) &&
+                /* As "eoa_pre_fsm_fsalloc" may be undefined for a crashed file
+                 * with persistant free space managers, therefore, set
+                 * "first_alloc_dealloc" when the condition 
+                 * "dropping free-space to the floor is true.
+                 * This will ensure that no action is done to settle things on file
+                 * close via H5MF_settle_meta_data_fsm() and H5MF_settle_raw_data_fsm().
+                 */
+                if((f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF || null_fsm_addr) &&
                    (H5F_INTENT(f) & H5F_ACC_RDWR))
                     f->shared->first_alloc_dealloc = TRUE;
 
@@ -822,7 +862,20 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
                 for(u = 1; u < NELMTS(f->shared->fs_addr); u++)
                     f->shared->fs_addr[u] = fsinfo.fs_addr[u - 1];
 
-                if(fsinfo.mapped && (rw_flags & H5AC__READ_ONLY_FLAG) == 0) {
+                /* If the following two conditions are true:
+                 *      (1) file is persisting free-space 
+                 *      (2) dropping free-space to the floor (null_fsm_addr)
+                 * nullify the addresses of the FSMs 
+                 */
+                if(f->shared->fs_persist && null_fsm_addr) {
+                    for(u = 0; u < NELMTS(fsinfo.fs_addr); u++)
+                        f->shared->fs_addr[u] = fsinfo.fs_addr[u] = HADDR_UNDEF;
+                } 
+
+                /* For fsinfo.mapped: remove the FSINFO message from the superblock extension
+                   and write a new message to the extension */
+                /* For null_fsm_addr: just update FSINFO message in the superblock extension */
+                if(((fsinfo.mapped || null_fsm_addr) && (rw_flags & H5AC__READ_ONLY_FLAG) == 0)) {
 
                     /* Do the same kluge until we know for sure.  VC */
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
@@ -836,11 +889,16 @@ H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial
                      f->shared->sblock = sblock;
 #endif /* JRM */
 
-                    if(H5F_super_ext_remove_msg(f, meta_dxpl_id, H5O_FSINFO_ID) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL,  "error in removing message from superblock extension")
+                    if(null_fsm_addr) {
+                        if(H5F_super_ext_write_msg(f, meta_dxpl_id, H5O_FSINFO_ID, &fsinfo, FALSE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
+                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
+                    } else {
+                        if(H5F_super_ext_remove_msg(f, meta_dxpl_id, H5O_FSINFO_ID) < 0)
+                            HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL,  "error in removing message from superblock extension")
 
-                    if(H5F_super_ext_write_msg(f, meta_dxpl_id, H5O_FSINFO_ID, &fsinfo, TRUE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
+                        if(H5F_super_ext_write_msg(f, meta_dxpl_id, H5O_FSINFO_ID, &fsinfo, TRUE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
+                            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
+                    }
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
                     f->shared->sblock = NULL;
 #endif /* JRM */
@@ -1637,13 +1695,13 @@ H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, unsigned id, void *mesg,
 
     /* Open/create the superblock extension object header */
     if(H5F_addr_defined(f->shared->sblock->ext_addr)) {
-	if(H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
+        if(H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
     } /* end if */
     else {
         HDassert(may_create);
-	if(H5F_super_ext_create(f, dxpl_id, &ext_loc) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create file's superblock extension")
+        if(H5F_super_ext_create(f, dxpl_id, &ext_loc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create file's superblock extension")
         ext_created = TRUE;
     } /* end else */
     HDassert(H5F_addr_defined(ext_loc.addr));
@@ -1651,24 +1709,24 @@ H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, unsigned id, void *mesg,
 
     /* Check if message with ID does not exist in the object header */
     if((status = H5O_msg_exists(&ext_loc, id, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check object header for message or message exists")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check object header for message or message exists")
 
     /* Check for creating vs. writing */
     if(may_create) {
-	if(status)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should not exist")
+        if(status)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should not exist")
 
-	/* Create the message with ID in the superblock extension */
-	if(H5O_msg_create(&ext_loc, id, (mesg_flags | H5O_MSG_FLAG_DONTSHARE), H5O_UPDATE_TIME, mesg, dxpl_id) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to create the message in object header")
+        /* Create the message with ID in the superblock extension */
+        if(H5O_msg_create(&ext_loc, id, (mesg_flags | H5O_MSG_FLAG_DONTSHARE), H5O_UPDATE_TIME, mesg, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to create the message in object header")
     } /* end if */
     else {
-	if(!status)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should exist")
+        if(!status)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should exist")
 
-	/* Update the message with ID in the superblock extension */
-	if(H5O_msg_write(&ext_loc, id, (mesg_flags | H5O_MSG_FLAG_DONTSHARE), H5O_UPDATE_TIME, mesg, dxpl_id) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to write the message in object header")
+        /* Update the message with ID in the superblock extension */
+        if(H5O_msg_write(&ext_loc, id, (mesg_flags | H5O_MSG_FLAG_DONTSHARE), H5O_UPDATE_TIME, mesg, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to write the message in object header")
     } /* end else */
 
 done:

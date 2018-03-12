@@ -875,6 +875,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags,
     udata.v1_pfx_nmesgs = 0;
     udata.chunk0_size = 0;
     udata.oh = NULL;
+    udata.free_oh = FALSE;
     udata.common.f = loc->file;
     udata.common.dxpl_id = dxpl_id;
     udata.common.file_intent = file_intent;

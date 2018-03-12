@@ -20,11 +20,19 @@
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
   set (HDF5_TEST_FILES
+      h5clear_fsm_persist_equal.h5
+      h5clear_fsm_persist_greater.h5
+      h5clear_fsm_persist_less.h5
+      h5clear_fsm_persist_noclose.h5
+      h5clear_fsm_persist_user_equal.h5
+      h5clear_fsm_persist_user_greater.h5
+      h5clear_fsm_persist_user_less.h5
       h5clear_log_v3.h5
       h5clear_mdc_image.h5
-      mod_h5clear_mdc_image.h5
+      h5clear_status_noclose.h5
       latest_h5clear_log_v3.h5
       latest_h5clear_sec2_v3.h5
+      mod_h5clear_mdc_image.h5
   )
   set (HDF5_SEC2_TEST_FILES
       h5clear_sec2_v0.h5
@@ -32,10 +40,25 @@
       h5clear_sec2_v3.h5
   )
   set (HDF5_REFERENCE_TEST_FILES
-      h5clear_usage.ddl
-      h5clear_open_fail.ddl
+      h5clear_equal_after_size.ddl
+      h5clear_equal_before_size.ddl
+      h5clear_greater_after_size.ddl
+      h5clear_greater_before_size.ddl
+      h5clear_less_after_size.ddl
+      h5clear_less_before_size.ddl
       h5clear_missing_file.ddl
+      h5clear_noclose_after_size.ddl
+      h5clear_noclose_before_size.ddl
       h5clear_no_mdc_image.ddl
+      h5clear_open_fail.ddl
+      h5clear_status_noclose_after_size.ddl
+      h5clear_usage.ddl
+      h5clear_user_equal_after_size.ddl
+      h5clear_user_equal_before_size.ddl
+      h5clear_user_greater_after_size.ddl
+      h5clear_user_greater_before_size.ddl
+      h5clear_user_less_after_size.ddl
+      h5clear_user_less_before_size.ddl
   )
 
   foreach (h5_file ${HDF5_TEST_FILES} ${HDF5_SEC2_TEST_FILES} ${HDF5_REFERENCE_TEST_FILES})
@@ -270,3 +293,74 @@ endif()
   ADD_H5_TEST (latest_h5clr_log_v3 latest_h5clear_log_v3 "true")
   ADD_H5_TEST (h5clr_sec2_v0 h5clear_sec2_v0 "false")
   ADD_H5_TEST (h5clr_sec2_v2 h5clear_sec2_v2 "false")
+#
+#
+#
+# The following tests verify the filesize, increment the filesize, then verify the filesize again.
+#
+# (1) h5clear_status_noclose.h5
+# "h5clear --filesize h5clear_status_noclose.h5"        (unable to open the file because status_flags is enabled)
+# "h5clear -s --increment=0 h5clear_status_noclose.h5"  (clear status_flag, EOA = MAX(EOA, EOF) + 0)
+#                                                       (no output, check exit code)
+# "h5clear --filesize h5clear_status_noclose.h5"        (print EOA/EOF after the last action)
+  ADD_H5_CMP (h5clr_open_fail_s h5clear_open_fail 1 "--filesize" h5clear_status_noclose.h5)
+  ADD_H5_RETTEST (h5clr_mdc_image "false" "-s" "--increment=0" h5clear_status_noclose.h5)
+  ADD_H5_CMP (h5clr_no_mdc_image_m h5clear_status_noclose_after_size 0 "--filesize" h5clear_status_noclose.h5)
+#
+# (2) h5clear_fsm_persist_noclose.h5
+# "h5clear --filesize h5clear_fsm_persist_noclose.h5"       (print EOA/EOF before the next action)
+# "h5clear --increment=0 h5clear_fsm_persist_noclose.h5"    (EOA = MAX(EOA, EOF)) (no output, just check exit code)
+# "h5clear --filesize h5clear_fsm_persist_noclose.h5"       (print EOA/EOF after the last action)
+  ADD_H5_CMP (h5clr_open_fail_s h5clear_noclose_before_size 0 "--filesize" h5clear_fsm_persist_noclose.h5)
+  ADD_H5_RETTEST (h5clr_mdc_image "false" "--increment=0" h5clear_fsm_persist_noclose.h5)
+  ADD_H5_CMP (h5clr_no_mdc_image_m h5clear_noclose_after_size 0 "--filesize" h5clear_fsm_persist_noclose.h5)
+#
+# (3) h5clear_fsm_persist_equal.h5
+# "h5clear --filesize h5clear_fsm_persist_equal.h5"     (print EOA/EOF before the next action)
+# "h5clear --increment h5clear_fsm_persist_equal.h5"    (EOA = MAX(EOA, EOF) + 1M) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_equal.h5"     (print EOA/EOF after the last action)
+  ADD_H5_CMP (h5clr_equal_before_size h5clear_equal_before_size 0 "--filesize" h5clear_fsm_persist_equal.h5)
+  ADD_H5_RETTEST (h5clr_equal_incr "false" "--increment" h5clear_fsm_persist_equal.h5)
+  ADD_H5_CMP (h5clr_equal_after_size h5clear_equal_after_size 0 "--filesize" h5clear_fsm_persist_equal.h5)
+#
+# (4) h5clear_fsm_persist_greater.h5
+# "h5clear --filesize h5clear_fsm_persist_greater.h5"       (print EOA/EOF before the next action)
+# "h5clear --increment=0 h5clear_fsm_persist_greater.h5"    (EOA = MAX(EOA, EOF) + 0) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_greater.h5"       (print EOA/EOF after the last action)
+  ADD_H5_CMP (h5clr_greater_before_size h5clear_greater_before_size 0 "--filesize" h5clear_fsm_persist_greater.h5)
+  ADD_H5_RETTEST (h5clr_greater_incr "false" "--increment=0" h5clear_fsm_persist_greater.h5)
+  ADD_H5_CMP (h5clr_greater_after_size h5clear_greater_after_size 0 "--filesize" h5clear_fsm_persist_greater.h5)
+#
+# (5) h5clear_fsm_persist_less.h5
+# "h5clear --filesize h5clear_fsm_persist_less.h5"      (print EOA/EOF before the next action)
+# "h5clear --increment=200 h5clear_fsm_persist_less.h5" (EOA = MAX(EOA, EOF) + 200) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_less.h5"      (print EOA/EOF after the last action)
+  ADD_H5_CMP (h5clr_less_before_size h5clear_less_before_size 0 "--filesize" h5clear_fsm_persist_less.h5)
+  ADD_H5_RETTEST (h5clr_less_incr "false" "--increment=200" h5clear_fsm_persist_less.h5)
+  ADD_H5_CMP (h5clr_less_after_size h5clear_less_after_size 0 "--filesize" h5clear_fsm_persist_less.h5)
+#
+# (6) h5clear_fsm_persist_user_equal.h5
+# "h5clear --filesize h5clear_fsm_persist_user_equal.h5"    (print EOA/EOF before the next action)
+# "h5clear --increment h5clear_fsm_persist_user_equal.h5"   (EOA = MAX(EOA, EOF) + 1M) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_user_equal.h5"    (print EOA/EOF after the last action)
+  ADD_H5_CMP (h5clr_user_equal_before_size h5clear_user_equal_before_size 0 "--filesize" h5clear_fsm_persist_user_equal.h5)
+  ADD_H5_RETTEST (h5clr_user_equal_incr "false" "--increment" h5clear_fsm_persist_user_equal.h5)
+  ADD_H5_CMP (h5clr_user_equal_after_size h5clear_user_equal_after_size 0 "--filesize" h5clear_fsm_persist_user_equal.h5)
+#
+# (7) h5clear_fsm_persist_user_greater.h5
+# "h5clear --filesize h5clear_fsm_persist_user_greater.h5"      (print EOA/EOF before the next action)
+# "h5clear --increment=0 h5clear_fsm_persist_user_greater.h5"   (EOA = MAX(EOA, EOF) + 0) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_user_greater.h5"      (print EOA/EOF after the last action)
+  ADD_H5_CMP (h5clr_user_greater_before_size h5clear_user_greater_before_size 0 "--filesize" h5clear_fsm_persist_user_greater.h5)
+  ADD_H5_RETTEST (h5clr_user_greater_incr "false" "--increment=0" h5clear_fsm_persist_user_greater.h5)
+  ADD_H5_CMP (h5clr_user_greater_after_size h5clear_user_greater_after_size 0 "--filesize" h5clear_fsm_persist_user_greater.h5)
+#
+# (8) h5clear_fsm_persist_user_less.h5
+# "h5clear --filesize h5clear_fsm_persist_user_greater.h5"      (print EOA/EOF before the next action)
+# "h5clear --increment=0 h5clear_fsm_persist_user_greater.h5"   (EOA = MAX(EOA, EOF) + 0) (no output, check exit code)
+# "h5clear --filesize h5clear_fsm_persist_user_greater.h5"      (print EOA/EOF after the last action)
+  ADD_H5_CMP (h5clr_user_less_before_size h5clear_user_less_before_size 0 "--filesize" h5clear_fsm_persist_user_less.h5)
+  ADD_H5_RETTEST (h5clr_user_less_incr "false" "--increment=0" h5clear_fsm_persist_user_less.h5)
+  ADD_H5_CMP (h5clr_user_less_after_size h5clear_user_less_after_size 0 "--filesize" h5clear_fsm_persist_user_less.h5)
+#
+#
