@@ -432,7 +432,92 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
     {
         issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}
+} // test_basic_links
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_lcpl
+ *
+ * Purpose:     Tests link creation property lists, specifically, the
+ *              character encoding property.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ * March, 2018
+ *-------------------------------------------------------------------------
+ */
+const H5std_string GROUP1NAME("First_group");
+const H5std_string GROUP2NAME("Second_group");
+static int
+test_lcpl(hid_t fapl_id, hbool_t new_format)
+{
+    H5L_info_t linfo;
+    char filename[1024];
+    hsize_t dims[2];
+
+    if(new_format)
+        TESTING("link creation property lists (w/new group format)")
+    else
+        TESTING("link creation property lists")
+
+    try
+    {
+        FileAccPropList fapl(fapl_id);
+
+        // Create a new file.
+        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_id);
+
+        // Create and link a group with the default LCPL.
+        Group grp_1(file.createGroup(GROUP1NAME));
+        grp_1.close();
+
+        // Check that its character encoding is the default.
+        linfo = file.getLinkInfo(GROUP1NAME);
+        if(linfo.cset != H5T_CSET_ASCII)
+            throw InvalidActionException("H5Lget_info", "Character encoding is not default");
+
+        // Create and commit a datatype with the default LCPL.
+        IntType dtype;
+        dtype.commit(file, "/type");
+        dtype.close();
+
+        // Check that its character encoding is the default.
+        linfo = file.getLinkInfo("type");
+        verify_val(linfo.cset, H5T_CSET_ASCII, "Character encoding is not default", __LINE__, __FILE__);
+
+        // Create a simple dataspace.
+        dims[0] = H5L_DIM1;
+        dims[1] = H5L_DIM2;
+        DataSpace dspace(2 ,dims);
+
+        // Create a dataset using the default LCPL.
+        DataSet dset(file.createDataSet("/dataset", PredType::NATIVE_INT, dspace));
+        dset.close();
+
+        // Check that its character encoding is the default.
+        linfo = file.getLinkInfo("/dataset");
+        verify_val(linfo.cset, H5T_CSET_ASCII, "Character encoding is not default", __LINE__, __FILE__);
+
+        // Create a link creation property list with the UTF-8 character encoding.
+        LinkCreatPropList lcpl;
+        lcpl.setCharEncoding(H5T_CSET_UTF8);
+
+        // Create and link a group with the new LCPL.
+        Group grp_2(file.createGroup(GROUP2NAME, lcpl));
+        grp_2.close();
+
+        // Check that its character encoding is UTF-8.
+        linfo = file.getLinkInfo(GROUP2NAME);
+        verify_val(linfo.cset, H5T_CSET_UTF8, "Character encoding is not UTF-8", __LINE__, __FILE__);
+
+        PASSED();
+    } // end of try block
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+} // end test_lcpl()
 
 
 /*-------------------------------------------------------------------------
@@ -445,8 +530,6 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
  * March, 2018
  *-------------------------------------------------------------------------
  */
-const H5std_string GROUP1NAME("First_group");
-const H5std_string GROUP2NAME("Second_group");
 static void
 test_move(hid_t fapl_id, hbool_t new_format)
 {
@@ -459,11 +542,13 @@ test_move(hid_t fapl_id, hbool_t new_format)
 
     try
     {
+        FileAccPropList fapl(fapl_id);
+
         // Create two new files
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
-        H5File file_a(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_id);
+        H5File file_a(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
         h5_fixname(FILENAME[1], fapl_id, filename, sizeof filename);
-        H5File file_b(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl_id);
+        H5File file_b(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Create groups in first file
         Group grp_1(file_a.createGroup(GROUP1NAME));
@@ -574,7 +659,7 @@ test_move(hid_t fapl_id, hbool_t new_format)
     {
         issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}
+} // test_move
 
 /*-------------------------------------------------------------------------
  * Function:    test_copy
@@ -609,8 +694,8 @@ static void test_copy(hid_t fapl_id, hbool_t new_format)
         Group grp_move(grp_1.createGroup("group_copy"));
 
         // Create hard and soft links
-        grp_1.newLink("group_copy", H5L_SAME_LOC, "hard");
-        grp_2.newLink("/First_group/group_copy", "soft");
+        grp_1.link("group_copy", H5L_SAME_LOC, "hard");
+        grp_2.link("/First_group/group_copy", "soft");
 
         // Copy a group across files, should fail
         try {
@@ -679,13 +764,37 @@ static void test_copy(hid_t fapl_id, hbool_t new_format)
         moved_grp = grp_1.openGroup("group_copy");
         moved_grp.close();
 
+        // Delete "group_newer_name" from group 2, then try to open it.
+        grp_2.unlink("group_newer_name");
+        try {
+            moved_grp = grp_2.openGroup("group_newer_name");
+            moved_grp.close();
+
+    	    H5_FAILED(); // Should throw an exception but didn't
+	        cerr << "    Group group_newer_name should not be in GROUP2NAME" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+
+        // Delete "group_copy" from group 1, then try to open it.
+        grp_1.unlink("group_copy");
+        try {
+            moved_grp = grp_1.openGroup("group_copy");
+            moved_grp.close();
+
+    	    H5_FAILED(); // Should throw an exception but didn't
+	        cerr << "    Group group_copy should not be in GROUP1NAME" << endl;
+        } catch (Exception& E) {
+            // expected
+        }
+
         PASSED();
     } // end of try block
     catch (Exception& E)
     {
         issue_fail_msg("test_num_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}
+} // test_copy
 
 
 /*-------------------------------------------------------------------------
