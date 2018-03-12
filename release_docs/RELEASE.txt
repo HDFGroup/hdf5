@@ -161,7 +161,63 @@ New Features
 
     C++ Library:
     ------------
-    -
+    - The following wrappers are added:
+
+      + H5Lcreate_soft:
+        // Creates a soft link from link_name to target_name.
+        void link(const char *target_name, const char *link_name,...)
+        void link(const H5std_string& target_name,...)
+
+      + H5Lcreate_hard:
+        // Creates a hard link from new_name to curr_name.
+        void link(const char *curr_name, const Group& new_loc,...)
+        void link(const H5std_string& curr_name, const Group& new_loc,...)
+
+        // Creates a hard link from new_name to curr_name in same location.
+        void link(const char *curr_name, const hid_t same_loc,...)
+        void link(const H5std_string& curr_name, const hid_t same_loc,...)
+
+        Note: previous version of H5Location::link will be deprecated.
+
+      + H5Lcopy:
+        // Copy an object from a group of file to another.
+        void copyLink(const char *src_name, const Group& dst,...)
+        void copyLink(const H5std_string& src_name, const Group& dst,...)
+
+        // Copy an object from a group of file to the same location.
+        void copyLink(const char *src_name, const char *dst_name,...)
+        void copyLink(const H5std_string& src_name,...)
+
+      + H5Lmove:
+        // Rename an object in a group or file to a new location.
+        void moveLink(const char* src_name, const Group& dst,...)
+        void moveLink(const H5std_string& src_name, const Group& dst,...)
+
+        // Rename an object in a group or file to the same location.
+        void moveLink(const char* src_name, const char* dst_name,...)
+        void moveLink(const H5std_string& src_name,...)
+
+        Note: previous version H5Location::move will be deprecated.
+
+      + H5Ldelete:
+        // Removes the specified link from this location.
+        void unlink(const char *link_name,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT)
+        void unlink(const H5std_string& link_name,
+            const LinkAccPropList& lapl = LinkAccPropList::DEFAULT)
+
+    - Added class LinkCreatPropList
+
+    - Added overloaded functions H5Location::createGroup to take a link
+      creation property list
+        Group createGroup(const char* name, const LinkCreatPropList& lcpl)
+        Group createGroup(const H5std_string& name, const LinkCreatPropList& lcpl)
+    - Added wrapper for H5Lget_info() to H5Location
+        // Returns the information of the named link.
+        H5L_info_t getLinkInfo(const H5std_string& link_name,...)
+
+      (BMR - 2018/03/11, HDFFV-10149)
+
 
     Java Library:
     ----------------
