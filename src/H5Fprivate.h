@@ -492,6 +492,10 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME         "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) */
+#define H5F_ACS_NULL_FSM_ADDR_NAME              "null_fsm_addr"   /* Nullify addresses of free-space managers */
+                                                                  /* Private property used only by h5clear */
+#define H5F_ACS_SKIP_EOF_CHECK_NAME             "skip_eof_check"  /* Skip EOF check */
+                                                                  /* Private property used only by h5clear */
 #define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME           "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME    "start_mdc_log_on_access" /* Whether logging starts on file create/open */

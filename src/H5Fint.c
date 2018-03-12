@@ -123,8 +123,8 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5P_genplist_t *old_plist;              /* Old property list */
     H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
     hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
-    unsigned    efc_size = 0;
-    hid_t	ret_value = SUCCEED;        /* Return value */
+    unsigned   efc_size = 0;
+    hid_t      ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1614,7 +1614,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     } /* end if */
     else if (1 == shared->nrefs) {
         /* Read the superblock if it hasn't been read before. */
-        if(H5F__super_read(file, meta_dxpl_id, raw_dxpl_id, TRUE) < 0)
+        if(H5F__super_read(file, meta_dxpl_id, raw_dxpl_id, fapl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
         /* Create the page buffer before initializing the superblock */
@@ -2939,6 +2939,43 @@ H5F__set_paged_aggr(const H5F_t *f, hbool_t paged)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_paged_aggr() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5F__get_max_eof_eoa
+ *
+ * Purpose:  Determine the maximum of (EOA, EOF) for the file
+ *
+ * Return:   Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__get_max_eof_eoa(const H5F_t *f, haddr_t *max_eof_eoa)
+{
+    haddr_t eof;                /* Relative address for EOF */
+    haddr_t eoa;                /* Relative address for EOA */
+    haddr_t tmp_max;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Get the relative EOA and EOF */
+    eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT);
+    eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT);
+
+    /* Determine the maximum */
+    tmp_max = MAX(eof, eoa);
+    if(HADDR_UNDEF == tmp_max)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file get eof/eoa requests failed")
+
+    *max_eof_eoa = tmp_max;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__get_max_eof_eoa() */
 
 #ifdef H5_HAVE_PARALLEL
 

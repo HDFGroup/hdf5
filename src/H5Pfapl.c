@@ -193,6 +193,14 @@
 /* Definition for status_flags in the superblock */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_SIZE         sizeof(hbool_t)
 #define H5F_ACS_CLEAR_STATUS_FLAGS_DEF          FALSE
+
+/* Definition for dropping free-space to the floor when reading in the superblock */
+#define H5F_ACS_NULL_FSM_ADDR_SIZE          sizeof(hbool_t)
+#define H5F_ACS_NULL_FSM_ADDR_DEF           FALSE
+/* Definition for skipping EOF check when reading in the superblock */
+#define H5F_ACS_SKIP_EOF_CHECK_SIZE         sizeof(hbool_t)
+#define H5F_ACS_SKIP_EOF_CHECK_DEF          FALSE
+
 /* Definition for 'use metadata cache logging' flag */
 #define H5F_ACS_USE_MDC_LOGGING_SIZE            sizeof(hbool_t)
 #define H5F_ACS_USE_MDC_LOGGING_DEF             FALSE
@@ -379,6 +387,9 @@ static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE
 static const unsigned H5F_def_metadata_read_attempts_g = H5F_ACS_METADATA_READ_ATTEMPTS_DEF;  /* Default setting for the # of metadata read attempts */
 static const H5F_object_flush_t H5F_def_object_flush_cb_g = H5F_ACS_OBJECT_FLUSH_CB_DEF;      /* Default setting for object flush callback */
 static const hbool_t H5F_def_clear_status_flags_g = H5F_ACS_CLEAR_STATUS_FLAGS_DEF;           /* Default to clear the superblock status_flags */
+static const hbool_t H5F_def_skip_eof_check_g = H5F_ACS_SKIP_EOF_CHECK_DEF;    /* Default setting for skipping EOF check */
+static const hbool_t H5F_def_null_fsm_addr_g = H5F_ACS_NULL_FSM_ADDR_DEF;      /* Default setting for dropping free-space to the floor */
+
 static const hbool_t H5F_def_use_mdc_logging_g = H5F_ACS_USE_MDC_LOGGING_DEF;                 /* Default metadata cache logging flag */
 static const char *H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF;                 /* Default mdc log location */
 static const hbool_t H5F_def_start_mdc_log_on_access_g = H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF; /* Default mdc log start on access flag */
@@ -568,6 +579,16 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the private property of whether to clear the superblock status_flags. It's used by h5clear only. */
     if(H5P_register_real(pclass, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, H5F_ACS_CLEAR_STATUS_FLAGS_SIZE, &H5F_def_clear_status_flags_g,
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the private property of whether to skip EOF check. It's used by h5clear only. */
+    if(H5P_register_real(pclass, H5F_ACS_SKIP_EOF_CHECK_NAME, H5F_ACS_SKIP_EOF_CHECK_SIZE, &H5F_def_skip_eof_check_g,
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the private property of whether to drop free-space to the floor. It's used by h5clear only. */
+    if(H5P_register_real(pclass, H5F_ACS_NULL_FSM_ADDR_NAME, H5F_ACS_NULL_FSM_ADDR_SIZE, &H5F_def_null_fsm_addr_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
