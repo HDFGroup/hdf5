@@ -67,6 +67,12 @@ typedef struct H5FD_mpio_t {
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
     haddr_t	local_eof;	/* Local end-of-file address for each process */
+    herr_t      do_pre_trunc_barrier;  /* hack to allow us to skip      */
+                                /* unnecessary barriers in              */
+                                /* H5FD_mpio_trucate() without a VFD    */
+                                /* API change.  This should be removed  */
+                                /* as soon as be make the necessary     */
+                                /* VFD API change.                      */
 } H5FD_mpio_t;
 
 /* Private Prototypes */
@@ -1039,6 +1045,9 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->eof = H5FD_mpi_MPIOff_to_haddr(size);
     file->local_eof = file->eof;
 
+    /* Mark initial barriers in H5FD_mpio_truncate() as necessary */
+    file->do_pre_trunc_barrier = TRUE;
+
     /* Set return value */
     ret_value=(H5FD_t*)file;
 
@@ -1932,15 +1941,74 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD_mark_pre_trunc_barrier_unecessary
+ *
+ * Purpose:     Hack to allow us to avoid most unnecessary barriers
+ *              prior in H5FD_mpio_truncate().
+ *
+ *              This function should be deleted when next we modify the
+ *              VFD interface.  This change should allow us to tell the
+ *              truncate function to omit the initial barrier if no
+ *              file I/O has occurred since the last barrier.
+ *
+ * Return:      void
+ *
+ *
+ * Programmer:  John Mainzer
+ *              12/14/17
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5FD_mpio_mark_pre_trunc_barrier_unecessary(H5FD_t *_file)
+{
+    H5FD_mpio_t             *file = (H5FD_mpio_t*)_file;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
+
+    file->do_pre_trunc_barrier = FALSE;
+
+    FUNC_LEAVE_NOAPI_VOID
+
+} /* end H5FD_mpio_mark_pre_trunc_barrier_unecessary() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD_mpio_truncate
  *
  * Purpose:     Make certain the file's size matches it's allocated size
+ *
+ *              This is a little sticky in the mpio case, as it is not 
+ *              easy for us to track the current EOF by extracting it from
+ *              write calls. 
+ *
+ *              Instead, we first check to see if the eoa has changed since
+ *              the last call to this function.  If it has, we call 
+ *              MPI_File_get_size() to determine the current EOF, and 
+ *              only call MPI_File_set_size() if this value disagrees 
+ *              with the current eoa.
  *
  * Return:      Success:	Non-negative
  * 		Failure:	Negative
  *
  * Programmer:  Quincey Koziol
  *              January 31, 2008
+ *
+ * Changes:     Heavily reworked to avoid unnecessary MPI_File_set_size()
+ *              calls.  The hope is that these calls are superfluous in the
+ *              typical case, allowing us to avoid truncates most of the 
+ *              time.
+ *
+ *              The basic idea is to query the file system to get the 
+ *              current eof, and only truncate if the file systems 
+ *              conception of the eof disagrees with our eoa.
+ *
+ *                                                 JRM -- 10/27/17
  *
  *-------------------------------------------------------------------------
  */
@@ -1959,35 +2027,77 @@ H5FD_mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
     HDassert(file);
     HDassert(H5FD_MPIO == file->pub.driver_id);
 
-    /* Extend the file to make sure it's large enough, then sync.
-     * Unfortunately, keeping track of EOF is an expensive operation, so
-     * we can't just check whether EOF<EOA like with other drivers.
-     * Therefore we'll just read the byte at EOA-1 and then write it back. */
-    if(file->eoa > file->last_eoa) {
-        int		mpi_code;	/* mpi return code */
-        MPI_Offset      mpi_off;
+    if ( !H5F_addr_eq(file->eoa, file->last_eoa) ) {
 
-        if(H5FD_mpi_haddr_to_MPIOff(file->eoa, &mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
+        int             mpi_code;       /* mpi return code */
+        MPI_Offset      size;
+        MPI_Offset      needed_eof;
 
-        /* Extend the file's size */
-        if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, mpi_off)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
-
-	/* Don't let any proc return until all have extended the file.
-         * (Prevents race condition where some processes go ahead and write
-         * more data to the file before all the processes have finished making
-         * it the shorter length, potentially truncating the file and dropping
-         * the new data written)
+        /* In principle, it is possible for the size returned by the 
+         * call to MPI_File_get_size() to depend on whether writes from 
+         * all proceeses have completed at the time process 0 makes the
+         * call.  
+         *
+         * In practice, most (all?) truncate calls will come after a barrier
+         * and with no interviening writes to the file (with the possible 
+         * exception of sueprblock / superblock extension message updates).
+         *
+         * Unfortunately, the current VFD API doesn't let us pass in a 
+         * flag indicating whether this particular call is unnecessary.
+         * To work around this, I have added the new function 
+         * H5FD_mpio_mark_pre_trunc_barrier_unecessary() allow us to 
+         * set a flag in H5FD_mpio_t indicating that we can skip the 
+         * barrier.
+         *
+         * This is a pretty ugly hack, but until we revise the VFD API,
+         * it is about the best we can do.
          */
-        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+        if (file->do_pre_trunc_barrier) {
+            if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(file->comm)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed(1)", mpi_code)
+        }
+
+        /* Only processor p0 will get the filesize and broadcast it. */
+        if (file->mpi_rank == 0) {
+            if (MPI_SUCCESS != (mpi_code=MPI_File_get_size(file->f, &size)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_get_size failed", mpi_code)
+        } /* end if */
+
+        /* Broadcast file size */
+        if(MPI_SUCCESS != (mpi_code = MPI_Bcast(&size, (int)sizeof(MPI_Offset),
+                                                MPI_BYTE, 0, file->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        if(H5FD_mpi_haddr_to_MPIOff(file->eoa, &needed_eof) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, \
+                        "cannot convert from haddr_t to MPI_Offset")
+
+        if (size != needed_eof) /* eoa != eof.  Set eof to eoa */ {
+
+            /* Extend the file's size */
+            if(MPI_SUCCESS != (mpi_code=MPI_File_set_size(file->f, needed_eof)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
+
+            /* In general, we must wait until all processes have finished 
+             * the truncate before any process can continue, since it is 
+             * possible that a process would write at the end of the 
+             * file, and this write would be discarded by the truncate.
+             *
+             * While this is an issue for a user initiated flush, it may 
+             * not be an issue at file close.  If so, we may be able to 
+             * optimize out the following barrier in that case.
+             */
+            if(MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+        }
 
         /* Update the 'last' eoa value */
         file->last_eoa = file->eoa;
     } /* end if */
 
 done:
+    file->do_pre_trunc_barrier = TRUE;
+
 #ifdef H5FDmpio_DEBUG
     if(H5FD_mpio_Debug[(int)'t'])
     	HDfprintf(stdout, "Leaving %s\n", FUNC);
