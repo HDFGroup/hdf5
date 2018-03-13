@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_F90_SRC C CXX Fortran)
+project (HDF5_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
 # configure def file for shared libs on windows
@@ -295,7 +295,7 @@ if (BUILD_SHARED_LIBS)
   )
   if (WIN32)
     set_property (TARGET ${HDF5_F90_LIBSH_TARGET}
-      APPEND PROPERTY COMPILE_DEFINITIONS "BUILD_HDF5_DLL;HDF5F90_WINDOWS"
+        APPEND PROPERTY COMPILE_DEFINITIONS "BUILD_HDF5_DLL;HDF5F90_WINDOWS"
     )
   endif ()
   set (install_targets ${install_targets} ${HDF5_F90_LIBSH_TARGET})
