@@ -174,6 +174,26 @@ Bug Fixes since HDF5-1.8.20
 
       (DER - 2018/02/26, HDFFV-10355)
 
+    - If an HDF5 file contains a malformed compound datatype with a
+      suitably large offset, the type conversion code can run off
+      the end of the type conversion buffer, causing a segmentation
+      fault.
+
+      This issue was reported to The HDF Group as issue #CVE-2017-17507.
+
+      NOTE: The HDF5 C library cannot produce such a file. This condition
+            should only occur in a corrupt (or deliberately altered) file
+            or a file created by third-party software.
+
+      THE HDF GROUP WILL NOT FIX THIS BUG AT THIS TIME
+
+      Fixing this problem would involve updating the publicly visible
+      H5T_conv_t function pointer typedef and versioning the API calls
+      which use it. We normally only modify the public API during
+      major releases, so this bug will not be fixed at this time.
+
+      (DER - 2018/02/26, HDFFV-10356)
+
     - If an HDF5 file contains a malformed compound type which contains
       a member of size zero, a division by zero error will occur while
       processing the type.
