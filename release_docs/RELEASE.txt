@@ -56,6 +56,16 @@ New Features
     -------------
     - CMake
 
+      Change minimum version to 3.10.
+
+      This change removes the need to support a copy of the FindMPI.cmake module,
+      which has been removed, along with its subfolder in the config/cmake_ext_mod
+      location.
+
+      (ADB - 2018/03/09)
+
+    - CMake
+
       Add pkg-config file generation
 
       Added pkg-config file generation for the C, C++, HL, and HL C++ libraries.

@@ -412,7 +412,7 @@ H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nop
 
 /* Superblock related routines */
 H5_DLL herr_t H5F__super_init(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id,
+H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hid_t fapl_id,
     hbool_t initial_read);
 H5_DLL herr_t H5F__super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size);
 H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
@@ -457,6 +457,7 @@ H5_DLL htri_t H5F_try_extend(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
 H5_DLL herr_t H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr);
 H5_DLL herr_t H5F__set_base_addr(const H5F_t *f, haddr_t addr);
 H5_DLL herr_t H5F__set_paged_aggr(const H5F_t *f, hbool_t paged);
+H5_DLL herr_t H5F__get_max_eof_eoa(const H5F_t *f, haddr_t *max_eof_eoa);
 
 /* Functions that flush or evict */
 H5_DLL herr_t H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id);
