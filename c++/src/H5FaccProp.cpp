@@ -88,7 +88,7 @@ FileAccPropList::FileAccPropList() : PropList(H5P_FILE_ACCESS) {}
 
 //--------------------------------------------------------------------------
 // Function:    FileAccPropList copy constructor
-///\brief       Copy Constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: FileAccPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

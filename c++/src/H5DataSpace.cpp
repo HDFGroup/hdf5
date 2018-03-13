@@ -133,7 +133,7 @@ DataSpace::DataSpace(const hid_t existing_id) : IdComponent(), id(existing_id)
 
 //--------------------------------------------------------------------------
 // Function:    DataSpace copy constructor
-///\brief       Copy constructor: makes a copy of the original DataSpace object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: DataSpace object to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

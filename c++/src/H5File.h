@@ -41,10 +41,10 @@ class H5_DLLCPP H5File : public Group {
         // Close this file.
         virtual void close();
 
-        // Gets the access property list of this file.
+        // Gets a copy of the access property list of this file.
         FileAccPropList getAccessPlist() const;
 
-        // Gets the creation property list of this file.
+        // Gets a copy of the creation property list of this file.
         FileCreatPropList getCreatePlist() const;
 
         // Gets general information about this file.
@@ -97,7 +97,7 @@ class H5_DLLCPP H5File : public Group {
         // Default constructor
         H5File();
 
-        // Copy constructor: makes a copy of the original H5File object.
+        // Copy constructor: same as the original H5File.
         H5File(const H5File& original);
 
         // Gets the HDF5 file id.

@@ -74,18 +74,6 @@ class H5_DLLCPP AbstractDs {
         // Default constructor
         AbstractDs();
 
-        // *** Deprecation warning ***
-        // The following two constructors are no longer appropriate after the
-        // data member "id" had been moved to the sub-classes.
-        // The copy constructor is a noop and is removed in 1.8.15 and the
-        // other will be removed from 1.10 release, and then from 1.8 if its
-        // removal does not raise any problems in two 1.10 releases.
-
-        // Mar 2016 -BMR, AbstractDs(const hid_t h5_id);
-
-        // Copy constructor
-        // AbstractDs( const AbstractDs& original );
-
    private:
         // This member function is implemented by DataSet and Attribute - pure virtual.
         virtual hid_t p_get_type() const = 0;

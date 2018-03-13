@@ -46,7 +46,7 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("ObjCreatPropList"); }
 
-        // Copy constructor: creates a copy of a ObjCreatPropList object.
+        // Copy constructor: same as the original ObjCreatPropList.
         ObjCreatPropList(const ObjCreatPropList& original);
 
         // Creates a copy of an existing object creation property list

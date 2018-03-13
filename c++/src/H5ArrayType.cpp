@@ -46,7 +46,7 @@ ArrayType::ArrayType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    ArrayType copy constructor
-///\brief       Copy constructor: makes a copy of the original ArrayType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const ArrayType& original) : DataType(original) {}

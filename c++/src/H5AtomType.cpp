@@ -47,7 +47,7 @@ AtomType::AtomType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    AtomType copy constructor
-///\brief       Copy constructor: makes a copy of the original AtomType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 AtomType::AtomType(const AtomType& original) : DataType(original) {}

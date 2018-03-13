@@ -95,7 +95,7 @@ DSetCreatPropList::DSetCreatPropList() : ObjCreatPropList(H5P_DATASET_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList copy constructor
-///\brief       Copy constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///             DSetCreatPropList object
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
