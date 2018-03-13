@@ -664,7 +664,11 @@ Bug Fixes since HDF5-1.10.1 release
 
     Testing
     -------
-    -
+    - Memory for three variables in testphdf5's coll_write_test was malloced 
+      but not freed, leaking memory when running the test.  The variables' 
+      memory is now freed.
+
+      (LRK - 2018/03/12, HDFFV-10397)
 
 Supported Platforms
 ===================
