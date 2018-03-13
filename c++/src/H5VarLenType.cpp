@@ -45,7 +45,7 @@ VarLenType::VarLenType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType copy constructor
-///\brief       Copy constructor: makes a copy of the original VarLenType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 VarLenType::VarLenType(const VarLenType& original) : DataType(original) {}

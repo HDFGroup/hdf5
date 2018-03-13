@@ -53,7 +53,7 @@ Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:    Group copy constructor
-///\brief       Copy constructor: makes a copy of the original Group object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: Original group to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

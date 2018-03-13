@@ -106,7 +106,7 @@ class H5_DLLCPP PropList : public IdComponent {
         // Default constructor: creates a stub PropList object.
         PropList();
 
-        // Copy constructor: creates a copy of a PropList object.
+        // Copy constructor: same as the original PropList.
         PropList(const PropList& original);
 
         // Gets the property list id.

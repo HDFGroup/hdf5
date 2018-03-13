@@ -88,7 +88,7 @@ LinkAccPropList::LinkAccPropList() : PropList(H5P_LINK_ACCESS) {}
 
 //--------------------------------------------------------------------------
 // Function:    LinkAccPropList copy constructor
-///\brief       Copy Constructor: makes a copy of the original
+///\brief       Copy Constructor: same HDF5 object as \a original
 ///\param       original - IN: LinkAccPropList instance to copy
 // Programmer   Binh-Minh Ribler - December, 2016
 //--------------------------------------------------------------------------

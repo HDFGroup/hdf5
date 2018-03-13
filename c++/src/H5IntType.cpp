@@ -43,7 +43,7 @@ IntType::IntType() {}
 
 //--------------------------------------------------------------------------
 // Function:    IntType copy constructor
-///\brief       Copy constructor: makes a copy of the original IntType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 IntType::IntType(const IntType& original) : AtomType( original ) {}

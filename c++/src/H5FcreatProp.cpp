@@ -86,7 +86,7 @@ FileCreatPropList::FileCreatPropList() : PropList(H5P_FILE_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList copy constructor
-///\brief       Copy constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///             FileCreatPropList object.
 ///\param       original - IN: FileCreatPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
