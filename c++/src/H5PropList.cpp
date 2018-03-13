@@ -94,7 +94,7 @@ PropList::PropList() : IdComponent(), id(H5P_DEFAULT) {}
 
 //--------------------------------------------------------------------------
 // Function:    PropList copy constructor
-///\brief       Copy constructor
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: The original property list to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

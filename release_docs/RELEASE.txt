@@ -638,7 +638,12 @@ Bug Fixes since HDF5-1.10.1 release
 
     C++ APIs
     --------
-    -
+    - Removal of memomry leaks
+
+      A private function was inadvertently called, causing memory leaks.  This
+      is now fixed.
+
+      (BMR - 2018/03/12 - User's reported in email)
 
     Testing
     -------

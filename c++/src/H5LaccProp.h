@@ -36,7 +36,7 @@ class H5_DLLCPP LinkAccPropList : public PropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("LinkAccPropList"); }
 
-        // Copy constructor: creates a copy of a LinkAccPropList object.
+        // Copy constructor: same as the original LinkAccPropList.
         LinkAccPropList(const LinkAccPropList& original);
 
         // Creates a copy of an existing file access property list

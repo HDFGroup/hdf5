@@ -75,7 +75,7 @@ class H5_DLLCPP EnumType : public DataType {
         // Creates an enumeration datatype using an existing id
         EnumType(const hid_t existing_id);
 
-        // Copy constructor: makes a copy of the original EnumType object.
+        // Copy constructor: same as the original EnumType.
         EnumType(const EnumType& original);
 
         virtual ~EnumType();

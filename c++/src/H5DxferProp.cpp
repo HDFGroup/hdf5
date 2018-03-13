@@ -101,7 +101,7 @@ DSetMemXferPropList::DSetMemXferPropList(const char* exp) : PropList(H5P_DATASET
 
 //--------------------------------------------------------------------------
 // Function     DSetMemXferPropList copy constructor
-///\brief       Copy constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///             DSetMemXferPropList object
 ///\param       original - IN: Original dataset memory and transfer property
 ///                            list object to copy
