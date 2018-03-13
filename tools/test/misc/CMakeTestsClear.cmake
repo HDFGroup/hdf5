@@ -303,17 +303,17 @@ endif()
 # "h5clear -s --increment=0 h5clear_status_noclose.h5"  (clear status_flag, EOA = MAX(EOA, EOF) + 0)
 #                                                       (no output, check exit code)
 # "h5clear --filesize h5clear_status_noclose.h5"        (print EOA/EOF after the last action)
-  ADD_H5_CMP (h5clr_open_fail_s h5clear_open_fail 1 "--filesize" h5clear_status_noclose.h5)
-  ADD_H5_RETTEST (h5clr_mdc_image "false" "-s" "--increment=0" h5clear_status_noclose.h5)
-  ADD_H5_CMP (h5clr_no_mdc_image_m h5clear_status_noclose_after_size 0 "--filesize" h5clear_status_noclose.h5)
+  ADD_H5_CMP (h5clr_open_fail_nc_s h5clear_open_fail 1 "--filesize" h5clear_status_noclose.h5)
+  ADD_H5_RETTEST (h5clr_mdc_image_nc "false" "-s" "--increment=0" h5clear_status_noclose.h5)
+  ADD_H5_CMP (h5clr_no_mdc_image_nc_m h5clear_status_noclose_after_size 0 "--filesize" h5clear_status_noclose.h5)
 #
 # (2) h5clear_fsm_persist_noclose.h5
 # "h5clear --filesize h5clear_fsm_persist_noclose.h5"       (print EOA/EOF before the next action)
 # "h5clear --increment=0 h5clear_fsm_persist_noclose.h5"    (EOA = MAX(EOA, EOF)) (no output, just check exit code)
 # "h5clear --filesize h5clear_fsm_persist_noclose.h5"       (print EOA/EOF after the last action)
-  ADD_H5_CMP (h5clr_open_fail_s h5clear_noclose_before_size 0 "--filesize" h5clear_fsm_persist_noclose.h5)
-  ADD_H5_RETTEST (h5clr_mdc_image "false" "--increment=0" h5clear_fsm_persist_noclose.h5)
-  ADD_H5_CMP (h5clr_no_mdc_image_m h5clear_noclose_after_size 0 "--filesize" h5clear_fsm_persist_noclose.h5)
+  ADD_H5_CMP (h5clr_open_fail_fsm_s h5clear_noclose_before_size 0 "--filesize" h5clear_fsm_persist_noclose.h5)
+  ADD_H5_RETTEST (h5clr_mdc_image_fsm "false" "--increment=0" h5clear_fsm_persist_noclose.h5)
+  ADD_H5_CMP (h5clr_no_mdc_image_fsm_m h5clear_noclose_after_size 0 "--filesize" h5clear_fsm_persist_noclose.h5)
 #
 # (3) h5clear_fsm_persist_equal.h5
 # "h5clear --filesize h5clear_fsm_persist_equal.h5"     (print EOA/EOF before the next action)
