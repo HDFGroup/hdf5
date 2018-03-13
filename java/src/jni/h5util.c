@@ -41,6 +41,9 @@ jobject get_callback;
 jobject set_callback;
 jobject delete_callback;
 
+H5E_auto2_t         efunc;
+void               *edata;
+
 /********************/
 /* Local Prototypes */
 /********************/
