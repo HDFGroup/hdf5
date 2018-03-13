@@ -134,6 +134,9 @@
 #define NGROUPS            2
 #define NDSETS            4
 
+/* Declaration for test_incr_filesize() */
+#define FILE8            "tfile8.h5"    /* Test file */
+
 /* Files created under 1.6 branch and 1.8 branch--used in test_filespace_compatible() */
 const char *OLD_FILENAME[] = {
     "filespace_1_6.h5",    /* 1.6 HDF5 file */
@@ -6926,6 +6929,130 @@ test_libver_macros2(void)
 
 /****************************************************************
 **
+**  test_filesize():
+**    Verify H5Fincrement_filesize() and H5Fget_eoa() works as
+**    indicated in the "RFC: Enhancement to the tool h5clear".
+**
+****************************************************************/
+static void
+test_incr_filesize(const char *env_h5_drvr)
+{
+    hid_t    fid;                       /* File opened with read-write permission */
+    h5_stat_size_t filesize;            /* Size of file when empty */
+    hid_t    fcpl;                      /* File creation property list */
+    hid_t    fapl;                      /* File access property list */
+    hid_t    dspace;                    /* Dataspace ID */
+    hid_t    dset;                      /* Dataset ID */
+    hid_t    dcpl;                      /* Dataset creation property list */
+    unsigned u;                         /* Local index variable */
+    char     filename[FILENAME_LEN];    /* Filename to use */
+    char     name[32];                  /* Dataset name */
+    haddr_t  stored_eoa;                /* The stored EOA value */
+    hid_t    driver_id = -1;            /* ID for this VFD */
+    unsigned long driver_flags = 0;     /* VFD feature flags */
+    herr_t   ret;                       /* Return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing H5Fincrement_filesize() and H5Fget_eoa())\n"));
+
+    fapl = h5_fileaccess();
+    h5_fixname(FILE8, fapl, filename, sizeof filename);
+
+    /* Get the VFD feature flags */
+    driver_id = H5Pget_driver(fapl);
+    CHECK(driver_id, FAIL, "H5Pget_driver");
+
+    ret = H5FDdriver_query(driver_id, &driver_flags);
+    CHECK(ret, FAIL, "H5PDdriver_query");
+
+    /* Check whether the VFD feature flag supports these two public routines */
+    if(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO) {
+
+        fcpl = H5Pcreate(H5P_FILE_CREATE);
+        CHECK(fcpl, FAIL, "H5Pcreate");
+
+        /* Set file space strategy */
+        ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, FALSE, (hsize_t)1);
+        CHECK(ret, FAIL, "H5P_set_file_space_strategy");
+
+        /* Create the test file */
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
+        CHECK(fid, FAIL, "H5Fcreate");
+
+        /* Create dataspace for datasets */
+        dspace = H5Screate(H5S_SCALAR);
+        CHECK(dspace, FAIL, "H5Screate");
+
+        /* Create a dataset creation property list */
+        dcpl = H5Pcreate(H5P_DATASET_CREATE);
+        CHECK(dcpl, FAIL, "H5Pcreate");
+
+        /* Set the space allocation time to early */
+        ret = H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
+        CHECK(ret, FAIL, "H5Pset_alloc_time");
+
+        /* Create datasets in file */
+        for(u = 0; u < 10; u++) {
+            sprintf(name, "Dataset %u", u);
+            dset = H5Dcreate2(fid, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+            CHECK(dset, FAIL, "H5Dcreate2");
+
+            ret = H5Dclose(dset);
+            CHECK(ret, FAIL, "H5Dclose");
+        } /* end for */
+
+        /* Close dataspace */
+        ret = H5Sclose(dspace);
+        CHECK(ret, FAIL, "H5Sclose");
+
+        /* Close dataset creation property list */
+        ret = H5Pclose(dcpl);
+        CHECK(ret, FAIL, "H5Pclose");
+
+        /* Close file */
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+
+        /* Get the file size */
+        filesize = h5_get_file_size(filename, fapl);
+
+        /* Open the file */
+        fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+        CHECK(fid, FAIL, "H5Fopen");
+
+        /* Get the stored EOA */
+        ret = H5Fget_eoa(fid, &stored_eoa);
+        CHECK(ret, FAIL, "H5Fget_eoa");
+        
+        /* Verify the stored EOA is the same as filesize */
+        VERIFY(filesize, stored_eoa, "file size");
+
+        /* Set the EOA to the MAX(EOA, EOF) + 512 */
+        ret = H5Fincrement_filesize(fid, 512);
+        CHECK(ret, FAIL, "H5Fincrement_filesize");
+
+        /* Close file */
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+
+        /* Get the file size */
+        filesize = h5_get_file_size(filename, fapl);
+
+        /* Verify the filesize is the previous stored_eoa + 512 */
+        VERIFY(filesize, stored_eoa+512, "file size");
+
+        /* Close the file access property list */
+        ret = H5Pclose(fapl);
+        CHECK(ret, FAIL, "H5Pclose");
+
+        /* Close the file creation property list */
+        ret = H5Pclose(fcpl);
+        CHECK(ret, FAIL, "H5Pclose");
+    }
+} /* end test_incr_filesize() */
+
+/****************************************************************
+**
 **  test_deprec():
 **    Test deprecated functionality.
 **
@@ -7210,6 +7337,7 @@ test_file(void)
     test_libver_bounds_low_high();
     test_libver_macros();                       /* Test the macros for library version comparison */
     test_libver_macros2();                      /* Test the macros for library version comparison */
+    test_incr_filesize(env_h5_drvr);            /* Test H5Fincrement_filesize() and H5Fget_eoa() */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_deprec();                              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

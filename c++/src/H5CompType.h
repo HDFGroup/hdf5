@@ -36,7 +36,7 @@ class H5_DLLCPP CompType : public DataType {
         // Gets the compound datatype of the specified dataset
         CompType(const DataSet& dataset);  // H5Dget_type
 
-        // Copy constructor - makes a copy of original object
+        // Copy constructor - same as the original CompType.
         CompType(const CompType& original);
 
         // Constructors that open a compound datatype, given a location.

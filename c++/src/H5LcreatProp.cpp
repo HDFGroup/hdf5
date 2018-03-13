@@ -88,7 +88,7 @@ LinkCreatPropList::LinkCreatPropList() : PropList(H5P_LINK_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:    LinkCreatPropList copy constructor
-///\brief       Copy Constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: LinkCreatPropList instance to copy
 // December, 2016
 //--------------------------------------------------------------------------

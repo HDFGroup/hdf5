@@ -88,7 +88,7 @@ ObjCreatPropList::ObjCreatPropList() : PropList(H5P_OBJECT_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:    ObjCreatPropList copy constructor
-///\brief       Copy Constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: ObjCreatPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

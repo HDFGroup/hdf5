@@ -395,7 +395,7 @@ H5_DLL void H5G__ent_copy(H5G_entry_t *dst, const H5G_entry_t *src,
             H5_copy_depth_t depth);
 H5_DLL void H5G__ent_reset(H5G_entry_t *ent);
 H5_DLL herr_t H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp,
-				  H5G_entry_t *ent, unsigned n);
+				  const uint8_t *p_end, H5G_entry_t *ent, unsigned n);
 H5_DLL herr_t H5G__ent_encode_vec(const H5F_t *f, uint8_t **pp,
 				  const H5G_entry_t *ent, unsigned n);
 H5_DLL herr_t H5G__ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap,

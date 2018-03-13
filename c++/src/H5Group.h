@@ -53,7 +53,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
         // default constructor
         Group();
 
-        // Copy constructor: makes a copy of the original object
+        // Copy constructor: same as the original Group.
         Group(const Group& original);
 
         // Gets the group id.

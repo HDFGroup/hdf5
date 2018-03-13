@@ -68,7 +68,7 @@ DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs(), id(existin
 
 //--------------------------------------------------------------------------
 // Function:    DataSet copy constructor
-///\brief       Copy constructor: makes a copy of the original DataSet object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: DataSet instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

@@ -104,19 +104,6 @@ class H5_DLLCPP H5Object : public H5Location {
         // Default constructor
         H5Object();
 
-        // *** Deprecation warning ***
-        // The following two constructors are no longer appropriate after the
-        // data member "id" had been moved to the sub-classes.
-        // The copy constructor is a noop and is removed in 1.8.15 and the
-        // other will be removed from 1.10 release, and then from 1.8 if its
-        // removal does not raise any problems in two 1.10 releases.
-
-        // Creates a copy of an existing object giving the object id
-        // H5Object(const hid_t object_id);
-
-        // Copy constructor: makes copy of an H5Object object.
-        // H5Object(const H5Object& original);
-
         // Sets the identifier of this object to a new value. - this one
         // doesn't increment reference count
         virtual void p_setId(const hid_t new_id) = 0;

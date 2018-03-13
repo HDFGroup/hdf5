@@ -55,7 +55,7 @@ PredType::PredType() : AtomType() {}
 
 //--------------------------------------------------------------------------
 // Function:    PredType copy constructor
-///\brief       Copy constructor: makes a copy of the original PredType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: PredType instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

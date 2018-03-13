@@ -60,7 +60,7 @@ class H5_DLLCPP AtomType : public DataType {
         virtual H5std_string fromClass () const { return("AtomType"); }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-        // Copy constructor - makes copy of the original object
+        // Copy constructor: same as the original AtomType.
         AtomType(const AtomType& original);
 
         // Noop destructor

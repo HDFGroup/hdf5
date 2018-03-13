@@ -79,7 +79,7 @@ class H5_DLLCPP FileCreatPropList : public PropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass() const { return("FileCreatPropList"); }
 
-        // Copy constructor: creates a copy of a FileCreatPropList object.
+        // Copy constructor: same as the original FileCreatPropList.
         FileCreatPropList(const FileCreatPropList& orig);
 
         // Creates a copy of an existing file create property list

@@ -102,7 +102,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DSetMemXferPropList"); }
 
-        // Copy constructor: makes a copy of a DSetMemXferPropList object.
+        // Copy constructor - same as the original DSetMemXferPropList.
         DSetMemXferPropList(const DSetMemXferPropList& orig);
 
         // Creates a copy of an existing dataset memory and transfer

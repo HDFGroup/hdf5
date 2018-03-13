@@ -53,7 +53,7 @@ class H5_DLLCPP IntType : public AtomType {
         // Creates a integer datatype using an existing id
         IntType(const hid_t existing_id);
 
-        // Copy constructor: makes copy of IntType object
+        // Copy constructor: same as the original IntType.
         IntType(const IntType& original);
 
         // Noop destructor.
