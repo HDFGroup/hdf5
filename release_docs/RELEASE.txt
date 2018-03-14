@@ -89,12 +89,12 @@ New Features
     - Add an enumerated value to H5F_libver_t for H5Pset_libver_bounds().
 
       Currently, the library defines two values for H5F_libver_t and supports
-      only two pairs of (low, high) combinations as derived from these values. 
+      only two pairs of (low, high) combinations as derived from these values.
       Thus the bounds setting via H5Pset_libver_bounds() is rather restricted.
 
-      Add an enumerated value (H5F_LIBVER_V18) to H5F_libver_t and 
-      H5Pset_libver_bounds() now supports five pairs of (low, high) combinations 
-      as derived from these values.  This addition provides the user more 
+      Add an enumerated value (H5F_LIBVER_V18) to H5F_libver_t and
+      H5Pset_libver_bounds() now supports five pairs of (low, high) combinations
+      as derived from these values.  This addition provides the user more
       flexibility in setting bounds for object creation.
 
       (VC - 2018/03/14)
@@ -234,6 +234,14 @@ New Features
 
     Java Library:
     ----------------
+    - Wrapper added for enabling the error stack.
+
+      H5error_off would disable the error stack reporting. In order
+      to re-enable the reporting, the error stack info needs to be
+      saved so that H5error_on can revert state.
+
+      (ADB - 2018/03/13, HDFFV-10412)
+
     - Wrappers added for the following APIs:
       H5Pset_evict_on_close
       H5Pget_evict_on_close
@@ -525,7 +533,7 @@ Bug Fixes since HDF5-1.10.1 release
       and closed, the library truncated the file to the stored EOA.
 
       Add an option to the tool in setting the file's stored EOA in the
-      superblock to the maximum of (EOA, EOF) + increment.  
+      superblock to the maximum of (EOA, EOF) + increment.
       Another option is also added to print the file's EOA and EOF.
 
       (VC - 2018/03/14, HDFFV-10360)
@@ -722,8 +730,8 @@ Bug Fixes since HDF5-1.10.1 release
 
     Testing
     -------
-    - Memory for three variables in testphdf5's coll_write_test was malloced 
-      but not freed, leaking memory when running the test.  The variables' 
+    - Memory for three variables in testphdf5's coll_write_test was malloced
+      but not freed, leaking memory when running the test.  The variables'
       memory is now freed.
 
       (LRK - 2018/03/12, HDFFV-10397)
