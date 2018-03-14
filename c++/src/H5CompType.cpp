@@ -40,7 +40,7 @@ CompType::CompType() : DataType() {}
 
 //--------------------------------------------------------------------------
 // Function:    CompType copy constructor
-///\brief       Copy constructor: makes copy of the original CompType object
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: Original CompType instance
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

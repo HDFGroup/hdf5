@@ -39,7 +39,7 @@ Exception::Exception(const H5std_string& func, const H5std_string& message) : de
 
 //--------------------------------------------------------------------------
 // Function:    Exception copy constructor
-///\brief       Copy constructor: makes a copy of the original Exception object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       orig - IN: Exception instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

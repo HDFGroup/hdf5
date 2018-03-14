@@ -125,7 +125,7 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 
 //--------------------------------------------------------------------------
 // Function:    DataType copy constructor
-///\brief       Copy constructor: makes a copy of the original DataType object
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataType::DataType(const DataType& original) : H5Object(), id(original.id), encoded_buf(NULL), buf_size(0)

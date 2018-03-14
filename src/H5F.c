@@ -845,8 +845,6 @@ herr_t
 H5Fget_filesize(hid_t file_id, hsize_t *size)
 {
     H5F_t       *file;                  /* File object for file ID */
-    haddr_t     eof;                    /* End of file address */
-    haddr_t     eoa;                    /* End of allocation address */
     haddr_t     max_eof_eoa;            /* Maximum of the EOA & EOF */
     haddr_t     base_addr;              /* Base address for the file */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -859,11 +857,9 @@ H5Fget_filesize(hid_t file_id, hsize_t *size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual file size */
-    eof = H5FD_get_eof(file->shared->lf, H5FD_MEM_DEFAULT);
-    eoa = H5FD_get_eoa(file->shared->lf, H5FD_MEM_DEFAULT);
-    max_eof_eoa = MAX(eof, eoa);
-    if(HADDR_UNDEF == max_eof_eoa)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file get eof/eoa requests failed")
+    if(H5F__get_max_eof_eoa(file, &max_eof_eoa) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file can't get max eof/eoa ")
+
     base_addr = H5FD_get_base_addr(file->shared->lf);
 
     if(size)
@@ -1949,3 +1945,87 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_mdc_image_info() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_eoa
+ *
+ * Purpose:     Returns the address of the first byte after the last
+ *              allocated memory in the file.
+ *              (See H5FDget_eoa() in H5FD.c)
+ *
+ * Return:      Success:    First byte after allocated memory.
+ *              Failure:    HADDR_UNDEF
+ *
+ * Return:      Non-negative on success/Negative on errors
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_eoa(hid_t file_id, haddr_t *eoa)
+{
+    H5F_t *file;                    /* File object for file ID */
+    haddr_t rel_eoa;                /* Relative address of EOA */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*a", file_id, eoa);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
+
+    /* This public routine will work only for drivers with this feature enabled.*/
+    /* We might introduce a new feature flag in the future */
+    if(!H5F_HAS_FEATURE(file, H5FD_FEAT_SUPPORTS_SWMR_IO))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must use a SWMR-compatible VFD for this public routine")
+
+    /* The real work */
+    if(HADDR_UNDEF == (rel_eoa = H5FD_get_eoa(file->shared->lf, H5FD_MEM_DEFAULT)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "get_eoa request failed")
+
+    /* (Note compensating for base address subtraction in internal routine) */
+    if(eoa)
+        *eoa = rel_eoa + H5FD_get_base_addr(file->shared->lf);
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fget_eoa() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fincrement_filesize
+ *
+ * Purpose:     Set the EOA for the file to the maximum of (EOA, EOF) + increment
+ *
+ * Return:      Non-negative on success/Negative on errors
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fincrement_filesize(hid_t file_id, hsize_t increment)
+{
+    H5F_t *file;                /* File object for file ID */
+    haddr_t max_eof_eoa;        /* Maximum of the relative EOA & EOF */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ih", file_id, increment);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
+
+    /* This public routine will work only for drivers with this feature enabled.*/
+    /* We might introduce a new feature flag in the future */
+    if(!H5F_HAS_FEATURE(file, H5FD_FEAT_SUPPORTS_SWMR_IO))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must use a SWMR-compatible VFD for this public routine")
+
+    /* Get the maximum of EOA and EOF */
+    if(H5F__get_max_eof_eoa(file, &max_eof_eoa) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "file can't get max eof/eoa ")
+
+    /* Set EOA to the maximum value + increment */
+    /* H5FD_set_eoa() will add base_addr to max_eof_eoa */
+    if(H5FD_set_eoa(file->shared->lf, H5FD_MEM_DEFAULT, max_eof_eoa + increment) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_eoa request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fincrement_filesize() */

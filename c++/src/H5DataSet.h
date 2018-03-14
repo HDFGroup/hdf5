@@ -93,7 +93,7 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
         // Default constructor.
         DataSet();
 
-        // Copy constructor.
+        // Copy constructor - same as the original DataSet.
         DataSet(const DataSet& original);
 
         // Creates a copy of an existing DataSet using its id.
