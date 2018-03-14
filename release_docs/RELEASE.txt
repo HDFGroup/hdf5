@@ -359,6 +359,30 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - Freeing of object header in H5Ocache.c
+
+      It was discovered that the object header was not released properly
+      when the checksum verification failed and a re-load of the object
+      header was needed.
+
+      Free the object header that failed the chksum verification only
+      after the new object header is reloaded, deserialized and set up.
+
+      (VC - 2018/03/14, HDFFV-10209)
+
+    - H5Pset_evict_on_close in H5Pfapl.c
+
+      Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
+      parallel library.
+
+      (ADB - 2018/03/06, HDFFV-10414)
+
+    - Utility function can not handle lowercase Windows drive letters
+
+      Added call to toupper function for drive letter.
+
+      (ADB - 2017/12/18, HDFFV-10307)
+
     - Fix H5Sencode() bug when the number of elements selected is > 2^32
 
       H5Sencode() incorrectly encodes dataspace selection with number of
@@ -375,30 +399,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (VC - 2017/11/28, HDFFV-9947)
 
-    - Freeing of object header in H5Ocache.c
-
-      It was discovered that the object header was not released properly
-      when the checksum verification failed and a re-load of the object
-      header was needed.
-
-      Free the object header that failed the chksum verification only
-      after the new object header is reloaded, deserialized and set up.
-
-      (VC - 2018/03/14, HDFFV-10209)
-
-    - H5Pset_evict_on_close in H5Pfapl.c
-
-      Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
-      parallel library.
-             (ADB - 2018/03/6, HDFFV-10414)
-
-    - Utility function can not handle lowercase Windows drive letters
-
-      Added call to toupper function for drive letter.
-
-      (ADB - 2017/12/18, HDFFV-10307)
-
-    - filter plugin handling in H5PL.c and H5Z.c
+    - Filter plugin handling in H5PL.c and H5Z.c
 
       It was discovered that the dynamic loading process used by
       filter plugins had issues with library dependencies.
@@ -407,7 +408,8 @@ Bug Fixes since HDF5-1.10.1 release
       allowed HDF5 C library to make dependent libraries private. The
       filter plugin libraries no longer require dependent libraries
       (such as szip or zlib) to be available.
-             (ADB - 2017/11/16, HDFFV-10328)
+             
+      (ADB - 2017/11/16, HDFFV-10328)
 
     - Fix rare object header corruption bug
 
