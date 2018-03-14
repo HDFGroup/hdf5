@@ -115,6 +115,19 @@ New Features
 
     Library:
     --------
+    - Add an enumerated value to H5F_libver_t for H5Pset_libver_bounds().
+
+      Currently, the library defines two values for H5F_libver_t and supports
+      only two pairs of (low, high) combinations as derived from these values. 
+      Thus the bounds setting via H5Pset_libver_bounds() is rather restricted.
+
+      Add an enumerated value (H5F_LIBVER_V18) to H5F_libver_t and 
+      H5Pset_libver_bounds() now supports five pairs of (low, high) combinations 
+      as derived from these values.  This addition provides the user more 
+      flexibility in setting bounds for object creation.
+
+      (VC - 2018/03/14)
+
     - Add prefix option to VDS files.
 
       Currently, VDS source files must be in the active directory to be
@@ -346,11 +359,23 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - Freeing of object header in H5Ocache.c
+
+      It was discovered that the object header was not released properly
+      when the checksum verification failed and a re-load of the object
+      header was needed.
+
+      Free the object header that failed the chksum verification only
+      after the new object header is reloaded, deserialized and set up.
+
+      (VC - 2018/03/14, HDFFV-10209)
+
     - H5Pset_evict_on_close in H5Pfapl.c
 
       Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
       parallel library.
-             (ADB - 2018/03/6, HDFFV-10414)
+
+      (ADB - 2018/03/06, HDFFV-10414)
 
     - Utility function can not handle lowercase Windows drive letters
 
@@ -374,7 +399,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (VC - 2017/11/28, HDFFV-9947)
 
-    - filter plugin handling in H5PL.c and H5Z.c
+    - Filter plugin handling in H5PL.c and H5Z.c
 
       It was discovered that the dynamic loading process used by
       filter plugins had issues with library dependencies.
@@ -383,7 +408,8 @@ Bug Fixes since HDF5-1.10.1 release
       allowed HDF5 C library to make dependent libraries private. The
       filter plugin libraries no longer require dependent libraries
       (such as szip or zlib) to be available.
-             (ADB - 2017/11/16, HDFFV-10328)
+             
+      (ADB - 2017/11/16, HDFFV-10328)
 
     - Fix rare object header corruption bug
 
@@ -694,6 +720,20 @@ Bug Fixes since HDF5-1.10.1 release
 
     Tools
     -----
+    - h5clear
+
+      An enhancement to the tool in setting a file's stored EOA.
+
+      It was discovered that a crashed file's stored EOA in the superblock
+      was smaller than the actual file's EOF.  When the file was reopened
+      and closed, the library truncated the file to the stored EOA.
+
+      Add an option to the tool in setting the file's stored EOA in the
+      superblock to the maximum of (EOA, EOF) + increment.  
+      Another option is also added to print the file's EOA and EOF.
+
+      (VC - 2018/03/14, HDFFV-10360)
+
     - h5repack
 
       h5repack changes the chunk parameters when a change of layout is not
