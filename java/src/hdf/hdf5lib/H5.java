@@ -424,12 +424,18 @@ public class H5 implements java.io.Serializable {
     private synchronized static native int H5dont_atexit() throws HDF5LibraryException;
 
     /**
-     * Turn off error handling By default, the C library prints the error stack of the HDF-5 C library on stdout. This
+     * Turn off error handling. By default, the C library prints the error stack of the HDF-5 C library on stdout. This
      * behavior may be disabled by calling H5error_off().
      *
      * @return a non-negative value if successful
      */
     public synchronized static native int H5error_off();
+
+    /**
+     * Turn on error handling. By default, the C library prints the error stack of the HDF-5 C library on stdout. This
+     * behavior may be reenabled by calling H5error_on().
+     */
+    public synchronized static native void H5error_on();
 
     /**
      * H5garbage_collect collects on all free-lists of all types.
