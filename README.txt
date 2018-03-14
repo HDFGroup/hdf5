@@ -1,4 +1,4 @@
-HDF5 version 1.10.2-snap10 currently under development
+HDF5 version 1.10.3-snap0 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
