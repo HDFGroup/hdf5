@@ -31,6 +31,16 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5error_1off
   (JNIEnv *env, jclass clss );
 
+/*
+ * Class:     hdf_hdf5lib_exceptions_HDF5Library
+ * Method:    H5error_on
+ * Signature: ()V
+ *
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5error_1on
+  (JNIEnv *env, jclass clss );
+
 
 /*
  * Class:     hdf_hdf5lib_exceptions_HDFLibraryException

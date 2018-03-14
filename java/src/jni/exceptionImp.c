@@ -33,6 +33,9 @@ extern "C" {
 #include "h5jni.h"
 #include "exceptionImp.h"
 
+extern H5E_auto2_t         efunc;
+extern void               *edata;
+
 
 /*******************/
 /* Local Variables */
@@ -122,9 +125,23 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5error_1off
     (JNIEnv *env, jclass clss)
 {
+    H5Eget_auto2(H5E_DEFAULT, &efunc, &edata);
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     return 0;
 } /* end Java_hdf_hdf5lib_H5_H5error_1off() */
+
+/*
+ * Class:     hdf_hdf5lib_exceptions_HDF5Library
+ * Method:    H5error_on
+ * Signature: ()V
+ *
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5error_1on
+    (JNIEnv *env, jclass clss)
+{
+    H5Eset_auto2(H5E_DEFAULT, efunc, edata);
+} /* end Java_hdf_hdf5lib_H5_H5error_1on() */
 
 
 /*
