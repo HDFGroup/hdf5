@@ -346,6 +346,12 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - H5Pset_evict_on_close in H5Pfapl.c
+
+      Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
+      parallel library.
+             (ADB - 2018/03/6, HDFFV-10414)
+
     - Utility function can not handle lowercase Windows drive letters
 
       Added call to toupper function for drive letter.
@@ -367,18 +373,6 @@ Bug Fixes since HDF5-1.10.1 release
       See details in the RFC: H5Sencode/H5Secode Format Change.
 
       (VC - 2017/11/28, HDFFV-9947)
-
-    - H5Pset_evict_on_close in H5Pfapl.c
-
-      Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
-      parallel library.
-             (ADB - 2018/03/6, HDFFV-10414)
-
-    - Utility function can not handle lowercase Windows drive letters
-
-      Added call to toupper function for drive letter.
-
-      (ADB - 2017/12/18, HDFFV-10307)
 
     - filter plugin handling in H5PL.c and H5Z.c
 
@@ -904,8 +898,8 @@ Bug Fixes since HDF5-1.10.1 release
 
     Testing
     -------
-    - Memory for three variables in testphdf5's coll_write_test was malloced 
-      but not freed, leaking memory when running the test.  The variables' 
+    - Memory for three variables in testphdf5's coll_write_test was malloced
+      but not freed, leaking memory when running the test.  The variables'
       memory is now freed.
 
       (LRK - 2018/03/12, HDFFV-10397)
