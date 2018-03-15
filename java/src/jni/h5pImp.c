@@ -2794,17 +2794,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1libver_1bounds
 {
     herr_t retVal = -1;
 
-    if ((H5F_libver_t)high != H5F_LIBVER_LATEST) {
-        h5badArgument(env, "H5Pset_libver_bounds:  invalid high library version bound");
-    } /* end if */
-    else if(((H5F_libver_t)low !=H5F_LIBVER_EARLIEST) && ((H5F_libver_t)low != H5F_LIBVER_LATEST)) {
-        h5badArgument(env, "H5Pset_libver_bounds:  invalid low library version bound");
-    } /* end else if */
-    else {
-        retVal = H5Pset_libver_bounds((hid_t)fapl_id, (H5F_libver_t)low, (H5F_libver_t)high);
-        if(retVal < 0)
-            h5libraryError(env);
-    } /* end else */
+    retVal = H5Pset_libver_bounds((hid_t)fapl_id, (H5F_libver_t)low, (H5F_libver_t)high);
+    if(retVal < 0)
+        h5libraryError(env);
 
     return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1libver_1bounds */

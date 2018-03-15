@@ -206,14 +206,14 @@ public class TestH5P {
         assertEquals(nlinks, 20L);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_libver_bounds_invalidlow() throws Throwable {
         H5.H5Pset_libver_bounds(fapl_id, 5, HDF5Constants.H5F_LIBVER_LATEST);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_libver_bounds_invalidhigh() throws Throwable {
-        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST, 5);
+        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V110+1);
     }
 
     @Test
