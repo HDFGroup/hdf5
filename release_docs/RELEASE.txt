@@ -118,12 +118,12 @@ New Features
     - Add an enumerated value to H5F_libver_t for H5Pset_libver_bounds().
 
       Currently, the library defines two values for H5F_libver_t and supports
-      only two pairs of (low, high) combinations as derived from these values. 
+      only two pairs of (low, high) combinations as derived from these values.
       Thus the bounds setting via H5Pset_libver_bounds() is rather restricted.
 
-      Add an enumerated value (H5F_LIBVER_V18) to H5F_libver_t and 
-      H5Pset_libver_bounds() now supports five pairs of (low, high) combinations 
-      as derived from these values.  This addition provides the user more 
+      Add an enumerated value (H5F_LIBVER_V18) to H5F_libver_t and
+      H5Pset_libver_bounds() now supports five pairs of (low, high) combinations
+      as derived from these values.  This addition provides the user more
       flexibility in setting bounds for object creation.
 
       (VC - 2018/03/14)
@@ -737,7 +737,7 @@ Bug Fixes since HDF5-1.10.1 release
       and closed, the library truncated the file to the stored EOA.
 
       Add an option to the tool in setting the file's stored EOA in the
-      superblock to the maximum of (EOA, EOF) + increment.  
+      superblock to the maximum of (EOA, EOF) + increment.
       Another option is also added to print the file's EOA and EOF.
 
       (VC - 2018/03/14, HDFFV-10360)
