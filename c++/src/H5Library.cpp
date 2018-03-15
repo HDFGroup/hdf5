@@ -188,6 +188,10 @@ void H5Library::initH5cpp()
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating LinkAccPropList::deleteConstants failed");
 
+    ret_value = std::atexit(LinkCreatPropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registrating LinkCreatPropList::deleteConstants failed");
+
     ret_value = std::atexit(FileAccPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating FileAccPropList::deleteConstants failed");
