@@ -31,6 +31,8 @@
 #define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 #include "H5Gpkg.h"
 
+#include "H5CXprivate.h"        /* API Contexts                         */
+
 const char *FILENAME[] = {
     "ohdr",
     NULL
@@ -67,6 +69,7 @@ test_cont(char *filename, hid_t fapl)
     const char	*short_name = "T";
     const char	*long_name = "This is the message";
     size_t	nchunks;
+hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("object header continuation block");
 
@@ -76,6 +79,8 @@ test_cont(char *filename, hid_t fapl)
     /* Create the file to operate on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
+if(H5CX_push() < 0) FAIL_STACK_ERROR
+api_ctx_pushed = TRUE;
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
     if (H5AC_ignore_tags(f) < 0) {
@@ -84,51 +89,51 @@ test_cont(char *filename, hid_t fapl)
         goto error;
     } /* end if */
 
-    if(H5O_create(f, H5AC_ind_read_dxpl_id, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_locA/*out*/) < 0)
+    if(H5O_create(f, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_locA/*out*/) < 0)
             FAIL_STACK_ERROR
 
-    if(H5O_create(f, H5AC_ind_read_dxpl_id, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_locB/*out*/) < 0)
+    if(H5O_create(f, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_locB/*out*/) < 0)
             FAIL_STACK_ERROR
 
     time_new = 11111111;
 
-    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &long_name, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &long_name) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
-    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
-    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
-        FAIL_STACK_ERROR
-
-    if(H5O_msg_create(&oh_locA, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locA, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &short_name, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
 
-    if(1 != H5O_link(&oh_locA, 1, H5AC_ind_read_dxpl_id))
-        FAIL_STACK_ERROR
-    if(1 != H5O_link(&oh_locB, 1, H5AC_ind_read_dxpl_id))
-        FAIL_STACK_ERROR
-    if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
-        FAIL_STACK_ERROR
-    if(H5O_expunge_chunks_test(&oh_locA, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &short_name) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_get_hdr_info(&oh_locA, H5AC_ind_read_dxpl_id, &hdr_info) < 0)
+    if(1 != H5O_link(&oh_locA, 1))
+        FAIL_STACK_ERROR
+    if(1 != H5O_link(&oh_locB, 1))
+        FAIL_STACK_ERROR
+    if(H5AC_flush(f) < 0)
+        FAIL_STACK_ERROR
+    if(H5O_expunge_chunks_test(&oh_locA) < 0)
+        FAIL_STACK_ERROR
+
+    if(H5O_get_hdr_info(&oh_locA, &hdr_info) < 0)
         FAIL_STACK_ERROR
     nchunks = hdr_info.nchunks;
 
     /* remove the 1st H5O_NAME_ID message */
-    if(H5O_msg_remove(&oh_locA, H5O_NAME_ID, 0, FALSE, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_remove(&oh_locA, H5O_NAME_ID, 0, FALSE) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_get_hdr_info(&oh_locA, H5AC_ind_read_dxpl_id, &hdr_info) < 0)
+    if(H5O_get_hdr_info(&oh_locA, &hdr_info) < 0)
         FAIL_STACK_ERROR
 
     if(hdr_info.nchunks >= nchunks)
@@ -140,6 +145,7 @@ test_cont(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
+if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
 
     PASSED();
 
@@ -151,6 +157,7 @@ error:
         H5O_close(&oh_locA, NULL);
         H5O_close(&oh_locB, NULL);
         H5Fclose(file);
+if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
 
     return FAIL;
@@ -169,7 +176,6 @@ test_ohdr_cache(char *filename, hid_t fapl)
 {
     hid_t	file = -1;              /* File ID */
     hid_t       my_fapl;                /* FAPL ID */
-    hid_t       my_dxpl;                /* DXPL ID */
     H5AC_cache_config_t mdc_config;     /* Metadata cache configuration info */
     H5F_t	*f = NULL;              /* File handle */
     H5HL_t      *lheap, *lheap2, *lheap3; /* Pointer to local heaps */
@@ -195,10 +201,6 @@ test_ohdr_cache(char *filename, hid_t fapl)
     if(H5Pset_mdc_config(my_fapl, &mdc_config) < 0)
         FAIL_STACK_ERROR
 
-    /* Make a copy of the default DXPL */
-    if((my_dxpl = H5Pcopy(H5AC_ind_read_dxpl_id)) < 0)
-        FAIL_STACK_ERROR
-
     /* Create the file to operate on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
         FAIL_STACK_ERROR
@@ -210,31 +212,31 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create object (local heap) that occupies most of cache */
-    if(H5HL_create(f, my_dxpl, (31 * 1024), &lheap_addr) < 0)
+    if(H5HL_create(f, (31 * 1024), &lheap_addr) < 0)
         FAIL_STACK_ERROR
 
     /* Protect local heap (which actually pins it in the cache) */
-    if(NULL == (lheap = H5HL_protect(f, my_dxpl, lheap_addr, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (lheap = H5HL_protect(f, lheap_addr, H5AC__READ_ONLY_FLAG)))
         FAIL_STACK_ERROR
 
     /* Create an object header */
     HDmemset(&oh_loc, 0, sizeof(oh_loc));
-    if(H5O_create(f, my_dxpl, (size_t)2048, (size_t)1, H5P_GROUP_CREATE_DEFAULT, &oh_loc/*out*/) < 0)
+    if(H5O_create(f, (size_t)2048, (size_t)1, H5P_GROUP_CREATE_DEFAULT, &oh_loc/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Query object header information */
     rc = 0;
-    if(H5O_get_rc(&oh_loc, my_dxpl, &rc) < 0)
+    if(H5O_get_rc(&oh_loc, &rc) < 0)
         FAIL_STACK_ERROR
     if(0 != rc)
         TEST_ERROR
 
     /* Create object (local heap) that occupies most of cache */
-    if(H5HL_create(f, my_dxpl, (31 * 1024), &lheap_addr2) < 0)
+    if(H5HL_create(f, (31 * 1024), &lheap_addr2) < 0)
         FAIL_STACK_ERROR
 
     /* Protect local heap (which actually pins it in the cache) */
-    if(NULL == (lheap2 = H5HL_protect(f, my_dxpl, lheap_addr2, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (lheap2 = H5HL_protect(f, lheap_addr2, H5AC__READ_ONLY_FLAG)))
         FAIL_STACK_ERROR
 
     /* Unprotect local heap (which actually unpins it from the cache) */
@@ -243,15 +245,15 @@ test_ohdr_cache(char *filename, hid_t fapl)
 
     /* Create object header message in new object header */
     time_new = 11111111;
-    if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, my_dxpl) < 0)
+    if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
 
     /* Create object (local heap) that occupies most of cache */
-    if(H5HL_create(f, my_dxpl, (31 * 1024), &lheap_addr3) < 0)
+    if(H5HL_create(f, (31 * 1024), &lheap_addr3) < 0)
         FAIL_STACK_ERROR
 
     /* Protect local heap (which actually pins it in the cache) */
-    if(NULL == (lheap3 = H5HL_protect(f, my_dxpl, lheap_addr3, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (lheap3 = H5HL_protect(f, lheap_addr3, H5AC__READ_ONLY_FLAG)))
         FAIL_STACK_ERROR
 
     /* Unprotect local heap (which actually unpins it from the cache) */
@@ -265,13 +267,13 @@ test_ohdr_cache(char *filename, hid_t fapl)
      *  a non-invasive way -QAK)
      */
     rc = 0;
-    if(H5O_get_rc(&oh_loc, my_dxpl, &rc) < 0)
+    if(H5O_get_rc(&oh_loc, &rc) < 0)
         FAIL_STACK_ERROR
     if(0 != rc)
         TEST_ERROR
 
     /* Decrement reference count o object header */
-    if(H5O_dec_rc_by_loc(&oh_loc, my_dxpl) < 0)
+    if(H5O_dec_rc_by_loc(&oh_loc) < 0)
         FAIL_STACK_ERROR
 
     /* Close object header created */
@@ -282,8 +284,6 @@ test_ohdr_cache(char *filename, hid_t fapl)
     if(H5HL_unprotect(lheap) < 0)
         FAIL_STACK_ERROR
 
-    if(H5Pclose(my_dxpl) < 0)
-        FAIL_STACK_ERROR
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -763,6 +763,7 @@ main(void)
     time_t	time_new, ro;
     int		i;                      /* Local index variable */
     unsigned    b;                      /* Index for "new format" loop */
+hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret;                    /* Generic return value */
 
     /* Reset library */
@@ -789,6 +790,8 @@ main(void)
         /* Create the file to operate on */
         if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             FAIL_STACK_ERROR
+if(H5CX_push() < 0) FAIL_STACK_ERROR
+api_ctx_pushed = TRUE;
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
         if(H5AC_ignore_tags(f) < 0) {
@@ -803,22 +806,22 @@ main(void)
          */
         TESTING("object header creation");
         HDmemset(&oh_loc, 0, sizeof(oh_loc));
-        if(H5O_create(f, H5AC_ind_read_dxpl_id, (size_t)64, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_loc/*out*/) < 0)
+        if(H5O_create(f, (size_t)64, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_loc/*out*/) < 0)
             FAIL_STACK_ERROR
         PASSED();
 
         /* create a new message */
         TESTING("message creation");
         time_new = 11111111;
-        if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
             FAIL_STACK_ERROR
-        if(1 != H5O_link(&oh_loc, 1, H5AC_ind_read_dxpl_id))
+        if(1 != H5O_link(&oh_loc, 1))
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+        if(H5AC_flush(f) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
-        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro))
             FAIL_STACK_ERROR
         if(ro != time_new)
             TEST_ERROR
@@ -829,19 +832,19 @@ main(void)
          */
         TESTING("message modification");
         time_new = 33333333;
-        if(H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+        if(H5AC_flush(f) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
-        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro))
             FAIL_STACK_ERROR
         if(ro != time_new)
             TEST_ERROR
 
         /* Make certain that chunk #0 in the object header can be encoded with a 1-byte size */
-        if(H5O_get_hdr_info(&oh_loc, H5AC_ind_read_dxpl_id, &hdr_info) < 0)
+        if(H5O_get_hdr_info(&oh_loc, &hdr_info) < 0)
             FAIL_STACK_ERROR
         if(hdr_info.space.total >=256)
             TEST_ERROR
@@ -859,16 +862,16 @@ main(void)
         TESTING("object header overflow in memory");
         for(i = 0; i < 40; i++) {
             time_new = (i + 1) * 1000 + 1000000;
-            if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+            if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
-        if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+        if(H5AC_flush(f) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that chunk #0 in the object header will be encoded with a 2-byte size */
-        if(H5O_get_hdr_info(&oh_loc, H5AC_ind_read_dxpl_id, &hdr_info) < 0)
+        if(H5O_get_hdr_info(&oh_loc, &hdr_info) < 0)
             FAIL_STACK_ERROR
         if(hdr_info.space.total < 256)
             TEST_ERROR
@@ -903,11 +906,11 @@ main(void)
         TESTING("object header overflow on disk");
         for(i = 0; i < 10; i++) {
             time_new = (i + 1) * 1000 + 10;
-            if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+            if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
                 FAIL_STACK_ERROR
-            if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+            if(H5AC_flush(f) < 0)
                 FAIL_STACK_ERROR
-            if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+            if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
         PASSED();
@@ -916,13 +919,13 @@ main(void)
          * Delete all time messages.
          */
         TESTING("message deletion");
-        if(H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE) < 0)
             FAIL_STACK_ERROR
-        if(H5O_msg_remove(&oh_loc, H5O_MTIME_ID, H5O_ALL, TRUE, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_remove(&oh_loc, H5O_MTIME_ID, H5O_ALL, TRUE) < 0)
             FAIL_STACK_ERROR
-        if(H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro))
             FAIL_STACK_ERROR
-        if(H5O_msg_read(&oh_loc, H5O_MTIME_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(H5O_msg_read(&oh_loc, H5O_MTIME_ID, &ro))
             FAIL_STACK_ERROR
         PASSED();
 
@@ -933,23 +936,23 @@ main(void)
          */
         TESTING("constant message handling");
         time_new = 22222222;
-        if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &time_new) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+        if(H5AC_flush(f) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
-        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro))
             FAIL_STACK_ERROR
         if(ro != time_new)
             TEST_ERROR
         time_new = 33333333;
         H5E_BEGIN_TRY {
-            ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id);
+            ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new);
         } H5E_END_TRY;
         if(ret >= 0)
             TEST_ERROR
-        if(H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE) < 0)
             FAIL_STACK_ERROR
         PASSED();
 
@@ -977,6 +980,7 @@ main(void)
         /* Test object header creation metadata cache issues */
         if(test_ohdr_cache(filename, fapl) < 0)
             TEST_ERROR
+if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
     } /* end for */
 
     /* Verify symbol table messages are cached */
@@ -994,6 +998,7 @@ error:
     puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5Fclose(file);
+if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
 
     return 1;

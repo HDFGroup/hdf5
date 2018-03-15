@@ -208,10 +208,9 @@ H5_DLL hbool_t H5S_has_extent(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_ndims(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[]/*out*/,
     hsize_t max_dims[]/*out*/);
-H5_DLL herr_t H5S_write(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned update_flags,
-    H5S_t *ds);
-H5_DLL herr_t H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, H5S_t *ds);
-H5_DLL H5S_t *H5S_read(const struct H5O_loc_t *loc, hid_t dxpl_id);
+H5_DLL herr_t H5S_write(H5F_t *f, H5O_t *oh, unsigned update_flags, H5S_t *ds);
+H5_DLL herr_t H5S_append(H5F_t *f, struct H5O_t *oh, H5S_t *ds);
+H5_DLL H5S_t *H5S_read(const struct H5O_loc_t *loc);
 H5_DLL htri_t H5S_set_extent(H5S_t *space, const hsize_t *size);
 H5_DLL herr_t H5S_set_extent_real(H5S_t *space, const hsize_t *size);
 H5_DLL herr_t H5S_set_extent_simple(H5S_t *space, unsigned rank,
@@ -222,11 +221,8 @@ H5_DLL H5S_t *H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
 H5_DLL herr_t H5S_set_latest_version(H5S_t *ds);
 H5_DLL herr_t H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc);
 H5_DLL H5S_t *H5S_decode(const unsigned char **p);
-H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
-    int indent, int fwidth);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+H5_DLL herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent,
+    int fwidth);
 
 /* Operations on dataspace extents */
 H5_DLL hsize_t H5S_extent_nelem(const H5S_extent_t *ext);

@@ -11,10 +11,10 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #003: (file name) line (number) in H5G_traverse(): internal path traversal failed
     major: Symbol table
     minor: Object not found
-  #004: (file name) line (number) in H5G_traverse_real(): traversal operator failed
+  #004: (file name) line (number) in H5G__traverse_real(): traversal operator failed
     major: Symbol table
     minor: Callback failed
-  #005: (file name) line (number) in H5G_loc_find_cb(): object 'y' doesn't exist
+  #005: (file name) line (number) in H5G__loc_find_cb(): object 'y' doesn't exist
     major: Symbol table
     minor: Object not found
 h5dump error: unable to open group "/y"

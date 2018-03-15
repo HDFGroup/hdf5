@@ -35,13 +35,13 @@
 /* Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts() */
 #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS      (0x0002u)
 
-/* Property names for H5LTDdirect_chunk_write */   
+/* Property names for H5DOwrite_chunk */   
 #define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME	        "direct_chunk_flag"
 #define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME	"direct_chunk_filters"
 #define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME		"direct_chunk_offset"
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME	"direct_chunk_datasize"
 
-/* Property names for H5LTDdirect_chunk_read */
+/* Property names for H5DOread_chunk */
 #define H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME        "direct_chunk_read_flag"
 #define H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME      "direct_chunk_read_offset"
 #define H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME     "direct_chunk_read_filters"

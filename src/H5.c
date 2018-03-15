@@ -21,6 +21,7 @@
 /***********/
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5FLprivate.h"        /* Free lists                           */
@@ -224,7 +225,7 @@ H5_init_library(void)
     if(H5L_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
     if(H5FS_init() < 0)
-       HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize FS interface")
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize FS interface")
 
     /* Debugging? */
     H5_debug_mask("-all");
@@ -266,6 +267,9 @@ H5_term_library(void)
 
     /* Indicate that the library is being shut down */
     H5_TERM_GLOBAL = TRUE;
+
+    /* Push the API context without checking for errors */
+    H5CX_push_special();
 
     /* Check if we should display error output */
     (void)H5Eget_auto2(H5E_DEFAULT, &func, NULL);
@@ -351,9 +355,12 @@ H5_term_library(void)
             /* Don't shut down the skip list code until everything that uses it is down */
             if(pending == 0)
                 pending += DOWN(SL);
-            /* Don't shut down the free list code until _everything_ else is down */
+            /* Don't shut down the free list code until everything that uses it is down */
             if(pending == 0)
                 pending += DOWN(FL);
+            /* Don't shut down the API context code until _everything_ else is down */
+            if(pending == 0)
+                pending += DOWN(CX);
         } /* end if */
     } while(pending && ntries++ < 100);
 
@@ -408,6 +415,9 @@ H5_term_library(void)
 
     /* Mark library as closed */
     H5_INIT_GLOBAL = FALSE;
+
+    /* Don't pop the API context, since it's been shut down already */
+    /* H5CX_pop_special(); */
 
 done:
 #ifdef H5_HAVE_THREADSAFE

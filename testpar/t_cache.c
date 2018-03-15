@@ -3061,7 +3061,7 @@ expunge_entry(H5F_t * file_ptr,
 
     if ( nerrors == 0 ) {
 
-        result = H5AC_expunge_entry(file_ptr, (hid_t)-1, &(types[0]),
+        result = H5AC_expunge_entry(file_ptr, &(types[0]),
 			            entry_ptr->header.addr, H5AC__NO_FLAGS_SET);
 
         if ( result < 0 ) {
@@ -3148,7 +3148,7 @@ insert_entry(H5C_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-        result = H5AC_insert_entry(file_ptr, H5AC_ind_read_dxpl_id, &(types[0]),
+        result = H5AC_insert_entry(file_ptr, &(types[0]),
                 entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
@@ -3547,7 +3547,6 @@ lock_entry(H5F_t * file_ptr,
 	HDassert( ! (entry_ptr->locked) );
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5AC_protect(file_ptr, 
-                                        H5AC_ind_read_dxpl_id,
                                         &(types[0]), entry_ptr->base_addr,
                                         &entry_ptr->base_addr, 
                                         H5AC__NO_FLAGS_SET);
@@ -3844,7 +3843,7 @@ move_entry(H5F_t * file_ptr,
 	    new_entry_ptr->local_len = tmp_len;
 	} /* end if */
 
-        result = H5AC_move_entry(file_ptr, &(types[0]), old_addr, new_addr, H5AC_ind_read_dxpl_id);
+        result = H5AC_move_entry(file_ptr, &(types[0]), old_addr, new_addr);
 
         if ( ( result < 0 ) || ( old_entry_ptr->header.addr != new_addr ) ) {
 
@@ -4227,7 +4226,7 @@ setup_cache_for_test(hid_t * fid_ptr,
      */
     if ( success ) { /* allocate space for test entries */
 
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id,
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT,
                                       (hsize_t)(max_addr + BASE_ADDR));
 
         if ( actual_base_addr == HADDR_UNDEF ) {
@@ -5047,7 +5046,7 @@ unlock_entry(H5F_t * file_ptr,
             entry_ptr->dirty = TRUE;
         }
 
-        result = H5AC_unprotect(file_ptr, H5AC_ind_read_dxpl_id, &(types[0]),
+        result = H5AC_unprotect(file_ptr, &(types[0]),
                 entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||

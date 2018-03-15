@@ -22,6 +22,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -77,6 +78,7 @@ herr_t
 H5Ddebug(hid_t dset_id)
 {
     H5D_t	*dset;                  /* Dataset to debug */
+hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -85,14 +87,20 @@ H5Ddebug(hid_t dset_id)
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+/* Set API context */
+if(H5CX_push() < 0)
+    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
+api_ctx_pushed = TRUE;
 
     /* Print B-tree information */
     if(H5D_CHUNKED == dset->shared->layout.type)
-	(void)H5D__chunk_dump_index(dset, H5AC_ind_read_dxpl_id, stdout);
+	(void)H5D__chunk_dump_index(dset, stdout);
     else if(H5D_CONTIGUOUS == dset->shared->layout.type)
 	HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->shared->layout.storage.u.contig.addr);
 
 done:
+if(api_ctx_pushed && H5CX_pop() < 0)
+    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ddebug() */
 

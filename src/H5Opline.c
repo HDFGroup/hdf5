@@ -33,36 +33,36 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_pline_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_pline_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+static void *H5O__pline_decode(H5F_t *f, H5O_t *open_oh,
     unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
 static void *H5O_pline_copy(const void *_mesg, void *_dest);
 static size_t H5O_pline_size(const H5F_t *f, const void *_mesg);
-static herr_t H5O_pline_reset(void *_mesg);
-static herr_t H5O_pline_free(void *_mesg);
+static herr_t H5O__pline_reset(void *_mesg);
+static herr_t H5O__pline_free(void *_mesg);
 static herr_t H5O_pline_pre_copy_file(H5F_t *file_src,
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
-static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
-    FILE * stream, int indent, int fwidth);
+static herr_t H5O__pline_debug(H5F_t *f, const void *_mesg, FILE * stream,
+    int indent, int fwidth);
 
 /* Set up & include shared message "interface" info */
 #define H5O_SHARED_TYPE			H5O_MSG_PLINE
 #define H5O_SHARED_DECODE		H5O_pline_shared_decode
-#define H5O_SHARED_DECODE_REAL		H5O_pline_decode
+#define H5O_SHARED_DECODE_REAL		H5O__pline_decode
 #define H5O_SHARED_ENCODE		H5O_pline_shared_encode
 #define H5O_SHARED_ENCODE_REAL		H5O_pline_encode
 #define H5O_SHARED_SIZE			H5O_pline_shared_size
 #define H5O_SHARED_SIZE_REAL		H5O_pline_size
-#define H5O_SHARED_DELETE		H5O_pline_shared_delete
+#define H5O_SHARED_DELETE		H5O__pline_shared_delete
 #undef H5O_SHARED_DELETE_REAL
-#define H5O_SHARED_LINK			H5O_pline_shared_link
+#define H5O_SHARED_LINK			H5O__pline_shared_link
 #undef H5O_SHARED_LINK_REAL
-#define H5O_SHARED_COPY_FILE		H5O_pline_shared_copy_file
+#define H5O_SHARED_COPY_FILE		H5O__pline_shared_copy_file
 #undef H5O_SHARED_COPY_FILE_REAL
 #define H5O_SHARED_POST_COPY_FILE	H5O_pline_shared_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_REAL
 #undef  H5O_SHARED_POST_COPY_FILE_UPD
 #define H5O_SHARED_DEBUG		H5O_pline_shared_debug
-#define H5O_SHARED_DEBUG_REAL		H5O_pline_debug
+#define H5O_SHARED_DEBUG_REAL		H5O__pline_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
 /* This message derives from H5O message class */
@@ -75,14 +75,14 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     H5O_pline_shared_encode,	/* encode message		*/
     H5O_pline_copy,		/* copy the native value	*/
     H5O_pline_shared_size,	/* size of raw message		*/
-    H5O_pline_reset,		/* reset method			*/
-    H5O_pline_free,		/* free method			*/
-    H5O_pline_shared_delete,    /* file delete method		*/
-    H5O_pline_shared_link,	/* link method			*/
+    H5O__pline_reset,		/* reset method			*/
+    H5O__pline_free,		/* free method			*/
+    H5O__pline_shared_delete,   /* file delete method		*/
+    H5O__pline_shared_link,	/* link method			*/
     NULL,			/* set share method		*/
     NULL,		    	/*can share method		*/
     H5O_pline_pre_copy_file,	/* pre copy native value to file */
-    H5O_pline_shared_copy_file,	/* copy native value to file    */
+    H5O__pline_shared_copy_file,	/* copy native value to file    */
     H5O_pline_shared_post_copy_file,	/* post copy native value to file    */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
@@ -95,7 +95,7 @@ H5FL_DEFINE(H5O_pline_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_decode
+ * Function:	H5O__pline_decode
  *
  * Purpose:	Decodes a filter pipeline message.
  *
@@ -108,7 +108,7 @@ H5FL_DEFINE(H5O_pline_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_pline_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_pline_t		*pline = NULL;          /* Pipeline message */
@@ -117,7 +117,7 @@ H5O_pline_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     size_t		i;                      /* Local index variable */
     void		*ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(p);
@@ -215,12 +215,12 @@ H5O_pline_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
 
 done:
     if(NULL == ret_value && pline) {
-        H5O_pline_reset(pline);
-        H5O_pline_free(pline);
+        H5O__pline_reset(pline);
+        H5O__pline_free(pline);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_pline_decode() */
+} /* end H5O__pline_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -405,9 +405,9 @@ H5O_pline_copy(const void *_src, void *_dst/*out*/)
 
 done:
     if(!ret_value && dst) {
-        H5O_pline_reset(dst);
+        H5O__pline_reset(dst);
 	if(!_dst)
-            H5O_pline_free(dst);
+            H5O__pline_free(dst);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -476,7 +476,7 @@ H5O_pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_reset
+ * Function:	H5O__pline_reset
  *
  * Purpose:	Resets a filter pipeline message by clearing all filters.
  *		The MESG buffer is not freed.
@@ -489,12 +489,12 @@ H5O_pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_reset(void *mesg)
+H5O__pline_reset(void *mesg)
 {
     H5O_pline_t	*pline = (H5O_pline_t*)mesg;    /* Pipeline message */
     size_t	i;                              /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(pline);
 
@@ -521,13 +521,13 @@ H5O_pline_reset(void *mesg)
     pline->version = H5O_PLINE_VERSION_1;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_pline_reset() */
+} /* end H5O__pline_reset() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_free
+ * Function:	H5O__pline_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -537,16 +537,16 @@ H5O_pline_reset(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_free(void *mesg)
+H5O__pline_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(mesg);
 
     mesg = H5FL_FREE(H5O_pline_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_pline_free() */
+} /* end H5O__pline_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -591,7 +591,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_pline_debug
+ * Function:	H5O__pline_debug
  *
  * Purpose:	Prints debugging information for filter pipeline message MESG
  *		on output stream STREAM.  Each line is indented INDENT
@@ -605,13 +605,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *mesg, FILE *stream,
-		int indent, int fwidth)
+H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream,
+    int indent, int fwidth)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t *)mesg;
     size_t		i, j;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -660,7 +660,7 @@ H5O_pline_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const voi
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_pline_debug() */
+} /* end H5O__pline_debug() */
 
 
 /*-------------------------------------------------------------------------
