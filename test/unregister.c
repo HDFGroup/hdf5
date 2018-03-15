@@ -16,6 +16,7 @@
  * Purpose:	Tests H5Zunregister function
  */
 #include "h5test.h"
+#include "H5CXprivate.h"        /* API Contexts                         */
 
 const char *FILENAME[] = {
     "unregister_filter_1",
@@ -230,10 +231,13 @@ main(void)
 {
     hid_t		fapl;
     int	nerrors = 0;
+hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Testing setup */
     h5_reset();
     fapl = h5_fileaccess();
+if(H5CX_push() < 0) FAIL_STACK_ERROR
+api_ctx_pushed = TRUE;
 
     /* Test unregistering filter in its own file */
     nerrors += (test_unregister_filters(fapl) < 0           ? 1 : 0);
@@ -242,6 +246,8 @@ main(void)
         goto error;
     printf("All filter unregistration tests passed.\n");
     h5_cleanup(FILENAME, fapl);
+if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+api_ctx_pushed = FALSE;
 
     return 0;
 
@@ -249,6 +255,7 @@ error:
     nerrors = MAX(1, nerrors);
     printf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
+if(api_ctx_pushed) H5CX_pop();
     return 1;
 }
 

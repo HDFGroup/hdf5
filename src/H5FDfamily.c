@@ -1265,7 +1265,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
+H5FD_family_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     unsigned		u, nerrors = 0;
@@ -1274,7 +1274,7 @@ H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
     FUNC_ENTER_NOAPI_NOINIT
 
     for(u = 0; u < file->nmembs; u++)
-        if(file->memb[u] && H5FD_flush(file->memb[u], dxpl_id, closing) < 0)
+        if(file->memb[u] && H5FD_flush(file->memb[u], closing) < 0)
             nerrors++;
 
     if(nerrors)
@@ -1300,7 +1300,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
+H5FD_family_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     unsigned		u, nerrors = 0;
@@ -1309,7 +1309,7 @@ H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
     FUNC_ENTER_NOAPI_NOINIT
 
     for(u = 0; u < file->nmembs; u++)
-        if(file->memb[u] && H5FD_truncate(file->memb[u], dxpl_id, closing) < 0)
+        if(file->memb[u] && H5FD_truncate(file->memb[u], closing) < 0)
             nerrors++;
 
     if(nerrors)

@@ -2172,28 +2172,30 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 /* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
  * up a metadata tag. */
-#define FUNC_ENTER_NOAPI_TAG(dxpl_id, tag, err) {                             \
+#define FUNC_ENTER_NOAPI_TAG(tag, err) {                                      \
     haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
                                                                               \
     FUNC_ENTER_COMMON(!H5_IS_API(FUNC));                                      \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag)<0)                               \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5AC_tag(tag, &prev_tag);                                                 \
     FUNC_ENTER_NOAPI_INIT(err)                                                \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-#define FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, tag, err) {                      \
+#define FUNC_ENTER_NOAPI_NOINIT_TAG(tag) {                                    \
     haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
                                                                               \
     FUNC_ENTER_COMMON(!H5_IS_API(FUNC));                                      \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag)<0)                               \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5AC_tag(tag, &prev_tag);                                                 \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
 /* Use this macro for all "normal" package-level functions */
 #define FUNC_ENTER_PACKAGE {                                                  \
+    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
+    H5_PUSH_FUNC                                                              \
+    if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+
+/* Use this macro for all package-level functions that are VOL entry-points */
+#define FUNC_ENTER_PACKAGE_VOL {                                              \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
@@ -2206,18 +2208,33 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 
 /* Use the following macro as replacement for the FUNC_ENTER_PACKAGE
  * macro when the function needs to set up a metadata tag. */
-#define FUNC_ENTER_PACKAGE_TAG(dxpl_id, tag, err) {                           \
+#define FUNC_ENTER_PACKAGE_TAG(tag) {                                         \
     haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
                                                                               \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag) < 0)                             \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5AC_tag(tag, &prev_tag);                                                 \
+    H5_PUSH_FUNC                                                              \
+    if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+
+/* Use the following macro as replacement for the FUNC_ENTER_PACKAGE
+ * macro when the function needs to set up a metadata tag and is also a
+ * VOL entry-point. */
+#define FUNC_ENTER_PACKAGE_VOL_TAG(tag) {                                     \
+    haddr_t prev_tag = HADDR_UNDEF;                                           \
+                                                                              \
+    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
+    H5AC_tag(tag, &prev_tag);                                                 \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
 /* Use this macro for all "normal" staticly-scoped functions */
 #define FUNC_ENTER_STATIC {                                                   \
+    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
+    H5_PUSH_FUNC                                                              \
+    if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+
+/* Use this macro for all "normal" staticly-scoped functions that are VOL entry-points */
+#define FUNC_ENTER_STATIC_VOL {                                               \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
@@ -2236,15 +2253,24 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 
 /* Use the following macro as replacement for the FUNC_ENTER_STATIC
  * macro when the function needs to set up a metadata tag. */
-#define FUNC_ENTER_STATIC_TAG(dxpl_id, tag, err) {                            \
+#define FUNC_ENTER_STATIC_TAG(tag) {                                          \
     haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
                                                                               \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag) < 0)                             \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
-    if(H5AC_start_transaction(tag_dxpl_id) < 0)                                           \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to set start transaction") \
+    H5AC_tag(tag, &prev_tag);                                                 \
+    H5AC_start_transaction(tag_dxpl_id);                                      \
+    H5_PUSH_FUNC                                                              \
+    if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+
+/* Use the following macro as replacement for the FUNC_ENTER_STATIC
+ * macro when the function needs to set up a metadata tag and is a VOL
+ * entry-point. */
+#define FUNC_ENTER_STATIC_VOL_TAG(tag) {                                      \
+    haddr_t prev_tag = HADDR_UNDEF;                                           \
+                                                                              \
+    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
+    H5AC_tag(tag, &prev_tag);                                                 \
+    H5AC_start_transaction(tag_dxpl_id);                                      \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2291,6 +2317,13 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     return(ret_value);                                                        \
 } /*end scope from beginning of FUNC_ENTER*/
 
+#define FUNC_LEAVE_NOAPI_VOL(ret_value)                                       \
+        ;                                                                     \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+    H5_POP_FUNC                                                               \
+    return(ret_value);                                                        \
+} /*end scope from beginning of FUNC_ENTER*/
+
 #define FUNC_LEAVE_NOAPI_VOID                                                 \
         ;                                                                     \
     } /*end scope from end of FUNC_ENTER*/                                    \
@@ -2310,11 +2343,19 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 } /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro when exiting a function that set up a metadata tag */
-#define FUNC_LEAVE_NOAPI_TAG(ret_value, err)                                  \
+#define FUNC_LEAVE_NOAPI_TAG(ret_value)                                       \
         ;                                                                     \
     } /*end scope from end of FUNC_ENTER*/                                    \
-    if(H5AC_tag(tag_dxpl_id, prev_tag, NULL) < 0)                             \
-        HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5AC_tag(prev_tag, NULL);                                                 \
+    H5_POP_FUNC                                                               \
+    return(ret_value);                                                        \
+} /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro when exiting a VOL entry-point function that set up a metadata tag */
+#define FUNC_LEAVE_NOAPI_VOL_TAG(ret_value)                                   \
+        ;                                                                     \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+    H5AC_tag(prev_tag, NULL);                                                 \
     H5_POP_FUNC                                                               \
     return(ret_value);                                                        \
 } /*end scope from beginning of FUNC_ENTER*/
@@ -2572,17 +2613,13 @@ func_init_failed:                                                             \
 
 /* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient).
  * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
-#define H5_BEGIN_TAG(dxpl, tag, err) {                                           \
-    haddr_t prv_tag = HADDR_UNDEF;                                               \
-    hid_t my_dxpl_id = dxpl;                                                     \
-    if(H5AC_tag(my_dxpl_id, tag, &prv_tag) < 0)                                  \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
-    if(H5AC_start_transaction(my_dxpl_id)<0)                               \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to set start transaction") 
+#define H5_BEGIN_TAG(tag) {                                                 \
+    haddr_t prv_tag = HADDR_UNDEF;                                          \
+    H5AC_tag(tag, &prv_tag);                                                \
+    H5AC_start_transaction(my_dxpl_id);
 
-#define H5_END_TAG(err)                                                          \
-    if(H5AC_tag(my_dxpl_id, prv_tag, NULL) <0)                                   \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+#define H5_END_TAG                                                          \
+    H5AC_tag(prv_tag, NULL);                                                \
 }
 
 /* Compile-time "assert" macro */
@@ -2600,6 +2637,7 @@ H5_DLL void H5_term_library(void);
 H5_DLL int H5A_term_package(void);
 H5_DLL int H5A_top_term_package(void);
 H5_DLL int H5AC_term_package(void);
+H5_DLL int H5CX_term_package(void);
 H5_DLL int H5D_term_package(void);
 H5_DLL int H5D_top_term_package(void);
 H5_DLL int H5E_term_package(void);

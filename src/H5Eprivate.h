@@ -72,8 +72,7 @@ typedef struct H5E_t H5E_t;
  * H5_END_TAG statements.  Resets the metadata tag before leaving the function.
  */
 #define HGOTO_ERROR_TAG(maj, min, ret_val, ...) {                              \
-   if(H5AC_tag(my_dxpl_id, prv_tag, NULL) < 0)                                 \
-      HERROR(H5E_CACHE, H5E_CANTTAG, "unable to apply metadata tag");          \
+   H5AC_tag(prv_tag, NULL);                                                    \
    HCOMMON_ERROR(maj, min, __VA_ARGS__);                                       \
    HGOTO_DONE(ret_val)                                                         \
 }
@@ -90,9 +89,8 @@ typedef struct H5E_t H5E_t;
  * HGOTO_DONE_TAG macro, used like HGOTO_DONE between H5_BEGIN_TAG and
  * H5_END_TAG statements.  Resets the metadata tag before leaving the function.
  */
-#define HGOTO_DONE_TAG(ret_val, err) {                                         \
-   if(H5AC_tag(my_dxpl_id, prv_tag, NULL) < 0)                                 \
-      HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
+#define HGOTO_DONE_TAG(ret_val) {                                              \
+   H5AC_tag(prv_tag, NULL);                                                    \
    HGOTO_DONE(ret_val)                                                         \
 }
 

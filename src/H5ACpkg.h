@@ -425,8 +425,8 @@ H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr,
 H5_DLL herr_t H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr,
     haddr_t new_addr);
-H5_DLL herr_t H5AC__flush_entries(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5AC__run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op);
+H5_DLL herr_t H5AC__flush_entries(H5F_t *f);
+H5_DLL herr_t H5AC__run_sync_point(H5F_t *f, int sync_point_op);
 H5_DLL herr_t H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
     void (*sync_point_done)(unsigned num_writes, haddr_t *written_entries_tbl));
 H5_DLL herr_t H5AC__set_write_done_callback(H5C_t * cache_ptr,

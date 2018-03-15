@@ -30,6 +30,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Ipkg.h"		/* IDs			  		*/
@@ -78,6 +79,7 @@ ssize_t
 H5I_get_name_test(hid_t id, char *name/*out*/, size_t size, hbool_t *cached)
 {
     H5G_loc_t     loc;          /* Object location */
+hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     ssize_t       ret_value = -1;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -86,11 +88,19 @@ H5I_get_name_test(hid_t id, char *name/*out*/, size_t size, hbool_t *cached)
     if(H5G_loc(id, &loc) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
 
+/* Set API context */
+if(H5CX_push() < 0)
+    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
+api_ctx_pushed = TRUE;
+
     /* Call internal group routine to retrieve object's name */
-    if((ret_value = H5G_get_name(&loc, name, size, cached, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
+    if((ret_value = H5G_get_name(&loc, name, size, cached)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
+if(api_ctx_pushed && H5CX_pop() < 0)
+    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_name_test() */
 

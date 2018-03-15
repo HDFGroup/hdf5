@@ -104,7 +104,6 @@ typedef struct H5FS_hdr_cache_ud_t {
 typedef struct H5FS_sinfo_cache_ud_t {
     H5F_t *f;                  /* File that free space section info is within */
     H5FS_t *fspace;            /* free space manager */
-    hid_t dxpl_id;
 } H5FS_sinfo_cache_ud_t;
 
 /* Free space section bin info */
@@ -237,8 +236,8 @@ H5_DLL herr_t H5FS_sinfo_dest(H5FS_sinfo_t *sinfo);
 
 /* Sanity check routines */
 #ifdef H5FS_DEBUG
-H5_DLL herr_t H5FS_assert(const H5FS_t *fspace, hid_t dxpl_id);
-H5_DLL herr_t H5FS_sect_assert(const H5FS_t *fspace, hid_t dxpl_id);
+H5_DLL herr_t H5FS__assert(const H5FS_t *fspace);
+H5_DLL herr_t H5FS__sect_assert(const H5FS_t *fspace);
 #endif /* H5FS_DEBUG */
 
 /* Testing routines */
