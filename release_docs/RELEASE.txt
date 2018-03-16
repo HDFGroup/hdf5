@@ -717,6 +717,20 @@ Bug Fixes since HDF5-1.10.1 release
 
       (RAW - 2017/11/03, HDFFV-10318)
 
+    - Fortran compilation fails for xlf and CMake builds
+
+      Fixed CMake shared library build for H5match_types and modules 
+
+      (MSB - 2017/12/19, HDFFV-10363)
+
+    - Shared libraries fail test on OSX with Fortran enabled with CMake
+
+      Fixed by removing the F77 use of EQUIVALENCE and COMMON, replaced
+      using MODULES. Updated CMake.
+
+      (MSB - 2017/12/07, HDFFV-10223) 
+
+
     Performance
     -------------
     -
