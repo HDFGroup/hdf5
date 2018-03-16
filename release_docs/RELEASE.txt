@@ -231,6 +231,12 @@ New Features
 
       (BMR - 2018/03/11, HDFFV-10149)
 
+    - A document is added to the HDF5 C++ API Reference Manual to show the
+      mapping from a C API to C++ wrappers.  It can be found from the main
+      page of the C++ API Reference Manual.
+
+      (BMR - 2017/10/17, HDFFV-10151)
+
 
     Java Library:
     ----------------
