@@ -174,8 +174,7 @@ New Features
 
     C++ Library:
     ------------
-    - The following wrappers are added:
-
+    - The following C++ API wrappers have been added to the C++ Library:
       + H5Lcreate_soft:
         // Creates a soft link from link_name to target_name.
         void link(const char *target_name, const char *link_name,...)
@@ -219,17 +218,45 @@ New Features
         void unlink(const H5std_string& link_name,
             const LinkAccPropList& lapl = LinkAccPropList::DEFAULT)
 
-    - Added class LinkCreatPropList
+        Note: additional parameter is added to previous H5Location::unlink.
+
+      + H5Tencode and H5Tdecode:
+        // Creates a binary object description of this datatype.
+        void DataType::encode() - C API H5Tencode()
+
+        // Returns the decoded type from the binary object description.
+        DataType::decode() - C API H5Tdecode()
+        ArrayType::decode() - C API H5Tdecode()
+        CompType::decode() - C API H5Tdecode()
+        DataType::decode() - C API H5Tdecode()
+        EnumType::decode() - C API H5Tdecode()
+        FloatType::decode() - C API H5Tdecode()
+        IntType::decode() - C API H5Tdecode()
+        StrType::decode() - C API H5Tdecode()
+        VarLenType::decode() - C API H5Tdecode()
+
+      + H5Lget_info:
+        // Returns the information of the named link.
+        H5L_info_t getLinkInfo(const H5std_string& link_name,...)
+
+      (BMR - 2018/03/11, HDFFV-10149)
+
+    - Added class LinkCreatPropList for link create property list.
+
+      (BMR - 2018/03/11, HDFFV-10149)
 
     - Added overloaded functions H5Location::createGroup to take a link
       creation property list
         Group createGroup(const char* name, const LinkCreatPropList& lcpl)
         Group createGroup(const H5std_string& name, const LinkCreatPropList& lcpl)
-    - Added wrapper for H5Lget_info() to H5Location
-        // Returns the information of the named link.
-        H5L_info_t getLinkInfo(const H5std_string& link_name,...)
 
       (BMR - 2018/03/11, HDFFV-10149)
+
+    - A document is added to the HDF5 C++ API Reference Manual to show the
+      mapping from a C API to C++ wrappers.  It can be found from the main
+      page of the C++ API Reference Manual.
+
+      (BMR - 2017/10/17, HDFFV-10151)
 
 
     Java Library:
