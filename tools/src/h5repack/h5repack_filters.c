@@ -84,7 +84,8 @@ static int aux_find_obj(const char* name, /* object name from traverse list */
         pack_opt_t *options,              /* repack options */
         pack_info_t *obj                  /*OUT*/) /* info about object to filter */
 {
-    char         *pdest;
+    char         *pdest = NULL;
+    char         *pname = NULL;
     int          result;
     unsigned int i;
 
@@ -94,11 +95,12 @@ static int aux_find_obj(const char* name, /* object name from traverse list */
             return (int) i;
         }
 
-        pdest = HDstrstr(name, options->op_tbl->objs[i].path);
-        result = (int) (pdest - name);
+        pdest = options->op_tbl->objs[i].path;
+        if (pdest[0] == '/') pdest++;
+        pname = name;
+        if (pname[0] == '/') pname++;
 
-        /* found at position 1, meaning without '/' */
-        if (pdest != NULL && result == 1) {
+        if (HDstrcmp(pdest, pname) == 0) {
             *obj = options->op_tbl->objs[i];
             return (int) i;
         }
@@ -278,30 +280,30 @@ int apply_filters(const char* name, /* object name from traverse list */
         *has_filter = 1;
         if (H5Premove_filter(dcpl_id, H5Z_FILTER_ALL) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Premove_filter failed");
-
-        /*-------------------------------------------------------------------------
-         * check if there is an existent chunk
-         * read it only if there is not a requested layout
-         *-------------------------------------------------------------------------
-         */
-        if (obj.layout == -1) {
-            if ((layout = H5Pget_layout(dcpl_id)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_layout failed");
-
-            if (layout == H5D_CHUNKED) {
-                if ((rank = H5Pget_chunk(dcpl_id, NELMTS(chsize), chsize/*out*/)) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_chunk failed");
-                obj.layout = H5D_CHUNKED;
-                obj.chunk.rank = rank;
-                for (i = 0; i < rank; i++)
-                    obj.chunk.chunk_lengths[i] = chsize[i];
-            }
-        }
     }
     else if(nfilters) {
         *has_filter = 1;
         if (aux_copy_obj(dcpl_id, name, &filtobj) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "aux_copy_obj failed");
+    }
+
+    /*-------------------------------------------------------------------------
+     * check if there is an existent chunk
+     * read it only if there is not a requested layout
+     *-------------------------------------------------------------------------
+     */
+    if (obj.layout == -1) {
+        if ((layout = H5Pget_layout(dcpl_id)) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_layout failed");
+
+        if (layout == H5D_CHUNKED) {
+            if ((rank = H5Pget_chunk(dcpl_id, NELMTS(chsize), chsize/*out*/)) < 0)
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_chunk failed");
+            obj.layout = H5D_CHUNKED;
+            obj.chunk.rank = rank;
+            for (i = 0; i < rank; i++)
+                obj.chunk.chunk_lengths[i] = chsize[i];
+        }
     }
 
     /*-------------------------------------------------------------------------

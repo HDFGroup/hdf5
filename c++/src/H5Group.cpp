@@ -27,6 +27,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -52,7 +53,7 @@ Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:    Group copy constructor
-///\brief       Copy constructor: makes a copy of the original Group object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: Original group to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -121,26 +122,6 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const 
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
-
-//--------------------------------------------------------------------------
-// Function:    Group overload constructor - dereference
-// brief        Given a reference, ref, to an hdf5 group, creates a Group objec
-// param        attr - IN: Specifying location where the referenced object is i
-// param        ref - IN: Reference pointer
-// param        ref_type - IN: Reference type - default to H5R_OBJECT
-// param        plist - IN: Property list - default to PropList::DEFAULT
-// exception    H5::ReferenceException
-// Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      Mar, 2017
-//              Removed in 1.10.1 because H5Location is Attribute's baseclass
-//              now. -BMR
-//--------------------------------------------------------------------------
-/* Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
-{
-    id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
-}
- */ 
 
 //--------------------------------------------------------------------------
 // Function:    Group::getNumObjs

@@ -26,6 +26,7 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dtypes.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr1.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr2.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr3.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset1.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset2.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset3.h5
@@ -63,10 +64,6 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/compounds_array_vlen2.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/non_comparables1.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmptest.he5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmptest2.he5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.reference.h5
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.output.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tudfilter.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tudfilter2.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/diff_strings1.h5
@@ -293,8 +290,8 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_800.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_801.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_tmp1.txt
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_tmp2.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8625.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8639.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_ud.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_udfail.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v1.txt
@@ -1021,6 +1018,10 @@
           h5diff_800.out.err
           h5diff_801.out
           h5diff_801.out.err
+          h5diff_8625.out
+          h5diff_8625.out.err
+          h5diff_8639.out
+          h5diff_8639.out.err
           h5diff_90.out
           h5diff_90.out.err
           h5diff_v1.out
@@ -1281,10 +1282,6 @@ ADD_H5_TEST (h5diff_631 0 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp18 g1/f
 # 7.  attributes
 # ##############################################################################
 ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6})
-# temporary test to verify HDF5-8625
-ADD_H5_TEST (h5diff_tmp1 0 tmptest2.he5 tmptest.he5)
-# temporary test to verify HDF5-8639
-ADD_H5_TEST (h5diff_tmp2 1 tmpSingleSiteBethe.output.h5 tmpSingleSiteBethe.reference.h5)
 
 # ##################################################
 #  attrs with verbose option level
@@ -1613,7 +1610,11 @@ ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
-ADD_H5_TEST (h5diff_530 0 -v  ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
+ADD_H5_TEST (h5diff_530 0 -v ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
+# test to verify HDFFV-8625
+ADD_H5_TEST (h5diff_8625 0 -v --enable-error-stack ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group/Compound_dset1 /group_copy/Compound_dset3)
+# test to verify HDFFV-8639
+ADD_H5_TEST (h5diff_8639 0 -v h5diff_attr3.h5 h5diff_attr2.h5 /g1)
 ADD_H5_TEST (h5diff_vlstr 0 -v tvlstr.h5 tvlstr2.h5)
 
 # ##############################################################################

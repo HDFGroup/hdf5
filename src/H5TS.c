@@ -266,8 +266,7 @@ H5TS_cancel_count_inc(void)
         cancel_counter = (H5TS_cancel_t *)HDcalloc(1, sizeof(H5TS_cancel_t));
 
         if (!cancel_counter) {
-            H5E_push_stack(NULL, "H5TS_cancel_count_inc", __FILE__, __LINE__,
-                H5E_ERR_CLS_g, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
+            HERROR(H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
             return FAIL;
         }
 

@@ -53,8 +53,8 @@ static herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
 static herr_t H5D__cache_dataspace_info(const H5D_t *dset);
 static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__build_extfile_prefix(const H5D_t *dset, hid_t dapl_id,
-        char **extfile_prefix);
+static herr_t H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id,
+    const char *prefix_type, char **file_prefix);
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
         hsize_t old_dim[]);
@@ -517,10 +517,10 @@ done:
 static herr_t
 H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
 {
-    htri_t  relocatable;                 /* Flag whether the type is relocatable */
-    htri_t  immutable;                   /* Flag whether the type is immutable */
-    hbool_t use_latest_format;           /* Flag indicating the 'latest datatype version support' is enabled */
-    herr_t  ret_value = SUCCEED;         /* Return value */
+    htri_t relocatable;            /* Flag whether the type is relocatable */
+    htri_t immutable;              /* Flag whether the type is immutable */
+    hbool_t use_at_least_v18;      /* Flag indicating to use at least v18 format versions */
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -537,17 +537,17 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
     if((immutable = H5T_is_immutable(type)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't check datatype?")
 
-    /* Get the file's 'use the latest datatype version support' flag */
-    use_latest_format = H5F_USE_LATEST_FLAGS(file, H5F_LATEST_DATATYPE);
+    /* To use at least v18 format versions or not */
+    use_at_least_v18 = (H5F_LOW_BOUND(file) >= H5F_LIBVER_V18);
 
     /* Copy the datatype if it's a custom datatype or if it'll change when it's location is changed */
-    if(!immutable || relocatable || use_latest_format) {
+    if(!immutable || relocatable || use_at_least_v18) {
         /* Copy datatype for dataset */
         if((dset->shared->type = H5T_copy(type, H5T_COPY_ALL)) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy datatype")
 
         /* Convert a datatype (if committed) to a transient type if the committed datatype's file
-        location is different from the file location where the dataset will be created */
+           location is different from the file location where the dataset will be created */
         if(H5T_convert_committed_datatype(dset->shared->type, file) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get shared datatype info")
 
@@ -555,10 +555,9 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
         if(H5T_set_loc(dset->shared->type, file, H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set datatype location")
 
-        /* Set the latest format, if requested */
-        if(use_latest_format)
-            if(H5T_set_latest_version(dset->shared->type) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
+        /* Set the version for datatype */
+       if(H5T_set_version(file, dset->shared->type) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set version of datatype")
 
         /* Get a datatype ID for the dataset's datatype */
         if((dset->shared->type_id = H5I_register(H5I_DATATYPE, dset->shared->type, FALSE)) < 0)
@@ -632,7 +631,6 @@ done:
 static herr_t
 H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
 {
-    hbool_t use_latest_format;          /* Flag indicating the 'latest dataspace version support' is enabled */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -642,9 +640,6 @@ H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
     HDassert(dset);
     HDassert(space);
 
-    /* Get the file's 'use the latest dataspace version support' flag */
-    use_latest_format = H5F_USE_LATEST_FLAGS(file, H5F_LATEST_DATASPACE);
-
     /* Copy dataspace for dataset */
     if(NULL == (dset->shared->space = H5S_copy(space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataspace")
@@ -653,10 +648,9 @@ H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
     if(H5D__cache_dataspace_info(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't cache dataspace info")
 
-    /* Set the latest format, if requested */
-    if(use_latest_format)
-        if(H5S_set_latest_version(dset->shared->space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
+    /* Set the version for dataspace */
+    if(H5S_set_version(file, dset->shared->space) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
 
     /* Set the dataset's dataspace to 'all' selection */
     if(H5S_select_all(dset->shared->space, TRUE) < 0)
@@ -688,6 +682,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     H5D_fill_value_t    fill_status;    /* Fill value status */
     hbool_t             fill_changed = FALSE;   /* Flag indicating the fill value was changed */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
+    hbool_t             use_at_least_v18;       /* Flag indicating to use at least v18 format versions */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -701,6 +696,9 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     layout = &dset->shared->layout;
     type = dset->shared->type;
     fill_prop = &dset->shared->dcpl_cache.fill;
+
+    /* To use at least v18 format versions or not */
+    use_at_least_v18 = (H5F_LOW_BOUND(file) >= H5F_LIBVER_V18);
 
     /* Retrieve "defined" status of fill value */
     if(H5P_is_fill_value_defined(fill_prop, &fill_status) < 0)
@@ -779,8 +777,8 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update new fill value header message")
 
     /* If there is valid information for the old fill value struct, add it */
-    /* (only if we aren't trying to write the 'latest fill message version support') */
-    if(fill_prop->buf && !(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_FILL_MSG))) {
+    /* (only if we aren't using v18 format versions and above */
+    if(fill_prop->buf && !use_at_least_v18) {
         H5O_fill_t old_fill_prop;       /* Copy of fill value property, for writing as "old" fill value */
 
         /* Shallow copy the fill value property */
@@ -832,10 +830,10 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
 #endif /* H5O_ENABLE_BOGUS */
 
     /* Add a modification time message, if using older format. */
-    /* (If using the latest 'no modification time message' version support, the modification time is part of the object
+    /* (If using v18 format versions and above, the the modification time is part of the object
      *  header and doesn't use a separate message -QAK)
      */
-    if(!(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_NO_MOD_TIME_MSG)))
+    if(!use_at_least_v18)
         if(H5O_touch_oh(file, oh, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
 
@@ -856,24 +854,26 @@ done:
 } /* end H5D__update_oh_info() */
 
 
+
 /*--------------------------------------------------------------------------
- * Function:    H5D__build_extfile_prefix
+ * Function:    H5D__build_file_prefix
  *
- * Purpose:     Determine the external file prefix to be used and store
- *              it in extfile_prefix. Stores an empty string if no prefix
+ * Purpose:     Determine the file prefix to be used and store
+ *              it in file_prefix. Stores an empty string if no prefix
  *              should be used.
  *
  * Return:      SUCCEED/FAIL
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5D__build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix /*out*/)
+H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type,
+    char **file_prefix /*out*/)
 {
     char            *prefix = NULL;       /* prefix used to look for the file               */
-    char            *extpath = NULL;      /* absolute path of directory the HDF5 file is in */
-    size_t          extpath_len;          /* length of extpath                              */
+    char            *filepath = NULL;     /* absolute path of directory the HDF5 file is in */
+    size_t          filepath_len;         /* length of file path                            */
     size_t          prefix_len;           /* length of prefix                               */
-    size_t          extfile_prefix_len;   /* length of expanded prefix                      */
+    size_t          file_prefix_len;      /* length of expanded prefix                      */
     H5P_genplist_t  *plist = NULL;        /* Property list pointer                          */
     herr_t          ret_value = SUCCEED;  /* Return value                                   */
 
@@ -882,20 +882,25 @@ H5D__build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefi
     /* Sanity checks */
     HDassert(dset);
     HDassert(dset->oloc.file);
-    extpath = H5F_EXTPATH(dset->oloc.file);
-    HDassert(extpath);
+    filepath = H5F_EXTPATH(dset->oloc.file);
+    HDassert(filepath);
 
     /* XXX: Future thread-safety note - getenv is not required
      *      to be reentrant.
      */
-    prefix = HDgetenv("HDF5_EXTFILE_PREFIX");
+    if(HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0)
+        prefix = HDgetenv("HDF5_VDS_PREFIX");
+    else if (HDstrcmp(prefix_type, H5D_ACS_EFILE_PREFIX_NAME) == 0)
+        prefix = HDgetenv("HDF5_EXTFILE_PREFIX");
+    else
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "prefix name is not sensible")
 
     if(prefix == NULL || *prefix == '\0') {
-        /* Set prefix to value of H5D_ACS_EFILE_PREFIX_NAME property */
+        /* Set prefix to value of prefix_type property */
         if(NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-        if(H5P_peek(plist, H5D_ACS_EFILE_PREFIX_NAME, &prefix) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file prefix")
+        if(H5P_peek(plist, prefix_type, &prefix) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file prefix")
     } /* end if */
 
     /* Prefix has to be checked for NULL / empty string again because the
@@ -905,29 +910,29 @@ H5D__build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefi
         /* filename is interpreted as relative to the current directory,
          * does not need to be expanded
          */
-        if(NULL == (*extfile_prefix = (char *)H5MM_strdup("")))
+        if(NULL == (*file_prefix = (char *)H5MM_strdup("")))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end if */
     else {
         if (HDstrncmp(prefix, "${ORIGIN}", HDstrlen("${ORIGIN}")) == 0) {
             /* Replace ${ORIGIN} at beginning of prefix by directory of HDF5 file */
-            extpath_len = HDstrlen(extpath);
+            filepath_len = HDstrlen(filepath);
             prefix_len = HDstrlen(prefix);
-            extfile_prefix_len = extpath_len + prefix_len - HDstrlen("${ORIGIN}") + 1;
+            file_prefix_len = filepath_len + prefix_len - HDstrlen("${ORIGIN}") + 1;
 
-            if(NULL == (*extfile_prefix = (char *)H5MM_malloc(extfile_prefix_len)))
+            if(NULL == (*file_prefix = (char *)H5MM_malloc(file_prefix_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate buffer")
-            HDsnprintf(*extfile_prefix, extfile_prefix_len, "%s%s", extpath, prefix + HDstrlen("${ORIGIN}"));
+            HDsnprintf(*file_prefix, file_prefix_len, "%s%s", filepath, prefix + HDstrlen("${ORIGIN}"));
         } /* end if */
         else {
-            if(NULL == (*extfile_prefix = (char *)H5MM_strdup(prefix)))
+            if(NULL == (*file_prefix = (char *)H5MM_strdup(prefix)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
         } /* end else */
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__build_extfile_prefix() */
+} /* H5D__build_file_prefix() */
 
 
 /*-------------------------------------------------------------------------
@@ -1059,26 +1064,19 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "compact dataset must have early space allocation")
     } /* end if */
 
-    /* Set the latest version of the layout, pline & fill messages, if requested */
-    if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_DSET_MSG_FLAGS)) {
-        /* Set the latest version for the I/O pipeline message */
-        if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_PLINE_MSG))
-            if(H5O_pline_set_latest_version(&new_dset->shared->dcpl_cache.pline) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline")
+    /* Set the version for the I/O pipeline message */
+    if(H5O_pline_set_version(file, &new_dset->shared->dcpl_cache.pline) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline")
 
-        /* Set the latest version for the fill message */
-        if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_FILL_MSG))
-            /* Set the latest version for the fill value message */
-            if(H5O_fill_set_latest_version(&new_dset->shared->dcpl_cache.fill) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value")
+    /* Set the version for the fill message */
+    if(H5O_fill_set_version(file, &new_dset->shared->dcpl_cache.fill) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value")
 
-        /* Set the latest version for the layout message */
-        if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_LAYOUT_MSG))
-            /* Set the latest version for the layout message */
-            if(H5D__layout_set_latest_version(&new_dset->shared->layout, new_dset->shared->space, &new_dset->shared->dcpl_cache) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of layout")
-    } /* end if */
-    else if(new_dset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
+    /* Set the latest version for the layout message */
+    if(H5D__layout_set_version(file, &new_dset->shared->layout) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of layout")
+
+    if(new_dset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
         /* Use latest indexing type for layout message version >= 4 */
         if(H5D__layout_set_latest_indexing(&new_dset->shared->layout, new_dset->shared->space, &new_dset->shared->dcpl_cache) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest indexing")
@@ -1108,8 +1106,12 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set up flush append property")
 
     /* Set the external file prefix */
-    if(H5D__build_extfile_prefix(new_dset, dapl_id, &new_dset->shared->extfile_prefix) < 0)
+    if(H5D__build_file_prefix(new_dset, dapl_id, H5D_ACS_EFILE_PREFIX_NAME, &new_dset->shared->extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
+
+    /* Set the VDS file prefix */
+    if(H5D__build_file_prefix(new_dset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &new_dset->shared->vds_prefix) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize VDS prefix")
 
     /* Add the dataset to the list of opened objects in the file */
     if(H5FO_top_incr(new_dset->oloc.file, new_dset->oloc.addr) < 0)
@@ -1156,6 +1158,7 @@ done:
             if(new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
             new_dset->shared->extfile_prefix = (char *)H5MM_xfree(new_dset->shared->extfile_prefix);
+            new_dset->shared->vds_prefix = (char *)H5MM_xfree(new_dset->shared->vds_prefix);
             new_dset->shared = H5FL_FREE(H5D_shared_t, new_dset->shared);
         } /* end if */
         new_dset->oloc.file = NULL;
@@ -1241,6 +1244,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
     H5D_shared_t    *shared_fo = NULL;
     H5D_t           *dataset = NULL;
     char            *extfile_prefix = NULL;  /* Expanded external file prefix */
+    char            *vds_prefix = NULL;      /* Expanded vds prefix */
     H5D_t           *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1261,8 +1265,12 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy path")
 
     /* Get the external file prefix */
-    if(H5D__build_extfile_prefix(dataset, dapl_id, &extfile_prefix) < 0)
+    if(H5D__build_file_prefix(dataset, dapl_id, H5D_ACS_EFILE_PREFIX_NAME, &extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
+
+    /* Get the VDS prefix */
+    if(H5D__build_file_prefix(dataset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &vds_prefix) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize VDS prefix")
 
     /* Check if dataset was already open */
     if(NULL == (shared_fo = (H5D_shared_t *)H5FO_opened(dataset->oloc.file, dataset->oloc.addr))) {
@@ -1288,6 +1296,11 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
         dataset->shared->extfile_prefix = extfile_prefix;
         /* Prevent string from being freed during done: */
         extfile_prefix = NULL;
+
+        /* Set the vds file prefix */
+        dataset->shared->vds_prefix = vds_prefix;
+        /* Prevent string from being freed during done: */
+        vds_prefix = NULL;
 
     } /* end if */
     else {
@@ -1320,12 +1333,14 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
 
 done:
     extfile_prefix = (char *)H5MM_xfree(extfile_prefix);
+    vds_prefix = (char *)H5MM_xfree(vds_prefix);
 
     if(ret_value == NULL) {
         /* Free the location--casting away const*/
         if(dataset) {
             if(shared_fo == NULL && dataset->shared) {   /* Need to free shared fo */
                 dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
+                dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
                 dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
             } /* end if */
 
@@ -1735,6 +1750,9 @@ H5D_close(H5D_t *dataset)
 
         /* Free the external file prefix */
         dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
+
+        /* Free the vds file prefix */
+        dataset->shared->vds_prefix = (char *)H5MM_xfree(dataset->shared->vds_prefix);
 
         /* Release layout, fill-value, efl & pipeline messages */
         if(dataset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT)
@@ -3153,7 +3171,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5D_get_create_plist(H5D_t *dset)
+H5D_get_create_plist(const H5D_t *dset)
 {
     H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
     H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
@@ -3329,7 +3347,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5D_get_access_plist(H5D_t *dset)
+H5D_get_access_plist(const H5D_t *dset)
 {
     H5P_genplist_t      *old_plist;     /* Default DAPL */
     H5P_genplist_t      *new_plist;     /* New DAPL */
@@ -3363,6 +3381,10 @@ H5D_get_access_plist(H5D_t *dset)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS view")
     if(H5P_set(new_plist, H5D_ACS_VDS_PRINTF_GAP_NAME, &(dset->shared->layout.storage.u.virt.printf_gap)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS printf gap")
+
+    /* Set the vds prefix option */
+    if(H5P_set(new_plist, H5D_ACS_VDS_PREFIX_NAME, &(dset->shared->vds_prefix)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vds prefix")
 
     /* Set the external file prefix option */
     if(H5P_set(new_plist, H5D_ACS_EFILE_PREFIX_NAME, &(dset->shared->extfile_prefix)) < 0)

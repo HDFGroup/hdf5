@@ -1043,7 +1043,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
          * Unix: does not apply
          */
         if(H5_CHECK_ABS_DRIVE(name)) {
-            drive = name[0] - 'A' + 1;
+            drive = HDtoupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             HDstrncpy(new_name, &name[2], name_len);
         } /* end if */

@@ -1753,33 +1753,38 @@ H5O_move_msgs_forward(H5F_t *f, H5O_t *oh)
                             if(NULL == (cont_targ_chk_proxy = H5O__chunk_protect(f, oh, ((H5O_cont_t *)(curr_msg->native))->chunkno)))
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
 
-                            /* Remove flush dependency on old continuation
-                             * message chunk */
-                            HDassert(cont_targ_chk_proxy);
-                            HDassert(cont_targ_chk_proxy->fd_parent);
-                            HDassert(curr_chk_proxy);
-                            HDassert((void *)curr_chk_proxy == cont_targ_chk_proxy->fd_parent);
+                            /* Check for flush dependency on previous continuation chunk */
+                            /* (As opposed to chunk 0) */
+                            if(cont_targ_chk_proxy->fd_parent) {
+                                /* Remove flush dependency on old continuation
+                                 * message chunk */
+                                HDassert(cont_targ_chk_proxy);
+                                HDassert(curr_chk_proxy);
+                                HDassert((void *)curr_chk_proxy == cont_targ_chk_proxy->fd_parent);
 
-                            if(H5AC_destroy_flush_dependency(curr_chk_proxy, cont_targ_chk_proxy) < 0)
-                                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                                if(H5AC_destroy_flush_dependency(curr_chk_proxy, cont_targ_chk_proxy) < 0)
+                                    HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
 
-                            cont_targ_chk_proxy->fd_parent = NULL;
+                                cont_targ_chk_proxy->fd_parent = NULL;
+                            } /* end if */
 
-                            /* Create flush dependency on new continuation
-                             * message chunk */
-                            if(H5AC_create_flush_dependency(null_chk_mdc_obj, cont_targ_chk_proxy) < 0)
-                                HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                            /* Avoid (another) flush dependency on chunk 0 */
+                            if(0 != null_msg->chunkno) {
+                                /* Sanity checks */
+                                HDassert(null_chk_mdc_obj);
+                                HDassert(((H5C_cache_entry_t *)null_chk_mdc_obj)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                                HDassert(((H5C_cache_entry_t *)null_chk_mdc_obj)->type);
+                                HDassert(((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_CHK_ID);
 
-                            HDassert(null_chk_mdc_obj);
-                            HDassert(((H5C_cache_entry_t *)null_chk_mdc_obj)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                            HDassert(((H5C_cache_entry_t *)null_chk_mdc_obj)->type);
-                            HDassert((((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_ID) ||
-                                     (((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_CHK_ID));
+                                /* Create flush dependency on new continuation
+                                 * message chunk */
+                                if(H5AC_create_flush_dependency(null_chk_mdc_obj, cont_targ_chk_proxy) < 0)
+                                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
-                            cont_targ_chk_proxy->fd_parent = null_chk_mdc_obj;
+                                cont_targ_chk_proxy->fd_parent = null_chk_mdc_obj;
+                            } /* end if */
 
-                            /* Unprotect continuation message target chunk
-                             */
+                            /* Unprotect continuation message target chunk */
                             if(H5O__chunk_unprotect(f, cont_targ_chk_proxy, FALSE) < 0)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
                             cont_targ_chk_proxy = NULL;

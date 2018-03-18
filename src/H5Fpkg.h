@@ -300,7 +300,8 @@ struct H5F_file_t {
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
-    unsigned	latest_flags;	/* The latest version support */
+    H5F_libver_t    low_bound;  /* The 'low' bound of library format versions */
+    H5F_libver_t    high_bound; /* The 'high' bound of library format versions */
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/
     unsigned	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
@@ -360,16 +361,16 @@ struct H5F_file_t {
  * to shared H5F_file_t structs.
  */
 struct H5F_t {
-    char		*open_name;	/* Name used to open file	*/
-    char		*actual_name;	/* Actual name of the file, after resolving symlinks, etc. */
-    char               	*extpath;       /* Path for searching target external link file */
-    H5F_file_t		*shared;	/* The shared file info		*/
-    unsigned		nopen_objs;	/* Number of open object headers*/
-    H5FO_t              *obj_count;     /* # of time each object is opened through top file structure */
-    hid_t               file_id;        /* ID of this file              */
-    hbool_t             closing;        /* File is in the process of being closed */
-    struct H5F_t        *parent;        /* Parent file that this file is mounted to */
-    unsigned            nmounts;        /* Number of children mounted to this file */
+    char		       *open_name;      /* Name used to open file                                       */
+    char		       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
+    char               *extpath;        /* Path for searching target external link file                 */
+    H5F_file_t		   *shared;         /* The shared file info                                         */
+    unsigned		    nopen_objs;     /* Number of open object headers                                */
+    H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
+    hid_t               file_id;        /* ID of this file                                              */
+    hbool_t             closing;        /* File is in the process of being closed                       */
+    struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
+    unsigned            nmounts;        /* Number of children mounted to this file                      */
 #ifdef H5_HAVE_PARALLEL
     H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
     hbool_t             coll_md_write;  /* Do all metadata writes collectively */
@@ -401,7 +402,7 @@ H5_DLL H5F_t *H5F__create(const char *filename, unsigned flags, hid_t fcpl_id,
 H5_DLL H5F_t * H5F__open(const char *filename, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id);
 H5_DLL herr_t H5F__flush(H5F_t *f, H5F_scope_t scope);
-H5_DLL herr_t H5F__flush_real(H5F_t *f, hbool_t closing);
+H5_DLL herr_t H5F__flush_real(H5F_t *f);
 H5_DLL htri_t H5F__is_hdf5(const char *name);
 H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL herr_t H5F__get_freespace(H5F_t *f, hsize_t *tot_space);
@@ -413,6 +414,7 @@ H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(hid_t file_id);
 H5_DLL herr_t H5F__close_cb(H5F_t *f);
+H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__close_mounts(H5F_t *f);
@@ -421,7 +423,7 @@ H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nop
 
 /* Superblock related routines */
 H5_DLL herr_t H5F__super_init(H5F_t *f);
-H5_DLL herr_t H5F__super_read(H5F_t *f, hbool_t initial_read);
+H5_DLL herr_t H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read);
 H5_DLL herr_t H5F__super_size(H5F_t *f, hsize_t *super_size, hsize_t *super_ext_size);
 H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
@@ -449,6 +451,8 @@ H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F_efc_create(unsigned max_nfiles);
+H5_DLL H5F_t *H5F__efc_open(H5F_t *parent, const char *name, unsigned flags,
+    hid_t fcpl_id, hid_t fapl_id);
 H5_DLL unsigned H5F_efc_max_nfiles(H5F_efc_t *efc);
 H5_DLL herr_t H5F__efc_release(H5F_efc_t *efc);
 H5_DLL herr_t H5F__efc_destroy(H5F_efc_t *efc);
@@ -464,6 +468,7 @@ H5_DLL htri_t H5F__try_extend(H5F_t *f, H5FD_mem_t type, haddr_t blk_end,
 H5_DLL herr_t H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr);
 H5_DLL herr_t H5F__set_base_addr(const H5F_t *f, haddr_t addr);
 H5_DLL herr_t H5F__set_paged_aggr(const H5F_t *f, hbool_t paged);
+H5_DLL herr_t H5F__get_max_eof_eoa(const H5F_t *f, haddr_t *max_eof_eoa);
 
 /* Functions that flush or evict */
 H5_DLL herr_t H5F__evict_cache_entries(H5F_t *f);

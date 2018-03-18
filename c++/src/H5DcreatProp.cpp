@@ -20,6 +20,7 @@
 #include "H5PropList.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -94,7 +95,7 @@ DSetCreatPropList::DSetCreatPropList() : ObjCreatPropList(H5P_DATASET_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList copy constructor
-///\brief       Copy constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///             DSetCreatPropList object
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -158,8 +159,8 @@ int DSetCreatPropList::getChunk(int max_ndims, hsize_t* dim) const
 ///\param       layout - IN: Type of storage layout for raw data
 ///\exception   H5::PropListIException
 ///\par Description
-///             For information on valid layout types, please refer to
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetLayout
+///             For information, please refer to the H5Pset_layout API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setLayout(H5D_layout_t layout) const
@@ -233,9 +234,8 @@ void DSetCreatPropList::setDeflate(int level) const
 ///\par Description
 ///             The associate C function sets an SZIP compression filter,
 ///             H5Z_FILTER_SZIP, for a dataset.  For more information about
-///             SZIP and usage, please refer to the C layer Reference
-///             Manual at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSzip
+///             SZIP and usage, please refer to the H5Pset_szip API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - Jan, 2007
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setSzip(unsigned int options_mask, unsigned int pixels_per_block) const
@@ -255,9 +255,8 @@ void DSetCreatPropList::setSzip(unsigned int options_mask, unsigned int pixels_p
 ///\par Description
 ///             The associate C function sets an Nbit compression filter,
 ///             H5Z_FILTER_NBIT, for a dataset.  For more information about
-///             Nbit compression, please refer to the C layer Reference
-///             Manual at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-setNbit
+///             Nbit compression, please refer to the H5Pset_nbit API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - Apr, 2016
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setNbit() const
@@ -284,8 +283,7 @@ void DSetCreatPropList::setNbit() const
 ///             according to the actual dataset datatype.
 ///\par
 ///             For information on setting fill value, please refer to the
-///             C layer Reference Manual at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFillValue
+///             H5Pset_fill_value API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setFillValue(const DataType& fvalue_type, const void* value) const
@@ -534,9 +532,8 @@ bool DSetCreatPropList::allFiltersAvail() const
 ///
 ///\exception   H5::PropListIException
 ///\par Description
-///             Please refer to the Reference Manual of \c H5Pset_shuffle for
-///             details.
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetShuffle
+///             For information, please refer to the H5Pset_shuffle API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setShuffle() const
@@ -752,7 +749,8 @@ void DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char* name, 
 ///                             an unlimited selection
 ///\exception   H5::PropListIException
 ///\par Description
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetVirtual
+///             For information, please refer to the H5Pset_virtual API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - Mar, 2017
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setVirtual(const DataSpace& vspace, const char *src_fname, const char *src_dsname, const DataSpace& sspace) const
@@ -779,7 +777,8 @@ void DSetCreatPropList::setVirtual(const DataSpace& vspace, const char *src_fnam
 ///                             an unlimited selection
 ///\exception   H5::PropListIException
 ///\par Description
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetVirtual
+///             For information, please refer to the H5Pset_virtual API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - Mar, 2017
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setVirtual(const DataSpace& vspace, const H5std_string src_fname, const H5std_string src_dsname, const DataSpace& sspace) const

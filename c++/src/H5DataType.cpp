@@ -28,6 +28,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -96,9 +97,6 @@ DataType::DataType(const H5T_class_t type_class, size_t size) : H5Object(), enco
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
 ///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//        Jul, 2008
-//              Added for application convenience.
 //--------------------------------------------------------------------------
 DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), encoded_buf(NULL), buf_size(0)
 {
@@ -127,7 +125,7 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 
 //--------------------------------------------------------------------------
 // Function:    DataType copy constructor
-///\brief       Copy constructor: makes a copy of the original DataType object
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataType::DataType(const DataType& original) : H5Object(), id(original.id), encoded_buf(NULL), buf_size(0)
@@ -247,6 +245,7 @@ void DataType::copy(const DataSet& dset)
         throw DataTypeIException(inMemFunc("copy"), "H5Tcopy failed");
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    DataType::p_decode
 // Purpose      Returns an id of a type by decoding the binary object
@@ -275,6 +274,7 @@ hid_t DataType::p_decode() const
         return(encoded_dtype_id);
     }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    DataType::decode
@@ -653,8 +653,8 @@ DataType DataType::getSuper() const
 ///             destination datatypes.
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For more information, please see:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-Register
+///             For information, please refer to the H5Tregister API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataType::registerFunc(H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func) const

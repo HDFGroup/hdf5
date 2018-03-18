@@ -30,7 +30,7 @@ class H5_DLLCPP DataType : public H5Object {
         // Creates a datatype given its class and size
         DataType(const H5T_class_t type_class, size_t size);
 
-        // Copy constructor: makes a copy of the original object
+        // Copy constructor - same as the original DataType.
         DataType(const DataType& original);
 
         // Creates a copy of a predefined type

@@ -13,16 +13,16 @@
 
 #include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5ACprivate.h"    /* Metadata cache            */
+#include "H5Eprivate.h"        /* Error handling              */
+#include "H5Iprivate.h"        /* IDs                      */
+#include "H5MMprivate.h"    /* Memory management            */
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Oprivate.h"         /* Object headers                       */
-#include "H5Sprivate.h"		/* Dataspaces         			*/
-#include "H5Tprivate.h"		/* Datatypes         			*/
-#include "H5Zpkg.h"		/* Data filters				*/
+#include "H5Sprivate.h"        /* Dataspaces                     */
+#include "H5Tprivate.h"        /* Datatypes                     */
+#include "H5Zpkg.h"        /* Data filters                */
 
 /* Struct of parameters needed for compressing/decompressing one atomic datatype */
 typedef struct {
@@ -78,13 +78,13 @@ static void H5Z_scaleoffset_compress(unsigned char *data, unsigned d_nelmts, uns
 /* This message derives from H5Z */
 H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_SCALEOFFSET, /* Filter id number		*/
+    H5Z_FILTER_SCALEOFFSET, /* Filter id number        */
     1,              /* Assume encoder present: check before registering */
     1,              /* decoder_present flag (set to true) */
-    "scaleoffset",		/* Filter name for debugging	*/
-    H5Z_can_apply_scaleoffset,	/* The "can apply" callback     */
+    "scaleoffset",        /* Filter name for debugging    */
+    H5Z_can_apply_scaleoffset,    /* The "can apply" callback     */
     H5Z_set_local_scaleoffset,  /* The "set local" callback     */
-    H5Z_filter_scaleoffset,	/* The actual filter function	*/
+    H5Z_filter_scaleoffset,    /* The actual filter function    */
 }};
 
 /* Local macros */
@@ -665,15 +665,15 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
       H5Z_scaleoffset_modify_4(i, type, pow_fun, buf, d_nelmts, min, D_val)                     \
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5Z_can_apply_scaleoffset
+ * Function:    H5Z_can_apply_scaleoffset
  *
- * Purpose:	Check the parameters for scaleoffset compression for
+ * Purpose:    Check the parameters for scaleoffset compression for
  *              validity and whether they fit a particular dataset.
  *
- * Return:	Success: Non-negative
- *		Failure: Negative
+ * Return:    Success: Non-negative
+ *        Failure: Negative
  *
  * Programmer:  Xiaowen Wu
  *              Friday, February 4, 2005
@@ -685,7 +685,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 static htri_t
 H5Z_can_apply_scaleoffset(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
-    const H5T_t	*type;                  /* Datatype */
+    const H5T_t    *type;                  /* Datatype */
     H5T_class_t dtype_class;            /* Datatype's class */
     H5T_order_t dtype_order;            /* Datatype's endianness order */
     htri_t ret_value = TRUE;            /* Return value */
@@ -694,20 +694,20 @@ H5Z_can_apply_scaleoffset(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_
 
     /* Get datatype */
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Get datatype's class, for checking the "datatype class" */
     if((dtype_class = H5T_get_class(type, TRUE)) == H5T_NO_CLASS)
-	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class")
 
     /* Get datatype's size, for checking the "datatype size" */
     if(H5T_get_size(type) == 0)
-	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
 
     if(dtype_class == H5T_INTEGER || dtype_class == H5T_FLOAT) {
         /* Get datatype's endianness order */
         if((dtype_order = H5T_get_order(type)) == H5T_ORDER_ERROR)
-	    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "can't retrieve datatype endianness order")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "can't retrieve datatype endianness order")
 
         /* Range check datatype's endianness order */
         if(dtype_order != H5T_ORDER_LE && dtype_order != H5T_ORDER_BE)
@@ -719,17 +719,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_can_apply_scaleoffset() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5Z_scaleoffset_get_type
+ * Function:    H5Z_scaleoffset_get_type
  *
- * Purpose:	Get the specific integer type based on datatype size and sign
+ * Purpose:    Get the specific integer type based on datatype size and sign
  *              or floating-point type based on size
  *
- * Return:	Success: id number of integer type
- *		Failure: 0
+ * Return:    Success: id number of integer type
+ *        Failure: 0
  *
- * Programmer:	Xiaowen Wu
+ * Programmer:    Xiaowen Wu
  *              Wednesday, April 13, 2005
  *
  * Modifications:
@@ -784,14 +784,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5Z_scaleoffset_set_parms_fillval
+ * Function:    H5Z_scaleoffset_set_parms_fillval
  *
- * Purpose:	Get the fill value of the dataset and store in cd_values[]
+ * Purpose:    Get the fill value of the dataset and store in cd_values[]
  *
- * Return:	Success: Non-negative
- *		Failure: Negative
+ * Return:    Success: Non-negative
+ *        Failure: Negative
  *
  * Programmer:  Xiaowen Wu
  *              Monday, March 7, 2005
@@ -836,17 +836,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_scaleoffset_set_parms_fillval() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5Z_set_local_scaleoffset
+ * Function:    H5Z_set_local_scaleoffset
  *
- * Purpose:	Set the "local" dataset parameters for scaleoffset
+ * Purpose:    Set the "local" dataset parameters for scaleoffset
  *              compression.
  *
- * Return:	Success: Non-negative
- *		Failure: Negative
+ * Return:    Success: Non-negative
+ *        Failure: Negative
  *
- * Programmer:	Xiaowen Wu
+ * Programmer:    Xiaowen Wu
  *              Friday, February 4, 2005
  *
  * Modifications:
@@ -857,8 +857,8 @@ static herr_t
 H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 {
     H5P_genplist_t *dcpl_plist;     /* Property list pointer */
-    H5T_t	*type;              /* Datatype */
-    const H5S_t	*ds;                /* Dataspace */
+    H5T_t    *type;              /* Datatype */
+    const H5S_t    *ds;                /* Dataspace */
     unsigned flags;                 /* Filter flags */
     size_t cd_nelmts = H5Z_SCALEOFFSET_USER_NPARMS;  /* Number of filter parameters */
     unsigned cd_values[H5Z_SCALEOFFSET_TOTAL_NPARMS]; /* Filter parameters */
@@ -879,14 +879,14 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get datatype */
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Initialize the parameters to a known state */
     HDmemset(cd_values, 0, sizeof(cd_values));
 
     /* Get the filter's current parameters */
     if(H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SCALEOFFSET, &flags, &cd_nelmts, cd_values, (size_t)0, NULL, NULL) < 0)
-	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get scaleoffset parameters")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get scaleoffset parameters")
 
     /* Get dataspace */
     if(NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -930,7 +930,7 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get datatype's size */
     if((dtype_size = H5T_get_size(type)) == 0)
-	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
 
     /* Set "local" parameter for datatype size */
     H5_CHECK_OVERFLOW(dtype_size, size_t, unsigned);
@@ -1008,23 +1008,23 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Modify the filter's parameters for this dataset */
     if(H5P_modify_filter(dcpl_plist, H5Z_FILTER_SCALEOFFSET, flags, (size_t)H5Z_SCALEOFFSET_TOTAL_NPARMS, cd_values) < 0)
-	HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local scaleoffset parameters")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local scaleoffset parameters")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_set_local_scaleoffset() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_scaleoffset
+ * Function:    H5Z_filter_scaleoffset
  *
- * Purpose:	Implement an I/O filter for storing packed integer
+ * Purpose:    Implement an I/O filter for storing packed integer
  *              data using scale and offset method.
  *
- * Return:	Success: Size of buffer filtered
- *		Failure: 0
+ * Return:    Success: Size of buffer filtered
+ *        Failure: 0
  *
- * Programmer:	Xiaowen Wu
+ * Programmer:    Xiaowen Wu
  *              Monday, February 7, 2005
  *
  * Modifications:
@@ -1051,13 +1051,13 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
     unsigned char *outbuf = NULL;   /* pointer to new output buffer */
     unsigned buf_offset = 21;       /* buffer offset because of parameters stored in file */
     unsigned i;                     /* index */
-    parms_atomic p;                 /* paramters needed for compress/decompress functions */
+    parms_atomic p;                 /* parameters needed for compress/decompress functions */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     if(cd_nelmts != H5Z_SCALEOFFSET_TOTAL_NPARMS)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scaleoffset number of paramters")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid scaleoffset number of parameters")
 
     /* Check if memory byte order matches dataset datatype byte order */
     switch(H5T_native_order_g) {
@@ -1107,7 +1107,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
         /* if scale_factor is less than 0 for integer, library will reset it to 0
          * in this case, library will calculate the minimum-bits
          */
-	if(scale_factor < 0) scale_factor = 0;
+        if(scale_factor < 0) scale_factor = 0;
     }
 
     /* fixed-minimum-bits method is not implemented and is forbidden */
@@ -1128,7 +1128,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
         minbits = (uint32_t)scale_factor;
     }
 
-    /* prepare paramters to pass to compress/decompress functions */
+    /* prepare parameters to pass to compress/decompress functions */
     p.size = cd_values[H5Z_SCALEOFFSET_PARM_SIZE];
     p.mem_order = H5T_native_order_g;
 
@@ -1310,7 +1310,7 @@ done:
  * atomic datatype is treated on byte basis
  */
 
-
+
 /* change byte order of input buffer either from little-endian to big-endian
  * or from big-endian to little-endian  2/21/2005
  */

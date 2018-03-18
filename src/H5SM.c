@@ -67,7 +67,8 @@ static herr_t H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *he
     hbool_t defer, unsigned type_id, void *mesg, unsigned *cache_flags_ptr);
 static herr_t H5SM__decr_ref(void *record, void *op_data, hbool_t *changed);
 static herr_t H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header,
-    const H5O_shared_t * mesg, unsigned *cache_flags, void ** /*out*/ encoded_mesg);
+    const H5O_shared_t * mesg, unsigned *cache_flags, size_t * /*out*/ mesg_size,
+    void ** /*out*/ encoded_mesg);
 static herr_t H5SM__type_to_flag(unsigned type_id, unsigned *type_flag);
 static herr_t H5SM__read_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence,
     unsigned *oh_modified, void *_udata);
@@ -1536,6 +1537,7 @@ H5SM_delete(H5F_t *f, H5O_t *open_oh, H5O_shared_t *sh_mesg)
     unsigned              cache_flags = H5AC__NO_FLAGS_SET;
     H5SM_table_cache_ud_t cache_udata;      /* User-data for callback */
     ssize_t               index_num;
+    size_t                mesg_size = 0;
     void                 *mesg_buf = NULL;
     void                 *native_mesg = NULL;
     unsigned              type_id;              /* Message type ID to operate on */
@@ -1565,8 +1567,8 @@ H5SM_delete(H5F_t *f, H5O_t *open_oh, H5O_shared_t *sh_mesg)
      * zero and any file space it uses needs to be freed.  mesg_buf holds the
      * serialized form of the message.
      */
-    if(H5SM__delete_from_index(f, open_oh, &(table->indexes[index_num]), sh_mesg, &cache_flags, &mesg_buf) < 0)
-	HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete mesage from SOHM index")
+    if(H5SM__delete_from_index(f, open_oh, &(table->indexes[index_num]), sh_mesg, &cache_flags, &mesg_size, &mesg_buf) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete mesage from SOHM index")
 
     /* Release the master SOHM table */
     if(H5AC_unprotect(f, H5AC_SOHM_TABLE, H5F_SOHM_ADDR(f), table, cache_flags) < 0)
@@ -1578,7 +1580,7 @@ H5SM_delete(H5F_t *f, H5O_t *open_oh, H5O_shared_t *sh_mesg)
      * master table needs to be unprotected when we do this.
      */
     if(mesg_buf) {
-        if(NULL == (native_mesg = H5O_msg_decode(f, open_oh, type_id, (const unsigned char *)mesg_buf)))
+        if(NULL == (native_mesg = H5O_msg_decode(f, open_oh, type_id, mesg_size, (const unsigned char *)mesg_buf)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTDECODE, FAIL, "can't decode shared message.")
 
         if(H5O_msg_delete(f, open_oh, type_id, native_mesg) < 0)
@@ -1764,7 +1766,8 @@ H5SM__decr_ref(void *record, void *op_data, hbool_t *changed)
  */
 static herr_t
 H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header,
-    const H5O_shared_t *mesg, unsigned *cache_flags, void ** /*out*/ encoded_mesg)
+    const H5O_shared_t *mesg, unsigned *cache_flags, size_t * /*out*/ mesg_size,
+    void ** /*out*/ encoded_mesg)
 {
     H5SM_list_t     *list = NULL;
     H5SM_mesg_key_t key;
@@ -1895,6 +1898,7 @@ H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header,
 
         /* Return the message's encoding so anything it references can be freed */
         *encoded_mesg = encoding_buf;
+        *mesg_size = buf_size;
 
         /* If there are no messages left in the index, delete it */
         if(header->num_messages == 0) {
@@ -1936,8 +1940,10 @@ done:
     /* Free the message encoding, if we're not returning it in encoded_mesg
      * or if there's been an error.
      */
-    if(encoding_buf && (NULL == *encoded_mesg || ret_value < 0))
+    if(encoding_buf && (NULL == *encoded_mesg || ret_value < 0)) {
         encoding_buf = H5MM_xfree(encoding_buf);
+        *mesg_size = 0;
+    }
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5SM__delete_from_index() */

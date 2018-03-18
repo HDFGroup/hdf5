@@ -11,7 +11,7 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 260
             COMMENT dynlib4
-            PARAMS { 9 1 11 0 }
+            PARAMS { 9 1 11 2 }
          }
       }
       FILLVALUE {
@@ -33,7 +33,7 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 260
             COMMENT dynlib4
-            PARAMS { 9 1 11 0 }
+            PARAMS { 9 1 11 2 }
          }
       }
       FILLVALUE {
@@ -55,7 +55,7 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 260
             COMMENT dynlib4
-            PARAMS { 9 1 11 0 }
+            PARAMS { 9 1 11 2 }
          }
       }
       FILLVALUE {
@@ -77,7 +77,7 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 260
             COMMENT dynlib4
-            PARAMS { 9 1 11 0 }
+            PARAMS { 9 1 11 2 }
          }
       }
       FILLVALUE {
@@ -92,14 +92,14 @@ GROUP "/" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
-         CHUNKED ( 40, 20 )
+         CHUNKED ( 20, 10 )
          SIZE 3200 (1.000:1 COMPRESSION)
       }
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 260
             COMMENT dynlib4
-            PARAMS { 9 1 11 0 }
+            PARAMS { 9 1 11 2 }
          }
       }
       FILLVALUE {
@@ -121,7 +121,7 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 260
             COMMENT dynlib4
-            PARAMS { 9 1 11 0 }
+            PARAMS { 9 1 11 2 }
          }
       }
       FILLVALUE {
@@ -143,7 +143,7 @@ GROUP "/" {
          USER_DEFINED_FILTER {
             FILTER_ID 260
             COMMENT dynlib4
-            PARAMS { 9 1 11 0 }
+            PARAMS { 9 1 11 2 }
          }
       }
       FILLVALUE {

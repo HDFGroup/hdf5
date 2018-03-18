@@ -374,6 +374,8 @@
 ./c++/src/H5IntType.h
 ./c++/src/H5LaccProp.cpp
 ./c++/src/H5LaccProp.h
+./c++/src/H5LcreatProp.cpp
+./c++/src/H5LcreatProp.h
 ./c++/src/H5Library.cpp
 ./c++/src/H5Library.h
 ./c++/src/H5Location.cpp
@@ -984,6 +986,7 @@
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c
+./test/gen_bounds.c
 ./test/gen_cross.c
 ./test/gen_deflate.c
 ./test/gen_file_image.c
@@ -1433,6 +1436,12 @@
 ./tools/test/h5ls/h5ls_plugin.sh.in
 ./tools/test/h5ls/testh5ls.sh.in
 ./tools/test/h5ls/testh5lsvds.sh.in
+./tools/test/h5ls/vds_prefix/tvds-1.ls
+./tools/test/h5ls/vds_prefix/tvds-2.ls
+./tools/test/h5ls/vds_prefix/tvds-3_1.ls
+./tools/test/h5ls/vds_prefix/tvds-3_2.ls
+./tools/test/h5ls/vds_prefix/tvds-4.ls
+./tools/test/h5ls/vds_prefix/tvds-5.ls
 
 # h5copy sources
 ./tools/src/h5copy/Makefile.am
@@ -1482,15 +1491,38 @@
 ./tools/test/misc/testh5mkgrp.sh.in
 ./tools/test/misc/testh5repart.sh.in
 ./tools/test/misc/talign.c
+./tools/test/misc/testfiles/h5clear_equal_after_size.ddl
+./tools/test/misc/testfiles/h5clear_equal_before_size.ddl
+./tools/test/misc/testfiles/h5clear_greater_after_size.ddl
+./tools/test/misc/testfiles/h5clear_greater_before_size.ddl
+./tools/test/misc/testfiles/h5clear_less_after_size.ddl
+./tools/test/misc/testfiles/h5clear_less_before_size.ddl
 ./tools/test/misc/testfiles/h5clear_missing_file.ddl
+./tools/test/misc/testfiles/h5clear_noclose_after_size.ddl
+./tools/test/misc/testfiles/h5clear_noclose_before_size.ddl
 ./tools/test/misc/testfiles/h5clear_no_mdc_image.ddl
 ./tools/test/misc/testfiles/h5clear_open_fail.ddl
+./tools/test/misc/testfiles/h5clear_status_noclose_after_size.ddl
 ./tools/test/misc/testfiles/h5clear_usage.ddl
+./tools/test/misc/testfiles/h5clear_user_equal_after_size.ddl
+./tools/test/misc/testfiles/h5clear_user_equal_before_size.ddl
+./tools/test/misc/testfiles/h5clear_user_greater_after_size.ddl
+./tools/test/misc/testfiles/h5clear_user_greater_before_size.ddl
+./tools/test/misc/testfiles/h5clear_user_less_after_size.ddl
+./tools/test/misc/testfiles/h5clear_user_less_before_size.ddl
+./tools/test/misc/testfiles/h5clear_fsm_persist_equal.h5
+./tools/test/misc/testfiles/h5clear_fsm_persist_greater.h5
+./tools/test/misc/testfiles/h5clear_fsm_persist_less.h5
+./tools/test/misc/testfiles/h5clear_fsm_persist_noclose.h5
+./tools/test/misc/testfiles/h5clear_fsm_persist_user_equal.h5
+./tools/test/misc/testfiles/h5clear_fsm_persist_user_greater.h5
+./tools/test/misc/testfiles/h5clear_fsm_persist_user_less.h5
 ./tools/test/misc/testfiles/h5clear_log_v3.h5
 ./tools/test/misc/testfiles/h5clear_mdc_image.h5
 ./tools/test/misc/testfiles/h5clear_sec2_v0.h5
 ./tools/test/misc/testfiles/h5clear_sec2_v2.h5
 ./tools/test/misc/testfiles/h5clear_sec2_v3.h5
+./tools/test/misc/testfiles/h5clear_status_noclose.h5
 ./tools/test/misc/testfiles/latest_h5clear_log_v3.h5
 ./tools/test/misc/testfiles/latest_h5clear_sec2_v3.h5
 ./tools/test/misc/testfiles/mod_h5clear_mdc_image.h5
@@ -2379,6 +2411,7 @@
 
 ./tools/test/h5diff/testfiles/h5diff_attr1.h5
 ./tools/test/h5diff/testfiles/h5diff_attr2.h5
+./tools/test/h5diff/testfiles/h5diff_attr3.h5
 ./tools/test/h5diff/testfiles/h5diff_attr_v_level1.h5
 ./tools/test/h5diff/testfiles/h5diff_attr_v_level2.h5
 ./tools/test/h5diff/testfiles/h5diff_basic1.h5
@@ -2420,12 +2453,8 @@
 ./tools/test/h5diff/testfiles/compounds_array_vlen2.h5
 ./tools/test/h5diff/testfiles/non_comparables1.h5
 ./tools/test/h5diff/testfiles/non_comparables2.h5
-./tools/test/h5diff/testfiles/tmptest2.he5
-./tools/test/h5diff/testfiles/tmpSingleSiteBethe.reference.h5
-./tools/test/h5diff/testfiles/h5diff_tmp1.txt
-./tools/test/h5diff/testfiles/tmptest.he5
-./tools/test/h5diff/testfiles/h5diff_tmp2.txt
-./tools/test/h5diff/testfiles/tmpSingleSiteBethe.output.h5
+./tools/test/h5diff/testfiles/h5diff_8625.txt
+./tools/test/h5diff/testfiles/h5diff_8639.txt
 ./tools/test/h5diff/testfiles/tudfilter.h5
 ./tools/test/h5diff/testfiles/tudfilter2.h5
 ./tools/test/h5diff/testfiles/h5diff_ud.txt
@@ -2440,6 +2469,7 @@
 
 #test files for h5repack
 ./tools/test/h5repack/testfiles/README
+./tools/test/h5repack/testfiles/bounds_latest_latest.h5
 ./tools/test/h5repack/testfiles/h5repack_aggr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr_refs.h5
@@ -3082,6 +3112,8 @@
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/jrunTest.cmake
+./config/cmake/libh5cc.in
+./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
@@ -3093,10 +3125,8 @@
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
 
-./config/cmake_ext_mod/CheckTypeSize.cmake
 ./config/cmake_ext_mod/ConfigureChecks.cmake
 ./config/cmake_ext_mod/CTestCustom.cmake
-./config/cmake_ext_mod/FindMPI.cmake
 ./config/cmake_ext_mod/FindSZIP.cmake
 ./config/cmake_ext_mod/GetTimeOfDayTest.cpp
 ./config/cmake_ext_mod/grepTest.cmake
@@ -3112,12 +3142,6 @@
 ./config/cmake_ext_mod/NSIS.template.in
 ./config/cmake_ext_mod/runTest.cmake
 ./config/cmake_ext_mod/version.plist.in
-./config/cmake_ext_mod/FindMPI/fortranparam_mpi.f90.in
-./config/cmake_ext_mod/FindMPI/libver_mpi.c
-./config/cmake_ext_mod/FindMPI/libver_mpi.f90.in
-./config/cmake_ext_mod/FindMPI/mpiver.f90.in
-./config/cmake_ext_mod/FindMPI/test_mpi.c
-./config/cmake_ext_mod/FindMPI/test_mpi.f90.in
 
 # CMake-specific User Files
 ./config/cmake/UserMacros/Windows_MT.cmake
@@ -3176,6 +3200,7 @@
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
+./test/CMakeVFDTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
 ./tools/CMakeLists.txt

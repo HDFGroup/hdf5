@@ -63,8 +63,8 @@
     )
 #define H5O_ALIGN_OH(O, X)						      \
      H5O_ALIGN_VERS((O)->version, X)
-#define H5O_ALIGN_F(F, X)						      \
-     H5O_ALIGN_VERS((H5F_USE_LATEST_FLAGS(F, H5F_LATEST_OBJ_HEADER) ? H5O_VERSION_LATEST : H5O_VERSION_1), X)
+#define H5O_ALIGN_F(F, X)                             \
+     H5O_ALIGN_VERS(MAX(H5O_VERSION_1, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(F)]), X)
 
 /* Size of checksum (on disk) */
 #define H5O_SIZEOF_CHKSUM               4
@@ -136,7 +136,7 @@
 #define H5O_SIZEOF_MSGHDR_OH(O)						      \
     H5O_SIZEOF_MSGHDR_VERS((O)->version, (O)->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
 #define H5O_SIZEOF_MSGHDR_F(F, C)						      \
-    H5O_SIZEOF_MSGHDR_VERS((H5F_USE_LATEST_FLAGS(F, H5F_LATEST_OBJ_HEADER) || H5F_STORE_MSG_CRT_IDX(F)) ? H5O_VERSION_LATEST : H5O_VERSION_1, (C))
+    H5O_SIZEOF_MSGHDR_VERS(MAX((H5F_STORE_MSG_CRT_IDX(F) ? H5O_VERSION_LATEST : H5O_VERSION_1), (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(F)]), (C))
 
 /*
  * Size of chunk "header" for each chunk
@@ -186,7 +186,7 @@
                                                                               \
         /* Decode the message */                                              \
         HDassert(msg_type->decode);                                           \
-        if(NULL == ((MSG)->native = (msg_type->decode)((F), (OH), (MSG)->flags, &ioflags, (MSG)->raw))) \
+        if(NULL == ((MSG)->native = (msg_type->decode)((F), (OH), (MSG)->flags, &ioflags, (MSG)->raw_size, (MSG)->raw))) \
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
                                                                               \
         /* Mark the message dirty if it was changed by decoding */            \
@@ -228,7 +228,7 @@ struct H5O_msg_class_t {
     const char	*name;				/*for debugging             */
     size_t	native_size;			/*size of native message    */
     unsigned    share_flags;			/* Message sharing settings */
-    void	*(*decode)(H5F_t *, H5O_t *, unsigned, unsigned *, const uint8_t *);
+    void	*(*decode)(H5F_t *, H5O_t *, unsigned, unsigned *, size_t, const uint8_t *);
     herr_t	(*encode)(H5F_t *, hbool_t, uint8_t *, const void *);
     void	*(*copy)(const void *, void *);	/*copy native value         */
     size_t	(*raw_size)(const H5F_t *, hbool_t, const void *);/*sizeof encoded message	*/
@@ -378,6 +378,7 @@ typedef struct H5O_cache_ud_t {
     unsigned v1_pfx_nmesgs;             /* Number of messages from v1 prefix header */
     size_t chunk0_size;                 /* Size of serialized first chunk    */
     H5O_t *oh;                          /* Partially deserialized object header, for later use */
+    hbool_t free_oh;                    /* Whether to free the object header or not */
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_cache_ud_t;
 
@@ -553,7 +554,6 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATASET[1];
 /* Datatype Object. (H5O_TYPE_NAMED_DATATYPE - 2) */
 H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 
-
 /* Package-local function prototypes */
 H5_DLL hid_t H5O__open_name(const H5G_loc_t *loc, const char *name);
 H5_DLL hid_t H5O__open_by_idx(const H5G_loc_t *loc, const char *name,
@@ -648,6 +648,14 @@ H5_DLL herr_t H5O__attr_reset(void *_mesg);
 H5_DLL herr_t H5O__attr_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 H5_DLL herr_t H5O__attr_link(H5F_t *f, H5O_t *open_oh, void *_mesg);
 H5_DLL herr_t H5O_attr_count_real(H5F_t *f, H5O_t *oh, hsize_t *nattrs);
+
+/* Arrays of versions for:
+   Object header, Attribute/Fill value/Filter pipeline messages */
+/* Layout/Datatype/Dataspace arrays of versions are in H5Dpkg.h, H5Tpkg.h and H5Spkg.h */
+H5_DLLVAR const unsigned H5O_obj_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_attr_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_fill_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_pline_ver_bounds[H5F_LIBVER_NBOUNDS];
 
 /* Testing functions */
 #ifdef H5O_TESTING

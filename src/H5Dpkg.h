@@ -458,6 +458,7 @@ typedef struct H5D_shared_t {
 
     H5D_append_flush_t   append_flush;   /* Append flush property information */
     char                *extfile_prefix; /* expanded external file prefix */
+    char                *vds_prefix;     /* expanded vds prefix */
 } H5D_shared_t;
 
 struct H5D_t {
@@ -541,6 +542,9 @@ H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BT2[1];
 H5_DLLVAR const H5B2_class_t H5D_BT2[1];
 H5_DLLVAR const H5B2_class_t H5D_BT2_FILT[1];
 
+/*  Array of versions for Layout */
+H5_DLLVAR const unsigned H5O_layout_ver_bounds[H5F_LIBVER_NBOUNDS];
+
 
 /******************************/
 /* Package Private Prototypes */
@@ -579,7 +583,7 @@ H5_DLL herr_t H5D__refresh(hid_t dset_id, H5D_t *dataset);
 H5_DLL herr_t H5D__format_convert(H5D_t *dataset);
 
 /* Internal I/O routines */
-H5_DLL herr_t H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
+H5_DLL herr_t H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, const void *buf);
 H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, void *buf/*out*/);
@@ -610,15 +614,14 @@ H5_DLL herr_t H5D__scatgath_write(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D__layout_set_io_ops(const H5D_t *dataset);
 H5_DLL size_t H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout,
     hbool_t include_compact_data);
-H5_DLL herr_t H5D__layout_set_latest_version(H5O_layout_t *layout,
-    const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache);
+H5_DLL herr_t H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout);
 H5_DLL herr_t H5D__layout_set_latest_indexing(H5O_layout_t *layout,
     const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache);
 H5_DLL herr_t H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset,
     hid_t dapl_id);
 H5_DLL herr_t H5D__layout_oh_read(H5D_t *dset, hid_t dapl_id,
     H5P_genplist_t *plist);
-H5_DLL herr_t H5D__layout_oh_write(H5D_t *dataset, H5O_t *oh, unsigned update_flags);
+H5_DLL herr_t H5D__layout_oh_write(const H5D_t *dataset, H5O_t *oh, unsigned update_flags);
 
 /* Functions that operate on contiguous storage */
 H5_DLL herr_t H5D__contig_alloc(H5F_t *f, H5O_storage_contig_t *storage);

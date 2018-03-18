@@ -12,6 +12,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#include <iostream>
+using namespace std;
 
 #include "H5private.h"        // for HDmemset
 #include "H5Include.h"
@@ -24,6 +26,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -230,7 +233,6 @@ void H5Location::setComment(const H5std_string& name, const H5std_string& commen
 ///             It differs from the above function in that it doesn't take
 ///             an object name.
 // Programmer   Binh-Minh Ribler - Sep 2013
-// Modification
 //--------------------------------------------------------------------------
 void H5Location::setComment(const char* comment) const
 {
@@ -513,9 +515,6 @@ void H5Location::reference(void* ref, const H5std_string& name, H5R_type_t ref_t
 //              from_func - IN: Name of the calling function
 // Exception    H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//        May 2008 - BMR
-//              Moved from IdComponent.
 //--------------------------------------------------------------------------
 hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type, const PropList& plist, const char* from_func)
 {
@@ -544,9 +543,6 @@ hid_t H5Location::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_ty
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
 ///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      May, 2008
-//              Corrected missing parameters. - BMR
 //--------------------------------------------------------------------------
 void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist)
 {
@@ -563,8 +559,6 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 // exception    H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
 // Modification
-//      May, 2008
-//              Corrected missing parameters. -BMR
 //      Mar, 2017
 //              Removed in 1.10.1 because H5Location is Attribute's baseclass
 //              now. -BMR
@@ -759,7 +753,53 @@ DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::createGroup
-///\brief       Creates a new group at this location.
+///\brief       Creates a new group at this location, which can be a file,
+///             group, dataset, attribute, or named datatype.
+///\param       name  - IN: Name of the group to create
+///\param       size_hint - IN: Indicates the number of bytes to reserve for
+///             the names that will appear in the group
+///\return      Group instance
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
+///\par Description
+///             The optional \a size_hint specifies how much file space to
+///             reserve for storing the names that will appear in this new
+///             group. If a non-positive value is provided for the \a size_hint
+///             then a default size is chosen.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+Group H5Location::createGroup(const char* name, const LinkCreatPropList& lcpl) const
+{
+    // Call C routine H5Gcreate2 to create the named group, giving the
+    // location id which can be a file id or a group id
+    hid_t group_id = H5Gcreate2(getId(), name, lcpl.getId(), H5P_DEFAULT, H5P_DEFAULT);
+
+    // If the creation of the group failed, throw an exception
+    if (group_id < 0)
+        throwException("createGroup", "H5Gcreate2 failed");
+
+    // No failure, create and return the Group object
+    Group group;
+    H5Location *ptr = &group;
+    ptr->p_setId(group_id);
+    return(group);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::createGroup
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+Group H5Location::createGroup(const H5std_string& name, const LinkCreatPropList& lcpl) const
+{
+    return(createGroup( name.c_str(), lcpl));
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::createGroup
+///\brief       Creates a new group at this location, which can be a file,
+///             group, dataset, attribute, or named datatype.
 ///\param       name  - IN: Name of the group to create
 ///\param       size_hint - IN: Indicates the number of bytes to reserve for
 ///             the names that will appear in the group
@@ -804,7 +844,6 @@ Group H5Location::createGroup(const char* name, size_t size_hint) const
 
     // No failure, create and return the Group object
     Group group;
-    //group.p_setId(group_id);
     H5Location *ptr = &group;
     ptr->p_setId(group_id);
     return(group);
@@ -942,6 +981,134 @@ DataSet H5Location::openDataSet(const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::link
+///\brief       Creates a soft link from \a link_name to \a target_name.
+///\param       target_name - IN: Name of object, can be a non-existing object
+///\param       link_name   - IN: Link name for the target name
+///\param       lcpl - IN: Link creation plist - default to LinkCreatPropList::DEFAULT
+///\param       lapl - IN: Link access plist - default to LinkAccPropList::DEFAULT
+///\exception   H5::FileIException or H5::GroupIException
+///\par Description
+///             Note that both names are interpreted relative to the current
+///             location.
+///             For information on creating a soft link, please refer to the
+///             H5Lcreate_soft APIs in the HDF5 C Reference Manual.
+//  March 2018
+//--------------------------------------------------------------------------
+void H5Location::link(const char *target_name, const char *link_name,
+             const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    herr_t ret_value = -1;
+    hid_t lcpl_id = lcpl.getId();
+    hid_t lapl_id = lapl.getId();
+
+    ret_value = H5Lcreate_soft(target_name, getId(), link_name, lcpl_id, lapl_id);
+    if (ret_value < 0)
+        throwException("link", "creating soft link failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::link
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a target_name and \a link_name.
+///\exception   H5::FileIException or H5::GroupIException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::link(const H5std_string& target_name, const H5std_string&
+             link_name, const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    link(target_name.c_str(), link_name.c_str(), lcpl, lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::link
+///\brief       Creates a hard link from \a new_name to \a curr_name.
+///\param       curr_name - IN: Name of the existing object
+///\param       new_loc   - IN: New group or root group
+///\param       new_name  - IN: New name for the object
+///\param       lcpl - IN: Link creation plist - default to LinkCreatPropList::DEFAULT
+///\param       lapl - IN: Link access plist - default to LinkAccPropList::DEFAULT
+///\exception   H5::FileIException or H5::GroupIException
+///\par Description
+///             Note that both names are interpreted relative to the
+///             specified location.
+///             For information on creating a hard link, please refer to the
+///             H5Lcreate_hard APIs in the HDF5 C Reference Manual.
+//  March 2018
+//--------------------------------------------------------------------------
+void H5Location::link(const char *curr_name, const Group& new_loc,
+             const char *new_name, const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    herr_t ret_value = -1;
+    hid_t new_loc_id = new_loc.getId();
+    hid_t lcpl_id = lcpl.getId();
+    hid_t lapl_id = lapl.getId();
+
+    ret_value = H5Lcreate_hard(getId(), curr_name, new_loc.getId(), new_name, H5P_DEFAULT, H5P_DEFAULT);
+   if (ret_value < 0)
+        throwException("link", "creating link failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::link
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a curr_name and \a new_name.
+///\exception   H5::FileIException or H5::GroupIException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::link(const H5std_string& curr_name, const Group& new_loc,
+             const H5std_string& new_name, const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    link(curr_name.c_str(), new_loc, new_name.c_str(), lcpl, lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::link
+///\brief       Creates a hard link from \a new_name to \a curr_name - can be
+///             used to pass in H5L_SAME_LOC.
+///\param       curr_name - IN: Name of the existing object
+///\param       loc_id    - IN: Group or root group ID, or H5L_SAME_LOC
+///\param       new_name  - IN: New name for the link
+///\param       lcpl - IN: Link creation plist - default to LinkCreatPropList::DEFAULT
+///\param       lapl - IN: Link access plist - default to LinkAccPropList::DEFAULT
+///\exception   H5::FileIException or H5::GroupIException
+///\par Description
+///             Note that both names are interpreted relative to the
+///             specified location.
+///             For information on creating a hard link, please refer to the
+///             H5Lcreate_hard APIs in the HDF5 C Reference Manual.
+//  March 2018
+//--------------------------------------------------------------------------
+void H5Location::link(const char *curr_name, const hid_t same_loc,
+             const char *new_name, const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    herr_t ret_value = -1;
+    hid_t lcpl_id = lcpl.getId();
+    hid_t lapl_id = lapl.getId();
+
+    ret_value = H5Lcreate_hard(getId(), curr_name, same_loc, new_name, H5P_DEFAULT, H5P_DEFAULT);
+
+   if (ret_value < 0)
+        throwException("link", "creating link failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::link
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a curr_name and \a new_name.
+///\exception   H5::FileIException or H5::GroupIException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::link(const H5std_string& curr_name, const hid_t same_loc,
+             const H5std_string& new_name, const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    link(curr_name.c_str(), same_loc, new_name.c_str(), lcpl, lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::link
 ///\brief       Creates a link of the specified type from \a new_name to
 ///             \a curr_name.
 ///\param       link_type  - IN: Link type; possible values are
@@ -955,12 +1122,14 @@ DataSet H5Location::openDataSet(const H5std_string& name) const
 ///             Note that both names are interpreted relative to the
 ///             specified location.
 ///             For information on creating hard link and soft link, please
-///             refer to the C layer Reference Manual at:
-/// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateHard and
-/// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateSoft
+///             refer to the H5Lcreate_hard and H5Lcreate_soft APIs in the
+///             HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //        2007: QAK modified to use H5L APIs - BMR
+//        Mar 2018: Inadequate functionality, new hard link is only in
+//              H5L_SAME_LOC.  This function will be retired in favor of
+//              its replacement. - BMR
 //--------------------------------------------------------------------------
 void H5Location::link(H5L_type_t link_type, const char* curr_name, const char* new_name) const
 {
@@ -1000,17 +1169,231 @@ void H5Location::link(H5L_type_t link_type, const H5std_string& curr_name, const
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5Location::unlink
-///\brief       Removes the specified name at this location.
-///\param       name  - IN: Name of the object to be removed
+// Function:    H5Location::copyLink
+///\brief       Copies a link from one group to another.
+///\param       src_name - IN: Original name
+///\param       dst      - IN: Destination location
+///\param       dst_name - IN: New name
+///\param       lcpl     - IN: Link creation plist - default LinkCreatPropList::DEFAULT
+///\param       lapl     - IN: Link access plist - default LinkAccPropList::DEFAULT
+///\exception   H5::FileIException or H5::GroupIException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::copyLink(const char *src_name,
+        const Group& dst, const char *dst_name, const LinkCreatPropList& lcpl,
+        const LinkAccPropList& lapl) const
+{
+    herr_t ret_value;
+    hid_t dst_id = dst.getId();
+    hid_t lcpl_id = lcpl.getId();
+    hid_t lapl_id = lapl.getId();
+
+    ret_value = H5Lcopy(getId(), src_name, dst_id, dst_name, lcpl_id, lapl_id);
+    if(ret_value < 0)
+        throwException("copyLink", "H5Lcopy failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::copyLink
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a src_name and \a dst_name.
+///\exception   H5::FileIException or H5::GroupIException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::copyLink(const H5std_string& src_name,
+        const Group& dst, const H5std_string& dst_name, const LinkCreatPropList& lcpl,
+        const LinkAccPropList& lapl) const
+{
+    copyLink(src_name.c_str(), dst, dst_name.c_str(), lcpl, lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::copyLink
+///\brief       Copies a link from a group in the same location.
+///\param       src_name - IN: Original name
+///\param       dst_name - IN: New name
+///\param       lcpl     - IN: Link creation plist - default LinkCreatPropList::DEFAULT
+///\param       lapl     - IN: Link access plist - default LinkAccPropList::DEFAULT
+///\exception   H5::FileIException or H5::GroupIException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::copyLink(const char *src_name,
+        const char *dst_name, const LinkCreatPropList& lcpl,
+        const LinkAccPropList& lapl) const
+{
+    herr_t ret_value;
+    hid_t lcpl_id = lcpl.getId();
+    hid_t lapl_id = lapl.getId();
+
+    ret_value = H5Lcopy(getId(), src_name, H5L_SAME_LOC, dst_name, lcpl_id, lapl_id);
+    if(ret_value < 0)
+        throwException("copyLink", "H5Lcopy H5L_SAME_LOC failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::copyLink
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a src_name and \a dst_name.
+///\exception   H5::FileIException or H5::GroupIException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::copyLink(const H5std_string& src_name,
+        const H5std_string& dst_name, const LinkCreatPropList& lcpl,
+        const LinkAccPropList& lapl) const
+{
+    copyLink(src_name.c_str(), dst_name.c_str(), lcpl, lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::moveLink
+///\brief       Renames a link in this group and moves it to a new location.
+///\param       src_name - IN: Original name
+///\param       dst      - IN: Destination location
+///\param       dst_name - IN: New name
+///\param       lcpl     - IN: Link creation plist - default LinkCreatPropList::DEFAULT
+///\param       lapl     - IN: Link access plist - default LinkAccPropList::DEFAULT
+///\exception   H5::FileIException or H5::GroupIException
+///\note
+///             Exercise care in moving groups as it is possible to render
+///             data in a file inaccessible with H5Location::moveLink. Please refer
+///             to the Group Interface in the HDF5 User's Guide for details.
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::moveLink(const char* src_name, const Group& dst, const char* dst_name, const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    herr_t ret_value;
+    hid_t dst_id = dst.getId();
+    hid_t lcpl_id = lcpl.getId();
+    hid_t lapl_id = lapl.getId();
+
+    ret_value = H5Lmove(getId(), src_name, dst_id, dst_name, lcpl_id, lapl_id);
+    if (ret_value < 0)
+        throwException("moveLink", "H5Lmove failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::moveLink
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a src_name and \a dst_name.
+///\exception   H5::FileIException or H5::GroupIException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::moveLink(const H5std_string& src_name, const Group& dst, const H5std_string& dst_name, const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    moveLink(src_name.c_str(), dst, dst_name.c_str(), lcpl, lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::moveLink
+///\brief       Renames a link in this group.
+///\param       src_name - IN: Original name
+///\param       dst_name - IN: New name
+///\param       lcpl     - IN: Link creation plist - default LinkCreatPropList::DEFAULT
+///\param       lapl     - IN: Link access plist - default LinkAccPropList::DEFAULT
+///\exception   H5::FileIException or H5::GroupIException
+///\note
+///             Exercise care in moving groups as it is possible to render
+///             data in a file inaccessible with H5Location::moveLink. Please refer
+///             to the Group Interface in the HDF5 User's Guide for details.
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::moveLink(const char* src_name, const char* dst_name, const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    herr_t ret_value;
+    hid_t lcpl_id = lcpl.getId();
+    hid_t lapl_id = lapl.getId();
+
+    ret_value = H5Lmove(getId(), src_name, H5L_SAME_LOC, dst_name, lcpl_id, lapl_id);
+    if (ret_value < 0)
+        throwException("moveLink", "H5Lmove H5L_SAME_LOC failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::moveLink
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a src_name and \a dst_name.
+///\exception   H5::FileIException or H5::GroupIException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::moveLink(const H5std_string& src_name, const H5std_string& dst_name, const LinkCreatPropList& lcpl, const LinkAccPropList& lapl) const
+{
+    moveLink(src_name.c_str(), dst_name.c_str(), lcpl, lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::move
+///\brief       Renames an object at this location. - Deprecated due to inadequate functionality
+///\param       src - IN: Object's original name
+///\param       dst - IN: Object's new name
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
-// Programmer   Binh-Minh Ribler - 2000
+///\note
+///             Exercise care in moving groups as it is possible to render
+///             data in a file inaccessible with H5Location::move. Please refer
+///             to the Group Interface in the HDF5 User's Guide for details.
 // Modification
 //      2007: QAK modified to use H5L APIs - BMR
+//      2018: Will be replaced by H5Location::moveLink() -BMR
 //--------------------------------------------------------------------------
-void H5Location::unlink(const char* name) const
+void H5Location::move(const char* src, const char* dst) const
+{
+    moveLink(src, dst, LinkCreatPropList::DEFAULT, LinkAccPropList::DEFAULT);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::move
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a src and \a dst. - Deprecated due to inadequate functionality
+// Modification
+//      2018: Will be replaced by H5Location::moveLink() -BMR
+//--------------------------------------------------------------------------
+void H5Location::move(const H5std_string& src, const H5std_string& dst) const
+{
+    moveLink(src.c_str(), dst.c_str(), LinkCreatPropList::DEFAULT, LinkAccPropList::DEFAULT);
+}
+
+#if 0
+//--------------------------------------------------------------------------
+// Function:    H5Location::deleteLink
+///\brief       Removes the specified link from this group.
+///\param       name  - IN: Name of the object to be removed
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::deleteLink(const char* name, const LinkAccPropList& lapl) const
 {
     herr_t ret_value = H5Ldelete(getId(), name, H5P_DEFAULT);
+    if (ret_value < 0)
+        throwException("deleteLink", "H5Ldelete failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::deleteLink
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a name.
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::deleteLink(const H5std_string& name, const LinkAccPropList& lapl) const
+{
+    deleteLink(name.c_str());
+}
+
+#endif
+//--------------------------------------------------------------------------
+// Function:    H5Location::unlink
+///\brief       Removes the specified link from this group.
+///\param       name  - IN: Name of the object to be removed
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
+// March, 2018
+//--------------------------------------------------------------------------
+void H5Location::unlink(const char* name, const LinkAccPropList& lapl) const
+{
+    herr_t ret_value = H5Ldelete(getId(), name, lapl.getId());
     if (ret_value < 0)
         throwException("unlink", "H5Ldelete failed");
 }
@@ -1020,45 +1403,11 @@ void H5Location::unlink(const char* name) const
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above function in that it takes an
 ///             \c H5std_string for \a name.
-// Programmer   Binh-Minh Ribler - 2000
+// March, 2018
 //--------------------------------------------------------------------------
-void H5Location::unlink(const H5std_string& name) const
+void H5Location::unlink(const H5std_string& name, const LinkAccPropList& lapl) const
 {
-    unlink(name.c_str());
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Location::move
-///\brief       Renames an object at this location.
-///\param       src - IN: Object's original name
-///\param       dst - IN: Object's new name
-///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
-///\note
-///             Exercise care in moving groups as it is possible to render
-///             data in a file inaccessible with H5Location::move. Please refer
-///             to the Group Interface in the HDF5 User's Guide for details at:
-/// https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html#t=HDF5_Users_Guide%2FGroups%2FHDF5_Groups.htm
-// Programmer   Binh-Minh Ribler - 2000
-// Modification
-//        2007: QAK modified to use H5L APIs - BMR
-//--------------------------------------------------------------------------
-void H5Location::move(const char* src, const char* dst) const
-{
-    herr_t ret_value = H5Lmove(getId(), src, H5L_SAME_LOC, dst, H5P_DEFAULT, H5P_DEFAULT);
-    if (ret_value < 0)
-        throwException("move", "H5Lmove failed");
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5Location::move
-///\brief       This is an overloaded member function, provided for convenience.
-///             It differs from the above function in that it takes an
-///             \c H5std_string for \a src and \a dst.
-// Programmer   Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void H5Location::move(const H5std_string& src, const H5std_string& dst) const
-{
-    move(src.c_str(), dst.c_str());
+    unlink(name.c_str(), lapl);
 }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -1070,10 +1419,9 @@ void H5Location::move(const H5std_string& src, const H5std_string& dst) const
 ///\param       statbuf - OUT: Buffer to return information about the object
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///\par Description
-///             For more information, please refer to the C layer Reference
-///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5G.html#Group-GetObjinfo
-// Programmer   Binh-Minh Ribler - 2000
+///             For information, please refer to the H5Gget_objinfo API in
+///             the HDF5 C Reference Manual.
+// 2000
 //--------------------------------------------------------------------------
 void H5Location::getObjinfo(const char* name, hbool_t follow_link, H5G_stat_t& statbuf) const
 {
@@ -1099,8 +1447,7 @@ void H5Location::getObjinfo(const H5std_string& name, hbool_t follow_link, H5G_s
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above functions in that it doesn't have
 ///             the paramemter \a follow_link.
-// Programmer   Binh-Minh Ribler - Nov, 2005
-// Note: need to modify to use H5Oget_info and H5Lget_info - BMR
+// Nov, 2005
 //--------------------------------------------------------------------------
 void H5Location::getObjinfo(const char* name, H5G_stat_t& statbuf) const
 {
@@ -1123,13 +1470,44 @@ void H5Location::getObjinfo(const H5std_string& name, H5G_stat_t& statbuf) const
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
+// Function:    H5Location::getLinkInfo
+///\brief       Returns the information of the named link.
+///\param       link_name  - IN: Symbolic link to the object
+///\param       size - IN: Maximum number of characters of value to be returned
+///\return      Name of the object
+///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
+// 2000
+//--------------------------------------------------------------------------
+H5L_info_t H5Location::getLinkInfo(const char* link_name, const LinkAccPropList& lapl) const
+{
+    H5L_info_t linkinfo; // link info structure
+
+    herr_t ret_value = H5Lget_info(getId(), link_name, &linkinfo, lapl.getId());
+    if (ret_value < 0)
+        throwException("getLinkInfo", "H5Lget_info to find buffer size failed");
+
+    return(linkinfo);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getLinkInfo
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for \a link_name.
+//--------------------------------------------------------------------------
+H5L_info_t H5Location::getLinkInfo(const H5std_string& link_name, const LinkAccPropList& lapl) const
+{
+    return(getLinkInfo(link_name.c_str(), lapl));
+}
+
+//--------------------------------------------------------------------------
 // Function:    H5Location::getLinkval
 ///\brief       Returns the name of the object that the symbolic link points to.
 ///\param       name  - IN: Symbolic link to the object
 ///\param       size - IN: Maximum number of characters of value to be returned
 ///\return      Name of the object
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
-// Programmer   Binh-Minh Ribler - 2000
+// 2000
 //--------------------------------------------------------------------------
 H5std_string H5Location::getLinkval(const char* name, size_t size) const
 {
@@ -1435,8 +1813,8 @@ ssize_t H5Location::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size
 ///             \li \c H5O_TYPE_GROUP
 ///             \li \c H5O_TYPE_DATASET
 ///             \li \c H5O_TYPE_NAMED_DATATYPE
-///             Refer to the C API documentation for more details:
-///             http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
+///             For information, please refer to the H5Oget_info_by_name API in
+///             the HDF5 C Reference Manual.
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API
@@ -1501,8 +1879,8 @@ H5O_type_t H5Location::childObjType(const H5std_string& objname) const
 ///             \li \c H5O_TYPE_GROUP
 ///             \li \c H5O_TYPE_DATASET
 ///             \li \c H5O_TYPE_NAMED_DATATYPE
-///             Refer to the C API documentation for more details:
-///             http://www.hdfgroup.org/HDF5/doc/RM/RM_H5O.html#Object-GetInfo
+///             For information, please refer to the H5Oget_info_by_idx API in
+///             the HDF5 C Reference Manual.
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 ///             Exception will be thrown when:
 ///             - an error returned by the C API
@@ -1679,7 +2057,7 @@ H5G_obj_t H5Location::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) cons
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //      August 2017 - BMR
-//              Keep Group::throwException and H5File::throwException to
+//              Keep H5Location::throwException and H5File::throwException to
 //              maintain backward compatibility.  For other subclasses, throw
 //              LocationException.
 //--------------------------------------------------------------------------

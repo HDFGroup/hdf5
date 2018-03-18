@@ -22,6 +22,7 @@
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DataSpace.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -52,7 +53,7 @@ EnumType::EnumType(const hid_t existing_id) : DataType( existing_id ) {}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType copy constructor
-///\brief       Copy constructor: makes a copy of the original EnumType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType::EnumType(const EnumType& original) : DataType( original ) {}

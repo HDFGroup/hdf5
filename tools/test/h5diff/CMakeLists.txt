@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_TOOLS_TEST_H5DIFF)
 
 #-----------------------------------------------------------------------------
@@ -11,7 +11,6 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS)
     add_executable (h5diffgentest ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
-    TARGET_NAMING (h5diffgentest STATIC)
     TARGET_C_PROPERTIES (h5diffgentest STATIC " " " ")
     target_link_libraries (h5diffgentest ${HDF5_LIB_TARGET})
     set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)

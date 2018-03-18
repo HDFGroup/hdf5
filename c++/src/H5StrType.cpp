@@ -20,6 +20,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -119,7 +120,7 @@ StrType::StrType(const hid_t existing_id) : AtomType( existing_id ) {}
 
 //--------------------------------------------------------------------------
 // Function:    StrType copy constructor
-///\brief       Copy constructor: makes a copy of the original StrType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 StrType::StrType(const StrType& original) : AtomType ( original ) {}
@@ -281,8 +282,8 @@ H5T_str_t StrType::getStrpad() const
 ///\param       strpad - IN: String padding type
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For detail, please refer to the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetStrpad
+///             For information, please refer to the H5Tset_strpad API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void StrType::setStrpad(H5T_str_t strpad) const

@@ -1248,18 +1248,44 @@ void
 os_grp_0(hid_t fid, const char *group_name)
 {
     hid_t gid = -1;
+    hid_t fapl = -1;
+    H5F_libver_t low, high;
+
     herr_t ret;
+
+    if ( pass ) { /* get the file's file access property list */
+
+        fapl = H5Fget_access_plist(fid);
+        if ( fapl <= 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "os_grp_0: H5Fget_access_plist() failed.";
+        }
+        HDassert(fapl > 0);
+    }
+    
+    if ( pass ) { /* get low and high bounds from fapl */
+
+        ret = H5Pget_libver_bounds(fapl, &low, &high);
+        if ( ret < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "os_grp_0: H5Pget_libver_bounds() failed(1).";
+        }
+        HDassert(ret >= 0);
+    }
 
     if ( pass ) { /* turn file format latest off */
 
-	ret = H5Fset_latest_format(fid, FALSE);
+        if(low >= H5F_LIBVER_V18) {
+            ret = H5Fset_libver_bounds(fid, H5F_LIBVER_EARLIEST, high);
+            if ( ret < 0 ) {
 
-	if ( ret < 0 ) {
-
-	    pass = FALSE;
-	    failure_mssg = "os_grp_0: H5Fset_latest_format() failed(1).";
-	}
-        HDassert(ret >= 0);
+                pass = FALSE;
+                failure_mssg = "os_grp_0: H5Fset_libver_bounds() failed(1).";
+            }
+            HDassert(ret >= 0);
+        }
     }
 
     if ( pass ) {
@@ -1268,9 +1294,9 @@ os_grp_0(hid_t fid, const char *group_name)
                          H5P_DEFAULT);
         if ( gid <= 0 ) {
 
-	    pass = FALSE;
-	    failure_mssg = "os_grp_0: H5Gcreate2() failed.";
-	}
+            pass = FALSE;
+            failure_mssg = "os_grp_0: H5Gcreate2() failed.";
+        }
         HDassert(gid > 0);
     }
 
@@ -1278,24 +1304,25 @@ os_grp_0(hid_t fid, const char *group_name)
 
         ret = H5Gclose(gid);
 
-	if ( ret < 0 ) {
+        if ( ret < 0 ) {
 
-	    pass = FALSE;
-	    failure_mssg = "os_grp_0: H5Gclose() failed.";
-	}
+            pass = FALSE;
+            failure_mssg = "os_grp_0: H5Gclose() failed.";
+        }
         HDassert(ret >= 0);
     }
 
-    if ( pass ) { /* turn file format latest on */
+    if ( pass ) { /* restore low and high bounds */
 
-	ret = H5Fset_latest_format(fid, TRUE);
+        if(low >= H5F_LIBVER_V18) {
+            ret = H5Fset_libver_bounds(fid, low, high);
+            if ( ret < 0 ) {
 
-	if ( ret < 0 ) {
-
-	    pass = FALSE;
-	    failure_mssg = "os_grp_0: H5Fset_latest_format() failed(2).";
-	}
-        HDassert(ret >= 0);
+                pass = FALSE;
+                failure_mssg = "os_grp_0: H5Fset_libver_bounds() failed(1).";
+            }
+            HDassert(ret >= 0);
+        }
     }
 
     return;
@@ -1462,18 +1489,43 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
 {
     hid_t gid = -1;
     unsigned u;
+    hid_t fapl = -1;
+    H5F_libver_t low, high;
     herr_t ret;
+
+    if ( pass ) { /* get the file's file access property list */
+
+        fapl = H5Fget_access_plist(fid);
+        if ( fapl <= 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "os_grp_n: H5Fget_access_plist() failed.";
+        }
+        HDassert(fapl > 0);
+    }
+
+    if ( pass ) {  /* get low and high bounds from fapl */
+    
+        ret = H5Pget_libver_bounds(fapl, &low, &high);
+        if ( ret < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "os_grp_0: H5Pget_libver_bounds() failed(1).";
+        }
+        HDassert(ret >= 0);
+    }
 
     if ( pass ) { /* turn file format latest off */
 
-	ret = H5Fset_latest_format(fid, FALSE);
+        if(low >= H5F_LIBVER_V18) {
+            ret = H5Fset_libver_bounds(fid, H5F_LIBVER_EARLIEST, high);
+            if ( ret < 0 ) {
 
-	if ( ret < 0 ) {
-
-	    pass = FALSE;
-	    failure_mssg = "os_grp_n: H5Fset_latest_format() failed(1).";
-	}
-        HDassert(ret >= 0);
+                pass = FALSE;
+                failure_mssg = "os_grp_0: H5Fset_libver_bounds() failed(1).";
+            }
+            HDassert(ret >= 0);
+        }
     }
 
     if ( pass ) {
@@ -1482,8 +1534,8 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
                          H5P_DEFAULT);
         if ( gid <= 0 ) {
 
-	    pass = FALSE;
-	    failure_mssg = "os_grp_n: H5Gcreate2() failed.";
+            pass = FALSE;
+            failure_mssg = "os_grp_n: H5Gcreate2() failed.";
         }
         HDassert(gid > 0);
     }
@@ -1538,16 +1590,17 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         assert(ret >= 0);
     }
 
-    if ( pass ) { /* turn file format latest on */
+    if ( pass ) { /* restore low and high bounds */
 
-	ret = H5Fset_latest_format(fid, TRUE);
+        if(low >= H5F_LIBVER_V18) {
+            ret = H5Fset_libver_bounds(fid, low, high);
+            if ( ret < 0 ) {
 
-	if ( ret < 0 ) {
-
-	    pass = FALSE;
-	    failure_mssg = "os_grp_n: H5Fset_latest_format() failed(2).";
-	}
-        HDassert(ret >= 0);
+                pass = FALSE;
+                failure_mssg = "os_grp_n: H5Fset_libver_bounds() failed(2).";
+            }
+            HDassert(ret >= 0);
+        }
     }
 
     return;

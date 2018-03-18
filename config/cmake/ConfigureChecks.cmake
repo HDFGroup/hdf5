@@ -179,7 +179,7 @@ endif ()
 # Macro to determine the various conversion capabilities
 #-----------------------------------------------------------------------------
 macro (H5ConversionTests TEST msg)
-  if ("${TEST}" MATCHES "^${TEST}$")
+  if (NOT DEFINED ${TEST})
    # message (STATUS "===> ${TEST}")
     TRY_RUN (${TEST}_RUN   ${TEST}_COMPILE
         ${CMAKE_BINARY_DIR}
@@ -206,21 +206,6 @@ macro (H5ConversionTests TEST msg)
       )
     endif ()
 
-  endif ()
-endmacro ()
-
-#-----------------------------------------------------------------------------
-# Macro to make some of the conversion tests easier to write/read
-#-----------------------------------------------------------------------------
-macro (H5MiscConversionTest VAR TEST msg)
-  if ("${TEST}" MATCHES "^${TEST}$")
-    if (${VAR})
-      set (${TEST} 1 CACHE INTERNAL ${msg})
-      message (STATUS "${msg}... yes")
-    else ()
-      set (${TEST} "" CACHE INTERNAL ${msg})
-      message (STATUS "${msg}... no")
-    endif ()
   endif ()
 endmacro ()
 

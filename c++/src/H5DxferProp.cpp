@@ -101,7 +101,7 @@ DSetMemXferPropList::DSetMemXferPropList(const char* exp) : PropList(H5P_DATASET
 
 //--------------------------------------------------------------------------
 // Function     DSetMemXferPropList copy constructor
-///\brief       Copy constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///             DSetMemXferPropList object
 ///\param       original - IN: Original dataset memory and transfer property
 ///                            list object to copy
@@ -434,8 +434,8 @@ void DSetMemXferPropList::getVlenMemManager(H5MM_allocate_t& alloc_func, void** 
 ///\param       size - IN: Maximum size, in bytes, of the small data block.
 ///\exception   H5::PropListIException
 ///\par Description
-///             For detail, please refer to the C layer Reference Manual at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSmallData
+///             For detail, please refer to the H5Pset_small_data_block_size
+///             API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void DSetMemXferPropList::setSmallDataBlockSize(hsize_t size) const
@@ -473,9 +473,8 @@ hsize_t DSetMemXferPropList::getSmallDataBlockSize() const
 ///
 ///\exception   H5::PropListIException
 ///\par Description
-///             For information, please refer to the C layer Reference
-///             Manual at:
-/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetHyperVectorSize
+///             For detail, please refer to the H5Pset_hyper_vector_size
+///             API in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void DSetMemXferPropList::setHyperVectorSize(size_t vector_size) const

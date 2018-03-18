@@ -20,6 +20,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -65,7 +66,7 @@ FloatType::FloatType(const hid_t existing_id) : AtomType( existing_id ) {}
 
 //--------------------------------------------------------------------------
 // Function:    FloatType copy constructor
-///\brief       Copy constructor: makes a copy of the original FloatType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType::FloatType(const FloatType&  original) : AtomType( original ){}

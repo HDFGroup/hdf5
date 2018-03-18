@@ -38,7 +38,7 @@
 !
 !*****
 
-MODULE H5R 
+MODULE H5R
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_SIGNED_CHAR
   USE H5GLOBAL
 
@@ -62,7 +62,7 @@ MODULE H5R
 
   END INTERFACE
 
-  TYPE :: hdset_reg_ref_t_f03 
+  TYPE :: hdset_reg_ref_t_f03
      INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref
   END TYPE hdset_reg_ref_t_f03
 
@@ -165,16 +165,16 @@ CONTAINS
 !  Retrieves the type of object that an object reference points to.
 !
 ! INPUTS
-!  dset_id 	 - identifier of the dataset containing
+!  dset_id      - identifier of the dataset containing
 !                  reference to the objects
-!  ref 	         - reference to open
+!  ref              - reference to open
 ! OUTPUTS
-!  obj_type 	 - object_type, possible values:
+!  obj_type      - object_type, possible values:
 !                    H5G_UNKNOWN_F
-!                    H5G_GROUP_F 
+!                    H5G_GROUP_F
 !                    H5G_DATASET_F
 !                    H5G_TYPE_F
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  hdferr      - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
@@ -227,17 +227,17 @@ CONTAINS
 !  Retrieves a dataspace with the specified region selected
 !
 ! INPUTS
-!  dset_id 	 - identifier of the dataset containing
+!  dset_id      - identifier of the dataset containing
 !                  reference to the regions
-!  ref 	         - reference to open
+!  ref              - reference to open
 ! OUTPUTS
-!  space_id 	 - dataspace identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  space_id      - dataspace identifier
+!  hdferr      - Returns 0 if successful and -1 if fails
 ! AUTHOR
 !  Elena Pourmal
 !  August 12, 1999
 !
-! HISTORY 	
+! HISTORY
 !  Explicit Fortran interfaces were added for
 !  called C functions (it is needed for Windows
 !  port).  February 28, 2001
@@ -276,16 +276,16 @@ CONTAINS
 !  h5rget_region_ptr_f
 !
 ! PURPOSE
-!  Retrieves a dataspace with the specified region 
+!  Retrieves a dataspace with the specified region
 !  selected using pointer
 !
 ! INPUTS
-!  dset_id 	 - identifier of the dataset containing
+!  dset_id      - identifier of the dataset containing
 !                  reference to the regions
-!  ref 	         - reference to open
+!  ref              - reference to open
 ! OUTPUTS
-!  space_id 	 - dataspace identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  space_id      - dataspace identifier
+!  hdferr      - Returns 0 if successful and -1 if fails
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  August 4, 2012
@@ -319,7 +319,7 @@ CONTAINS
 !  loc_id    - location identifier
 !  name      - name of the object at the specified location
 ! Outputs:
-!  ref 	     - reference to the specified object
+!  ref          - reference to the specified object
 !  hdferr    - returns 0 if successful and -1 if fails
 ! AUTHOR
 !  Elena Pourmal
@@ -363,11 +363,11 @@ CONTAINS
 !  Creates reference to the dataset region
 !
 ! INPUTS
-!  loc_id 	 - location identifier
-!  name 	 - name of the dataset at the specified location
-!  space_id 	 - dataspace identifier that describes selected region
+!  loc_id      - location identifier
+!  name      - name of the dataset at the specified location
+!  space_id      - dataspace identifier that describes selected region
 ! OUTPUTS
-!  ref 	         - reference to the dataset region
+!  ref              - reference to the dataset region
 !  hdferr        - returns 0 if successful and -1 if fails
 ! AUTHOR
 !  Elena Pourmal
@@ -424,12 +424,12 @@ CONTAINS
 !
 ! Inputs:
 !  loc_id     - location identifier
-!  name	      - name of the dataset at the specified location
+!  name          - name of the dataset at the specified location
 !  ref_type   - type of reference:
 !                H5R_OBJECT
 !                H5T_STD_REF_DSETREG
 ! Outputs:
-!  ref	      - reference created by the function call.
+!  ref          - reference created by the function call.
 !  hdferr     - returns 0 if successful and -1 if fails.
 ! OPTIONAL
 !  space_id   - dataspace identifier that describes selected region
@@ -474,7 +474,7 @@ CONTAINS
 ! Inputs:
 !  dset_id  - identifier of the dataset containing
 !             reference
-!  ref 	    - reference to open
+!  ref         - reference to open
 ! Outputs:
 !  obj_id   - object_identifier
 !  hdferr   - returns 0 if successful and -1 if fails
@@ -515,8 +515,8 @@ CONTAINS
 !
 ! Inputs:
 !  dset_id  - identifier of the dataset containing
-!             reference to teh regions
-!  ref 	    - reference to open
+!             reference to the regions
+!  ref         - reference to open
 ! Outputs:
 !  obj_id   - dataspace identifier
 !  hdferr   - returns 0 if successful and -1 if fails
@@ -585,7 +585,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: ref_obj_id
                                           ! Identifier of referenced object
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
-!***** 
+!*****
     hdferr = h5rdereference_ptr_c(obj_id, ref_type, ref, ref_obj_id)
 
   END SUBROUTINE h5rdereference_ptr_f
@@ -600,14 +600,14 @@ CONTAINS
 !
 ! Inputs:
 !  loc_id    - Identifier for the file containing the reference or for any object in that file.
-!  ref 	     - An object or dataset region reference.
+!  ref          - An object or dataset region reference.
 !
 ! Outputs:
 !  name      - A name associated with the referenced object or dataset region.
 !  hdferr    - Returns 0 if successful and -1 if fails.
 !
 ! Optional parameters:
-!  size     - The size of the name buffer, returning 0 (zero) if no name is associated 
+!  size     - The size of the name buffer, returning 0 (zero) if no name is associated
 !             with the identifier.
 !
 ! AUTHOR
@@ -648,7 +648,7 @@ CONTAINS
 !
 ! Inputs:
 !  loc_id  - Identifier for the file containing the reference or for any object in that file.
-!  ref 	   - An object or dataset region reference.
+!  ref        - An object or dataset region reference.
 !
 ! Outputs:
 !  name    - A name associated with the referenced object or dataset region.
@@ -747,12 +747,12 @@ CONTAINS
   !  ref      - Reference to query.
   !
   ! Outputs:
-  !  obj_type - Type of referenced object. 
+  !  obj_type - Type of referenced object.
   !               H5G_UNKNOWN_F
   !               H5G_GROUP_F
   !               H5G_DATASET_F
   !               H5G_TYPE_F
-  !              
+  !
   !  hdferr   - Returns 0 if successful and -1 if fails.
   !
   ! AUTHOR

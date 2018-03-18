@@ -71,7 +71,7 @@ class H5_DLLCPP FloatType : public AtomType {
         // Creates a floating-point datatype using an existing id.
         FloatType(const hid_t existing_id);
 
-        // Copy constructor: makes a copy of the original FloatType object.
+        // Copy constructor: same as the original FloatType.
         FloatType(const FloatType& original);
 
         // Noop destructor.

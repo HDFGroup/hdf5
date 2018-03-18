@@ -53,6 +53,7 @@
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
   set (LIST_HDF5_TEST_FILES
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/bounds_latest_latest.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_attr.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_attr_refs.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_deflate.h5
@@ -580,6 +581,62 @@
         set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname})
       endif ()
     endif ()
+  endmacro ()
+
+# VERIFY_SUPERBLOCK
+  macro (ADD_H5_VERIFY_SUPERBLOCK testname testfile lowbound highbound superblock)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/out-${testname}.${testfile}
+              testfiles/${testfile}-${testname}-v.out
+              testfiles/${testfile}-${testname}-v.out.err
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
+      add_test (
+          NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}
+          COMMAND $<TARGET_FILE:h5repack> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+      )
+      set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname} PROPERTIES DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects)
+      add_test (
+          NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=-H;-B;out-${testname}.${testfile}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_FILTER:STRING=SUPERBLOCK_VERSION ${superblock}"
+              -D "TEST_REFERENCE=SUPERBLOCK_VERSION ${superblock}"
+              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+      )
+      set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname})
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_VERIFY_INVALIDBOUNDS testname resultcode lowbound highbound)
+      add_test (
+          NAME ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/out-${testname}.${testfile}
+      )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      endif ()
+      add_test (
+          NAME ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}
+          COMMAND $<TARGET_FILE:h5repack> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+      )
+      set_tests_properties (
+          ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname} PROPERTIES
+              DEPENDS ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects
+              WILL_FAIL "true"
+      )
   endmacro ()
 
   macro (ADD_H5_TEST_META testname testfile)
@@ -1369,6 +1426,18 @@
     set (TESTTYPE "SKIP")
   endif ()
   ADD_H5_VERIFY_VDS (vds_conti ${TESTTYPE} 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_dset:CONTI)
+
+##############################################################################
+###    V E R S I O N  B O U N D S  T E S T S
+##############################################################################
+# -j 0 -k 2, superblock will be 0
+ADD_H5_VERIFY_SUPERBLOCK (SB_IS_0 h5repack_layout.h5 0 2 0)
+# -j 1 -k 2, superblock will be 2
+ADD_H5_VERIFY_SUPERBLOCK (SB_IS_2 h5repack_layout.h5 1 2 2)
+# -j 2 -k 2, superblock will be 3
+ADD_H5_VERIFY_SUPERBLOCK (SB_IS_3 h5repack_layout.h5 2 2 3)
+# -j 0 -k 1, file cannot be opened
+ADD_H5_VERIFY_INVALIDBOUNDS (latest_latest_invalid bounds_latest_latest.h5 0 1)
 
 ##############################################################################
 ###    P L U G I N  T E S T S

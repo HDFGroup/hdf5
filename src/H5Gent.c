@@ -91,7 +91,7 @@ H5FL_BLK_EXTERN(str_buf);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsigned n)
+H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, const uint8_t *p_end, H5G_entry_t *ent, unsigned n)
 {
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -104,9 +104,12 @@ H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsign
     HDassert(ent);
 
     /* decode entries */
-    for(u = 0; u < n; u++)
+    for(u = 0; u < n; u++) {
+        if(*pp > p_end)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "ran off the end of the image buffer")
         if(H5G_ent_decode(f, pp, ent + u) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -46,6 +46,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Dpkg.h"             /* Dataset functions                    */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Fprivate.h"         /* Files                                */
@@ -55,6 +56,7 @@
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Oprivate.h"         /* Object headers                       */
+#include "H5Pprivate.h"         /* Property Lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
 
 
@@ -145,7 +147,7 @@ H5FL_DEFINE(H5O_storage_virtual_name_seg_t);
 H5FL_DEFINE_STATIC(H5D_virtual_held_file_t);
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_check_mapping_pre
  *
@@ -215,7 +217,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_check_mapping_pre() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_check_mapping_post
  *
@@ -283,7 +285,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_check_mapping_post() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_update_min_dims
  *
@@ -342,7 +344,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_update_min_dims() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_check_min_dims
  *
@@ -387,7 +389,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_check_min_dims() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_store_layout
  *
@@ -685,7 +687,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy_layout() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_reset_layout
  *
@@ -769,7 +771,7 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_reset_layout() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_copy
  *
@@ -812,7 +814,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_delete
  *
@@ -861,7 +863,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_delete */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_open_source_dset
  *
@@ -881,7 +883,6 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
 {
     H5F_t       *src_file = NULL;       /* Source file */
     hbool_t     src_file_open = FALSE;  /* Whether we have opened and need to close src_file */
-    H5G_loc_t   src_root_loc;           /* Object location of source file root group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -895,28 +896,42 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
 
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
-        /* Open the source file */
-        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl)))
-            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
-        else
+        unsigned    intent;                 /* File access permissions */
+
+        /* Get the virtual dataset's file open flags ("intent") */
+        intent = H5F_INTENT(vdset->oloc.file);
+
+        /* Try opening the file */
+        src_file = H5F_prefix_open_file(vdset->oloc.file, H5F_PREFIX_VDS, vdset->shared->vds_prefix, source_dset->file_name, intent, vdset->shared->layout.storage.u.virt.source_fapl);
+
+        /* If we opened the source file here, we should close it when leaving */
+        if(src_file)
             src_file_open = TRUE;
+        else
+            /* Reset the error stack */
+            H5E_clear_stack(NULL);
     } /* end if */
     else
         /* Source file is ".", use the virtual dataset's file */
         src_file = vdset->oloc.file;
 
     if(src_file) {
+        H5G_loc_t   src_root_loc;           /* Object location of source file root group */
+
         /* Set up the root group in the destination file */
         if(NULL == (src_root_loc.oloc = H5G_oloc(H5G_rootof(src_file))))
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get object location for root group")
         if(NULL == (src_root_loc.path = H5G_nameof(H5G_rootof(src_file))))
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
-        /* Open the source dataset */
-        if(NULL == (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl))) {
-            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Dopen with missing file is implemented */
+        /* Try opening the source dataset */
+        source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl);
 
-            /* Dataset does not exist */
+        /* Dataset does not exist */
+        if(NULL == source_dset->dset) {
+            /* Reset the error stack */
+            H5E_clear_stack(NULL);
+
             source_dset->dset_exists = FALSE;
         } /* end if */
         else {
@@ -933,15 +948,15 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     } /* end if */
 
 done:
-    /* Close source file */
+    /* Release resources */
     if(src_file_open)
-        if(H5F_try_close(src_file, NULL) < 0)
+        if(H5F_efc_close(vdset->oloc.file, src_file) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_open_source_dset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_reset_source_dset
  *
@@ -1028,7 +1043,7 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *virtual_ent,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_reset_source_dset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_str_append
  *
@@ -1104,7 +1119,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D__virtual_str_append() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_parse_source_name
  *
@@ -1220,7 +1235,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_parse_source_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_copy_parsed_name
  *
@@ -1277,7 +1292,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy_parsed_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_virtual_free_parsed_name
  *
@@ -1310,7 +1325,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_free_parsed_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_build_source_name
  *
@@ -1412,7 +1427,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_build_source_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_set_extent_unlim
  *
@@ -1537,7 +1552,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
                         } /* end if */
 
-                        /* Update cached values unlim_extent_source and 
+                        /* Update cached values unlim_extent_source and
                          * clip_size_virtual */
                         storage->list[i].unlim_extent_source = curr_dims[storage->list[i].unlim_dim_source];
                         storage->list[i].clip_size_virtual = clip_size;
@@ -1689,7 +1704,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
 
         /* Mark the space as dirty, for later writing to the file */
-        if(H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR) 
+        if(H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR)
             if(H5D__mark(dset, H5D_MARK_SPACE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
@@ -1840,7 +1855,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_set_extent_unlim() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_init_all
  *
@@ -2064,7 +2079,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_init_all() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_init
  *
@@ -2158,7 +2173,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_is_space_alloc
  *
@@ -2190,7 +2205,7 @@ H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_is_space_alloc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_pre_io
  *
@@ -2375,7 +2390,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected memory space")
                         storage->list[i].sub_dset[j].projected_mem_space = NULL;
                     } /* end if */
-                    else 
+                    else
                         *tot_nelmts += (hsize_t)select_nelmts;
                 } /* end if */
             } /* end for */
@@ -2394,7 +2409,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                 /* Check if anything is selected */
                 if(select_nelmts > (hssize_t)0) {
                     /* Open source dataset */
-                    if(!storage->list[i].source_dset.dset) 
+                    if(!storage->list[i].source_dset.dset)
                         /* Try to open dataset */
                         if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].source_dset) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
@@ -2431,7 +2446,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_pre_io() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_post_io
  *
@@ -2481,7 +2496,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_post_io() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_read_one
  *
@@ -2538,7 +2553,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_read_one() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_read
  *
@@ -2670,7 +2685,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_read() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_write_one
  *
@@ -2729,7 +2744,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_write_one() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_write
  *
@@ -2806,7 +2821,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_flush
  *
@@ -2854,7 +2869,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_flush() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_hold_source_dset_files
  *
@@ -2930,7 +2945,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_hold_source_dset_files() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_refresh_source_dset
  *
@@ -2970,7 +2985,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_refresh_source_dsets() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_refresh_source_dsets
  *
@@ -3023,7 +3038,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_refresh_source_dsets() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_release_source_dset_files
  *

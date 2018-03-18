@@ -1060,7 +1060,7 @@ done:
         fprintf(stdout, "Leaving H5FD_mpio_open\n" );
 #endif
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_mpio_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -1892,10 +1892,9 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
     HDassert(H5FD_MPIO == file->pub.driver_id);
 
     /* Only sync the file if we are not going to immediately close it */
-    if(!closing) {
+    if(!closing)
         if(MPI_SUCCESS != (mpi_code = MPI_File_sync(file->f)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code)
-    } /* end if */
 
 done:
 #ifdef H5FDmpio_DEBUG
@@ -1912,11 +1911,32 @@ done:
  *
  * Purpose:     Make certain the file's size matches it's allocated size
  *
+ *              This is a little sticky in the mpio case, as it is not 
+ *              easy for us to track the current EOF by extracting it from
+ *              write calls. 
+ *
+ *              Instead, we first check to see if the eoa has changed since
+ *              the last call to this function.  If it has, we call 
+ *              MPI_File_get_size() to determine the current EOF, and 
+ *              only call MPI_File_set_size() if this value disagrees 
+ *              with the current eoa.
+ *
  * Return:      Success:	Non-negative
  * 		Failure:	Negative
  *
  * Programmer:  Quincey Koziol
  *              January 31, 2008
+ *
+ * Changes:     Heavily reworked to avoid unnecessary MPI_File_set_size()
+ *              calls.  The hope is that these calls are superfluous in the
+ *              typical case, allowing us to avoid truncates most of the 
+ *              time.
+ *
+ *              The basic idea is to query the file system to get the 
+ *              current eof, and only truncate if the file systems 
+ *              conception of the eof disagrees with our eoa.
+ *
+ *                                                 JRM -- 10/27/17
  *
  *-------------------------------------------------------------------------
  */
@@ -1935,29 +1955,60 @@ H5FD_mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
     HDassert(file);
     HDassert(H5FD_MPIO == file->pub.driver_id);
 
-    /* Extend the file to make sure it's large enough, then sync.
-     * Unfortunately, keeping track of EOF is an expensive operation, so
-     * we can't just check whether EOF<EOA like with other drivers.
-     * Therefore we'll just read the byte at EOA-1 and then write it back. */
-    if(file->eoa > file->last_eoa) {
-        int		mpi_code;	/* mpi return code */
-        MPI_Offset      mpi_off;
+    if(!H5F_addr_eq(file->eoa, file->last_eoa)) {
+        int             mpi_code;       /* mpi return code */
+        MPI_Offset      size;
+        MPI_Offset      needed_eof;
 
-        if(H5FD_mpi_haddr_to_MPIOff(file->eoa, &mpi_off) < 0)
+        /* In principle, it is possible for the size returned by the 
+         * call to MPI_File_get_size() to depend on whether writes from 
+         * all proceeses have completed at the time process 0 makes the
+         * call.  
+         *
+         * In practice, most (all?) truncate calls will come after a barrier
+         * and with no interviening writes to the file (with the possible 
+         * exception of sueprblock / superblock extension message updates).
+         *
+         * Check the "MPI file closing" flag in the API context to determine
+         * if we can skip the barrier.
+         */
+        if(!H5CX_get_mpi_file_flushing())
+            if(MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+
+        /* Only processor p0 will get the filesize and broadcast it. */
+        /* (Note that throwing an error here will cause non-rank 0 processes
+         *      to hang in following Bcast.  -QAK, 3/17/2018)
+         */
+        if(0 == file->mpi_rank)
+            if(MPI_SUCCESS != (mpi_code = MPI_File_get_size(file->f, &size)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_get_size failed", mpi_code)
+
+        /* Broadcast file size */
+        if(MPI_SUCCESS != (mpi_code = MPI_Bcast(&size, (int)sizeof(MPI_Offset), MPI_BYTE, 0, file->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        if(H5FD_mpi_haddr_to_MPIOff(file->eoa, &needed_eof) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
 
-        /* Extend the file's size */
-        if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, mpi_off)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
+        /* eoa != eof.  Set eof to eoa */
+        if(size != needed_eof) {
+            /* Extend the file's size */
+            if(MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, needed_eof)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
 
-	/* Don't let any proc return until all have extended the file.
-         * (Prevents race condition where some processes go ahead and write
-         * more data to the file before all the processes have finished making
-         * it the shorter length, potentially truncating the file and dropping
-         * the new data written)
-         */
-        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+            /* In general, we must wait until all processes have finished 
+             * the truncate before any process can continue, since it is 
+             * possible that a process would write at the end of the 
+             * file, and this write would be discarded by the truncate.
+             *
+             * While this is an issue for a user initiated flush, it may 
+             * not be an issue at file close.  If so, we may be able to 
+             * optimize out the following barrier in that case.
+             */
+            if(MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+        } /* end if */
 
         /* Update the 'last' eoa value */
         file->last_eoa = file->eoa;
