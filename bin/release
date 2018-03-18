@@ -181,8 +181,8 @@ tar2zip()
 
 
 # Parameters:
-# $1 version
-# $2 release tarball
+
+ $2 release tarball
 # $3 output zipball file name
 #
 # Returns 0 if successful; 1 otherwise
@@ -224,6 +224,7 @@ tar2cmakezip()
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.7-Source.tar.gz $cmziptmpdir
     cp $cmziptmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpdir
     cp $cmziptmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpdir
     cp $cmziptmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpdir
@@ -316,6 +317,7 @@ tar2cmaketgz()
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.7-Source.tar.gz $cmgztmpdir
     cp $cmgztmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpdir
     cp $cmgztmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpdir
     cp $cmgztmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpdir
