@@ -319,6 +319,16 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - Add public routine H5DOread_chunk to the high-level C library
+
+      As we have H5DOwrite_chunk() to write an entire chunk to the file
+      directly, the customer requested to add this public routine to 
+      read an entire chunk from the file directly.
+
+      This public routine was added based on a patch from GE Healthcare.
+
+      (VC - 2018/03/18, HDFFV-9934)
+
     - Freeing of object header in H5Ocache.c
 
       It was discovered that the object header was not released properly
