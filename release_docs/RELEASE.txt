@@ -4,38 +4,30 @@ HDF5 version 1.10.2-pre1 currently under development
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.10.1 and HDF5 1.10.2, and
-contains information on the platforms tested and known problems in HDF5-1.10.1.
-For more details check the HISTORY*.txt files in the HDF5 source.
+This document describes the differences between this release and the previous 
+HDF5 release. It contains information on the platforms tested and known 
+problems in this release. For more details check the HISTORY*.txt files in the 
+HDF5 source.
 
+Note that documentation in the links below will be updated at the time of each 
+final release.
 
-Links to HDF5 1.10.1 source code, documentation, and additional materials can be found on The HDF5 web page at:
+Links to HDF5 documentation can be found on The HDF5 web page:
 
-     https://support.hdfgroup.org/HDF5/
+     https://portal.hdfgroup.org/display/HDF5/HDF5
 
-The HDF5 1.10.1 release can be obtained from:
+The official HDF5 releases can be obtained from:
 
-     https://support.hdfgroup.org/HDF5/release/obtain5.html
+     https://www.hdfgroup.org/downloads/hdf5/
 
-User documentation for the snapshot can be accessed directly at this location:
+Changes from Release to Release and New Features in the HDF5-1.10.x release series
+can be found at:
 
-     https://support.hdfgroup.org/HDF5/doc/
-
-New features in the HDF5-1.10.x release series, including brief general
-descriptions of some new and modified APIs, are described in the "New Features
-in HDF5 1.10" document:
-
-https://support.hdfgroup.org/HDF5/docNewFeatures/index.html
-
-All new and modified APIs are listed in detail in the "HDF5 Software Changes
-from Release to Release" document, in the section "Release 1.10.1 (current
-release) versus Release 1.10.0
-
-     https://support.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
+     https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
-    help@hdfgroup.org
+     help@hdfgroup.org
 
 
 CONTENTS
@@ -231,10 +223,6 @@ New Features
 
       (RAW - 2017/09/10, HDFFV-8839)
 
-    Fortran Library:
-    ----------------
-    -
-
     C++ Library:
     ------------
     - The following C++ API wrappers have been added to the C++ Library:
@@ -369,21 +357,6 @@ New Features
 
       (ADB - 2017/08/30, HDFFV-9774)
 
-    High-Level APIs:
-    ---------------
-    -
-
-    C Packet Table API
-    ------------------
-    -
-
-    Internal header file
-    --------------------
-    -
-
-    Documentation
-    -------------
-    -
 
 Support for new platforms, languages and compilers.
 =======================================
@@ -472,7 +445,7 @@ Bug Fixes since HDF5-1.10.1 release
       (2) Fix other places in the library that call this routine to detect
           error routine.
 
-      (HDFFV-10216, VC, 2017/08/30)
+      (VC - 2017/08/30, HDFFV-10216)
 
     - Fixes for paged aggregation
 
@@ -489,7 +462,7 @@ Bug Fixes since HDF5-1.10.1 release
       (2) Drop check for page end metadata threshold
       (3) Remove "can_shrink" and "shrink" callbacks for small section class
 
-      (VC, 2017/06/09)
+      (VC - 2017/06/09)
 
     - Fix for infinite loop in H5VM_power2up().
 
@@ -500,7 +473,7 @@ Bug Fixes since HDF5-1.10.1 release
       The fix ensures that the function checks for n >= 2^63
       and returns 0.
 
-      (HDFFV-10217, VC, 2017/07/10)
+      (VC - 2017/07/10, HDFFV-10217)
 
     - Fix for H5Ocopy doesn't work with open identifiers
 
@@ -508,7 +481,7 @@ Bug Fixes since HDF5-1.10.1 release
       cached info when possible instead of flushing objects to file and
       read them back in again.
 
-      (HDFFV-7853, VC, 2017/07/05)
+      (VC - 2017/07/05, HDFFV-7853)
 
     - Refactored the testpar/t_bigio.c test to include ALARM macros
 
@@ -721,7 +694,7 @@ Bug Fixes since HDF5-1.10.1 release
       configuration step and emit a helpful error message
       (use --enable-build-mode=debug|production instead).
 
-      (HDFFV-10248, DER, 2017/07/05)
+      (DER - 2017/07/05, HDFFV-10248)
 
     - CMake
 
@@ -757,10 +730,6 @@ Bug Fixes since HDF5-1.10.1 release
 
       (MSB - 2017/12/07, HDFFV-10223) 
 
-
-    Performance
-    -------------
-    -
 
     Fortran
     --------
@@ -898,7 +867,7 @@ Bug Fixes since HDF5-1.10.1 release
       Add tests to h5repack.sh.in to verify options added for paged
       aggregation work as expected.
 
-      (VC, 2017/08/03)
+      (VC - 2017/08/03)
 
     - h5dump
 
@@ -962,19 +931,7 @@ Bug Fixes since HDF5-1.10.1 release
       debug builds) or additional chunks to be inserted instead of overwriting
       the data (without assertions enabled / production builds).
 
-      (HDFFV-10187, DER, 2017/05/11)
-
-    Fortran High-Level APIs:
-    ------
-    -
-
-    Documentation
-    -------------
-    -
-
-    F90 APIs
-    --------
-    -
+      (DER, 2017/05/11, HDFFV-10187)
 
     C++ APIs
     --------
@@ -988,10 +945,12 @@ Bug Fixes since HDF5-1.10.1 release
     Testing
     -------
     - Memory for three variables in testphdf5's coll_write_test was malloced
-      but not freed, leaking memory when running the test.  The variables'
-      memory is now freed.
+      but not freed, leaking memory when running the test.  
+      
+      The variables' memory is now freed.
 
       (LRK - 2018/03/12, HDFFV-10397)
+
 
 Supported Platforms
 ===================
@@ -1124,6 +1083,7 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
     (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
                                   GCC Version 7.1.0
+                                  OpenMPI 3.0.0-GCC-7.2.0-2.29
                                   Intel(R) C (icc) and C++ (icpc) compilers
                                      Version 15.0.3.187 (Build 20150407)
                                   with NAG Fortran Compiler Release 6.1(Tozai)
@@ -1159,6 +1119,12 @@ Known Problems
     applications.  Parallel applications can read files with metadata cache
     images, but since this is a collective operation, a deadlock is possible
     if one or more processes do not participate.
+
+    Three tests fail with OpenMPI 3.0.0/GCC-7.2.0-2.29:
+        testphdf5 (ecdsetw, selnone, cchunk1, cchunk3, cchunk4, and actualio)
+        t_shapesame (sscontig2)
+        t_pflush1/fails on exit
+    The first two tests fail attempting collective writes. 
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
