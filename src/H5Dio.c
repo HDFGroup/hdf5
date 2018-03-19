@@ -118,7 +118,6 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t	    *mem_space = NULL;
     const H5S_t	    *file_space = NULL;
     hbool_t         direct_read = FALSE;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t          ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -159,12 +158,8 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Retrieve the 'direct read' flag */
     if(H5CX_get_dcr_flag(&direct_read) < 0)
@@ -216,9 +211,6 @@ H5CX_set_dxpl(dxpl_id);
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread() */
 
@@ -262,7 +254,6 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t            *mem_space = NULL;
     const H5S_t            *file_space = NULL;
     hbool_t                 direct_write = FALSE;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -282,12 +273,8 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Retrieve the 'direct write' flag */
     if(H5CX_get_dcw_flag(&direct_write) < 0)
@@ -320,9 +307,6 @@ H5CX_set_dxpl(dxpl_id);
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite() */
 

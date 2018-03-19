@@ -255,7 +255,7 @@ main(int argc, char *argv[])
     size_t      u;
     H5E_auto2_t func;
     void 	*edata;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      status = SUCCEED;
 
     if(argc == 1) {
@@ -289,11 +289,14 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HDfprintf(stderr, "cannot open file\n");
         HDexit(1);
     } /* end if */
-if(H5CX_push() < 0) {
-    HDfprintf(stderr, "cannot set API context\n");
-    HDexit(1);
-}
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) {
+        HDfprintf(stderr, "cannot set API context\n");
+        HDexit(1);
+    }
+    api_ctx_pushed = TRUE;
+
     if(NULL == (f = (H5F_t *)H5I_object(fid))) {
         HDfprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
@@ -719,7 +722,9 @@ api_ctx_pushed = TRUE;
 
     H5Pclose(fapl);
     H5Fclose(fid);
-if(api_ctx_pushed) H5CX_pop();
+
+    /* Pop API context */
+    if(api_ctx_pushed) H5CX_pop();
 
     H5Eset_auto2(H5E_DEFAULT, func, edata);
 

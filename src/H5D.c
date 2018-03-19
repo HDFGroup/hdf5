@@ -136,9 +136,9 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Create the new dataset & get its ID */
     if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, lcpl_id, dcpl_id, dapl_id)))
@@ -215,9 +215,9 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
         if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* build and open the new dataset */
     if(NULL == (dset = H5D__create_anon(loc.oloc->file, type_id, space, dcpl_id, dapl_id)))
@@ -283,9 +283,9 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Open the dataset */
     if(NULL == (dset = H5D__open_name(&loc, name, dapl_id)))
@@ -753,8 +753,8 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf)
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Call internal routine */
     ret_value = H5D_vlen_reclaim(type_id, space, buf);
@@ -897,9 +897,9 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
     if(!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dset_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dset_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Private function */
     if(H5D__set_extent(dset, size) < 0)
@@ -935,9 +935,9 @@ H5Dflush(hid_t dset_id)
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dset_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dset_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Flush dataset information cached in memory */
     if(H5D__flush(dset, dset_id) < 0)
@@ -973,9 +973,9 @@ H5Drefresh(hid_t dset_id)
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dset_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dset_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call private function to refresh the dataset object */
     if((H5D__refresh(dset_id, dset)) < 0)
@@ -1015,9 +1015,9 @@ H5Dformat_convert(hid_t dset_id)
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dset_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dset_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     switch(dset->shared->layout.type) {
 	case H5D_CHUNKED:

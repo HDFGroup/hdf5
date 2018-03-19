@@ -3638,7 +3638,7 @@ check_invalid_tag_application(void)
     hid_t fid = -1;
     haddr_t addr;
     H5HL_t * lheap = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 #endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     /* Testing Macro */
@@ -3647,8 +3647,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 #if H5C_DO_TAGGING_SANITY_CHECKS
     /* Create a test file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
-if(H5CX_push() < 0) TEST_ERROR
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) TEST_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Get internal file pointer*/
     if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
@@ -3678,8 +3680,10 @@ api_ctx_pushed = TRUE;
 
     /* Now unprotect the heap, as we're done with the test. */
     if ( H5HL_unprotect(lheap) < 0 ) TEST_ERROR;
-if(api_ctx_pushed && H5CX_pop() < 0) TEST_ERROR
-api_ctx_pushed = FALSE;
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) TEST_ERROR
+    api_ctx_pushed = FALSE;
 
     /* Close open objects and file */
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
@@ -3695,7 +3699,7 @@ api_ctx_pushed = FALSE;
 
 error:
 #if H5C_DO_TAGGING_SANITY_CHECKS
-if(api_ctx_pushed) H5CX_pop();
+    if(api_ctx_pushed) H5CX_pop();
 #endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     return 1;

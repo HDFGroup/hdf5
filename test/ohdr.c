@@ -69,7 +69,6 @@ test_cont(char *filename, hid_t fapl)
     const char    *short_name = "T";
     const char    *long_name = "This is the message";
     size_t    nchunks;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("object header continuation block");
 
@@ -79,8 +78,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Create the file to operate on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
     if (H5AC_ignore_tags(f) < 0) {
@@ -145,10 +142,8 @@ api_ctx_pushed = TRUE;
         FAIL_STACK_ERROR
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
 
     PASSED();
-
 
     return SUCCEED;
 
@@ -157,7 +152,6 @@ error:
         H5O_close(&oh_locA, NULL);
         H5O_close(&oh_locB, NULL);
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
 
     return FAIL;
@@ -808,13 +802,17 @@ main(void)
     time_t time_new, ro;
     char msg[80];             /* Message for file format version */
     int    i;                 /* Local index variable */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret;               /* Generic return value */
 
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Loop through all the combinations of low/high library format bounds */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
@@ -846,8 +844,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         /* Create the file to operate on */
         if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
         if(H5AC_ignore_tags(f) < 0) {
@@ -1037,8 +1033,6 @@ api_ctx_pushed = TRUE;
         if(test_ohdr_cache(filename, fapl) < 0)
             TEST_ERROR
 
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
       } /* high */
     } /* low */
 
@@ -1049,6 +1043,10 @@ api_ctx_pushed = FALSE;
     if(test_ohdr_swmr(TRUE) < 0) TEST_ERROR
     if(test_ohdr_swmr(FALSE) < 0) TEST_ERROR
 
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
+
     HDputs("All object header tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
@@ -1057,8 +1055,9 @@ error:
     puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
+
+    if(api_ctx_pushed) H5CX_pop();
 
     return 1;
 } /* end main() */

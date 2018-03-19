@@ -1024,7 +1024,6 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 haddr_t
 H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     haddr_t	ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_API(HADDR_UNDEF)
@@ -1042,12 +1041,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a data transfer property list")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, HADDR_UNDEF, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Do the real work */
     if(HADDR_UNDEF == (ret_value = H5FD__alloc_real(file, type, size, NULL, NULL)))
@@ -1057,8 +1053,6 @@ H5CX_set_dxpl(dxpl_id);
     ret_value += file->base_addr;
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_VFL, H5E_CANTRESET, HADDR_UNDEF, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDalloc() */
 
@@ -1082,7 +1076,6 @@ if(api_ctx_pushed && H5CX_pop() < 0)
 herr_t
 H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1098,12 +1091,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Do the real work */
     /* (Note compensating for base address addition in internal routine) */
@@ -1111,8 +1101,6 @@ H5CX_set_dxpl(dxpl_id);
         HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "file deallocation request failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_VFL, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDfree() */
 
@@ -1378,7 +1366,6 @@ herr_t
 H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	 void *buf/*out*/)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1397,12 +1384,8 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Do the real work */
     /* (Note compensating for base address addition in internal routine) */
@@ -1410,8 +1393,6 @@ H5CX_set_dxpl(dxpl_id);
 	HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_VFL, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDread() */
 
@@ -1434,7 +1415,6 @@ herr_t
 H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	  const void *buf)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1452,12 +1432,8 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* The real work */
     /* (Note compensating for base address addition in internal routine) */
@@ -1465,8 +1441,6 @@ H5CX_set_dxpl(dxpl_id);
 	HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_VFL, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDwrite() */
 
@@ -1489,7 +1463,6 @@ if(api_ctx_pushed && H5CX_pop() < 0)
 herr_t
 H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1503,20 +1476,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Do the real work */
     if(H5FD_flush(file, closing) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "file flush request failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_VFL, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDflush() */
 
@@ -1562,7 +1530,6 @@ done:
 herr_t
 H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1576,20 +1543,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Do the real work */
     if(H5FD_truncate(file, closing) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "file flush request failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_VFL, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDtruncate() */
 

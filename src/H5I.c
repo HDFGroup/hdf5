@@ -1201,7 +1201,6 @@ done:
 int
 H5Idec_ref(hid_t id)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1210,18 +1209,12 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Check arguments */
     if(id < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Do actual decrement operation */
     if((ret_value = H5I_dec_app_ref(id)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Idec_ref() */
 
@@ -2025,7 +2018,6 @@ ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
     H5G_loc_t     loc;          /* Object location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     ssize_t       ret_value;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2035,18 +2027,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(H5G_loc(id, &loc) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Call internal routine to retrieve object's name */
     if((ret_value = H5I__get_name(&loc, name, size)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_name() */
 

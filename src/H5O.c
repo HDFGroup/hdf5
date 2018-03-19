@@ -100,7 +100,6 @@ hid_t
 H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -112,21 +111,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Open the object */
     if((ret_value = H5O__open_name(&loc, name)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen() */
 
@@ -159,7 +152,6 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -175,21 +167,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Open the object */
     if((ret_value = H5O__open_by_idx(&loc, group_name, idx_type, order, n)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_idx() */
 
@@ -233,7 +219,6 @@ hid_t
 H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 {
     H5G_loc_t	loc;                    /* Location within file */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value = H5I_INVALID_HID;	/* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -245,18 +230,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!H5F_addr_defined(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no address supplied")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Open the object */
     if((ret_value = H5O__open_by_addr(&loc, addr)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_addr() */
 
@@ -288,7 +266,6 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
 {
     H5G_loc_t	new_loc;		/* Location of group to link from */
     H5G_loc_t	obj_loc;		/* Location of object to link to */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -311,21 +288,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, obj_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, obj_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Create a link to the object */
     if(H5O__create_link(&new_loc, new_name, &obj_loc, lcpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Olink() */
 
@@ -354,7 +325,6 @@ herr_t
 H5Oincr_refcount(hid_t object_id)
 {
     H5O_loc_t  *oloc;			/* Object location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -364,21 +334,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if((oloc = H5O_get_loc(object_id)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(object_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(object_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Change the object's refcount */
     if(H5O__link(oloc, 1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5O_incr_refcount() */
 
@@ -407,7 +371,6 @@ herr_t
 H5Odecr_refcount(hid_t object_id)
 {
     H5O_loc_t  *oloc;			/* Object location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -417,21 +380,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if((oloc = H5O_get_loc(object_id)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(object_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(object_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Change the object's refcount */
     if(H5O__link(oloc, -1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Odecr_refcount() */
 
@@ -453,7 +410,6 @@ htri_t
 H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location info */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     htri_t      ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -465,21 +421,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Check if the object exists */
     if((ret_value = H5O__exists_by_name(&loc, name)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oexists_by_name() */
 
@@ -501,7 +451,6 @@ herr_t
 H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -513,18 +462,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Retrieve the object's information */
     if(H5O__get_info_by_name(&loc, ".", oinfo/*out*/) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info() */
 
@@ -546,7 +488,6 @@ herr_t
 H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -560,21 +501,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Retrieve the object's information */
     if(H5O__get_info_by_name(&loc, name, oinfo/*out*/) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object: '%s'", name)
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_name() */
 
@@ -598,7 +533,6 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -617,21 +551,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Retrieve the object's information */
     if(H5O__get_info_by_idx(&loc, group_name, idx_type, order, n, oinfo) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_idx() */
 
@@ -657,7 +585,6 @@ herr_t
 H5Oset_comment(hid_t obj_id, const char *comment)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -667,21 +594,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(H5G_loc(obj_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(obj_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(obj_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* (Re)set the object's comment */
     if(H5O__set_comment_by_name(&loc, ".", comment) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set comment for object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oset_comment() */
 
@@ -708,7 +629,6 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -720,21 +640,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* (Re)set the object's comment */
     if(H5O__set_comment_by_name(&loc, name, comment) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set comment for object: '%s'", name)
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oset_comment_by_name() */
 
@@ -759,7 +673,6 @@ ssize_t
 H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     ssize_t     ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -769,18 +682,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(H5G_loc(obj_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Retrieve the object's comment */
     if((ret_value = H5O__get_comment_by_name(&loc, ".", comment/*out*/, bufsize)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_comment() */
 
@@ -806,7 +712,6 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
     hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     ssize_t     ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -818,21 +723,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Retrieve the object's comment */
     if((ret_value = H5O__get_comment_by_name(&loc, name, comment/*out*/, bufsize)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object: '%s'", name)
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_comment_by_name() */
 
@@ -873,7 +772,6 @@ herr_t
 H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     H5O_iterate_t op, void *op_data)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -887,18 +785,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Call internal object visitation routine */
     if((ret_value = H5O__visit(obj_id, ".", idx_type, order, op, op_data)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ovisit() */
 
@@ -939,7 +830,6 @@ herr_t
 H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -956,21 +846,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Call internal object visitation routine */
     if((ret_value = H5O__visit(loc_id, obj_name, idx_type, order, op, op_data)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ovisit_by_name() */
 
@@ -996,7 +880,6 @@ if(api_ctx_pushed && H5CX_pop() < 0)
 herr_t
 H5Oclose(hid_t object_id)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -1009,10 +892,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         case H5I_DATASET:
             if(H5I_object(object_id) == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
             if(H5I_dec_app_ref(object_id) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
             break;
@@ -1036,8 +915,6 @@ api_ctx_pushed = TRUE;
     } /* end switch */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oclose() */
 

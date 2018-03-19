@@ -289,7 +289,6 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
 {
     H5G_loc_t	    loc;                /* Location to create group */
     H5G_t	   *grp = NULL;         /* New group created */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	    ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -315,13 +314,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group create property list")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Create the new group & get its ID */
     if(NULL == (grp = H5G__create_named(&loc, name, lcpl_id, gcpl_id)))
@@ -334,8 +329,6 @@ done:
         if(grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate2() */
 
@@ -381,7 +374,6 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     H5G_loc_t	    loc;
     H5G_t	   *grp = NULL;
     H5G_obj_create_t gcrt_info;         /* Information for group creation */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	    ret_value;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -398,13 +390,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group create property list")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Set up group creation info */
     gcrt_info.gcpl_id = gcpl_id;
@@ -436,8 +424,6 @@ done:
         if(grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate_anon() */
 
@@ -464,7 +450,6 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 {
     H5G_t       *grp = NULL;            /* Group opened */
     H5G_loc_t	loc;                    /* Location of parent for group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -476,13 +461,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Open the group */
     if(NULL == (grp = H5G__open_name(&loc, name)))
@@ -497,8 +478,6 @@ done:
         if(grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
 
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen2() */
 
@@ -523,7 +502,6 @@ hid_t
 H5Gget_create_plist(hid_t group_id)
 {
     H5G_t	*group = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	ret_value = H5I_INVALID_HID;        /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -533,17 +511,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (group = (H5G_t *)H5I_object_verify(group_id, H5I_GROUP)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-
     if((ret_value = H5G__get_create_plist(group)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5I_INVALID_HID, "can't get group's creation property list")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_create_plist() */
 
@@ -566,7 +537,6 @@ H5Gget_info(hid_t grp_id, H5G_info_t *grp_info)
 {
     H5I_type_t  id_type;                /* Type of ID */
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -583,18 +553,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(H5G_loc(grp_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Retrieve the group's information */
     if(H5G__get_info(&loc, grp_info/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_info() */
 
@@ -617,7 +580,6 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
     hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -631,21 +593,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Retrieve the group's information */
     if(H5G__get_info_by_name(&loc, name, grp_info/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_info_by_name() */
 
@@ -669,7 +625,6 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5G_info_t *grp_info, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -688,21 +643,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Retrieve the group's information */
     if(H5G__get_info_by_idx(&loc, group_name, idx_type, order, n, grp_info/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_info_by_idx() */
 
@@ -723,7 +672,6 @@ if(api_ctx_pushed && H5CX_pop() < 0)
 herr_t
 H5Gclose(hid_t group_id)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t  ret_value = SUCCEED;    /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
@@ -732,10 +680,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Check args */
     if(NULL == H5I_object_verify(group_id,H5I_GROUP))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /*
      * Decrement the counter on the group atom.	 It will be freed if the count
@@ -745,8 +689,6 @@ api_ctx_pushed = TRUE;
     	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gclose() */
 
@@ -767,7 +709,6 @@ herr_t
 H5Gflush(hid_t group_id)
 {
     H5G_t *grp;                 /* Group for this operation */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -777,21 +718,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(group_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(group_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(group_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Flush group's metadata to file */
     if(H5G__flush(grp, group_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush group")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Gflush */
 
@@ -812,7 +747,6 @@ herr_t
 H5Grefresh(hid_t group_id)
 {
     H5G_t *grp;                 /* Group for this operation */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
     
     FUNC_ENTER_API(FAIL)
@@ -822,21 +756,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(group_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(group_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(group_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call private function to refresh group object */
     if((H5G__refresh(grp, group_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Grefresh */
 

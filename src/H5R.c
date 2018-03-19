@@ -93,7 +93,6 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
 {
     H5G_loc_t   loc;            /* File location */
     H5S_t      *space = NULL;   /* Pointer to dataspace containing region */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -115,21 +114,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if (space_id != (-1) && (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Create reference */
     if((ret_value = H5R__create(ref, &loc, name, ref_type, space)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create reference")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_REFERENCE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rcreate() */
 
@@ -166,7 +159,6 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
 {
     H5G_loc_t loc;      /* Group location */
     H5F_t *file = NULL; /* File object */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t ret_value = H5I_INVALID_HID;	/* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -182,13 +174,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if (_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid reference pointer")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&oapl_id, H5P_CLS_DACC, obj_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&oapl_id, H5P_CLS_DACC, obj_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Get the file pointer from the entry */
     file = loc.oloc->file;
@@ -198,8 +186,6 @@ if(H5CX_set_apl(&oapl_id, H5P_CLS_DACC, obj_id, FALSE) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to dereference object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_REFERENCE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rdereference2() */
 
@@ -232,7 +218,6 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 {
     H5G_loc_t loc;          /* Object's group location */
     H5S_t *space = NULL;    /* Dataspace object */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t ret_value = H5I_INVALID_HID;	/* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -246,11 +231,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if (ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid reference pointer")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get the dataspace with the correct region selected */
     if(NULL == (space = H5R__get_region(loc.oloc->file, ref)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve dataspace")
@@ -260,8 +240,6 @@ api_ctx_pushed = TRUE;
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_REFERENCE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rget_region() */
 
@@ -294,7 +272,6 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
     H5O_type_t *obj_type)
 {
     H5G_loc_t loc;              /* Object location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -308,18 +285,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if (ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get the object information */
     if(H5R__get_obj_type(loc.oloc->file, ref_type, ref, obj_type) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to determine object type")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_REFERENCE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rget_obj_type2() */
 
@@ -363,7 +333,6 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
 {
     H5G_loc_t loc;      /* Group location */
     H5F_t *file;        /* File object */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -377,11 +346,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if (_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get the file pointer from the entry */
     file = loc.oloc->file;
 
@@ -390,8 +354,6 @@ api_ctx_pushed = TRUE;
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to determine object path")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_REFERENCE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rget_name() */
 

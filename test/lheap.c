@@ -63,12 +63,15 @@ main(void)
     int         i, j;               /* miscellaneous counters   */
     char        buf[1024];          /* the value to store       */
     const char  *s;                 /* value to read            */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
 
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /*
      * Test writing to the heap...
@@ -77,8 +80,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if(FAIL == (file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)))
         goto error;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
@@ -119,8 +120,6 @@ api_ctx_pushed = TRUE;
     }
     if (FAIL == H5Fclose(file))
         goto error;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     PASSED();
 
     /*
@@ -131,8 +130,6 @@ api_ctx_pushed = FALSE;
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if(FAIL == (file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)))
         goto error;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
@@ -179,8 +176,6 @@ api_ctx_pushed = TRUE;
 
     if (FAIL == H5Fclose(file))
         goto error;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     PASSED();
 
     /* Check opening existing file non-default sizes of lengths and addresses */
@@ -189,8 +184,6 @@ api_ctx_pushed = FALSE;
         const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
         hid_t dset = -1;
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
         if(file >= 0){
             if((dset = H5Dopen2(file, "/Dataset1", H5P_DEFAULT)) < 0)
                 TEST_ERROR
@@ -206,12 +199,14 @@ api_ctx_pushed = TRUE;
             goto error;
         } /* end else */
     }
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     PASSED();
 
     /* Verify symbol table messages are cached */
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
 
     HDputs("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
@@ -222,8 +217,10 @@ api_ctx_pushed = FALSE;
     HDputs("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
+
+    if(api_ctx_pushed) H5CX_pop();
+
     return 1;
 }
 

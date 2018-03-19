@@ -87,7 +87,6 @@ test_1 (hid_t fapl)
     herr_t    status;
     int        nerrors = 0;
     char    filename[1024];
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("monotonically increasing lengths");
 
@@ -99,8 +98,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
         H5_FAILED();
         puts("    Unable to create file");
@@ -151,8 +148,6 @@ api_ctx_pushed = TRUE;
     obj = NULL;
 
     if(H5Fclose(file) < 0) goto error;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     if(nerrors) goto error;
 
     PASSED();
@@ -161,7 +156,6 @@ api_ctx_pushed = FALSE;
 error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     if(obj)
         HDfree(obj);
@@ -198,7 +192,6 @@ test_2 (hid_t fapl)
     size_t    size;
     int        nerrors = 0;
     char    filename[1024];
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("monotonically decreasing lengths");
 
@@ -210,8 +203,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
         H5_FAILED();
         puts("    Unable to create file");
@@ -255,8 +246,6 @@ api_ctx_pushed = TRUE;
     obj = NULL;
 
     if (H5Fclose(file)<0) goto error;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     if (nerrors) goto error;
 
     PASSED();
@@ -265,7 +254,6 @@ api_ctx_pushed = FALSE;
  error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     if(obj)
         HDfree(obj);
@@ -302,7 +290,6 @@ test_3 (hid_t fapl)
     herr_t    status;
     int        nerrors = 0;
     char    filename[1024];
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("complete object removal");
 
@@ -314,8 +301,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
     H5_FAILED();
     puts("    Unable to create file");
@@ -350,8 +335,6 @@ api_ctx_pushed = TRUE;
     obj = NULL;
 
     if (H5Fclose(file)<0) goto error;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     if (nerrors) goto error;
 
     PASSED();
@@ -360,7 +343,6 @@ api_ctx_pushed = FALSE;
  error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     if(obj)
         HDfree(obj);
@@ -398,7 +380,6 @@ test_4 (hid_t fapl)
     herr_t    status;
     int        nerrors = 0;
     char    filename[1024];
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("partial object removal");
 
@@ -410,8 +391,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
         H5_FAILED();
         puts("    Unable to create file");
@@ -452,8 +431,6 @@ api_ctx_pushed = TRUE;
     obj = NULL;
 
     if (H5Fclose(file)<0) goto error;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     if (nerrors) goto error;
 
     PASSED();
@@ -462,7 +439,6 @@ api_ctx_pushed = FALSE;
  error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     if(obj)
         HDfree(obj);
@@ -499,7 +475,6 @@ test_ooo_indices(hid_t fapl)
     herr_t    status;
     int        nerrors=0;
     char    filename[1024];
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("out of order indices");
 
@@ -510,8 +485,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
         H5_FAILED();
         puts("    Unable to create file");
@@ -571,8 +544,6 @@ api_ctx_pushed = TRUE;
     } /* end for */
 
     if (H5Fclose(file)<0) goto error;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     if (nerrors) goto error;
 
     HDfree(obj);
@@ -584,7 +555,6 @@ api_ctx_pushed = FALSE;
  error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     if(obj)
         HDfree(obj);
@@ -613,9 +583,14 @@ main (void)
 {
     int        nerrors=0;
     hid_t    fapl;
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     h5_reset();
     fapl = h5_fileaccess();
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     nerrors += test_1(fapl);
     nerrors += test_2(fapl);
@@ -626,13 +601,22 @@ main (void)
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
-    if (nerrors) goto error;
-
+    if (nerrors)
+        goto error;
     puts("All global heap tests passed.");
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
+
     h5_cleanup(FILENAME, fapl);
     return 0;
 
  error:
     puts("*** TESTS FAILED ***");
+
+    if(api_ctx_pushed) H5CX_pop();
+
     return 1;
 }
+

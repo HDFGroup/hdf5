@@ -3185,7 +3185,6 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     H5O_fill_t fill;                    /* Fill value to modify */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -3194,10 +3193,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Get the current fill value */
     if(H5P_peek(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
@@ -3254,8 +3249,6 @@ api_ctx_pushed = TRUE;
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set fill value")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fill_value() */
 
@@ -3375,7 +3368,6 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
     H5T_t		*type;		        /* Datatype		*/
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -3390,18 +3382,12 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Get the fill value */
     if(H5P_get_fill_value(plist, type, value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fill_value() */
 

@@ -231,13 +231,15 @@ main(void)
 {
     hid_t		fapl;
     int	nerrors = 0;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Testing setup */
     h5_reset();
     fapl = h5_fileaccess();
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Test unregistering filter in its own file */
     nerrors += (test_unregister_filters(fapl) < 0           ? 1 : 0);
@@ -245,9 +247,12 @@ api_ctx_pushed = TRUE;
     if(nerrors)
         goto error;
     printf("All filter unregistration tests passed.\n");
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
+
     h5_cleanup(FILENAME, fapl);
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     return 0;
 
@@ -255,7 +260,9 @@ error:
     nerrors = MAX(1, nerrors);
     printf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
-if(api_ctx_pushed) H5CX_pop();
+
+    if(api_ctx_pushed) H5CX_pop();
+
     return 1;
 }
 

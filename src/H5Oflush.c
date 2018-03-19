@@ -73,27 +73,20 @@ static herr_t H5O__refresh(hid_t obj_id);
 herr_t
 H5Oflush(hid_t obj_id)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", obj_id);
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(obj_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(obj_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Call internal routine */
     if(H5O__flush(obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oflush() */
 
@@ -242,27 +235,20 @@ done:
 herr_t
 H5Orefresh(hid_t oid)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;		/* Return value */
     
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", oid);
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(oid, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(oid, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Call internal routine */
     if(H5O__refresh(oid) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Orefresh() */
 

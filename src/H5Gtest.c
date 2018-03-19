@@ -96,7 +96,7 @@ H5G__is_empty_test(hid_t gid)
     H5G_t *grp = NULL;          /* Pointer to group */
     htri_t msg_exists = FALSE;  /* Indicate that a header message is present */
     htri_t linfo_exists = FALSE;/* Indicate that the 'link info' message is present */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -105,10 +105,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+    /* Set API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* "New format" checks */
 
@@ -185,8 +185,8 @@ api_ctx_pushed = TRUE;
     } /* end if */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G__is_empty_test() */
@@ -216,7 +216,7 @@ H5G__has_links_test(hid_t gid, unsigned *nmsgs)
 {
     H5G_t *grp = NULL;          /* Pointer to group */
     htri_t msg_exists = 0;      /* Indicate that a header message is present */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -225,10 +225,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+    /* Set API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* Check if the group has any link messages */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
@@ -253,8 +253,8 @@ api_ctx_pushed = TRUE;
     } /* end if */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G__has_links_test() */
@@ -283,7 +283,7 @@ H5G__has_stab_test(hid_t gid)
 {
     H5G_t *grp = NULL;          /* Pointer to group */
     htri_t msg_exists = 0;      /* Indicate that a header message is present */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -292,10 +292,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+    /* Set API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* Check if the group has a symbol table message */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
@@ -310,8 +310,8 @@ api_ctx_pushed = TRUE;
 	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G__has_stab_test() */
@@ -342,7 +342,7 @@ H5G__is_new_dense_test(hid_t gid)
 {
     H5G_t *grp = NULL;          /* Pointer to group */
     htri_t msg_exists = 0;      /* Indicate that a header message is present */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -351,10 +351,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+    /* Set API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* Check if the group has a symbol table message */
     if((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
@@ -386,8 +386,8 @@ api_ctx_pushed = TRUE;
     } /* end if */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G__is_new_dense_test() */
@@ -421,7 +421,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     H5B2_t *bt2_corder = NULL;  /* v2 B-tree handle for creation order index */
     H5O_linfo_t linfo;		/* Link info message */
     H5G_t *grp = NULL;          /* Pointer to group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -430,10 +430,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+    /* Set API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* Set metadata tag in API context */
     H5_BEGIN_TAG(grp->oloc.addr);
@@ -478,8 +478,8 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
     if(bt2_corder && H5B2_close(bt2_corder) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G__new_dense_info_test() */
@@ -509,7 +509,7 @@ H5G__lheap_size_test(hid_t gid, size_t *lheap_size)
 {
     H5G_t *grp = NULL;          /* Pointer to group */
     H5O_stab_t stab;		/* Symbol table message	*/
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -518,10 +518,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+    /* Set API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* Make certain the group has a symbol table message */
     if(NULL == H5O_msg_read(&(grp->oloc), H5O_STAB_ID, &stab))
@@ -532,8 +532,8 @@ api_ctx_pushed = TRUE;
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't query local heap size")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G__lheap_size_test() */
@@ -566,7 +566,7 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
 {
     void *obj_ptr;              /* Pointer to object for ID */
     H5G_name_t *obj_path;       /* Pointer to group hier. path for obj */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -579,10 +579,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (obj_ptr = H5I_object(obj_id)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get object for ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+    /* Set API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* Get the symbol table entry */
     switch(H5I_get_type(obj_id)) {
@@ -640,8 +640,8 @@ api_ctx_pushed = TRUE;
     } /* end else */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G__user_path_test() */

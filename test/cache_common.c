@@ -3267,7 +3267,9 @@ setup_cache(size_t max_cache_size,
                 HDfprintf(stdout, "%s: H5Fcreate() failed.\n", FUNC);
         } /* end if */
     } /* end if */
-H5CX_push();
+
+    /* Push API context */
+    H5CX_push();
 
     if(show_progress) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -3497,7 +3499,9 @@ takedown_cache(H5F_t * file_ptr,
 	    saved_fid = -1;
 
         }
-H5CX_pop();
+
+        /* Pop API context */
+        H5CX_pop();
 
 	if ( ( ! try_core_file_driver ) || ( core_file_driver_failed ) ) {
 

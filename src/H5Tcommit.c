@@ -103,7 +103,6 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 {
     H5G_loc_t	loc;                    /* Location to create datatype */
     H5T_t	*type;                  /* Datatype for ID */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -131,21 +130,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Commit the type */
     if(H5T__commit_named(&loc, name, type, lcpl_id, tcpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit2() */
 
@@ -254,7 +247,6 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 {
     H5G_loc_t	loc;                    /* Group location for location */
     H5T_t	*type = NULL;           /* Datatype created */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -273,21 +265,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Commit the type */
     if(H5T__commit_anon(loc.oloc->file, type, tcpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit_anon() */
 
@@ -568,7 +554,6 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 {
     H5T_t      *type = NULL;            /* Datatype opened in file */
     H5G_loc_t	 loc;                   /* Group location of object to open */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t        ret_value = H5I_INVALID_HID;      /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -580,13 +565,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Open it */
     if(NULL == (type = H5T__open_name(&loc, name)))
@@ -602,8 +583,6 @@ done:
         if(type != NULL)
             (void)H5T_close(type);
 
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen2() */
 
@@ -632,7 +611,6 @@ H5Tget_create_plist(hid_t dtype_id)
 {
     H5T_t *type;                /* Datatype object for ID */
     herr_t status;              /* Generic status value */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t ret_value = FAIL;	/* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -647,20 +625,12 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check whether datatype is committed")
 
     /* Retrieve further information, if the datatype is committed */
-    if(status > 0) {
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-
+    if(status > 0)
         /* Retrieve datatype creation properties */
         if((ret_value = H5T__get_create_plist(type)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info")
-    } /* end if */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_create_plist() */
 
@@ -681,7 +651,6 @@ herr_t
 H5Tflush(hid_t type_id)
 {
     H5T_t *dt;                          /* Datatype for this operation */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -693,21 +662,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!H5T_is_named(dt))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(type_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(type_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Flush metadata for named datatype */
     if(H5T__flush(dt, type_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Tflush */
 
@@ -728,7 +691,6 @@ herr_t
 H5Trefresh(hid_t type_id)
 {
     H5T_t *dt;                          /* Datatype for this operation */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -740,21 +702,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!H5T_is_named(dt))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(type_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(type_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Call private function to refresh datatype object */
     if((H5T__refresh(dt, type_id)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Trefresh */
 

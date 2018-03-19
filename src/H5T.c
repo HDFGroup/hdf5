@@ -1744,7 +1744,6 @@ herr_t
 H5Tclose(hid_t type_id)
 {
     H5T_t    *dt;                    /* Pointer to datatype to close */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1755,18 +1754,12 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(H5T_STATE_IMMUTABLE == dt->shared->state)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* When the reference count reaches zero the resources are freed */
     if(H5I_dec_app_ref(type_id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tclose() */
 
@@ -2526,7 +2519,6 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     H5T_t     *src;                  /*source data type descriptor    */
     H5T_t     *dst;                  /*destination data type desc     */
     H5T_conv_func_t conv_func;       /* Conversion function wrapper */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t    ret_value = SUCCEED;   /*return value                   */
 
     FUNC_ENTER_API(FAIL)
@@ -2543,10 +2535,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     if(!func)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no conversion function specified")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Set up conversion function wrapper */
     conv_func.is_app = TRUE;
@@ -2557,8 +2545,6 @@ api_ctx_pushed = TRUE;
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register conversion function")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tregister() */
 
@@ -2688,7 +2674,6 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     H5T_conv_t func)
 {
     H5T_t       *src = NULL, *dst = NULL;    /* Datatype descriptors */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2699,17 +2684,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "src is not a data type")
     if(dst_id > 0 && (NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst is not a data type")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     if(H5T__unregister(pers, name, src, dst, func) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "internal unregister function failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tunregister() */
 
@@ -2833,7 +2812,6 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
 {
     H5T_path_t    *tpath;                 /* type conversion info    */
     H5T_t         *src, *dst;             /* unatomized types        */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t        ret_value = SUCCEED;    /* Return value            */
 
     FUNC_ENTER_API(FAIL)
@@ -2848,12 +2826,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset transfer property list")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Find the conversion function */
     if(NULL == (tpath = H5T_path_find(src, dst)))
@@ -2863,8 +2838,6 @@ H5CX_set_dxpl(dxpl_id);
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tconvert() */
 

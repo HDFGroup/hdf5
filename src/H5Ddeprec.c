@@ -116,7 +116,6 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5D_t	   *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           dapl_id = H5P_DEFAULT;   /* DAPL used by library */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -137,13 +136,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Build and open the new dataset */
     if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, H5P_LINK_CREATE_DEFAULT, dcpl_id, dapl_id)))
@@ -157,8 +152,6 @@ done:
     if(ret_value < 0)
         if(dset && H5D_close(dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate1() */
@@ -186,7 +179,6 @@ H5Dopen1(hid_t loc_id, const char *name)
 {
     H5D_t       *dset = NULL;
     H5G_loc_t   loc;                    /* Object location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -197,11 +189,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Open the dataset */
     if(NULL == (dset = H5D__open_name(&loc, name, H5P_DATASET_ACCESS_DEFAULT)))
@@ -215,8 +202,6 @@ done:
     if(ret_value < 0)
         if(dset && H5D_close(dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen1() */
@@ -244,7 +229,6 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
     H5D_t	*dset;                  /* Pointer to dataset to modify */
     hsize_t     dset_dims[H5S_MAX_RANK]; /* Current dataset dimensions */
     unsigned    u;                      /* Local index variable */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -264,21 +248,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(size[u] > dset_dims[u])
             dset_dims[u] = size[u];
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dset_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dset_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Increase size */
     if(H5D__set_extent(dset, dset_dims) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dextend() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

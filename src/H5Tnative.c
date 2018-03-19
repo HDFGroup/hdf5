@@ -78,7 +78,6 @@ H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
     H5T_t       *dt;                /* Datatype to create native datatype from */
     H5T_t       *new_dt = NULL;     /* Datatype for native datatype created */
     size_t      comp_size = 0;      /* Compound datatype's size */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -90,10 +89,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(direction != H5T_DIR_DEFAULT && direction != H5T_DIR_ASCEND
             && direction != H5T_DIR_DESCEND)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not valid direction value")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Get the native type */
     if(NULL == (new_dt = H5T__get_native_type(dt, direction, NULL, NULL, &comp_size)))
@@ -108,8 +103,6 @@ done:
     if(ret_value < 0)
         if(new_dt && H5T_close_real(new_dt) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_native_type() */

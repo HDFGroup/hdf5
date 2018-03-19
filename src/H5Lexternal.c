@@ -340,7 +340,6 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     size_t      file_name_len;          /* Length of file name string */
     size_t      norm_obj_name_len;      /* Length of normalized object name string */
     uint8_t    *p;                      /* Pointer into external link buffer */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -375,13 +374,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     p += file_name_len;
     HDstrncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1));       /* External link's object */
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Create an external link */
     if(H5L__create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id) < 0)
@@ -391,8 +386,6 @@ done:
     H5MM_xfree(ext_link_buf);
     H5MM_xfree(norm_obj_name);
 
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_LINK, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcreate_external() */
 

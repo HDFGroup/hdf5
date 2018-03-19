@@ -8868,7 +8868,7 @@ main(void)
     unsigned    nerrors = 0;       /* Cumulative error count */
     test_type_t	curr_test;	   /* Current test being worked on */
     const char  *env_h5_drvr;      /* File Driver value from environment */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
@@ -8878,8 +8878,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     h5_reset();
 
     fapl = h5_fileaccess();
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Make a copy of the FAPL before adjusting the alignment */
     if((new_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
@@ -8993,8 +8995,10 @@ api_ctx_pushed = TRUE;
     if(H5Pclose(new_fapl) < 0)
         FAIL_STACK_ERROR
     h5_cleanup(FILENAME, fapl);
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
 
     if(nerrors)
         goto error;
@@ -9007,8 +9011,10 @@ error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl);
         H5Pclose(new_fapl);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
+
+    if(api_ctx_pushed) H5CX_pop();
+
     return(1);
 } /* main() */
 

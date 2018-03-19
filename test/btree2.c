@@ -9947,7 +9947,7 @@ main(void)
     unsigned    reopen;                 /* Whether to reopen B-tree during tests */
     int		ExpressMode;
     const char  *envval = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
@@ -9962,8 +9962,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Initialize v2 B-tree creation parameters */
     init_cparam(&cparam, &cparam2);
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Loop over re-opening B-tree during tests */
     for(reopen = FALSE; reopen <= TRUE; reopen++) {
@@ -10052,8 +10054,10 @@ api_ctx_pushed = TRUE;
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
 
     if(nerrors)
         goto error;
@@ -10070,6 +10074,8 @@ error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl);
     } H5E_END_TRY;
+
+    if(api_ctx_pushed) H5CX_pop();
 
     return 1;
 } /* end main() */

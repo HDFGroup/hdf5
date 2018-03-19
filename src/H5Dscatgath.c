@@ -955,7 +955,6 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
     size_t type_size;           /* Datatype element size */
     hssize_t nelmts;            /* Number of remaining elements in selection */
     size_t nelmts_scatter = 0;  /* Number of elements to scatter to dst_buf */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -970,10 +969,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
     if(dst_buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination buffer provided")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Get datatype element size */
     if(0 == (type_size = H5T_GET_SIZE(type)))
@@ -1024,8 +1019,6 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     if(iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 }   /* H5Dscatter() */
@@ -1059,7 +1052,6 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
     hssize_t nelmts;            /* Number of remaining elements in selection */
     size_t dst_buf_nelmts;      /* Number of elements that can fit in dst_buf */
     size_t nelmts_gathered;     /* Number of elements gathered from src_buf */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1077,10 +1069,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination buffer size is 0")
     if(dst_buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination buffer provided")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Get datatype element size */
     if(0 == (type_size = H5T_GET_SIZE(type)))
@@ -1130,8 +1118,6 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     if(iter)
         iter = H5FL_FREE(H5S_sel_iter_t, iter);
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 }   /* H5Dgather() */

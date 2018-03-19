@@ -99,7 +99,7 @@ H5F_get_sohm_mesg_count_test(hid_t file_id, unsigned type_id,
     size_t *mesg_count)
 {
     H5F_t	*file;                  /* File info */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -107,17 +107,20 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Check arguments */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* Retrieve count for message type */
     if(H5SM__get_mesg_count_test(file, type_id, mesg_count) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve shared message count")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_sohm_mesg_count_test() */
 
@@ -142,7 +145,7 @@ herr_t
 H5F_check_cached_stab_test(hid_t file_id)
 {
     H5F_t	*file;                  /* File info */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -150,17 +153,20 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Check arguments */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* Verify the cached stab info */
     if(H5G__verify_cached_stab_test(H5G_oloc(file->shared->root_grp), file->shared->sblock->root_ent) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to verify cached symbol table info")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_check_cached_stab_test() */
 

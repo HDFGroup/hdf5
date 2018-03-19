@@ -120,7 +120,6 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     H5S_t *space;               /* Dataspace */
     H5T_t *fill_type;           /* Fill-value datatype */
     H5T_t *buf_type;            /* Buffer datatype */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -135,17 +134,12 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
     if(NULL == (buf_type = (H5T_t *)H5I_object_verify(buf_type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Fill the selection in the memory buffer */
     if(H5D__fill(fill, fill_type, buf, buf_type, space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* H5Dfill() */
 

@@ -581,7 +581,6 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
 {
     H5F_t *f = (H5F_t *)obj_ptr;        /* File object for operations */
     H5Z_object_t    *object = (H5Z_object_t *)key;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     int    ret_value = FALSE;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -592,11 +591,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Do a global flush if the file is opened for write */
     if(H5F_ACC_RDWR & H5F_INTENT(f)) {
-
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
 /* When parallel HDF5 is defined, check for collective metadata reads on this
  *      file and set the flag for metadata I/O in the API context.  -QAK, 2018/02/14
@@ -636,15 +630,9 @@ api_ctx_pushed = TRUE;
         /* Call the flush routine for mounted file hierarchies */
         if(H5F_flush_mounts((H5F_t *)obj_ptr) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFLUSH, FAIL, "unable to flush file hierarchy")
-
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HGOTO_ERROR(H5E_PLINE, H5E_CANTRESET, FAIL, "can't reset API context")
-api_ctx_pushed = FALSE;
     } /* end if */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_PLINE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z__flush_file_cb() */
 

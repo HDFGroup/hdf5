@@ -457,7 +457,6 @@ test_fs_create(hid_t fapl)
     H5FS_create_t 	cparam, test_cparam; 	/* creation parameters */
     uint16_t		nclasses;
     unsigned		init_flags=0;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("the creation/close/reopen/deletion of the free-space manager");
 
@@ -479,8 +478,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Re-open the file */
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
@@ -548,8 +545,6 @@ api_ctx_pushed = TRUE;
     /* Verify the file is the correct size */
     if(file_size != empty_size)
         TEST_ERROR
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     PASSED()
 
@@ -560,7 +555,6 @@ error:
         if(frsp)
             H5FS_close(f, frsp);
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     return 1;
 } /* test_fs_create() */
@@ -606,7 +600,6 @@ test_fs_sect_add(hid_t fapl)
     unsigned			init_flags=0;
     h5_stat_size_t 		file_size=0, tmp_file_size=0, fr_meta_size=0;
     unsigned			can_shrink=FALSE;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("adding a section via H5FS_sect_add() to free-space: test 1");
 
@@ -627,8 +620,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Re-open the file */
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
@@ -891,8 +882,6 @@ api_ctx_pushed = TRUE;
     /* Close the file and dxpl */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     PASSED()
 
@@ -905,7 +894,6 @@ error:
         if(frsp)
             H5FS_close(f, frsp);
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     return 1;
 } /* test_fs_sect_add() */
@@ -947,7 +935,6 @@ test_fs_sect_find(hid_t fapl)
     TEST_free_section_t 	*node;
     htri_t 			node_found = FALSE;
     unsigned			init_flags=0;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("H5FS_sect_find(): free-space is empty");
 
@@ -957,8 +944,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Create the file to work on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
@@ -1266,8 +1251,6 @@ api_ctx_pushed = TRUE;
     /* Close the file and dxpl */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     PASSED()
 
@@ -1284,7 +1267,6 @@ error:
         if(frsp)
 	    H5FS_close(f, frsp);
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     return 1;
 } /* test_fs_sect_find() */
@@ -1338,7 +1320,6 @@ test_fs_sect_merge(hid_t fapl)
     unsigned			init_flags=0;
     htri_t 			node_found = FALSE;
     TEST_free_section_t 	*node;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("the merge of sections when H5FS_sect_add() to free-space: test 1");
 
@@ -1351,8 +1332,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Create the file to work on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
@@ -1742,8 +1721,6 @@ api_ctx_pushed = TRUE;
     /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     PASSED()
 
@@ -1758,7 +1735,6 @@ error:
         if(frsp)
             H5FS_close(f, frsp);
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     return 1;
 } /* test_fs_sect_merge() */
@@ -1814,7 +1790,6 @@ test_fs_sect_shrink(hid_t fapl)
     unsigned			can_shrink=FALSE;
     htri_t 			node_found = FALSE;
     TEST_free_section_t 	*node;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("shrinking of sections when H5FS_sect_add() to free-space: test 1");
 
@@ -1824,8 +1799,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Create the file to work on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
@@ -2112,8 +2085,6 @@ api_ctx_pushed = TRUE;
     /* Close the file and dxpl */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     PASSED()
 
@@ -2124,7 +2095,6 @@ error:
         if(frsp)
 	        H5FS_close(f, frsp);
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     return 1;
 } /* test_sect_shrink() */
@@ -2161,7 +2131,6 @@ test_fs_sect_change_class(hid_t fapl)
     TEST_free_section_t	*sect_node1=NULL, *sect_node2=NULL, *sect_node3=NULL;
     unsigned		init_flags=0;
     TEST_free_section_t 	*node;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("the change of section class via H5FS_sect_change_class() in free-space: Test 1");
 
@@ -2171,8 +2140,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Create the file to work on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
@@ -2393,8 +2360,6 @@ api_ctx_pushed = TRUE;
     /* Close the file and dxpl */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     PASSED()
 
@@ -2409,7 +2374,6 @@ error:
         if(frsp)
             H5FS_close(f, frsp);
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     return 1;
 } /* test_sect_change_class() */
@@ -2459,7 +2423,6 @@ test_fs_sect_extend(hid_t fapl)
     TEST_free_section_t *sect_node1=NULL, *sect_node2=NULL;
     unsigned		init_flags=0;
     htri_t              status;                 /* Status of 'try' calls */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("a block's extension by requested-size which is = adjoining free section's size: Test 1");
 
@@ -2468,8 +2431,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Create the file to work on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
@@ -2778,8 +2739,6 @@ api_ctx_pushed = TRUE;
     /* Close the file and dxpl */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     return 0;
 
@@ -2788,7 +2747,6 @@ error:
         if(frsp)
             H5FS_close(f, frsp);
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     return 1;
 } /* test_sect_extend() */
@@ -2818,7 +2776,6 @@ test_fs_sect_iterate(hid_t fapl)
     TEST_iter_ud_t 		udata;
     int				i;
     hsize_t			tot_space, nsects;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("iteration of sections in the free-space manager");
 
@@ -2828,8 +2785,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Create the file to work on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
@@ -2886,8 +2841,6 @@ api_ctx_pushed = TRUE;
     /* Close the file and dxpl */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     PASSED()
 
@@ -2898,7 +2851,6 @@ error:
         if(frsp)
             H5FS_close(f, frsp);
         H5Fclose(file);
-if(api_ctx_pushed) H5CX_pop();
     } H5E_END_TRY;
     return 1;
 } /* test_fs_sect_iterate() */
@@ -2910,6 +2862,7 @@ main(void)
     hid_t           fapl = -1;              /* File access property list for data files */
     unsigned        nerrors = 0;            /* Cumulative error count */
     const char     *env_h5_drvr = NULL;     /* File Driver value from environment */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
@@ -2922,6 +2875,10 @@ main(void)
         nerrors++;
         PUTS_ERROR("Can't get VFD-dependent fapl")
     } /* end if */
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* make sure alignment is not set for tests to succeed */
     if(H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)1) < 0) {
@@ -2945,6 +2902,10 @@ main(void)
         goto error;
     HDputs("All free-space tests passed.");
 
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
+
     h5_cleanup(FILENAME, fapl);
     HDexit(EXIT_SUCCESS);
 
@@ -2953,6 +2914,9 @@ error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl);
     } H5E_END_TRY;
+
+    if(api_ctx_pushed) H5CX_pop();
+
     HDexit(EXIT_FAILURE);
 } /* main() */
 

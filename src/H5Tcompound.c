@@ -214,7 +214,6 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
 {
     H5T_t	*dt;                    /* Datatype to query */
     H5T_t	*memb_dt = NULL;        /* Member datatype */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -225,11 +224,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a compound datatype")
     if(membno >= dt->shared->u.compnd.nmembs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid member number")
-
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Retrieve the datatype for the member */
     if(NULL == (memb_dt = H5T_get_member_type(dt, membno, H5T_COPY_REOPEN)))
@@ -243,8 +237,6 @@ done:
     if(ret_value < 0)
         if(memb_dt && H5T_close(memb_dt) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close datatype")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_member_type() */
