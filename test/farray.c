@@ -1659,7 +1659,7 @@ main(void)
     unsigned	nerrors = 0;            /* Cumulative error count */
     time_t      curr_time;              /* Current time, for seeding random number generator */
     int		ExpressMode;            /* Test express value */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Reset library */
     h5_reset();
@@ -1670,8 +1670,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Seed random #'s */
     curr_time = HDtime(NULL);
@@ -1791,8 +1793,10 @@ api_ctx_pushed = TRUE;
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
 
     if(nerrors)
         goto error;
@@ -1809,6 +1813,8 @@ error:
     H5E_BEGIN_TRY {
 	H5Pclose(fapl);
     } H5E_END_TRY;
+
+    if(api_ctx_pushed) H5CX_pop();
 
     return 1;
 } /* end main() */

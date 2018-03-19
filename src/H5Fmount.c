@@ -443,7 +443,6 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
     H5G_loc_t	loc;
     H5F_t	*child = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -462,22 +461,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(plist_id, H5P_FILE_MOUNT))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Do the mount */
     if(H5F__mount(&loc, name, child, plist_id) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fmount() */
 
@@ -505,7 +497,6 @@ herr_t
 H5Funmount(hid_t loc_id, const char *name)
 {
     H5G_loc_t	loc;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -517,22 +508,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Unmount */
     if(H5F__unmount(&loc, name) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Funmount() */
 

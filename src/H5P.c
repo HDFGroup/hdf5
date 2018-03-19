@@ -97,7 +97,6 @@ hid_t
 H5Pcopy(hid_t id)
 {
     void *obj;                  /* Property object to copy */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t ret_value=FALSE;      /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -111,10 +110,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property object");
     if(NULL == (obj = H5I_object(id)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Compare property lists */
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
@@ -137,8 +132,6 @@ api_ctx_pushed = TRUE;
     } /* end else */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* H5Pcopy() */
 
@@ -1509,7 +1502,6 @@ done:
 herr_t
 H5Pclose(hid_t plist_id)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;      /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1520,10 +1512,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         /* Check arguments. */
         if(H5I_GENPROP_LST != H5I_get_type(plist_id))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
         /* Close the property list */
         if(H5I_dec_app_ref(plist_id) < 0)
@@ -1531,8 +1519,6 @@ api_ctx_pushed = TRUE;
     } /* end if */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* H5Pclose() */
 

@@ -190,7 +190,6 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     H5G_loc_t	    loc;                /* Location to create group */
     H5G_t	   *grp = NULL;         /* New group created */
     hid_t           tmp_gcpl = (-1);    /* Temporary group creation property list */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	    ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -231,13 +230,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     else
         tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Create the new group & get its ID */
     if(NULL == (grp = H5G__create_named(&loc, name, H5P_LINK_CREATE_DEFAULT, tmp_gcpl)))
@@ -253,8 +248,6 @@ done:
     if(ret_value < 0)
         if(grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate1() */
@@ -282,7 +275,6 @@ H5Gopen1(hid_t loc_id, const char *name)
 {
     H5G_t       *grp = NULL;            /* Group opened */
     H5G_loc_t	loc;                    /* Location of parent for group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -293,11 +285,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Open the group */
     if(NULL == (grp = H5G__open_name(&loc, name)))
@@ -311,8 +298,6 @@ done:
     if(ret_value < 0)
         if(grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen1() */
@@ -329,7 +314,6 @@ if(api_ctx_pushed && H5CX_pop() < 0)
 herr_t
 H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new_name)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -341,21 +325,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!new_name || !*new_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(cur_loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(cur_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine to create link */
     if(H5G__link(cur_loc_id, cur_name, type, H5L_SAME_LOC, new_name, H5P_LINK_CREATE_DEFAULT) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "couldn't create link")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Glink() */
 
@@ -372,7 +350,6 @@ herr_t
 H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
     hid_t new_loc_id, const char *new_name)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -384,21 +361,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!new_name || !*new_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(cur_loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(cur_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine to create link */
     if(H5G__link(cur_loc_id, cur_name, type, new_loc_id, new_name, H5P_LINK_CREATE_DEFAULT) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "couldn't create link")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Glink2() */
 
@@ -484,27 +455,20 @@ done:
 herr_t
 H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*s*s", src_loc_id, src_name, dst_name);
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(src_loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(src_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call common routine to move the link */
     if(H5G__move(src_loc_id, src_name, H5L_SAME_LOC, dst_name, H5P_LINK_CREATE_DEFAULT) < 0)
       HGOTO_ERROR(H5E_SYM, H5E_CANTMOVE, FAIL, "couldn't move link")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gmove() */
 
@@ -520,7 +484,6 @@ herr_t
 H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -530,21 +493,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(src_loc_id == H5L_SAME_LOC && dst_loc_id == H5L_SAME_LOC)
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "source and destination should not both be H5L_SAME_LOC")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dst_loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dst_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call common routine to move the link */
     if(H5G__move(src_loc_id, src_name, dst_loc_id, dst_name, H5P_LINK_CREATE_DEFAULT) < 0)
       HGOTO_ERROR(H5E_SYM, H5E_CANTMOVE, FAIL, "couldn't move link")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gmove2() */
 
@@ -614,7 +571,6 @@ herr_t
 H5Gunlink(hid_t loc_id, const char *name)
 {
     H5G_loc_t	loc;                    /* Group's location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -626,21 +582,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no name")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine */
     if(H5G__unlink(&loc, name) < 0)
       HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "couldn't delete link")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gunlink() */
 
@@ -688,7 +638,6 @@ herr_t
 H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 {
     H5G_loc_t	loc;                    /* Group's location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -700,21 +649,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine */
     if(H5G__get_linkval(&loc, name, size, buf) < 0)
       HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "couldn't delete link")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_linkval() */
 
@@ -772,7 +715,6 @@ herr_t
 H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 {
     H5G_loc_t	loc;                    /* Group's location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -783,21 +725,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine */
     if(H5G__set_comment(&loc, name, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set comment value")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gset_comment() */
 
@@ -860,7 +796,6 @@ int
 H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
     H5G_loc_t	loc;                    /* Group's location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     int	ret_value;                      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -873,21 +808,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(bufsize > 0 && !buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine */
     if((ret_value = H5G__get_comment(&loc, name, buf, bufsize)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get comment value")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_comment() */
 
@@ -955,7 +884,6 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     H5G_link_iterate_t  lnk_op;         /* Link operator                    */
     hsize_t             last_obj;       /* Index of last object looked at   */
     hsize_t	        idx;            /* Internal location to hold index  */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t              ret_value;      /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
@@ -977,11 +905,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     lnk_op.op_type = H5G_LINK_OP_OLD;
     lnk_op.op_func.op_old = op;
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Call private function. */
     if((ret_value = H5G__iterate(loc_id, name, H5_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
@@ -991,8 +914,6 @@ api_ctx_pushed = TRUE;
         *idx_p = (int)last_obj;
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Giterate() */
 
@@ -1051,7 +972,6 @@ H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
 {
     H5G_loc_t	loc;            /* Location of object */
     H5G_info_t  grp_info;       /* Group information */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -1063,11 +983,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!num_objs)
 	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "bad pointer to # of objects")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Call the internal routine */
     if(H5G__get_num_objs(loc.oloc, &grp_info) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "can't determine")
@@ -1076,8 +991,6 @@ api_ctx_pushed = TRUE;
     *num_objs = grp_info.nlinks;
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_num_objs() */
 
@@ -1142,7 +1055,6 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
 	       H5G_stat_t *statbuf/*out*/)
 {
     H5G_loc_t	loc;                    /* Group's location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1154,18 +1066,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no name specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get info */
     if(H5G__get_objinfo(&loc, name, follow_link, statbuf) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "cannot stat object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_objinfo() */
 
@@ -1346,7 +1251,6 @@ ssize_t
 H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
 {
     H5G_loc_t	loc;            /* Object location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     ssize_t	ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -1356,18 +1260,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a location ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Call internal function */
     if((ret_value = H5G__get_objname_by_idx(loc.oloc, H5_INDEX_NAME, H5_ITER_INC, idx, name, size)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "can't get object name")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_objname_by_idx() */
 
@@ -1430,7 +1327,6 @@ H5G_obj_t
 H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 {
     H5G_loc_t	loc;            /* Object location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     H5G_obj_t	ret_value;
 
     FUNC_ENTER_API(H5G_UNKNOWN)
@@ -1440,18 +1336,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5G_UNKNOWN, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Call internal function*/
     if(H5G_UNKNOWN == (ret_value = H5G__obj_get_type_by_idx(loc.oloc, idx)))
 	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't get object type")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_SYM, H5E_CANTRESET, H5G_UNKNOWN, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_objtype_by_idx() */
 

@@ -108,7 +108,6 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5G_loc_t	   loc;                 /* Object location to insert dataset into */
     H5D_t	   *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -137,13 +136,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Create the new dataset & get its ID */
     if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, lcpl_id, dcpl_id, dapl_id)))
@@ -156,8 +151,6 @@ done:
         if(dset && H5D_close(dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
 
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate2() */
 
@@ -204,7 +197,6 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     H5G_loc_t	   loc;                 /* Object location to insert dataset into */
     H5D_t	   *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -223,13 +215,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* build and open the new dataset */
     if(NULL == (dset = H5D__create_anon(loc.oloc->file, type_id, space, dcpl_id, dapl_id)))
@@ -258,8 +246,6 @@ done:
         if(dset && H5D_close(dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
 
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate_anon() */
 
@@ -286,7 +272,6 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 {
     H5D_t       *dset = NULL;
     H5G_loc_t   loc;                    /* Object location of group */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -298,13 +283,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, FALSE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Open the dataset */
     if(NULL == (dset = H5D__open_name(&loc, name, dapl_id)))
@@ -319,8 +300,6 @@ done:
         if(dset && H5D_close(dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
 
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen2() */
 
@@ -342,7 +321,6 @@ if(api_ctx_pushed && H5CX_pop() < 0)
 herr_t
 H5Dclose(hid_t dset_id)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t  ret_value = SUCCEED;    /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
@@ -351,9 +329,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Check args */
     if(NULL == H5I_object_verify(dset_id, H5I_DATASET))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
@@ -363,8 +338,6 @@ api_ctx_pushed = TRUE;
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dclose() */
 
@@ -389,7 +362,6 @@ hid_t
 H5Dget_space(hid_t dset_id)
 {
     H5D_t	*dset = NULL;
-hbool_t     api_ctx_pushed = FALSE;     /* Whether API context pushed */
     hid_t	ret_value;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -399,17 +371,10 @@ hbool_t     api_ctx_pushed = FALSE;     /* Whether API context pushed */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataset")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-
     if((ret_value = H5D__get_space(dset)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to get dataspace")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_space() */
 
@@ -432,7 +397,6 @@ herr_t
 H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
 {
     H5D_t 	*dset = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t 	ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -442,18 +406,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Read dataspace address and return */
     if(H5D__get_space_status(dset, allocation) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Dget_space_status() */
 
@@ -478,7 +435,6 @@ hid_t
 H5Dget_type(hid_t dset_id)
 {
     H5D_t	*dset;                  /* Dataset */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -488,17 +444,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-
     if((ret_value = H5D__get_type(dset)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_type() */
 
@@ -523,7 +472,6 @@ hid_t
 H5Dget_create_plist(hid_t dset_id)
 {
     H5D_t	*dataset;               /* Dataset structure */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	ret_value;    		/* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -533,17 +481,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a dataset")
 
-/* Set API context, verify access property list, and set up collective metadata if appropriate */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-
     if((ret_value = H5D__get_create_plist(dataset)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "Can't get creation plist")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_create_plist() */
 
@@ -624,7 +565,6 @@ hsize_t
 H5Dget_storage_size(hid_t dset_id)
 {
     H5D_t	*dset;          /* Dataset to query */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hsize_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(0)
@@ -634,18 +574,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, 0, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Set return value */
     if(H5D__get_storage_size(dset, &ret_value) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of dataset's storage")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, 0, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_storage_size() */
 
@@ -800,7 +733,6 @@ herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf)
 {
     H5S_t *space;               /* Dataspace for iteration */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -820,19 +752,14 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set DXPL for operation */
-H5CX_set_dxpl(dxpl_id);
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
 
     /* Call internal routine */
     ret_value = H5D_vlen_reclaim(type_id, space, buf);
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Dvlen_reclaim() */
 
@@ -873,7 +800,6 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     H5S_t *space;               /* Dataspace for iteration */
     H5T_t *type;                /* Datatype */
     H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -911,11 +837,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (vlen_bufsize.vl_tbuf = H5FL_BLK_MALLOC(vlen_vl_buf, (size_t)1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Set the memory manager to the special allocation routine */
     if(H5CX_set_vlen_alloc_info(H5D__vlen_get_buf_size_alloc, &vlen_bufsize, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VL data allocation routine")
@@ -943,8 +864,6 @@ done:
         vlen_bufsize.fl_tbuf = H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.fl_tbuf);
     if(vlen_bufsize.vl_tbuf != NULL)
         vlen_bufsize.vl_tbuf = H5FL_BLK_FREE(vlen_vl_buf, vlen_bufsize.vl_tbuf);
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Dvlen_get_buf_size() */
@@ -967,7 +886,6 @@ herr_t
 H5Dset_extent(hid_t dset_id, const hsize_t size[])
 {
     H5D_t *dset;                /* Dataset for this operation */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -979,21 +897,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dset_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dset_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Private function */
     if(H5D__set_extent(dset, size) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dset_extent() */
 
@@ -1014,7 +926,6 @@ herr_t
 H5Dflush(hid_t dset_id)
 {
     H5D_t *dset;                /* Dataset for this operation */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1024,21 +935,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dset_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dset_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Flush dataset information cached in memory */
     if(H5D__flush(dset, dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush cached dataset info")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Dflush */
 
@@ -1059,7 +964,6 @@ herr_t
 H5Drefresh(hid_t dset_id)
 {
     H5D_t *dset;                   /* Dataset to refresh */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;    /* return value */
     
     FUNC_ENTER_API(FAIL)
@@ -1069,21 +973,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dset_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dset_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call private function to refresh the dataset object */
     if((H5D__refresh(dset_id, dset)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to refresh dataset")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Drefresh() */
 
@@ -1108,7 +1006,6 @@ herr_t
 H5Dformat_convert(hid_t dset_id)
 {
     H5D_t *dset;                /* Dataset to refresh */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* return value */
     
     FUNC_ENTER_API(FAIL)
@@ -1118,13 +1015,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(dset_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(dset_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     switch(dset->shared->layout.type) {
 	case H5D_CHUNKED:
@@ -1155,8 +1048,6 @@ if(H5CX_set_loc(dset_id, TRUE) < 0)
     } /* end switch */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Dformat_convert */
 
@@ -1215,7 +1106,6 @@ herr_t
 H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_nbytes)
 {
     H5D_t       *dset = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -1231,18 +1121,12 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     if(H5D_CHUNKED != dset->shared->layout.type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Call private function */
     if(H5D__get_chunk_storage_size(dset, offset, chunk_nbytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get storage size of chunk")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value);
 } /* H5Dget_chunk_storage_size() */
 

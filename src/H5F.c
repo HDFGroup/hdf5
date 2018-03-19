@@ -355,7 +355,6 @@ done:
 htri_t
 H5Fis_hdf5(const char *name)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     htri_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -364,10 +363,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Check args and all the boring stuff. */
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* call the private is_HDF5 function */
     /* (Should not trigger raw data I/O - QAK, 2018/01/03) */
@@ -375,8 +370,6 @@ api_ctx_pushed = TRUE;
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable open file")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fis_hdf5() */
 
@@ -408,7 +401,6 @@ hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t   *new_file = NULL;               /* file struct for new file                 */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t   ret_value;                      /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -435,13 +427,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         if (TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not file create property list")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Adjust bit flags by turning on the creation bit and making sure that
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
@@ -465,8 +453,6 @@ if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
 done:
     if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
@@ -495,7 +481,6 @@ hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
     H5F_t       *new_file = NULL;                   /* file struct for new file                 */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value;                          /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -515,13 +500,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if((flags & H5F_ACC_SWMR_READ) && (flags & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "SWMR read access on a file open for read-write access is not allowed")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Open the file */
     if(NULL == (new_file = H5F__open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
@@ -538,8 +519,6 @@ done:
     if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
 
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
 
@@ -559,7 +538,6 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 {
     H5F_t      *f = NULL;              /* File to flush */
     H5O_loc_t  *oloc = NULL;           /* Object location for ID */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -645,13 +623,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(H5F_ACC_RDWR & H5F_INTENT(f)) {
 	hid_t fapl_id = H5P_DEFAULT;    /* FAPL to use */
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, object_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access property list info")
+        /* Verify access property list and set up collective metadata if appropriate */
+        if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, object_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access property list info")
 
         /* Flush the file */
         if(H5F__flush(f, scope) < 0)
@@ -659,8 +633,6 @@ if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, object_id, TRUE) < 0)
     } /* end if */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fflush() */
 
@@ -682,7 +654,6 @@ if(api_ctx_pushed && H5CX_pop() < 0)
 herr_t
 H5Fclose(hid_t file_id)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -692,18 +663,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(H5I_FILE != H5I_get_type(file_id))
         HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Close the file */
     if(H5F__close(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "closing file ID failed")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclose() */
 
@@ -823,7 +787,6 @@ H5Fget_freespace(hid_t file_id)
 {
     H5F_t      *file;           /* File object for file ID */
     hsize_t     tot_space;      /* Amount of free space in the file */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hssize_t    ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -833,11 +796,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get the free space in the file */
     if(H5F__get_freespace(file, &tot_space) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
@@ -845,8 +803,6 @@ api_ctx_pushed = TRUE;
     ret_value = (hssize_t)tot_space;
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_freespace() */
 
@@ -932,7 +888,6 @@ ssize_t
 H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
 {
     H5F_t      *file;                   /* File object for file ID */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     ssize_t     ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -942,19 +897,12 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* call private get_file_image function */
     /* (Should not trigger raw data I/O - QAK, 2018/01/03) */
     if((ret_value = H5F__get_file_image(file, buf_ptr, buf_len)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file image")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Fget_file_image() */
 
@@ -1225,7 +1173,6 @@ herr_t
 H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
 {
     H5F_t *f;                           /* Top file in mount hierarchy */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1253,18 +1200,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     } /* end else */
     HDassert(f->shared);
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get the file info */
     if(H5F__get_info(f, finfo) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve file info")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info2() */
 
@@ -1380,7 +1320,6 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
     H5F_sect_info_t *sect_info/*out*/)
 {
     H5F_t         *file;        /* Top file in mount hierarchy */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     ssize_t       ret_value;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1392,18 +1331,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(sect_info && nsects == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get the free-space section information in the file */
     if((ret_value = H5F__get_free_sections(file, type, nsects, sect_info)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_free_sections() */
 
@@ -1423,7 +1355,6 @@ herr_t
 H5Fclear_elink_file_cache(hid_t file_id)
 {
     H5F_t       *file;        /* File */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1434,20 +1365,12 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* See if there's an EFC */
-    if(file->shared->efc) {
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
+    if(file->shared->efc)
         /* Release the EFC */
         if(H5F__efc_release(file->shared->efc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
-    } /* end if */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclear_elink_file_cache() */
 
@@ -1488,7 +1411,6 @@ H5Fstart_swmr_write(hid_t file_id)
     H5F_t *file;         	/* File info */
     hbool_t ci_load = FALSE;    /* whether MDC ci load requested */
     hbool_t ci_write = FALSE;   /* whether MDC CI write requested */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1519,21 +1441,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(ci_load || ci_write )
         HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and MDC cache image")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(file_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(file_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call the internal routine */
     if(H5F__start_swmr_write(file) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTCONVERT, FAIL, "unable to convert file format")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fstart_swmr_write() */
 
@@ -1650,7 +1566,6 @@ H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
 {
     H5F_t *f;                           /* File */
     unsigned latest_flags;              /* Latest format flags for file */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1665,13 +1580,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(latest_format != (H5F_LATEST_ALL_FLAGS == latest_flags)) {
 	hid_t 	fapl_id = H5P_DEFAULT;  /* FAPL to use */
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Verify access property list and set up collective metadata if appropriate */
-if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, file_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access property list info")
+        /* Set up collective metadata if appropriate */
+        if(H5CX_set_loc(file_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
         /* Call the flush routine, for this file */
         if(H5F__flush_real(f, FALSE) < 0)
@@ -1682,8 +1593,6 @@ if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, file_id, TRUE) < 0)
     } /* end if */
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fset_libver_bounds() */
 
@@ -1702,7 +1611,6 @@ herr_t
 H5Fformat_convert(hid_t fid)
 {
     H5F_t    *f;                     /* File to flush */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t    ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1715,21 +1623,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (f = (H5F_t *)H5I_object(fid)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(fid, TRUE) < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(fid, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call the internal routine */
     if(H5F__format_convert(f) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTCONVERT, FAIL, "unable to convert file format")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fformat_convert() */
 

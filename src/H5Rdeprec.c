@@ -104,7 +104,6 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 {
     H5G_loc_t loc;              /* Object location */
     H5O_type_t obj_type;        /* Object type */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     H5G_obj_t ret_value;        /* Return value */
 
     FUNC_ENTER_API(H5G_UNKNOWN)
@@ -118,11 +117,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if (ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN, "invalid reference pointer")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5G_UNKNOWN, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get the object information */
     if(H5R__get_obj_type(loc.oloc->file, ref_type, ref, &obj_type) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type")
@@ -131,8 +125,6 @@ api_ctx_pushed = TRUE;
     ret_value = H5G_map_obj_type(obj_type);
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_REFERENCE, H5E_CANTRESET, H5G_UNKNOWN, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rget_obj_type1() */
 
@@ -158,7 +150,6 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
 {
     H5G_loc_t loc;      /* Group location */
     H5F_t *file = NULL; /* File object */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t ret_value = H5I_INVALID_HID;	/* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -172,11 +163,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if (_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid reference pointer")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get the file pointer from the entry */
     file = loc.oloc->file;
 
@@ -185,8 +171,6 @@ api_ctx_pushed = TRUE;
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5I_INVALID_HID, "unable dereference object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_REFERENCE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rdereference1() */
 

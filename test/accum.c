@@ -88,7 +88,7 @@ int
 main(void)
 {
     unsigned nerrors = 0;        /* track errors */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t fid = -1;
     H5F_t * f = NULL;           /* File for all tests */
 
@@ -98,8 +98,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Create a test file */
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
     if(NULL == (f = (H5F_t *)H5I_object(fid))) FAIL_STACK_ERROR
@@ -124,8 +126,10 @@ api_ctx_pushed = TRUE;
     nerrors += test_free(f);
     nerrors += test_big(f);
     nerrors += test_random_write(f);
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
 
     /* End of test code, close and delete file */
     if(H5Fclose(fid) < 0) TEST_ERROR
@@ -142,7 +146,8 @@ api_ctx_pushed = FALSE;
     return 0;
 
 error: 
-if(api_ctx_pushed) H5CX_pop();
+    if(api_ctx_pushed) H5CX_pop();
+
     puts("*** TESTS FAILED ***");
     return 1;
 } /* end main() */
@@ -1822,7 +1827,7 @@ test_swmr_write_big(hbool_t newest_format)
     int status;				    /* Status returned from child process */
     char *new_argv[] = {NULL};
     char *driver = NULL;        /* VFD string (from env variable) */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     if(newest_format)
         TESTING("SWMR write of large metadata: with latest format")
@@ -1870,8 +1875,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Open the file with SWMR_WRITE */
     if((fid = H5Fopen(SWMR_FILENAME, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
         FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
     if(NULL == (rf = (H5F_t *)H5I_object(fid))) FAIL_STACK_ERROR
@@ -1957,19 +1964,22 @@ api_ctx_pushed = TRUE;
 
     /* Check if child process terminates normally and its return value */
     if(WIFEXITED(status) && !WEXITSTATUS(status)) {
-	    /* Flush the accumulator */
-	    if(accum_reset(rf) < 0)
-                FAIL_STACK_ERROR;
-	    /* Close the property list */
-	    if(H5Pclose(fapl) < 0) 
-	        FAIL_STACK_ERROR;
+        /* Flush the accumulator */
+        if(accum_reset(rf) < 0)
+            FAIL_STACK_ERROR;
+        /* Close the property list */
+        if(H5Pclose(fapl) < 0) 
+            FAIL_STACK_ERROR;
 
-	    /* Close and remove the file */
-	    if(H5Fclose(fid) < 0) 
-	        FAIL_STACK_ERROR;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
-	    HDremove(SWMR_FILENAME);
+        /* Close and remove the file */
+        if(H5Fclose(fid) < 0) 
+            FAIL_STACK_ERROR;
+
+        /* Pop API context */
+        if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+        api_ctx_pushed = FALSE;
+
+        HDremove(SWMR_FILENAME);
 
         /* Release memory */
         if(wbuf2)
@@ -1984,8 +1994,11 @@ error:
     /* Closing and remove the file */
     H5Pclose(fapl);
     H5Fclose(fid);
-if(api_ctx_pushed) H5CX_pop();
+
+    if(api_ctx_pushed) H5CX_pop();
+
     HDremove(SWMR_FILENAME);
+
     /* Release memory */
     if(wbuf2)
         HDfree(wbuf2);

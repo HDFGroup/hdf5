@@ -102,7 +102,6 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
 {
     H5G_loc_t	loc;                    /* Location to create datatype */
     H5T_t	*type;                  /* Datatype for ID */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -116,21 +115,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Commit the datatype to the file, using default property list values */
     if(H5T__commit_named(&loc, name, type, H5P_LINK_CREATE_DEFAULT, H5P_DATATYPE_CREATE_DEFAULT) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit1() */
 
@@ -156,7 +149,6 @@ H5Topen1(hid_t loc_id, const char *name)
 {
     H5T_t       *type = NULL;
     H5G_loc_t	loc;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t       ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -167,11 +159,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a location")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name")
-
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Open it */
     if(NULL == (type = H5T__open_name(&loc, name)))
@@ -186,8 +173,6 @@ done:
     if(ret_value < 0)
         if(type && H5T_close(type) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close datatype")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_DATATYPE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen1() */

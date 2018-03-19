@@ -102,7 +102,6 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
 {
     H5F_t *f;                           /* Top file in mount hierarchy */
     H5F_info2_t finfo2;                 /* Current file info struct */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -130,11 +129,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     } /* end else */
     HDassert(f->shared);
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Get the current file info */
     if(H5F__get_info(f, &finfo2) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve file info")
@@ -145,8 +139,6 @@ api_ctx_pushed = TRUE;
     finfo->sohm.msgs_info = finfo2.sohm.msgs_info;
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_FILE, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info1() */
 

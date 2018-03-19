@@ -128,7 +128,7 @@ test_page_buffer_access(void)
     H5F_t *f = NULL;
     herr_t ret;			/* generic return value */
     const char *filename;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -194,9 +194,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl_self);
         VRFY((file_id >= 0), "");
-ret = H5CX_push();
-VRFY((ret == 0), "H5CX_push()");
-api_ctx_pushed = TRUE;
+
+        /* Push API context */
+        ret = H5CX_push();
+        VRFY((ret == 0), "H5CX_push()");
+        api_ctx_pushed = TRUE;
 
         /* Get a pointer to the internal file object */
         f = (H5F_t *)H5I_object(file_id);
@@ -282,7 +284,9 @@ api_ctx_pushed = TRUE;
         VRFY((ret >= 0), "H5Fclose succeeded");
         ret = H5Pclose(fapl_self);
         VRFY((ret>=0), "H5Pclose succeeded");
-if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+
+        /* Pop API context */
+        if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
     }
 #endif
 
@@ -297,9 +301,11 @@ if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_p
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
         VRFY((file_id >= 0), "");
-ret = H5CX_push();
-VRFY((ret == 0), "H5CX_push()");
-api_ctx_pushed = TRUE;
+
+        /* Push API context */
+        ret = H5CX_push();
+        VRFY((ret == 0), "H5CX_push()");
+        api_ctx_pushed = TRUE;
 
         /* Get a pointer to the internal file object */
         f = (H5F_t *)H5I_object(file_id);
@@ -409,7 +415,9 @@ api_ctx_pushed = TRUE;
     VRFY((ret>=0), "H5Pclose succeeded");
     ret = H5Pclose(fcpl);
     VRFY((ret>=0), "H5Pclose succeeded");
-if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+
+    /* Pop API context */
+    if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
 
     HDfree(data);
     data = NULL;
@@ -433,7 +441,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     H5F_t       *f = NULL;
     H5C_t       *cache_ptr = NULL;
     H5AC_cache_config_t config;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
@@ -441,9 +449,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     ret = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
     VRFY((ret == 0), "");
-ret = H5CX_push();
-VRFY((ret == 0), "H5CX_push()");
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    ret = H5CX_push();
+    VRFY((ret == 0), "H5CX_push()");
+    api_ctx_pushed = TRUE;
 
     f = (H5F_t *)H5I_object(file_id);
     VRFY((f != NULL), "");
@@ -561,7 +571,9 @@ api_ctx_pushed = TRUE;
     VRFY((ret == 0), "");
     ret = H5Sclose(mem_dataspace);
     VRFY((ret == 0), "");
-if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+
+    /* Pop API context */
+    if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
 
     MPI_Barrier(MPI_COMM_WORLD);
     HDfree(data_array);
@@ -586,7 +598,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
     H5F_t       *f = NULL;
     H5C_t       *cache_ptr = NULL;
     H5AC_cache_config_t config;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret;
 
     config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -601,9 +613,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     H5Eprint2(H5E_DEFAULT, stderr);
     VRFY((file_id >= 0), "");
-ret = H5CX_push();
-VRFY((ret == 0), "H5CX_push()");
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    ret = H5CX_push();
+    VRFY((ret == 0), "H5CX_push()");
+    api_ctx_pushed = TRUE;
 
     ret = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
     VRFY((ret == 0), "");
@@ -717,7 +731,10 @@ api_ctx_pushed = TRUE;
     VRFY((ret == 0), "");
     ret = H5Sclose(mem_dataspace);
     VRFY((ret == 0), "");
-if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+
+    /* Pop API context */
+    if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+
     HDfree(data_array);
 
     return nerrors;

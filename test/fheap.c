@@ -16288,7 +16288,7 @@ main(void)
     int	ExpressMode;                    /* Express testing level */
     const char *envval;                 /* Environment variable */
     hbool_t contig_addr_vfd;            /* Whether VFD used has a contigous address space */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
     envval = HDgetenv("HDF5_DRIVER");
@@ -16327,8 +16327,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Initialize heap creation parameters */
     init_small_cparam(&small_cparam);
     init_large_cparam(&large_cparam);
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Allocate space for the shared objects */
     shared_obj_size_g = large_cparam.max_man_size + 256;
@@ -16777,8 +16779,6 @@ api_ctx_pushed = TRUE;
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     if(nerrors)
         goto error;
@@ -16793,6 +16793,10 @@ api_ctx_pushed = FALSE;
 
     if(H5Pclose(def_fcpl) < 0) TEST_ERROR
     if(H5Pclose(pb_fapl) < 0) TEST_ERROR
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
 
     /* Clean up file used */
     h5_cleanup(FILENAME, def_fapl);
@@ -16812,6 +16816,9 @@ error:
         H5Pclose(def_fcpl);
         H5Pclose(fcpl);
     } H5E_END_TRY;
+
+    if(api_ctx_pushed) H5CX_pop();
+
     return 1;
 } /* end main() */
 

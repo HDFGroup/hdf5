@@ -50,7 +50,7 @@ main(void)
     uint8_t rbuf[1024];	    /* Buffer for reading */
     uint8_t buf[1024];	    /* Buffer for holding the expected data */
     char *driver = NULL;    /* VFD string (from env variable) */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
@@ -72,8 +72,10 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Open the file with SWMR_READ */
     if((fid = H5Fopen(SWMR_FILENAME, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
 	    FAIL_STACK_ERROR
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
     if(NULL == (f = (H5F_t *)H5I_object(fid))) 
@@ -92,14 +94,18 @@ api_ctx_pushed = TRUE;
 	    FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
 	    FAIL_STACK_ERROR;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
 
     return EXIT_SUCCESS;
 
 error: 
     H5Fclose(fid);
-if(api_ctx_pushed) H5CX_pop();
+
+    if(api_ctx_pushed) H5CX_pop();
+
     return EXIT_FAILURE;
 } /* end main() */
 

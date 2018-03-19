@@ -577,7 +577,6 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
     haddr_t addr = HADDR_UNDEF;
     int *data = NULL;
     H5F_t *f = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("Raw Data Handling");
 
@@ -603,8 +602,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file_id)))
@@ -797,8 +794,6 @@ api_ctx_pushed = TRUE;
         FAIL_STACK_ERROR;
     if(H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     HDfree(data);
 
     PASSED()
@@ -809,7 +804,6 @@ error:
         H5Pclose(fapl);
         H5Pclose(fcpl);
         H5Fclose(file_id);
-if(api_ctx_pushed) H5CX_pop();
         if(data)
             HDfree(data);
     } H5E_END_TRY;
@@ -862,7 +856,6 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     haddr_t search_addr = HADDR_UNDEF;
     int *data = NULL;
     H5F_t *f = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("LRU Processing");
 
@@ -896,8 +889,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file_id)))
         FAIL_STACK_ERROR;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* opening the file inserts one or more pages into the page buffer.
      * Get the number of pages inserted, and verify that it is the 
@@ -1056,8 +1047,6 @@ api_ctx_pushed = TRUE;
         FAIL_STACK_ERROR;
     if(H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     HDfree(data);
 
     PASSED()
@@ -1068,7 +1057,6 @@ error:
         H5Pclose(fapl);
         H5Pclose(fcpl);
         H5Fclose(file_id);
-if(api_ctx_pushed) H5CX_pop();
         if(data)
             HDfree(data);
     } H5E_END_TRY;
@@ -1124,7 +1112,6 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     haddr_t raw_addr = HADDR_UNDEF;
     int *data = NULL;
     H5F_t *f = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("Minimum Metadata threshold Processing");
     HDprintf("\n");
@@ -1157,8 +1144,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* create the file */
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file_id)))
@@ -1693,8 +1678,6 @@ api_ctx_pushed = TRUE;
 
     if(H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
 
     HDfree(data);
 
@@ -1708,7 +1691,6 @@ error:
         H5Pclose(fapl);
         H5Pclose(fcpl);
         H5Fclose(file_id);
-if(api_ctx_pushed) H5CX_pop();
         if(data)
             HDfree(data);
     } H5E_END_TRY;
@@ -1763,7 +1745,6 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     haddr_t raw_addr = HADDR_UNDEF;
     int *data = NULL;
     H5F_t *f = NULL;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     TESTING("Statistics Collection");
 
@@ -1793,8 +1774,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
-if(H5CX_push() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = TRUE;
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file_id)))
@@ -2005,8 +1984,6 @@ api_ctx_pushed = TRUE;
         FAIL_STACK_ERROR;
     if(H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
-if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
-api_ctx_pushed = FALSE;
     HDfree(data);
 
 
@@ -2018,7 +1995,6 @@ error:
         H5Pclose(fapl);
         H5Pclose(fcpl);
         H5Fclose(file_id);
-if(api_ctx_pushed) H5CX_pop();
         if(data)
             HDfree(data);
     } H5E_END_TRY;
@@ -2161,6 +2137,7 @@ main(void)
     hid_t       fapl = -1;              /* File access property list for data files */
     unsigned    nerrors = 0;            /* Cumulative error count */
     const char  *env_h5_drvr = NULL;    /* File Driver value from environment */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     h5_reset();
 
@@ -2186,6 +2163,10 @@ main(void)
         PUTS_ERROR("Can't get VFD-dependent fapl")
     } /* end if */
 
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
+
 #ifdef H5_HAVE_PARALLEL 
 
     HDputs("Page Buffering is disabled for parallel.");
@@ -2206,12 +2187,15 @@ main(void)
     if(nerrors)
         goto error;
 
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
+
     HDputs("All Page Buffering tests passed.");
 
     HDexit(EXIT_SUCCESS);
 
 error:
-
     HDprintf("***** %d Page Buffering TEST%s FAILED! *****\n",
         nerrors, nerrors > 1 ? "S" : "");
 
@@ -2219,7 +2203,8 @@ error:
         H5Pclose(fapl);
     } H5E_END_TRY;
 
-    HDexit(EXIT_FAILURE);
+    if(api_ctx_pushed) H5CX_pop();
 
+    HDexit(EXIT_FAILURE);
 } /* main() */
 

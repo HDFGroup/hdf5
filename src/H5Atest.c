@@ -127,7 +127,7 @@ herr_t
 H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
 {
     H5A_t	*attr;                  /* Attribute object for ID */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -135,9 +135,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     /* Check arguments */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
+
+    /* Push API context */
+    if(H5CX_push() < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set API context")
+    api_ctx_pushed = TRUE;
 
     /* Sanity check */
     HDassert(H5O_msg_is_shared(H5O_ATTR_ID, attr));
@@ -147,8 +149,9 @@ api_ctx_pushed = TRUE;
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, FAIL, "can't reset API context")
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, FAIL, "can't reset API context")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__get_shared_rc_test() */
 

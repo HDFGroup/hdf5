@@ -208,7 +208,6 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 {
     H5G_loc_t	loc;                    /* Source group group location */
     H5G_loc_t	dst_loc;                /* Destination group location */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -225,21 +224,15 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(!dst_name || !*dst_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(src_loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(src_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine to copy object */
     if(H5O__copy(&loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_OHDR, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ocopy() */
 

@@ -117,7 +117,6 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5G_loc_t   loc;                    /* Object location */
     H5T_t	*type;                  /* Datatype to use for attribute */
     H5S_t	*space;                 /* Dataspace to use for attribute */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -137,13 +136,9 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-/* Set up collective metadata if appropriate */
-if(H5CX_set_loc(loc_id, TRUE) < 0)
-    HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set collective metadata read")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set collective metadata read")
 
     /* Go do the real work for attaching the attribute to the dataset */
     if(NULL == (attr = H5A__create(&loc, name, type, space, acpl_id)))
@@ -157,8 +152,6 @@ done:
     /* Cleanup on failure */
     if(ret_value < 0 && attr && H5A__close(attr) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate1() */
@@ -191,7 +184,6 @@ H5Aopen_name(hid_t loc_id, const char *name)
 {
     H5G_loc_t   loc;            /* Object location */
     H5A_t       *attr = NULL;   /* Attribute opened */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -204,11 +196,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Open the attribute on the object header */
     if(NULL == (attr = H5A__open_by_name(&loc, ".", name)))
@@ -223,8 +210,6 @@ done:
     if(ret_value < 0)
         if(attr && H5A__close(attr) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_name() */
@@ -257,7 +242,6 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
 {
     H5G_loc_t	loc;	        /* Object location */
     H5A_t       *attr = NULL;   /* Attribute opened */
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t	ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -268,11 +252,6 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
 
     /* Open the attribute in the object header */
     if(NULL == (attr = H5A__open_by_idx(&loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)idx)))
@@ -287,8 +266,6 @@ done:
     if(ret_value < 0)
         if(attr && H5A__close(attr) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, H5I_INVALID_HID, "can't reset API context")
 
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_idx() */
@@ -317,7 +294,6 @@ H5Aget_num_attrs(hid_t loc_id)
 {
     H5O_loc_t   *loc;	/* Object location for attribute */
     void        *obj;
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     int		ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -363,18 +339,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "inappropriate attribute target")
     } /*lint !e788 All appropriate cases are covered */
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Look up the # of attributes for the object */
     if((ret_value = H5A__get_num_attrs(loc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "can't get attribute count for object")
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_num_attrs() */
 
@@ -419,7 +388,6 @@ if(api_ctx_pushed && H5CX_pop() < 0)
 herr_t
 H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
 {
-hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -429,18 +397,11 @@ hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
 
-/* Set API context */
-if(H5CX_push() < 0)
-    HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set API context")
-api_ctx_pushed = TRUE;
-
     /* Call attribute iteration routine */
     if((ret_value = H5A__iterate_old(loc_id, attr_num, op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
 done:
-if(api_ctx_pushed && H5CX_pop() < 0)
-    HDONE_ERROR(H5E_ATTR, H5E_CANTRESET, FAIL, "can't reset API context")
     FUNC_LEAVE_API(ret_value)
 } /* H5Aiterate1() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
