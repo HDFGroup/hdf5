@@ -1124,7 +1124,10 @@ Known Problems
         testphdf5 (ecdsetw, selnone, cchunk1, cchunk3, cchunk4, and actualio)
         t_shapesame (sscontig2)
         t_pflush1/fails on exit
-    The first two tests fail attempting collective writes. 
+    The first two tests fail attempting collective writes.
+
+    H5DOwrite_chunk write wrong data when H5Pset_libver_bounds is set to 
+    H5F_LIBVER_LATEST, H5F_LIBVER_LATEST.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
