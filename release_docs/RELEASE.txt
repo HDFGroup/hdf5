@@ -100,7 +100,7 @@ New Features
       to remove the flags not understood by that version of the compiler.
       Nothing should change when building with gcc >= 4.1.
 
-      (HDFFV-9937, DER, 2017/05/31)
+      (DER - 2017/05/31, HDFFV-9937)
 
     - -fno-omit-frame-pointer was added when building with debugging symbols
       enabled.
@@ -111,7 +111,7 @@ New Features
       we've disabled this optimization when debugging symbols are requested
       (e.g.: via building with --enable-symbols).
 
-      (HDFFV-10226, DER, 2017/05/31)
+      (DER - 2017/05/31, HDFFV-10226)
 
     Library:
     --------
@@ -157,7 +157,7 @@ New Features
       store is switched on). Since the new API call queries a generic VFD
       unassociated with a file, these flags will never be returned.
 
-      (HDFFV-10215, DER, 2017/05/31)
+      (DER - 2017/05/31, HDFFV-10215)
 
 
     - H5FD_FEAT_DEFAULT_VFD_COMPATIBLE VFD feature flag added to the C library.
@@ -166,7 +166,7 @@ New Features
       default VFD. VFDs that set this flag create single files that follow
       the canonical HDF5 file format.
 
-      (HDFFV-10214, DER, 2017/05/31)
+      (DER - 2017/05/31, HDFFV-10214)
 
     - The H5I_REFERENCE value in the H5I_type_t enum (defined in H5Ipublic.h)
       has been marked as deprectated.
@@ -177,7 +177,7 @@ New Features
       This enum value will be removed in a future major version of the library.
       The code will remain unchanged in the HDF5 1.10.x branches.
 
-      (HDFFV-10252, DER, 2017/04/05)
+      (DER - 2017/04/05, HDFFV-10252)
 
 
     Parallel Library:
@@ -205,7 +205,6 @@ New Features
       subgroup operating as an independant collection of processes.
 
       (RAW - 2017/10/10, HDFFV-10294)
-
 
     - Large MPI-IO transfers
 
@@ -500,7 +499,7 @@ Bug Fixes since HDF5-1.10.1 release
       The fix ensures that the function checks for n >= 2^63
       and returns 0.
 
-      (HDFFV-10217, VC, 2017/07/10)
+      (VC - 2017/07/10, HDFFV-10217)
 
     - Fix for H5Ocopy doesn't work with open identifiers
 
@@ -508,17 +507,7 @@ Bug Fixes since HDF5-1.10.1 release
       cached info when possible instead of flushing objects to file and
       read them back in again.
 
-      (HDFFV-7853, VC, 2017/07/05)
-
-    - Refactored the testpar/t_bigio.c test to include ALARM macros
-
-      Changed the test to include the ALARM_ON and ALARM_OFF macros which
-      are intended to prevent nightly test hangs that have been observed
-      with this particular parallel test example.  The code was also modified to
-      simplify status reporting (only from MPI rank 0) and additional
-      status checking added.
-
-      (RAW - 2017/11/08, HDFFV-10301)
+      (VC - 2017/07/05, HDFFV-7853)
 
     - An uninitialized struct could cause a memory access error when using
       variable-length or reference types in a compressed, chunked dataset.
@@ -640,6 +629,28 @@ Bug Fixes since HDF5-1.10.1 release
 
       (DER - 2018/03/12, HDFFV-10358)
 
+    - Fixed permissions passed to open(2) on file create.
+
+      On Windows, the POSIX permissions passed to open(2) when creating files
+      were only incidentally correct. They are now set to the correct value of
+      (_S_IREAD | _S_IWRITE).
+
+      On other platforms, the permissions were set to a mix of 666, 644, and
+      000. They are now set uniformly to 666.
+
+      (DER - 2017/04/28, HDFFV-9877)
+
+    - The H5FD_FEAT_POSIX_COMPAT_HANDLE flag is no longer used to determine
+      if a virtual file driver (VFD) is compatible with SWMR.
+
+      Use of this VFD feature flag was not in line with the documentation in
+      the public H5FDpublich.h file. In particular, it was being used as a
+      proxy for determining if SWMR I/O is allowed. This is unecessary as we
+      already have a feature flag for this (H5FD_SUPPORTS_SWMR_IO).
+
+      (DER - 2017/05/31, HDFFV-10214)
+
+
     Configuration
     -------------
     - CMake
@@ -707,7 +718,7 @@ Bug Fixes since HDF5-1.10.1 release
       long double type was not available and the Fortran wrappers
       were being built.
 
-      (HDFFV-10247, DER, 2017/07/05)
+      (DER - 2017/07/05, HDFFV-10247)
 
     - The deprecated --enable-production and --enable-debug configure options
       failed to emit errors when passed an empty string
@@ -721,7 +732,7 @@ Bug Fixes since HDF5-1.10.1 release
       configuration step and emit a helpful error message
       (use --enable-build-mode=debug|production instead).
 
-      (HDFFV-10248, DER, 2017/07/05)
+      (DER - 2017/07/05, HDFFV-10248)
 
     - CMake
 
@@ -756,6 +767,43 @@ Bug Fixes since HDF5-1.10.1 release
       using MODULES. Updated CMake.
 
       (MSB - 2017/12/07, HDFFV-10223) 
+
+    - The bin/trace script now emits an error code on problems and autogen.sh
+      will fail if bin/trace fails.
+
+      The bin/trace script adds tracing functionality to public HDF5 API calls.
+      It is only of interest to developers who modify the HDF5 source code.
+      Previously, bin/trace just wrote an error message to stdout when it
+      encountered problems, so autogen.sh processing did not halt and a broken
+      version of the library could be built. The script will now return an
+      error code when it encounters problems, and autogen.sh will fail.
+
+      This only affects users who run autogen.sh to rebuild the Autotools files,
+      which is not necessary to build HDF5 from source in official releases of the
+      library. CMake users are unaffected as bin/trace is not run via CMake
+      at this time.
+
+      (DER - 2017/04/25, HDFFV-10178)
+
+    - FC_BASENAME was changed from gfortran40 to gfortran in a few places.
+
+      In the autotools, FC_BASENAME was set to gfortran40 in a few locations
+      (config/gnu-fflags and config/freebsd). This was probably a historical
+      artifact and did not seem to affect many users.
+
+      The value is now correctly set to gfortran.
+
+      (DER - 2017/05/26, HDFFV-10249)
+
+    - The ar flags were changed to -cr (was: -cru)
+
+      The autotools set the flags for ar to -cru by default. The -u flag,
+      which allows selective replacement of only the members which have
+      changed, raises warnings on some platforms, so the flags are now set to
+      -cr via AR_FLAGS in configure.ac. This causes the static library to
+      always be completely recreated from the object files on each build.
+
+      (DER - 2017/11/15, HDFFV-10428)
 
 
     Performance
@@ -957,12 +1005,17 @@ Bug Fixes since HDF5-1.10.1 release
 
     High-Level APIs:
     ------
-    - Fixed a bug in the H5DOwrite_chunk() API call where overwriting a chunk
-      with no filters caused an assert to trip (with assertions enabled /
-      debug builds) or additional chunks to be inserted instead of overwriting
-      the data (without assertions enabled / production builds).
+    - H5DOwrite_chunk() problems when overwriting an existing chunk with
+      no filters enabled.
 
-      (HDFFV-10187, DER, 2017/05/11)
+      When overwriting chunks and no filters were being used, the library would
+      fail (when asserts are enabled, e.g. debug builds) or incorrectly
+      insert additional chunks instead of overwriting (when asserts are not
+      enabled, e.g. production builds).
+
+      This has been fixed and a test was added to the hl/test_dset_opt test.
+
+      (DER - 2017/05/11, HDFFV-10187)
 
     Fortran High-Level APIs:
     ------
@@ -992,6 +1045,17 @@ Bug Fixes since HDF5-1.10.1 release
       memory is now freed.
 
       (LRK - 2018/03/12, HDFFV-10397)
+
+    - Refactored the testpar/t_bigio.c test to include ALARM macros
+
+      Changed the test to include the ALARM_ON and ALARM_OFF macros which
+      are intended to prevent nightly test hangs that have been observed
+      with this particular parallel test example.  The code was also modified to
+      simplify status reporting (only from MPI rank 0) and additional
+      status checking added.
+
+      (RAW - 2017/11/08, HDFFV-10301)
+
 
 Supported Platforms
 ===================
