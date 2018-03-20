@@ -64,6 +64,83 @@
 #define H5CX_get_my_context() (H5CX_head_g)
 #endif /* H5_HAVE_THREADSAFE */
 
+/* Common macro for the duplicated code to retrieve properties from a property list */
+#define H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)          \
+    /* Check for default property list */                                     \
+    if((*head)->ctx.H5_GLUE(PL,_id) == (DEF_PL))                              \
+        HDmemcpy(&(*head)->ctx.PROP_FIELD, &H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD, sizeof(H5_GLUE3(H5CX_def_,PL,_cache).PROP_FIELD)); \
+    else {                                                                    \
+        /* Check if the property list is already available */                 \
+        if(NULL == (*head)->ctx.PL)                                           \
+            /* Get the dataset transfer property list pointer */              \
+            if(NULL == ((*head)->ctx.PL = (H5P_genplist_t *)H5I_object((*head)->ctx.H5_GLUE(PL,_id)))) \
+                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list") \
+                                                                              \
+        /* Get the property */                                                \
+        if(H5P_get((*head)->ctx.PL, (PROP_NAME), &(*head)->ctx.PROP_FIELD) < 0) \
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't retrieve value from API context") \
+    } /* end else */                                                          \
+                                                                              \
+    /* Mark the field as valid */                                             \
+    (*head)->ctx.H5_GLUE(PROP_FIELD,_valid) = TRUE;
+
+/* Macro for the duplicated code to retrieve properties from a property list */
+#define H5CX_RETRIEVE_PROP_VALID(PL, DEF_PL, PROP_NAME, PROP_FIELD)           \
+    /* Check if the value has been retrieved already */                       \
+    if(!(*head)->ctx.H5_GLUE(PROP_FIELD,_valid)) {                            \
+        H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)          \
+    } /* end if */
+
+#ifdef H5_HAVE_PARALLEL
+/* Macro for the duplicated code to retrieve possibly set properties from a property list */
+#define H5CX_RETRIEVE_PROP_VALID_SET(PL, DEF_PL, PROP_NAME, PROP_FIELD)       \
+    /* Check if the value has been retrieved already */                       \
+    if(!((*head)->ctx.H5_GLUE(PROP_FIELD,_valid) || (*head)->ctx.H5_GLUE(PROP_FIELD,_set))) { \
+        H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)          \
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+
+#ifdef H5_HAVE_PARALLEL
+/* Macro for the duplicated code to test and set properties for a property list */
+#define H5CX_TEST_SET_PROP(PROP_NAME, PROP_FIELD)                             \
+{                                                                             \
+    htri_t check_prop = 0;              /* Whether the property exists in the API context's DXPL */ \
+                                                                              \
+    /* Check if property exists in DXPL */                                    \
+    if(!(*head)->ctx.H5_GLUE(PROP_FIELD,_set)) {                              \
+        /* Check if the property list is already available */                 \
+        if(NULL == (*head)->ctx.dxpl)                                         \
+            /* Get the dataset transfer property list pointer */              \
+            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id))) \
+                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list") \
+                                                                              \
+        if((check_prop = H5P_exist_plist((*head)->ctx.dxpl, PROP_NAME)) < 0)  \
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property") \
+    } /* end if */                                                            \
+                                                                              \
+    /* If property was already set or exists (for first set), update it */    \
+    if((*head)->ctx.H5_GLUE(PROP_FIELD,_set) || check_prop > 0) {             \
+        /* Cache the value for later, marking it to set in DXPL when context popped */ \
+        (*head)->ctx.PROP_FIELD = PROP_FIELD;                                 \
+        (*head)->ctx.H5_GLUE(PROP_FIELD,_set) = TRUE;                         \
+    } /* end if */                                                            \
+}
+#endif /* H5_HAVE_PARALLEL */
+
+/* Macro for the duplicated code to test and set properties for a property list */
+#define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                  \
+    if((*head)->ctx.H5_GLUE(PROP_FIELD,_set)) {                               \
+        /* Check if the property list is already available */                 \
+        if(NULL == (*head)->ctx.dxpl)                                         \
+            /* Get the dataset transfer property list pointer */              \
+            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id))) \
+                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list") \
+                                                                              \
+        /* Set the chunk filter mask property */                              \
+        if(H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0) \
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting filter mask xfer property") \
+    } /* end if */
+
 
 /******************/
 /* Local Typedefs */
@@ -1026,26 +1103,7 @@ H5CX_get_btree_split_ratios(double split_ratio[3])
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.btree_split_ratio_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            HDmemcpy((*head)->ctx.btree_split_ratio, &H5CX_def_dxpl_cache.btree_split_ratio, sizeof(H5CX_def_dxpl_cache.btree_split_ratio));
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get B-tree split ratios */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_BTREE_SPLIT_RATIO_NAME, (*head)->ctx.btree_split_ratio) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "can't retrieve B-tree split ratios")
-        } /* end else */
-
-        /* Mark the B-tree split ratio values as valid */
-        (*head)->ctx.btree_split_ratio_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_BTREE_SPLIT_RATIO_NAME, btree_split_ratio)
 
     /* Get the B-tree split ratio values */
     HDmemcpy(split_ratio, &(*head)->ctx.btree_split_ratio, sizeof((*head)->ctx.btree_split_ratio));
@@ -1080,26 +1138,7 @@ H5CX_get_max_temp_buf(size_t *max_temp_buf)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.max_temp_buf_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.max_temp_buf = H5CX_def_dxpl_cache.max_temp_buf;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get maximum temporary buffer size value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_MAX_TEMP_BUF_NAME, &(*head)->ctx.max_temp_buf) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve maximum temporary buffer size")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.max_temp_buf_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MAX_TEMP_BUF_NAME, max_temp_buf)
 
     /* Get the value */
     *max_temp_buf = (*head)->ctx.max_temp_buf;
@@ -1134,26 +1173,7 @@ H5CX_get_tconv_buf(void **tconv_buf)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.tconv_buf_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.tconv_buf = H5CX_def_dxpl_cache.tconv_buf;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get temporary conversion buffer pointer value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_TCONV_BUF_NAME, &(*head)->ctx.tconv_buf) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve temporary buffer pointer")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.tconv_buf_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_TCONV_BUF_NAME, tconv_buf)
 
     /* Get the value */
     *tconv_buf = (*head)->ctx.tconv_buf;
@@ -1188,26 +1208,7 @@ H5CX_get_bkgr_buf(void **bkgr_buf)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.bkgr_buf_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.bkgr_buf = H5CX_def_dxpl_cache.bkgr_buf;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get background conversion buffer pointer value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_BKGR_BUF_NAME, &(*head)->ctx.bkgr_buf) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve background buffer pointer")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.bkgr_buf_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_BKGR_BUF_NAME, bkgr_buf)
 
     /* Get the value */
     *bkgr_buf = (*head)->ctx.bkgr_buf;
@@ -1242,26 +1243,7 @@ H5CX_get_bkgr_buf_type(H5T_bkg_t *bkgr_buf_type)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.bkgr_buf_type_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.bkgr_buf_type = H5CX_def_dxpl_cache.bkgr_buf_type;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get background buffer type value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_BKGR_BUF_TYPE_NAME, &(*head)->ctx.bkgr_buf_type) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve background buffer type")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.bkgr_buf_type_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_BKGR_BUF_TYPE_NAME, bkgr_buf_type)
 
     /* Get the value */
     *bkgr_buf_type = (*head)->ctx.bkgr_buf_type;
@@ -1296,26 +1278,7 @@ H5CX_get_vec_size(size_t *vec_size)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.vec_size_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.vec_size = H5CX_def_dxpl_cache.vec_size;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get hyperslab vector size value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_HYPER_VECTOR_SIZE_NAME, &(*head)->ctx.vec_size) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve I/O vector size")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.vec_size_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_HYPER_VECTOR_SIZE_NAME, vec_size)
 
     /* Get the value */
     *vec_size = (*head)->ctx.vec_size;
@@ -1351,26 +1314,7 @@ H5CX_get_io_xfer_mode(H5FD_mpio_xfer_t *io_xfer_mode)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.io_xfer_mode_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.io_xfer_mode = H5CX_def_dxpl_cache.io_xfer_mode;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get parallel transfer mode value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_IO_XFER_MODE_NAME, &(*head)->ctx.io_xfer_mode) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve parallel transfer method")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.io_xfer_mode_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_IO_XFER_MODE_NAME, io_xfer_mode)
 
     /* Get the value */
     *io_xfer_mode = (*head)->ctx.io_xfer_mode;
@@ -1405,26 +1349,7 @@ H5CX_get_mpio_coll_opt(H5FD_mpio_collective_opt_t *mpio_coll_opt)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.mpio_coll_opt_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.mpio_coll_opt = H5CX_def_dxpl_cache.mpio_coll_opt;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get collective I/O option value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, &(*head)->ctx.mpio_coll_opt) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve collective transfer option")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.mpio_coll_opt_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, mpio_coll_opt)
 
     /* Get the value */
     *mpio_coll_opt = (*head)->ctx.mpio_coll_opt;
@@ -1459,26 +1384,7 @@ H5CX_get_mpio_local_no_coll_cause(uint32_t *mpio_local_no_coll_cause)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved or set already */
-    if(!((*head)->ctx.mpio_local_no_coll_cause_valid || (*head)->ctx.mpio_local_no_coll_cause_set)) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.mpio_local_no_coll_cause = H5CX_def_dxpl_cache.mpio_local_no_coll_cause;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get the value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, &(*head)->ctx.mpio_local_no_coll_cause) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve local cause for breaking collective I/O")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.mpio_local_no_coll_cause_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID_SET(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, mpio_local_no_coll_cause)
 
     /* Get the value */
     *mpio_local_no_coll_cause = (*head)->ctx.mpio_local_no_coll_cause;
@@ -1513,26 +1419,7 @@ H5CX_get_mpio_global_no_coll_cause(uint32_t *mpio_global_no_coll_cause)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved or set already */
-    if(!((*head)->ctx.mpio_global_no_coll_cause_valid || (*head)->ctx.mpio_global_no_coll_cause_set)) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.mpio_global_no_coll_cause = H5CX_def_dxpl_cache.mpio_global_no_coll_cause;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get the value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &(*head)->ctx.mpio_global_no_coll_cause) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve global cause for breaking collective I/O")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.mpio_global_no_coll_cause_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID_SET(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, mpio_global_no_coll_cause)
 
     /* Get the value */
     *mpio_global_no_coll_cause = (*head)->ctx.mpio_global_no_coll_cause;
@@ -1567,26 +1454,7 @@ H5CX_get_mpio_chunk_opt_mode(H5FD_mpio_chunk_opt_t *mpio_chunk_opt_mode)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved or set already */
-    if(!(*head)->ctx.mpio_chunk_opt_mode_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.mpio_chunk_opt_mode = H5CX_def_dxpl_cache.mpio_chunk_opt_mode;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get the value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &(*head)->ctx.mpio_chunk_opt_mode) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve chunk optimization option")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.mpio_chunk_opt_mode_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, mpio_chunk_opt_mode)
 
     /* Get the value */
     *mpio_chunk_opt_mode = (*head)->ctx.mpio_chunk_opt_mode;
@@ -1621,26 +1489,7 @@ H5CX_get_mpio_chunk_opt_num(unsigned *mpio_chunk_opt_num)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved or set already */
-    if(!(*head)->ctx.mpio_chunk_opt_num_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.mpio_chunk_opt_num = H5CX_def_dxpl_cache.mpio_chunk_opt_num;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get the value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, &(*head)->ctx.mpio_chunk_opt_num) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve chunk optimization threshold")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.mpio_chunk_opt_num_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, mpio_chunk_opt_num)
 
     /* Get the value */
     *mpio_chunk_opt_num = (*head)->ctx.mpio_chunk_opt_num;
@@ -1675,26 +1524,7 @@ H5CX_get_mpio_chunk_opt_ratio(unsigned *mpio_chunk_opt_ratio)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved or set already */
-    if(!(*head)->ctx.mpio_chunk_opt_ratio_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.mpio_chunk_opt_ratio = H5CX_def_dxpl_cache.mpio_chunk_opt_ratio;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get the value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, &(*head)->ctx.mpio_chunk_opt_ratio) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve chunk optimization ratio")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.mpio_chunk_opt_ratio_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, mpio_chunk_opt_ratio)
 
     /* Get the value */
     *mpio_chunk_opt_ratio = (*head)->ctx.mpio_chunk_opt_ratio;
@@ -1730,26 +1560,7 @@ H5CX_get_err_detect(H5Z_EDC_t *err_detect)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.err_detect_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.err_detect = H5CX_def_dxpl_cache.err_detect;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get error detection info value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_EDC_NAME, &(*head)->ctx.err_detect) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve error detection info")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.err_detect_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_EDC_NAME, err_detect)
 
     /* Get the value */
     *err_detect = (*head)->ctx.err_detect;
@@ -1784,26 +1595,7 @@ H5CX_get_filter_cb(H5Z_cb_t *filter_cb)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.filter_cb_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.filter_cb = H5CX_def_dxpl_cache.filter_cb;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get I/O filter callback function value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_FILTER_CB_NAME, &(*head)->ctx.filter_cb) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve filter callback function")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.filter_cb_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_FILTER_CB_NAME, filter_cb)
 
     /* Get the value */
     *filter_cb = (*head)->ctx.filter_cb;
@@ -1955,26 +1747,7 @@ H5CX_get_dcr_flag(hbool_t *dcr_flag)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.dcr_flag_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.dcr_flag = H5CX_def_dxpl_cache.dcr_flag;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get direct chunk read flag */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, &(*head)->ctx.dcr_flag) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk read flag")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.dcr_flag_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, dcr_flag)
 
     /* Get the value */
     *dcr_flag = (*head)->ctx.dcr_flag;
@@ -2009,26 +1782,7 @@ H5CX_get_dcr_offset(hsize_t **dcr_offset)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.dcr_offset_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.dcr_offset = H5CX_def_dxpl_cache.dcr_offset;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get direct chunk read offset */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME, &(*head)->ctx.dcr_offset) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk read offset")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.dcr_offset_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME, dcr_offset)
 
     /* Get the value */
     *dcr_offset = (*head)->ctx.dcr_offset;
@@ -2063,26 +1817,7 @@ H5CX_get_dcw_flag(hbool_t *dcw_flag)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.dcw_flag_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.dcw_flag = H5CX_def_dxpl_cache.dcw_flag;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get direct chunk write flag */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &(*head)->ctx.dcw_flag) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk write flag")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.dcw_flag_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, dcw_flag)
 
     /* Get the value */
     *dcw_flag = (*head)->ctx.dcw_flag;
@@ -2117,26 +1852,7 @@ H5CX_get_dcw_filters(uint32_t *dcw_filters)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.dcw_filters_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.dcw_filters = H5CX_def_dxpl_cache.dcw_filters;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get direct chunk write filter mask */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &(*head)->ctx.dcw_filters) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk write filters")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.dcw_filters_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, dcw_filters)
 
     /* Get the value */
     *dcw_filters = (*head)->ctx.dcw_filters;
@@ -2171,26 +1887,7 @@ H5CX_get_dcw_offset(hsize_t **dcw_offset)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.dcw_offset_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.dcw_offset = H5CX_def_dxpl_cache.dcw_offset;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get direct chunk write offset */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, &(*head)->ctx.dcw_offset) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk write offset")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.dcw_offset_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, dcw_offset)
 
     /* Get the value */
     *dcw_offset = (*head)->ctx.dcw_offset;
@@ -2225,26 +1922,7 @@ H5CX_get_dcw_datasize(uint32_t *dcw_datasize)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.dcw_datasize_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.dcw_datasize = H5CX_def_dxpl_cache.dcw_datasize;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get direct chunk write data size */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &(*head)->ctx.dcw_datasize) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve direct chunk write datasize")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.dcw_datasize_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, dcw_datasize)
 
     /* Get the value */
     *dcw_datasize = (*head)->ctx.dcw_datasize;
@@ -2279,26 +1957,7 @@ H5CX_get_dt_conv_cb(H5T_conv_cb_t *dt_conv_cb)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.dt_conv_cb_valid) {
-        /* Check for default DXPL */
-        if((*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT)
-            (*head)->ctx.dt_conv_cb = H5CX_def_dxpl_cache.dt_conv_cb;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.dxpl)
-                /* Get the dataset transfer property list pointer */
-                if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-            /* Get value */
-            if(H5P_get((*head)->ctx.dxpl, H5D_XFER_CONV_CB_NAME, &(*head)->ctx.dt_conv_cb) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve datatype conversion exception callback")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.dt_conv_cb_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_CONV_CB_NAME, dt_conv_cb)
 
     /* Get the value */
     *dt_conv_cb = (*head)->ctx.dt_conv_cb;
@@ -2333,26 +1992,7 @@ H5CX_get_nlinks(size_t *nlinks)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* Check if the value has been retrieved already */
-    if(!(*head)->ctx.nlinks_valid) {
-        /* Check for default LAPL */
-        if((*head)->ctx.lapl_id == H5P_LINK_ACCESS_DEFAULT)
-            (*head)->ctx.nlinks = H5CX_def_lapl_cache.nlinks;
-        else {
-            /* Check if the property list is already available */
-            if(NULL == (*head)->ctx.lapl)
-                /* Get the link access property list pointer */
-                if(NULL == ((*head)->ctx.lapl = (H5P_genplist_t *)H5I_object((*head)->ctx.lapl_id)))
-                    HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default link access property list")
-
-            /* Get value */
-            if(H5P_get((*head)->ctx.lapl, H5L_ACS_NLINKS_NAME, &(*head)->ctx.nlinks) < 0)
-                HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve number of soft / UD links to traverse")
-        } /* end else */
-
-        /* Mark the value as valid */
-        (*head)->ctx.nlinks_valid = TRUE;
-    } /* end if */
+    H5CX_RETRIEVE_PROP_VALID(lapl, H5P_LINK_ACCESS_DEFAULT, H5L_ACS_NLINKS_NAME, nlinks)
 
     /* Get the value */
     *nlinks = (*head)->ctx.nlinks;
@@ -2802,7 +2442,6 @@ herr_t
 H5CX_test_set_mpio_coll_chunk_link_hard(int mpio_coll_chunk_link_hard)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    htri_t check_prop = 0;              /* Whether the property exists in the API context's DXPL */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2812,24 +2451,7 @@ H5CX_test_set_mpio_coll_chunk_link_hard(int mpio_coll_chunk_link_hard)
     HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
-    /* Check if property exists in DXPL */
-    if(!(*head)->ctx.mpio_coll_chunk_link_hard_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-        if((check_prop = H5P_exist_plist((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME)) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property")
-    } /* end if */
-
-    /* If property was already set or exists (for first set), update it */
-    if((*head)->ctx.mpio_coll_chunk_link_hard_set || check_prop > 0) {
-        /* Cache the value for later, marking it to set in DXPL when context popped */
-        (*head)->ctx.mpio_coll_chunk_link_hard = mpio_coll_chunk_link_hard;
-        (*head)->ctx.mpio_coll_chunk_link_hard_set = TRUE;
-    } /* end if */
+    H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, mpio_coll_chunk_link_hard)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2854,7 +2476,6 @@ herr_t
 H5CX_test_set_mpio_coll_chunk_multi_hard(int mpio_coll_chunk_multi_hard)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    htri_t check_prop = 0;              /* Whether the property exists in the API context's DXPL */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2864,24 +2485,7 @@ H5CX_test_set_mpio_coll_chunk_multi_hard(int mpio_coll_chunk_multi_hard)
     HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
-    /* Check if property exists in DXPL */
-    if(!(*head)->ctx.mpio_coll_chunk_multi_hard_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-        if((check_prop = H5P_exist_plist((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME)) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property")
-    } /* end if */
-
-    /* If property was already set or exists (for first set), update it */
-    if((*head)->ctx.mpio_coll_chunk_multi_hard_set || check_prop > 0) {
-        /* Cache the value for later, marking it to set in DXPL when context popped */
-        (*head)->ctx.mpio_coll_chunk_multi_hard = mpio_coll_chunk_multi_hard;
-        (*head)->ctx.mpio_coll_chunk_multi_hard_set = TRUE;
-    } /* end if */
+    H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, mpio_coll_chunk_multi_hard)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2906,7 +2510,6 @@ herr_t
 H5CX_test_set_mpio_coll_chunk_link_num_true(int mpio_coll_chunk_link_num_true)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    htri_t check_prop = 0;              /* Whether the property exists in the API context's DXPL */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2916,24 +2519,7 @@ H5CX_test_set_mpio_coll_chunk_link_num_true(int mpio_coll_chunk_link_num_true)
     HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
-    /* Check if property exists in DXPL */
-    if(!(*head)->ctx.mpio_coll_chunk_link_num_true_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-        if((check_prop = H5P_exist_plist((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME)) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property")
-    } /* end if */
-
-    /* If property was already set or exists (for first set), update it */
-    if((*head)->ctx.mpio_coll_chunk_link_num_true_set || check_prop > 0) {
-        /* Cache the value for later, marking it to set in DXPL when context popped */
-        (*head)->ctx.mpio_coll_chunk_link_num_true = mpio_coll_chunk_link_num_true;
-        (*head)->ctx.mpio_coll_chunk_link_num_true_set = TRUE;
-    } /* end if */
+    H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, mpio_coll_chunk_link_num_true)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2958,7 +2544,6 @@ herr_t
 H5CX_test_set_mpio_coll_chunk_link_num_false(int mpio_coll_chunk_link_num_false)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    htri_t check_prop = 0;              /* Whether the property exists in the API context's DXPL */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2968,24 +2553,7 @@ H5CX_test_set_mpio_coll_chunk_link_num_false(int mpio_coll_chunk_link_num_false)
     HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
-    /* Check if property exists in DXPL */
-    if(!(*head)->ctx.mpio_coll_chunk_link_num_false_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-        if((check_prop = H5P_exist_plist((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME)) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property")
-    } /* end if */
-
-    /* If property was already set or exists (for first set), update it */
-    if((*head)->ctx.mpio_coll_chunk_link_num_false_set || check_prop > 0) {
-        /* Cache the value for later, marking it to set in DXPL when context popped */
-        (*head)->ctx.mpio_coll_chunk_link_num_false = mpio_coll_chunk_link_num_false;
-        (*head)->ctx.mpio_coll_chunk_link_num_false_set = TRUE;
-    } /* end if */
+    H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, mpio_coll_chunk_link_num_false)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3010,7 +2578,6 @@ herr_t
 H5CX_test_set_mpio_coll_chunk_multi_ratio_coll(int mpio_coll_chunk_multi_ratio_coll)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    htri_t check_prop = 0;              /* Whether the property exists in the API context's DXPL */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3020,24 +2587,7 @@ H5CX_test_set_mpio_coll_chunk_multi_ratio_coll(int mpio_coll_chunk_multi_ratio_c
     HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
-    /* Check if property exists in DXPL */
-    if(!(*head)->ctx.mpio_coll_chunk_multi_ratio_coll_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-        if((check_prop = H5P_exist_plist((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME)) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property")
-    } /* end if */
-
-    /* If property was already set or exists (for first set), update it */
-    if((*head)->ctx.mpio_coll_chunk_multi_ratio_coll_set || check_prop > 0) {
-        /* Cache the value for later, marking it to set in DXPL when context popped */
-        (*head)->ctx.mpio_coll_chunk_multi_ratio_coll = mpio_coll_chunk_multi_ratio_coll;
-        (*head)->ctx.mpio_coll_chunk_multi_ratio_coll_set = TRUE;
-    } /* end if */
+    H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, mpio_coll_chunk_multi_ratio_coll)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3062,7 +2612,6 @@ herr_t
 H5CX_test_set_mpio_coll_chunk_multi_ratio_ind(int mpio_coll_chunk_multi_ratio_ind)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    htri_t check_prop = 0;              /* Whether the property exists in the API context's DXPL */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3072,24 +2621,7 @@ H5CX_test_set_mpio_coll_chunk_multi_ratio_ind(int mpio_coll_chunk_multi_ratio_in
     HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
             (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
-    /* Check if property exists in DXPL */
-    if(!(*head)->ctx.mpio_coll_chunk_multi_ratio_ind_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "can't get default dataset transfer property list")
-
-        if((check_prop = H5P_exist_plist((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME)) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error checking for property")
-    } /* end if */
-
-    /* If property was already set or exists (for first set), update it */
-    if((*head)->ctx.mpio_coll_chunk_multi_ratio_ind_set || check_prop > 0) {
-        /* Cache the value for later, marking it to set in DXPL when context popped */
-        (*head)->ctx.mpio_coll_chunk_multi_ratio_ind = mpio_coll_chunk_multi_ratio_ind;
-        (*head)->ctx.mpio_coll_chunk_multi_ratio_ind_set = TRUE;
-    } /* end if */
+    H5CX_TEST_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, mpio_coll_chunk_multi_ratio_ind)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3121,117 +2653,17 @@ H5CX__pop_common(void)
     HDassert(head && *head);
 
     /* Check for cached DXPL properties to return to application */
-    if((*head)->ctx.dcr_filters_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the chunk filter mask property */
-        if(H5P_set((*head)->ctx.dxpl, H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, &(*head)->ctx.dcr_filters) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting filter mask xfer property")
-    } /* end if */
+    H5CX_SET_PROP(H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, dcr_filters)
 #ifdef H5_HAVE_PARALLEL
-    if((*head)->ctx.mpio_actual_chunk_opt_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the actual chunk optimization mode for parallel I/O */
-        if(H5P_set((*head)->ctx.dxpl, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, &(*head)->ctx.mpio_actual_chunk_opt) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting actual chunk optimization mode for parallel I/O")
-    } /* end if */
-    if((*head)->ctx.mpio_actual_io_mode_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the actual chunk optimization mode for parallel I/O */
-        if(H5P_set((*head)->ctx.dxpl, H5D_MPIO_ACTUAL_IO_MODE_NAME, &(*head)->ctx.mpio_actual_io_mode) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting actual I/O mode for parallel I/O")
-    } /* end if */
-    if((*head)->ctx.mpio_local_no_coll_cause_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the local reason for breaking collective I/O */
-        if(H5P_set((*head)->ctx.dxpl, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, &(*head)->ctx.mpio_local_no_coll_cause) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting local reason for breaking collective I/O")
-    } /* end if */
-    if((*head)->ctx.mpio_global_no_coll_cause_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the global reason for breaking collective I/O */
-        if(H5P_set((*head)->ctx.dxpl, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &(*head)->ctx.mpio_global_no_coll_cause) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting global reason for breaking collective I/O")
-    } /* end if */
-    if((*head)->ctx.mpio_coll_chunk_link_hard_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the instrumented "collective chunk link hard" value */
-        if(H5P_set((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &(*head)->ctx.mpio_coll_chunk_link_hard) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting instrumented collective chunk link hard value")
-    } /* end if */
-    if((*head)->ctx.mpio_coll_chunk_multi_hard_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the instrumented "collective chunk multi hard" value */
-        if(H5P_set((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, &(*head)->ctx.mpio_coll_chunk_multi_hard) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting instrumented collective chunk multi hard value")
-    } /* end if */
-    if((*head)->ctx.mpio_coll_chunk_link_num_true_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the instrumented "collective chunk multi hard" value */
-        if(H5P_set((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, &(*head)->ctx.mpio_coll_chunk_link_num_true) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting instrumented collective chunk link num true value")
-    } /* end if */
-    if((*head)->ctx.mpio_coll_chunk_link_num_false_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the instrumented "collective chunk multi hard" value */
-        if(H5P_set((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, &(*head)->ctx.mpio_coll_chunk_link_num_false) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting instrumented collective chunk link num false value")
-    } /* end if */
-    if((*head)->ctx.mpio_coll_chunk_multi_ratio_coll_set) {
-        /* Check if the property list is already available */
-        if(NULL == (*head)->ctx.dxpl)
-            /* Get the dataset transfer property list pointer */
-            if(NULL == ((*head)->ctx.dxpl = (H5P_genplist_t *)H5I_object((*head)->ctx.dxpl_id)))
-                HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, NULL, "can't get default dataset transfer property list")
-
-        /* Set the instrumented "collective chunk multi ratio coll" value */
-        if(H5P_set((*head)->ctx.dxpl, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, &(*head)->ctx.mpio_coll_chunk_multi_ratio_coll) < 0)
-            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting instrumented collective chunk multi ratio coll value")
-    } /* end if */
+    H5CX_SET_PROP(H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, mpio_actual_chunk_opt)
+    H5CX_SET_PROP(H5D_MPIO_ACTUAL_IO_MODE_NAME, mpio_actual_io_mode)
+    H5CX_SET_PROP(H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, mpio_local_no_coll_cause)
+    H5CX_SET_PROP(H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, mpio_global_no_coll_cause)
+    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, mpio_coll_chunk_link_hard)
+    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, mpio_coll_chunk_multi_hard)
+    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, mpio_coll_chunk_link_num_true)
+    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, mpio_coll_chunk_link_num_false)
+    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, mpio_coll_chunk_multi_ratio_coll)
 #endif /* H5_HAVE_PARALLEL */
 
     /* Pop the top context node from the stack */
