@@ -21,14 +21,14 @@
  * This file needs to access private datatypes from the H5O package.
  * This file also needs to access the object header testing code.
  */
-#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#define H5O_FRIEND        /*suppress error about including H5Opkg      */
 #define H5O_TESTING
 #include "H5Opkg.h"
 
 /*
  * This file needs to access private datatypes from the H5G package.
  */
-#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
+#define H5G_FRIEND        /*suppress error about including H5Gpkg      */
 #include "H5Gpkg.h"
 
 const char *FILENAME[] = {
@@ -49,24 +49,24 @@ const char *FILENAME[] = {
 
 /*
  *  Verify that messages are moved forward into a "continuation message":
- *	Create an object header with several continuation chunks
- *	Remove a message in the last chunk
- *	The remaining message(s) in the last chunk should be moved forward into the continuation message
- *	The process will repeat when the continuation message is big enough to hold all the
- *		messages in the last chunk.
- *	Result: the number of chunks should be reduced
+ *    Create an object header with several continuation chunks
+ *    Remove a message in the last chunk
+ *    The remaining message(s) in the last chunk should be moved forward into the continuation message
+ *    The process will repeat when the continuation message is big enough to hold all the
+ *        messages in the last chunk.
+ *    Result: the number of chunks should be reduced
  */
 static herr_t
 test_cont(char *filename, hid_t fapl)
 {
-    hid_t	file=-1;
-    H5F_t	*f = NULL;
+    hid_t    file=-1;
+    H5F_t    *f = NULL;
     H5O_hdr_info_t hdr_info;
-    H5O_loc_t	oh_locA, oh_locB;
-    time_t	time_new;
-    const char	*short_name = "T";
-    const char	*long_name = "This is the message";
-    size_t	nchunks;
+    H5O_loc_t    oh_locA, oh_locB;
+    time_t    time_new;
+    const char    *short_name = "T";
+    const char    *long_name = "This is the message";
+    size_t    nchunks;
 
     TESTING("object header continuation block");
 
@@ -167,15 +167,15 @@ error:
 static herr_t
 test_ohdr_cache(char *filename, hid_t fapl)
 {
-    hid_t	file = -1;              /* File ID */
+    hid_t    file = -1;              /* File ID */
     hid_t       my_fapl;                /* FAPL ID */
     hid_t       my_dxpl;                /* DXPL ID */
     H5AC_cache_config_t mdc_config;     /* Metadata cache configuration info */
-    H5F_t	*f = NULL;              /* File handle */
+    H5F_t    *f = NULL;              /* File handle */
     H5HL_t      *lheap, *lheap2, *lheap3; /* Pointer to local heaps */
     haddr_t     lheap_addr, lheap_addr2, lheap_addr3; /* Local heap addresses */
-    H5O_loc_t	oh_loc;                 /* Object header location */
-    time_t	time_new;               /* Time value for modification time message */
+    H5O_loc_t    oh_loc;                 /* Object header location */
+    time_t    time_new;               /* Time value for modification time message */
     unsigned    rc;                     /* Refcount for object */
 
     TESTING("object header creation in cache");
@@ -309,17 +309,17 @@ error:
 static herr_t
 test_ohdr_swmr(hbool_t new_format)
 {
-    hid_t fid = -1;			    /* File ID */
-    hid_t fapl = -1;			/* File access property list */
-    hid_t did = -1;			    /* Dataset ID */
+    hid_t fid = -1;                /* File ID */
+    hid_t fapl = -1;            /* File access property list */
+    hid_t did = -1;                /* Dataset ID */
     hid_t sid = -1;             /* Dataspace ID */
-    hid_t plist = -1;			/* Dataset creation property list */
-    size_t compact_size = 1024;	/* The size of compact dataset */
-    int *wbuf = NULL;			/* Buffer for writing */
-    hsize_t dims[1];			/* Dimension sizes */
-    size_t u;		            /* Iterator */
+    hid_t plist = -1;            /* Dataset creation property list */
+    size_t compact_size = 1024;    /* The size of compact dataset */
+    int *wbuf = NULL;            /* Buffer for writing */
+    hsize_t dims[1];            /* Dimension sizes */
+    size_t u;                    /* Iterator */
     int n;                      /* Data variable */
-    H5O_info_t obj_info;		/* Information for the object */
+    H5O_info_t obj_info;        /* Information for the object */
 
     if(new_format) {
         TESTING("exercise the coding for the re-read of the object header for SWMR access: latest-format");
@@ -355,7 +355,7 @@ test_ohdr_swmr(hbool_t new_format)
     dims[0] = (hsize_t)compact_size;
     if((sid = H5Screate_simple(1, dims, NULL)) < 0)
         FAIL_STACK_ERROR
-    
+
     /* Create property list for compact dataset creation */
     if((plist = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
@@ -448,10 +448,10 @@ error:
 
 /*
  *  To test objects with unknown messages in a file with:
- *  	a) H5O_BOGUS_VALID_ID:
- *	   --the bogus_id is within the range of H5O_msg_class_g[]
- *  	b) H5O_BOGUS_INVALID_ID:
- *  	   --the bogus_id is outside the range of H5O_msg_class_g[]
+ *      a) H5O_BOGUS_VALID_ID:
+ *       --the bogus_id is within the range of H5O_msg_class_g[]
+ *      b) H5O_BOGUS_INVALID_ID:
+ *         --the bogus_id is outside the range of H5O_msg_class_g[]
  *
  *   The test file is FILE_BOGUS: "tbogus.h5" generated with gen_bogus.c
  *   --objects that have unknown header messages with H5O_BOGUS_VALID_ID in "/"
@@ -462,15 +462,15 @@ error:
 static herr_t
 test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 {
-    hid_t fid = -1;	/* file ID */
-    hid_t gid = -1;	/* group ID */
-    hid_t did = -1;	/* Dataset ID */
+    hid_t fid = -1;    /* file ID */
+    hid_t gid = -1;    /* group ID */
+    hid_t did = -1;    /* Dataset ID */
     hid_t sid = -1;     /* Dataspace ID */
     hid_t aid = -1;     /* Attribute ID */
-    hid_t loc = -1;	/* location: file or group ID */
-    hid_t fid_bogus = -1;	/* bogus file ID */
-    hid_t gid_bogus = -1;	/* bogus group ID */
-    hid_t loc_bogus = -1;	/* location: bogus file or group ID */
+    hid_t loc = -1;    /* location: file or group ID */
+    hid_t fid_bogus = -1;    /* bogus file ID */
+    hid_t gid_bogus = -1;    /* bogus group ID */
+    hid_t loc_bogus = -1;    /* location: bogus file or group ID */
     char testfile[256];
 
     /* create a different name for a local copy of the data file to be
@@ -497,7 +497,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID depending on bogus_id */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in FILE_BOGUS */
-        if((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0) 
+        if((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc_bogus = gid_bogus;
 
@@ -562,7 +562,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID depending on bogus_id */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in filename */
-        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0) 
+        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc = gid;
     } else
@@ -596,7 +596,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID depending on bogus_id */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in filename */
-        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0) 
+        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc = gid;
     } else
@@ -642,7 +642,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID depending on bogus_id */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in filename */
-        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0) 
+        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc = gid;
     } else
@@ -660,7 +660,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     if(H5Dclose(did) < 0)
         FAIL_STACK_ERROR
 
-    /* Closing: filename */ 
+    /* Closing: filename */
     if(bogus_id == H5O_BOGUS_INVALID_ID)
         if(H5Gclose(gid) < 0)
             FAIL_STACK_ERROR
@@ -685,7 +685,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in FILE_BOGUS */
-        if((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0) 
+        if((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc_bogus = gid_bogus;
     } else
@@ -716,7 +716,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Closing: FILE_BOGUS */
     if(bogus_id == H5O_BOGUS_INVALID_ID)
         if(H5Gclose(gid_bogus) < 0)
-	        FAIL_STACK_ERROR
+            FAIL_STACK_ERROR
     if(H5Fclose(fid_bogus) < 0)
         FAIL_STACK_ERROR
 
@@ -772,21 +772,21 @@ char *version_string(H5F_libver_t libver)
           sprintf(str, "%ld", (long)libver);
           break;
     } /* end switch */
- 
+
     /* Return the formed version bound string */
     return(str);
 } /* end of version_string */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
  * Purpose:     Exercise private object header behavior and routines
  *
  * Return:      Success: 0
  *              Failure: 1
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
  *
  * Modification:
@@ -819,6 +819,8 @@ main(void)
     /* Loop through all the combinations of low/high library format bounds */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
       for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+        char *low_string = NULL;
+        char *high_string = NULL;
 
         /* Set version bounds before opening the file */
         H5E_BEGIN_TRY {
@@ -829,9 +831,13 @@ main(void)
             continue;
 
         /* Display info about testing */
-        sprintf(msg, "Using file format version: (%s, %s)", version_string(low),
-                     version_string(high));
+        low_string = version_string(low);
+        high_string = version_string(high);
+        sprintf(msg, "Using file format version: (%s, %s)", low_string,
+                high_string);
         HDputs(msg);
+        HDfree(high_string);
+        HDfree(low_string);
 
         /* test on object continuation block */
         if(test_cont(filename, fapl) < 0)
