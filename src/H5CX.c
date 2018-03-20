@@ -2436,12 +2436,14 @@ H5CX_set_mpio_local_no_coll_cause(uint32_t mpio_local_no_coll_cause)
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
-            (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
+    HDassert((*head)->ctx.dxpl_id != H5P_DEFAULT);
 
-    /* Cache the value for later, marking it to set in DXPL when context popped */
-    (*head)->ctx.mpio_local_no_coll_cause = mpio_local_no_coll_cause;
-    (*head)->ctx.mpio_local_no_coll_cause_set = TRUE;
+    /* If we're using the default DXPL, don't modify it */
+    if((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT) {
+        /* Cache the value for later, marking it to set in DXPL when context popped */
+        (*head)->ctx.mpio_local_no_coll_cause = mpio_local_no_coll_cause;
+        (*head)->ctx.mpio_local_no_coll_cause_set = TRUE;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_mpio_local_no_coll_cause() */
@@ -2468,12 +2470,14 @@ H5CX_set_mpio_global_no_coll_cause(uint32_t mpio_global_no_coll_cause)
 
     /* Sanity checks */
     HDassert(head && *head);
-    HDassert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || 
-            (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
+    HDassert((*head)->ctx.dxpl_id != H5P_DEFAULT);
 
-    /* Cache the value for later, marking it to set in DXPL when context popped */
-    (*head)->ctx.mpio_global_no_coll_cause = mpio_global_no_coll_cause;
-    (*head)->ctx.mpio_global_no_coll_cause_set = TRUE;
+    /* If we're using the default DXPL, don't modify it */
+    if((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT) {
+        /* Cache the value for later, marking it to set in DXPL when context popped */
+        (*head)->ctx.mpio_global_no_coll_cause = mpio_global_no_coll_cause;
+        (*head)->ctx.mpio_global_no_coll_cause_set = TRUE;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_mpio_global_no_coll_cause() */
