@@ -348,7 +348,7 @@ H5CX__init_package(void)
 
 #ifndef H5_HAVE_THREADSAFE
     /* Allocate the context stack head pointer */
-    if(NULL = (H5CX_head_g = (H5CX_node_t **)HDmalloc(sizeof(H5CX_node_t *))))
+    if(NULL == (H5CX_head_g = (H5CX_node_t **)HDmalloc(sizeof(H5CX_node_t *))))
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTALLOC, FAIL, "can't allocate pointer to head of context stack")
     *H5CX_head_g = NULL;
 #endif /* H5_HAVE_THREADSAFE */
