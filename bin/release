@@ -181,8 +181,8 @@ tar2zip()
 
 
 # Parameters:
-
- $2 release tarball
+# $1 version
+# $2 release tarball
 # $3 output zipball file name
 #
 # Returns 0 if successful; 1 otherwise
@@ -213,13 +213,13 @@ tar2cmakezip()
 	return 1
     fi
 
-    # step 2: add batch file for building CMake on window
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-64.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-64.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-32.bat $cmziptmpdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2017-64.bat $cmziptmpdir
+    # step 2: add batch files for building CMake on windows
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2013-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2013-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2015-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2015-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2017-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5_1_10/build-VS2017-64.bat $cmziptmpdir
 
     # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpdir

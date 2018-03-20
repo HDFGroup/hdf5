@@ -92,7 +92,7 @@ New Features
       to remove the flags not understood by that version of the compiler.
       Nothing should change when building with gcc >= 4.1.
 
-      (HDFFV-9937, DER, 2017/05/31)
+      (DER, 2017/05/31, HDFFV-9937)
 
     - -fno-omit-frame-pointer was added when building with debugging symbols
       enabled.
@@ -103,7 +103,7 @@ New Features
       we've disabled this optimization when debugging symbols are requested
       (e.g.: via building with --enable-symbols).
 
-      (HDFFV-10226, DER, 2017/05/31)
+      (DER, 2017/05/31, HDFFV-10226)
 
     Library:
     --------
@@ -149,7 +149,7 @@ New Features
       store is switched on). Since the new API call queries a generic VFD
       unassociated with a file, these flags will never be returned.
 
-      (HDFFV-10215, DER, 2017/05/31)
+      (DER, 2017/05/31, HDFFV-10215)
 
 
     - H5FD_FEAT_DEFAULT_VFD_COMPATIBLE VFD feature flag added to the C library.
@@ -158,7 +158,7 @@ New Features
       default VFD. VFDs that set this flag create single files that follow
       the canonical HDF5 file format.
 
-      (HDFFV-10214, DER, 2017/05/31)
+      (DER, 2017/05/31, HDFFV-10214)
 
     - The H5I_REFERENCE value in the H5I_type_t enum (defined in H5Ipublic.h)
       has been marked as deprectated.
@@ -169,7 +169,7 @@ New Features
       This enum value will be removed in a future major version of the library.
       The code will remain unchanged in the HDF5 1.10.x branches.
 
-      (HDFFV-10252, DER, 2017/04/05)
+      (DER, 2017/04/05, HDFFV-10252)
 
 
     Parallel Library:
@@ -1136,7 +1136,7 @@ Known Problems
         t_pflush1/fails on exit
     The first two tests fail attempting collective writes.
 
-    H5DOwrite_chunk write wrong data when H5Pset_libver_bounds is set to 
+    H5DOwrite_chunk writes wrong data when H5Pset_libver_bounds is set to 
     H5F_LIBVER_LATEST, H5F_LIBVER_LATEST.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
