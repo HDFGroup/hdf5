@@ -319,6 +319,22 @@ Bug Fixes since HDF5-1.10.1 release
 
     Library
     -------
+    - The data read after a direct chunk write to a chunked dataset
+      was incorrect. 
+
+      The problem was due to the passing of a null dataset pointer to
+      the insert callback for the chunk index in the routine
+      H5D__chunk_direct_write() in H5Dchunk.c
+      The dataset was a single-chunked dataset which will use the 
+      single chunk index when latest format was enabled on file creation.  
+      The single chunk index was the only index that used this pointer
+      in the insert callback.
+
+      Pass the dataset pointer to the insert callback for the chunk
+      index in H5D__chunk_direct_write().
+
+      (VC - 2018/03/20, HDFFV-10425)
+
     - Add public routine H5DOread_chunk to the high-level C library
 
       As we have H5DOwrite_chunk() to write an entire chunk to the file
