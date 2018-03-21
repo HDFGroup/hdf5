@@ -464,7 +464,7 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
         /* Set the chunk's filter mask to the new settings */
         udata.filter_mask = filters;
 
-        if((layout->storage.u.chunk.ops->insert)(&idx_info, &udata, NULL) < 0)
+        if((layout->storage.u.chunk.ops->insert)(&idx_info, &udata, dset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
     } /* end if */
 
