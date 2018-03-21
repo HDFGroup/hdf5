@@ -57,8 +57,7 @@ static herr_t H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id,
     hbool_t do_write, H5D_type_info_t *type_info);
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
-    const H5S_t *file_space, const H5S_t *mem_space, const H5D_type_info_t *type_info,
-    const H5D_chunk_map_t *fm);
+    const H5S_t *file_space, const H5S_t *mem_space, const H5D_type_info_t *type_info);
 #endif /* H5_HAVE_PARALLEL */
 static herr_t H5D__typeinfo_term(const H5D_type_info_t *type_info);
 
@@ -562,7 +561,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
-    if(H5D__ioinfo_adjust(&io_info, dataset, file_space, mem_space, &type_info, fm) < 0)
+    if(H5D__ioinfo_adjust(&io_info, dataset, file_space, mem_space, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -789,7 +788,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
-    if(H5D__ioinfo_adjust(&io_info, dataset, file_space, mem_space, &type_info, fm) < 0)
+    if(H5D__ioinfo_adjust(&io_info, dataset, file_space, mem_space, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -1091,7 +1090,7 @@ done:
 static herr_t
 H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
     const H5S_t *file_space, const H5S_t *mem_space,
-    const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm)
+    const H5D_type_info_t *type_info)
 {
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
