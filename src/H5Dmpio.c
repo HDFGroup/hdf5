@@ -37,12 +37,13 @@
 #include "H5Eprivate.h"       /* Error handling    */
 #include "H5Fprivate.h"       /* File access       */
 #include "H5FDprivate.h"      /* File drivers      */
+#include "H5FDmpi.h"          /* MPI-based file drivers	*/
 #include "H5Iprivate.h"       /* IDs               */
 #include "H5MMprivate.h"      /* Memory management */
 #include "H5Oprivate.h"       /* Object headers    */
 #include "H5Pprivate.h"       /* Property lists    */
 #include "H5Sprivate.h"       /* Dataspaces        */
-#include "H5VMprivate.h"       /* Vector            */
+#include "H5VMprivate.h"      /* Vector            */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -77,13 +78,11 @@
 */
 
 /* Macros to represent different IO modes(NONE, Independent or collective)for multiple chunk IO case */
-#define H5D_CHUNK_IO_MODE_IND         0
 #define H5D_CHUNK_IO_MODE_COL         1
 
 /* Macros to represent the regularity of the selection for multiple chunk IO case. */
 #define H5D_CHUNK_SELECT_REG          1
-#define H5D_CHUNK_SELECT_IRREG        2
-#define H5D_CHUNK_SELECT_NONE         0
+
 
 /******************/
 /* Local Typedefs */
@@ -225,8 +224,6 @@ static herr_t H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     H5D_chunk_addr_info_t chunk_addr_info_array[], int many_chunk_opt);
 static herr_t H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_chunk_map_t *fm,
     uint8_t assign_io_mode[], haddr_t chunk_addr[]);
-static herr_t H5D__mpio_get_min_chunk(const H5D_io_info_t *io_info,
-    const H5D_chunk_map_t *fm, int *min_chunkf);
 static herr_t H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info,
     const H5D_chunk_map_t *fm, int *sum_chunkf);
 static herr_t H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info,
@@ -280,8 +277,8 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     const H5S_t *mem_space, const H5D_type_info_t *type_info)
 {
     H5FD_mpio_xfer_t io_xfer_mode;      /* MPI I/O transfer mode */
-    int local_cause = 0;                /* Local reason(s) for breaking collective mode */
-    int global_cause = 0;               /* Global reason(s) for breaking collective mode */
+    unsigned local_cause = 0;                /* Local reason(s) for breaking collective mode */
+    unsigned global_cause = 0;               /* Global reason(s) for breaking collective mode */
     htri_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -342,7 +339,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
         /* Form consensus opinion among all processes about whether to perform
          * collective I/O
          */
-        if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, io_info->comm)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_UNSIGNED, MPI_BOR, io_info->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
     } /* end else */
 
@@ -522,41 +519,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_array_gatherv() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__mpio_get_min_chunk
- *
- * Purpose:     Routine for obtaining minimum number of chunks to cover
- *              hyperslab selection selected by all processors.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__mpio_get_min_chunk(const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
-    int *min_chunkf)
-{
-    int num_chunkf;             /* Number of chunks to iterate over */
-    int mpi_code;               /* MPI return code */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Get the number of chunks to perform I/O on */
-    H5_CHECKED_ASSIGN(num_chunkf, int, H5SL_count(fm->sel_chunks), size_t)
-
-    /* Determine the minimum # of chunks for all processes */
-    if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, min_chunkf, 1, MPI_INT, MPI_MIN, io_info->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mpio_get_min_chunk() */
 
 
 /*-------------------------------------------------------------------------
@@ -3070,19 +3032,34 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
      * read from the file and unfiltered.
      */
     if(!chunk_entry->full_overwrite || io_info->op_type == H5D_IO_OP_READ) {
+        H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
+
         chunk_entry->chunk_states.new_chunk.length = chunk_entry->chunk_states.chunk_current.length;
 
         /* Currently, these chunk reads are done independently and will likely
 	 * cause issues with collective metadata reads enabled. In the future,
 	 * this should be refactored to use collective chunk reads - JTH */
+
+        /* Get the original state of parallel I/O transfer mode */
+        if(H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+
+        /* Change the xfer_mode to independent for handling the I/O */
+        if(H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
+
         if(H5F_block_read(io_info->dset->oloc.file, H5FD_MEM_DRAW, chunk_entry->chunk_states.chunk_current.offset,
                 chunk_entry->chunk_states.new_chunk.length, chunk_entry->buf) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data chunk")
+
+        /* Return to the original I/O transfer mode setting */
+        if(H5CX_set_io_xfer_mode(xfer_mode) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
 
         if(H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
                 &filter_mask, err_detect, filter_cb, (size_t *)&chunk_entry->chunk_states.new_chunk.length,
                 &buf_size, &chunk_entry->buf) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "couldn't unfilter chunk for modifying")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "couldn't unfilter chunk for modifying")
     } /* end if */
     else {
         chunk_entry->chunk_states.new_chunk.length = true_chunk_size;

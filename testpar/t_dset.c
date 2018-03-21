@@ -679,8 +679,8 @@ dataset_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -748,8 +748,8 @@ dataset_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-      ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-      VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -819,8 +819,8 @@ dataset_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -884,8 +884,8 @@ dataset_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-      ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-      VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
     /* write data collectively */
@@ -1184,8 +1184,8 @@ dataset_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-      ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-      VRFY((ret>= 0),"set independent IO collectively succeeded");
+         ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+         VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -1252,8 +1252,8 @@ dataset_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -1335,8 +1335,8 @@ dataset_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
     /* read data collectively */
@@ -2200,8 +2200,8 @@ extend_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -2240,8 +2240,8 @@ extend_writeAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -2414,8 +2414,8 @@ extend_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -2461,8 +2461,8 @@ extend_readAll(void)
     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((ret>= 0),"set independent IO collectively succeeded");
+        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -2634,8 +2634,8 @@ compress_readAll(void)
             ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
             VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
             if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-            ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
-            VRFY((ret>= 0),"set independent IO collectively succeeded");
+                ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,H5FD_MPIO_INDIVIDUAL_IO);
+                VRFY((ret>= 0),"set independent IO collectively succeeded");
             }
 
 

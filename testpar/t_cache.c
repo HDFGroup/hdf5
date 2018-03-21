@@ -4075,6 +4075,9 @@ setup_cache_for_test(hid_t * fid_ptr,
 
     fid = H5Fcreate(filenames[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
+    /* Push API context */
+    H5CX_push();
+
     if ( fid < 0 ) {
         nerrors++;
         if ( verbose ) {
@@ -4555,6 +4558,9 @@ take_down_cache(hid_t fid, H5C_t * cache_ptr)
         }
 
     }
+
+    /* Pop API context */
+    H5CX_pop();
 
     if ( success ) {
 
