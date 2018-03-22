@@ -2040,7 +2040,7 @@ test_single_chunk_latest(void)
         goto error;
 
     /* Create the dataset */
-    if((did = H5Dcreate(fid, DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data directly to the dataset */
@@ -2064,7 +2064,7 @@ test_single_chunk_latest(void)
     /* Open the file and dataset with default properties  */
     if((fid = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         goto error;
-    if((did = H5Dopen(fid, DATASET, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DATASET, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Retrieve dataset creation property list */
