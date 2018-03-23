@@ -746,6 +746,172 @@ done:
 }
 
 
+/* /\****if* H5Lf/h5lget_val_c */
+/*  * NAME */
+/*  *        h5lget_val_c */
+/*  * PURPOSE */
+/*  *     Call  H5Lget_val */
+/*  * INPUTS */
+/*  * */
+/*  *		link_loc_id - File or group identifier. */
+/*  *                link_name - Name of the link for which valrmation is being sought */
+/*  *             link_namelen - Name length */
+/*  *                     size - Maximum number of characters of link value to be returned. */
+/*  *                  lapl_id - Link access property list */
+/*  * OUTPUTS */
+/*  * */
+/*  *             linkval_buff - The buffer to hold the returned link value. */
+/*  * */
+/*  * RETURNS */
+/*  *     0 on success, -1 on failure */
+/*  * AUTHOR */
+/*  *  M. Scot Breitenfeld */
+/*  *              March 3, 2008 */
+/*  * HISTORY */
+/*  * N/A */
+/*  * SOURCE */
+/* *\/ */
+/* int_f */
+/* h5lget_val_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, */
+/* 	       size_t_f *size, _fcd linkval_buff, */
+/* 	       hid_t_f *lapl_id) */
+/* { */
+/*     char *c_link_name = NULL;   /\* Buffer to hold C string *\/ */
+/*     int_f ret_value = 0;        /\* Return value *\/ */
+/*     void *c_linkval_buff = NULL; */
+
+/*     /\* */
+/*      * Convert FORTRAN name to C name */
+/*      *\/ */
+/*     if((c_link_name = HD5f2cstring(link_name, (size_t)*link_namelen)) == NULL) */
+/*       HGOTO_DONE(FAIL); */
+/*     /\* */
+/*      * Call H5Lval function. */
+/*      *\/ */
+/*     if(H5Lget_val((hid_t)*link_loc_id, c_link_name, &linkval_buff, (size_t)*size, (hid_t)*lapl_id) < 0) */
+/*       HGOTO_DONE(FAIL); */
+/*   /\* */
+/*    * Convert C name to FORTRAN  */
+/*    *\/ */
+/*     HD5packFstring(c_buf, _fcdtocp(buf), c_bufsize-1); */
+
+
+/* done: */
+/*     return ret_value; */
+/* } */
+
+
+/* /\****if* H5Lf/ */
+/*  * NAME */
+/*  *        H5Lregistered_c */
+/*  * PURPOSE */
+/*  *     Call H5Lregistered */
+/*  * INPUTS */
+/*  * */
+/*  * */
+/*  * INPUTS */
+/*  * */
+/*  *     version         - Version number of this struct */
+/*  *     class_id        - Link class identifier */
+/*  *     comment         - Comment for debugging */
+/*  *     comment_len     - Comment for debugging */
+/*  *     create_func     - Callback during link creation */
+/*  *     create_func_len - length */
+/*  *    move_func        - Callback after moving link */
+/*  *    move_func_len    - length */
+/*  *     copy_func       - Callback after copying link */
+/*  *     copy_func_len   - length */
+/*  *     trav_func       - The main traversal function */
+/*  *     trav_func_len   - length */
+/*  *     del_func        - Callback for link deletion */
+/*  *     del_func_len    - length */
+/*  *     query_func      - Callback for queries */
+/*  *     query_func_len  - length */
+/*  * */
+/*  * RETURNS */
+/*  *     0 on success, -1 on failure */
+/*  * AUTHOR */
+/*  *  M. Scot Breitenfeld */
+/*  *              February 3, 2008 */
+/*  * HISTORY */
+/*  * */
+/*  * SOURCE */
+/* *\/ */
+
+/* int_f */
+
+/* h5lregistered_c(int_f *version, int_f *class_id, */
+/* 		 _fcd comment, size_t_f *comment_len, */
+/* 		 _fcd create_func, size_t_f *create_func_len, */
+/* 		 _fcd move_func, size_t_f *move_func_len, */
+/* 		 _fcd copy_func, size_t_f *copy_func_len, */
+/* 		 _fcd trav_func, size_t_f *trav_func_len, */
+/* 		 _fcd del_func , size_t_f *del_func_len, */
+/* 		 _fcd query_func, size_t_f *query_func_len) */
+/* { */
+/*   char *c_comment = NULL;         */
+/*   char *c_create_func = NULL; */
+/*   char *c_move_func = NULL;    */
+/*   char *c_copy_func = NULL;   */
+/*   char *c_trav_func = NULL;  */
+/*   char *c_del_func = NULL;  */
+/*   char *c_query_func = NULL; */
+
+/*   H5L_class_t class_t; */
+
+/*   int_f ret_value = 0; */
+
+/*   /\* */
+/*    * Convert FORTRAN name to C name */
+/*    *\/ */
+/*   if((c_comment = HD5f2cstring(c_comment, (size_t)*sc_comment_len)) == NULL) */
+/*     HGOTO_DONE(FAIL); */
+/*   if((c_create_func = HD5f2cstring(c_create_func, (size_t)*c_create_func_len)) == NULL) */
+/*     HGOTO_DONE(FAIL); */
+/*   if((c_move_func = HD5f2cstring(c_move_func, (size_t)*sc_move_func_len)) == NULL) */
+/*     HGOTO_DONE(FAIL); */
+/*   if((c_copy_func = HD5f2cstring(c_copy_func, (size_t)*c_copy_func_len)) == NULL) */
+/*     HGOTO_DONE(FAIL); */
+/*   if((c_trav_func = HD5f2cstring(c_trav_func, (size_t)*sc_trav_func_len)) == NULL) */
+/*     HGOTO_DONE(FAIL); */
+/*   if((c_del_func = HD5f2cstring(c_del_func, (size_t)*c_del_func_len)) == NULL) */
+/*     HGOTO_DONE(FAIL); */
+/*   if((c_query_func = HD5f2cstring(c_query_func, (size_t)*c_query_func_len)) == NULL) */
+/*     HGOTO_DONE(FAIL); */
+/*   /\* */
+/*    * Pack into C struct H5L_class_t */
+/*    *\/ */
+/*       int version;                    /\* Version number of this struct  *\/ */
+/*       H5L_type_t class_id;            /\* Link class identifier          *\/ */
+/*       const char *comment;            /\* Comment for debugging          *\/ */
+/*       H5L_create_func_t create_func;  /\* Callback during link creation  *\/ */
+/*       H5L_move_func_t move_func;      /\* Callback after moving link     *\/ */
+/*       H5L_copy_func_t copy_func;      /\* Callback after copying link    *\/ */
+/*       H5L_traverse_func_t trav_func;  /\* The main traversal function    *\/ */
+/*       H5L_delete_func_t del_func;     /\* Callback for link deletion     *\/ */
+/*       H5L_query_func_t query_func;    /\* Callback for queries           *\/ */
+
+/*       class_t.version = (int)*version; */
+/*       class_t.class_id = (H5L_type_t)*class_id; */
+/*       class_t.comment = c_comment; */
+/*       class_t. */
+
+/*   /\* */
+/*    * Call H5Lcopy function. */
+/*    *\/ */
+/*   if( H5Lcopy( (hid_t)*src_loc_id, c_src_name, (hid_t) *dest_loc_id,  */
+/* 	       c_dest_name, (hid_t)*lcpl_id, (hid_t)*lapl_id ) < 0) */
+/*     HGOTO_DONE(FAIL); */
+
+/* done: */
+/*   if(c_src_name) */
+/*     HDfree(c_src_name); */
+/*   if(c_dest_name) */
+/*     HDfree(c_dest_name); */
+
+/*   return ret_value; */
+/* } */
+
 /****if* H5Lf/h5lget_val_c
  * NAME
  *  h5lget_val_c

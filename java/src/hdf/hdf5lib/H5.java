@@ -4018,6 +4018,22 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native void H5Lunregister(int link_cls_id) throws HDF5LibraryException;
 
+    // /////// unimplemented ////////
+    // herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
+    //         H5L_type_t link_type, const void *udata, size_t udata_size, hid_t lcpl_id,
+    //         hid_t lapl_id);
+
+    // herr_t H5Lregister(const H5L_class_t *cls);
+
+    // herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_size,
+    //         unsigned *flags, const char **filename/*out*/, const char **obj_path /*out*/);
+    // herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
+    //        size_t size, hid_t lapl_id);
+    // herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
+    //        H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+    //        void *buf/*out*/, size_t size, hid_t lapl_id);
+
+
     // ////////////////////////////////////////////////////////////
     // //
     // H5O: HDF5 1.8 Object Interface API Functions //
