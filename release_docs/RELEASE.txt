@@ -1,4 +1,4 @@
-HDF5 version 1.10.2-pre1 currently under development
+HDF5 version 1.10.2-pre1 released on 2018-03-21
 ================================================================================
 
 
@@ -540,6 +540,8 @@ Bug Fixes since HDF5-1.10.1 release
       the error handling code will attempt to dereference a NULL pointer.
 
       This issue was reported to The HDF Group as issue #CVE-2017-17505.
+          https://security-tracker.debian.org/tracker/CVE-2017-17505
+          https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2017-17505
 
       NOTE: The HDF5 C library cannot produce such a file. This condition
             should only occur in a corrupt (or deliberately altered) file
@@ -564,6 +566,8 @@ Bug Fixes since HDF5-1.10.1 release
       the read buffer.
 
       This issue was reported to The HDF Group as issue #CVE-2017-17506.
+          https://security-tracker.debian.org/tracker/CVE-2017-17506
+          https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2017-17506
 
       NOTE: The HDF5 C library cannot produce such a file. This condition
             should only occur in a corrupt (or deliberately altered) file
@@ -583,6 +587,8 @@ Bug Fixes since HDF5-1.10.1 release
       fault.
 
       This issue was reported to The HDF Group as issue #CVE-2017-17507.
+          https://security-tracker.debian.org/tracker/CVE-2017-17506
+          https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2017-17506
 
       NOTE: The HDF5 C library cannot produce such a file. This condition
             should only occur in a corrupt (or deliberately altered) file
@@ -602,6 +608,8 @@ Bug Fixes since HDF5-1.10.1 release
       processing the type.
 
       This issue was reported to The HDF Group as issue #CVE-2017-17508.
+          https://security-tracker.debian.org/tracker/CVE-2017-17508
+          https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2017-17508
 
       NOTE: The HDF5 C library cannot produce such a file. This condition
             should only occur in a corrupt (or deliberately altered) file
@@ -618,6 +626,8 @@ Bug Fixes since HDF5-1.10.1 release
       the symbol table node.
 
       This issue was reported to The HDF Group as issue #CVE-2017-17509.
+          https://security-tracker.debian.org/tracker/CVE-2017-17509
+          https://cve.mitre.org/cgi-bin/cvename.cgi?name=3DCVE-2017-17509
 
       NOTE: The HDF5 C library cannot produce such a file. This condition
             should only occur in a corrupt (or deliberately altered) file
