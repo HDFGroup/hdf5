@@ -398,7 +398,6 @@ These five steps are described in detail below.
                 ########################
                 set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
                 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
-                set (HDF5_GENERATE_HEADERS ON CACHE BOOL "Rebuild Generated Files" FORCE)
                 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
                 set (HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
                 set (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
@@ -575,7 +574,7 @@ HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"             
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
-HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
+HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      OFF
 HDF5_BUILD_GENERATORS          "Build Test Generators"                                        OFF
 HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                            OFF
 HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
