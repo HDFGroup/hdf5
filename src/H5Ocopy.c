@@ -225,7 +225,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(src_loc_id, TRUE) < 0)
+    if(H5CX_set_loc(src_loc_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine to copy object */

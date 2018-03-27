@@ -116,7 +116,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Commit the datatype to the file, using default property list values */

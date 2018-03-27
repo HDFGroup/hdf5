@@ -249,7 +249,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
             dset_dims[u] = size[u];
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(dset_id, TRUE) < 0)
+    if(H5CX_set_loc(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Increase size */

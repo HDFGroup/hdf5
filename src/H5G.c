@@ -719,7 +719,7 @@ H5Gflush(hid_t group_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(group_id, TRUE) < 0)
+    if(H5CX_set_loc(group_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Flush group's metadata to file */
@@ -757,7 +757,7 @@ H5Grefresh(hid_t group_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(group_id, TRUE) < 0)
+    if(H5CX_set_loc(group_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call private function to refresh group object */

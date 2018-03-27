@@ -335,7 +335,7 @@ H5Oincr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(object_id, TRUE) < 0)
+    if(H5CX_set_loc(object_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Change the object's refcount */
@@ -381,7 +381,7 @@ H5Odecr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(object_id, TRUE) < 0)
+    if(H5CX_set_loc(object_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Change the object's refcount */
@@ -595,7 +595,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(obj_id, TRUE) < 0)
+    if(H5CX_set_loc(obj_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* (Re)set the object's comment */

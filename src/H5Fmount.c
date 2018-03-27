@@ -462,7 +462,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Do the mount */
@@ -509,7 +509,7 @@ H5Funmount(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Unmount */

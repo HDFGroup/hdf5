@@ -231,7 +231,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Create the new group & get its ID */
@@ -326,7 +326,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(cur_loc_id, TRUE) < 0)
+    if(H5CX_set_loc(cur_loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine to create link */
@@ -362,7 +362,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(cur_loc_id, TRUE) < 0)
+    if(H5CX_set_loc(cur_loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine to create link */
@@ -461,7 +461,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
     H5TRACE3("e", "i*s*s", src_loc_id, src_name, dst_name);
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(src_loc_id, TRUE) < 0)
+    if(H5CX_set_loc(src_loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call common routine to move the link */
@@ -494,7 +494,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "source and destination should not both be H5L_SAME_LOC")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(dst_loc_id, TRUE) < 0)
+    if(H5CX_set_loc(dst_loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call common routine to move the link */
@@ -583,7 +583,7 @@ H5Gunlink(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no name")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine */
@@ -650,7 +650,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine */
@@ -726,7 +726,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine */
@@ -809,7 +809,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal routine */
