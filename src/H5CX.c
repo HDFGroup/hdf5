@@ -146,7 +146,7 @@
 /* Local Typedefs */
 /******************/
 
-/* Context stored for each I/O-related API call */
+/* Context stored for each API call */
 typedef struct H5CX_t {
     /* DXPL */
     hid_t dxpl_id;              /* DXPL ID for API operation */
