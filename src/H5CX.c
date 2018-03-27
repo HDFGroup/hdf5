@@ -146,7 +146,35 @@
 /* Local Typedefs */
 /******************/
 
-/* Context stored for each API call */
+/* Typedef for context about each API call, as it proceeds */
+/* Fields in this struct are of several types:
+ * - The DXPL & LAPL ID are either library default ones (from the API context
+ *      initialization) or passed in from the application via an API call
+ *      parameter.  The corresponding H5P_genplist_t* is just the underlying
+ *      property list struct for the ID, to optimize retrieving properties
+ *      from the list multiple times.
+ *
+ * - Internal fields, used and set only within the library, for managing the
+ *      operation under way.  These do not correspond to properties in the
+ *      DXPL or LAPL.
+ *
+ * - Cached properties, which are not returned to the application, for managing
+ *      the operation under way.  These correspond to properties in the DXPL
+ *      or LAPL, and are retrieved either from the (global) cache for a
+ *      default property list, or from the corresponding property in the
+ *      application's (non-default) property list.  Getting / setting these
+ *      properties within the library does _not_ affect the application's
+ *      property list.  Note that the naming of these fields, <foo> and
+ *      <foo>_valid, is important for the macros to work properly.
+ *
+ * - "Set" properties that are returned to the application, mainly for sending
+ *      out "introspection" information ("Why did collective I/O get broken?",
+ *      "Which filters are set on the chunk I just directly read in?", etc)
+ *      Setting these values will cause the corresponding property in the
+ *      property list to be set when the API context is popped, when
+ *      returning from the API routine.  Note that the naming of these fields,
+ *      <foo> and <foo>_set, is important for the macros to work properly.
+ */
 typedef struct H5CX_t {
     /* DXPL */
     hid_t dxpl_id;              /* DXPL ID for API operation */
@@ -156,14 +184,14 @@ typedef struct H5CX_t {
     hid_t lapl_id;              /* LAPL ID for API operation */
     H5P_genplist_t *lapl;       /* Link Access Property List */
 
-    /* Object tagging info */
+    /* Internal: Object tagging info */
     haddr_t tag;                /* Current object's tag (ohdr chunk #0 address) */
 
-    /* Metadata cache info */
+    /* Internal: Metadata cache info */
     H5AC_ring_t ring;           /* Current metadata cache ring for entries */
 
 #ifdef H5_HAVE_PARALLEL
-    /* Parallel I/O settings */
+    /* Internal: Parallel I/O settings */
     hbool_t coll_metadata_read; /* Whether to use collective I/O for metadata read */
     MPI_Datatype btype;         /* MPI datatype for buffer, when using collective I/O */
     MPI_Datatype ftype;         /* MPI datatype for file, when using collective I/O */
@@ -252,12 +280,23 @@ typedef struct H5CX_t {
 } H5CX_t;
 
 /* Typedef for nodes on the API context stack */
+/* Each entry into the library through an API routine invokes H5CX_push()
+ * in a FUNC_ENTER_API* macro, which pushes an H5CX_node_t on the API
+ * context [thread-local] stack, after initializing it with default values
+ * in H5CX__push_common().
+ */
 typedef struct H5CX_node_t {
     H5CX_t ctx;                 /* Context for current API call */
     struct H5CX_node_t *next;   /* Pointer to previous context, on stack */
 } H5CX_node_t;
 
 /* Typedef for cached default dataset transfer property list information */
+/* This is initialized to the values in the default DXPL during package
+ * initialization and then remains constant for the rest of the library's
+ * operation.  When a field in H5CX_t is retrieved from an API context that
+ * uses a default DXPL, this value is copied instead of spending time looking
+ * up the property in the DXPL.
+ */
 typedef struct H5CX_dxpl_cache_t {
     size_t max_temp_buf;            /* Maximum temporary buffer size (H5D_XFER_MAX_TEMP_BUF_NAME) */
     void *tconv_buf;                /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
@@ -288,6 +327,7 @@ typedef struct H5CX_dxpl_cache_t {
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link access property list information */
+/* (Same as the cached DXPL struct, above, except for the default LAPL) */
 typedef struct H5CX_lapl_cache_t {
     size_t nlinks;                  /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
 } H5CX_lapl_cache_t;
