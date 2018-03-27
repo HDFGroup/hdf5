@@ -115,7 +115,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Create reference */

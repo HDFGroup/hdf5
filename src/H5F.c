@@ -1442,7 +1442,7 @@ H5Fstart_swmr_write(hid_t file_id)
         HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and MDC cache image")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(file_id, TRUE) < 0)
+    if(H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call the internal routine */
@@ -1575,7 +1575,7 @@ H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(file_id, TRUE) < 0)
+    if(H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call internal set_libver_bounds function */
@@ -1614,7 +1614,7 @@ H5Fformat_convert(hid_t fid)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(fid, TRUE) < 0)
+    if(H5CX_set_loc(fid) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call the internal routine */

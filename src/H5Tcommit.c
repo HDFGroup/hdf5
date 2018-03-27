@@ -663,7 +663,7 @@ H5Tflush(hid_t type_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(type_id, TRUE) < 0)
+    if(H5CX_set_loc(type_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Flush metadata for named datatype */
@@ -703,7 +703,7 @@ H5Trefresh(hid_t type_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(type_id, TRUE) < 0)
+    if(H5CX_set_loc(type_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Call private function to refresh datatype object */

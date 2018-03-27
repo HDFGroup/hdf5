@@ -619,7 +619,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(attr_id, TRUE) < 0)
+    if(H5CX_set_loc(attr_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set collective metadata read")
 
     /* Go write the actual data to the attribute */
@@ -1129,7 +1129,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set collective metadata read")
 
         /* Call private attribute rename routine */
@@ -1375,7 +1375,7 @@ H5Adelete(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(loc_id, TRUE) < 0)
+    if(H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set collective metadata read")
 
     /* Delete the attribute from the location */

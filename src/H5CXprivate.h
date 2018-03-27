@@ -63,7 +63,7 @@ H5_DLL void H5CX_set_dxpl(hid_t dxpl_id);
 H5_DLL void H5CX_set_lapl(hid_t lapl_id);
 H5_DLL herr_t H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
     hid_t loc_id, hbool_t is_collective);
-H5_DLL herr_t H5CX_set_loc(hid_t loc_id, hbool_t is_collective);
+H5_DLL herr_t H5CX_set_loc(hid_t loc_id);
 
 /* "Getter" routines for API context info */
 H5_DLL hid_t H5CX_get_dxpl(void);

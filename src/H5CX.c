@@ -852,7 +852,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5CX_set_loc
  *
- * Purpose:     Sanity checks and  sets up collective operations.
+ * Purpose:     Sanity checks and sets up collective operations.
+ *
+ * Note:	Should be called for all API routines that modify file
+ *              file metadata but don't pass in an access property list.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -866,11 +869,7 @@ H5CX_set_loc(hid_t
 #ifndef H5_HAVE_PARALLEL
    H5_ATTR_UNUSED
 #endif /* H5_HAVE_PARALLEL */
-   loc_id, hbool_t
-#ifndef H5_HAVE_PARALLEL
-   H5_ATTR_UNUSED
-#endif /* H5_HAVE_PARALLEL */
-   is_collective)
+   loc_id)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -881,28 +880,25 @@ H5CX_set_loc(hid_t
     HDassert(head && *head);
 
 #ifdef H5_HAVE_PARALLEL
-    /* Check for collective operation */
-    if(is_collective) {
-        /* Set collective metadata read flag */
-        (*head)->ctx.coll_metadata_read = TRUE;
+    /* Set collective metadata read flag */
+    (*head)->ctx.coll_metadata_read = TRUE;
 
-        /* If parallel is enabled and the file driver used is the MPI-IO
-         * VFD, issue an MPI barrier for easier debugging if the API function
-         * calling this is supposed to be called collectively. Note that this
-         * happens only when the environment variable H5_COLL_BARRIER is set
-         * to non 0.
-         */
-        if(H5_coll_api_sanity_check_g) {
-            MPI_Comm mpi_comm;      /* File communicator */
+    /* If parallel is enabled and the file driver used is the MPI-IO
+     * VFD, issue an MPI barrier for easier debugging if the API function
+     * calling this is supposed to be called collectively. Note that this
+     * happens only when the environment variable H5_COLL_BARRIER is set
+     * to non 0.
+     */
+    if(H5_coll_api_sanity_check_g) {
+        MPI_Comm mpi_comm;      /* File communicator */
 
-            /* Retrieve the MPI communicator from the loc_id or the fapl_id */
-            if(H5F_mpi_retrieve_comm(loc_id, H5P_DEFAULT, &mpi_comm) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
+        /* Retrieve the MPI communicator from the loc_id or the fapl_id */
+        if(H5F_mpi_retrieve_comm(loc_id, H5P_DEFAULT, &mpi_comm) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
 
-            /* issue the barrier */
-            if(mpi_comm != MPI_COMM_NULL)
-                MPI_Barrier(mpi_comm);
-        } /* end if */
+        /* issue the barrier */
+        if(mpi_comm != MPI_COMM_NULL)
+            MPI_Barrier(mpi_comm);
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 

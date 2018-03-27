@@ -898,7 +898,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(dset_id, TRUE) < 0)
+    if(H5CX_set_loc(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Private function */
@@ -936,7 +936,7 @@ H5Dflush(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(dset_id, TRUE) < 0)
+    if(H5CX_set_loc(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Flush dataset information cached in memory */
@@ -974,7 +974,7 @@ H5Drefresh(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(dset_id, TRUE) < 0)
+    if(H5CX_set_loc(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Call private function to refresh the dataset object */
@@ -1016,7 +1016,7 @@ H5Dformat_convert(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(dset_id, TRUE) < 0)
+    if(H5CX_set_loc(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     switch(dset->shared->layout.type) {

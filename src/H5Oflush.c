@@ -79,7 +79,7 @@ H5Oflush(hid_t obj_id)
     H5TRACE1("e", "i", obj_id);
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(obj_id, TRUE) < 0)
+    if(H5CX_set_loc(obj_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Call internal routine */
@@ -241,7 +241,7 @@ H5Orefresh(hid_t oid)
     H5TRACE1("e", "i", oid);
 
     /* Set up collective metadata if appropriate */
-    if(H5CX_set_loc(oid, TRUE) < 0)
+    if(H5CX_set_loc(oid) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Call internal routine */
