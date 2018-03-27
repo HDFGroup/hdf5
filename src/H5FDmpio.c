@@ -1730,6 +1730,9 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
     HDassert(H5FD_MPIO==file->pub.driver_id);
     HDassert(buf);
 
+    /* Verify that no data is written when between MPI_Barrier()s during file flush */
+    HDassert(!H5CX_get_mpi_file_flushing());
+
     /* Portably initialize MPI status variable */
     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
 
