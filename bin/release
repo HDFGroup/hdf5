@@ -321,6 +321,8 @@ tar2cmaketgz()
     cp $cmgztmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpdir
     cp $cmgztmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpdir
     cp $cmgztmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpdir
+    mkdir $cmgztmpdir/CMake-$HDF5_VERS
+    mv $cmgztmpdir/* $cmgztmpdir/CMake-$HDF5_VERS
     tar czf $DEST/CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1 
                  
     # cleanup

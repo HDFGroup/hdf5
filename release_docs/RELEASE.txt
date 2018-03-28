@@ -1,4 +1,4 @@
-HDF5 version 1.10.2-pre2 currently under development
+HDF5 version 1.10.2 currently under development
 ================================================================================
 
 
@@ -50,7 +50,7 @@ New Features
 
       Change minimum version to 3.10.
 
-      This change removes the need to support a copy of the FindMPI.cmake module,
+      This change removed the need to support a copy of the FindMPI.cmake module,
       which has been removed, along with its subfolder in the config/cmake_ext_mod
       location.
 
@@ -58,7 +58,7 @@ New Features
 
     - CMake
 
-      Add pkg-config file generation
+      Added pkg-config file generation
 
       Added pkg-config file generation for the C, C++, HL, and HL C++ libraries.
       In addition, builds on linux will create h5cXXX scripts that use the pkg-config
@@ -108,20 +108,20 @@ New Features
 
     Library:
     --------
-    - Add an enumerated value to H5F_libver_t for H5Pset_libver_bounds().
+    - Added an enumerated value to H5F_libver_t for H5Pset_libver_bounds().
 
       Currently, the library defines two values for H5F_libver_t and supports
       only two pairs of (low, high) combinations as derived from these values.
       Thus the bounds setting via H5Pset_libver_bounds() is rather restricted.
 
-      Add an enumerated value (H5F_LIBVER_V18) to H5F_libver_t and
+      Added an enumerated value (H5F_LIBVER_V18) to H5F_libver_t and
       H5Pset_libver_bounds() now supports five pairs of (low, high) combinations
       as derived from these values.  This addition provides the user more
       flexibility in setting bounds for object creation.
 
       (VC - 2018/03/14)
 
-    - Add prefix option to VDS files.
+    - Added prefix option to VDS files.
 
       Currently, VDS source files must be in the active directory to be
       found by the virtual file. Adding the option of a prefix to be set
@@ -378,12 +378,12 @@ Bug Fixes since HDF5-1.10.1 release
       The single chunk index was the only index that used this pointer
       in the insert callback.
 
-      Pass the dataset pointer to the insert callback for the chunk
+      Passed the dataset pointer to the insert callback for the chunk
       index in H5D__chunk_direct_write().
 
       (VC - 2018/03/20, HDFFV-10425)
 
-    - Add public routine H5DOread_chunk to the high-level C library
+    - Added public routine H5DOread_chunk to the high-level C library
 
       As we have H5DOwrite_chunk() to write an entire chunk to the file
       directly, the customer requested to add this public routine to 
@@ -484,9 +484,9 @@ Bug Fixes since HDF5-1.10.1 release
     - Fixes for paged aggregation
 
       Changes made based on RFC review comments:
-      (1) Add maximum value for file space page size
-      (2) Drop check for page end metadata threshold
-      (3) Remove "can_shrink" and "shrink" callbacks for small section class
+      (1) Added maximum value for file space page size
+      (2) Dropped check for page end metadata threshold
+      (3) Removed "can_shrink" and "shrink" callbacks for small section class
 
       (VC - 2017/06/09)
 
@@ -688,7 +688,7 @@ Bug Fixes since HDF5-1.10.1 release
 
     - CMake
 
-      Add replacement of fortran flags if using static CRT.
+      Added replacement of fortran flags if using static CRT.
 
       Added TARGET_STATIC_CRT_FLAGS call to HDFUseFortran.cmake file in
       config/cmake_ext_mod folder.
@@ -831,9 +831,9 @@ Bug Fixes since HDF5-1.10.1 release
       was smaller than the actual file's EOF.  When the file was reopened
       and closed, the library truncated the file to the stored EOA.
 
-      Add an option to the tool in setting the file's stored EOA in the
+      Added an option to the tool in setting the file's stored EOA in the
       superblock to the maximum of (EOA, EOF) + increment.
-      Another option is also added to print the file's EOA and EOF.
+      An option was also added to print the file's EOA and EOF.
 
       (VC - 2018/03/14, HDFFV-10360)
 
@@ -949,7 +949,7 @@ Bug Fixes since HDF5-1.10.1 release
 
     - h5repack
 
-      Add tests to h5repack.sh.in to verify options added for paged
+      Added tests to h5repack.sh.in to verify options added for paged
       aggregation work as expected.
 
       (VC - 2017/08/03)
