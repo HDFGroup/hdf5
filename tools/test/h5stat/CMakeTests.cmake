@@ -37,6 +37,7 @@
       h5stat_newgrat-UG
       h5stat_newgrat-UA
       h5stat_err1_links
+      h5stat_idx
       h5stat_links1
       h5stat_links2
       h5stat_links3
@@ -54,6 +55,7 @@
   )
   set (HDF5_REFERENCE_TEST_FILES
       h5stat_filters.h5
+      h5stat_idx.h5
       h5stat_tsohm.h5
       h5stat_newgrat.h5
       h5stat_threshold.h5
