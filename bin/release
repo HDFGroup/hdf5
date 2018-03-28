@@ -298,7 +298,7 @@ tar2cmaketgz()
 	echo "usage: tar2cmaketgz <tarfilename> <tgzfilename>"
 	return 1
     fi
-    cmgztmpdir=/tmp/cmgztmpdir$$/
+    cmgztmpdir=/tmp/cmgztmpdir$$
     mkdir -p $cmgztmpdir
     version=$1
     tarfile=$2
