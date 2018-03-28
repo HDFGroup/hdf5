@@ -241,6 +241,10 @@ tar2cmakezip()
 		unix2dos -q -k $inf; \
 	    fi\
 	done
+
+    
+    mkdir $cmziptmpdir/CMake-$HDF5_VERS
+    mv $cmziptmpdir/* $cmziptmpdir/CMake-$HDF5_VERS
     # step 3: make zipball
     # -9 maximum compression
     # -y Store symbolic links as such in the zip archive
@@ -294,7 +298,7 @@ tar2cmaketgz()
 	echo "usage: tar2cmaketgz <tarfilename> <tgzfilename>"
 	return 1
     fi
-    cmgztmpdir=/tmp/cmgztmpdir$$
+    cmgztmpdir=/tmp/cmgztmpdir$$/
     mkdir -p $cmgztmpdir
     version=$1
     tarfile=$2
