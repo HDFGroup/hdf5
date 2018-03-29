@@ -156,24 +156,26 @@
  *
  * - Internal fields, used and set only within the library, for managing the
  *      operation under way.  These do not correspond to properties in the
- *      DXPL or LAPL.
+ *      DXPL or LAPL and can have any name.
  *
- * - Cached properties, which are not returned to the application, for managing
+ * - Cached fields, which are not returned to the application, for managing
  *      the operation under way.  These correspond to properties in the DXPL
  *      or LAPL, and are retrieved either from the (global) cache for a
  *      default property list, or from the corresponding property in the
  *      application's (non-default) property list.  Getting / setting these
  *      properties within the library does _not_ affect the application's
  *      property list.  Note that the naming of these fields, <foo> and
- *      <foo>_valid, is important for the macros to work properly.
+ *      <foo>_valid, is important for the H5CX_RETRIEVE_PROP_VALID ahd
+ *      H5CX_RETRIEVE_PROP_VALID_SET macros to work properly.
  *
- * - "Set" properties that are returned to the application, mainly for sending
- *      out "introspection" information ("Why did collective I/O get broken?",
- *      "Which filters are set on the chunk I just directly read in?", etc)
- *      Setting these values will cause the corresponding property in the
- *      property list to be set when the API context is popped, when
- *      returning from the API routine.  Note that the naming of these fields,
- *      <foo> and <foo>_set, is important for the macros to work properly.
+ * - "Return-only"" properties that are returned to the application, mainly
+ *      for sending out "introspection" information ("Why did collective I/O
+ *      get broken for this operation?", "Which filters are set on the chunk I
+ *      just directly read in?", etc) Setting these fields will cause the
+ *      corresponding property in the property list to be set when the API
+ *      context is popped, when returning from the API routine.  Note that the
+ *      naming of these fields, <foo> and <foo>_set, is important for the
+*       H5CX_TEST_SET_PROP and H5CX_SET_PROP macros to work properly.
  */
 typedef struct H5CX_t {
     /* DXPL */
@@ -246,7 +248,7 @@ typedef struct H5CX_t {
     H5T_conv_cb_t dt_conv_cb;   /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
     hbool_t dt_conv_cb_valid;   /* Whether datatype conversion struct is valid */
 
-    /* Set DXPL properties to return to application */
+    /* Return-only DXPL properties to return to application */
     uint32_t dcr_filters;       /* Direct chunk read filter flags (H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME) */
     hbool_t dcr_filters_set;    /* Whether direct chunk read filter flags are set */
 #ifdef H5_HAVE_PARALLEL
