@@ -24,13 +24,13 @@ Obtaining HDF5 source code
    1. Create a directory for your development; for example, "myhdfstuff".
 
    2. Obtain compressed (*.tar or *.zip) HDF5 source from
-        http://www.hdfgroup.org/ftp/HDF5/current/src/
+         https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
       and put it in "myhdfstuff".
       Uncompress the file. There should be a hdf5-1.10."X" folder.
 
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
-      The HDF5 1.10."X" product requires a minimum CMake version 3.2.2,
+      The HDF5 1.10."X" product requires a minimum CMake version 3.10,
       where "X" is the current HDF5 release version.
 
 Note:
@@ -48,12 +48,12 @@ the config/cmake/cacheinit.cmake file.
 HDF Group recommends using the ctest script mode to build HDF5.
 
 The following files referenced below are available at the HDF web site:
-    http://www.hdfgroup.org/HDF5/release/cmakebuild.html
+     https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
 
 Single compressed file with all the files needed, including source:
-    hdf5-1.10.X-CMake.zip or hdf5-1.10.X-CMake.tar.gz
+    CMake-hdf5-1.10.X.zip or CMake-hdf5-1.10.X.tar.gz
 
-Individual files
+Individual files included in the above mentioned compressed files
 -----------------------------------------------
 CMake build script:
     CTestScript.cmake
@@ -62,37 +62,44 @@ External compression szip and zlib libraries:
     SZip.tar.gz
     ZLib.tar.gz
 
-Platform configuration files:
-    HDF518config.cmake
+Examples Source package:
+    HDF5Examples-1.10.x-Source.tar.gz
+
+Configuration files:
+    HDF5config.cmake
+    HDF5options.cmake
+
+Build scripts for windows or linux
 -----------------------------------------------
 
 To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
    1. Change to the development directory "myhdfstuff".
 
-   2. Download the SZip.tar.gz and ZLib.tar.gz to "myhdfstuff".
-      Do not uncompress the files.
+   2. Download the CMake-hdf5-1.10.X.zip(.tar.gz) file to "myhdfstuff".
+      Uncompress the file.
 
-   3. Download the CTestScript.cmake file to "myhdfstuff".
+   3. Change to the source directory "hdf5-1.10.x".
       CTestScript.cmake file should not be modified.
 
-   4. Download the platform configuration file, HDF518config.cmake,
-      to "myhdfstuff". Do not modify the file unless you want to change
-      default build environment. (See http://www.hdfgroup.org/HDF5/release/chgcmkbuild.html)
+   4. Edit the platform configuration file, HDF5options.cmake, if you want to change
+      the default build environment.
+      (See  https://portal.hdfgroup.org/display/support/How+to+Change+HDF5+CMake+Build+Options)
 
    5. From the "myhdfstuff" directory execute the CTest Script with the
       following options:
 
-      On 32-bit Windows with Visual Studio 2012, execute:
-         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2012 -C Release -VV -O hdf5.log
-      On 64-bit Windows with Visual Studio 2012, execute:
-         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -VV -O hdf5.log
+      On 32-bit Windows with Visual Studio 2015, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2015 -C Release -VV -O hdf5.log
+      On 64-bit Windows with Visual Studio 2015, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201564 -C Release -VV -O hdf5.log
       On 32-bit Windows with Visual Studio 2013, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2013 -C Release -VV -O hdf5.log
       On 64-bit Windows with Visual Studio 2013, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201364 -C Release -VV -O hdf5.log
       On Linux and Mac, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -VV -O hdf5.log
+      The supplied build scripts are versions of the above.
 
       The command above will configure, build, test, and create an install
       package in the myhdfstuff folder. It will have the format:
@@ -103,19 +110,20 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
           installer on your system, you will also see a similar file that ends
           in either .exe (NSIS) or .msi (WiX).
 
-      The -S option uses the script version of ctest.
+      Notes on the command line options.
+          The -S option uses the script version of ctest.
 
-      The value for the -C option (as shown above, "-C Release") must
-      match the setting for CTEST_CONFIGURATION_TYPE in the platform
-      configuration file.
+          The value for the -C option (as shown above, "-C Release") must
+          match the setting for CTEST_CONFIGURATION_TYPE in the platform
+          configuration file.
 
-      The -VV option is for most verbose; use -V for less verbose.
+          The -VV option is for most verbose; use -V for less verbose.
 
-      The "-O hdf5.log" option saves the output to a log file hdf5.log.
+          The "-O hdf5.log" option saves the output to a log file hdf5.log.
 
    6. To install, "X" is the current release version
 
-      On Windows, execute:
+      On Windows (with WiX installed), execute:
                 HDF5-1.10."X"-win32.msi or HDF5-1.10."X"-win64.msi
       By default this program will install the hdf5 library into the
       "C:\Program Files" directory and will create the following
@@ -202,7 +210,7 @@ Notes: This short set of instructions is written for users who want to
            cpack -C Release CPackConfig.cmake
 
       9. To install
-         On Windows, execute:
+         On Windows (with WiX installed), execute:
                 HDF5-1.10."X"-win32.msi or HDF5-1.10."X"-win64.msi
          By default this program will install the hdf5 library into the
          "C:\Program Files" directory and will create the following
@@ -250,7 +258,7 @@ IV. Further considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.10."X" product requires a minimum CMake version 3.2.2.
+      web site. The HDF5 1.10."X" product requires a minimum CMake version 3.10.
 
    2. If you plan to use Zlib or Szip:
       A. Download the binary packages and install them in a central location.
@@ -315,9 +323,21 @@ Notes: CMake and HDF5
       how CMake support can be improved on any system. Visit the
       KitWare site for more information about CMake.
 
-   3. Build and test results can be submitted to our CDash server,
-      please read the HDF and CDash document at:
-                 www.hdfgroup.org/CDash/HowToSubmit.
+   3. Build and test results can be submitted to our CDash server:
+      The CDash server for community submissions of hdf5 is at
+          https://cdash.hdfgroup.org.
+
+      Submitters are requested to register their name and contact info and
+      maintain their test sites. After your first submission, login and go
+      to your "My CDash" link and claim your site.
+
+      We ask that all submissions include the configuration information and
+      contact information in the CTest Notes Files upload step. See the
+      current reports on CDash for examples.
+
+      Please follow the convention that "NIGHTLY" submissions maintain the same
+      configuration every time. "EXPERIMENTAL" submissions can be expected to
+      be different for each submission.
 
    4. See the appendix at the bottom of this file for examples of using
       a ctest script for building and testing. Using a ctest script is
@@ -416,7 +436,7 @@ These five steps are described in detail below.
 
       2.1  Visual CMake users, click the Configure button. If this is the first time you are
            running cmake-gui in this directory, you will be prompted for the
-           generator you wish to use (for example on Windows, Visual Studio 11).
+           generator you wish to use (for example on Windows, Visual Studio 12).
            CMake will read in the CMakeLists.txt files from the source directory and
            display options for the HDF5 project. After the first configure you
            can adjust the cache settings and/or specify the locations of other programs.
@@ -574,7 +594,7 @@ HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"             
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
-HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      OFF
+HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
 HDF5_BUILD_GENERATORS          "Build Test Generators"                                        OFF
 HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                            OFF
 HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
@@ -666,7 +686,7 @@ cmake_minimum_required (VERSION 3.10)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION 1.10.2)
+set (CTEST_SOURCE_VERSION "1.11.0")
 set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
