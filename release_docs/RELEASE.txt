@@ -44,11 +44,12 @@ CONTENTS
 New Features
 ============
 
-    Configuration:
-    -------------
-    - CMake
+    Configuration and Build Systems:
+    --------------------------------
+    - CMake builds
+    --------------
 
-      Change minimum version to 3.10.
+      - Changed minimum CMake required version to 3.10.
 
       This change removed the need to support a copy of the FindMPI.cmake module,
       which has been removed, along with its subfolder in the config/cmake_ext_mod
@@ -56,19 +57,16 @@ New Features
 
       (ADB - 2018/03/09)
 
-    - CMake
-
-      Added pkg-config file generation
+      - Added pkg-config file generation
 
       Added pkg-config file generation for the C, C++, HL, and HL C++ libraries.
-      In addition, builds on linux will create h5cXXX scripts that use the pkg-config
-      files. This is a limited implementation of a script like autotools h5cc.
+      In addition, builds on Linux will create h5cc, h5c++, h5hlcc, and h5hlc++ scripts in the bin
+      directory that use the pkg-config files. The scripts can be used to build HDF5 C and C++ 
+      applications (i.e, similar to the compiler scripts produced by the Autotools builds).
 
       (ADB - 2018/03/08, HDFFV-4359)
 
-    - CMake
-
-      Refactor use of CMAKE_BUILD_TYPE for new variable, which understands
+       - Refactored use of CMAKE_BUILD_TYPE for new variable, which understands
       the type of generator in use.
 
       Added new configuration macros to use new HDF_BUILD_TYPE variable. This
@@ -76,7 +74,10 @@ New Features
 
       (ADB - 2018/01/08, HDFFV-10385, HDFFV-10296)
 
-    - Removed version-specific gcc/gfortran flags for version 4.0 (inclusive)
+    - Autotools builds
+    ------------------
+
+       - Removed version-specific gcc/gfortran flags for version 4.0 (inclusive)
       and earlier.
 
       The config/gnu-flags file, which is sourced as a part of the configure
@@ -94,7 +95,7 @@ New Features
 
       (DER - 2017/05/31, HDFFV-9937)
 
-    - -fno-omit-frame-pointer was added when building with debugging symbols
+       - -fno-omit-frame-pointer was added when building with debugging symbols
       enabled.
 
       Debugging symbols can be enabled independently of the overall build
@@ -126,7 +127,7 @@ New Features
       Currently, VDS source files must be in the active directory to be
       found by the virtual file. Adding the option of a prefix to be set
       on the virtual file, using a data access property list (DAPL),
-      allows the source files to located at an absolute or relative path
+      allows the source files to locate at an absolute or relative path
       to the virtual file.
       Private utility functions in H5D and H5L packages merged into single
       function in H5F package.
@@ -167,14 +168,36 @@ New Features
       hid_t values that are of ID type H5I_REFERENCE.
 
       This enum value will be removed in a future major version of the library.
-      The code will remain unchanged in the HDF5 1.10.x branches.
+      The code will remain unchanged in the HDF5 1.10.x  releases and branches.
 
       (DER - 2017/04/05, HDFFV-10252)
 
 
     Parallel Library:
     -----------------
-    - Optimize parallel open/location of the HDF5 super-block
+    - Enabled compression for parallel applications.
+
+      With this release parallel applications can create and write compressed
+      datasets (or the datasets with the filters such as Fletcher32 applied). 
+
+      (EIP - 2018/03/29) 
+
+    - Addressed slow file close on some Lustre file systems.
+
+      Slow file close has been reported on some Lustre file systems.
+      While the ultimate cause is not understood fully, the proximate 
+      cause appears to be long delays in MPI_File_set_size() calls at 
+      file close and flush.
+
+      To minimize this problem pending a definitive diagnosis and fix, 
+      PHDF5 has been modified to avoid MPI_File_set_size() calls when       
+      possible.  This is done by comparing the library's EOA (End of 
+      Allocation) with the file systems EOF, and skipping the 
+      MPI_File_set_size() call if the two match.
+
+      (JRM - 2018/03/29)
+
+    - Optimized parallel open/location of the HDF5 super-block.
 
       Previous releases of PHDF5 required all parallel ranks to
       search for the HDF5 superblock signature when opening the
@@ -198,7 +221,7 @@ New Features
 
       (RAW - 2017/10/10, HDFFV-10294)
 
-    - Large MPI-IO transfers
+    - Added large (>2GB)  MPI-IO transfers.
 
       Previous releases of PHDF5 would fail when attempting to
       read or write greater than 2GB of data in a single IO operation.
@@ -297,7 +320,7 @@ New Features
       (BMR - 2018/03/11, HDFFV-10149)
 
     - Added overloaded functions H5Location::createGroup to take a link
-      creation property list
+      creation property list.
         Group createGroup(const char* name, const LinkCreatPropList& lcpl)
         Group createGroup(const H5std_string& name, const LinkCreatPropList& lcpl)
 
@@ -320,7 +343,7 @@ New Features
 
       (ADB - 2018/03/13, HDFFV-10412)
 
-    - Wrappers added for the following APIs:
+    - Wrappers were added for the following C APIs:
       H5Pset_evict_on_close
       H5Pget_evict_on_close
       H5Pset_chunk_opts
@@ -337,7 +360,7 @@ New Features
 
       JNI code which refers to this value will be removed in a future
       major version of the library. The code will remain unchanged in the
-      1.10.x branches.
+      1.10.x releases and branches.
 
       See the C library section, above, for further information.
 
@@ -346,13 +369,11 @@ New Features
 
     Tools:
     ------
-    - h5diff
-
-      h5diff has new option enable-error-stack.
+    - h5diff has a new option to display error stack.
 
       Updated h5diff with the --enable-error-stack argument, which
       enables the display of the hdf5 error stack. This completes the
-      improvement to the main tools; h5copy, h5diff, h5dump, h5ls and
+      improvement to the main tools: h5copy, h5diff, h5dump, h5ls and
       h5repack.
 
       (ADB - 2017/08/30, HDFFV-9774)
@@ -360,15 +381,15 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
-    -
+    - None
 
 Bug Fixes since HDF5-1.10.1 release
 ==================================
 
     Library
     -------
-    - The data read after a direct chunk write to a chunked dataset
-      was incorrect. 
+    - The data read after a direct chunk write to a chunked dataset with 
+      one chunk was incorrect. 
 
       The problem was due to the passing of a null dataset pointer to
       the insert callback for the chunk index in the routine
@@ -383,41 +404,40 @@ Bug Fixes since HDF5-1.10.1 release
 
       (VC - 2018/03/20, HDFFV-10425)
 
-    - Added public routine H5DOread_chunk to the high-level C library
+    - Added public routine H5DOread_chunk to the high-level C library.
 
-      As we have H5DOwrite_chunk() to write an entire chunk to the file
-      directly, the customer requested to add this public routine to 
-      read an entire chunk from the file directly.
-
-      This public routine was added based on a patch from GE Healthcare.
-
+      The patch for H5DOwrite_chunk() to write an entire chunk to the file
+      directly was contributed by GE Healthcare and integrated by The HDF Group
+      developers.
+ 
       (VC - 2017/05/19, HDFFV-9934)
 
-    - Freeing of object header in H5Ocache.c
+    - Freeing of object header after failed checksum verification.
 
-      It was discovered that the object header was not released properly
+      It was discovered that the object header (in H5Ocache.c) was not released properly
       when the checksum verification failed and a re-load of the object
       header was needed.
 
-      Free the object header that failed the chksum verification only
+      Freed the object header that failed the chksum verification only
       after the new object header is reloaded, deserialized and set up.
 
       (VC - 2018/03/14, HDFFV-10209)
 
-    - H5Pset_evict_on_close in H5Pfapl.c
+    - Updated H5Pset_evict_on_close in H5Pfapl.c
 
       Changed the minor error number from H5E_CANTSET to H5E_UNSUPPORTED for
       parallel library.
 
       (ADB - 2018/03/06, HDFFV-10414)
 
-    - Utility function can not handle lowercase Windows drive letters
+    - Fixed the problems with the utility function that could not handle lowercase 
+      Windows drive letters.
 
-      Added call to toupper function for drive letter.
+      Added call to upper function for drive letter.
 
       (ADB - 2017/12/18, HDFFV-10307)
 
-    - Fix H5Sencode() bug when the number of elements selected is > 2^32
+    - Fixed H5Sencode() bug when the number of elements selected was > 2^32.
 
       H5Sencode() incorrectly encodes dataspace selection with number of
       elements exceeding 2^32.  When decoding such selection via H5Sdecode(),
@@ -425,15 +445,17 @@ Bug Fixes since HDF5-1.10.1 release
       what is encoded.  This problem exists for H5S_SEL_HYPER and
       H5S_SEL_POINTS encoding.
 
-      The cause of the problem is because the library uses 32 bits to
+      The cause of the problem is due to the fact that the library uses 32 bits to
       encode counts and block offsets for the selection.
       The solution is to use the original 32 bit encodings if possible,
-      but use a different way to encode selection > 32 bits when needed.
-      See details in the RFC: H5Sencode/H5Secode Format Change.
+      but use a different way to encode selection if more that 32 bits is needed.
+      See details in the RFC: H5Sencode/H5Sdecode Format Change i
+      https://bitbucket.hdfgroup.org/projects/HDFFV/repos/hdf5doc/browse/RFCs/HDF5_Library/H5SencodeFormatChange.
 
       (VC - 2017/11/28, HDFFV-9947)
 
-    - Filter plugin handling in H5PL.c and H5Z.c
+    - Fixed filter plugin handling in H5PL.c and H5Z.c to not require i availability of
+      dependent libraries (e.g., szip or zlib).
 
       It was discovered that the dynamic loading process used by
       filter plugins had issues with library dependencies.
@@ -445,7 +467,7 @@ Bug Fixes since HDF5-1.10.1 release
              
       (ADB - 2017/11/16, HDFFV-10328)
 
-    - Fix rare object header corruption bug
+    - Fixed rare object header corruption bug.
 
       In certain cases, such as when converting large attributes to dense
       storage, an error could occur which would either fail an assertion or
@@ -453,7 +475,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (NAF - 2017/11/14, HDFFV-10274)
 
-    - H5Zfilter_avail in H5Z.c
+    - Updated H5Zfilter_avail in H5Z.c. 
 
       The public function checked for plugins, while the private
       function did not.
@@ -464,24 +486,24 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2017/10/10, HDFFV-10297, HDFFV-10319)
 
-    - Fix H5HL_offset_into()
+    - h5dump produced SEGFAULT when dumping corrypted file.
+      
+      The behavior was due to the error in the internal function H5HL_offset_into().
 
-      (1) Fix H5HL_offset_into() to return error when offset exceeds heap data
+      (1) Fixed H5HL_offset_into() to return error when offset exceeds heap data
           block size.
-      (2) Fix other places in the library that call this routine to detect
+      (2) Fixed other places in the library that call this routine to detect
           error routine.
 
       (VC - 2017/08/30, HDFFV-10216)
 
-    - Fixes for paged aggregation
+    - Fixes for paged aggregation feature.
 
       Skip test in test/fheap.c when:
       (1) multi/split drivers and
       (2) persisting free-space or using paged aggregation strategy
 
       (VC, 2017/07/10)
-
-    - Fixes for paged aggregation
 
       Changes made based on RFC review comments:
       (1) Added maximum value for file space page size
@@ -490,7 +512,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (VC - 2017/06/09)
 
-    - Fix for infinite loop in H5VM_power2up().
+    - Fixed for infinite loop in H5VM_power2up().
 
       The function H5VM_power2up() returns the next power of 2
       for n. When n exceeds 2^63, it overflows and becomes 0 causing
@@ -501,7 +523,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (VC - 2017/07/10, HDFFV-10217)
 
-    - Fix for H5Ocopy doesn't work with open identifiers
+    - Fixed for H5Ocopy doesn't work with open identifiers.
 
       Changes made so that raw data for dataset objects are copied from
       cached info when possible instead of flushing objects to file and
@@ -524,7 +546,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (DER - 2017/11/21, HDFFV-10330)
 
-    - Fix for collective metadata writes on file close
+    - Fixed collective metadata writes on file close.
 
       It was discovered that metadata was being written twice as part of
       the parallel file close behavior, once independently and once
@@ -663,9 +685,9 @@ Bug Fixes since HDF5-1.10.1 release
 
     Configuration
     -------------
-    - CMake
+    - CMake changes
 
-      Update CMake commands configuration.
+       - Updated CMake commands configuration.
 
       A number of improvements were made to the CMake commands. Most
       changes simplify usage or eliminate unused constructs. Also,
@@ -673,9 +695,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2018/02/01, HDFFV-10398)
 
-    - CMake
-
-      Correct usage of CMAKE_BUILD_TYPE variable.
+       - Corrected usage of CMAKE_BUILD_TYPE variable.
 
       The use of the CMAKE_BUILD_TYPE is incorrect for multi-config
       generators (Visual Studio and XCode) and is optional for single
@@ -686,18 +706,15 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2018/01/10, HDFFV-10385)
 
-    - CMake
-
-      Added replacement of fortran flags if using static CRT.
+       - Added replacement of fortran flags if using static CRT.
 
       Added TARGET_STATIC_CRT_FLAGS call to HDFUseFortran.cmake file in
       config/cmake_ext_mod folder.
 
       (ADB - 2018/01/08, HDFFV-10334)
 
-    - CMake
 
-      The hdf5 library used shared szip and zlib, which needlessly required
+       - The hdf5 library used shared szip and zlib, which needlessly required
       applications to link with the same szip and zlib libraries.
 
       Changed the target_link_libraries commands to use the static libs.
@@ -754,7 +771,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       (ADB - 2017/07/12, HDFFV-10254)
 
-    - cmake test execution environment
+    - CMake test execution environment
 
       The parallel HDF5 test: 't_pread' assumed the use of autotools
       and the directory structure associated with that testing approach.
@@ -765,13 +782,13 @@ Bug Fixes since HDF5-1.10.1 release
 
       (RAW - 2017/11/03, HDFFV-10318)
 
-    - Fortran compilation fails for xlf and CMake builds
+    - Fortran compilation fails for xlf and CMake builds.
 
       Fixed CMake shared library build for H5match_types and modules 
 
       (MSB - 2017/12/19, HDFFV-10363)
 
-    - Shared libraries fail test on OSX with Fortran enabled with CMake
+    - Shared libraries fail test on OSX with Fortran enabled with CMake.
 
       Fixed by removing the F77 use of EQUIVALENCE and COMMON, replaced
       using MODULES. Updated CMake.
@@ -851,7 +868,7 @@ Bug Fixes since HDF5-1.10.1 release
 
     - h5dump
 
-      the tools library will hide the error stack during file open.
+      The tools library will hide the error stack during file open.
 
       While this is preferable almost always, there are reasons to enable
       display of the error stack when a tool will not open a file. Adding an
@@ -889,9 +906,10 @@ Bug Fixes since HDF5-1.10.1 release
 
     - h5repack
 
-      h5repack failed to handle more then 9 chars for int conversion.
+      h5repack failed to handle command line parameters for customer filters.
 
-      User defined filter parameter conversions would fail for integers
+      User defined filter parameter conversions would fail whenintegers were 
+      represented on the command line with character string
       larger then 9 characters. Increased local variable array for storing
       the current command line parameter to prevent buffer overflows.
 
@@ -903,10 +921,9 @@ Bug Fixes since HDF5-1.10.1 release
 
       Reworked solution for HDFFV-8625 and HDFFV-8639. Implemented the check
       for string objects of same type in the diff_can_type function by
-      adding an if(tclass1 == H5T_STRING) block. This if block moves the
+      adding an if(tclass1 == H5T_STRING) block. This "if block" moves the
       same check that was added for attributes to this function, which is
-      used by all object types. This function also handles complex type
-      structures.
+      used by all object types. This function handles complex type structures.
       Also added a new test file in h5diffgenttest for testing this issue
       and removed the temporary files used in the test scripts.
 
@@ -916,7 +933,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       h5repack failed to copy a dataset with existing filter.
 
-      Reworked code for h5repack and h5diff code in tools library. Added
+      Reworked code for h5repack and h5diff code in the tools library. Added
       improved error handling, cleanup of resources and checks of calls.
       Modified H5Zfilter_avail and private function, H5Z_filter_avail.
       Moved check for plugin from public to private function. Updated
@@ -1025,7 +1042,7 @@ Bug Fixes since HDF5-1.10.1 release
 
     C++ APIs
     --------
-    - Removal of memory leaks
+    - Removal of memory leaks.
 
       A private function was inadvertently called, causing memory leaks.  This
       is now fixed.
@@ -1067,7 +1084,7 @@ Supported Platforms
                                     Version 4.9.3, Version 5.2.0,
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
-                                     Version 17.0.0.098 Build 20150407
+                                     Version 17.0.0.098 Build 20160721
                                   MPICH 3.1.4 compiled with GCC 4.9.3
 
     SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
@@ -1176,7 +1193,7 @@ The following platforms are not supported but have been tested for this release.
                                       Version 17.10-0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
-                                     Version 15.0.3.187 (Build 20150407)
+                                     Version 17.0.4.196 Build 20170411 
                                   MPICH 3.1.4 compiled with GCC 4.9.3
 
     Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
@@ -1185,8 +1202,12 @@ The following platforms are not supported but have been tested for this release.
                                   GCC Version 7.1.0
                                   OpenMPI 3.0.0-GCC-7.2.0-2.29
                                   Intel(R) C (icc) and C++ (icpc) compilers
-                                     Version 15.0.3.187 (Build 20150407)
+                                     Version 17.0.0.098 Build 20160721 
                                   with NAG Fortran Compiler Release 6.1(Tozai)
+
+    Linux 3.10.0-327.10.1.el7     MPICH 3.2 compiled with GCC 5.3.0
+    #1 SMP x86_64 GNU/Linux
+    (moohan)
 
     Linux 2.6.32-573.18.1.el6.ppc64  MPICH mpich 3.1.4 compiled with
     #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
