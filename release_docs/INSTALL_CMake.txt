@@ -324,7 +324,7 @@ Notes: CMake and HDF5
       KitWare site for more information about CMake.
 
    3. Build and test results can be submitted to our CDash server:
-      The CDash server for community submissions of hdf5 1.8 is at
+      The CDash server for community submissions of hdf5 is at
           https://cdash.hdfgroup.org.
 
       Submitters are requested to register their name and contact info and
