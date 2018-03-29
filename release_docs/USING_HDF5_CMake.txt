@@ -216,7 +216,7 @@ adjust the forward slash to double backslashes, except for the HDF_DIR
 environment variable.
 
 NOTE: this file is available at the HDF web site:
-    http://www.hdfgroup.org/HDF5/release/cmakebuild.html
+    https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
 
     HDF5_Examples.cmake
     HDF5_Examples_options.cmake
@@ -290,7 +290,7 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDN
 
 #TAR_SOURCE - name of tarfile
 #if(NOT DEFINED TAR_SOURCE)
-#  set(CTEST_USE_TAR_SOURCE "HDF5Examples-1.10.5-Source")
+#  set(CTEST_USE_TAR_SOURCE "HDF5Examples-1.10.7-Source")
 #endif()
 
 ###############################################################################################################
@@ -313,7 +313,7 @@ endif()
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
 
 ###############################################################################################################
-# For any comments please contact cdashhelp@hdfgroup.org
+# For any comments please contact help@hdfgroup.org
 #
 ###############################################################################################################
 
