@@ -24,7 +24,7 @@ Obtaining HDF5 source code
    1. Create a directory for your development; for example, "myhdfstuff".
 
    2. Obtain compressed (*.tar or *.zip) HDF5 source from
-        http://www.hdfgroup.org/ftp/HDF5/current/src/
+         https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
       and put it in "myhdfstuff".
       Uncompress the file. There should be a hdf5-1.10."X" folder.
 
@@ -48,7 +48,7 @@ the config/cmake/cacheinit.cmake file.
 HDF Group recommends using the ctest script mode to build HDF5.
 
 The following files referenced below are available at the HDF web site:
-    http://www.hdfgroup.org/HDF5/release/cmakebuild.html
+     https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
 
 Single compressed file with all the files needed, including source:
     CMake-hdf5-1.10.X.zip or CMake-hdf5-1.10.X.tar.gz
@@ -84,7 +84,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
    4. Edit the platform configuration file, HDF5options.cmake, if you want to change
       the default build environment.
-      (See http://www.hdfgroup.org/HDF5/release/chgcmkbuild.html)
+      (See  https://portal.hdfgroup.org/display/support/How+to+Change+HDF5+CMake+Build+Options)
 
    5. From the "myhdfstuff" directory execute the CTest Script with the
       following options:
