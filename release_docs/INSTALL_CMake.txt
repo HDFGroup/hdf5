@@ -323,9 +323,21 @@ Notes: CMake and HDF5
       how CMake support can be improved on any system. Visit the
       KitWare site for more information about CMake.
 
-   3. Build and test results can be submitted to our CDash server,
-      please read the HDF and CDash document at:
-??                 www.hdfgroup.org/CDash/HowToSubmit.
+   3. Build and test results can be submitted to our CDash server:
+      The CDash server for community submissions of hdf5 1.8 is at
+          https://cdash.hdfgroup.org.
+
+      Submitters are requested to register their name and contact info and
+      maintain their test sites. After your first submission, login and go
+      to your "My CDash" link and claim your site.
+
+      We ask that all submissions include the configuration information and
+      contact information in the CTest Notes Files upload step. See the
+      current reports on CDash for examples.
+
+      Please follow the convention that "NIGHTLY" submissions maintain the same
+      configuration every time. "EXPERIMENTAL" submissions can be expected to
+      be different for each submission.
 
    4. See the appendix at the bottom of this file for examples of using
       a ctest script for building and testing. Using a ctest script is

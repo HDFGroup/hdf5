@@ -24,7 +24,7 @@ if (CDASH_LOCAL)
   set (CTEST_DROP_LOCATION "/submit.php?project=HDF5Trunk")
 else ()
   set (CTEST_DROP_SITE "cdash.hdfgroup.org")
-  set (CTEST_DROP_LOCATION "/submit.php?project=HDF5+Trunk")
+  set (CTEST_DROP_LOCATION "/submit.php?project=HDF5")
 endif ()
 set (CTEST_DROP_SITE_CDASH TRUE)
 
