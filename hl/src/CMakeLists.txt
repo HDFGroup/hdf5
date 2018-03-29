@@ -124,11 +124,11 @@ if (NOT WIN32)
   set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in
-      ${HDF5_BINARY_DIR}/CMakeFiles/h5chl
+      ${HDF5_BINARY_DIR}/CMakeFiles/h5hlcc
       @ONLY
   )
   install (
-      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5chl
+      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5hlcc
       DESTINATION ${HDF5_INSTALL_BIN_DIR}
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
       COMPONENT hllibraries
