@@ -66,7 +66,7 @@ Preconditions:
     2.2.2 Szip
        The HDF5 library has a predefined compression filter that uses
        the extended-Rice lossless compression algorithm for chunked
-       datatsets.  For information on Szip compression, license terms,
+       datasets.  For information on Szip compression, license terms,
        and obtaining the Szip source code, see:
 
           https://portal.hdfgroup.org/display/HDF5/Szip+Compression+in+HDF+Products
