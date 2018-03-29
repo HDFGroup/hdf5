@@ -241,6 +241,10 @@ tar2cmakezip()
 		unix2dos -q -k $inf; \
 	    fi\
 	done
+
+    
+    mkdir $cmziptmpdir/CMake-$HDF5_VERS
+    mv $cmziptmpdir/* $cmziptmpdir/CMake-$HDF5_VERS
     # step 3: make zipball
     # -9 maximum compression
     # -y Store symbolic links as such in the zip archive
