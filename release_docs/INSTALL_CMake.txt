@@ -30,7 +30,7 @@ Obtaining HDF5 source code
 
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
-      The HDF5 1.10."X" product requires a minimum CMake version 3.2.2,
+      The HDF5 1.10."X" product requires a minimum CMake version 3.10,
       where "X" is the current HDF5 release version.
 
 Note:
@@ -325,7 +325,7 @@ Notes: CMake and HDF5
 
    3. Build and test results can be submitted to our CDash server,
       please read the HDF and CDash document at:
-                 www.hdfgroup.org/CDash/HowToSubmit.
+??                 www.hdfgroup.org/CDash/HowToSubmit.
 
    4. See the appendix at the bottom of this file for examples of using
       a ctest script for building and testing. Using a ctest script is
