@@ -723,6 +723,7 @@ typedef enum H5F_mem_page_t {
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
+H5_DLL herr_t H5F_start_swmr_write(H5F_t *file);
 
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
@@ -817,6 +818,7 @@ H5_DLL herr_t H5F_get_checksums(const uint8_t *buf, size_t chk_size, uint32_t *s
 /* Routine to track the # of retries */
 H5_DLL herr_t H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries);
 H5_DLL herr_t H5F_set_retries(H5F_t *f);
+H5_DLL herr_t H5F_get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info);
 
 /* Routine to invoke callback function upon object flush */
 H5_DLL herr_t H5F_object_flush_cb(H5F_t *f, hid_t obj_id);
