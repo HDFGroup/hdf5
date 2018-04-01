@@ -2734,6 +2734,66 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_set_libver_bounds()
+ *
+ * Purpose:     Set the file's low and high bound to the input parameters
+ *              'low' and 'high' respectively.
+ *              This is done only if the existing setting is different
+ *              from the inputs.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  Vailin Choi; December 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
+{
+    herr_t     ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_PACKAGE_VOL
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Set the bounds only if the existing setting is different from the inputs */
+    if(f->shared->low_bound != low || f->shared->high_bound != high) {
+        /* Call the flush routine, for this file */
+        /* Note: This is done in case the binary format for representing a
+         *      metadata entry class changes when the file format low / high
+         *      bounds are changed and an unwritten entry of that class is
+         *      sitting in the metadata cache.
+         *      
+         *      If that happens, it's possible that the entry's size could
+         *      become larger, potentially corrupting the file (if the larger
+         *      entry is fully written, overwriting data outside its allocated
+         *      space), or corrupting the entry (if the entry is truncated to
+         *      fit into the allocated space).
+         *      
+         *      Although I'm not aware of any metadata with this behavior
+         *      currently, it would be very difficult to guard against and / or
+         *      detect, but if we flush everything here, the format version
+         *      for metadata entries in the cache will be finalized and these
+         *      sorts of problems can be avoided.
+         *      
+         *      QAK - April, 2018
+         */
+        if(H5F__flush_real(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+
+        /* Set the new bounds */
+        f->shared->low_bound = low;
+        f->shared->high_bound = high;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_set_libver_bounds() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5F__get_freespace
  *
  * Purpose:     Private version of H5Fget_freespace

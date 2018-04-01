@@ -1462,7 +1462,6 @@ herr_t
 H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
 {
     H5F_t *f;                           /* File */
-    unsigned latest_flags;              /* Latest format flags for file */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1472,22 +1471,13 @@ H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
     if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* Check if the value is changing */
-    latest_flags = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ALL_FLAGS);
-    if(latest_format != (H5F_LATEST_ALL_FLAGS == latest_flags)) {
-	hid_t 	fapl_id = H5P_DEFAULT;  /* FAPL to use */
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
-        /* Set up collective metadata if appropriate */
-        if(H5CX_set_loc(file_id) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
-
-        /* Call the flush routine, for this file */
-        if(H5F__flush_real(f, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
-
-        /* Toggle the 'latest format' flag */
-        H5F_SET_LATEST_FLAGS(f, latest_format ? H5F_LATEST_ALL_FLAGS : 0);
-    } /* end if */
+    /* Call internal set_libver_bounds function */
+    if(H5F__set_libver_bounds(f, low, high) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
 done:
     FUNC_LEAVE_API(ret_value)
