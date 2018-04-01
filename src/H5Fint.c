@@ -2788,6 +2788,25 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
     /* Set the bounds only if the existing setting is different from the inputs */
     if(f->shared->low_bound != low || f->shared->high_bound != high) {
         /* Call the flush routine, for this file */
+        /* Note: This is done in case the binary format for representing a
+         *      metadata entry class changes when the file format low / high
+         *      bounds are changed and an unwritten entry of that class is
+         *      sitting in the metadata cache.
+         *      
+         *      If that happens, it's possible that the entry's size could
+         *      become larger, potentially corrupting the file (if the larger
+         *      entry is fully written, overwriting data outside its allocated
+         *      space), or corrupting the entry (if the entry is truncated to
+         *      fit into the allocated space).
+         *      
+         *      Although I'm not aware of any metadata with this behavior
+         *      currently, it would be very difficult to guard against and / or
+         *      detect, but if we flush everything here, the format version
+         *      for metadata entries in the cache will be finalized and these
+         *      sorts of problems can be avoided.
+         *      
+         *      QAK - April, 2018
+         */
         if(H5F__flush_real(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
