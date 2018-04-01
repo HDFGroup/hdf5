@@ -1221,82 +1221,23 @@ done:
 herr_t
 H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info)
 {
-    H5F_t        *file;           /* File object for file ID */
-    unsigned     i, j;            /* Local index variable */
-    size_t       tot_size;        /* Size of each retries[i] */
-    herr_t       ret_value = SUCCEED;       /* Return value */
+    H5F_t          *file;                       /* File object for file ID */
+    herr_t          ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", file_id, info);
 
     /* Check args */
-    if(!info)
+    if (!info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
     /* Get the file pointer */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* Copy the # of bins for "retries" array */
-    info->nbins = file->shared->retries_nbins;
-
-    /* Initialize the array of "retries" */
-    HDmemset(info->retries, 0, sizeof(info->retries));
-
-    /* Return if there are no bins -- no retries */
-    if(!info->nbins)
-        HGOTO_DONE(SUCCEED);
-
-    /* Calculate size for each retries[i] */
-    tot_size = info->nbins * sizeof(uint32_t);
-
-    /* Map and copy information to info's retries for metadata items with tracking for read retries */
-    j = 0;
-    for(i = 0; i < H5AC_NTYPES; i++) {
-        switch(i) {
-            case H5AC_OHDR_ID:
-            case H5AC_OHDR_CHK_ID:
-            case H5AC_BT2_HDR_ID:
-            case H5AC_BT2_INT_ID:
-            case H5AC_BT2_LEAF_ID:
-            case H5AC_FHEAP_HDR_ID:
-            case H5AC_FHEAP_DBLOCK_ID:
-            case H5AC_FHEAP_IBLOCK_ID:
-            case H5AC_FSPACE_HDR_ID:
-            case H5AC_FSPACE_SINFO_ID:
-            case H5AC_SOHM_TABLE_ID:
-            case H5AC_SOHM_LIST_ID:
-            case H5AC_EARRAY_HDR_ID:
-            case H5AC_EARRAY_IBLOCK_ID:
-            case H5AC_EARRAY_SBLOCK_ID:
-            case H5AC_EARRAY_DBLOCK_ID:
-            case H5AC_EARRAY_DBLK_PAGE_ID:
-            case H5AC_FARRAY_HDR_ID:
-            case H5AC_FARRAY_DBLOCK_ID:
-            case H5AC_FARRAY_DBLK_PAGE_ID:
-            case H5AC_SUPERBLOCK_ID:
-                HDassert(j < H5F_NUM_METADATA_READ_RETRY_TYPES);
-                if(file->shared->retries[i] != NULL) {
-                    /* Allocate memory for retries[i]
-                     *
-                     * This memory should be released by the user with
-                     * the H5free_memory() call.
-                     */
-                    if(NULL == (info->retries[j] = (uint32_t *)H5MM_malloc(tot_size)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-                    /* Copy the information */
-                    HDmemcpy(info->retries[j], file->shared->retries[i], tot_size);
-                } /* end if */
-
-                /* Increment location in info->retries[] array */
-                j++;
-                break;
-
-            default:
-                break;
-        } /* end switch */
-    } /* end for */
+    /* Get the retry info */
+    if(H5F__get_metadata_read_retry_info(file, info) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't get metadata read retry info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1379,39 +1320,16 @@ done:
  * Function:    H5Fstart_swmr_write
  *
  * Purpose:    To enable SWMR writing mode for the file
- *        1) Refresh opened objects: part 1
- *        2) Flush & reset accumulator
- *        3) Mark the file in SWMR writing mode
- *         4) Set metadata read attempts and retries info
- *        5) Disable accumulator
- *        6) Evict all cache entries except the superblock
- *        7) Refresh opened objects (part 2)
- *        8) Unlock the file
- *
- *        Pre-conditions:
- *        1) The file being opened has v3 superblock
- *        2) The file is opened with H5F_ACC_RDWR
- *        3) The file is not already marked for SWMR writing
- *        4) Current implementaion for opened objects:
- *           --only allow datasets and groups without attributes
- *           --disallow named datatype with/without attributes
- *           --disallow opened attributes attached to objects
- *        NOTE: Currently, only opened groups and datasets are allowed
- *              when enabling SWMR via H5Fstart_swmr_write().
- *              Will later implement a different approach--
- *              set up flush dependency/proxy even for file opened without
- *              SWMR to resolve issues with opened objects.
  *
  * Return:    Non-negative on success/negative on failure
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Fstart_swmr_write(hid_t file_id)
 {
-    H5F_t *file;         	/* File info */
-    hbool_t ci_load = FALSE;    /* whether MDC ci load requested */
-    hbool_t ci_write = FALSE;   /* whether MDC CI write requested */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5F_t      *file = NULL;            /* File info */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
@@ -1419,27 +1337,6 @@ H5Fstart_swmr_write(hid_t file_id)
     /* check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-
-    /* Should have write permission */
-    if((H5F_INTENT(file) & H5F_ACC_RDWR) == 0)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no write intent on file")
-
-    if(file->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file superblock version should be at least 3")
-
-    HDassert((file->shared->low_bound == H5F_LIBVER_V110) && (file->shared->high_bound == H5F_LIBVER_V110));
-
-    /* Should not be marked for SWMR writing mode already */
-    if(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file already in SWMR writing mode")
-
-    HDassert(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS);
-
-    /* Check to see if cache image is enabled.  Fail if so */
-    if(H5C_cache_image_status(file, &ci_load, &ci_write) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
-    if(ci_load || ci_write )
-        HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and MDC cache image")
 
     /* Set up collective metadata if appropriate */
     if(H5CX_set_loc(file_id) < 0)
