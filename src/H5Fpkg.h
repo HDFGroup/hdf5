@@ -410,6 +410,7 @@ H5_DLL ssize_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
 H5_DLL herr_t H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
 H5_DLL ssize_t H5F__get_free_sections(H5F_t *f, H5FD_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info);
+H5_DLL herr_t H5F__get_metadata_read_retry_info(H5F_t *file, H5F_retry_info_t *info);
 H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(hid_t file_id);
