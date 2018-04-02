@@ -144,8 +144,8 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
     H5MF_sect_deserialize,		/* Deserialize section          */
     H5MF_sect_small_can_merge,  /* Can sections merge?          */
     H5MF_sect_small_merge,      /* Merge sections               */
-    H5MF_sect_small_can_shrink,	/* Can section shrink container?*/
-    H5MF_sect_small_shrink,	/* Shrink container w/section   */
+    NULL,			/* Can section shrink container?*/
+    NULL,			/* Shrink container w/section   */
     H5MF_sect_free,             /* Free section                 */
     H5MF_sect_valid,            /* Check validity of section    */
     H5MF_sect_split,            /* Split section node for alignment */
@@ -694,6 +694,12 @@ done:
  *
  * Note: 	A small section is allowed to shrink only at closing.
  *
+ * Note:	This is unused currently, to maintain the invariant that the
+ *		file size is always a multiple of the page size.
+ *
+ *		(This function should probably be deleted, or the invariant
+ *		relaxed)
+ *
  * Return:	Success:	non-negative (TRUE/FALSE)
  *          Failure:	negative
  *
@@ -745,6 +751,12 @@ done:
  * Function:	H5MF_sect_small_shrink
  *
  * Purpose:	Shrink container with section
+ *
+ * Note:	This is unused currently, to maintain the invariant that the
+ *		file size is always a multiple of the page size.
+ *
+ *		(This function should probably be deleted, or the invariant
+ *		relaxed)
  *
  * Return:	Success:	non-negative
  *          Failure:	negative 
