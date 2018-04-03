@@ -176,7 +176,7 @@ New Features
       (DER - 2017/05/31, HDFFV-10214)
 
     - The H5I_REFERENCE value in the H5I_type_t enum (defined in H5Ipublic.h)
-      has been marked as deprectated.
+      has been marked as deprecated.
 
       This ID type value is not used in the C library. i.e.: There are no
       hid_t values that are of ID type H5I_REFERENCE.
