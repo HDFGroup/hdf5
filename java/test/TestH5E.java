@@ -187,7 +187,7 @@ public class TestH5E {
                 fail("H5.H5Eget_msg: " + err);
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", "Invalid arguments to routine",
+            assertEquals("H5.H5Eget_msg: ", "Object atom",
                         msg);
             assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR,
                         error_msg_type[0]);
@@ -215,7 +215,7 @@ public class TestH5E {
                 fail("H5.H5Eget_msg: " + err);
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", "Inappropriate type", msg);
+            assertEquals("H5.H5Eget_msg: ", "Unable to find atom information (already closed?)", msg);
             assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MINOR,
                         error_msg_type[0]);
         }
@@ -289,7 +289,7 @@ public class TestH5E {
             fail("H5.H5Epop: " + err);
         }
 
-        assertTrue("H5.H5Epop #:" + num_msg, num_msg == 3);
+        assertTrue("H5.H5Epop #:" + num_msg, num_msg == 4);
 
         try {
             H5.H5Epop(current_stackid, 1);
@@ -307,7 +307,7 @@ public class TestH5E {
             fail("H5.H5Epop: " + err);
         }
 
-        assertTrue("H5.H5Epop", num_msg == 2);
+        assertTrue("H5.H5Epop", num_msg == 3);
     }
 
     @Test
@@ -530,7 +530,7 @@ public class TestH5E {
             err.printStackTrace();
             fail("testH5Ewalk:H5Eget_num " + err);
         }
-        assertTrue("testH5Ewalk #:" + num_msg, num_msg == 3);
+        assertTrue("testH5Ewalk #:" + num_msg, num_msg == 4);
 
         try {
             H5.H5Ewalk2(current_stackid, HDF5Constants.H5E_WALK_UPWARD, walk_cb, walk_data);
@@ -540,12 +540,12 @@ public class TestH5E {
             fail("testH5Ewalk:H5Ewalk2 " + err);
         }
         assertFalse("testH5Ewalk:H5Ewalk2 ",((H5E_walk_data)walk_data).walkdata.isEmpty());
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((H5E_walk_data)walk_data).walkdata.size(),((H5E_walk_data)walk_data).walkdata.size()==3);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line==3765);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line==5504);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).func_name,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).func_name.compareToIgnoreCase("H5P_verify_apl_and_dxpl")==0);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).err_desc,((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).err_desc.compareToIgnoreCase("not a property list")==0);
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).err_desc,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).err_desc.compareToIgnoreCase("not the required access property list")==0);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((H5E_walk_data)walk_data).walkdata.size(),((H5E_walk_data)walk_data).walkdata.size()==4);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).line==378);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).line==1512);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(2)).func_name,((wdata)((H5E_walk_data)walk_data).walkdata.get(2)).func_name.compareToIgnoreCase("H5F__open")==0);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).err_desc,((wdata)((H5E_walk_data)walk_data).walkdata.get(0)).err_desc.compareToIgnoreCase("can't find object for ID")==0);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).err_desc,((wdata)((H5E_walk_data)walk_data).walkdata.get(1)).err_desc.compareToIgnoreCase("unable to retrieve VFL class")==0);
     }
 
 }
