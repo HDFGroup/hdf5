@@ -597,7 +597,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__efl_bh_info(H5F_t *f, hid_t dxpl_id, H5O_efl_t *efl, hsize_t *heap_size)
+H5D__efl_bh_info(H5F_t *f, H5O_efl_t *efl, hsize_t *heap_size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -610,7 +610,7 @@ H5D__efl_bh_info(H5F_t *f, hid_t dxpl_id, H5O_efl_t *efl, hsize_t *heap_size)
     HDassert(heap_size);
 
     /* Get the size of the local heap for EFL's file list */
-    if(H5HL_heapsize(f, dxpl_id, efl->heap_addr, heap_size) < 0)
+    if(H5HL_heapsize(f, efl->heap_addr, heap_size) < 0)
         HGOTO_ERROR(H5E_EFL, H5E_CANTINIT, FAIL, "unable to retrieve local heap info")
 
 done:

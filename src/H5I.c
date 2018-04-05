@@ -30,8 +30,9 @@
 
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5ACprivate.h"        /* Metadata cache                           */
-#include "H5Eprivate.h"		    /* Error handling                           */
-#include "H5FLprivate.h"	    /* Free Lists                               */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Eprivate.h"		/* Error handling                           */
+#include "H5FLprivate.h"	/* Free Lists                               */
 #include "H5Ipkg.h"             /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Oprivate.h"         /* Object headers                           */
@@ -126,6 +127,7 @@ static void *H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id);
 static int H5I__inc_type_ref(H5I_type_t type);
 static int H5I__get_type_ref(H5I_type_t type);
 static H5I_id_info_t *H5I__find_id(hid_t id);
+static ssize_t H5I__get_name(const H5G_loc_t *loc, char *name, size_t size);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I__debug(H5I_type_t type);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -2022,16 +2024,51 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     H5TRACE3("Zs", "ixz", id, name, size);
 
     /* Get object location */
-    if (H5G_loc(id, &loc) < 0)
+    if(H5G_loc(id, &loc) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
 
-    /* Call internal group routine to retrieve object's name */
-    if ((ret_value = H5G_get_name(&loc, name, size, NULL, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
+    /* Call internal routine to retrieve object's name */
+    if((ret_value = H5I__get_name(&loc, name, size)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I__get_name
+ *
+ * Purpose:     Internal routine to retrieve the name for an object
+ *
+ * Note:        This routine is needed so that there's a non-API routine
+ *              that can set up VOL / SWMR info (which need a DXPL).
+ *
+ * Return:      Success:    The length of the name
+ *              Failure:    -1
+ *
+ * Programmer:	Quincey Koziol
+ *		January 9, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static ssize_t
+H5I__get_name(const H5G_loc_t *loc, char *name, size_t size)
+{
+    ssize_t ret_value = FAIL;   /* Return value */
+
+    FUNC_ENTER_STATIC_VOL
+
+    /* Check arguments */
+    HDassert(loc);
+
+    /* Retrieve object's name */
+    if((ret_value = H5G_get_name(loc, name, size, NULL)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
+
+done:
+    FUNC_LEAVE_NOAPI_VOL(ret_value)
+} /* end H5I__get_name() */
 
 
 /*-------------------------------------------------------------------------

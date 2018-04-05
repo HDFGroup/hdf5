@@ -24,6 +24,7 @@
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Aprivate.h"         /* Attributes                           */
 #include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Fpkg.h"             /* File access                          */
@@ -33,7 +34,6 @@
 #include "H5MFprivate.h"        /* File memory management               */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5SMprivate.h"        /* Shared Object Header Messages        */
 #include "H5Tprivate.h"         /* Datatypes                            */
 
 
@@ -79,7 +79,7 @@ static const H5I_class_t H5I_FILE_CLS[1] = {{
     H5I_FILE,            /* ID class value */
     0,                   /* Class flags */
     0,                   /* # of reserved IDs for class */
-    (H5I_free_t)H5F_close    /* Callback routine for closing objects of this class */
+    (H5I_free_t)H5F__close_cb  /* Callback routine for closing objects of this class */
 }};
 
 
@@ -365,11 +365,11 @@ H5Fis_hdf5(const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* call the private is_HDF5 function */
-    if((ret_value = H5F__is_hdf5(name, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
+    /* (Should not trigger raw data I/O - QAK, 2018/01/03) */
+    if((ret_value = H5F__is_hdf5(name)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable open file")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fis_hdf5() */
 
@@ -401,36 +401,35 @@ hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t   *new_file = NULL;               /* file struct for new file                 */
-    hid_t   dxpl_id = H5AC_ind_read_dxpl_id;/* dxpl used by library                     */
     hid_t   ret_value;                      /* return value                             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Check/fix arguments */
     if (!filename || !*filename)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file name")
 
     /* In this routine, we only accept the following flags:
      *          H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_SWMR_WRITE
      */
     if (flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid flags")
 
     /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
     if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "mutually exclusive flags for file creation")
 
     /* Check file creation property list */
     if (H5P_DEFAULT == fcpl_id)
         fcpl_id = H5P_FILE_CREATE_DEFAULT;
     else
         if (TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not file create property list")
 
-    /* Verify access property list and get correct dxpl */
-    if (H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Adjust bit flags by turning on the creation bit and making sure that
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
@@ -441,19 +440,19 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create a new file or truncate an existing file. */
-    if (NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
+    if (NULL == (new_file = H5F__create(filename, flags, fcpl_id, fapl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
     /* Get an atom for the file */
     if ((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
 done:
-    if (ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+    if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
@@ -482,44 +481,43 @@ hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
     H5F_t       *new_file = NULL;                   /* file struct for new file                 */
-    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;    /* dxpl used by library                     */
     hid_t       ret_value;                          /* return value                             */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
 
     /* Check/fix arguments. */
     if(!filename || !*filename)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file name")
     /* Reject undefined flags (~H5F_ACC_PUBLIC_FLAGS) and the H5F_ACC_TRUNC & H5F_ACC_EXCL flags */
     if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
             (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file open flags")
     /* Asking for SWMR write access on a read-only file is invalid */
     if((flags & H5F_ACC_SWMR_WRITE) && 0 == (flags & H5F_ACC_RDWR))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "SWMR write access on a file open for read-only access is not allowed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "SWMR write access on a file open for read-only access is not allowed")
     /* Asking for SWMR read access on a non-read-only file is invalid */
     if((flags & H5F_ACC_SWMR_READ) && (flags & H5F_ACC_RDWR))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "SWMR read access on a file open for read-write access is not allowed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "SWMR read access on a file open for read-write access is not allowed")
 
-    /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Open the file */
-    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
+    if(NULL == (new_file = H5F__open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
 done:
     if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problems closing file")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
@@ -623,17 +621,15 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
      * to be flushed.
      */
     if(H5F_ACC_RDWR & H5F_INTENT(f)) {
-        /* Flush other files, depending on scope */
-        if(H5F_SCOPE_GLOBAL == scope) {
-            /* Call the flush routine for mounted file hierarchies */
-            if(H5F_flush_mounts(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
-        } /* end if */
-        else {
-            /* Call the flush routine, for this file */
-            if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
-        } /* end else */
+	hid_t fapl_id = H5P_DEFAULT;    /* FAPL to use */
+
+        /* Verify access property list and set up collective metadata if appropriate */
+        if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, object_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access property list info")
+
+        /* Flush the file */
+        if(H5F__flush(f, scope) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
     } /* end if */
 
 done:
@@ -658,37 +654,18 @@ done:
 herr_t
 H5Fclose(hid_t file_id)
 {
-    H5F_t       *f = NULL;
-    int         nref;
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
-    /* Check/fix arguments. */
-    if (H5I_FILE != H5I_get_type(file_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
+    /* Check arguments */
+    if(H5I_FILE != H5I_get_type(file_id))
+        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file ID")
 
-    /* Flush file if this is the last reference to this id and we have write
-     * intent, unless it will be flushed by the "shared" file being closed.
-     * This is only necessary to replicate previous behaviour, and could be
-     * disabled by an option/property to improve performance.
-     */
-    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    if ((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
-        if ((nref = H5I_get_ref(file_id, FALSE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
-        if (nref == 1)
-            if (H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    }
-
-    /* Decrement reference count on atom.  When it reaches zero the file will
-     * be closed.
-     */
-    if (H5I_dec_app_ref(file_id) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+    /* Close the file */
+    if(H5F__close(file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "closing file ID failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -739,7 +716,7 @@ H5Freopen(hid_t file_id)
 
 done:
     if(ret_value < 0 && new_file)
-        if(H5F__dest(new_file, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
+        if(H5F__dest(new_file, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
     FUNC_LEAVE_API(ret_value)
@@ -819,8 +796,8 @@ H5Fget_freespace(hid_t file_id)
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* Go get the actual amount of free space in the file */
-    if(H5MF_get_freespace(file, H5AC_ind_read_dxpl_id, &tot_space, NULL) < 0)
+    /* Get the free space in the file */
+    if(H5F__get_freespace(file, &tot_space) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
     ret_value = (hssize_t)tot_space;
@@ -921,7 +898,8 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* call private get_file_image function */
-    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
+    /* (Should not trigger raw data I/O - QAK, 2018/01/03) */
+    if((ret_value = H5F__get_file_image(file, buf_ptr, buf_len)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file image")
 
 done:
@@ -1222,26 +1200,9 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     } /* end else */
     HDassert(f->shared);
 
-    /* Reset file info struct */
-    HDmemset(finfo, 0, sizeof(*finfo));
-
-    /* Get the size of the superblock and any superblock extensions */
-    if(H5F__super_size(f, H5AC_ind_read_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
-
-    /* Get the size of any persistent free space */
-    if(H5MF_get_freespace(f, H5AC_ind_read_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
-
-    /* Check for SOHM info */
-    if(H5F_addr_defined(f->shared->sohm_addr))
-        if(H5SM_ih_size(f, H5AC_ind_read_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
-
-    /* Set version # fields */
-    finfo->super.version = f->shared->sblock->super_vers;
-    finfo->sohm.version = f->shared->sohm_vers;
-    finfo->free.version = HDF5_FREESPACE_VERSION;
+    /* Get the file info */
+    if(H5F__get_info(f, finfo) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve file info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1271,11 +1232,11 @@ H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
     /* Get the file pointer */
-    if (NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Get the retry info */
-    if (H5F_get_metadata_read_retry_info(file, info) < 0)
+    if(H5F__get_metadata_read_retry_info(file, info) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't get metadata read retry info")
 
 done:
@@ -1311,8 +1272,8 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
     if(sect_info && nsects == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
 
-    /* Go get the free-space section information in the file */
-    if((ret_value = H5MF_get_free_sections(file, H5AC_ind_read_dxpl_id, type, nsects, sect_info)) < 0)
+    /* Get the free-space section information in the file */
+    if((ret_value = H5F__get_free_sections(file, type, nsects, sect_info)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
 done:
@@ -1334,8 +1295,8 @@ done:
 herr_t
 H5Fclear_elink_file_cache(hid_t file_id)
 {
-    H5F_t         *file;        /* File */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    H5F_t       *file;        /* File */
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
@@ -1344,9 +1305,10 @@ H5Fclear_elink_file_cache(hid_t file_id)
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* Release the EFC */
+    /* See if there's an EFC */
     if(file->shared->efc)
-        if(H5F_efc_release(file->shared->efc) < 0)
+        /* Release the EFC */
+        if(H5F__efc_release(file->shared->efc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
 
 done:
@@ -1358,30 +1320,9 @@ done:
  * Function:    H5Fstart_swmr_write
  *
  * Purpose:    To enable SWMR writing mode for the file
- *        1) Refresh opened objects: part 1
- *        2) Flush & reset accumulator
- *        3) Mark the file in SWMR writing mode
- *         4) Set metadata read attempts and retries info
- *        5) Disable accumulator
- *        6) Evict all cache entries except the superblock
- *        7) Refresh opened objects (part 2)
- *        8) Unlock the file
- *
- *        Pre-conditions:
- *        1) The file being opened has v3 superblock
- *        2) The file is opened with H5F_ACC_RDWR
- *        3) The file is not already marked for SWMR writing
- *        4) Current implementaion for opened objects:
- *           --only allow datasets and groups without attributes
- *           --disallow named datatype with/without attributes
- *           --disallow opened attributes attached to objects
- *        NOTE: Currently, only opened groups and datasets are allowed
- *              when enabling SWMR via H5Fstart_swmr_write().
- *              Will later implement a different approach--
- *              set up flush dependency/proxy even for file opened without
- *              SWMR to resolve issues with opened objects.
  *
  * Return:    Non-negative on success/negative on failure
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1394,12 +1335,16 @@ H5Fstart_swmr_write(hid_t file_id)
     H5TRACE1("e", "i", file_id);
 
     /* check args */
-    if (NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
-    /* start SWMR writing */
-    if (H5F_start_swmr_write(file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "unable to start SWMR writing")
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+
+    /* Call the internal routine */
+    if(H5F__start_swmr_write(file) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTCONVERT, FAIL, "unable to convert file format")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1526,8 +1471,12 @@ H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
     if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* Call private set_libver_bounds function */
-    if(H5F_set_libver_bounds(f, low, high) < 0)
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+
+    /* Call internal set_libver_bounds function */
+    if(H5F__set_libver_bounds(f, low, high) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
 done:
@@ -1536,7 +1485,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5Fformat_convert_super (Internal)
+ * Function: H5Fformat_convert
  *
  * Purpose:  Downgrade the superblock version to v2 and
  *           downgrade persistent file space to non-persistent
@@ -1548,57 +1497,26 @@ done:
 herr_t
 H5Fformat_convert(hid_t fid)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5F_t    *f;                     /* File to flush */
+    herr_t    ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", fid);
 
-    if(H5I_FILE == H5I_get_type(fid)) {
-        H5F_t    *f;                     /* File to flush */
-        hbool_t   mark_dirty = FALSE;
-
-        /* Get file object */
-        if(NULL == (f = (H5F_t *)H5I_object(fid)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
-        /* Check if the superblock should be downgraded */
-        if(f->shared->sblock->super_vers > HDF5_SUPERBLOCK_VERSION_V18_LATEST) {
-            f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_V18_LATEST;
-            mark_dirty = TRUE;
-        } /* end if */
-
-        /* Check for persistent freespace manager, which needs to be downgraded */
-        if(!(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
-                f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
-                f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
-                f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
-            /* Check to remove free-space manager info message from superblock extension */
-            if(H5F_addr_defined(f->shared->sblock->ext_addr))
-                if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_FSINFO_ID) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
-
-            /* Close freespace manager */
-            if(H5MF_try_close(f, H5AC_ind_read_dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
-
-            /* Set non-persistent freespace manager */
-            f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
-            f->shared->fs_persist = H5F_FREE_SPACE_PERSIST_DEF;
-            f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
-            f->shared->fs_page_size = H5F_FILE_SPACE_PAGE_SIZE_DEF;
-
-            /* Indicate that the superblock should be marked dirty */
-            mark_dirty = TRUE;
-        } /* end if */
-
-        /* Check if we should mark the superblock dirty */
-        if(mark_dirty)
-            /* Mark superblock as dirty */
-            if(H5F_super_dirty(f) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
-    } /* end if */
-    else
+    if(H5I_FILE != H5I_get_type(fid))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    /* Get file object */
+    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(fid) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+
+    /* Call the internal routine */
+    if(H5F__format_convert(f) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTCONVERT, FAIL, "unable to convert file format")
 
 done:
     FUNC_LEAVE_API(ret_value)
