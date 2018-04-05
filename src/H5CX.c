@@ -262,6 +262,7 @@ typedef struct H5CX_t {
     uint32_t mpio_global_no_coll_cause; /* Global reason for breaking collective I/O (H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME) */
     hbool_t mpio_global_no_coll_cause_set; /* Whether global reason for breaking collective I/O is set */
     hbool_t mpio_global_no_coll_cause_valid; /* Whether global reason for breaking collective I/O is valid */
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     int mpio_coll_chunk_link_hard;  /* Instrumented "collective chunk link hard" value (H5D_XFER_COLL_CHUNK_LINK_HARD_NAME) */
     hbool_t mpio_coll_chunk_link_hard_set; /* Whether instrumented "collective chunk link hard" value is set */
     int mpio_coll_chunk_multi_hard;  /* Instrumented "collective chunk multi hard" value (H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME) */
@@ -274,6 +275,7 @@ typedef struct H5CX_t {
     hbool_t mpio_coll_chunk_multi_ratio_coll_set; /* Whether instrumented "collective chunk multi ratio coll" value is set */
     int mpio_coll_chunk_multi_ratio_ind;  /* Instrumented "collective chunk multi ratio ind" value (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
     hbool_t mpio_coll_chunk_multi_ratio_ind_set; /* Whether instrumented "collective chunk multi ratio ind" value is set */
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
     /* Cached LAPL properties */
@@ -2520,6 +2522,7 @@ H5CX_set_mpio_global_no_coll_cause(uint32_t mpio_global_no_coll_cause)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_mpio_global_no_coll_cause() */
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_test_set_mpio_coll_chunk_link_hard
@@ -2723,6 +2726,7 @@ H5CX_test_set_mpio_coll_chunk_multi_ratio_ind(int mpio_coll_chunk_multi_ratio_in
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_test_set_mpio_coll_chunk_multi_ratio_ind() */
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -2756,12 +2760,14 @@ H5CX__pop_common(void)
     H5CX_SET_PROP(H5D_MPIO_ACTUAL_IO_MODE_NAME, mpio_actual_io_mode)
     H5CX_SET_PROP(H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, mpio_local_no_coll_cause)
     H5CX_SET_PROP(H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, mpio_global_no_coll_cause)
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, mpio_coll_chunk_link_hard)
     H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, mpio_coll_chunk_multi_hard)
     H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, mpio_coll_chunk_link_num_true)
     H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, mpio_coll_chunk_link_num_false)
     H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, mpio_coll_chunk_multi_ratio_coll)
     H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, mpio_coll_chunk_multi_ratio_ind)
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
     /* Pop the top context node from the stack */
