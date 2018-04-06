@@ -310,7 +310,7 @@ static herr_t UD_hard_create(const char *link_name, hid_t loc_group,
 static herr_t UD_hard_delete(const char *link_name, hid_t loc_group,
     const void *udata, size_t udata_size);
 static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id);
+    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id);
 
 static void hard_link_example(void)
 {
@@ -490,7 +490,7 @@ done:
  * return its ID.
  */
 static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id)
+    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id)
 {
     haddr_t       addr;
     hid_t         ret_value = -1;
@@ -527,7 +527,7 @@ static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group,
  * These links have no udata, so they don't need a query function.
  */
 static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id);
+    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id);
 
 static void plist_link_example(void)
 {
@@ -618,7 +618,7 @@ static void plist_link_example(void)
  * Open a path passed in through the property list.
  */
 static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t lapl_id)
+    const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id)
 {
     char *        path;
     hid_t         ret_value = -1;

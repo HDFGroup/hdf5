@@ -87,7 +87,8 @@ typedef struct s1_t {
 
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t UD_traverse(const char H5_ATTR_UNUSED * link_name, hid_t H5_ATTR_UNUSED cur_group,
-    const void H5_ATTR_UNUSED * udata, size_t H5_ATTR_UNUSED udata_size, hid_t H5_ATTR_UNUSED lapl_id)
+    const void H5_ATTR_UNUSED * udata, size_t H5_ATTR_UNUSED udata_size, hid_t H5_ATTR_UNUSED lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     return -1;
 }

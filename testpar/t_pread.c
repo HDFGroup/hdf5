@@ -90,7 +90,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
     int header = -1;
     const char *fcn_name = "generate_test_file()";
     const char *failure_mssg = NULL;
-    char *group_filename = NULL;
+    const char *group_filename = NULL;
     char data_filename[FILENAME_BUF_SIZE];
     int file_index = 0;
     int group_size;
