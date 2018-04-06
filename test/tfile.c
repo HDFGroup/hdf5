@@ -181,8 +181,6 @@ static void test_libver_bounds_datatype(hid_t fapl);
 static void test_libver_bounds_datatype_check(hid_t fapl, hid_t tid);
 static void test_libver_bounds_attributes(hid_t fapl);
 
-#define FILE8            "tfile8.h5"    /* Test file */
-
 #define DSET_NULL    "DSET_NULL"
 #define DSET        "DSET"
 #define DSETA        "DSETA"
@@ -6935,7 +6933,7 @@ test_libver_macros2(void)
 **
 ****************************************************************/
 static void
-test_incr_filesize(const char *env_h5_drvr)
+test_incr_filesize(void)
 {
     hid_t    fid;                       /* File opened with read-write permission */
     h5_stat_size_t filesize;            /* Size of file when empty */
@@ -7337,7 +7335,7 @@ test_file(void)
     test_libver_bounds_low_high();
     test_libver_macros();                       /* Test the macros for library version comparison */
     test_libver_macros2();                      /* Test the macros for library version comparison */
-    test_incr_filesize(env_h5_drvr);            /* Test H5Fincrement_filesize() and H5Fget_eoa() */
+    test_incr_filesize();                       /* Test H5Fincrement_filesize() and H5Fget_eoa() */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_deprec();                              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
