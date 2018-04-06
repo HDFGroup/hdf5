@@ -826,11 +826,11 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
     else {
         htri_t is_lapl;         /* Whether the access property list is (or is derived from) a link access property list */
 
-#ifdef H5_DEBUG_BUILD
+#ifdef H5CX_DEBUG
         /* Sanity check the access property list class */
         if(TRUE != H5P_isa_class(*acspl_id, *libclass->class_id))
             HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not the required access property list")
-#endif /* H5_DEBUG_BUILD */
+#endif /* H5CX_DEBUG*/
 
         /* Check for link access property and set API context if so */
         if((is_lapl = H5P_class_isa(*libclass->pclass, *H5P_CLS_LACC->pclass)) < 0)
