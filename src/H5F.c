@@ -1344,7 +1344,7 @@ H5Fstart_swmr_write(hid_t file_id)
 
     /* Call the internal routine */
     if(H5F__start_swmr_write(file) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTCONVERT, FAIL, "unable to convert file format")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCONVERT, FAIL, "unable to convert file format")
 
 done:
     FUNC_LEAVE_API(ret_value)

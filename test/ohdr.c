@@ -735,40 +735,40 @@ error:
 #define STR_EARLIEST "earliest"
 #define STR_V18 "v18"
 #define STR_LATEST "latest"
-static char *version_string(H5F_libver_t libver)
+static char *
+version_string(H5F_libver_t libver)
 {
     char *str = NULL;
 
     str = (char *) HDmalloc(20);
-    if (str == NULL)
-    {
-        fprintf(stderr, "Allocation failed\n");
-        exit(1);
+    if (str == NULL) {
+        HDfprintf(stderr, "Allocation failed\n");
+        HDexit(1);
     }
 
     switch(libver) {
       case H5F_LIBVER_EARLIEST:
-          strcpy(str, STR_EARLIEST);
+          HDstrcpy(str, STR_EARLIEST);
           break;
 
       case H5F_LIBVER_V18:
-          strcpy(str, STR_V18);
+          HDstrcpy(str, STR_V18);
           break;
 
       case H5F_LIBVER_V110:
           HDassert(H5F_LIBVER_LATEST == H5F_LIBVER_V110);
-          strcpy(str, STR_LATEST);
+          HDstrcpy(str, STR_LATEST);
           break;
 
       case H5F_LIBVER_ERROR:
       case H5F_LIBVER_NBOUNDS:
       default:
-          sprintf(str, "%ld", (long)libver);
+          HDsprintf(str, "%ld", (long)libver);
           break;
     } /* end switch */
 
     /* Return the formed version bound string */
-    return(str);
+    return str;
 } /* end of version_string */
 
 
