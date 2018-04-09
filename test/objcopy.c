@@ -145,7 +145,6 @@ const char *FILENAME[] = {
 #define NAME_LINK_EXTERN_DANGLE "/g_links/external_link_to_nowhere"
 #define NAME_LINK_EXTERN_DANGLE2        "/g_links2/external_link_to_nowhere"
 #define NAME_OLD_FORMAT        "/dset1"
-#define NAME_DSET_NULL      "DSET_NULL"
 
 #define NAME_BUF_SIZE   1024
 #define ATTR_NAME_LEN 80
