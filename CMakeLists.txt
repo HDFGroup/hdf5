@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5 C CXX)
 
 #-----------------------------------------------------------------------------
@@ -183,44 +183,6 @@ set (HDF5_TOOLS_SRC_DIR      ${HDF5_SOURCE_DIR}/tools)
 set (HDF5_PERFORM_SRC_DIR    ${HDF5_SOURCE_DIR}/tools/perform)
 set (HDF5_F90_SRC_DIR        ${HDF5_SOURCE_DIR}/fortran)
 
-if (APPLE)
-  option (HDF5_BUILD_FRAMEWORKS "TRUE to build as frameworks libraries, FALSE to build according to BUILD_SHARED_LIBS" FALSE)
-endif ()
-
-if (NOT HDF5_INSTALL_BIN_DIR)
-  set (HDF5_INSTALL_BIN_DIR bin)
-endif ()
-if (NOT HDF5_INSTALL_LIB_DIR)
-  if (APPLE)
-    set (HDF5_INSTALL_FMWK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
-  endif ()
-  set (HDF5_INSTALL_LIB_DIR lib)
-endif ()
-if (NOT HDF5_INSTALL_INCLUDE_DIR)
-  set (HDF5_INSTALL_INCLUDE_DIR include)
-endif ()
-if (NOT HDF5_INSTALL_DATA_DIR)
-  if (NOT WIN32)
-    if (APPLE)
-      if (HDF5_BUILD_FRAMEWORKS)
-        set (HDF5_INSTALL_EXTRA_DIR ../SharedSupport)
-      else ()
-        set (HDF5_INSTALL_EXTRA_DIR share)
-      endif ()
-      set (HDF5_INSTALL_FWRK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
-    endif ()
-    set (HDF5_INSTALL_DATA_DIR share)
-    set (HDF5_INSTALL_CMAKE_DIR share/cmake)
-  else ()
-    set (HDF5_INSTALL_DATA_DIR ".")
-    set (HDF5_INSTALL_CMAKE_DIR cmake)
-  endif ()
-endif ()
-
-if (DEFINED ADDITIONAL_CMAKE_PREFIX_PATH AND EXISTS "${ADDITIONAL_CMAKE_PREFIX_PATH}")
-  set (CMAKE_PREFIX_PATH ${ADDITIONAL_CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
-endif ()
-
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
 #-----------------------------------------------------------------------------
@@ -325,44 +287,15 @@ set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 include (${HDF_RESOURCES_EXT_DIR}/HDFMacros.cmake)
+
+HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
+
 include (${HDF_RESOURCES_EXT_DIR}/HDFLibMacros.cmake)
 include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
 
 #-----------------------------------------------------------------------------
-# Setup output Directories
-#-----------------------------------------------------------------------------
-if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  set (CMAKE_RUNTIME_OUTPUT_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Executables."
-  )
-  set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Libraries"
-  )
-  set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
-  )
-  set (CMAKE_Fortran_MODULE_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
-  )
-  if (WIN32)
-    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
-    set (CMAKE_PDB_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
-    )
-  else ()
-    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-  endif ()
-else ()
-  # if we are externally configured, but the project uses old cmake scripts
-  # this may not be set and utilities like H5detect will fail
-  if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
-  endif ()
-endif ()
-
-#-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
-# by other projects using FindHDF5.
+# by other projects.
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXPORTED_TARGETS)
   set (HDF5_EXPORTED_TARGETS "hdf5-targets")
@@ -462,11 +395,9 @@ endif ()
 set (EXE_EXT "")
 if (WIN32)
   set (EXE_EXT ".exe")
-  if (NOT CYGWIN)
-    add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
-    add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-    add_definitions (-D_CONSOLE)
-  endif ()
+  add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
+  add_definitions (-D_CRT_SECURE_NO_WARNINGS)
+  add_definitions (-D_CONSOLE)
 endif ()
 
 if (MSVC)
@@ -493,7 +424,7 @@ option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
 mark_as_advanced (HDF5_ENABLE_TRACE)
-if (CMAKE_BUILD_TYPE MATCHES Debug)
+if (${HDF_CFG_NAME} MATCHES "Debug")
   add_definitions (-DDEBUG)
   # Enable tracing of the API
   if (HDF5_ENABLE_TRACE)
@@ -515,9 +446,13 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to embed library info into executables
 #-----------------------------------------------------------------------------
-option (HDF5_ENABLE_EMBEDDED_LIBINFO "embed library info into executables" ON)
-if (HDF5_ENABLE_EMBEDDED_LIBINFO)
-  set (H5_HAVE_EMBEDDED_LIBINFO 1)
+if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set (H5_HAVE_EMBEDDED_LIBINFO 0)
+else ()
+  option (HDF5_ENABLE_EMBEDDED_LIBINFO "embed library info into executables" ON)
+  if (HDF5_ENABLE_EMBEDDED_LIBINFO)
+    set (H5_HAVE_EMBEDDED_LIBINFO 1)
+  endif ()
 endif ()
 
 include (${HDF_RESOURCES_DIR}/HDFCompilerFlags.cmake)
@@ -542,6 +477,7 @@ if (HDF5_ENABLE_PARALLEL)
     # Used by Fortran + MPI
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+    INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_DIRS})
   else ()
     message (STATUS "Parallel libraries not found")
   endif ()
@@ -550,7 +486,6 @@ endif ()
 # Parallel IO usage requires MPI to be Linked and Included
 if (H5_HAVE_PARALLEL)
   set (LINK_LIBS ${LINK_LIBS} ${MPI_C_LIBRARIES})
-  set (LINK_SHARED_LIBS ${LINK_SHARED_LIBS} ${MPI_C_LIBRARIES})
   if (MPI_C_LINK_FLAGS)
     set (CMAKE_EXE_LINKER_FLAGS "${MPI_C_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
   endif ()
@@ -575,8 +510,6 @@ include (UserMacros.cmake)
 #-----------------------------------------------------------------------------
 # Include filter (zlib, szip, etc.) macros
 #-----------------------------------------------------------------------------
-set (LINK_COMP_LIBS)
-set (LINK_COMP_SHARED_LIBS)
 include (CMakeFilters.cmake)
 
 #-----------------------------------------------------------------------------
@@ -649,17 +582,17 @@ endif ()
 #-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
-add_subdirectory (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
+add_subdirectory (src)
 
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
-    ADD_DEPENDENCIES (${HDF5_LIB_TARGET} ZLIB)
+    add_dependencies (${HDF5_LIB_TARGET} ZLIB)
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} ZLIB)
     endif ()
   endif ()
   if (SZIP_FOUND AND SZIP_USE_EXTERNAL)
-    ADD_DEPENDENCIES (${HDF5_LIB_TARGET} SZIP)
+    add_dependencies (${HDF5_LIB_TARGET} SZIP)
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} SZIP)
     endif ()
@@ -697,12 +630,11 @@ if (BUILD_TESTING)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
-      add_subdirectory (${HDF5_SOURCE_DIR}/tools/lib ${PROJECT_BINARY_DIR}/tools/lib)
-      add_subdirectory (${HDF5_SOURCE_DIR}/test      ${PROJECT_BINARY_DIR}/test)
+      add_subdirectory (test)
     endif ()
     if (H5_HAVE_PARALLEL)
       if (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
-        add_subdirectory (${HDF5_SOURCE_DIR}/testpar ${PROJECT_BINARY_DIR}/testpar)
+        add_subdirectory (testpar)
       endif ()
     endif ()
   endif ()
@@ -714,7 +646,7 @@ endif ()
 if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
   option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
   if (HDF5_BUILD_TOOLS)
-    add_subdirectory (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
+    add_subdirectory (tools)
   endif ()
 endif ()
 
@@ -724,7 +656,7 @@ endif ()
 if (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
   option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
   if (HDF5_BUILD_EXAMPLES)
-    add_subdirectory (${HDF5_SOURCE_DIR}/examples ${PROJECT_BINARY_DIR}/examples)
+    add_subdirectory (examples)
   endif ()
 endif ()
 
@@ -735,7 +667,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
   option (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" ON)
   if (HDF5_BUILD_HL_LIB)
     set (H5_INCLUDE_HL 1)
-    add_subdirectory (${HDF5_SOURCE_DIR}/hl ${PROJECT_BINARY_DIR}/hl)
+    add_subdirectory (hl)
   endif ()
 endif ()
 
@@ -764,7 +696,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
 
     set (LINK_Fortran_LIBS ${LINK_LIBS})
-    set (LINK_Fortran_SHARED_LIBS ${LINK_SHARED_LIBS})
 
     if (HDF5_ENABLE_F2003)
       if (NOT FORTRAN_HAVE_ISO_C_BINDING)
@@ -775,17 +706,16 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     # Parallel IO usage requires MPI to be Linked and Included
     if (H5_HAVE_PARALLEL)
       set (LINK_Fortran_LIBS ${LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
-      set (LINK_Fortran_SHARED_LIBS ${LINK_Fortran_SHARED_LIBS} ${MPI_Fortran_LIBRARIES})
       if (MPI_Fortran_LINK_FLAGS)
         set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
       endif ()
     endif ()
 
-    add_subdirectory (${HDF5_SOURCE_DIR}/fortran ${PROJECT_BINARY_DIR}/fortran)
+    add_subdirectory (fortran)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
         #-- Build the High Level Fortran source codes
-        add_subdirectory (${HDF5_SOURCE_DIR}/hl/fortran ${PROJECT_BINARY_DIR}/hl/fortran)
+        add_subdirectory (hl/fortran)
       endif ()
     endif ()
   endif ()
@@ -808,11 +738,11 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
     if (CMAKE_NO_STD_NAMESPACE)
       set (H5_NO_STD 1)
     endif ()
-    add_subdirectory (${HDF5_SOURCE_DIR}/c++ ${PROJECT_BINARY_DIR}/c++)
+    add_subdirectory (c++)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/c++")
         #-- Build the High Level Fortran source codes
-        add_subdirectory (${HDF5_SOURCE_DIR}/hl/c++ ${PROJECT_BINARY_DIR}/hl/c++)
+        add_subdirectory (hl/c++)
       endif ()
     endif ()
   endif ()

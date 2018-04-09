@@ -1991,6 +1991,7 @@
 
 ./tools/h5diff/testfiles/h5diff_attr1.h5
 ./tools/h5diff/testfiles/h5diff_attr2.h5
+./tools/h5diff/testfiles/h5diff_attr3.h5
 ./tools/h5diff/testfiles/h5diff_attr_v_level1.h5
 ./tools/h5diff/testfiles/h5diff_attr_v_level2.h5
 ./tools/h5diff/testfiles/h5diff_basic1.h5
@@ -2032,12 +2033,8 @@
 ./tools/h5diff/testfiles/compounds_array_vlen2.h5
 ./tools/h5diff/testfiles/non_comparables1.h5
 ./tools/h5diff/testfiles/non_comparables2.h5
-./tools/h5diff/testfiles/tmptest2.he5
-./tools/h5diff/testfiles/tmpSingleSiteBethe.reference.h5
-./tools/h5diff/testfiles/h5diff_tmp1.txt
-./tools/h5diff/testfiles/tmptest.he5
-./tools/h5diff/testfiles/h5diff_tmp2.txt
-./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
+./tools/h5diff/testfiles/h5diff_8625.txt
+./tools/h5diff/testfiles/h5diff_8639.txt
 ./tools/h5diff/testfiles/tudfilter.h5
 ./tools/h5diff/testfiles/tudfilter2.h5
 ./tools/h5diff/testfiles/h5diff_ud.txt
@@ -2334,6 +2331,8 @@
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDFCompilerFlags.cmake
 ./config/cmake/HDF5Macros.cmake
+./config/cmake/libh5cc.in
+./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
@@ -2342,10 +2341,8 @@
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
 
-./config/cmake_ext_mod/CheckTypeSize.cmake
 ./config/cmake_ext_mod/ConfigureChecks.cmake
 ./config/cmake_ext_mod/CTestCustom.cmake
-./config/cmake_ext_mod/FindMPI.cmake
 ./config/cmake_ext_mod/FindSZIP.cmake
 ./config/cmake_ext_mod/GetTimeOfDayTest.cpp
 ./config/cmake_ext_mod/grepTest.cmake
@@ -2361,12 +2358,6 @@
 ./config/cmake_ext_mod/NSIS.template.in
 ./config/cmake_ext_mod/runTest.cmake
 ./config/cmake_ext_mod/version.plist.in
-./config/cmake_ext_mod/FindMPI/fortranparam_mpi.f90.in
-./config/cmake_ext_mod/FindMPI/libver_mpi.c
-./config/cmake_ext_mod/FindMPI/libver_mpi.f90.in
-./config/cmake_ext_mod/FindMPI/mpiver.f90.in
-./config/cmake_ext_mod/FindMPI/test_mpi.c
-./config/cmake_ext_mod/FindMPI/test_mpi.f90.in
 
 # CMake-specific User Files
 ./config/cmake/UserMacros/Windows_MT.cmake

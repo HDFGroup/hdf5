@@ -325,8 +325,6 @@ hsize_t diff_attr(hid_t loc1_id,
     hid_t      space2_id = -1;    /* space ID */
     hid_t      ftype1_id = -1;    /* file data type ID */
     hid_t      ftype2_id = -1;    /* file data type ID */
-    int        vstrtype1 = 0;     /* ftype1 is a variable string */
-    int        vstrtype2 = 0;     /* ftype2 is a variable string */
     hid_t      mtype1_id = -1;    /* memory data type ID */
     hid_t      mtype2_id = -1;    /* memory data type ID */
     size_t     msize1;            /* memory size of memory type */
@@ -385,28 +383,8 @@ hsize_t diff_attr(hid_t loc1_id,
             /* get the datatypes  */
             if((ftype1_id = H5Aget_type(attr1_id)) < 0)
                 HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type first attribute failed");
-            vstrtype1 = H5Tis_variable_str(ftype1_id);
             if((ftype2_id = H5Aget_type(attr2_id)) < 0)
                 HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type second attribute failed");
-            vstrtype2 = H5Tis_variable_str(ftype2_id);
-
-            /* no compare if either one but not both are variable string type */
-            if (vstrtype1 != vstrtype2) {
-                if((opts->m_verbose || opts->m_list_not_cmp))
-                    parallel_print("Not comparable: one of attribute <%s/%s> or <%s/%s> is of variable length type\n",
-                            path1, name1, path2, name2);
-                opts->not_cmp = 1;
-                if (H5Tclose(ftype1_id) < 0)
-                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose first attribute ftype failed");
-                if (H5Tclose(ftype2_id) < 0)
-                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose second attribute ftype failed");
-                if (H5Aclose(attr1_id) < 0)
-                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aclose first attribute failed");
-                if (H5Aclose(attr2_id) < 0)
-                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aclose second attribute failed");
-
-                continue;
-            }
 
             if((mtype1_id = H5Tget_native_type(ftype1_id, H5T_DIR_DEFAULT)) < 0)
                 HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tget_native_type first attribute ftype failed");

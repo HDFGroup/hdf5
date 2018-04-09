@@ -129,6 +129,7 @@ parse_command_line(int argc, const char *argv[], param_t *parms)
             case 'h':
                 usage();
                 leave(EXIT_SUCCESS);
+                break;
 
             /* Create objects with the latest version of the format */
             case 'l':
@@ -149,6 +150,7 @@ parse_command_line(int argc, const char *argv[], param_t *parms)
             case 'V':
                 print_version(h5tools_getprogname());
                 leave(EXIT_SUCCESS);
+                break;
 
             /* Bad command line argument */
             default:

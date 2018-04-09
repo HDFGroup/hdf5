@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_HL_CPP_EXAMPLES)
 
 #-----------------------------------------------------------------------------
@@ -11,7 +11,6 @@ INCLUDE_DIRECTORIES (${HDF5_HL_CPP_SRC_DIR}/src)
 #  Add in the examples for the Packet Table codes
 # --------------------------------------------------------------------
 add_executable (ptExampleFL ${HDF5_HL_CPP_EXAMPLES_SOURCE_DIR}/ptExampleFL.cpp)
-TARGET_NAMING (ptExampleFL STATIC)
 TARGET_C_PROPERTIES (ptExampleFL STATIC " " " ")
 target_link_libraries (
     ptExampleFL

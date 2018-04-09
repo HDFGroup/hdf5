@@ -36,8 +36,8 @@ static const char *FileHeader = "\n\
  *		Livermore National Laboratory.
  *
  *		Detects machine byte order and floating point
- *		format and generates a C source file (native.c)
- *		to describe those paramters.
+ *        format and generates a C source file (H5Tinit.c)
+ *        to describe those parameters.
  *
  * Assumptions: We have an ANSI compiler.  We're on a Unix like
  *		system or configure has detected those Unix
@@ -54,6 +54,16 @@ static const char *FileHeader = "\n\
 #include "H5Tpublic.h"
 #include "H5Rpublic.h"
 
+#if defined(__has_attribute)
+#if __has_attribute(no_sanitize)
+#define HDF_NO_UBSAN __attribute__((no_sanitize("undefined")))
+#else
+#define HDF_NO_UBSAN
+#endif
+#else
+#define HDF_NO_UBSAN
+#endif
+
 #define MAXDETECT 64
 
 /* The ALIGNMENT test code may generate the SIGBUS, SIGSEGV, or SIGILL signals. 
@@ -65,7 +75,7 @@ static const char *FileHeader = "\n\
 /* Define H5SETJMP/H5LONGJMP depending on if sigsetjmp/siglongjmp are */
 /* supported. */
 #if defined(H5_HAVE_SIGSETJMP) && defined(H5_HAVE_SIGLONGJMP)
-/* Always save blocked signals to be restore by siglongjmp. */
+/* Always save blocked signals to be restored by siglongjmp. */
 #define H5JMP_BUF	sigjmp_buf
 #define H5SETJMP(buf)	HDsigsetjmp(buf, 1)
 #define H5LONGJMP(buf, val)	HDsiglongjmp(buf, val)
@@ -1348,7 +1358,7 @@ bit.\n";
  *-------------------------------------------------------------------------
  */
 static void
-detect_C89_integers(void)
+detect_C89_integers(void) HDF_NO_UBSAN
 {
     DETECT_BYTE(signed char,	  SCHAR,        d_g[nd_g]); nd_g++;
     DETECT_BYTE(unsigned char,	  UCHAR,        d_g[nd_g]); nd_g++;
@@ -1376,7 +1386,7 @@ detect_C89_integers(void)
  *-------------------------------------------------------------------------
  */
 static void
-detect_C89_floats(void)
+detect_C89_floats(void) HDF_NO_UBSAN
 {
     DETECT_F(float,     FLOAT,      d_g[nd_g]); nd_g++;
     DETECT_F(double,    DOUBLE,     d_g[nd_g]); nd_g++;
@@ -1398,7 +1408,7 @@ detect_C89_floats(void)
  *-------------------------------------------------------------------------
  */
 static void
-detect_C99_integers8(void)
+detect_C99_integers8(void) HDF_NO_UBSAN
 {
 #if H5_SIZEOF_INT8_T>0
   #if H5_SIZEOF_INT8_T==1
@@ -1460,7 +1470,7 @@ detect_C99_integers8(void)
  *-------------------------------------------------------------------------
  */
 static void
-detect_C99_integers16(void)
+detect_C99_integers16(void) HDF_NO_UBSAN
 {
 #if H5_SIZEOF_INT16_T>0
     DETECT_I(int16_t, 		  INT16,        d_g[nd_g]); nd_g++;
@@ -1498,7 +1508,7 @@ detect_C99_integers16(void)
  *-------------------------------------------------------------------------
  */
 static void
-detect_C99_integers32(void)
+detect_C99_integers32(void) HDF_NO_UBSAN
 {
 #if H5_SIZEOF_INT32_T>0
     DETECT_I(int32_t, 		  INT32,        d_g[nd_g]); nd_g++;
@@ -1536,7 +1546,7 @@ detect_C99_integers32(void)
  *-------------------------------------------------------------------------
  */
 static void
-detect_C99_integers64(void)
+detect_C99_integers64(void) HDF_NO_UBSAN
 {
 #if H5_SIZEOF_INT64_T>0
     DETECT_I(int64_t, 		  INT64,        d_g[nd_g]); nd_g++;
@@ -1587,7 +1597,7 @@ detect_C99_integers64(void)
  *-------------------------------------------------------------------------
  */
 static void
-detect_C99_integers(void)
+detect_C99_integers(void) HDF_NO_UBSAN
 {
     /* break it down to more subroutines so that each module subroutine */
     /* is smaller and takes less time to compile with optimization on.  */
@@ -1613,7 +1623,7 @@ detect_C99_integers(void)
  *-------------------------------------------------------------------------
  */
 static void
-detect_C99_floats(void)
+detect_C99_floats(void) HDF_NO_UBSAN
 {
 #if H5_SIZEOF_DOUBLE == H5_SIZEOF_LONG_DOUBLE
     /*
@@ -1644,7 +1654,7 @@ detect_C99_floats(void)
  *-------------------------------------------------------------------------
  */
 static void
-detect_alignments(void)
+detect_alignments(void) HDF_NO_UBSAN
 {
     /* Detect structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
     DETECT_M(void *,              POINTER,      m_g[na_g]); na_g++;
@@ -1662,6 +1672,12 @@ detect_alignments(void)
  */
 static int verify_signal_handlers(int signum, void (*handler)(int))
 {						      
+#if defined(__has_feature)
+#if __has_feature(address_sanitizer) || __has_feature(thread_sanitizer)
+    /* Under the address and thread sanitizers, don't raise any signals. */
+    return 0;
+#endif
+#endif
     void	(*save_handler)(int) = HDsignal(signum, handler);    
     int i, val;
     int ntries=5;
@@ -1726,7 +1742,7 @@ static int verify_signal_handlers(int signum, void (*handler)(int))
  *-------------------------------------------------------------------------
  */
 int
-main(void)
+main(void) HDF_NO_UBSAN
 {
 
 #if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
