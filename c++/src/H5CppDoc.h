@@ -26,12 +26,9 @@
  *
  * The C++ API provides C++ wrappers for the HDF5 C Library.
  * 
- * It is assumed that the user has knowledge of the 
- * <a href="https://support.hdfgroup.org/HDF5/doc/H5.format.html">
- * HDF5 file format</a> and its components. 
- * For more information on the HDF5 C Library, see the 
- * <a href="https://support.hdfgroup.org/HDF5/doc/index.html"> 
- * HDF5 Software Documentation</a> page.
+ * It is assumed that the user has knowledge of the HDF5 file format and its
+ * components.  For more information on the HDF5 C Library, please refer to
+ * the HDF5 Software Documentation page.
  *
  * Because the HDF5 C Library maps very well to
  * the object oriented design approach, classes in the C++ API can
