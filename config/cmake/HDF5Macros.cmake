@@ -10,19 +10,15 @@
 # help@hdfgroup.org.
 #
 #-------------------------------------------------------------------------------
-macro (H5_SET_LIB_OPTIONS libtarget libname libtype)
+macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
   set (LIB_OUT_NAME "${libname}")
   # SOVERSION passed in ARGN when shared
   if (${libtype} MATCHES "SHARED")
-    if (ARGN)
-      set (PACKAGE_SOVERSION ${ARGN})
-    else ()
-      set (PACKAGE_SOVERSION ${H5_SOVERS_MAJOR})
-    endif ()
+    set (PACKAGE_SOVERSION ${HDF5_${libpackage}_PACKAGE_SOVERSION})
     if (WIN32)
       set (LIBHDF_VERSION ${HDF5_PACKAGE_VERSION_MAJOR})
     else ()
-      set (LIBHDF_VERSION ${HDF5_PACKAGE_SOVERSION})
+      set (LIBHDF_VERSION ${HDF5_${libpackage}_PACKAGE_SOVERSION_MAJOR})
     endif ()
     set_target_properties (${libtarget} PROPERTIES VERSION ${LIBHDF_VERSION})
     if (WIN32)
