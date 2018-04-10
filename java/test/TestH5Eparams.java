@@ -47,8 +47,7 @@ public class TestH5Eparams {
 
         hdf_java_classid = -1;
         try {
-            hdf_java_classid = H5.H5Eregister_class("HDF-Java-Error",
-                    "hdf-java", "2.5");
+            hdf_java_classid = H5.H5Eregister_class("HDF-Java-Error", "hdf-java", "2.5");
             current_stackid = H5.H5Eget_current_stack();
         }
         catch (Throwable err) {
@@ -110,8 +109,7 @@ public class TestH5Eparams {
     @Test
     public void testH5Ecreate_msg_major() {
         try {
-            long err_id = H5.H5Ecreate_msg(hdf_java_classid,
-                    HDF5Constants.H5E_MAJOR, "Error in Test");
+            long err_id = H5.H5Ecreate_msg(hdf_java_classid, HDF5Constants.H5E_MAJOR, "Error in Test");
             assertFalse("H5.H5Ecreate_msg_major: " + err_id, err_id < 0);
             H5.H5Eclose_msg(err_id);
         }
@@ -124,8 +122,7 @@ public class TestH5Eparams {
     @Test
     public void testH5Ecreate_msg_minor() {
         try {
-            long err_id = H5.H5Ecreate_msg(hdf_java_classid,
-                    HDF5Constants.H5E_MINOR, "Error in Test Function");
+            long err_id = H5.H5Ecreate_msg(hdf_java_classid, HDF5Constants.H5E_MINOR, "Error in Test Function");
             assertFalse("H5.H5Ecreate_msg_minor: " + err_id, err_id < 0);
             H5.H5Eclose_msg(err_id);
         }
@@ -141,8 +138,7 @@ public class TestH5Eparams {
         long err_id = -1;
         String msg = null;
         try {
-            err_id = H5.H5Ecreate_msg(hdf_java_classid,
-                    HDF5Constants.H5E_MAJOR, "Error in Test");
+            err_id = H5.H5Ecreate_msg(hdf_java_classid, HDF5Constants.H5E_MAJOR, "Error in Test");
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -158,8 +154,7 @@ public class TestH5Eparams {
         }
         assertNotNull("H5.H5Eget_msg: " + msg, msg);
         assertEquals("H5.H5Eget_msg: ", "Error in Test", msg);
-        assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR,
-                    error_msg_type[0]);
+        assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR, error_msg_type[0]);
         try {
             H5.H5Eclose_msg(err_id);
         }

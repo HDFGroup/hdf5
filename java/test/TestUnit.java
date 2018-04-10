@@ -18,7 +18,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { TestH5.class,
-        TestH5Eparams.class,
+        TestH5Eparams.class, TestH5Eregister.class,
         TestH5Fparams.class, TestH5Fbasic.class, TestH5F.class, TestH5Fswmr.class,
         TestH5Gbasic.class, TestH5G.class,
         TestH5Sbasic.class, TestH5S.class,

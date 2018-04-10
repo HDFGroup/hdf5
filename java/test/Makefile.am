@@ -36,6 +36,7 @@ AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 noinst_JAVA = \
 	TestH5.java \
     TestH5Eparams.java \
+    TestH5Eregister.java \
     TestH5Fparams.java \
     TestH5Fbasic.java \
     TestH5F.java \

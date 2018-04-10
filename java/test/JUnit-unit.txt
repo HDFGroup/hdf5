@@ -21,6 +21,11 @@ JUnit version 4.11
 .testH5Ecreate_msg_name_null
 .testH5Eauto_is_v2
 .testH5EclearInt
+.testH5Eregister_class_lib_name_null
+.testH5Eregister_class_version_null
+.testH5Eunregister_class_invalid_classid
+.testH5Eregister_class
+.testH5Eregister_class_cls_name_null
 .testH5Fcreate_null
 .testH5Fflush_local
 .testH5Fget_info
@@ -608,5 +613,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (606 tests)
+OK (611 tests)
 
