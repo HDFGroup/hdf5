@@ -35,16 +35,13 @@ AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
 noinst_JAVA = \
 	TestH5.java \
-    TestH5E.java \
-    TestH5Edefault.java \
-    TestH5Eregister.java \
+    TestH5Eparams.java \
     TestH5Fparams.java \
     TestH5Fbasic.java \
     TestH5F.java \
     TestH5Fswmr.java \
     TestH5Gbasic.java \
     TestH5G.java \
-    TestH5Giterate.java \
     TestH5Sbasic.java \
     TestH5S.java \
     TestH5Tparams.java \
@@ -69,7 +66,7 @@ noinst_JAVA = \
     TestH5Ocopy.java \
     TestH5PL.java \
     TestH5Z.java \
-    TestAll.java
+    TestUnit.java
 
 $(jarfile): classnoinst.stamp classes
 	$(JAR) cvf $@ -C $(JAVAROOT)/ $(pkgpath)
@@ -91,7 +88,7 @@ TESTS_JUNIT = AllJunitTests
 
 AllJunitTests :
 	echo "#! /bin/sh" > $@
-	echo "exec @JUNIT@ test.TestAll" >> $@
+	echo "exec @JUNIT@ test.TestUnit" >> $@
 	chmod +x $@
 
 clean:
