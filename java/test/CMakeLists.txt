@@ -11,6 +11,7 @@ INCLUDE_DIRECTORIES (
 set (HDF5_JAVA_TEST_SOURCES
     TestH5.java
     TestH5Eparams.java
+    TestH5Eregister.java
     TestH5Fparams.java
     TestH5Fbasic.java
     TestH5F.java
@@ -58,7 +59,6 @@ else ()
       ${HDF5_JAVA_TEST_SOURCES}
       TestH5E.java
       TestH5Edefault.java
-      TestH5Eregister.java
       TestH5Giterate.java
       TestAll.java
   )
