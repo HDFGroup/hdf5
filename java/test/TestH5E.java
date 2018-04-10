@@ -47,8 +47,7 @@ public class TestH5E {
 
         hdf_java_classid = -1;
         try {
-            hdf_java_classid = H5.H5Eregister_class("HDF-Java-Error",
-                    "hdf-java", "2.5");
+            hdf_java_classid = H5.H5Eregister_class("HDF-Java-Error", "hdf-java", "2.5");
             current_stackid = H5.H5Eget_current_stack();
         }
         catch (Throwable err) {
@@ -82,18 +81,15 @@ public class TestH5E {
             int[] error_msg_type = { HDF5Constants.H5E_MAJOR };
             String msg = null;
             try {
-                msg = H5.H5Eget_msg(hdferr.getMajorErrorNumber(),
-                        error_msg_type);
+                msg = H5.H5Eget_msg(hdferr.getMajorErrorNumber(), error_msg_type);
             }
             catch (Throwable err) {
                 err.printStackTrace();
                 fail("H5.H5Eget_msg: " + err);
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", "Object atom",
-                        msg);
-            assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR,
-                        error_msg_type[0]);
+            assertEquals("H5.H5Eget_msg: ", "Object atom", msg);
+            assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR, error_msg_type[0]);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -110,8 +106,7 @@ public class TestH5E {
             int[] error_msg_type = { HDF5Constants.H5E_MINOR };
             String msg = null;
             try {
-                msg = H5.H5Eget_msg(hdferr.getMinorErrorNumber(),
-                        error_msg_type);
+                msg = H5.H5Eget_msg(hdferr.getMinorErrorNumber(), error_msg_type);
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -119,8 +114,7 @@ public class TestH5E {
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
             assertEquals("H5.H5Eget_msg: ", "Unable to find atom information (already closed?)", msg);
-            assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MINOR,
-                        error_msg_type[0]);
+            assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MINOR, error_msg_type[0]);
         }
         catch (Throwable err) {
             err.printStackTrace();
