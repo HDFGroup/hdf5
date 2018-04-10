@@ -51,7 +51,7 @@
     endif ()
     set (last_test "CPP_ex_${example}")
   endforeach ()
-#the following dependicies are handled by the order of the files
+#the following dependencies are handled by the order of the files
 #  SET_TESTS_PROPERTIES(CPP_ex_readdata PROPERTIES DEPENDS CPP_ex_create)
 #  SET_TESTS_PROPERTIES(CPP_ex_chunks PROPERTIES DEPENDS CPP_ex_extend_ds)
 
@@ -91,7 +91,7 @@
     endif ()
     set (last_test "CPP_ex_${example}")
   endforeach ()
-#the following dependicies are handled by the order of the files
+#the following dependencies are handled by the order of the files
 #  SET_TESTS_PROPERTIES(CPP_ex_h5tutr_crtatt PROPERTIES DEPENDS CPP_ex_h5tutr_crtdat)
 #  SET_TESTS_PROPERTIES(CPP_ex_h5tutr_rdwt PROPERTIES DEPENDS CPP_ex_h5tutr_crtdat)
 #  SET_TESTS_PROPERTIES(CPP_ex_h5tutr_crtgrpd PROPERTIES DEPENDS CPP_ex_h5tutr_crtgrpar)
