@@ -170,62 +170,6 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Eget_msg_major() {
-
-        try {
-            H5.H5Fopen("test", 0, 1);
-        }
-        catch (HDF5LibraryException hdferr) {
-            int[] error_msg_type = { HDF5Constants.H5E_MAJOR };
-            String msg = null;
-            try {
-                msg = H5.H5Eget_msg(hdferr.getMajorErrorNumber(),
-                        error_msg_type);
-            }
-            catch (Throwable err) {
-                err.printStackTrace();
-                fail("H5.H5Eget_msg: " + err);
-            }
-            assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", "Object atom",
-                        msg);
-            assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR,
-                        error_msg_type[0]);
-        }
-        catch (Throwable err) {
-            err.printStackTrace();
-            fail("H5.H5Eget_msg: " + err);
-        }
-    }
-
-    @Test
-    public void testH5Eget_msg_minor() {
-        try {
-            H5.H5Fopen("test", 0, 1);
-        }
-        catch (HDF5LibraryException hdferr) {
-            int[] error_msg_type = { HDF5Constants.H5E_MINOR };
-            String msg = null;
-            try {
-                msg = H5.H5Eget_msg(hdferr.getMinorErrorNumber(),
-                        error_msg_type);
-            }
-            catch (Throwable err) {
-                err.printStackTrace();
-                fail("H5.H5Eget_msg: " + err);
-            }
-            assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", "Unable to find atom information (already closed?)", msg);
-            assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MINOR,
-                        error_msg_type[0]);
-        }
-        catch (Throwable err) {
-            err.printStackTrace();
-            fail("H5.H5Eget_msg: " + err);
-        }
-    }
-
-    @Test
     public void testH5Ecreate_stack() {
         long stk_id = -1;
         try {

@@ -9,8 +9,6 @@ JUnit version 4.11
 .testH5get_libversion
 .testH5set_free_list_limits
 .testH5EprintInt
-.testH5Eget_msg_major
-.testH5Eget_msg_minor
 .testH5Eget_msg
 .testH5Eget_num
 .testH5Eget_class_name
@@ -610,5 +608,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (608 tests)
+OK (606 tests)
 
