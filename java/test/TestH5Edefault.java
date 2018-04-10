@@ -122,8 +122,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eget_current_stack: " + err);
         }
-        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg,
-                num_msg == 4);
+        assertTrue("H5.H5Eget_current_stack: get_num #:" + num_msg, num_msg == 4);
 
         try {
             H5.H5Eclose_stack(stack_id);
@@ -364,8 +363,7 @@ public class TestH5Edefault {
             err.printStackTrace();
             fail("H5.H5Eset_current_stack: " + err);
         }
-        assertTrue("H5.H5Eset_current_stack: get_num - " + num_msg,
-                    num_msg == 4);
+        assertTrue("H5.H5Eset_current_stack: get_num - " + num_msg, num_msg == 4);
     }
 
     @Test(expected = IllegalArgumentException.class)
