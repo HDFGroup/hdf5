@@ -26,39 +26,6 @@ JUnit version 4.11
 .testH5Eunregister_class_invalid_classid
 .testH5Eregister_class
 .testH5Eregister_class_cls_name_null
-.testH5EprintInt
-.testH5Eset_current_stack_invalid_stkid
-.testH5Eset_current_stack
-.testH5Eget_num
-.testH5Eclear
-.testH5Eprint
-.testH5Epush_null_name
-.testH5Eget_num_with_msg
-.testH5Eclear2_with_msg
-.testH5Epush_invalid_stkid
-.testH5Eget_current_stack
-.testH5Ecreate_stack
-.testH5Eget_msg_invalid_msgid
-.testH5Eauto_is_v2
-.testH5EclearInt
-.testH5Eauto_is_v2_invalid_stkid
-.testH5Eclose_msg_invalid_errid
-.testH5Eclose_stack_invalid_stackid
-.testH5Eget_class_name_invalid_classname
-.testH5Eget_num_invalid_stkid
-.testH5EprintInt_invalid_classid
-.testH5Epop
-.testH5Epop_invalid_stkid
-.testH5Eget_current_stack_pop
-.testH5Eget_class_name_invalid_classid
-.testH5Ecreate_msg_invalid_errid
-.testH5Eclear2_invalid_stkid
-.testH5Eprint2_invalid_classid
-.testH5Eget_msg_major
-.testH5Eget_msg_minor
-.testH5Epush
-.testH5Ewalk
-.testH5Epop
 .testH5Fcreate_null
 .testH5Fflush_local
 .testH5Fget_info
@@ -133,7 +100,6 @@ JUnit version 4.11
 .testH5Gget_obj_info_all_gid
 .testH5Gget_info_by_idx
 .testH5Gget_info
-.testH5Gget_obj_info_all
 .testH5Sclose_invalid
 .testH5Screate_simple_max_default
 .testH5Screate_simple_dims_null
@@ -647,31 +613,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (645 tests)
+OK (611 tests)
 
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Fopen(): unable to open file
-    major: File accessibilty
-    minor: Unable to open file
-  #001: (file name) line (number) in H5F__open(): unable to open file
-    major: File accessibilty
-    minor: Unable to open file
-  #002: (file name) line (number) in H5F_open(): unable to retrieve VFL class
-    major: File accessibilty
-    minor: Can't get value
-  #003: (file name) line (number) in H5FD_get_class(): can't find object for ID
-    major: Object atom
-    minor: Unable to find atom information (already closed?)
-HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Fopen(): unable to open file
-    major: File accessibilty
-    minor: Unable to open file
-  #001: (file name) line (number) in H5F__open(): unable to open file
-    major: File accessibilty
-    minor: Unable to open file
-  #002: (file name) line (number) in H5F_open(): unable to retrieve VFL class
-    major: File accessibilty
-    minor: Can't get value
-  #003: (file name) line (number) in H5FD_get_class(): can't find object for ID
-    major: Object atom
-    minor: Unable to find atom information (already closed?)
