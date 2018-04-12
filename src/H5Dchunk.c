@@ -641,7 +641,7 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize
 
     /* Compute the # of chunks in dataset dimensions */
     for(u = 0, layout->nchunks = 1; u < ndims; u++) {
-        /* Round up to the next integer # of chunks, to accomodate partial chunks */
+        /* Round up to the next integer # of chunks, to accommodate partial chunks */
     layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
 
         /* Accumulate the # of chunks */
@@ -2731,7 +2731,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
             } /* end if */
             else {
                 /*
-                 * If we are reseting and something goes wrong after this
+                 * If we are resetting and something goes wrong after this
                  * point then it's too late to recover because we may have
                  * destroyed the original data by calling H5Z_pipeline().
                  * The only safe option is to continue with the reset
@@ -4267,7 +4267,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
             HGOTO_DONE(SUCCEED)
         } /* end if */
 
-    /* Round up to the next integer # of chunks, to accomodate partial chunks */
+    /* Round up to the next integer # of chunks, to accommodate partial chunks */
     /* Use current dims because the indices have already been updated! -NAF */
     /* (also compute the number of elements per chunk) */
     /* (also copy the chunk dimensions into 'hsize_t' array for creating dataspace) */

@@ -282,7 +282,7 @@ typedef enum H5T_state_t {
     H5T_STATE_OPEN			/*named constant, open object header */
 } H5T_state_t;
 
-    /* This struct is shared between all occurances of an open named type */
+    /* This struct is shared between all occurrences of an open named type */
 typedef struct H5T_shared_t {
     hsize_t		fo_count; /* number of references to this file object */
     H5T_state_t		state;	/*current state of the type		     */

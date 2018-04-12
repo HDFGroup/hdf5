@@ -997,7 +997,7 @@ H5A_free(H5A_t *attr)
 
     HDassert(attr);
 
-    /* Free dynamicly allocated items */
+    /* Free dynamically allocated items */
     if(attr->shared->name) {
         H5MM_xfree(attr->shared->name);
         attr->shared->name = NULL;
@@ -1052,7 +1052,7 @@ H5A_close(H5A_t *attr)
 
     /* Reference count can be 0.  It only happens when H5A_create fails. */
     if(attr->shared->nrefs <= 1) {
-        /* Free dynamicly allocated items */
+        /* Free dynamically allocated items */
         if(H5A_free(attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
 

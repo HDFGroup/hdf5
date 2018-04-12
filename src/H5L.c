@@ -15,10 +15,10 @@
 /* Module Setup */
 /****************/
 
-#define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
+#define H5L_PACKAGE     /*suppress error about including H5Lpkg   */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5L_init_interface
+#define H5_INTERFACE_INIT_FUNC  H5L_init_interface
 
 /***********/
 /* Headers */
@@ -27,7 +27,7 @@
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
-#include "H5Fprivate.h"		/* File access                          */
+#include "H5Fprivate.h"         /* File access                          */
 #include "H5Gprivate.h"         /* Groups                               */
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5Lpkg.h"             /* Links                                */
@@ -78,7 +78,7 @@ typedef struct {
 typedef struct {
     const char *dst_name;               /* Destination name for moving object */
     H5T_cset_t cset;                    /* Char set for new name */
-    H5G_loc_t  *dst_loc;		/* Destination location for moving object */
+    H5G_loc_t  *dst_loc;                /* Destination location for moving object */
     unsigned dst_target_flags;          /* Target flags for destination object */
     hbool_t copy;                       /* TRUE if this is a copy operation */
     hid_t lapl_id;                      /* LAPL to use in callback */
@@ -206,15 +206,15 @@ static H5L_class_t      *H5L_table_g = NULL;
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_init
+ * Function:    H5L_init
  *
- * Purpose:	Initialize the interface from some other package.
+ * Purpose:     Initialize the interface from some other package.
  *
- * Return:	Success:	non-negative
+ * Return:      Success:    non-negative
  *
- *		Failure:	negative
+ *              Failure:    negative
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Thursday, July 13, 2006
  *
  *-------------------------------------------------------------------------
@@ -233,13 +233,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_init_interface
+ * Function:    H5L_init_interface
  *
- * Purpose:	Initialize information specific to H5L interface.
+ * Purpose:     Initialize information specific to H5L interface.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Tuesday, January 24, 2006
  *
  *-------------------------------------------------------------------------
@@ -261,13 +261,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_term_interface
+ * Function:    H5L_term_interface
  *
- * Purpose:	Terminate any resources allocated in H5L_init_interface.
+ * Purpose:     Terminate any resources allocated in H5L_init_interface.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Tuesday, January 24, 2006
  *
  *-------------------------------------------------------------------------
@@ -275,7 +275,7 @@ done:
 int
 H5L_term_interface(void)
 {
-    int	n = 0;
+    int n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -291,18 +291,18 @@ H5L_term_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lmove
+ * Function:    H5Lmove
  *
- * Purpose:	Renames an object within an HDF5 file and moves it to a new
+ * Purpose:     Renames an object within an HDF5 file and moves it to a new
  *              group.  The original name SRC is unlinked from the group graph
  *              and then inserted with the new name DST (which can specify a
  *              new path for the object) as an atomic operation. The names
  *              are interpreted relative to SRC_LOC_ID and
  *              DST_LOC_ID, which are either file IDs or group ID.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Wednesday, March 29, 2006
  *
  *-------------------------------------------------------------------------
@@ -311,8 +311,8 @@ herr_t
 H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	src_loc, *src_loc_p;
-    H5G_loc_t	dst_loc, *dst_loc_p;
+    H5G_loc_t   src_loc, *src_loc_p;
+    H5G_loc_t   dst_loc, *dst_loc_p;
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -344,7 +344,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Move the link */
     if(H5L_move(src_loc_p, src_name, dst_loc_p, dst_name, FALSE, lcpl_id,
             lapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
+    HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -352,15 +352,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lcopy
+ * Function:    H5Lcopy
  *
- * Purpose:	Creates an identical copy of a link with the same creation
+ * Purpose:     Creates an identical copy of a link with the same creation
  *              time and target.  The new link can have a different name
  *              and be in a different location than the original.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Wednesday, March 29, 2006
  *
  *-------------------------------------------------------------------------
@@ -369,8 +369,8 @@ herr_t
 H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	src_loc, *src_loc_p;
-    H5G_loc_t	dst_loc, *dst_loc_p;
+    H5G_loc_t   src_loc, *src_loc_p;
+    H5G_loc_t   dst_loc, *dst_loc_p;
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -402,7 +402,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Copy the link */
     if(H5L_move(src_loc_p, src_name, dst_loc_p, dst_name, TRUE, lcpl_id,
                 lapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
+    HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -410,19 +410,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lcreate_soft
+ * Function:    H5Lcreate_soft
  *
- * Purpose:	Creates a soft link from LINK_NAME to LINK_TARGET.
+ * Purpose:     Creates a soft link from LINK_NAME to LINK_TARGET.
  *
- * 		LINK_TARGET can be anything and is interpreted at lookup
+ *              LINK_TARGET can be anything and is interpreted at lookup
  *              time relative to the group which contains the final component
  *              of LINK_NAME.  For instance, if LINK_TARGET is `./foo' and
  *              LINK_NAME is `./x/y/bar' and a request is made for `./x/y/bar'
  *              then the actual object looked up is `./x/y/./foo'.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -431,7 +431,7 @@ herr_t
 H5Lcreate_soft(const char *link_target,
     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	link_loc;               /* Group location for new link */
+    H5G_loc_t   link_loc;               /* Group location for new link */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -441,15 +441,15 @@ H5Lcreate_soft(const char *link_target,
     if(H5G_loc(link_loc_id, &link_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!link_target || !*link_target)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no target specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no target specified")
     if(!link_name || !*link_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
     /* Create the link */
     if(H5L_create_soft(link_target, &link_loc, link_name, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -457,17 +457,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lcreate_hard
+ * Function:    H5Lcreate_hard
  *
- * Purpose:	Creates a hard link from NEW_NAME to CUR_NAME.
+ * Purpose:     Creates a hard link from NEW_NAME to CUR_NAME.
  *
- *		CUR_NAME must name an existing object.  CUR_NAME and
+ *              CUR_NAME must name an existing object.  CUR_NAME and
  *              NEW_NAME are interpreted relative to CUR_LOC_ID and
  *              NEW_LOC_ID, which are either file IDs or group IDs.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -476,8 +476,8 @@ herr_t
 H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	cur_loc, *cur_loc_p;
-    H5G_loc_t	new_loc, *new_loc_p;
+    H5G_loc_t   cur_loc, *cur_loc_p;
+    H5G_loc_t   new_loc, *new_loc_p;
     herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -488,13 +488,13 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     if(cur_loc_id == H5L_SAME_LOC && new_loc_id == H5L_SAME_LOC)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should not be both H5L_SAME_LOC")
     if(cur_loc_id != H5L_SAME_LOC && H5G_loc(cur_loc_id, &cur_loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(new_loc_id != H5L_SAME_LOC && H5G_loc(new_loc_id, &new_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!cur_name || !*cur_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified")
     if(!new_name || !*new_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
@@ -504,14 +504,14 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     if(cur_loc_id == H5L_SAME_LOC)
         cur_loc_p = new_loc_p;
     else if(new_loc_id == H5L_SAME_LOC)
-   	new_loc_p = cur_loc_p;
+        new_loc_p = cur_loc_p;
     else if(cur_loc_p->oloc->file != new_loc_p->oloc->file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.")
 
     /* Create the link */
     if(H5L_create_hard(cur_loc_p, cur_name, new_loc_p, new_name,
                 lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -519,25 +519,25 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lcreate_ud
+ * Function:    H5Lcreate_ud
  *
- * Purpose:	Creates a user-defined link of type LINK_TYPE named LINK_NAME
+ * Purpose:     Creates a user-defined link of type LINK_TYPE named LINK_NAME
  *              with user-specified data UDATA.
  *
- *		The format of the information pointed to by UDATA is
+ *              The format of the information pointed to by UDATA is
  *              defined by the user. UDATA_SIZE holds the size of this buffer.
  *
- *		LINK_NAME is interpreted relative to LINK_LOC_ID.
+ *              LINK_NAME is interpreted relative to LINK_LOC_ID.
  *
- *		The property list specified by LCPL_ID holds properties used
+ *              The property list specified by LCPL_ID holds properties used
  *              to create the link.
  *
  *              The link class of the new link must already be registered
  *              with the library.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Tuesday, December 13, 2005
  *
  *-------------------------------------------------------------------------
@@ -546,7 +546,7 @@ herr_t
 H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     const void *udata, size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	link_loc;
+    H5G_loc_t   link_loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -557,13 +557,13 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     if(H5G_loc(link_loc_id, &link_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!link_name || !*link_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
     if(link_type < H5L_TYPE_UD_MIN || link_type > H5L_TYPE_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid link class")
 
     /* Create external link */
     if(H5L_create_ud(&link_loc, link_name, udata, udata_size, link_type, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -571,18 +571,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ldelete
+ * Function:    H5Ldelete
  *
- * Purpose:	Removes the specified NAME from the group graph and
- *		decrements the link count for the object to which NAME
- *		points.  If the link count reaches zero then all file-space
- *		associated with the object will be reclaimed (but if the
- *		object is open, then the reclamation of the file space is
- *		delayed until all handles to the object are closed).
+ * Purpose:     Removes the specified NAME from the group graph and
+ *              decrements the link count for the object to which NAME
+ *              points.  If the link count reaches zero then all file-space
+ *              associated with the object will be reclaimed (but if the
+ *              object is open, then the reclamation of the file space is
+ *              delayed until all handles to the object are closed).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -590,7 +590,7 @@ done:
 herr_t
 H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group's location */
+    H5G_loc_t   loc;                    /* Group's location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -598,13 +598,13 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Unlink */
     if(H5L_delete(&loc, name, lapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -612,20 +612,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ldelete_by_idx
+ * Function:    H5Ldelete_by_idx
  *
- * Purpose:	Removes the specified link from the group graph and
- *		decrements the link count for the object to which it
- *		points, according to the order within an index.
+ * Purpose:     Removes the specified link from the group graph and
+ *              decrements the link count for the object to which it
+ *              points, according to the order within an index.
  *
- *		If the link count reaches zero then all file-space
- *		associated with the object will be reclaimed (but if the
- *		object is open, then the reclamation of the file space is
- *		delayed until all handles to the object are closed).
+ *              If the link count reaches zero then all file-space
+ *              associated with the object will be reclaimed (but if the
+ *              object is open, then the reclamation of the file space is
+ *              delayed until all handles to the object are closed).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13, 2006
  *
  *-------------------------------------------------------------------------
@@ -634,7 +634,7 @@ herr_t
 H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group's location */
+    H5G_loc_t   loc;                    /* Group's location */
     H5L_trav_rmbi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -643,13 +643,13 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else
@@ -672,20 +672,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_val
+ * Function:    H5Lget_val
  *
- * Purpose:	Returns the link value of a link whose name is NAME.  For
+ * Purpose:     Returns the link value of a link whose name is NAME.  For
  *              symbolic links, this is the path to which the link points,
  *              including the null terminator.  For user-defined links, it
  *              is the link buffer.
  *
  *              At most SIZE bytes are copied to the BUF result buffer.
  *
- * Return:	Success:	Non-negative with the link value in BUF.
+ * Return:      Success:    Non-negative with the link value in BUF.
  *
- * 		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April 13, 1998
  *
  *-------------------------------------------------------------------------
@@ -694,7 +694,7 @@ herr_t
 H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group location for location to query */
+    H5G_loc_t   loc;                    /* Group location for location to query */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -702,9 +702,9 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else
@@ -713,7 +713,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
 
     /* Get the link value */
     if(H5L_get_val(&loc, name, buf, size, lapl_id, H5AC_ind_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link value for '%s'", name)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link value for '%s'", name)
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -721,19 +721,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_val_by_idx
+ * Function:    H5Lget_val_by_idx
  *
- * Purpose:	Returns the link value of a link, according to the order of
+ * Purpose:     Returns the link value of a link, according to the order of
  *              an index.  For symbolic links, this is the path to which the
  *              link points, including the null terminator.  For user-defined
  *              links, it is the link buffer.
  *
  *              At most SIZE bytes are copied to the BUF result buffer.
  *
- * Return:	Success:	Non-negative with the link value in BUF.
- * 		Failure:	Negative
+ * Return:      Success:    Non-negative with the link value in BUF.
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13, 2006
  *
  *-------------------------------------------------------------------------
@@ -743,7 +743,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, void *buf/*out*/, size_t size,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group location for location to query */
+    H5G_loc_t   loc;                    /* Group location for location to query */
     H5L_trav_gvbi_t udata;              /* User data for callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -753,13 +753,13 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else
@@ -785,14 +785,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lexists
+ * Function:    H5Lexists
  *
- * Purpose:	Checks if a link of a given name exists in a group
+ * Purpose:     Checks if a link of a given name exists in a group
  *
- * Return:	Success:	TRUE/FALSE
- * 		Failure:	Negative
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, March 16, 2007
  *
  *-------------------------------------------------------------------------
@@ -800,7 +800,7 @@ done:
 htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;
+    H5G_loc_t   loc;
     htri_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -808,9 +808,9 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else
@@ -819,7 +819,7 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* Check for the existence of the link */
     if((ret_value = H5L_exists(&loc, name, lapl_id, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -827,15 +827,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_info
+ * Function:    H5Lget_info
  *
- * Purpose:	Gets metadata for a link.
+ * Purpose:     Gets metadata for a link.
  *
- * Return:	Success:	Non-negative with information in LINFO
+ * Return:      Success:    Non-negative with information in LINFO
  *
- * 		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Wednesday, June 21, 2006
  *
  *-------------------------------------------------------------------------
@@ -844,7 +844,7 @@ herr_t
 H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;
+    H5G_loc_t   loc;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -852,9 +852,9 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else
@@ -863,7 +863,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
 
     /* Get the link information */
     if(H5L_get_info(&loc, name, linfo, lapl_id, H5AC_ind_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -871,15 +871,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_info_by_idx
+ * Function:    H5Lget_info_by_idx
  *
- * Purpose:	Gets metadata for a link, according to the order within an
+ * Purpose:     Gets metadata for a link, according to the order within an
  *              index.
  *
- * Return:	Success:	Non-negative with information in LINFO
- * 		Failure:	Negative
+ * Return:      Success:    Non-negative with information in LINFO
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
@@ -889,7 +889,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group location for group to query */
+    H5G_loc_t   loc;                    /* Group location for group to query */
     H5L_trav_gibi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -899,13 +899,13 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else
@@ -921,7 +921,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 
     /* Traverse the group hierarchy to locate the object to get info about */
     if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_info_by_idx_cb, &udata, lapl_id, H5AC_ind_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
 
 
 done:
@@ -930,9 +930,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lregister
+ * Function:    H5Lregister
  *
- * Purpose:	Registers a class of user-defined links, or changes the
+ * Purpose:     Registers a class of user-defined links, or changes the
  *              behavior of an existing class.
  *
  *              The link class passed in will override any existing link
@@ -941,9 +941,9 @@ done:
  *              H5L_LINK_CLASS_T_VERS), a link class ID, and a traversal
  *              function.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -958,7 +958,7 @@ H5Lregister(const H5L_class_t *cls)
 
     /* Check args */
     if(cls == NULL)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid link class")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid link class")
 
     /* Check H5L_class_t version number; this is where a function to convert
      * from an outdated version should be called.
@@ -981,16 +981,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lunregister
+ * Function:    H5Lunregister
  *
- * Purpose:	Unregisters a class of user-defined links, preventing them
+ * Purpose:     Unregisters a class of user-defined links, preventing them
  *              from being traversed, queried, moved, etc.
  *
  *              A link class can be re-registered using H5Lregister().
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1005,11 +1005,11 @@ H5Lunregister(H5L_type_t id)
 
     /* Check args */
     if(id < 0 || id > H5L_TYPE_MAX)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid link type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid link type")
 
     /* Do it */
     if(H5L_unregister(id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to unregister link type")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to unregister link type")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1017,16 +1017,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lis_registered
+ * Function:    H5Lis_registered
  *
- * Purpose:	Tests whether a user-defined link class has been registered
+ * Purpose:     Tests whether a user-defined link class has been registered
  *              or not.
  *
- * Return:	Positive if the link class has been registered
+ * Return:      Positive if the link class has been registered
  *              Zero if it is unregistered
  *              Negative on error (if the class is not a valid UD class ID)
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1046,7 +1046,7 @@ H5Lis_registered(H5L_type_t id)
 
     /* Is the link class already registered? */
     for(i = 0; i < H5L_table_used_g; i++)
-	if(H5L_table_g[i].id == id) {
+        if(H5L_table_g[i].id == id) {
             ret_value = TRUE;
             break;
         } /* end if */
@@ -1057,18 +1057,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_name_by_idx
+ * Function:    H5Lget_name_by_idx
  *
- * Purpose:	Gets name for a link, according to the order within an
+ * Purpose:     Gets name for a link, according to the order within an
  *              index.
  *
  *              Same pattern of behavior as H5Iget_name.
  *
- * Return:	Success:	Non-negative length of name, with information
- *				in NAME buffer
- * 		Failure:	Negative
+ * Return:      Success:    Non-negative length of name, with information
+ *              in NAME buffer
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November 11, 2006
  *
  *-------------------------------------------------------------------------
@@ -1078,7 +1078,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id)
 {
-    H5G_loc_t	loc;            /* Location of group */
+    H5G_loc_t   loc;            /* Location of group */
     H5L_trav_gnbi_t udata;      /* User data for callback */
     ssize_t ret_value;          /* Return value */
 
@@ -1088,13 +1088,13 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else
@@ -1123,23 +1123,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Literate
+ * Function:    H5Literate
  *
- * Purpose:	Iterates over links in a group, with user callback routine,
+ * Purpose:     Iterates over links in a group, with user callback routine,
  *              according to the order within an index.
  *
  *              Same pattern of behavior as H5Giterate.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *              returns non-zero, or zero if all members were
+ *              processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
+ *              Failure:    Negative if something goes wrong within the
+ *              library, or the negative value returned by one
+ *              of the operators.
  *
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, November 16, 2006
  *
  *-------------------------------------------------------------------------
@@ -1150,8 +1150,8 @@ H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
 {
     H5I_type_t  id_type;        /* Type of ID */
     H5G_link_iterate_t lnk_op;  /* Link operator */
-    hsize_t     last_lnk;       /* Index of last object looked at */
-    hsize_t	idx;            /* Internal location to hold index */
+    hsize_t last_lnk;           /* Index of last object looked at */
+    hsize_t idx;                /* Internal location to hold index */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1162,11 +1162,11 @@ H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!op)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
 
     /* Set up iteration beginning/end info */
     idx = (idx_p == NULL ? 0 : *idx_p);
@@ -1178,7 +1178,7 @@ H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
 
     /* Iterate over the links */
     if((ret_value = H5G_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
     /* Set the index we stopped at */
     if(idx_p)
@@ -1190,23 +1190,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Literate_by_name
+ * Function:    H5Literate_by_name
  *
- * Purpose:	Iterates over links in a group, with user callback routine,
+ * Purpose:     Iterates over links in a group, with user callback routine,
  *              according to the order within an index.
  *
  *              Same pattern of behavior as H5Giterate.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *              returns non-zero, or zero if all members were
+ *              processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
+ *              Failure:    Negative if something goes wrong within the
+ *              library, or the negative value returned by one
+ *              of the operators.
  *
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, November 16, 2006
  *
  *-------------------------------------------------------------------------
@@ -1217,9 +1217,9 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     H5L_iterate_t op, void *op_data, hid_t lapl_id)
 {
     H5G_link_iterate_t lnk_op;  /* Link operator */
-    hsize_t     last_lnk;       /* Index of last object looked at */
-    hsize_t	idx;            /* Internal location to hold index */
-    herr_t ret_value;           /* Return value */
+    hsize_t last_lnk;       /* Index of last object looked at */
+    hsize_t idx;            /* Internal location to hold index */
+    herr_t  ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "i*sIiIo*hx*xi", loc_id, group_name, idx_type, order, idx_p, op,
@@ -1227,13 +1227,13 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
 
     /* Check arguments */
     if(!group_name || !*group_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!op)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
     if(H5P_DEFAULT == lapl_id)
         lapl_id = H5P_LINK_ACCESS_DEFAULT;
     else
@@ -1250,7 +1250,7 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
 
     /* Iterate over the links */
     if((ret_value = H5G_iterate(loc_id, group_name, idx_type, order, idx, &last_lnk, &lnk_op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
     /* Set the index we stopped at */
     if(idx_p)
@@ -1262,9 +1262,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lvisit
+ * Function:    H5Lvisit
  *
- * Purpose:	Recursively visit all the links in a group and all
+ * Purpose:     Recursively visit all the links in a group and all
  *              the groups that are linked to from that group.  Links within
  *              each group are visited according to the order within the
  *              specified index (unless the specified index does not exist for
@@ -1276,16 +1276,16 @@ done:
  *              callback with more than one link that points to a particular
  *              _object_.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *              returns non-zero, or zero if all members were
+ *              processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
+ *              Failure:    Negative if something goes wrong within the
+ *              library, or the negative value returned by one
+ *              of the operators.
  *
- * Programmer:	Quincey Koziol
- *		November 24 2007
+ * Programmer:  Quincey Koziol
+ *              November 24 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1304,15 +1304,15 @@ H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
     /* Call internal group visitation routine */
     if((ret_value = H5G_visit(grp_id, ".", idx_type, order, op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1320,9 +1320,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lvisit_by_name
+ * Function:    H5Lvisit_by_name
  *
- * Purpose:	Recursively visit all the links in a group and all
+ * Purpose:     Recursively visit all the links in a group and all
  *              the groups that are linked to from that group.  Links within
  *              each group are visited according to the order within the
  *              specified index (unless the specified index does not exist for
@@ -1334,16 +1334,16 @@ done:
  *              callback with more than one link that points to a particular
  *              _object_.
  *
- * Return:	Success:	The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ * Return:      Success:    The return value of the first operator that
+ *              returns non-zero, or zero if all members were
+ *              processed with no operator returning non-zero.
  *
- *		Failure:	Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
+ *              Failure:    Negative if something goes wrong within the
+ *              library, or the negative value returned by one
+ *              of the operators.
  *
- * Programmer:	Quincey Koziol
- *		November 3 2007
+ * Programmer:  Quincey Koziol
+ *              November 3 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1359,11 +1359,11 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* Check args */
     if(!group_name || !*group_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
     if(H5P_DEFAULT == lapl_id)
@@ -1374,7 +1374,7 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* Call internal group visitation routine */
     if((ret_value = H5G_visit(loc_id, group_name, idx_type, order, op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1390,16 +1390,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_find_class_idx
+ * Function:    H5L_find_class_idx
  *
- * Purpose:	Given a link class ID, return the offset in the global array
+ * Purpose:     Given a link class ID, return the offset in the global array
  *              that holds all the registered link classes.
  *
- * Return:	Success:	Non-negative index of entry in global
+ * Return:      Success:    Non-negative index of entry in global
  *                              link class table.
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1413,8 +1413,8 @@ H5L_find_class_idx(H5L_type_t id)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     for(i = 0; i < H5L_table_used_g; i++)
-	if(H5L_table_g[i].id == id)
-	    HGOTO_DONE((int)i)
+        if(H5L_table_g[i].id == id)
+            HGOTO_DONE((int)i)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1422,15 +1422,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_find_class
+ * Function:    H5L_find_class
  *
- * Purpose:	Given a link class ID return a pointer to a global struct that
- *		defines the link class.
+ * Purpose:     Given a link class ID return a pointer to a global struct that
+ *              defines the link class.
  *
- * Return:	Success:	Ptr to entry in global link class table.
- *		Failure:	NULL
+ * Return:      Success:    Ptr to entry in global link class table.
+ *              Failure:    NULL
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1438,7 +1438,7 @@ done:
 const H5L_class_t *
 H5L_find_class(H5L_type_t id)
 {
-    int	idx;                            /* Filter index in global table */
+    int idx;                            /* Filter index in global table */
     H5L_class_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1456,16 +1456,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_register
+ * Function:    H5L_register
  *
- * Purpose:	Registers a class of user-defined links, or changes the
+ * Purpose:     Registers a class of user-defined links, or changes the
  *              behavior of an existing class.
  *
  *              See H5Lregister for full documentation.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1483,22 +1483,22 @@ H5L_register(const H5L_class_t *cls)
 
     /* Is the link type already registered? */
     for(i = 0; i < H5L_table_used_g; i++)
-	if(H5L_table_g[i].id == cls->id)
+        if(H5L_table_g[i].id == cls->id)
             break;
 
     /* Filter not already registered */
     if(i >= H5L_table_used_g) {
-	if(H5L_table_used_g >= H5L_table_alloc_g) {
-	    size_t n = MAX(H5L_MIN_TABLE_SIZE, (2 * H5L_table_alloc_g));
-	    H5L_class_t *table = (H5L_class_t *)H5MM_realloc(H5L_table_g, (n * sizeof(H5L_class_t)));
+        if(H5L_table_used_g >= H5L_table_alloc_g) {
+            size_t n = MAX(H5L_MIN_TABLE_SIZE, (2 * H5L_table_alloc_g));
+            H5L_class_t *table = (H5L_class_t *)H5MM_realloc(H5L_table_g, (n * sizeof(H5L_class_t)));
             if(!table)
-		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend link type table")
-	    H5L_table_g = table;
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend link type table")
+            H5L_table_g = table;
             H5L_table_alloc_g = n;
-	} /* end if */
+    } /* end if */
 
-	/* Initialize */
-	i = H5L_table_used_g++;
+    /* Initialize */
+    i = H5L_table_used_g++;
     } /* end if */
 
     /* Copy link class info into table */
@@ -1510,15 +1510,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_unregister
+ * Function:    H5L_unregister
  *
- * Purpose:	Unregisters a class of user-defined links.
+ * Purpose:     Unregisters a class of user-defined links.
  *
  *              See H5Lunregister for full documentation.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
@@ -1535,7 +1535,7 @@ H5L_unregister(H5L_type_t id)
 
     /* Is the filter already registered? */
     for(i = 0; i < H5L_table_used_g; i++)
-	if(H5L_table_g[i].id == id)
+    if(H5L_table_g[i].id == id)
             break;
 
     /* Fail if filter not found */
@@ -1553,14 +1553,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_link
+ * Function:    H5L_link
  *
- * Purpose:	Creates a link from OBJ_ID to CUR_NAME.  See H5Olink() for
- *		full documentation.
+ * Purpose:     Creates a link from OBJ_ID to CUR_NAME.  See H5Olink() for
+ *              full documentation.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Tuesday, December 13, 2005
  *
  *-------------------------------------------------------------------------
@@ -1598,13 +1598,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_link_object
+ * Function:    H5L_link_object
  *
- * Purpose:	Creates a new object and a link to it.
+ * Purpose:     Creates a new object and a link to it.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, April 9, 2007
  *
  *-------------------------------------------------------------------------
@@ -1641,13 +1641,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_link_cb
+ * Function:    H5L_link_cb
  *
- * Purpose:	Callback for creating a link to an object.
+ * Purpose:     Callback for creating a link to an object.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -1889,13 +1889,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_create_hard
+ * Function:    H5L_create_hard
  *
- * Purpose:	Creates a hard link from NEW_NAME to CUR_NAME.
+ * Purpose:     Creates a hard link from NEW_NAME to CUR_NAME.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -1905,7 +1905,7 @@ H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
     const H5G_loc_t *link_loc, const char *link_name, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id)
 {
-    char *norm_cur_name = NULL;	        /* Pointer to normalized current name */
+    char *norm_cur_name = NULL;         /* Pointer to normalized current name */
     H5F_t *link_file = NULL;            /* Pointer to file to link to */
     H5O_link_t lnk;                     /* Link to insert */
     H5G_loc_t obj_loc;                  /* Location of object to link to */
@@ -1963,13 +1963,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_create_soft
+ * Function:    H5L_create_soft
  *
- * Purpose:	Creates a soft link from LINK_NAME to TARGET_PATH.
+ * Purpose:     Creates a soft link from LINK_NAME to TARGET_PATH.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April  6, 1998
  *
  *-------------------------------------------------------------------------
@@ -1978,7 +1978,7 @@ herr_t
 H5L_create_soft(const char *target_path, const H5G_loc_t *link_loc,
     const char *link_name, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id)
 {
-    char *norm_target = NULL;	        /* Pointer to normalized current name */
+    char *norm_target = NULL;           /* Pointer to normalized current name */
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2011,14 +2011,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_create_ud
+ * Function:    H5L_create_ud
  *
- * Purpose:	Creates a user-defined link. See H5Lcreate_ud for
+ * Purpose:     Creates a user-defined link. See H5Lcreate_ud for
  *              full documentation.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Friday, May 19, 2006
  *
  *-------------------------------------------------------------------------
@@ -2070,13 +2070,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_val_real
+ * Function:    H5L_get_val_real
  *
- * Purpose:	Retrieve link value from a link object
+ * Purpose:     Retrieve link value from a link object
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13 2006
  *
  *-------------------------------------------------------------------------
@@ -2126,13 +2126,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_val_cb
+ * Function:    H5L_get_val_cb
  *
- * Purpose:	Callback for retrieving link value or udata.
+ * Purpose:     Callback for retrieving link value or udata.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, September 20, 2005
  *
  *-------------------------------------------------------------------------
@@ -2164,20 +2164,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_val
+ * Function:    H5L_get_val
  *
- * Purpose:	Returns the value of a symbolic link or the udata for a
+ * Purpose:     Returns the value of a symbolic link or the udata for a
  *              user-defined link.
  *
- * Return:	Success:	Non-negative, with at most SIZE bytes of the
- *				link value copied into the BUF buffer.  If the
- *				link value is larger than SIZE characters
- *				counting the null terminator then the BUF
- *				result will not be null terminated.
+ * Return:      Success:    Non-negative, with at most SIZE bytes of the
+ *              link value copied into the BUF buffer.  If the
+ *              link value is larger than SIZE characters
+ *              counting the null terminator then the BUF
+ *              result will not be null terminated.
  *
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, April 13, 1998
  *
  *-------------------------------------------------------------------------
@@ -2187,7 +2187,7 @@ H5L_get_val(H5G_loc_t *loc, const char *name, void *buf/*out*/, size_t size,
     hid_t lapl_id, hid_t dxpl_id)
 {
     H5L_trav_gv_t udata;           /* User data for callback */
-    herr_t ret_value = SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2209,14 +2209,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_val_by_idx_cb
+ * Function:    H5L_get_val_by_idx_cb
  *
- * Purpose:	Callback for retrieving a link's value according to an
+ * Purpose:     Callback for retrieving a link's value according to an
  *              index's order.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13 2006
  *
  *-------------------------------------------------------------------------
@@ -2261,14 +2261,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_delete_cb
+ * Function:    H5L_delete_cb
  *
- * Purpose:	Callback for deleting a link.  This routine
+ * Purpose:     Callback for deleting a link.  This routine
  *              actually deletes the link
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -2298,7 +2298,7 @@ H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
 
     /* Remove the link from the group */
     if(H5G_obj_remove(grp_loc->oloc, grp_loc->path->full_path_r, name, udata->dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to remove link from group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to remove link from group")
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
@@ -2310,13 +2310,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_delete
+ * Function:    H5L_delete
  *
- * Purpose:	Delete a link from a group.
+ * Purpose:     Delete a link from a group.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, September 17, 1998
  *
  *-------------------------------------------------------------------------
@@ -2324,9 +2324,9 @@ done:
 herr_t
 H5L_delete(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
-    H5L_trav_rm_t      udata;                  /* User data for callback */
-    char		*norm_name = NULL;	/* Pointer to normalized name */
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5L_trav_rm_t udata;                  /* User data for callback */
+    char         *norm_name = NULL;       /* Pointer to normalized name */
+    herr_t        ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2353,13 +2353,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_delete_by_idx_cb
+ * Function:    H5L_delete_by_idx_cb
  *
- * Purpose:	Callback for removing a link according to an index's order.
+ * Purpose:     Callback for removing a link according to an index's order.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November 13 2006
  *
  *-------------------------------------------------------------------------
@@ -2393,15 +2393,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_move_dest_cb
+ * Function:    H5L_move_dest_cb
  *
- * Purpose:	Second callback for moving and renaming an object.  This routine
+ * Purpose:     Second callback for moving and renaming an object.  This routine
  *              inserts a new link into the group returned by the traversal.
  *              It is called by H5L_move_cb.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, April 3, 2006
  *
  *-------------------------------------------------------------------------
@@ -2507,15 +2507,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_move_cb
+ * Function:    H5L_move_cb
  *
- * Purpose:	Callback for moving and renaming an object.  This routine
+ * Purpose:     Callback for moving and renaming an object.  This routine
  *              replaces the names of open objects with the moved object
  *              in the path
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Friday, April 3, 2006
  *
  *-------------------------------------------------------------------------
@@ -2561,7 +2561,7 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     /* Insert the link into its new location */
     if(H5G_traverse(udata->dst_loc, udata->dst_name, udata->dst_target_flags,
             H5L_move_dest_cb, &udata_out, udata->lapl_id, udata->dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
 
     /* If this is a move and not a copy operation, change the object's name and remove the old link */
     if(!udata->copy) {
@@ -2617,9 +2617,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_move
+ * Function:    H5L_move
  *
- * Purpose:	Atomically move or copy a link.
+ * Purpose:     Atomically move or copy a link.
  *
  *              Creates a copy of a link in a new destination with a new name.
  *              SRC_LOC and SRC_NAME together define the link's original
@@ -2629,9 +2629,9 @@ done:
  *              If copy_flag is FALSE, the original link is removed
  *              (effectively moving the link).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, May 1, 2006
  *
  *-------------------------------------------------------------------------
@@ -2699,9 +2699,10 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     udata.dxpl_id = dxpl_id;
 
     /* Do the move */
-    if(H5G_traverse(src_loc, src_name, H5G_TARGET_MOUNT | H5G_TARGET_SLINK | H5G_TARGET_UDLINK,
+    if(H5G_traverse(src_loc,
+            src_name, H5G_TARGET_MOUNT | H5G_TARGET_SLINK | H5G_TARGET_UDLINK,
             H5L_move_cb, &udata, lapl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to find link")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to find link")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2709,13 +2710,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_exists_cb
+ * Function:    H5L_exists_cb
  *
- * Purpose:	Callback for checking whether a link exists
+ * Purpose:     Callback for checking whether a link exists
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, March 16 2007
  *
  *-------------------------------------------------------------------------
@@ -2741,13 +2742,13 @@ H5L_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_exists
+ * Function:    H5L_exists
  *
- * Purpose:	Returns whether a link exists in a group
+ * Purpose:     Returns whether a link exists in a group
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ * Return:      Non-negative (TRUE/FALSE) on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, March 16 2007
  *
  *-------------------------------------------------------------------------
@@ -2773,13 +2774,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_info_cb
+ * Function:    H5L_get_info_cb
  *
- * Purpose:	Callback for retrieving a link's metadata
+ * Purpose:     Callback for retrieving a link's metadata
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, April 17 2006
  *
  *-------------------------------------------------------------------------
@@ -2812,13 +2813,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_info
+ * Function:    H5L_get_info
  *
- * Purpose:	Returns metadata about a link.
+ * Purpose:     Returns metadata about a link.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Monday, April 17 2006
  *
  *-------------------------------------------------------------------------
@@ -2845,14 +2846,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_info_by_idx_cb
+ * Function:    H5L_get_info_by_idx_cb
  *
- * Purpose:	Callback for retrieving a link's metadata according to an
+ * Purpose:     Callback for retrieving a link's metadata according to an
  *              index's order.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, November  6 2006
  *
  *-------------------------------------------------------------------------
@@ -2897,15 +2898,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_default_lcpl
+ * Function:    H5L_get_default_lcpl
  *
- * Purpose:	Accessor for the default Link Creation Property List
+ * Purpose:     Accessor for the default Link Creation Property List
  *
- * Return:	Success:	ID of the deafult lcpl
+ * Return:      Success:    ID of the default lcpl
  *
- * 		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              Tuesday, July 4, 2006
  *
  *-------------------------------------------------------------------------
@@ -2925,14 +2926,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_get_name_by_idx_cb
+ * Function:    H5L_get_name_by_idx_cb
  *
- * Purpose:	Callback for retrieving a link's name according to an
+ * Purpose:     Callback for retrieving a link's name according to an
  *              index's order.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November 11 2006
  *
  *-------------------------------------------------------------------------
@@ -2966,16 +2967,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_link_copy_file
+ * Function:    H5L_link_copy_file
  *
  * Purpose:     Copy a link and the object it points to from one file to
  *              another.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 29 2006
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Sep 29 2006
  *
  *-------------------------------------------------------------------------
  */

@@ -775,7 +775,7 @@ H5B_insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx,
  *		the specified type.
  *
  *		On return, if LT_KEY_CHANGED is non-zero, then LT_KEY is
- *		the new native left key.  Similarily for RT_KEY_CHANGED
+ *		the new native left key.  Similarly for RT_KEY_CHANGED
  *		and RT_KEY.
  *
  *		If the node splits, then MD_KEY contains the key that

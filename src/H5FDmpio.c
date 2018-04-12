@@ -1483,7 +1483,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t dxpl_id, had
 
     /* Only look for MPI views for raw data transfers */
     if(type==H5FD_MEM_DRAW) {
-        H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+        H5FD_mpio_xfer_t            xfer_mode;   /* I/O transfer mode */
 
         /* Obtain the data transfer properties */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -1769,7 +1769,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 #endif
 
     if(type == H5FD_MEM_DRAW) {
-        H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+        H5FD_mpio_xfer_t            xfer_mode;   /* I/O transfer mode */
 
         /* Obtain the data transfer properties */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
