@@ -22,7 +22,10 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
-  EXAMPLE_PROG_PARA = ph5example
+  EXAMPLE_PROG_PARA = ph5example h5rados_file_create h5rados_file_open \
+           h5rados_group_create h5rados_group_open h5rados_dset_create \
+           h5rados_dset_open h5rados_dset_write h5rados_dset_read \
+           h5rados_dset_wpartial h5rados_dset_rpartial
 endif
 
 INSTALL_SCRIPT_FILES = run-c-ex.sh
@@ -57,6 +60,10 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
 	  h5_vds.c h5_vds-exc.c \
           h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c h5_vds-percival.c \
           h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c
+          h5rados_file_create.c h5rados_file_open.c h5rados_group_create.c \
+          h5rados_group_open.c h5rados_dset_create.c \
+          h5rados_dset_open.c h5rados_dset_write.c h5rados_dset_read.c \
+          h5rados_dset_wpartial.c h5rados_dset_rpartial.c
 
 
 
@@ -134,6 +141,16 @@ h5_vds-simpleIO: $(srcdir)/h5_vds-simpleIO.c
 h5_vds-percival: $(srcdir)/h5_vds-percival.c
 h5_vds-percival-unlim: $(srcdir)/h5_vds-percival-unlim.c
 h5_vds-percival-unlim-maxmin: $(srcdir)/h5_vds-percival-unlim-maxmin.c
+h5rados_file_create: $(srcdir)/h5rados_file_create.c
+h5rados_file_open: $(srcdir)/h5rados_file_open.c
+h5rados_group_create: $(srcdir)/h5rados_group_create.c
+h5rados_group_open: $(srcdir)/h5rados_group_open.c
+h5rados_dset_create: $(srcdir)/h5rados_dset_create.c
+h5rados_dset_open: $(srcdir)/h5rados_dset_open.c
+h5rados_dset_write: $(srcdir)/h5rados_dset_write.c
+h5rados_dset_read: $(srcdir)/h5rados_dset_read.c
+h5rados_dset_wpartial: $(srcdir)/h5rados_dset_wpartial.c
+h5rados_dset_rpartial: $(srcdir)/h5rados_dset_rpartial.c
 
 if BUILD_SHARED_SZIP_CONDITIONAL
 LD_LIBRARY_PATH=$(LL_PATH)
