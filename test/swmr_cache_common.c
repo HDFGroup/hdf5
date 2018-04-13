@@ -45,7 +45,7 @@ static herr_t fullswmr_cache_free_icr(void *thing);
 static const H5C_class_t FULLSWMR_CACHE_TEST_CLASS[1] = {{
     FULLSWMR_CACHE_ENTRY_TYPE,
     "fullswmr_cache_entry",
-    H5FD_MEM_DEFAULT,
+    H5FD_MEM_EARRAY_DBLK_PAGE,
     H5C__CLASS_NO_FLAGS_SET,
     fullswmr_cache_get_initial_load_size,
     NULL,
@@ -524,8 +524,8 @@ fullswmr_setup_cache(hsize_t entry_size, int n_entry, unsigned file_flags)
     max_type_id = file_ptr->shared->cache->max_type_id;
     HDmemcpy(fullswmr_test_classes_g, file_ptr->shared->cache->class_table_ptr, H5C__MAX_NUM_TYPE_IDS*sizeof(H5C_class_t*));
 
-    /* replace H5AC_SOHM_TABLE_ID with our own class */
-    entry_type_id_g = H5AC_SOHM_TABLE_ID;
+    /* Replace H5AC_EARRAY_DBLK_PAGE_ID with our own class */
+    entry_type_id_g = H5AC_EARRAY_DBLK_PAGE_ID;
     fullswmr_test_classes_g[entry_type_id_g] = FULLSWMR_CACHE_TEST_CLASS;
 
     saved_cache_g = file_ptr->shared->cache;

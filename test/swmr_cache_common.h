@@ -38,7 +38,7 @@
 /* Macro to make error reporting easier */
 #define CACHE_ERROR(s)      {failure_mssg_g = "Line #" H5_TOSTRING(__LINE__) ": " s ; pass_g = FALSE; goto done;}
 
-#define FULLSWMR_CACHE_ENTRY_TYPE		H5AC_SOHM_TABLE_ID
+#define FULLSWMR_CACHE_ENTRY_TYPE		H5AC_EARRAY_DBLK_PAGE_ID
 #define FULLSWMR_DELTAT_SECONDS         		1
 
 typedef struct fullswmr_cache_entry_t {

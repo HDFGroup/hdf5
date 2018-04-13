@@ -166,7 +166,6 @@ static int
 H5MF__freedspace_create_cb(H5AC_info_t *entry, void *_ctx)
 {
     H5MF_freedspace_ctx_t *ctx = (H5MF_freedspace_ctx_t*)_ctx;   /* Callback context */
-    int type_id;                        /* Cache client for entry */
     int ret_value = H5_ITER_CONT;       /* Return value */
 
     FUNC_ENTER_STATIC
@@ -175,33 +174,39 @@ H5MF__freedspace_create_cb(H5AC_info_t *entry, void *_ctx)
     HDassert(entry);
     HDassert(ctx);
 
-    /* Retrieve type for entry */
-    if((type_id = H5AC_get_entry_type(entry)) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, H5_ITER_ERROR, "unable to get entry type")
+    /* Only create flush dependencies on currently dirty entries in rings that
+     *  will be flushed same / earlier, and are not the freed entry
+     */
+    if(H5F_addr_ne(entry->addr, ctx->addr) && entry->is_dirty && entry->ring <= ctx->ring) {
+        int type_id;                    /* Cache client for entry */
+        hbool_t create_fd = FALSE;      /* Whther to create the flush dependency */
 
-    /* Don't create dependency for the freed entry */
-    if (entry->addr == ctx->addr) 
-        goto done;
+        /* Retrieve type for entry */
+        if((type_id = H5AC_get_entry_type(entry)) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, H5_ITER_ERROR, "unable to get entry type")
 
-    if (ctx->fs && ctx->alloc_type == H5FD_MEM_DRAW && (type_id == H5FD_MEM_BTREE ||
-                type_id == H5FD_MEM_OHDR) && entry->ring <= ctx->ring) {
-
-            if(H5AC_create_flush_dependency(ctx->fs, entry) < 0)
-               HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, H5_ITER_ERROR, "can't create flush dependency")
-    }
-    /* Don't create flush dependency on clean entries or cache-internal ones */
-    else if(type_id != H5AC_FREEDSPACE_ID && type_id != H5AC_PROXY_ENTRY_ID
-            && type_id != H5AC_EPOCH_MARKER_ID && type_id != H5AC_PREFETCHED_ENTRY_ID
-            && entry->is_dirty) {
-
-        /* Only create flush dependencies on entries in rings which will be flushed same / earlier */
-        if(entry->ring <= ctx->ring) {
+        /* Create freespace entry for raw data only when the dirty entry is a
+         * object header or chunk index entry
+         */
+        if(ctx->alloc_type == H5FD_MEM_DRAW) {
+            if((type_id == H5AC_BT2_HDR_ID || type_id == H5AC_BT2_INT_ID || type_id == H5AC_BT2_LEAF_ID)
+                    || (type_id == H5AC_EARRAY_HDR_ID || type_id == H5AC_EARRAY_IBLOCK_ID || type_id == H5AC_EARRAY_SBLOCK_ID || type_id == H5AC_EARRAY_DBLOCK_ID || type_id == H5AC_EARRAY_DBLK_PAGE_ID)
+                    || (type_id == H5AC_FARRAY_HDR_ID || type_id == H5AC_FARRAY_DBLOCK_ID || type_id == H5AC_FARRAY_DBLK_PAGE_ID)
+                    || (type_id == H5AC_OHDR_ID || type_id == H5AC_OHDR_CHK_ID))
+                create_fd = TRUE;
+        } /* end if */
+        /* Don't create flush dependency on cache-internal entries */
+        else if(type_id != H5AC_FREEDSPACE_ID && type_id != H5AC_PROXY_ENTRY_ID
+                && type_id != H5AC_EPOCH_MARKER_ID && type_id != H5AC_PREFETCHED_ENTRY_ID)
+            create_fd = TRUE;
+    
+        /* Check for creating the flush dependency */
+        if(create_fd) {
             /* Create freedspace object, if not already available */
-            if(ctx->fs == NULL) {
+            if(ctx->fs == NULL)
                 /* Allocate new freedspace object */
                 if(NULL == (ctx->fs = H5MF__freedspace_new(ctx)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, H5_ITER_ERROR, "can't create freed space entry")
-            } /* if ctx->fs == NULL */
 
             /* Create flush dependency between the freedspace entry and the dirty entry */
             if(H5AC_create_flush_dependency(ctx->fs, entry) < 0)
