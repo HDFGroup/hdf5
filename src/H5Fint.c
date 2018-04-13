@@ -400,11 +400,11 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     /* Count file IDs */
     if(olist->obj_type == H5I_FILE) {
         if((olist->file_info.local &&
-                (!olist->file_info.ptr.file ||
-                (olist->file_info.ptr.file && (H5F_t*)obj_ptr == olist->file_info.ptr.file))) ||
+                    (!olist->file_info.ptr.file ||
+                        (olist->file_info.ptr.file && (H5F_t*)obj_ptr == olist->file_info.ptr.file))) ||
                 (!olist->file_info.local &&
-                (!olist->file_info.ptr.shared ||
-                (olist->file_info.ptr.shared && ((H5F_t*)obj_ptr)->shared == olist->file_info.ptr.shared)))) {
+                    (!olist->file_info.ptr.shared ||
+                        (olist->file_info.ptr.shared && ((H5F_t*)obj_ptr)->shared == olist->file_info.ptr.shared)))) {
             add_obj = TRUE;
         } /* end if */
     } /* end if */
@@ -449,12 +449,12 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
         if((olist->file_info.local &&
                     ((!olist->file_info.ptr.file && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE) ||
-                    (!olist->file_info.ptr.file && olist->obj_type != H5I_DATATYPE) ||
-                    (oloc && oloc->file == olist->file_info.ptr.file))) ||
-                    (!olist->file_info.local &&
+                        (!olist->file_info.ptr.file && olist->obj_type != H5I_DATATYPE) ||
+                            (oloc && oloc->file == olist->file_info.ptr.file))) ||
+                (!olist->file_info.local &&
                     ((!olist->file_info.ptr.shared && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE) ||
-                    (!olist->file_info.ptr.shared && olist->obj_type != H5I_DATATYPE) ||
-                    (oloc && oloc->file && oloc->file->shared == olist->file_info.ptr.shared)))) {
+                        (!olist->file_info.ptr.shared && olist->obj_type != H5I_DATATYPE) ||
+                            (oloc && oloc->file && oloc->file->shared == olist->file_info.ptr.shared)))) {
             add_obj = TRUE;
         } /* end if */
     } /* end else */
