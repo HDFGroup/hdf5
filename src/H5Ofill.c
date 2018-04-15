@@ -43,7 +43,7 @@ static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
 static void  *H5O_fill_copy(const void *_mesg, void *_dest);
 static herr_t H5O_fill_reset(void *_mesg);
 static herr_t H5O_fill_free(void *_mesg);
-static herr_t H5O__fill_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+static herr_t H5O_fill_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
@@ -121,7 +121,7 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     H5O_fill_shared_link,	/* link method				*/
     NULL,			/* set share method			*/
     NULL,		    	/*can share method		*/
-    H5O__fill_pre_copy_file,    /* pre copy native value to file            */
+    H5O_fill_pre_copy_file,     /* pre copy native value to file        */
     H5O_fill_shared_copy_file,	/* copy native value to file		*/
     H5O_fill_shared_post_copy_file,	/* post copy native value to file	*/
     NULL,			/* get creation index		*/
@@ -145,7 +145,7 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     H5O_fill_new_shared_link,	/* link method				*/
     NULL,			/* set share method			*/
     NULL,		    	/*can share method		*/
-    H5O__fill_pre_copy_file,            /* pre copy native value to file    */
+    H5O_fill_pre_copy_file,     /* pre copy native value to file        */
     H5O_fill_new_shared_copy_file, /* copy native value to file		*/
     H5O_fill_new_shared_post_copy_file,	/* post copy native value to file	*/
     NULL,			/* get creation index		*/

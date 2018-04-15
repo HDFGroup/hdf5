@@ -132,6 +132,13 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
 #endif /* H5O_ENABLE_BOGUS */
 };
 
+/* Format version bounds for object header */
+const unsigned H5O_obj_ver_bounds[] = {
+    H5O_VERSION_1,      /* H5F_LIBVER_EARLIEST */
+    H5O_VERSION_2,      /* H5F_LIBVER_V18 */
+    H5O_VERSION_LATEST  /* H5F_LIBVER_LATEST */
+};
+
 /* Declare a free list to manage the H5O_t struct */
 H5FL_DEFINE(H5O_t);
 
@@ -173,13 +180,6 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
     H5O_OBJ_DATATYPE,		/* Datatype object (H5O_TYPE_NAMED_DATATYPE - 2) */
     H5O_OBJ_DATASET,		/* Dataset object (H5O_TYPE_DATASET - 1) */
     H5O_OBJ_GROUP,		/* Group object (H5O_TYPE_GROUP - 0) */
-};
-
-/* Format version bounds for object header */
-static const unsigned H5O_obj_ver_bounds[] = {
-    H5O_VERSION_1,      /* H5F_LIBVER_EARLIEST */
-    H5O_VERSION_2,      /* H5F_LIBVER_V18 */
-    H5O_VERSION_LATEST  /* H5F_LIBVER_LATEST */
 };
 
 
