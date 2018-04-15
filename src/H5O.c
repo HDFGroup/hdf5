@@ -72,44 +72,6 @@
 /* Local Variables */
 /*******************/
 
-/* Header object ID to class mapping */
-/*
- * Initialize the object class info table.  Begin with the most general types
- * and end with the most specific. For instance, any object that has a
- * datatype message is a datatype but only some of them are datasets.
- */
-static const H5O_obj_class_t *const H5O_obj_class_g[] = {
-    H5O_OBJ_DATATYPE,		/* Datatype object (H5O_TYPE_NAMED_DATATYPE - 2) */
-    H5O_OBJ_DATASET,		/* Dataset object (H5O_TYPE_DATASET - 1) */
-    H5O_OBJ_GROUP,		/* Group object (H5O_TYPE_GROUP - 0) */
-};
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O__init_package
- *
- * Purpose:	Initialize information specific to H5O interface.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, January 18, 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5O__init_package(void)
-{
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* H5O interface sanity checks */
-    HDcompile_assert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
-    HDcompile_assert(sizeof(H5O_fheap_id_t) == H5O_FHEAP_ID_LEN);
-
-    HDcompile_assert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O__init_package() */
 
 
 /*-------------------------------------------------------------------------
