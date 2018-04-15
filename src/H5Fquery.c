@@ -97,15 +97,15 @@ H5F_get_intent(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_low_bound
+ * Function:    H5F_get_low_bound
  *
- * Purpose:	Quick and dirty routine to retrieve the file's low_bound.
+ * Purpose: Quick and dirty routine to retrieve the file's low_bound.
  *          (Mainly added to stop non-file routines from poking about in the
  *          H5F_t data structure)
  *
- * Return:	low_bound on success/abort on failure (shouldn't fail)
+ * Return:  low_bound on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Vailin Choi; June 2016
+ * Programmer:  Vailin Choi; June 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -122,15 +122,15 @@ H5F_get_low_bound(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_high_bound
+ * Function:    H5F_get_high_bound
  *
- * Purpose:	Quick and dirty routine to retrieve the file's high_bound.
+ * Purpose: Quick and dirty routine to retrieve the file's high_bound.
  *          (Mainly added to stop non-file routines from poking about in the
  *          H5F_t data structure)
  *
- * Return:	high_bound on success/abort on failure (shouldn't fail)
+ * Return:  high_bound on success/abort on failure (shouldn't fail)
  *
- * Programmer:	Vailin Choi; June 2016
+ * Programmer:  Vailin Choi; June 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -147,12 +147,7 @@ H5F_get_high_bound(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_open_name
- *
- * Purpose:	Retrieve the name used to open a file.
- *
- * Return:	Success:	The name of the file.
- * 		Failure:	? (should not happen)
+ * Function: H5F_get_open_name
  *
  * Purpose:  Retrieve the name used to open a file.
  *
@@ -741,11 +736,7 @@ H5F_gc_ref(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_fc_degree
- *
- * Purpose:	Retrieve the 'file close degree' for the file.
- *
- * Return:	Success:	Non-negative, the 'file close degree'
+ * Function: H5F_get_fc_degree
  *
  * Purpose:  Retrieve the 'file close degree' for the file.
  *

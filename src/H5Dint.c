@@ -918,17 +918,17 @@ H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
         (H5P_exist_plist(dc_plist, H5O_BOGUS_MSG_ID_NAME) > 0) ) {
 
         uint8_t bogus_flags = 0;        /* Flags for creating "bogus" message */
-    unsigned bogus_id;        /* "bogus" ID */
+        unsigned bogus_id;        /* "bogus" ID */
 
-    /* Retrieve "bogus" message ID */
+        /* Retrieve "bogus" message ID */
         if(H5P_get(dc_plist, H5O_BOGUS_MSG_ID_NAME, &bogus_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get bogus ID options")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get bogus ID options")
         /* Retrieve "bogus" message flags */
         if(H5P_get(dc_plist, H5O_BOGUS_MSG_FLAGS_NAME, &bogus_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get bogus message options")
 
         /* Add a "bogus" message (for error testing). */
-    if(H5O_bogus_oh(file, dxpl_id, oh, bogus_id, (unsigned)bogus_flags) < 0)
+        if(H5O_bogus_oh(file, dxpl_id, oh, bogus_id, (unsigned)bogus_flags) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create 'bogus' message")
     } /* end if */
 }
@@ -1208,7 +1208,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
 
     /* Set up append flush parameters for the dataset */
     if(H5D__append_flush_setup(new_dset, dapl_id) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set up flush append property")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set up flush append property")
 
     /* Set the external file prefix */
     if(H5D_build_file_prefix(new_dset, dapl_id, H5D_ACS_EFILE_PREFIX_NAME, &new_dset->shared->extfile_prefix) < 0)

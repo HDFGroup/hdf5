@@ -7,6 +7,9 @@ usage: h5repack [OPTIONS] file1 file2
    -V, --version           Print version number and exit
    -n, --native            Use a native HDF5 type when repacking
    -L, --latest            Use latest version of file format
+                           This option will take precedence over the -j and -k options
+   -j, --low               The low bound as in H5Pset_libver_bounds()
+   -k, --high              The high bound as in H5Pset_libver_bounds()
    -c L1, --compact=L1     Maximum number of links in header messages
    -d L2, --indexed=L2     Minimum number of links in the indexed format
    -s S[:F], --ssize=S[:F] Shared object header message minimum size

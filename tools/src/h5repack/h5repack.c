@@ -75,6 +75,8 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
     options->verbose = verbose;
     options->latest = latest;
     options->layout_g = H5D_LAYOUT_ERROR;
+    options->low_bound = H5F_LIBVER_EARLIEST;
+    options->high_bound = H5F_LIBVER_LATEST;
 
     for (n = 0; n < H5_REPACK_MAX_NFILTERS; n++) {
         options->filter_g[n].filtn = -1;
@@ -707,9 +709,9 @@ done:
  */
 static int check_objects(const char* fname, pack_opt_t *options) {
     int           ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t         fid;
-    hid_t         did;
-    hid_t         sid;
+    hid_t         fid = -1;
+    hid_t         did = -1;
+    hid_t         sid = -1;
     unsigned int  i;
     unsigned int  uf;
     trav_table_t *travt = NULL;
