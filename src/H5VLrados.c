@@ -493,12 +493,12 @@ H5VLrados_init(rados_t rados_cluster, const char *rados_pool)
 
     /* Connect to cluster */
     if((ret = rados_connect(rados_cluster)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't connect to cluster: %s", strerror(ret))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't connect to cluster: %s", strerror(-ret))
     cluster_init_g = TRUE;
 
     /* Create IO context */
     if((ret = rados_ioctx_create(cluster_g, rados_pool, &ioctx_g)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't create IO context: %s", strerror(ret))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't create IO context: %s", strerror(-ret))
     ioctx_init_g = TRUE;
 
 done:
@@ -1160,13 +1160,13 @@ H5VL_rados_link_read(H5VL_rados_group_t *grp, char *name, size_t name_len,
 
     /* Execute read operation */
     if((ret = rados_read_op_operate(read_op, ioctx_g, grp->obj.oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't perform read operation: %s", strerror(ret))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't perform read operation: %s", strerror(-ret))
     if(read_ret < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link value: %s", strerror(read_ret))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link value: %s", strerror(-read_ret))
 
     /* Get link value */
     if((ret = rados_omap_get_next(iter, &key, &omap_val, &val_len)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't get link value: %s", strerror(ret))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't get link value: %s", strerror(-ret))
 
     /* Check for no link found */
     if(val_len == 0)
@@ -1300,7 +1300,7 @@ H5VL_rados_link_write(H5VL_rados_group_t *grp, const char *name,
 
     /* Execute write operation */
     if((ret = rados_write_op_operate(write_op, ioctx_g, grp->obj.oid, NULL, LIBRADOS_OPERATION_NOFLAG)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't perform write operation: %s", strerror(ret))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't perform write operation: %s", strerror(-ret))
 
 done:
     if(write_op_init)
@@ -1564,7 +1564,7 @@ H5VL_rados_group_create_helper(H5VL_rados_file_t *file, hid_t gcpl_id,
 
         /* Write internal metadata to group */
         if((ret = rados_write_full(ioctx_g, grp->obj.oid, gcpl_buf, gcpl_size)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't write metadata to group: %s", strerror(ret))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't write metadata to group: %s", strerror(-ret))
 
         /* Write link to group if requested */
         if(parent_grp) {
@@ -1705,7 +1705,7 @@ H5VL_rados_group_open_helper(H5VL_rados_file_t *file, uint64_t oid,
 
     /* Read internal metadata size from group */
     if((ret = rados_stat(ioctx_g, grp->obj.oid, &gcpl_len, &pmtime)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(ret))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(-ret))
 
     /* Check for metadata not found */
     if(gcpl_len == (uint64_t)0)
@@ -1717,7 +1717,7 @@ H5VL_rados_group_open_helper(H5VL_rados_file_t *file, uint64_t oid,
 
     /* Read internal metadata from group */
     if((ret = rados_read(ioctx_g, grp->obj.oid, gcpl_buf, gcpl_len, 0)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata from group: %s", strerror(ret))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata from group: %s", strerror(-ret))
 
     /* Decode GCPL */
     if((grp->gcpl_id = H5Pdecode(gcpl_buf)) < 0)
@@ -2426,7 +2426,7 @@ H5VL_rados_dataset_create(void *_item,
 
         /* Write internal metadata to dataset */
         if((ret = rados_write_full(ioctx_g, dset->obj.oid, (const char *)md_buf, md_size)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't write metadata to dataset: %s", strerror(ret))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't write metadata to dataset: %s", strerror(-ret))
 
         /* Create link to dataset */
         link_val.type = H5L_TYPE_HARD;
@@ -2554,7 +2554,7 @@ H5VL_rados_dataset_open(void *_item,
 
         /* Read internal metadata size from dataset */
         if((ret = rados_stat(ioctx_g, dset->obj.oid, &md_len, &pmtime)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(ret))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata size from group: %s", strerror(-ret))
 
         /* Check for metadata not found */
         if(md_len == (uint64_t)0)
@@ -2569,7 +2569,7 @@ H5VL_rados_dataset_open(void *_item,
 
         /* Read internal metadata from dataset */
         if((ret = rados_read(ioctx_g, dset->obj.oid, (char *)(dinfo_buf + sizeof(uint64_t)), md_len, 0)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata from dataset: %s", strerror(ret))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata from dataset: %s", strerror(-ret))
 
         /* Decode info lengths */
         p = (uint8_t *)dinfo_buf + sizeof(uint64_t);
@@ -3314,7 +3314,7 @@ H5VL_rados_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
             /* Read data from dataset */
             if((ret = rados_read_op_operate(read_op, ioctx_g, chunk_oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(ret))
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(-ret))
         } /* end if */
         else {
             size_t nseq_tmp;
@@ -3362,7 +3362,7 @@ H5VL_rados_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
             /* Read data from dataset */
             if((ret = rados_read_op_operate(read_op, ioctx_g, chunk_oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(ret))
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(-ret))
 
             /* Gather data to background buffer if necessary */
             if(fill_bkg && (reuse != H5VL_RADOS_TCONV_REUSE_BKG))
@@ -3678,7 +3678,7 @@ H5VL_rados_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
                 /* Read data from dataset to background buffer */
                 if((ret = rados_read_op_operate(read_op, ioctx_g, chunk_oid, LIBRADOS_OPERATION_NOFLAG)) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(ret))
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %s", strerror(-ret))
             } /* end if */
             else
                 /* Build write op from file space */
@@ -3713,7 +3713,7 @@ H5VL_rados_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
         /* Write data to dataset */
         if((ret = rados_write_op_operate(write_op, ioctx_g, chunk_oid, NULL, LIBRADOS_OPERATION_NOFLAG)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data to dataset: %s", strerror(ret))
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data to dataset: %s", strerror(-ret))
     } /* end else */
 
 done:
