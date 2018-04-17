@@ -254,18 +254,3 @@ H5ConversionTests (H5_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting
 # Check if pointer alignments are enforced
 #
 H5ConversionTests (H5_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restrictions are strictly enforced")
-
-# -----------------------------------------------------------------------
-# wrapper script variables
-#
-set (prefix ${CMAKE_INSTALL_PREFIX})
-set (exec_prefix "\${prefix}")
-set (libdir "${exec_prefix}/lib")
-set (includedir "\${prefix}/include")
-set (host_os ${CMAKE_HOST_SYSTEM_NAME})
-set (CC ${CMAKE_C_COMPILER})
-set (CXX ${CMAKE_CXX_COMPILER})
-set (FC ${CMAKE_Fortran_COMPILER})
-foreach (LINK_LIB ${LINK_LIBS})
-  set (LIBS "${LIBS} -l${LINK_LIB}")
-endforeach ()

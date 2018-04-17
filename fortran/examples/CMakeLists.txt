@@ -8,7 +8,8 @@ PROJECT (HDF5_F90_EXAMPLES C CXX Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
+
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src")
 
 #-----------------------------------------------------------------------------
 # Define Sources

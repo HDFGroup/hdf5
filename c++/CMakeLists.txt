@@ -14,12 +14,6 @@ configure_file (${HDF_RESOURCES_DIR}/H5cxx_config.h.in
 )
 
 #-----------------------------------------------------------------------------
-# Setup Include directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_CPP_SOURCE_DIR}/src)
-INCLUDE_DIRECTORIES (${HDF5_BINARY_DIR})
-
-#-----------------------------------------------------------------------------
 # Parallel/MPI, prevent spurious cpp/cxx warnings
 #-----------------------------------------------------------------------------
 if (H5_HAVE_PARALLEL)

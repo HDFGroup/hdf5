@@ -11,11 +11,6 @@ add_definitions (${HDF_EXTRA_C_FLAGS})
 # --------------------------------------------------------------------
 add_subdirectory (lib)
 
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
-
 #-- Add the test sources
 add_subdirectory (src)
 

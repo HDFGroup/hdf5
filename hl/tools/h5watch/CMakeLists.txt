@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.10)
 PROJECT (HDF5_HL_TOOLS_H5WATCH)
 
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------

@@ -13,7 +13,6 @@ find_package (JNI)
 message ("JNI_LIBRARIES=${JNI_LIBRARIES}")
 message ("JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
 
-INCLUDE_DIRECTORIES ( ${JNI_INCLUDE_DIRS} )
 
 if (WIN32)
   set (HDF_JRE_DIRECTORY "C:/Program Files/Java/jre8")
@@ -25,11 +24,12 @@ endif ()
 # Include the main src and config directories
 #-----------------------------------------------------------------------------
 set (HDF5_JAVA_INCLUDE_DIRECTORIES
+    ${JNI_INCLUDE_DIRS}
     ${HDF5_JAVA_JNI_SRC_DIR}
     ${JAVA_INCLUDE_PATH}
     ${JAVA_INCLUDE_PATH2}
 )
-INCLUDE_DIRECTORIES (${HDF5_JAVA_INCLUDE_DIRECTORIES})
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_INCLUDE_DIRECTORIES}")
 set (CMAKE_JAVA_INCLUDE_PATH "")
 
 

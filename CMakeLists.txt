@@ -555,11 +555,6 @@ endif ()
 include (${HDF_RESOURCES_DIR}/HDFCompilerFlags.cmake)
 
 #-----------------------------------------------------------------------------
-# All libs/tests/examples need the main include directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_BINARY_DIR} ${HDF5_SRC_DIR} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-#-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
 set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MODULE_PATH})
