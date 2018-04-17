@@ -342,7 +342,7 @@ typedef struct H5CX_lapl_cache_t {
 /********************/
 static H5CX_node_t **H5CX__get_context(void);
 static void H5CX__push_common(H5CX_node_t *cnode);
-static H5CX_node_t *H5CX__pop_common(void);
+static H5CX_node_t *H5CX__pop_common(hbool_t update_dxpl);
 
 
 /*********************/
@@ -2743,7 +2743,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5CX_node_t *
-H5CX__pop_common(void)
+H5CX__pop_common(hbool_t update_dxpl)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     H5CX_node_t *ret_value = NULL;      /* Return value */
@@ -2753,22 +2753,25 @@ H5CX__pop_common(void)
     /* Sanity check */
     HDassert(head && *head);
 
-    /* Check for cached DXPL properties to return to application */
-    H5CX_SET_PROP(H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, dcr_filters)
+    /* Update DXPL properties, if requested */
+    if(update_dxpl) {
+        /* Check for cached DXPL properties to return to application */
+        H5CX_SET_PROP(H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, dcr_filters)
 #ifdef H5_HAVE_PARALLEL
-    H5CX_SET_PROP(H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, mpio_actual_chunk_opt)
-    H5CX_SET_PROP(H5D_MPIO_ACTUAL_IO_MODE_NAME, mpio_actual_io_mode)
-    H5CX_SET_PROP(H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, mpio_local_no_coll_cause)
-    H5CX_SET_PROP(H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, mpio_global_no_coll_cause)
+        H5CX_SET_PROP(H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, mpio_actual_chunk_opt)
+        H5CX_SET_PROP(H5D_MPIO_ACTUAL_IO_MODE_NAME, mpio_actual_io_mode)
+        H5CX_SET_PROP(H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, mpio_local_no_coll_cause)
+        H5CX_SET_PROP(H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, mpio_global_no_coll_cause)
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, mpio_coll_chunk_link_hard)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, mpio_coll_chunk_multi_hard)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, mpio_coll_chunk_link_num_true)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, mpio_coll_chunk_link_num_false)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, mpio_coll_chunk_multi_ratio_coll)
-    H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, mpio_coll_chunk_multi_ratio_ind)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, mpio_coll_chunk_link_hard)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, mpio_coll_chunk_multi_hard)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, mpio_coll_chunk_link_num_true)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, mpio_coll_chunk_link_num_false)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, mpio_coll_chunk_multi_ratio_coll)
+        H5CX_SET_PROP(H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, mpio_coll_chunk_multi_ratio_ind)
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
+    } /* end if */
 
     /* Pop the top context node from the stack */
     ret_value = (*head);
@@ -2800,7 +2803,7 @@ H5CX_pop(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Perform common operations and get top context from stack */
-    if(NULL == (cnode = H5CX__pop_common()))
+    if(NULL == (cnode = H5CX__pop_common(TRUE)))
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "error getting API context node")
 
     /* Free the context node */
@@ -2833,7 +2836,7 @@ H5CX_pop_special(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Perform common operations and get top context from stack */
-    cnode = H5CX__pop_common();
+    cnode = H5CX__pop_common(FALSE);
     HDassert(cnode);
 
     /* Free the context node */
