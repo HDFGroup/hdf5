@@ -535,6 +535,16 @@ H5CX_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_PKG_INIT_VAR) {
+        H5CX_node_t *cnode;         /* Context node */
+
+        /* Pop the top context node from the stack */
+        /* (Can't check for errors, as rest of library is shut down) */
+        cnode = H5CX__pop_common();
+
+        /* Free the context node */
+        /* (Allocated with HDmalloc() in H5CX_push_special() ) */
+        HDfree(cnode);
+
 #ifndef H5_HAVE_THREADSAFE
         /* Release pointer to head of API context stack */
         HDfree(H5CX_head_g);
@@ -2809,36 +2819,4 @@ H5CX_pop(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_pop() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_pop_special
- *
- * Purpose:     Pops the context for an API call, without using library routines.
- *
- * Note:	This should only be called in special circumstances, like H5close.
- *
- * Return:      <none>
- *
- * Programmer:  Quincey Koziol
- *              Februrary 22, 2018
- *
- *-------------------------------------------------------------------------
- */
-void
-H5CX_pop_special(void)
-{
-    H5CX_node_t *cnode;         /* Context node */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Perform common operations and get top context from stack */
-    cnode = H5CX__pop_common();
-    HDassert(cnode);
-
-    /* Free the context node */
-    HDfree(cnode);
-
-    FUNC_LEAVE_NOAPI_VOID
-} /* end H5CX_pop_special() */
 
