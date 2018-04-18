@@ -415,8 +415,7 @@ H5_term_library(void)
     /* Mark library as closed */
     H5_INIT_GLOBAL = FALSE;
 
-    /* Pop the API context (without checking for errors) */
-    H5CX_pop_special();
+    /* Don't pop the API context (i.e. H5CX_pop), since it's been shut down already */
 
 done:
 #ifdef H5_HAVE_THREADSAFE
