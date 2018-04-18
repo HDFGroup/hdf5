@@ -187,16 +187,21 @@ static herr_t H5VL_rados_attribute_close(void *_attr, hid_t dxpl_id,
 static herr_t H5VL_rados_file_close_helper(H5VL_rados_file_t *file,
     hid_t dxpl_id, void **req);
 
-static herr_t H5VL_rados_link_read(H5VL_rados_group_t *grp, char *name,
-    size_t name_len, H5VL_rados_link_val_t *val);
+static herr_t H5VL_rados_link_read(H5VL_rados_group_t *grp, const char *name,
+    H5VL_rados_link_val_t *val);
 static herr_t H5VL_rados_link_write(H5VL_rados_group_t *grp, const char *name,
     H5VL_rados_link_val_t *val);
-static herr_t H5VL_rados_link_follow(H5VL_rados_group_t *grp, char *name,
+static herr_t H5VL_rados_link_follow(H5VL_rados_group_t *grp, const char *name,
+    hid_t dxpl_id, void **req, uint64_t *oid);
+static herr_t H5VL_rados_link_follow_comp(H5VL_rados_group_t *grp, char *name,
     size_t name_len, hid_t dxpl_id, void **req, uint64_t *oid);
 
 static H5VL_rados_group_t *H5VL_rados_group_traverse(H5VL_rados_item_t *item,
-    const char *path, hid_t dxpl_id, void **req, const char **obj_name,
+    char *path, hid_t dxpl_id, void **req, char **obj_name,
     void **gcpl_buf_out, uint64_t *gcpl_len_out);
+static H5VL_rados_group_t *H5VL_rados_group_traverse_const(
+    H5VL_rados_item_t *item, const char *path, hid_t dxpl_id, void **req,
+    const char **obj_name, void **gcpl_buf_out, uint64_t *gcpl_len_out);
 static void *H5VL_rados_group_create_helper(H5VL_rados_file_t *file,
     hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req,
     H5VL_rados_group_t *parent_grp, const char *name, hbool_t collective);
@@ -1127,7 +1132,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_rados_link_read(H5VL_rados_group_t *grp, char *name, size_t name_len,
+H5VL_rados_link_read(H5VL_rados_group_t *grp, const char *name,
     H5VL_rados_link_val_t *val)
 {
     rados_read_op_t read_op;
@@ -1137,16 +1142,12 @@ H5VL_rados_link_read(H5VL_rados_group_t *grp, char *name, size_t name_len,
     char *key;
     char *omap_val;
     size_t val_len;
-    char saved_end = name[name_len]; // Stop this, or copy path first RADOSINC
     uint8_t *p;
     int ret;
     int read_ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    /* Add null terminator to name (necessary for RADOS API) */
-    name[name_len] = '\0';
 
     /* Create read op */
     if(NULL == (read_op = rados_create_read_op()))
@@ -1207,7 +1208,6 @@ done:
         rados_omap_get_end(iter);
     if(read_op_init)
         rados_release_read_op(read_op);
-    name[name_len] = saved_end;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_link_read() */
@@ -1315,7 +1315,8 @@ done:
  * Function:    H5VL_rados_link_follow
  *
  * Purpose:     Follows the link in grp identified with name, and returns
- *              in oid the oid of the target object.
+ *              in oid the oid of the target object.  name must be NULL
+ *              terminated.
  *
  * Return:      Success:        SUCCEED 
  *              Failure:        FAIL
@@ -1326,8 +1327,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_rados_link_follow(H5VL_rados_group_t *grp, char *name, size_t name_len,
-    hid_t dxpl_id, void **req, uint64_t *oid)
+H5VL_rados_link_follow(H5VL_rados_group_t *grp, const char *name, hid_t dxpl_id,
+    void **req, uint64_t *oid)
 {
     H5VL_rados_link_val_t link_val;
     hbool_t link_val_alloc = FALSE;
@@ -1341,7 +1342,7 @@ H5VL_rados_link_follow(H5VL_rados_group_t *grp, char *name, size_t name_len,
     HDassert(oid);
 
     /* Read link to group */
-   if(H5VL_rados_link_read(grp, name, name_len, &link_val) < 0)
+   if(H5VL_rados_link_read(grp, name, &link_val) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link")
 
     switch(link_val.type) {
@@ -1358,7 +1359,7 @@ H5VL_rados_link_follow(H5VL_rados_group_t *grp, char *name, size_t name_len,
                 link_val_alloc = TRUE;
 
                 /* Traverse the soft link path */
-                if(NULL == (target_grp = H5VL_rados_group_traverse(&grp->obj.item, link_val.target.soft, dxpl_id, req, (const char **)&target_name, NULL, NULL)))
+                if(NULL == (target_grp = H5VL_rados_group_traverse(&grp->obj.item, link_val.target.soft, dxpl_id, req, &target_name, NULL, NULL)))
                     HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't traverse path")
 
                 /* Check for no target_name, in this case just return
@@ -1368,7 +1369,7 @@ H5VL_rados_link_follow(H5VL_rados_group_t *grp, char *name, size_t name_len,
                     *oid = target_grp->obj.bin_oid;
                 else
                     /* Follow the last element in the path */
-                    if(H5VL_rados_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, oid) < 0)
+                    if(H5VL_rados_link_follow(target_grp, target_name, dxpl_id, req, oid) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't follow link")
 
                 break;
@@ -1397,6 +1398,50 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_link_follow_comp
+ *
+ * Purpose:     Follows the link in grp identified with name, and returns
+ *              in oid the oid of the target object.  name may be a
+ *              component of a path, only the first name_len bytes of name
+ *              are examined.
+ *
+ * Return:      Success:        SUCCEED 
+ *              Failure:        FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              April, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_rados_link_follow_comp(H5VL_rados_group_t *grp, char *name,
+    size_t name_len, hid_t dxpl_id, void **req, uint64_t *oid)
+{
+    char saved_end = name[name_len];
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(grp);
+    HDassert(name);
+    HDassert(oid);
+
+    /* Add null terminator to name so we can use the underlying routine */
+    name[name_len] = '\0';
+
+    /* Follow the link now that name is NULL terminated */
+    if(H5VL_rados_link_follow(grp, name, dxpl_id, req, oid) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't follow link to group")
+
+done:
+    /* Put name back the way it was */
+    name[name_len] = saved_end;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_link_follow_comp() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_rados_group_traverse
  *
  * Purpose:     Given a path name and base object, returns the final group
@@ -1413,15 +1458,103 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5VL_rados_group_t *
-H5VL_rados_group_traverse(H5VL_rados_item_t *item, const char *path,
+H5VL_rados_group_traverse(H5VL_rados_item_t *item, char *path,
+    hid_t dxpl_id, void **req, char **obj_name, void **gcpl_buf_out,
+    uint64_t *gcpl_len_out)
+{
+    H5VL_rados_group_t *grp = NULL;
+    char *next_obj;
+    uint64_t oid;
+    H5VL_rados_group_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(item);
+    HDassert(path);
+    HDassert(obj_name);
+
+    /* Initialize obj_name */
+    *obj_name = path;
+
+    /* Open starting group */
+    if((*obj_name)[0] == '/') {
+        grp = item->file->root_grp;
+        (*obj_name)++;
+    } /* end if */
+    else {
+        if(item->type == H5I_GROUP)
+            grp = (H5VL_rados_group_t *)item;
+        else if(item->type == H5I_FILE)
+            grp = ((H5VL_rados_file_t *)item)->root_grp;
+        else
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "item not a file or group")
+    } /* end else */
+        
+    grp->obj.item.rc++;
+
+    /* Search for '/' */
+    next_obj = strchr(*obj_name, '/');
+
+    /* Traverse path */
+    while(next_obj) {
+        /* Free gcpl_buf_out */
+        if(gcpl_buf_out)
+            *gcpl_buf_out = H5MM_xfree(*gcpl_buf_out);
+
+        /* Follow link to next group in path */
+        HDassert(next_obj > *obj_name);
+        if(H5VL_rados_link_follow_comp(grp, *obj_name, (size_t)(next_obj - *obj_name), dxpl_id, req, &oid) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't follow link to group")
+
+        /* Close previous group */
+        if(H5VL_rados_group_close(grp, dxpl_id, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close group")
+        grp = NULL;
+
+        /* Open group */
+        if(NULL == (grp = (H5VL_rados_group_t *)H5VL_rados_group_open_helper(item->file, oid, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, gcpl_buf_out, gcpl_len_out)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't open group")
+
+        /* Advance to next path element */
+        *obj_name = next_obj + 1;
+        next_obj = strchr(*obj_name, '/');
+    } /* end while */
+
+    /* Set return values */
+    ret_value = grp;
+
+done:
+    /* Cleanup on failure */
+    if(NULL == ret_value)
+        /* Close group */
+        if(grp && H5VL_rados_group_close(grp, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, NULL, "can't close group")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_group_traverse() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_group_traverse_const
+ *
+ * Purpose:     Wrapper for H5VL_rados_group_traverse for a const path.
+ *
+ * Return:      Success:        group object. 
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              April, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5VL_rados_group_t *
+H5VL_rados_group_traverse_const(H5VL_rados_item_t *item, const char *path,
     hid_t dxpl_id, void **req, const char **obj_name, void **gcpl_buf_out,
     uint64_t *gcpl_len_out)
 {
     H5VL_rados_group_t *grp = NULL;
     char *tmp_path = NULL;
     char *tmp_obj_name;
-    char *next_obj;
-    uint64_t oid;
     H5VL_rados_group_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1438,55 +1571,15 @@ H5VL_rados_group_traverse(H5VL_rados_item_t *item, const char *path,
     if(NULL == (tmp_path = HDstrdup(path)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't duplicate path name")
 
-    /* Initialize obj_name */
-    tmp_obj_name = tmp_path;
+    /* Forward the call to the non-const routine */
+    if(NULL == (grp = H5VL_rados_group_traverse(item, tmp_path, dxpl_id, req,
+            &tmp_obj_name, gcpl_buf_out, gcpl_len_out)))
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "can't traverse path")
 
-    /* Open starting group */
-    if((tmp_obj_name)[0] == '/') {
-        grp = item->file->root_grp;
-        tmp_obj_name++;
-    } /* end if */
-    else {
-        if(item->type == H5I_GROUP)
-            grp = (H5VL_rados_group_t *)item;
-        else if(item->type == H5I_FILE)
-            grp = ((H5VL_rados_file_t *)item)->root_grp;
-        else
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "item not a file or group")
-    } /* end else */
-        
-    grp->obj.item.rc++;
-
-    /* Search for '/' */
-    next_obj = strchr(tmp_obj_name, '/');
-
-    /* Traverse path */
-    while(next_obj) {
-        /* Free gcpl_buf_out */
-        if(gcpl_buf_out)
-            *gcpl_buf_out = H5MM_xfree(*gcpl_buf_out);
-
-        /* Follow link to next group in path */
-        HDassert(next_obj > tmp_obj_name);
-        if(H5VL_rados_link_follow(grp, tmp_obj_name, (size_t)(next_obj - tmp_obj_name), dxpl_id, req, &oid) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't follow link to group")
-
-        /* Close previous group */
-        if(H5VL_rados_group_close(grp, dxpl_id, req) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close group")
-        grp = NULL;
-
-        /* Open group */
-        if(NULL == (grp = (H5VL_rados_group_t *)H5VL_rados_group_open_helper(item->file, oid, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, gcpl_buf_out, gcpl_len_out)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't open group")
-
-        /* Advance to next path element */
-        tmp_obj_name = next_obj + 1;
-        next_obj = strchr(tmp_obj_name, '/');
-    } /* end while */
-
-    /* Set return values */
+    /* Set *obj_name in path to match tmp_obj_name in tmp_path */
     *obj_name = path + (tmp_obj_name - tmp_path);
+
+    /* Set return value */
     ret_value = grp;
 
 done:
@@ -1499,7 +1592,7 @@ done:
     H5MM_xfree(tmp_path);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_rados_group_traverse() */
+} /* end H5VL_rados_group_traverse_const() */
 
 
 /*-------------------------------------------------------------------------
@@ -1639,7 +1732,7 @@ H5VL_rados_group_create(void *_item,
 
     /* Traverse the path */
     if(!collective || (item->file->my_rank == 0))
-        if(NULL == (target_grp = H5VL_rados_group_traverse(item, name, dxpl_id, req, &target_name, NULL, NULL)))
+        if(NULL == (target_grp = H5VL_rados_group_traverse_const(item, name, dxpl_id, req, &target_name, NULL, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "can't traverse path")
 
     /* Create group and link to group */
@@ -1864,7 +1957,7 @@ H5VL_rados_group_open(void *_item, H5VL_loc_params_t loc_params,
         else {
             /* Open using name parameter */
             /* Traverse the path */
-            if(NULL == (target_grp = H5VL_rados_group_traverse(item, name, dxpl_id, req, &target_name, (collective && (item->file->num_procs > 1)) ? (void **)&gcpl_buf : NULL, &gcpl_len)))
+            if(NULL == (target_grp = H5VL_rados_group_traverse_const(item, name, dxpl_id, req, &target_name, (collective && (item->file->num_procs > 1)) ? (void **)&gcpl_buf : NULL, &gcpl_len)))
                 HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "can't traverse path")
 
             /* Check for no target_name, in this case just return target_grp */
@@ -1890,7 +1983,7 @@ H5VL_rados_group_open(void *_item, H5VL_loc_params_t loc_params,
                 gcpl_len = 0;
 
                 /* Follow link to group */
-                if(H5VL_rados_link_follow(target_grp, (char *)target_name, HDstrlen(target_name), dxpl_id, req, &oid) < 0)
+                if(H5VL_rados_link_follow(target_grp, target_name, dxpl_id, req, &oid) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't follow link to group")
 
                 /* Open group */
@@ -2385,7 +2478,7 @@ H5VL_rados_dataset_create(void *_item,
         size_t md_size = 0;
 
         /* Traverse the path */
-        if(NULL == (target_grp = H5VL_rados_group_traverse(item, name, dxpl_id, req, &target_name, NULL, NULL)))
+        if(NULL == (target_grp = H5VL_rados_group_traverse_const(item, name, dxpl_id, req, &target_name, NULL, NULL)))
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "can't traverse path")
 
         /* Create dataset */
@@ -2540,11 +2633,11 @@ H5VL_rados_dataset_open(void *_item,
         else {
             /* Open using name parameter */
             /* Traverse the path */
-            if(NULL == (target_grp = H5VL_rados_group_traverse(item, name, dxpl_id, req, &target_name, NULL, NULL)))
+            if(NULL == (target_grp = H5VL_rados_group_traverse_const(item, name, dxpl_id, req, &target_name, NULL, NULL)))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "can't traverse path")
 
             /* Follow link to dataset */
-            if(H5VL_rados_link_follow(target_grp, (char *)target_name, HDstrlen(target_name), dxpl_id, req, &dset->obj.bin_oid) < 0)
+            if(H5VL_rados_link_follow(target_grp, target_name, dxpl_id, req, &dset->obj.bin_oid) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't follow link to dataset")
 
             /* Create string oid */
