@@ -6,12 +6,6 @@ PROJECT (HDF5_F90_EXAMPLES C CXX Fortran)
 # --------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src")
-
-#-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
 set (examples
@@ -47,6 +41,7 @@ foreach (example ${examples})
       ${HDF5_LIB_TARGET}
   )
   target_include_directories (f90_ex_${example} PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  set_property(TARGET f90_ex_${example} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
   set_target_properties (f90_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran
@@ -60,6 +55,7 @@ foreach (example ${examples})
         ${HDF5_LIBSH_TARGET}
     )
     target_include_directories (f90_ex_${example}-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+    set_property(TARGET f90_ex_${example}-shared APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
     set_target_properties (f90_ex_${example}-shared PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran
@@ -76,6 +72,7 @@ foreach (example ${F2003_examples})
       ${HDF5_LIB_TARGET}
   )
   target_include_directories (f03_ex_${example} PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  set_property(TARGET f03_ex_${example} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
   set_target_properties (f03_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran03
@@ -89,6 +86,7 @@ foreach (example ${F2003_examples})
         ${HDF5_LIBSH_TARGET}
     )
     target_include_directories (f03_ex_${example}-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+    set_property(TARGET f03_ex_${example}-shared APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
     set_target_properties (f03_ex_${example}-shared PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran03
@@ -105,6 +103,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
       ${HDF5_LIB_TARGET}
   )
   target_include_directories (f90_ex_ph5example PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  set_property(TARGET f90_ex_ph5example APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
   set_target_properties (f90_ex_ph5example PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran
@@ -118,6 +117,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         ${HDF5_LIBSH_TARGET}
     )
     target_include_directories (f90_ex_ph5example-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+    set_property(TARGET f90_ex_ph5example-shared APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
     set_target_properties (f90_ex_ph5example-shared PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran
