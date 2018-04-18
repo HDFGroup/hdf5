@@ -343,13 +343,13 @@ H5VL_rados_oid_create_string(const H5VL_rados_file_t *file, uint64_t bin_oid,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate space for oid */
-    if(NULL == (tmp_oid = (char *)H5MM_malloc(file->file_name_len + 16 + 1)))
+    if(NULL == (tmp_oid = (char *)H5MM_malloc(2 + file->file_name_len + 16 + 1)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate RADOS object id")
 
     /* Encode file name and binary oid into string oid */
-    if(HDsnprintf(tmp_oid, file->file_name_len + 16 + 1, "%s%016llX",
+    if(HDsnprintf(tmp_oid, file->file_name_len + 16 + 1, "ob%s%016llX",
             file->file_name, (long long unsigned)bin_oid)
-            != (int)file->file_name_len + 16)
+            != 2 + (int)file->file_name_len + 16)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't encode string object id")
 
     /* Return oid string value */
@@ -378,15 +378,15 @@ H5VL_rados_oid_create_chunk(const H5VL_rados_file_t *file, uint64_t bin_oid,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate space for oid */
-    oid_len = file->file_name_len + 16 + ((size_t)rank * 16) + 1;
+    oid_len = 2 + file->file_name_len + 16 + ((size_t)rank * 16) + 1;
     if(NULL == (tmp_oid = (char *)H5MM_malloc(oid_len)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate RADOS object id")
 
     /* Encode file name and binary oid into string oid */
-    if(HDsnprintf(tmp_oid, oid_len, "%s%016llX", file->file_name,
-            (long long unsigned)bin_oid) != (int)file->file_name_len + 16)
+    if(HDsnprintf(tmp_oid, oid_len, "%02X%s%016llX", rank, file->file_name,
+            (long long unsigned)bin_oid) != 2 + (int)file->file_name_len + 16)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't encode string object id")
-    oid_off = file->file_name_len + 16;
+    oid_off = 2 + file->file_name_len + 16;
 
     /* Encode chunk location */
     for(i = 0; i < rank; i++) {

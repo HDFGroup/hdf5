@@ -57,9 +57,9 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_reference.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
           h5_ref2reg.c h5_shared_mesg.c ph5example.c \
           h5_vol_external_log_native.c \
-	  h5_vds.c h5_vds-exc.c \
+          h5_vds.c h5_vds-exc.c \
           h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c h5_vds-percival.c \
-          h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c
+          h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c \
           h5rados_file_create.c h5rados_file_open.c h5rados_group_create.c \
           h5rados_group_open.c h5rados_dset_create.c \
           h5rados_dset_open.c h5rados_dset_write.c h5rados_dset_read.c \
