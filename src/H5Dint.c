@@ -1554,7 +1554,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
 {
     H5P_genplist_t *plist;              /* Property list */
     H5O_fill_t *fill_prop;              /* Pointer to dataset's fill value info */
-    unsigned alloc_time_state;          /* Allocation time state */
+    unsigned alloc_time_state = 0;      /* Allocation time state */
     htri_t msg_exists;                  /* Whether a particular type of message exists */
     hbool_t layout_init = FALSE;        /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1653,12 +1653,19 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
         if(fill_prop->size == 0)
             fill_prop->size = (ssize_t)-1;
     } /* end if */
-    alloc_time_state = 0;
+
     if((dataset->shared->layout.type == H5D_COMPACT && fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
             || (dataset->shared->layout.type == H5D_CONTIGUOUS && fill_prop->alloc_time == H5D_ALLOC_TIME_LATE)
             || (dataset->shared->layout.type == H5D_CHUNKED && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR)
             || (dataset->shared->layout.type == H5D_VIRTUAL && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
         alloc_time_state = 1;
+#ifdef H5_HAVE_PARALLEL
+        if((dataset->shared->layout.type == H5D_VIRTUAL) &&
+            H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)) {
+            fill_prop->alloc_time = H5D_ALLOC_TIME_EARLY;
+            alloc_time_state = 1;
+        }
+#endif
 
     /* Set revised fill value properties, if they are different from the defaults */
     if(H5P_fill_value_cmp(&H5D_def_dset.dcpl_cache.fill, fill_prop, sizeof(H5O_fill_t))) {

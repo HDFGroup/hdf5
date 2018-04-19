@@ -33,9 +33,6 @@
 
 /* Local macros */
 
-/* Version # of encoded virtual dataset global heap blocks */
-#define H5O_LAYOUT_VDS_GH_ENC_VERS      0
-
 
 /* PRIVATE PROTOTYPES */
 static void *H5O__layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,

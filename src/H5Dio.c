@@ -427,7 +427,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                                         /* Note that if this variable is used, the        */
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
-    H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
+    H5D_storage_t store = {0,};         /*union of EFL and chunk pointer in file space */
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
     hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
@@ -637,7 +637,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {
     H5D_chunk_map_t *fm = NULL;         /* Chunk file<->memory mapping */
-    H5D_io_info_t io_info;              /* Dataset I/O info     */
+    H5D_io_info_t io_info = {0,};       /* Dataset I/O info     */
     H5D_type_info_t type_info;          /* Datatype info for operation */
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */

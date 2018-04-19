@@ -1627,6 +1627,9 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
         if(H5S_GET_SELECT_NPOINTS(space1) != H5S_GET_SELECT_NPOINTS(space2))
             HGOTO_DONE(FALSE)
     } /* end if */
+    else if(space1 == space2) {
+        HGOTO_DONE(TRUE)
+    }
     else {
         const H5S_t *space_a;           /* Dataspace with larger rank */
         const H5S_t *space_b;           /* Dataspace with smaller rank */

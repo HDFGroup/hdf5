@@ -58,6 +58,7 @@ static char H5FD_mpi_native_g[] = "native";
  */
 typedef struct H5FD_mpio_t {
     H5FD_t	pub;		/*public stuff, must be first		*/
+    char        *filename;      /*Used for comparison  */
     MPI_File	f;		/*MPIO file handle			*/
     MPI_Comm	comm;		/*communicator				*/
     MPI_Info	info;		/*file information			*/
@@ -85,6 +86,7 @@ static herr_t H5FD_mpio_fapl_free(void *_fa);
 static H5FD_t *H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_mpio_close(H5FD_t *_file);
+static int H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_mpio_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_mpio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
@@ -106,7 +108,7 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     {   /* Start of superclass information */
     "mpio",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
-    H5F_CLOSE_SEMI,				/* fc_degree		*/
+    H5F_CLOSE_WEAK,				/* fc_degree		*/
     H5FD_mpio_term,                             /*terminate             */
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
@@ -120,7 +122,7 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     NULL,					/*dxpl_free		*/
     H5FD_mpio_open,				/*open			*/
     H5FD_mpio_close,				/*close			*/
-    NULL,					/*cmp			*/
+    H5FD_mpio_cmp,     	                        /*cmp			*/
     H5FD_mpio_query,		                /*query			*/
     NULL,					/*get_type_map		*/
     NULL,					/*alloc			*/
@@ -1013,6 +1015,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     if(NULL == (file = (H5FD_mpio_t *)H5MM_calloc(sizeof(H5FD_mpio_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     file->f = fh;
+    file->filename = HDstrdup(name);
     file->comm = comm_dup;
     file->info = info_dup;
     file->mpi_rank = mpi_rank;
@@ -1059,8 +1062,11 @@ done:
 	    MPI_Comm_free(&comm_dup);
 	if (MPI_INFO_NULL != info_dup)
 	    MPI_Info_free(&info_dup);
-	if (file)
+	if (file) {
+            if (file->filename)
+                HDfree(file->filename);
 	    H5MM_xfree(file);
+        }
     } /* end if */
 
 #ifdef H5FDmpio_DEBUG
@@ -1069,6 +1075,56 @@ done:
 #endif
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+#ifdef H5_HAVE_WIN32_API
+#define SLASH '\\'
+#else
+#define SLASH '/'
+#endif
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mpio_cmp
+ *
+ * Purpose:     Compares two files belonging to this driver using an
+ *              arbitrary (but consistent) ordering.
+ *
+ * Return:      Success:    A value like strcmp()
+ *              Failure:    never fails (arguments were checked by the
+ *                          caller).
+ *
+ * Programmer:  Richard Warren
+ *              Borrowed from H5FD_sec2_cmp (Robb Matzke)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD_mpio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
+{
+    const H5FD_mpio_t   *f1 = (const H5FD_mpio_t *)_f1;
+    const H5FD_mpio_t   *f2 = (const H5FD_mpio_t *)_f2;
+    int ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    char *filename1 = f1->filename;
+    char *filename2 = f2->filename;
+    char *fname1    = HDstrrchr(filename1,SLASH);
+    char *fname2    = HDstrrchr(filename2,SLASH);
+    /* the strrchr above points to a slash character.
+     * Increment these pointers prior use in strcmp()
+     */
+    if (fname1 == NULL)
+        if (fname2 == NULL)
+            ret_value = HDstrcmp(filename1, filename2);
+        else ret_value = HDstrcmp(filename1, ++fname2);
+    else if (fname2 == NULL)
+        ret_value = HDstrcmp(++fname1, filename2);
+    else ret_value = HDstrcmp(fname1, fname2);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_mpio_cmp() */
 
 
 /*-------------------------------------------------------------------------
