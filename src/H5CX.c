@@ -61,7 +61,7 @@
 /*
  * The current API context.
  */
-#define H5CX_get_my_context() (H5CX_head_g)
+#define H5CX_get_my_context() (&H5CX_head_g)
 #endif /* H5_HAVE_THREADSAFE */
 
 /* Common macro for the duplicated code to retrieve properties from a property list */
@@ -357,7 +357,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /*******************/
 
 #ifndef H5_HAVE_THREADSAFE
-static H5CX_node_t **H5CX_head_g = NULL;         /* Pointer to head of context stack */
+static H5CX_node_t *H5CX_head_g = NULL;         /* Pointer to head of context stack */
 #endif /* H5_HAVE_THREADSAFE */
 
 /* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
@@ -389,13 +389,6 @@ H5CX__init_package(void)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
-
-#ifndef H5_HAVE_THREADSAFE
-    /* Allocate the context stack head pointer */
-    if(NULL == (H5CX_head_g = (H5CX_node_t **)HDmalloc(sizeof(H5CX_node_t *))))
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTALLOC, FAIL, "can't allocate pointer to head of context stack")
-    *H5CX_head_g = NULL;
-#endif /* H5_HAVE_THREADSAFE */
 
     /* Reset the "default DXPL cache" information */
     HDmemset(&H5CX_def_dxpl_cache, 0, sizeof(H5CX_dxpl_cache_t));
@@ -545,8 +538,6 @@ H5CX_term_package(void)
         HDfree(cnode);
 
 #ifndef H5_HAVE_THREADSAFE
-        /* Release pointer to head of API context stack */
-        HDfree(H5CX_head_g);
         H5CX_head_g = NULL;
 #endif /* H5_HAVE_THREADSAFE */
 
