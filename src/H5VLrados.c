@@ -110,9 +110,9 @@ static void *H5VL_rados_file_create(const char *name, unsigned flags,
 static void *H5VL_rados_file_open(const char *name, unsigned flags,
     hid_t fapl_id, hid_t dxpl_id, void **req);
 //static herr_t H5VL_iod_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-/*static herr_t H5VL_rados_file_specific(void *_item,
+static herr_t H5VL_rados_file_specific(void *_item,
     H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req,
-    va_list arguments);*/
+    va_list arguments);
 static herr_t H5VL_rados_file_close(void *_file, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
@@ -182,8 +182,8 @@ static herr_t H5VL_rados_attribute_close(void *_attr, hid_t dxpl_id,
     void **req);*/
 
 /* Helper routines */
-//static herr_t H5VL_rados_write_max_oid(H5VL_rados_file_t *file);
-//static herr_t H5VL_rados_file_flush(H5VL_rados_file_t *file);
+static herr_t H5VL_rados_write_max_oid(H5VL_rados_file_t *file);
+static herr_t H5VL_rados_file_flush(H5VL_rados_file_t *file);
 static herr_t H5VL_rados_file_close_helper(H5VL_rados_file_t *file,
     hid_t dxpl_id, void **req);
 
@@ -250,7 +250,7 @@ H5FL_DEFINE(H5VL_rados_attr_t);*/
 static H5VL_class_t H5VL_rados_g = {
     HDF5_VOL_RADOS_VERSION_1,                   /* Version number */
     H5_VOL_RADOS,                               /* Plugin value */
-    "rados",                                   /* name */
+    "rados",                                    /* name */
     NULL,                                       /* initialize */
     H5VL_rados_term,                            /* terminate */
     sizeof(H5VL_rados_fapl_t),                  /*fapl_size */
@@ -286,11 +286,11 @@ static H5VL_class_t H5VL_rados_g = {
     },
     {                                           /* file_cls */
         H5VL_rados_file_create,                 /* create */
-        H5VL_rados_file_open,                     /* open */
+        H5VL_rados_file_open,                   /* open */
         NULL,//H5VL_iod_file_get,                      /* get */
-        NULL,//H5VL_rados_file_specific,               /* specific */
+        H5VL_rados_file_specific,               /* specific */
         NULL,                                   /* optional */
-        H5VL_rados_file_close                     /* close */
+        H5VL_rados_file_close                   /* close */
     },
     {                                           /* group_cls */
         H5VL_rados_group_create,                /* create */
@@ -347,7 +347,7 @@ H5VL_rados_oid_create_string(const H5VL_rados_file_t *file, uint64_t bin_oid,
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate RADOS object id")
 
     /* Encode file name and binary oid into string oid */
-    if(HDsnprintf(tmp_oid, file->file_name_len + 16 + 1, "ob%s%016llX",
+    if(HDsnprintf(tmp_oid, 2 + file->file_name_len + 16 + 1, "ob%s%016llX",
             file->file_name, (long long unsigned)bin_oid)
             != 2 + (int)file->file_name_len + 16)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't encode string object id")
@@ -377,13 +377,15 @@ H5VL_rados_oid_create_chunk(const H5VL_rados_file_t *file, uint64_t bin_oid,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    HDassert((rank >= 0) && (rank <= 99));
+
     /* Allocate space for oid */
     oid_len = 2 + file->file_name_len + 16 + ((size_t)rank * 16) + 1;
     if(NULL == (tmp_oid = (char *)H5MM_malloc(oid_len)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate RADOS object id")
 
     /* Encode file name and binary oid into string oid */
-    if(HDsnprintf(tmp_oid, oid_len, "%02X%s%016llX", rank, file->file_name,
+    if(HDsnprintf(tmp_oid, oid_len, "%02d%s%016llX", rank, file->file_name,
             (long long unsigned)bin_oid) != 2 + (int)file->file_name_len + 16)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't encode string object id")
     oid_off = 2 + file->file_name_len + 16;
@@ -794,7 +796,7 @@ H5VL_rados_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     /* allocate the file object that is returned to the user */
     if(NULL == (file = H5FL_CALLOC(H5VL_rados_file_t)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate RADOS file struct")
-    //file->glob_md_oh = DAOS_HDL_INVAL;
+    file->glob_md_oid = NULL;
     file->root_grp = NULL;
     file->fcpl_id = FAIL;
     file->fapl_id = FAIL;
@@ -808,6 +810,8 @@ H5VL_rados_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     file->file_name_len = HDstrlen(name);
     file->flags = flags;
     file->max_oid = 0;
+    if(H5VL_rados_oid_create_string(file, file->max_oid, &file->glob_md_oid) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create oid for globabl metadata object")
     file->max_oid_dirty = FALSE;
     if((file->fcpl_id = H5Pcopy(fcpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, NULL, "failed to copy fcpl")
@@ -876,6 +880,7 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
     uint64_t root_grp_oid;
     hbool_t must_bcast = FALSE;
     uint8_t *p;
+    int ret;
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -902,6 +907,8 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't copy file name")
     file->file_name_len = HDstrlen(name);
     file->flags = flags;
+    if(H5VL_rados_oid_create_string(file, file->max_oid, &file->glob_md_oid) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create oid for globabl metadata object")
     if((file->fapl_id = H5Pcopy(fapl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, NULL, "failed to copy fapl")
 
@@ -927,6 +934,15 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
         if(file->num_procs > 1)
             must_bcast = TRUE;
 
+        /* Read max oid directly to foi_buf */
+        /* Check for does not exist here and assume 0? -NAF */
+        if((ret = rados_read(ioctx_g, file->glob_md_oid, foi_buf, 8, 0)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata from dataset: %s", strerror(-ret))
+
+        /* Decode max oid */
+        p = (uint8_t *)foi_buf;
+        UINT64DECODE(p, file->max_oid)
+
         /* Open root group */
         if(NULL == (file->root_grp = (H5VL_rados_group_t *)H5VL_rados_group_open_helper(file, root_grp_oid, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, (file->num_procs > 1) ? &gcpl_buf : NULL, &gcpl_len)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't open root group")
@@ -934,21 +950,23 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
         /* Bcast global handles if there are other processes */
         if(file->num_procs > 1) {
             /* Check if the file open info won't fit into the static buffer */
-            if(gcpl_len + /*2 **/ sizeof(uint64_t) > sizeof(foi_buf_static)) {
+            if(gcpl_len + 2 * sizeof(uint64_t) > sizeof(foi_buf_static)) {
                 /* Allocate dynamic buffer */
-                if(NULL == (foi_buf_dyn = (char *)H5MM_malloc(gcpl_len + sizeof(uint64_t))))
+                if(NULL == (foi_buf_dyn = (char *)H5MM_malloc(gcpl_len + 2 * sizeof(uint64_t))))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global container handle")
 
                 /* Use dynamic buffer */
                 foi_buf = foi_buf_dyn;
+
+                /* Copy max oid from static buffer */
+                HDmemcpy(foi_buf, foi_buf_static, sizeof(uint64_t));
             } /* end if */
 
-            /* Encode GCPL length */
-            p = (uint8_t *)foi_buf;
-            UINT64ENCODE(p, gcpl_len)
+            /* Max oid already encoded (read in encoded form from rados) */
+            HDassert(p == ((uint8_t *)foi_buf) + sizeof(uint64_t));
 
-            /* Encode max OID */
-            //UINT64ENCODE(p, file->max_oid)
+            /* Encode GCPL length */
+            UINT64ENCODE(p, gcpl_len)
 
             /* Copy GCPL buffer */
             HDmemcpy(p, gcpl_buf, gcpl_len);
@@ -967,23 +985,25 @@ H5VL_rados_file_open(const char *name, unsigned flags, hid_t fapl_id,
         } /* end if */
     } /* end if */
     else {
+        HDassert(sizeof(foi_buf_static) >= 2 * sizeof(uint64_t));
+
         /* Receive file open info */
         if(MPI_SUCCESS != MPI_Bcast(foi_buf, (int)sizeof(foi_buf_static), MPI_BYTE, 0, fa->comm))
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global container handle")
 
-        /* Decode GCPL length */
+        /* Decode max OID */
         p = (uint8_t *)foi_buf;
+        UINT64DECODE(p, file->max_oid)
+
+        /* Decode GCPL length */
         UINT64DECODE(p, gcpl_len)
 
         /* Check for gcpl_len set to 0 - indicates failure */
         if(gcpl_len == 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "lead process failed to open file")
 
-        /* Decode max OID */
-        //UINT64DECODE(p, file->max_oid)
-
         /* Check if we need to perform another bcast */
-        if(gcpl_len + /*2 **/ sizeof(uint64_t) > sizeof(foi_buf_static)) {
+        if(gcpl_len + 2 * sizeof(uint64_t) > sizeof(foi_buf_static)) {
             /* Check if we need to allocate a dynamic buffer */
             if(gcpl_len > sizeof(foi_buf_static)) {
                 /* Allocate dynamic buffer */
@@ -1037,6 +1057,84 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_file_flush
+ *
+ * Purpose:     Flushes a RADOS file.  Currently just writes the max oid.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              April, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_rados_file_flush(H5VL_rados_file_t *file)
+{
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Nothing to do if no write intent */
+    if(!(file->flags & H5F_ACC_RDWR))
+        HGOTO_DONE(SUCCEED)
+
+    /* Write max oid */
+    if(H5VL_rados_write_max_oid(file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't write max OID")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_file_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_file_specific
+ *
+ * Purpose:     Perform an operation
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              April, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_rados_file_specific(void *item, H5VL_file_specific_t specific_type,
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req,
+    va_list H5_ATTR_UNUSED arguments)
+{
+    H5VL_rados_file_t *file = ((H5VL_rados_item_t *)item)->file;
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (specific_type) {
+        /* H5Fflush` */
+        case H5VL_FILE_FLUSH:
+            if(H5VL_rados_file_flush(file) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "can't flush file")
+
+            break;
+        /* H5Fmount */
+        case H5VL_FILE_MOUNT:
+        /* H5Fmount */
+        case H5VL_FILE_UNMOUNT:
+        /* H5Fis_accessible */
+        case H5VL_FILE_IS_ACCESSIBLE:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid or unsupported specific operation")
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_file_specific() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_rados_file_close_helper
  *
  * Purpose:     Closes a RADOS HDF5 file.
@@ -1060,6 +1158,7 @@ H5VL_rados_file_close_helper(H5VL_rados_file_t *file, hid_t dxpl_id, void **req)
     /* Free file data structures */
     if(file->file_name)
         HDfree(file->file_name);
+    file->glob_md_oid = H5MM_xfree(file->glob_md_oid);
     if(file->comm || file->info)
         if(H5FD_mpi_comm_info_free(&file->comm, &file->info) < 0)
             HDONE_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "Communicator/Info free failed")
@@ -1104,8 +1203,8 @@ H5VL_rados_file_close(void *_file, hid_t dxpl_id, void **req)
     HDassert(file);
 
     /* Flush the file */
-    /*if(H5VL_rados_file_flush(file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "can't flush file")*/
+    if(H5VL_rados_file_flush(file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "can't flush file")
 
     /* Close the file */
     if(H5VL_rados_file_close_helper(file, dxpl_id, req) < 0)
@@ -1114,6 +1213,45 @@ H5VL_rados_file_close(void *_file, hid_t dxpl_id, void **req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_rados_file_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_rados_write_max_oid
+ *
+ * Purpose:     Writes the max OID (object index) to the global metadata
+ *              object
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ * Programmer:  Neil Fortner
+ *              April, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_rados_write_max_oid(H5VL_rados_file_t *file)
+{
+    int ret;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Write max oid to global metadata object if necessary */
+    if(file->max_oid_dirty) {
+        uint8_t wbuf[8];
+        uint8_t *p = wbuf;
+
+        UINT64ENCODE(p, file->max_oid)
+
+        if((ret = rados_write_full(ioctx_g, file->glob_md_oid, (const char *)wbuf, (size_t)8)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't write metadata to group: %s", strerror(-ret))
+        file->max_oid_dirty = FALSE;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_rados_write_max_oid() */
 
 
 /*-------------------------------------------------------------------------
@@ -1658,6 +1796,9 @@ H5VL_rados_group_create_helper(H5VL_rados_file_t *file, hid_t gcpl_id,
         /* Write internal metadata to group */
         if((ret = rados_write_full(ioctx_g, grp->obj.oid, gcpl_buf, gcpl_size)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't write metadata to group: %s", strerror(-ret))
+
+        /* Mark max OID as dirty */
+        file->max_oid_dirty = TRUE;
 
         /* Write link to group if requested */
         if(parent_grp) {
@@ -2520,6 +2661,9 @@ H5VL_rados_dataset_create(void *_item,
         /* Write internal metadata to dataset */
         if((ret = rados_write_full(ioctx_g, dset->obj.oid, (const char *)md_buf, md_size)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't write metadata to dataset: %s", strerror(-ret))
+
+        /* Mark max OID as dirty */
+        item->file->max_oid_dirty = TRUE;
 
         /* Create link to dataset */
         link_val.type = H5L_TYPE_HARD;

@@ -55,7 +55,7 @@ typedef struct H5VL_rados_file_t {
     char *file_name;
     size_t file_name_len;
     unsigned flags;
-    /*char *glob_md_oid;*/
+    char *glob_md_oid;
     struct H5VL_rados_group_t *root_grp;
     uint64_t max_oid;
     hbool_t max_oid_dirty;
