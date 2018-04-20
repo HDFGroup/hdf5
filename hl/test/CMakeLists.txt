@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_HL_TEST)
+project (HDF5_HL_TEST C)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
 # with "hl_". This allows for easier filtering of the test suite when

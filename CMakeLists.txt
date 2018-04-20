@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5 C CXX)
+project (HDF5 C)
 
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build

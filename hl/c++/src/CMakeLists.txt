@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_HL_CPP_SRC)
+project (HDF5_HL_CPP_SRC CXX)
 
 #-----------------------------------------------------------------------------
 # Define Sources

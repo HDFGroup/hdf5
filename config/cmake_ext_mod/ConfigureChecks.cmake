@@ -14,7 +14,6 @@
 #-----------------------------------------------------------------------------
 include (CheckFunctionExists)
 include (CheckIncludeFile)
-include (CheckIncludeFileCXX)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckSymbolExists)
@@ -23,6 +22,7 @@ include (CheckVariableExists)
 include (CheckFortranFunctionExists)
 include (TestBigEndian)
 if (CMAKE_CXX_COMPILER AND CMAKE_CXX_COMPILER_LOADED)
+  include (CheckIncludeFileCXX)
   include (TestForSTDNamespace)
 endif ()
 

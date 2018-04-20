@@ -1,10 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_HL C CXX)
-
-#-----------------------------------------------------------------------------
-# Apply Definitions to compiler in this directory and below
-#-----------------------------------------------------------------------------
-add_definitions (${HDF_EXTRA_C_FLAGS})
+project (HDF5_HL C)
 
 
 #-----------------------------------------------------------------------------

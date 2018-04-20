@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_SRC_MISC)
+project (HDF5_TOOLS_SRC_MISC C)
 
 #-----------------------------------------------------------------------------
 # Setup include Directories

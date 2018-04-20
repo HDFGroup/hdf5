@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TEST_PAR)
+project (HDF5_TEST_PAR C)
 
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below

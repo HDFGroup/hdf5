@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-project (HDF5_HL_F90_SRC C CXX Fortran)
+project (HDF5_HL_F90_SRC C Fortran)
 
 #-----------------------------------------------------------------------------
 # configure def file for shared libs on windows

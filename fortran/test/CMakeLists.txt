@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_FORTRAN_TESTS C CXX Fortran)
+project (HDF5_FORTRAN_TESTS C Fortran)
 
 #-----------------------------------------------------------------------------
 # Setup include Directories

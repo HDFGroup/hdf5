@@ -1,8 +1,9 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT ( HDF5_JAVA C Java )
+project (HDF5_JAVA C Java)
 
 set (CMAKE_MODULE_PATH "${HDF_RESOURCES_DIR};${HDF_RESOURCES_EXT_DIR}")
 find_package (Java)
+
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
@@ -29,9 +30,9 @@ set (HDF5_JAVA_INCLUDE_DIRECTORIES
     ${JAVA_INCLUDE_PATH}
     ${JAVA_INCLUDE_PATH2}
 )
-INCLUDE_DIRECTORIES (${HDF5_JAVA_INCLUDE_DIRECTORIES})
-set (CMAKE_JAVA_INCLUDE_PATH "")
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_INCLUDE_DIRECTORIES}")
 
+set (CMAKE_JAVA_INCLUDE_PATH "")
 
 #-----------------------------------------------------------------------------
 # Traverse source subdirectory

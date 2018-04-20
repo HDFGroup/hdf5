@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_JAVA_JNI C CXX)
+project (HDF5_JAVA_JNI C)
 
 set (HDF5_JAVA_JNI_CSRCS
     ${HDF5_JAVA_JNI_SOURCE_DIR}/exceptionImp.c
