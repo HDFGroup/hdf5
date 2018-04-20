@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_TEST_H5COPY)
+project (HDF5_TOOLS_TEST_H5COPY C)
 
 # --------------------------------------------------------------------
 # Add the h5copy test executables

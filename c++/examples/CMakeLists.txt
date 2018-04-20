@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_CPP_EXAMPLES)
+project (HDF5_CPP_EXAMPLES CXX)
 
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed

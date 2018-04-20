@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_TEST_H5LS)
+project (HDF5_TOOLS_TEST_H5LS C)
 
 #-----------------------------------------------------------------------------
 # If plugin library tests can be tested

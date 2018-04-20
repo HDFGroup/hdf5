@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_LIB)
+project (HDF5_TOOLS_LIB C)
 
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below

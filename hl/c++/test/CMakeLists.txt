@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_HL_CPP_TEST)
+project (HDF5_HL_CPP_TEST CXX)
 
 add_executable (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
 set_property(TARGET hl_ptableTest APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_HL_SRC_DIR}/test;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_HL_TOOLS_GIF2H5)
+project (HDF5_HL_TOOLS_GIF2H5 C)
 
 #-----------------------------------------------------------------------------
 # Define Sources

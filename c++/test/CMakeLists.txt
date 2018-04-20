@@ -1,5 +1,19 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_CPP_TEST)
+project (HDF5_CPP_TEST CXX)
+
+#-----------------------------------------------------------------------------
+# Parallel/MPI, prevent spurious cpp/cxx warnings
+#-----------------------------------------------------------------------------
+if (H5_HAVE_PARALLEL)
+  add_definitions ("-DMPICH_SKIP_MPICXX")
+  add_definitions ("-DMPICH_IGNORE_CXX_SEEK")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Apply Definitions to compiler in this directory and below
+#-----------------------------------------------------------------------------
+add_definitions (${HDF_EXTRA_C_FLAGS})
+
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
 # with "cpp_". This allows for easier filtering of the test suite when

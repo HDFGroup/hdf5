@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_SRC_H5JAM)
+project (HDF5_TOOLS_SRC_H5JAM C)
 
 # --------------------------------------------------------------------
 # Add the h5jam executables

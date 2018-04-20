@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_TEST_MISC)
+project (HDF5_TOOLS_TEST_MISC C)
 
 # --------------------------------------------------------------------
 # Add the misc test executables

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_TEST_H5FC)
+project (HDF5_TOOLS_TEST_H5FC C)
 
 # --------------------------------------------------------------------
 # Add the h5format_convert test executables

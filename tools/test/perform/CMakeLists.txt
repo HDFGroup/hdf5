@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_TEST_PERFORM )
+project (HDF5_TOOLS_TEST_PERFORM C)
 
 # --------------------------------------------------------------------
 # Add the executables

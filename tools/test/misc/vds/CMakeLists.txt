@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_TEST_MISC_VDS)
+project (HDF5_TOOLS_TEST_MISC_VDS C)
 
 MACRO (ADD_H5_GENERATOR genfile)
   add_executable (${genfile} ${HDF5_TOOLS_TEST_MISC_VDS_SOURCE_DIR}/${genfile}.c)
