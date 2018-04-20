@@ -66,8 +66,7 @@ New Features
     -----------------
     - Create VDS in parallel
       The creation, along with reading and writing of Virtual Data Sets (VDS)
-      is now supported. The initial coding was for version 1.10.1 by Neil Fortner,
-      but required additional validation and testing.
+      is now supported. 
       
       (HDFFV-10287, RAW, 2018/04/18)
 

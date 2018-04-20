@@ -1326,9 +1326,6 @@ H5C__flush_candidates_in_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,
 #if H5C_DO_SANITY_CHECKS
     /* index len should not change */
     init_index_len = cache_ptr->index_len;
-    if(H5C_get_aux_ptr(f->shared->cache))
-        init_index_len++; /* parallel ops may add an additional
-                           * operation for a heap entry if VDS... */
 #endif /* H5C_DO_SANITY_CHECKS */
 
     /* Examine entries in the LRU list, and flush or clear all entries
@@ -1614,7 +1611,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,
        */
 
 #if H5C_DO_SANITY_CHECKS
-    HDassert(init_index_len >= cache_ptr->index_len);
+    HDassert(init_index_len == cache_ptr->index_len);
 #endif /* H5C_DO_SANITY_CHECKS */
 
     if(entries_flushed != entries_to_flush || entries_cleared != entries_to_clear) {
