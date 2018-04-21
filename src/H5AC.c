@@ -2755,6 +2755,41 @@ done:
 
 
 /*------------------------------------------------------------------------------
+ * Function:    H5AC_start_transaction()
+ *
+ * Purpose:     Sets the is_api_call_start property in the provided property list.
+ * 
+ * Return:      SUCCEED on success, FAIL otherwise.
+ *
+ * Programmer:  Houjun Tang
+ *              Nov 20, 2017
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_start_transaction(hid_t dxpl_id)
+{
+    H5P_genplist_t *dxpl;           /* Dataset transfer property list */
+    hbool_t set_value;
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check Arguments */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Set the provided tag in the dxpl_id. */
+    set_value = TRUE;
+    if(H5P_set(dxpl, H5F_ACS_IS_START_TRANSACTION_NAME, &set_value) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set is_api_call_start in dxpl")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_start_transaction() */
+
+
+/*------------------------------------------------------------------------------
  * Function:    H5AC_tag()
  *
  * Purpose:     Sets the metadata tag property in the provided property list.

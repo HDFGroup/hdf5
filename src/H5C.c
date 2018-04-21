@@ -206,6 +206,7 @@ H5FL_DEFINE_STATIC(H5C_t);
 
 /* Declare a free list to manage flush dependency arrays */
 H5FL_BLK_DEFINE_STATIC(parent);
+H5FL_BLK_DEFINE_STATIC(children);
 
 
 
@@ -326,6 +327,12 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->il_size				= (size_t)0;
     cache_ptr->il_head				= NULL;
     cache_ptr->il_tail				= NULL;
+
+    /* FULLSWMR timestamp fields */
+    cache_ptr->ts_len				= 0;
+    cache_ptr->ts_size				= (size_t)0;
+    cache_ptr->ts_head				= NULL;
+    cache_ptr->ts_tail				= NULL;
 
     /* Tagging Field Initializations */
     cache_ptr->ignore_tags                      = FALSE;
@@ -1402,12 +1409,6 @@ H5C_insert_entry(H5F_t *             f,
     if((H5P_get(dxpl, H5AC_RING_NAME, &ring)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to query ring value")
 
-    /* FULLSWMR: should invoked H5C__flush_by_timestamp() when the SWMR-reader flag is set 
-     * on the file, before the entry is looked up in the cache
-     */
-    if (H5C__flush_by_timestamp(f, dxpl_id, flags) < 0) 
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "fail to flush by timestamp")
-
     entry_ptr = (H5C_cache_entry_t *)thing;
 
     /* verify that the new entry isn't already in the hash table -- scream
@@ -1466,6 +1467,8 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->flush_dep_parent             = NULL;
     entry_ptr->flush_dep_nparents           = 0;
     entry_ptr->flush_dep_parent_nalloc      = 0;
+
+    entry_ptr->flush_dep_children           = NULL;
     entry_ptr->flush_dep_nchildren          = 0;
     entry_ptr->flush_dep_ndirty_children    = 0;
     entry_ptr->flush_dep_nunser_children    = 0;
@@ -1513,8 +1516,6 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->ts = H5_now_usec();
     entry_ptr->ts_prev = NULL;
     entry_ptr->ts_next = NULL;
-
-    /* TODO, add to linked list*/
 
     /* Apply tag to newly inserted entry */
     if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
@@ -1585,9 +1586,8 @@ H5C_insert_entry(H5F_t *             f,
 
     H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
-    /* FULLSWMR TODO add to timestamp list */
-    /* H5C__INSERT_IN_TS_LIST(cache_ptr, entry_ptr, NULL); */
-
+    /* FULLSWMR: add to timestamp list */
+    H5C__INSERT_IN_TS_LIST(cache_ptr, entry_ptr, FAIL);
 
     /* New entries are presumed to be dirty */
     HDassert(entry_ptr->is_dirty);
@@ -2201,6 +2201,9 @@ H5C_resize_entry(void *thing, size_t new_size)
 	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, entry_ptr->size, \
                                           new_size, entry_ptr, was_clean);
 
+        /* FULLSWMR: Update the timestamp list for the size change */
+        H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->ts_len, cache_ptr->ts_size, entry_ptr->size, new_size)
+
         /* if the entry is in the skip list, update that too */
         if(entry_ptr->in_slist)
 	    H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, entry_ptr->size, new_size);
@@ -2358,6 +2361,104 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5C__flush_recursive_by_dep
+ *
+ * Purpose:     Flush entries recursively by their flush dependency.
+ *              
+ *
+ * Return:      Non-negative on success/Negative on failure or if there was
+ *		an attempt to flush a protected item.
+ *
+ * Programmer:  Houjun Tang 
+ *              11/9/17
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5C__flush_recursive_by_dep(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
+    unsigned flags)
+{
+    int i;                              /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Recursively flush and evict flush dependency children of the entry. */
+    if(entry_ptr->flush_dep_ndirty_children > 0)
+        /* Flush from the end so there is less memory movement. */
+        for(i = (int)(entry_ptr->flush_dep_nchildren - 1); i >= 0; i--)
+            if(H5C__flush_recursive_by_dep(f, dxpl_id, entry_ptr->flush_dep_children[i], flags) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush child entry")
+
+    /* Reach the end of recursive process, do the actual entry flush */
+    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush single entry failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__flush_recursive_by_dep() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C__flush_by_timestamp
+ *
+ * Purpose:     Check the current time and work through the timestamp queue,
+ *              evicting entries that are older than Delta t.
+ *
+ * Return:      Non-negative on success/Negative on failure or if there was
+ *		an attempt to flush a protected item.
+ *
+ * Programmer:  Houjun Tang 
+ *              10/30/17
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C__flush_by_timestamp(H5F_t *f, hid_t dxpl_id, unsigned flags)
+{
+    H5C_cache_entry_t *entry_ptr;       /* Current entry to examine */
+    uint64_t too_old;                   /* Time boundary for old entries */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Get the time boundary for entries that are too old and must be evicted */
+    too_old = H5_now_usec() - f->shared->swmr_deltat;
+
+    /* Iterate over all entries in the cache, according to their timestamp order  */
+    entry_ptr = f->shared->cache->ts_head;
+    while (entry_ptr != NULL) {
+        H5C_cache_entry_t *tmp_entry_ptr;
+
+        /* Get pointer to next entry */
+        tmp_entry_ptr = entry_ptr->ts_next;
+
+        /* Evict entries that are older than delta t */ 
+        if(entry_ptr->ts < too_old) {
+            if(entry_ptr->is_pinned || entry_ptr->is_protected) {
+                entry_ptr = entry_ptr->ts_next;
+                continue;
+            } /* end if */
+
+            if (H5C__flush_recursive_by_dep(f, dxpl_id, entry_ptr, flags) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush recursive by flush dependency failed")
+        } /* end if */
+        else
+            /* Leave loop when into entries which won't be evicted */
+            break;
+
+        /* Advance to (saved) next entry */
+        entry_ptr = tmp_entry_ptr;
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__flush_by_timestamp() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_protect
  *
  * Purpose:     If the target entry is not in the cache, load it.  If
@@ -2458,12 +2559,47 @@ H5C_protect(H5F_t *		f,
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
-    /* FULLSWMR TODO: should invoked H5C__flush_by_timestamp() when the SWMR-reader flag is set 
+    /* FULLSWMR should invoked H5C__flush_by_timestamp() when the SWMR-reader flag is set 
      * on the file, before the entry being protected is looked up in the cache
      */
-    if (H5C__flush_by_timestamp(f, dxpl_id, flags) < 0) {
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "fail to flush by timestamp")
-    }
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_READ ) {
+        unsigned deltat;        /* SWMR delta-t set by SWMR writer */
+
+        /* Check for a file that has a SWMR delta-t value set by a SWMR writer */
+        deltat = f->shared->swmr_deltat;
+        if(deltat > 0) {
+            hbool_t is_api_call_start = FALSE;
+
+            if(H5P_get_is_api_call_start(dxpl, &is_api_call_start) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "fail to get is_api_call_start")
+
+            if(FALSE == is_api_call_start) {
+                uint64_t api_call_start_time = 0;
+                uint64_t now_time;
+
+                /* Check if the entry is in cache more than 2 delta t since the transaction start
+                 * time, if so, error */
+
+                if(H5P_get_api_call_start_time(dxpl, &api_call_start_time) < 0) 
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "fail to get api_call_start_time")
+
+                now_time = H5_now_usec();
+                if(now_time > api_call_start_time + (uint64_t)(2 * deltat)) 
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "entry in cache more than 2 delta t")
+            } /* end if */
+            else {
+                /* Record the transaction start time*/
+                if(H5P_set_api_call_start_time(dxpl) < 0) 
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, NULL, "fail to set api_call_start_time")
+
+                if(H5C__flush_by_timestamp(f, dxpl_id, H5C__FLUSH_INVALIDATE_FLAG) < 0) 
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "fail to flush by timestamp")
+
+                if(H5P_set_is_api_call_start(dxpl, FALSE) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, NULL, "fail to end transaction")
+            } /* end else */
+        } /* end if */
+    } /* end if */
 
     /* first check to see if the target is in cache */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, NULL)
@@ -2698,8 +2834,8 @@ H5C_protect(H5F_t *		f,
             H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, NULL)
         }
 
-        /* FULLSWMR TODO add to timestamp list */
-        /* H5C__INSERT_IN_TS_LIST(cache_ptr, entry_ptr, NULL); */
+        /* FULLSWMR add to timestamp list */
+        H5C__INSERT_IN_TS_LIST(cache_ptr, entry_ptr, NULL);
 
         /* insert the entry in the data structures used by the replacement
          * policy.  We are just going to take it out again when we update
@@ -3898,6 +4034,27 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
     /* Mark the entry as pinned from the cache's action (possibly redundantly) */
     parent_entry->pinned_from_cache = TRUE;
 
+    /* FULLSWMR: Check if we need to resize the entry's children array */
+    if(parent_entry->flush_dep_nchildren >= parent_entry->flush_dep_children_nalloc) {
+        if(parent_entry->flush_dep_children_nalloc == 0) {
+            /* Array does not exist yet, allocate it */
+            HDassert(!parent_entry->flush_dep_children);
+
+            if(NULL == (parent_entry->flush_dep_children = (H5C_cache_entry_t **)H5FL_BLK_MALLOC(children, H5C_FLUSH_DEP_CHILDREN_INIT * sizeof(H5C_cache_entry_t *))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency children list")
+            parent_entry->flush_dep_children_nalloc = H5C_FLUSH_DEP_CHILDREN_INIT;
+        } /* end if */
+        else {
+            /* Resize existing array */
+            HDassert(parent_entry->flush_dep_children);
+
+            if(NULL == (parent_entry->flush_dep_children = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(children, parent_entry->flush_dep_children, 2 * parent_entry->flush_dep_children_nalloc * sizeof(H5C_cache_entry_t *))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency children list")
+            parent_entry->flush_dep_children_nalloc *= 2;
+        } /* end else */
+        cache_ptr->entry_fd_height_change_counter++;
+    } /* end if */
+
     /* Check if we need to resize the child's parent array */
     if(child_entry->flush_dep_nparents >= child_entry->flush_dep_parent_nalloc) {
         if(child_entry->flush_dep_parent_nalloc == 0) {
@@ -3923,7 +4080,8 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
     child_entry->flush_dep_parent[child_entry->flush_dep_nparents] = parent_entry;
     child_entry->flush_dep_nparents++;
 
-    /* Increment parent's number of children */
+    /* FULLSWMR: Add the dependency to the parent's children array */
+    parent_entry->flush_dep_children[parent_entry->flush_dep_nchildren] = child_entry;
     parent_entry->flush_dep_nchildren++;
 
     /* Adjust the number of dirty children */
@@ -3959,6 +4117,9 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
     HDassert(child_entry->flush_dep_parent);
     HDassert(child_entry->flush_dep_nparents > 0);
     HDassert(child_entry->flush_dep_parent_nalloc > 0);
+    /* FULLSWMR */
+    HDassert(parent_entry->flush_dep_children);
+    HDassert(parent_entry->flush_dep_children_nalloc > 0);
 #ifndef NDEBUG
     H5C__assert_flush_dep_nocycle(parent_entry, child_entry);
 #endif /* NDEBUG */
@@ -4028,11 +4189,31 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
                 (child_entry->flush_dep_nparents - u - 1) * sizeof(child_entry->flush_dep_parent[0]));
     child_entry->flush_dep_nparents--;
 
+    /* FULLSWMR: Search for child in parent's children array.  
+     * This is a linear search because we do not expect large numbers of children.  
+     * If this changes, we may wish to change the children array to a skip list */
+    for(u = 0; u < parent_entry->flush_dep_nchildren; u++)
+        if(parent_entry->flush_dep_children[u] == child_entry)
+            break;
+    if(u == parent_entry->flush_dep_nchildren)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Child entry isn't a flush dependency child for parent entry")
+
+    /* Remove child entry from parent's children array */
+    if(u < (parent_entry->flush_dep_nchildren - 1))
+        HDmemmove(&parent_entry->flush_dep_children[u],
+                &parent_entry->flush_dep_children[u + 1],
+                (parent_entry->flush_dep_nchildren - u - 1) * sizeof(parent_entry->flush_dep_children[0]));
+
     /* Adjust parent entry's nchildren and unpin parent if it goes to zero */
     parent_entry->flush_dep_nchildren--;
     if(0 == parent_entry->flush_dep_nchildren) {
         /* Sanity check */
         HDassert(parent_entry->pinned_from_cache);
+
+        /* FULLSWMR */
+        parent_entry->flush_dep_children = (H5C_cache_entry_t **)
+                                            H5FL_BLK_FREE(children, parent_entry->flush_dep_children);
+        parent_entry->flush_dep_children_nalloc = 0;
 
         /* Check if we should unpin parent entry now */
         if(!parent_entry->pinned_from_client) {
@@ -4049,6 +4230,13 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
 
         /* Mark the entry as unpinned from the cache's action */
         parent_entry->pinned_from_cache = FALSE;
+    } /* end if */
+    else if(parent_entry->flush_dep_children_nalloc > H5C_FLUSH_DEP_CHILDREN_INIT
+            && parent_entry->flush_dep_nchildren <= (parent_entry->flush_dep_children_nalloc / 4)) {
+        /* FULLSWMR shrink the children array if possible */
+        if(NULL == (parent_entry->flush_dep_children = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(children, parent_entry->flush_dep_children, (parent_entry->flush_dep_children_nalloc / 4) * sizeof(H5C_cache_entry_t *))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency children list")
+        parent_entry->flush_dep_children_nalloc /= 4;
     } /* end if */
 
     /* Adjust parent entry's ndirty_children */
@@ -6389,6 +6577,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
                 if(entry_ptr->flush_dep_parent[i]->type->notify &&
                         (entry_ptr->flush_dep_parent[i]->type->notify)(H5C_NOTIFY_ACTION_CHILD_BEFORE_EVICT, entry_ptr->flush_dep_parent[i], entry_ptr->addr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry being evicted")
+
             } /* end for */
         } /* end if */
 
@@ -6410,8 +6599,8 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
          */
         H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
 
-        /* FULLSWMR TODO: remove entry from timestamp list*/
-        /* H5C__DELETE_FROM_TS_LIST(cache_ptr, entry_ptr, FAIL); */
+        /* FULLSWMR: remove entry from timestamp list*/
+        H5C__DELETE_FROM_TS_LIST(cache_ptr, entry_ptr, FAIL);
 
         if(entry_ptr->in_slist && del_from_slist_on_destroy)
             H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)
@@ -6638,53 +6827,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__flush_single_entry() */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C__flush_by_timestamp
- *
- * Purpose:     Check the current time and work through the timestamp queue,
- *              evicting entries that are older than Delta t.
- *
- * Return:      Non-negative on success/Negative on failure or if there was
- *		an attempt to flush a protected item.
- *
- * Programmer:  Houjun Tang 
- *              10/30/17
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C__flush_by_timestamp(H5F_t *f, hid_t dxpl_id, unsigned flags)
-{
-    herr_t ret_value = SUCCEED;
-    H5C_cache_entry_t *entry_ptr;
-    uint64_t now_time;
-    unsigned delta_t;
-
-    FUNC_ENTER_PACKAGE
-
-    /* check the current time and work through the timestamp queue, 
-     */
-    now_time = H5_now_usec();
-    delta_t  = f->shared->swmr_deltat;
-
-    entry_ptr = f->shared->cache->ts_head;
-    while (entry_ptr != NULL) {
-
-        /* evicting entries that are older than Delta t */ 
-        if (entry_ptr->ts > now_time - (uint64_t)(delta_t)) {
-            if (H5C__flush_single_entry(f, dxpl_id, entry_ptr, flags) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush single entry failed")
-            
-        }
-        entry_ptr = entry_ptr->ts_next;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__flush_by_timestamp() */
 
 
 /*-------------------------------------------------------------------------
@@ -7032,6 +7174,7 @@ H5C_load_entry(H5F_t *              f,
     entry->flush_dep_parent             = NULL;
     entry->flush_dep_nparents           = 0;
     entry->flush_dep_parent_nalloc      = 0;
+    entry->flush_dep_children           = NULL;
     entry->flush_dep_nchildren          = 0;
     entry->flush_dep_ndirty_children    = 0;
     entry->flush_dep_nunser_children    = 0;
@@ -7078,10 +7221,6 @@ H5C_load_entry(H5F_t *              f,
     entry->ts = H5_now_usec();
     entry->ts_prev = NULL;
     entry->ts_next = NULL;
-
-    /* TODO */
-    /* if (entry->ts_head == NULL) { */
-    /* } */
 
     H5C__RESET_CACHE_ENTRY_STATS(entry);
 
@@ -8879,6 +9018,9 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
             /* Update the hash table for the size change */
             H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, entry_ptr->size, new_len, entry_ptr, !(entry_ptr->is_dirty));
 
+            /* FULLSWMR: Update the timestamp list for the size change */
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->ts_len, cache_ptr->ts_size, entry_ptr->size, new_len)
+
             /* The entry can't be protected since we are in the process of
              * flushing it.  Thus we must update the replacement policy data
              * structures for the size change.  The macro deals with the pinned
@@ -9024,8 +9166,8 @@ H5C_remove_entry(void *_entry)
 
     H5C__DELETE_FROM_INDEX(cache, entry, FAIL)
 
-    /* FULLSWMR TODO: remove entry from timestamp list*/
-    /* H5C__DELETE_FROM_TS_LIST(cache, entry, FAIL); */
+    /* FULLSWMR: remove entry from timestamp list*/
+    H5C__DELETE_FROM_TS_LIST(cache, entry, FAIL);
 
 #ifdef H5_HAVE_PARALLEL
     /* Check for collective read access flag */

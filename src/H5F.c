@@ -1495,7 +1495,7 @@ H5Fstart_swmr_write(hid_t file_id)
     /* write SWMR delta t message */
     if(file->shared->swmr_deltat != 0)
         if(H5F_super_ext_write_msg(file, H5AC_ind_read_dxpl_id, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "error in writing deltat message to superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing deltat message to superblock extension")
 
     /* Flush the superblock extension */
     if(H5F_flush_tagged_metadata(file, file->shared->sblock->ext_addr, H5AC_ind_read_dxpl_id) < 0)

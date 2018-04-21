@@ -27,7 +27,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 
 static void  *H5O_swmr_deltat_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
+    unsigned mesg_flags, unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_swmr_deltat_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O_swmr_deltat_copy(const void *_mesg, void *_dest);
 static size_t H5O_swmr_deltat_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -78,7 +78,8 @@ const H5O_msg_class_t H5O_MSG_SWMR_DELTAT[1] = {{
  */
 static void *
 H5O_swmr_deltat_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
-    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
+    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
 
     H5O_swmr_deltat_t	*swmr_deltat;          /* Native message */
@@ -96,7 +97,7 @@ H5O_swmr_deltat_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5
 
     /* Allocate space for message */
     if(NULL == (swmr_deltat = (H5O_swmr_deltat_t *)H5MM_calloc(sizeof(H5O_swmr_deltat_t))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for v1 B-tree 'K' message")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed for SWMR delta-T message")
 
     /* Retrieve non-default SWMR delta t values */
     UINT32DECODE(p, *swmr_deltat);

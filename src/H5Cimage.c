@@ -720,7 +720,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
     H5C__INSERT_IN_INDEX(cache_ptr, ds_entry_ptr, FAIL)
 
     /* FULLSWMR TODO add to timestamp list */
-    /* H5C__INSERT_IN_TS_LIST(cache_ptr, ds_entry_ptr, NULL); */
+    H5C__INSERT_IN_TS_LIST(cache_ptr, ds_entry_ptr, FAIL);
 
     HDassert(!ds_entry_ptr->in_slist);
     if(ds_entry_ptr->is_dirty)
@@ -1385,12 +1385,9 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id, hbool_t *image_generated
      * Note that under some error conditions, the superblock will be 
      * undefined in this case as well -- if so, assume that the 
      * superblock does not support superblock extension messages.
-     * Also verify that the file's high_bound is at least release
-     * 1.10.x, otherwise cancel the request for a cache image
      */
     if((NULL == f->shared->sblock) ||
-         (f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2) ||
-         (f->shared->high_bound < H5F_LIBVER_V110)) {
+         (f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2)) {
         H5C_cache_image_ctl_t default_image_ctl = H5C__DEFAULT_CACHE_IMAGE_CTL;
 
         cache_ptr->image_ctl = default_image_ctl;
@@ -3148,8 +3145,8 @@ H5C__reconstruct_cache_contents(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr)
 	/* Insert the prefetched entry in the index */
 	H5C__INSERT_IN_INDEX(cache_ptr, pf_entry_ptr, FAIL)
 
-        /* FULLSWMR TODO add to timestamp list */
-        /* H5C__INSERT_IN_TS_LIST(cache_ptr, pf_entry_ptr, NULL); */
+        /* FULLSWMR add to timestamp list */
+        H5C__INSERT_IN_TS_LIST(cache_ptr, pf_entry_ptr, FAIL);
 
 	/* If dirty, insert the entry into the slist. */
 	if(pf_entry_ptr->is_dirty)

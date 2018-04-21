@@ -181,6 +181,12 @@
 #define H5AC_XFER_RING_DEF       H5AC_RING_USER
 #define H5AC_XFER_RING_ENC       H5P__encode_unsigned
 #define H5AC_XFER_RING_DEC       H5P__decode_unsigned
+/* Definations for properties for SWMR transaction  */
+#define H5F_ACS_IS_START_TRANSACTION_DEF                FALSE
+#define H5F_ACS_IS_START_TRANSACTION_SIZE               sizeof(hbool_t)
+#define H5F_ACS_TRANSACTION_START_TIME_DEF              0
+#define H5F_ACS_TRANSACTION_START_TIME_SIZE             sizeof(uint64_t)
+
 #ifdef H5_DEBUG_BUILD
 /* dxpl I/O type - private property */
 #define H5FD_DXPL_TYPE_SIZE       sizeof(H5FD_dxpl_type_t)
@@ -304,6 +310,8 @@ static const hbool_t direct_chunk_read_flag = H5D_XFER_DIRECT_CHUNK_READ_FLAG_DE
 static const hsize_t *direct_chunk_read_offset = H5D_XFER_DIRECT_CHUNK_READ_OFFSET_DEF;    /* Default value for the offset of direct chunk read */
 static const uint32_t direct_chunk_read_filters = H5D_XFER_DIRECT_CHUNK_READ_FILTERS_DEF;    /* Default value for the filters of direct chunk read */
 static const H5AC_ring_t H5D_ring_g = H5AC_XFER_RING_DEF; /* Default value for the cache entry ring type */
+static const hbool_t is_start_transaction_g = H5F_ACS_IS_START_TRANSACTION_DEF;         /* Default value for the is start transaction used in FULLSWMR */
+static const hbool_t transaction_start_time_g = H5F_ACS_TRANSACTION_START_TIME_DEF;         /* Default value for transaction start time used in FULLSWMR */
 #ifdef H5_DEBUG_BUILD
 static const H5FD_dxpl_type_t H5D_dxpl_type_g = H5FD_NOIO_DXPL; /* Default value for the dxpl type */
 #endif /* H5_DEBUG_BUILD */
@@ -529,6 +537,16 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5AC_RING_NAME, H5AC_XFER_RING_SIZE, &H5D_ring_g,
             NULL, NULL, NULL, H5AC_XFER_RING_ENC, H5AC_XFER_RING_DEC, 
             NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the is start transaction property used in FULLSWMR */
+    if(H5P_register_real(pclass, H5F_ACS_IS_START_TRANSACTION_NAME, H5F_ACS_IS_START_TRANSACTION_SIZE, 
+            &is_start_transaction_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the transaction start time property used in FULLSWMR */
+    if(H5P_register_real(pclass, H5F_ACS_TRANSACTION_START_TIME_NAME, H5F_ACS_TRANSACTION_START_TIME_SIZE, 
+            &transaction_start_time_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 #ifdef H5_DEBUG_BUILD
@@ -2267,4 +2285,116 @@ H5P__dxfr_edc_dec(const void **_pp, void *_value)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__dxfr_edc_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_set_is_api_call_start
+ *
+ * Purpose:     Set the "is_api_call_start" value for SWMR to use 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Houjun Tang
+ *              Nov 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_set_is_api_call_start(H5P_genplist_t *plist, hbool_t is_api_call_start)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(H5P_set(plist, H5F_ACS_IS_START_TRANSACTION_NAME, &is_api_call_start) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set is_api_call_start")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_set_is_api_call_start() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_get_is_api_call_start
+ *
+ * Purpose:	Retrieves the SWMR is_api_call_start value.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Houjun Tang
+ *              Nov 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_get_is_api_call_start(H5P_genplist_t *plist, hbool_t *is_api_call_start)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(is_api_call_start)
+        if(H5P_get(plist, H5F_ACS_IS_START_TRANSACTION_NAME, is_api_call_start) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get is_api_call_start")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_get_is_api_call_start() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_set_api_call_start_time
+ *
+ * Purpose:     Set the "api_call_start_time" value for SWMR to use 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Houjun Tang
+ *              Nov 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_set_api_call_start_time(H5P_genplist_t *plist)
+{
+    uint64_t now_time;                  /* The current time */
+    herr_t ret_value  = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    now_time = H5_now_usec();
+    if(H5P_set(plist, H5F_ACS_TRANSACTION_START_TIME_NAME, &now_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set is_api_call_start")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_set_api_call_start_time() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_get_api_call_start_time
+ *
+ * Purpose:     Get the "api_call_start_time" value for SWMR to use 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Houjun Tang
+ *              Nov 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_get_api_call_start_time(H5P_genplist_t *plist, uint64_t *api_call_start_time)
+{
+    herr_t ret_value  = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(api_call_start_time)
+        if(H5P_get(plist, H5F_ACS_TRANSACTION_START_TIME_NAME, api_call_start_time) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get is_api_call_start")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_get_api_call_start_time() */
 

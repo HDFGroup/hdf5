@@ -6415,7 +6415,7 @@ test_swmr_deltat_read_concur(hid_t in_fapl)
     int child_wait_option=0;        /* Options passed to waitpid */
     int out_pdf[2];
     int notify = 0;
-    unsigned deltat = 17;
+    unsigned deltat = 17000;
 
     /* Output message about test being performed */
     TESTING("SWMR delta t value with concurrent read access");
@@ -6468,10 +6468,11 @@ test_swmr_deltat_read_concur(hid_t in_fapl)
 
         /* Should succeed */
         if(child_fid >= 0) {
-            fapl_child = H5Fget_access_plist(child_fid);
-            if(H5Pget_swmr_deltat(fapl_child, &deltat))
+            if((fapl_child = H5Fget_access_plist(child_fid)) < 0)
                 FAIL_STACK_ERROR
-            if(deltat != 17)
+            if(H5Pget_swmr_deltat(fapl_child, &deltat) < 0)
+                FAIL_STACK_ERROR
+            if(deltat != 17000)
                 TEST_ERROR
 
             if(H5Fclose(child_fid) < 0)

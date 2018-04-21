@@ -1209,7 +1209,13 @@ typedef int H5C_ring_t;
  *              entry, i.e. the number of valid elements in flush_dep_parent.
  *
  * flush_dep_parent_nalloc: The number of allocated elements in
- *              flush_dep_parent_nalloc.
+ *              flush_dep_parent.
+ *
+ * flush_dep_children: Pointer to the array of flush dependency children entries
+ *              for this entry.
+ *
+ * flush_dep_children_nalloc: The number of allocated elements in
+ *              flush_dep_children.
  *
  * flush_dep_nchildren: Number of flush dependency children for this entry.  If
  *              this field is nonzero, then this entry must be pinned and
@@ -1635,6 +1641,10 @@ typedef struct H5C_cache_entry_t {
     struct H5C_cache_entry_t ** flush_dep_parent;
     unsigned                    flush_dep_nparents;
     unsigned                    flush_dep_parent_nalloc;
+    /* FULLSWMR children pointers*/
+    struct H5C_cache_entry_t ** flush_dep_children;
+    unsigned                    flush_dep_children_nalloc;
+
     unsigned                    flush_dep_nchildren;
     unsigned                    flush_dep_ndirty_children;
     unsigned                    flush_dep_nunser_children;
@@ -2364,8 +2374,8 @@ H5_DLL herr_t H5C_validate_index_list(H5C_t *cache_ptr);
 #endif /* NDEBUG */
 
 /* FULLSWMR typedef for cache entry iteration callback */
-typedef int (*H5AC_cache_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
-H5_DLL herr_t H5C_iterate(H5C_t *cache_ptr, H5AC_cache_iter_cb_t cb, void *cb_ctx);
+typedef int (*H5C_cache_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
+H5_DLL herr_t H5C_iterate(H5C_t *cache_ptr, H5C_cache_iter_cb_t cb, void *cb_ctx);
 
 #endif /* !_H5Cprivate_H */
 

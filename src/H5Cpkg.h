@@ -53,7 +53,10 @@
 /* Initial allocated size of the "flush_dep_parent" array */
 #define H5C_FLUSH_DEP_PARENT_INIT 8
 
-/****************************************************************************
+/* Initial allocated size of the "flush_dep_children" array */
+#define H5C_FLUSH_DEP_CHILDREN_INIT 8
+
+/***************************************************************************
  *
  * We maintain doubly linked lists of instances of H5C_cache_entry_t for a
  * variety of reasons -- protected list, LRU list, and the clean and dirty
@@ -237,6 +240,49 @@ if ( ( (new_size) > (dll_size) ) ||                                            \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "DLL post size update SC failed") \
 }
 
+/* FULLSWMR */
+#define H5C__TS_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
+if ( ( (entry_ptr) == NULL ) ||                                              \
+     ( (entry_ptr)->ts_next != NULL ) ||                                     \
+     ( (entry_ptr)->ts_prev != NULL ) ||                                     \
+     ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&               \
+       ( (head_ptr) != (tail_ptr) )                                          \
+     ) ||                                                                    \
+     ( ( (len) == 1 ) &&                                                     \
+       ( ( (head_ptr) != (tail_ptr) ) ||                                     \
+         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )            \
+       )                                                                     \
+     ) ||                                                                    \
+     ( ( (len) >= 1 ) &&                                                     \
+       ( ( (head_ptr) == NULL ) || ( (head_ptr)->ts_prev != NULL ) ||        \
+         ( (tail_ptr) == NULL ) || ( (tail_ptr)->ts_next != NULL )           \
+       )                                                                     \
+     )                                                                       \
+   ) {                                                                       \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL pre insert TS SC failed")  \
+}
+
+#define H5C__TS_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
+if ( ( (hd_ptr) == NULL ) ||                                                  \
+     ( (tail_ptr) == NULL ) ||                                                \
+     ( (entry_ptr) == NULL ) ||                                               \
+     ( (len) <= 0 ) ||                                                        \
+     ( (Size) < (entry_ptr)->size ) ||                                        \
+     ( ( (Size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) ||           \
+     ( ( (entry_ptr)->ts_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) ||   \
+     ( ( (entry_ptr)->ts_next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) || \
+     ( ( ( (len) == 1 ) &&                                                    \
+       ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&  \
+             ( (entry_ptr)->ts_next == NULL ) &&                              \
+             ( (entry_ptr)->ts_prev == NULL ) &&                              \
+             ( (Size) == (entry_ptr)->size )                                  \
+           )                                                                  \
+       )                                                                      \
+     )                                                                        \
+   ) {                                                                        \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "TS DLL pre remove SC failed")   \
+}
+
 #else /* H5C_DO_SANITY_CHECKS */
 
 #define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv)
@@ -244,6 +290,10 @@ if ( ( (new_size) > (dll_size) ) ||                                            \
 #define H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv)
 #define H5C__DLL_PRE_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size)
 #define H5C__DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size)
+
+/* FULLSWMR */
+#define H5C__TS_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv)
+#define H5C__TS_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv)
 
 #endif /* H5C_DO_SANITY_CHECKS */
 
@@ -1318,25 +1368,63 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #endif /* H5C_DO_SANITY_CHECKS */
 
+#define H5C__TS_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val) \
+{                                                                           \
+    H5C__TS_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,     \
+                           fail_val)                                        \
+    if ( (head_ptr) == NULL )                                               \
+    {                                                                       \
+       (head_ptr) = (entry_ptr);                                            \
+       (tail_ptr) = (entry_ptr);                                            \
+    }                                                                       \
+    else                                                                    \
+    {                                                                       \
+       (tail_ptr)->ts_next = (entry_ptr);                                   \
+       (entry_ptr)->ts_prev = (tail_ptr);                                   \
+       (tail_ptr) = (entry_ptr);                                            \
+    }                                                                       \
+    (len)++;                                                                \
+    (Size) += entry_ptr->size;                                              \
+} /* H5C__TS_DLL_APPEND() */
+
+#define H5C__TS_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val) \
+{                                                                           \
+    {                                                                       \
+       if ( (head_ptr) == (entry_ptr) )                                     \
+       {                                                                    \
+          (head_ptr) = (entry_ptr)->ts_next;                                \
+          if ( (head_ptr) != NULL )                                         \
+             (head_ptr)->ts_prev = NULL;                                    \
+       }                                                                    \
+       else                                                                 \
+          (entry_ptr)->ts_prev->ts_next = (entry_ptr)->ts_next;             \
+       if ( (tail_ptr) == (entry_ptr) )                                     \
+       {                                                                    \
+          (tail_ptr) = (entry_ptr)->ts_prev;                                \
+          if ( (tail_ptr) != NULL )                                         \
+             (tail_ptr)->ts_next = NULL;                                    \
+       }                                                                    \
+       else                                                                 \
+          (entry_ptr)->ts_next->ts_prev = (entry_ptr)->ts_prev;             \
+       entry_ptr->ts_next = NULL;                                           \
+       entry_ptr->ts_prev = NULL;                                           \
+       (len)--;                                                             \
+       (Size) -= entry_ptr->size;                                           \
+    }                                                                       \
+} /* H5C__TS_DLL_REMOVE() */
+
 #define H5C__INSERT_IN_TS_LIST(cache_ptr, entry_ptr, fail_val)               \
 {                                                                            \
-    H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)                    \
-                                                   \
-    H5C__IL_DLL_APPEND((entry_ptr), (cache_ptr)->ts_head,                    \
-                       (cache_ptr)->ts_tail, (cache_ptr)->il_len,            \
-                       (cache_ptr)->il_size, fail_val)                       \
-    H5C__POST_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)                   \
+    H5C__TS_DLL_APPEND((entry_ptr), (cache_ptr)->ts_head,                    \
+                   (cache_ptr)->ts_tail, (cache_ptr)->ts_len,                \
+                   (cache_ptr)->ts_size, (fail_val))                         \
 }
-
-    /* H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)                            \ */
 
 #define H5C__DELETE_FROM_TS_LIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                            \
-    H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)                              \
-    H5C__IL_DLL_REMOVE((entry_ptr), (cache_ptr)->ts_head,                    \
-                       (cache_ptr)->ts_tail, (cache_ptr)->il_len,            \
-                       (cache_ptr)->il_size, fail_val)                       \
-    H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr)                             \
+    H5C__TS_DLL_REMOVE((entry_ptr), (cache_ptr)->ts_head,                    \
+                   (cache_ptr)->ts_tail, (cache_ptr)->ts_len,                \
+                   (cache_ptr)->ts_size, (fail_val))                         \
 }
 
 
@@ -3742,6 +3830,11 @@ typedef struct H5C_tag_info_t {
  *
  *              This field is NULL if the index is empty.
  *
+ * ts_len:	Number of entries on the timestamp list.  
+ *
+ * ts_size: 	Number of bytes of cache entries currently stored in the
+ *		timestamp list.
+ *
  * ts_head:	Pointer to the head of the doubly linked list of entries in
  *              the timestamp list.  Note that cache entries on this list are 
  *		linked by their ts_next and ts_prev fields.
@@ -3753,7 +3846,7 @@ typedef struct H5C_tag_info_t {
  *              linked by their ts_next and ts_prev fields.
  *
  *              This field is NULL if the timestamp list is empty.
- **
+ *
  *
  * With the addition of the take ownership flag, it is possible that 
  * an entry may be removed from the cache as the result of the flush of 
@@ -4933,7 +5026,9 @@ struct H5C_t {
 
     char			prefix[H5C__PREFIX_LEN];
 
-    /* Full SWMR timestampe-ordered queue fields */
+    /* FULLSWMR timestampe-ordered queue fields */
+    uint32_t                    ts_len;
+    size_t                      ts_size;
     H5C_cache_entry_t          *ts_head;
     H5C_cache_entry_t          *ts_tail;
 
@@ -4960,7 +5055,6 @@ H5_DLL herr_t H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id,
 /* General routines */
 H5_DLL herr_t H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id,
     H5C_cache_entry_t *entry_ptr, unsigned flags);
-H5_DLL herr_t H5C__flush_by_timestamp(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5C__generate_cache_image(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr);
 H5_DLL herr_t H5C__load_cache_image(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry_ptr);

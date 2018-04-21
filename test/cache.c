@@ -204,8 +204,8 @@ static unsigned check_stats(unsigned paged);
 static void check_stats__smoke_check_1(H5F_t * file_ptr);
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-static H5AC_cache_iter_cb_t check_iteration_inc_count_cb(H5C_cache_entry_t *entry, void *_ctx);
-static H5AC_cache_iter_cb_t check_iteration_mark_every_other_clean_cb(H5C_cache_entry_t *entry, void *_ctx);
+static int check_iteration_inc_count_cb(H5C_cache_entry_t *entry, void *_ctx);
+static int check_iteration_mark_every_other_clean_cb(H5C_cache_entry_t *entry, void *_ctx);
 
 
 /**************************************************************************/
@@ -28956,8 +28956,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
  *
  *-------------------------------------------------------------------------
  */
-
-H5AC_cache_iter_cb_t
+static int
 check_iteration_inc_count_cb(H5C_cache_entry_t *entry, void *_ctx)
 {
     int32_t *count = (int32_t*)_ctx; /* Get pointer to iterator context */
@@ -28988,8 +28987,7 @@ check_iteration_inc_count_cb(H5C_cache_entry_t *entry, void *_ctx)
  *
  *-------------------------------------------------------------------------
  */
-
-H5AC_cache_iter_cb_t
+static int
 check_iteration_mark_every_other_clean_cb(H5C_cache_entry_t *entry, void *_ctx)
 {
     int32_t *count = (int32_t*)_ctx; /* Get pointer to iterator context */
@@ -29134,9 +29132,10 @@ check_iteration(unsigned paged)
     /* Iteration test #3 - count # of dirty entries */
     is_dirty = FALSE;
     in_cache = FALSE;
-    test_entry_t * entry_ptr;
     n_dirty_entry = 0;
     for(u = 0; u < 5; u++) {
+        test_entry_t * entry_ptr;
+
         entry_ptr = &(base_addr[u]);
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, NULL,
@@ -29154,7 +29153,7 @@ check_iteration(unsigned paged)
 
     /* Unpin entries */
     for(u = 0; u < 5; u++) {
-        unpin_entry(entry_type, u);
+        unpin_entry(entry_type, (int)u);
         if(!pass) CACHE_ERROR("unpin_entry failed")
     }
 

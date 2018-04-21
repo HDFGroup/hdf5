@@ -207,6 +207,9 @@ typedef H5C_get_fsf_size_t		H5AC_get_fsf_size_t;
 
 typedef H5C_class_t			H5AC_class_t;
 
+/* Cache entry iteration callback */
+typedef H5C_cache_iter_cb_t		H5AC_cache_iter_cb_t;
+
 /* Cache entry info */
 typedef H5C_cache_entry_t		H5AC_info_t;
 
@@ -477,6 +480,9 @@ H5_DLL herr_t H5AC_unsettle_entry_ring(void *entry);
 H5_DLL herr_t H5AC_unsettle_ring(H5F_t * f, H5AC_ring_t ring);
 H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
 H5_DLL herr_t H5AC_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
+
+/* SWMR Transaction routines */
+H5_DLL herr_t H5AC_start_transaction(hid_t dxpl_id);
 
 /* Virtual entry routines */
 H5_DLL H5AC_proxy_entry_t *H5AC_proxy_entry_create(void);

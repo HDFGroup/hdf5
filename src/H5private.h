@@ -2243,6 +2243,8 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
     if(H5AC_tag(tag_dxpl_id, tag, &prev_tag) < 0)                             \
         HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    if(H5AC_start_transaction(tag_dxpl_id) < 0)                                           \
+        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to set start transaction") \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2574,7 +2576,9 @@ func_init_failed:                                                             \
     haddr_t prv_tag = HADDR_UNDEF;                                               \
     hid_t my_dxpl_id = dxpl;                                                     \
     if(H5AC_tag(my_dxpl_id, tag, &prv_tag) < 0)                                  \
-        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag")
+        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    if(H5AC_start_transaction(my_dxpl_id)<0)                               \
+        HGOTO_ERROR(H5_MY_PKG_ERR, H5E_CANTTAG, err, "unable to set start transaction") 
 
 #define H5_END_TAG(err)                                                          \
     if(H5AC_tag(my_dxpl_id, prv_tag, NULL) <0)                                   \

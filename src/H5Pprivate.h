@@ -205,5 +205,11 @@ H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
 H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, const struct H5T_t *type,
     void *value, hid_t dxpl_id);
 
+/* Private DXPL routines */
+H5_DLL herr_t H5P_set_is_api_call_start(H5P_genplist_t *dxpl, hbool_t is_api_call_start);
+H5_DLL herr_t H5P_get_is_api_call_start(H5P_genplist_t *dxpl, hbool_t *is_api_call_start);
+H5_DLL herr_t H5P_set_api_call_start_time(H5P_genplist_t *dxpl);
+H5_DLL herr_t H5P_get_api_call_start_time(H5P_genplist_t *dxpl, uint64_t *api_call_start_time);
+
 #endif /* _H5Pprivate_H */
 

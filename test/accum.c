@@ -1950,9 +1950,9 @@ test_swmr_write_big(hbool_t newest_format)
         HDperror("fork");
         FAIL_STACK_ERROR;
     } else if(0 == pid) { /* Child process */
-	    /* Run the reader */
-	    status = HDexecv(SWMR_READER, new_argv);
-	    printf("errno from execv = %s\n", strerror(errno));
+        /* Run the reader */
+        status = HDexecv(SWMR_READER, new_argv);
+        printf("errno from execv = %s\n", strerror(errno));
         FAIL_STACK_ERROR;
     } /* end if */
 

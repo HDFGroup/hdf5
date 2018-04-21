@@ -4162,23 +4162,23 @@ protect_entry(H5F_t * file_ptr, int32_t type, int32_t idx)
              * again.
              *                              - JRM
              */
-            HDfprintf(stdout, "( cache_entry_ptr != (void *)entry_ptr ) = %d\n",
-                      (int)( cache_entry_ptr != (void *)entry_ptr ));
-            HDfprintf(stdout, "cache_entry_ptr = 0x%lx, entry_ptr = 0x%lx\n",
-                      (long)cache_entry_ptr, (long)entry_ptr);
-            HDfprintf(stdout, "entry_ptr->header.is_protected = %d\n",
-                      (int)(entry_ptr->header.is_protected));
+            HDfprintf(stdout, "( cache_entry_ptr != (void *)entry_ptr ) = %t\n",
+                      (hbool_t)( cache_entry_ptr != (void *)entry_ptr ));
+            HDfprintf(stdout, "cache_entry_ptr = %p, entry_ptr = %p\n",
+                      cache_entry_ptr, entry_ptr);
+            HDfprintf(stdout, "entry_ptr->header.is_protected = %t\n",
+                      entry_ptr->header.is_protected);
             HDfprintf(stdout,
-                      "( entry_ptr->header.type != types[type] ) = %d\n",
-                      (int)( entry_ptr->header.type != types[type] ));
+                      "( entry_ptr->header.type != types[type] ) = %t\n",
+                      (hbool_t)( entry_ptr->header.type != types[type] ));
             HDfprintf(stdout,
-                      "entry_ptr->size = %d, entry_ptr->header.size = %d\n",
-                      (int)(entry_ptr->size), (int)(entry_ptr->header.size));
+                      "entry_ptr->size = %zu, entry_ptr->header.size = %zu\n",
+                      entry_ptr->size, entry_ptr->header.size);
             HDfprintf(stdout,
-                      "entry_ptr->addr = %d, entry_ptr->header.addr = %d\n",
-                      (int)(entry_ptr->addr), (int)(entry_ptr->header.addr));
+                      "entry_ptr->addr = %a, entry_ptr->header.addr = %a\n",
+                      entry_ptr->addr, entry_ptr->header.addr);
             HDfprintf(stdout, 
-                    "entry_ptr->verify_ct = %d, entry_ptr->max_verify_ct = %d\n",
+                    "entry_ptr->verify_ct = %u, entry_ptr->max_verify_ct = %u\n",
                     entry_ptr->verify_ct, entry_ptr->max_verify_ct);
             H5Eprint2(H5E_DEFAULT, stdout);
 #endif

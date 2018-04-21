@@ -1355,6 +1355,9 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
             if(H5O_msg_create(&ext_loc, H5O_FSINFO_ID, H5O_MSG_FLAG_DONTSHARE | H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &fsinfo, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message")
 	} /* end if */
+
+        // FULLSWMR TODO
+        // Write swmr deltat value
     } /* end if */
     else {
         /* Check for creating an "old-style" driver info block */
