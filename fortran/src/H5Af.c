@@ -143,7 +143,8 @@ h5aget_num_attrs_c (hid_t_f *obj_id, int_f *attr_num)
     /*
      * Call H5Oget_info function.
      */
-    if(H5Oget_info((hid_t)*obj_id, &oinfo) < 0)
+    /* TO DO: See H5Opublic.h: #define H5O_INFO_NUM_ATTRS      0x0002u  Fill in the num_attrs field */         
+    if(H5Oget_info2((hid_t)*obj_id, &oinfo, (unsigned)2) < 0)
         HGOTO_DONE(FAIL);
 
     /* Set number of attributes */

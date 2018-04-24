@@ -180,7 +180,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_
         H5O_info_t  oinfo;
 
         /* Stat the object */
-        if(H5Oget_info_by_name(group, name, &oinfo, H5P_DEFAULT) < 0) {
+        if(H5Oget_info_by_name2(group, name, &oinfo, 0, H5P_DEFAULT) < 0) {
             error_msg("unable to get object information for \"%s\"\n", name);
             h5tools_setstatus(EXIT_FAILURE);
             ret = FAIL;
@@ -881,7 +881,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
         obj_t  *found_obj;    /* Found object */
 
         /* detect a shared datatype, output only once */
-        H5Oget_info(type, &oinfo);
+        H5Oget_info2(type, &oinfo, 0);
         found_obj = search_obj(type_table, oinfo.addr);
 
         if(found_obj) {
@@ -1534,7 +1534,7 @@ xml_dump_datatype(hid_t type)
         obj_t  *found_obj;    /* Found object */
 
         /* Datatype is a shared or named datatype */
-        H5Oget_info(type, &oinfo);
+        H5Oget_info2(type, &oinfo, 0);
         found_obj = search_obj(type_table, oinfo.addr);
 
         if(found_obj) {
@@ -2362,7 +2362,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
         /* Check uniqueness of named datatype */
-        H5Oget_info(type, &oinfo);
+        H5Oget_info2(type, &oinfo, 0);
         if(oinfo.rc > 1) {
             obj_t       *found_obj;     /* Found object */
 
@@ -2548,7 +2548,7 @@ xml_dump_group(hid_t gid, const char *name)
         }
     }
 
-    H5Oget_info(gid, &oinfo);
+    H5Oget_info2(gid, &oinfo, 0);
 
     if(oinfo.rc > 1) {
         obj_t *found_obj;    /* Found object */

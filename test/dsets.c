@@ -10719,9 +10719,9 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_EARRAY_HDR_FD, &info, 0, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_EARRAY_HDR_FD, &info, 0, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -10839,9 +10839,9 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name(fid, DSET_FARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_FARRAY_HDR_FD, &info, 0, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name(fid, DSET_FARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_FARRAY_HDR_FD, &info, 0, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -10959,9 +10959,9 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name(fid, DSET_BT2_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_BT2_HDR_FD, &info, 0, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name(fid, DSET_BT2_HDR_FD, &info, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name2(fid, DSET_BT2_HDR_FD, &info, 0, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -12680,7 +12680,7 @@ dls_01_read_stuff( hid_t fid ) {
     did = H5Dopen2( fid, DLS_01_DATASET, H5P_DEFAULT );
     if ( did <= 0 ) TEST_ERROR
 
-    status = H5Oget_info( did, &info );
+    status = H5Oget_info2( did, &info, 0 );
     if ( status != 0 ) TEST_ERROR
 
     status = H5Dclose( did );

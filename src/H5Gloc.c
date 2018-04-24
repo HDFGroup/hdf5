@@ -76,7 +76,7 @@ typedef struct {
 /* User data for getting an object's info in a group */
 typedef struct {
     /* downward */
-    hbool_t want_ih_info;       /* Whether to retrieve the index & heap info */
+    unsigned fields;            /* which fields in H5O_info_t struct to fill in */
 
     /* upward */
     H5O_info_t  *oinfo;         /* Object information to retrieve */
@@ -684,7 +684,7 @@ H5G_loc_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUS
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
     /* Query object information */
-    if(H5O_get_info(obj_loc->oloc, udata->want_ih_info, udata->oinfo) < 0)
+    if(H5O_get_info(obj_loc->oloc, udata->oinfo, udata->fields) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object info")
 
 done:
@@ -710,7 +710,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_info(const H5G_loc_t *loc, const char *name, hbool_t want_ih_info, H5O_info_t *oinfo/*out*/)
+H5G_loc_info(const H5G_loc_t *loc, const char *name, H5O_info_t *oinfo/*out*/, unsigned fields)
 {
     H5G_loc_info_t udata;               /* User data for traversal callback */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -723,7 +723,7 @@ H5G_loc_info(const H5G_loc_t *loc, const char *name, hbool_t want_ih_info, H5O_i
     HDassert(oinfo);
 
     /* Set up user data for locating object */
-    udata.want_ih_info = want_ih_info;
+    udata.fields = fields;
     udata.oinfo = oinfo;
 
     /* Traverse group hierarchy to locate object */

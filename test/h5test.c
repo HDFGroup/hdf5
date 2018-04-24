@@ -1694,8 +1694,8 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
             continue;
         } /* end if */
 
-        if(H5Ovisit(file, H5_INDEX_NAME, H5_ITER_NATIVE,
-                h5_verify_cached_stabs_cb, NULL) < 0)
+        if(H5Ovisit2(file, H5_INDEX_NAME, H5_ITER_NATIVE,
+                h5_verify_cached_stabs_cb, NULL, 0) < 0)
             goto error;
 
         if(H5Fclose(file) < 0)

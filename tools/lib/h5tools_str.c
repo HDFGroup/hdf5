@@ -1120,7 +1120,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             const char *path;
 
                             obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, vp);
-                            H5Oget_info(obj, &oi);
+                            H5Oget_info2(obj, &oi, 0);
 
                             /* Print object type and close object */
                             switch(oi.type) {

@@ -1,4 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -1482,7 +1483,7 @@ main(int argc, const char *argv[])
         }
 
         /* Get object info for root group */
-        if(H5Oget_info_by_name(fid, "/", &oi, H5P_DEFAULT) < 0) {
+        if(H5Oget_info_by_name2(fid, "/", &oi, 0, H5P_DEFAULT) < 0) {
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
