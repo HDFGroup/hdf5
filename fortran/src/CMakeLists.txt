@@ -33,7 +33,7 @@ if (HAVE_FLOAT128)
 endif ()
 
 configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5config_f.inc.cmake ${HDF5_F90_BINARY_DIR}/H5config_f.inc @ONLY)
-configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5fort_type_defines.h.in ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h @ONLY)
+configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5fort_type_defines.h.cmake ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h @ONLY)
 
 set (Fortran_COMPILER_ID CMAKE_Fortran_COMPILER_ID)
 

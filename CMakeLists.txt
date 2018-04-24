@@ -834,6 +834,9 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
         message (STATUS " **** Allowing unsupported Parallel and C++ options **** ")
       endif ()
     endif ()
+
+    include (${HDF_RESOURCES_EXT_DIR}/HDFUseCXX.cmake)
+
     if (CMAKE_NO_STD_NAMESPACE)
       set (H5_NO_STD 1)
     endif ()
@@ -852,7 +855,7 @@ endif ()
 # being built then configure should fail due to bug HDFFV-889.
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB)
-  if (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
+  if (NOT H5_FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
     message (FATAL_ERROR " **** Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use HDF5_BUILD_HL_LIB:BOOL=OFF **** ")
   endif ()
 endif ()
