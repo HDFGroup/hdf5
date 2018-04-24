@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT ( HDF5_JAVA_SRC C Java )
+project (HDF5_JAVA_SRC C)
 
 #-----------------------------------------------------------------------------
 # Traverse source subdirectory

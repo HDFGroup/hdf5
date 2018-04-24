@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_SRC C CXX)
+project (HDF5_SRC C)
 
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below
@@ -858,6 +858,7 @@ endif ()
 # specific type checks inside
 #-----------------------------------------------------------------------------
 add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
+target_include_directories(H5detect PRIVATE ${HDF5_BINARY_DIR})
 TARGET_C_PROPERTIES (H5detect STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
@@ -874,6 +875,7 @@ add_custom_command (
 )
 
 add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
+target_include_directories(H5make_libsettings PRIVATE ${HDF5_BINARY_DIR})
 TARGET_C_PROPERTIES (H5make_libsettings STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
@@ -896,6 +898,7 @@ add_custom_command (
 set (gen_SRCS ${HDF5_BINARY_DIR}/H5Tinit.c ${HDF5_BINARY_DIR}/H5lib_settings.c)
 
 add_library (${HDF5_LIB_TARGET} STATIC ${common_SRCS} ${gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
+target_include_directories(${HDF5_LIB_TARGET} PUBLIC "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_LIB_TARGET} PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS})
 if (NOT WIN32)
@@ -905,14 +908,16 @@ set_global_variable (HDF5_LIBRARIES_TO_EXPORT ${HDF5_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} STATIC 0)
 set_target_properties (${HDF5_LIB_TARGET} PROPERTIES
     FOLDER libraries
-    INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+    INTERFACE_INCLUDE_DIRECTORIES $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>
 )
 
+## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
+#all_packages="AC,B2,CX,D,F,HL,I,O,S,ST,T,Z"
 option (HDF5_ENABLE_DEBUG_APIS "Turn on extra debug output in all packages" OFF)
 if (HDF5_ENABLE_DEBUG_APIS)
   set_target_properties (${HDF5_LIB_TARGET} PROPERTIES
       COMPILE_DEFINITIONS
-          "H5Z_DEBUG;H5T_DEBUG;H5ST_DEBUG;H5S_DEBUG;H5O_DEBUG;H5I_DEBUG;H5HL_DEBUG;H5F_DEBUG;H5D_DEBUG;H5B2_DEBUG;H5AC_DEBUG"
+          "H5Z_DEBUG;H5T_DEBUG;H5ST_DEBUG;H5S_DEBUG;H5O_DEBUG;H5I_DEBUG;H5HL_DEBUG;H5F_DEBUG;H5D_DEBUG;H5CX_DEBUG;H5B2_DEBUG;H5AC_DEBUG"
   )
 endif ()
 set (install_targets ${HDF5_LIB_TARGET})
@@ -935,6 +940,7 @@ if (BUILD_SHARED_LIBS)
   )
   set (shared_gen_SRCS ${HDF5_BINARY_DIR}/shared/H5Tinit.c ${HDF5_BINARY_DIR}/shared/H5lib_settings.c)
   add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
+  target_include_directories(${HDF5_LIBSH_TARGET} PUBLIC "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (${HDF5_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_LIBSH_TARGET} PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS})
   if (NOT WIN32)
@@ -973,6 +979,7 @@ if (NOT HDF5_INSTALL_NO_DEVELOPMENT)
       FILES
           ${H5_PUBLIC_HEADERS}
           ${H5_GENERATED_HEADERS}
+          ${HDF5_BINARY_DIR}/H5pubconf.h
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT

@@ -1,5 +1,18 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_CPP_SRC)
+project (HDF5_CPP_SRC CXX)
+
+#-----------------------------------------------------------------------------
+# Parallel/MPI, prevent spurious cpp/cxx warnings
+#-----------------------------------------------------------------------------
+if (H5_HAVE_PARALLEL)
+  add_definitions ("-DMPICH_SKIP_MPICXX")
+  add_definitions ("-DMPICH_IGNORE_CXX_SEEK")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Apply Definitions to compiler in this directory and below
+#-----------------------------------------------------------------------------
+add_definitions (${HDF_EXTRA_C_FLAGS})
 
 #-----------------------------------------------------------------------------
 # Generate configure file
@@ -83,6 +96,7 @@ set (CPP_HDRS
 )
 
 add_library (${HDF5_CPP_LIB_TARGET} STATIC ${CPP_SOURCES} ${CPP_HDRS})
+set_property(TARGET ${HDF5_CPP_LIB_TARGET} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (${HDF5_CPP_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_CPP_LIB_TARGET} PUBLIC ${HDF5_LIB_TARGET})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIB_TARGET}")
@@ -95,6 +109,7 @@ set (install_targets ${HDF5_CPP_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_CPP_LIBSH_TARGET} SHARED ${CPP_SOURCES} ${CPP_HDRS})
+  set_property(TARGET ${HDF5_CPP_LIBSH_TARGET} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (${HDF5_CPP_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_CPP_LIBSH_TARGET} PUBLIC ${HDF5_LIBSH_TARGET})
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIBSH_TARGET}")
