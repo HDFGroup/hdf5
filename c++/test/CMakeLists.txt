@@ -51,6 +51,7 @@ set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
 add_executable (cpp_testhdf5 ${CPP_TEST_SOURCES} )
+set_property(TARGET cpp_testhdf5 APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR}")
 TARGET_C_PROPERTIES (cpp_testhdf5 STATIC " " " ")
 target_link_libraries (cpp_testhdf5
     ${HDF5_CPP_LIB_TARGET}

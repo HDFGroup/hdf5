@@ -14,14 +14,12 @@ project (HDF5_HL_TEST C)
 set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file (${HDF5_HL_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
-include_directories (${CMAKE_CURRENT_BINARY_DIR})
-include_directories (${HDF5_TEST_SRC_DIR})
-
 # --------------------------------------------------------------------
 #  Macro used to add a unit test
 # --------------------------------------------------------------------
 MACRO (HL_ADD_EXE hl_name)
   add_executable (hl_${hl_name} ${hl_name}.c)
+  set_property(TARGET hl_${hl_name} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (hl_${hl_name} STATIC " " " ")
   target_link_libraries (hl_${hl_name}
       ${HDF5_HL_LIB_TARGET}
@@ -33,6 +31,7 @@ ENDMACRO ()
 
 MACRO (HL_ADD_SHEXE hl_name)
   add_executable (hl_${hl_name} ${hl_name}.c)
+  set_property(TARGET hl_${hl_name} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (hl_${hl_name} SHARED " " " ")
   target_link_libraries (hl_${hl_name}
       ${HDF5_HL_LIBSH_TARGET}
@@ -53,6 +52,7 @@ HL_ADD_EXE (test_dset_append)
 
 # test_packet has two source files
 add_executable (hl_test_packet test_packet.c test_packet_vlen.c)
+set_property(TARGET hl_test_packet APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (hl_test_packet STATIC " " " ")
 target_link_libraries (hl_test_packet
     ${HDF5_HL_LIB_TARGET}
@@ -67,6 +67,7 @@ set_target_properties (hl_test_packet PROPERTIES FOLDER test/hl)
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS)
   add_executable (hl_gen_test_ds gen_test_ds.c)
+  set_property(TARGET hl_gen_test_ds APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (hl_gen_test_ds STATIC " " " ")
   target_link_libraries (hl_gen_test_ds
       ${HDF5_HL_LIB_TARGET}
@@ -76,6 +77,7 @@ if (HDF5_BUILD_GENERATORS)
   set_target_properties (hl_gen_test_ds PROPERTIES FOLDER test/hl/gen)
 
   add_executable (hl_gen_test_ld gen_test_ld.c)
+  set_property(TARGET hl_gen_test_ld APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (hl_gen_test_ld STATIC " " " ")
   target_link_libraries (hl_gen_test_ld
       ${HDF5_HL_LIB_TARGET}

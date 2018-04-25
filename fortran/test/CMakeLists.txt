@@ -2,11 +2,6 @@ cmake_minimum_required (VERSION 3.10)
 project (HDF5_FORTRAN_TESTS C Fortran)
 
 #-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_FORTRAN_TESTS_SOURCE_DIR} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
-
-#-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
 # H5_test_buildiface.F90         used to generate various KIND test interfaces
 #-----------------------------------------------------------------------------
@@ -14,7 +9,7 @@ INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_FORTRAN_TESTS_SOUR
 add_executable (H5_test_buildiface
       ${HDF5_F90_SRC_DIR}/test/H5_test_buildiface.F90
   )
-
+target_include_directories(H5_test_buildiface PRIVATE ${HDF5_BINARY_DIR} ${HDF5_F90_BINARY_DIR})
 if (WIN32 AND MSVC)
   if (BUILD_SHARED_LIBS)
     set_target_properties (H5_test_buildiface
@@ -44,7 +39,7 @@ set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF_CFG_BUILD_TYPE
 #-----------------------------------------------------------------------------
 add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c)
 set_source_files_properties (t.c PROPERTIES LANGUAGE C)
-target_include_directories(${HDF5_F90_C_TEST_LIB_TARGET} PUBLIC ${HDF5_F90_BINARY_DIR}/static)
+set_property(TARGET ${HDF5_F90_C_TEST_LIB_TARGET} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
 TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_F90_C_LIB_TARGET}
@@ -58,7 +53,7 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
 )
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c)
-  target_include_directories(${HDF5_F90_C_TEST_LIBSH_TARGET} PUBLIC ${HDF5_F90_BINARY_DIR}/shared)
+  set_property(TARGET ${HDF5_F90_C_TEST_LIBSH_TARGET} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
   TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_F90_C_TEST_LIBSH_TARGET}
       ${HDF5_F90_C_LIBSH_TARGET}
@@ -128,6 +123,7 @@ target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
 )
 H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_TEST_LIB_NAME} STATIC 0)
 target_include_directories (${HDF5_F90_TEST_LIB_TARGET} PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
 set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test/fortran
     LINKER_LANGUAGE Fortran
@@ -155,6 +151,7 @@ if (BUILD_SHARED_LIBS)
   )
   H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_TEST_LIB_NAME} SHARED "F")
   target_include_directories (${HDF5_F90_TEST_LIBSH_TARGET} PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
   set_target_properties (${HDF5_F90_TEST_LIBSH_TARGET} PROPERTIES
       FOLDER libraries/test/fortran
       LINKER_LANGUAGE Fortran
@@ -203,6 +200,7 @@ if (WIN32 AND MSVC)
   target_link_libraries (testhdf5_fortran "ws2_32.lib")
 endif ()
 target_include_directories (testhdf5_fortran PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+set_property(TARGET testhdf5_fortran APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
 set_target_properties (testhdf5_fortran PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
@@ -238,6 +236,7 @@ if (BUILD_SHARED_LIBS)
     target_link_libraries (testhdf5_fortran-shared "ws2_32.lib")
   endif ()
   target_include_directories (testhdf5_fortran-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  set_property(TARGET testhdf5_fortran-shared APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
   set_target_properties (testhdf5_fortran-shared PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER test/fortran
@@ -265,6 +264,7 @@ if (WIN32 AND MSVC)
   target_link_libraries (testhdf5_fortran_1_8 "ws2_32.lib")
 endif ()
 target_include_directories (testhdf5_fortran_1_8 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+set_property(TARGET testhdf5_fortran_1_8 APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
 set_target_properties (testhdf5_fortran_1_8 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
@@ -291,6 +291,7 @@ if (BUILD_SHARED_LIBS)
     target_link_libraries (testhdf5_fortran_1_8-shared "ws2_32.lib")
   endif ()
   target_include_directories (testhdf5_fortran_1_8-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  set_property(TARGET testhdf5_fortran_1_8-shared APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
   set_target_properties (testhdf5_fortran_1_8-shared PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER test/fortran
@@ -320,6 +321,7 @@ if (WIN32 AND MSVC)
   target_link_libraries (fortranlib_test_F03 "ws2_32.lib")
 endif ()
 target_include_directories (fortranlib_test_F03 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+set_property(TARGET fortranlib_test_F03 APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
 set_target_properties (fortranlib_test_F03 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
@@ -349,6 +351,7 @@ if (BUILD_SHARED_LIBS)
   endif ()
 
   target_include_directories (fortranlib_test_F03-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  set_property(TARGET fortranlib_test_F03-shared APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
   set_target_properties (fortranlib_test_F03-shared PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran

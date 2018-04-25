@@ -1,14 +1,6 @@
 cmake_minimum_required (VERSION 3.10)
 project (HDF5_HL_F90_EXAMPLES C Fortran)
 
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (
-    ${HDF5_F90_BINARY_DIR}
-    ${HDF5_F90_SRC_DIR}/src
-)
-
 set (examples
     exlite
     ex_ds1
@@ -23,6 +15,7 @@ foreach (example ${examples})
       ${HDF5_LIB_TARGET}
   )
   target_include_directories (hl_f90_ex_${example} PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  set_property(TARGET hl_f90_ex_${example} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_F90_BINARY_DIR};${HDF5_F90_SRC_DIR}/src")
   set_target_properties (hl_f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
   set_target_properties (hl_f90_ex_${example} PROPERTIES FOLDER examples/hl/fortran)
 

@@ -1,11 +1,6 @@
 cmake_minimum_required (VERSION 3.10)
 project (HDF5_TOOLS_TEST C)
 
-#-----------------------------------------------------------------------------
-# Apply Definitions to compiler in this directory and below
-#-----------------------------------------------------------------------------
-add_definitions (${HDF_EXTRA_C_FLAGS})
-
 #-- Add the h5diff tests
 add_subdirectory (h5diff)
 

@@ -1,11 +1,9 @@
 cmake_minimum_required (VERSION 3.10)
 project (HDF5_HL C)
 
-
 #-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_HL_SOURCE_DIR}/src )
 
 add_subdirectory (src)
 

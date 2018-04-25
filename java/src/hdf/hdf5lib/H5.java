@@ -4138,7 +4138,6 @@ public class H5 implements java.io.Serializable {
     //        H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     //        void *buf/*out*/, size_t size, hid_t lapl_id);
 
-
     // ////////////////////////////////////////////////////////////
     // //
     // H5MM: Memory Management Interface API Functions //
