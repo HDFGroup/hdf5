@@ -19,9 +19,9 @@ configure_file (${HDF5_HL_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ON
 # --------------------------------------------------------------------
 MACRO (HL_ADD_EXE hl_name)
   add_executable (hl_${hl_name} ${hl_name}.c)
-  set_property(TARGET hl_${hl_name} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-  TARGET_C_PROPERTIES (hl_${hl_name} STATIC " " " ")
-  target_link_libraries (hl_${hl_name}
+  target_include_directories(hl_${hl_name} PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+  TARGET_C_PROPERTIES (hl_${hl_name} STATIC)
+  target_link_libraries (hl_${hl_name} PRIVATE
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_TEST_LIB_TARGET}
       ${HDF5_LIB_TARGET}
@@ -31,9 +31,9 @@ ENDMACRO ()
 
 MACRO (HL_ADD_SHEXE hl_name)
   add_executable (hl_${hl_name} ${hl_name}.c)
-  set_property(TARGET hl_${hl_name} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-  TARGET_C_PROPERTIES (hl_${hl_name} SHARED " " " ")
-  target_link_libraries (hl_${hl_name}
+  target_include_directories(hl_${hl_name} PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+  TARGET_C_PROPERTIES (hl_${hl_name} SHARED)
+  target_link_libraries (hl_${hl_name} PRIVATE
       ${HDF5_HL_LIBSH_TARGET}
       ${HDF5_TEST_LIBSH_TARGET}
       ${HDF5_LIBSH_TARGET}
@@ -52,9 +52,9 @@ HL_ADD_EXE (test_dset_append)
 
 # test_packet has two source files
 add_executable (hl_test_packet test_packet.c test_packet_vlen.c)
-set_property(TARGET hl_test_packet APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-TARGET_C_PROPERTIES (hl_test_packet STATIC " " " ")
-target_link_libraries (hl_test_packet
+target_include_directories(hl_test_packet PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+TARGET_C_PROPERTIES (hl_test_packet STATIC)
+target_link_libraries (hl_test_packet PRIVATE
     ${HDF5_HL_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
     ${HDF5_LIB_TARGET}
@@ -67,9 +67,9 @@ set_target_properties (hl_test_packet PROPERTIES FOLDER test/hl)
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS)
   add_executable (hl_gen_test_ds gen_test_ds.c)
-  set_property(TARGET hl_gen_test_ds APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-  TARGET_C_PROPERTIES (hl_gen_test_ds STATIC " " " ")
-  target_link_libraries (hl_gen_test_ds
+  target_include_directories(hl_gen_test_ds PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+  TARGET_C_PROPERTIES (hl_gen_test_ds STATIC)
+  target_link_libraries (hl_gen_test_ds PRIVATE
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_TEST_LIB_TARGET}
       ${HDF5_LIB_TARGET}
@@ -77,9 +77,9 @@ if (HDF5_BUILD_GENERATORS)
   set_target_properties (hl_gen_test_ds PROPERTIES FOLDER test/hl/gen)
 
   add_executable (hl_gen_test_ld gen_test_ld.c)
-  set_property(TARGET hl_gen_test_ld APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
-  TARGET_C_PROPERTIES (hl_gen_test_ld STATIC " " " ")
-  target_link_libraries (hl_gen_test_ld
+  target_include_directories(hl_gen_test_ld PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+  TARGET_C_PROPERTIES (hl_gen_test_ld STATIC)
+  target_link_libraries (hl_gen_test_ld PRIVATE
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_TEST_LIB_TARGET}
       ${HDF5_LIB_TARGET}
