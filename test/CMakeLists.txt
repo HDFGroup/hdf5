@@ -20,12 +20,14 @@ set (TEST_LIB_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/testframe.c
     ${HDF5_TEST_SOURCE_DIR}/cache_common.c
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
+    ${HDF5_TEST_SOURCE_DIR}/swmr_cache_common.c
 )
 
 set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/h5test.h
     ${HDF5_TEST_SOURCE_DIR}/cache_common.h
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
+    ${HDF5_TEST_SOURCE_DIR}/swmr_cache_common.h
 )
 
 add_library (${HDF5_TEST_LIB_TARGET} STATIC ${TEST_LIB_SOURCES} ${TEST_LIB_HEADERS})
