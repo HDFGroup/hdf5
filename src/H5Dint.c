@@ -53,8 +53,8 @@ static herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
 static herr_t H5D__cache_dataspace_info(const H5D_t *dset);
 static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__build_extfile_prefix(const H5D_t *dset, hid_t dapl_id,
-        char **extfile_prefix);
+static herr_t H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id,
+    const char *prefix_type, char **file_prefix);
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
         hsize_t old_dim[]);
@@ -510,12 +510,8 @@ done:
  * Purpose:  Copy a datatype for a dataset's use, performing all the
  *              necessary adjustments, etc.
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
- *
- * Programmer:	Quincey Koziol
- *		Thursday, June 24, 2004
- *
+ * Return:   Success:    SUCCEED
+ *           Failure:    FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -860,7 +856,7 @@ done:
 
 
 /*--------------------------------------------------------------------------
- * Function:    H5D__build_extfile_prefix
+ * Function:    H5D__build_file_prefix
  *
  * Purpose:     Determine the file prefix to be used and store
  *              it in file_prefix. Stores an empty string if no prefix
@@ -870,7 +866,8 @@ done:
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5D__build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix /*out*/)
+H5D__build_file_prefix(const H5D_t *dset, hid_t dapl_id, const char *prefix_type,
+    char **file_prefix /*out*/)
 {
     char            *prefix = NULL;       /* prefix used to look for the file               */
     char            *filepath = NULL;     /* absolute path of directory the HDF5 file is in */
@@ -891,7 +888,7 @@ H5D__build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefi
     /* XXX: Future thread-safety note - getenv is not required
      *      to be reentrant.
      */
-    if (HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0)
+    if(HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0)
         prefix = HDgetenv("HDF5_VDS_PREFIX");
     else if (HDstrcmp(prefix_type, H5D_ACS_EFILE_PREFIX_NAME) == 0)
         prefix = HDgetenv("HDF5_EXTFILE_PREFIX");
@@ -935,7 +932,7 @@ H5D__build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefi
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__build_extfile_prefix() */
+} /* H5D__build_file_prefix() */
 
 
 /*-------------------------------------------------------------------------
@@ -1108,12 +1105,12 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set up flush append property")
 
     /* Set the external file prefix */
-    if(H5D__build_extfile_prefix(new_dset, dapl_id, &new_dset->shared->extfile_prefix) < 0)
+    if(H5D__build_file_prefix(new_dset, dapl_id, H5D_ACS_EFILE_PREFIX_NAME, &new_dset->shared->extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
 
-    /* Set the vds file prefix */
-    if(H5D_build_file_prefix(new_dset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &new_dset->shared->vds_prefix) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize vds  prefix")
+    /* Set the VDS file prefix */
+    if(H5D__build_file_prefix(new_dset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &new_dset->shared->vds_prefix) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize VDS prefix")
 
     /* Add the dataset to the list of opened objects in the file */
     if(H5FO_top_incr(new_dset->oloc.file, new_dset->oloc.addr) < 0)
@@ -1267,12 +1264,12 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy path")
 
     /* Get the external file prefix */
-    if(H5D__build_extfile_prefix(dataset, dapl_id, &extfile_prefix) < 0)
+    if(H5D__build_file_prefix(dataset, dapl_id, H5D_ACS_EFILE_PREFIX_NAME, &extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
 
-    /* Get the vds prefix */
-    if(H5D_build_file_prefix(dataset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &vds_prefix) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize vds prefix")
+    /* Get the VDS prefix */
+    if(H5D__build_file_prefix(dataset, dapl_id, H5D_ACS_VDS_PREFIX_NAME, &vds_prefix) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize VDS prefix")
 
     /* Check if dataset was already open */
     if(NULL == (shared_fo = (H5D_shared_t *)H5FO_opened(dataset->oloc.file, dataset->oloc.addr))) {
@@ -3173,7 +3170,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5D_get_create_plist(H5D_t *dset)
+H5D_get_create_plist(const H5D_t *dset)
 {
     H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
     H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
@@ -3349,7 +3346,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5D_get_access_plist(H5D_t *dset)
+H5D_get_access_plist(const H5D_t *dset)
 {
     H5P_genplist_t      *old_plist;     /* Default DAPL */
     H5P_genplist_t      *new_plist;     /* New DAPL */

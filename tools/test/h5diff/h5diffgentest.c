@@ -4916,10 +4916,8 @@ static void test_objs_nocomparables(const char *fname1, const char *fname2)
     hid_t topgid1 = -1;
     hid_t topgid2 = -1;
     hid_t gid1 = -1;
-    hid_t did1 = -1;
     hid_t tid1 = -1;
     hid_t gid2 = -1;
-    hid_t did2 = -1;
     hid_t tid2 = -1;
     hsize_t dims[1] = { DIM_ARRY };
     int data1[DIM_ARRY] = { 1, 1, 1 };
@@ -5024,10 +5022,6 @@ out:
         H5Gclose(topgid1);
     if (topgid2)
         H5Gclose(topgid2);
-    if (did1)
-        H5Dclose(did1);
-    if (did2)
-        H5Dclose(did2);
     if (gid1)
         H5Gclose(gid1);
     if (gid2)

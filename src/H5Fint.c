@@ -24,6 +24,7 @@
 #include "H5private.h"         /* Generic Functions */
 #include "H5Aprivate.h"        /* Attributes */
 #include "H5ACprivate.h"       /* Metadata cache */
+#include "H5CXprivate.h"       /* API Contexts */
 #include "H5Dprivate.h"        /* Datasets */
 #include "H5Eprivate.h"        /* Error handling */
 #include "H5Fpkg.h"            /* File access */
@@ -73,6 +74,9 @@ typedef struct H5F_olist_t {
 /********************/
 
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
+static herr_t H5F__build_name(const char *prefix, const char *file_name,
+    char **full_name/*out*/);
+static char *H5F__getenv_prefix_name(char **env_prefix/*in,out*/);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);/* Declare a free list to manage the H5F_t struct */
 static herr_t H5F__flush_phase1(H5F_t *f);
@@ -100,6 +104,7 @@ H5FL_DEFINE(H5F_t);
 H5FL_DEFINE(H5F_file_t);
 
 
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_access_plist
  *
@@ -217,7 +222,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_access_plist() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_obj_count
  *
@@ -245,7 +250,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_obj_count() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_obj_ids
  *
@@ -272,7 +277,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_obj_ids() */
 
-
+
 /*---------------------------------------------------------------------------
  * Function: H5F_get_objects
  *
@@ -374,7 +379,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_objects() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_objects_cb
  *
@@ -483,6 +488,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_objects_cb() */
 
+
 /*--------------------------------------------------------------------------
  * Function: H5F__build_name
  *
@@ -491,7 +497,7 @@ done:
  * Return:   Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
 static herr_t
-H5F__build_name(char *prefix, char *file_name, char **full_name/*out*/)
+H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out*/)
 {
     size_t      prefix_len;             /* length of prefix */
     size_t      fname_len;              /* Length of external link file name */
@@ -504,7 +510,7 @@ H5F__build_name(char *prefix, char *file_name, char **full_name/*out*/)
 
     /* Allocate a buffer to hold the filename + prefix + possibly the delimiter + terminating null byte */
     if(NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 2)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate filename buffer")
 
     /* Compose the full file name */
     HDsnprintf(*full_name, (prefix_len + fname_len + 2), "%s%s%s", prefix,
@@ -514,9 +520,9 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__build_name() */
 
-
+
 /*--------------------------------------------------------------------------
- * Function: H5F__getenv_prefix_name --
+ * Function: H5F__getenv_prefix_name
  *
  * Purpose:  Get the first pathname in the list of pathnames stored in env_prefix,
  *           which is separated by the environment delimiter.
@@ -528,43 +534,49 @@ done:
 static char *
 H5F__getenv_prefix_name(char **env_prefix/*in,out*/)
 {
-    char        *retptr=NULL;
-    char        *strret=NULL;
+    char *strret;               /* Pointer to next separator */
+    char *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
+    /* Set return value now */
+    ret_value = *env_prefix;
+
+    /* Advance to next component, if possible */
     strret = HDstrchr(*env_prefix, H5_COLON_SEPC);
-    if (strret == NULL) {
-        retptr = *env_prefix;
-        *env_prefix = strret;
-    } else {
-        retptr = *env_prefix;
+    if(strret == NULL)
+        *env_prefix = NULL;
+    else {
+        /* Advance to next component */
         *env_prefix = strret + 1;
-        *strret = '\0';
-    }
 
-    FUNC_LEAVE_NOAPI(retptr)
+        /* Terminate current component (pointed to by ret_value) */
+        *strret = '\0';
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__getenv_prefix_name() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_prefix_open_file
  *
  * Purpose:     Attempts to open a dataset file.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      Pointer to an opened file on success / NULL on failure
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_type,
-        const char *file_name, unsigned file_intent, hid_t fapl_id, hid_t dxpl_id)
+H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type,
+    const char *prop_prefix, const char *file_name, unsigned file_intent,
+    hid_t fapl_id)
 {
     H5F_t       *src_file = NULL;       /* Source file */
-    H5F_t       *ret_value = NULL;      /* Actual return value  */
     char        *full_name = NULL;      /* File name with prefix */
-    char        *my_prefix = NULL;      /* Library's copy of the prefix */
     char        *actual_file_name = NULL; /* File's actual name */
     char        *temp_file_name = NULL; /* Temporary pointer to file name */
     size_t      temp_file_name_len;     /* Length of temporary file name */
+    H5F_t       *ret_value = NULL;      /* Return value  */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -576,15 +588,19 @@ H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_typ
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     temp_file_name_len = HDstrlen(temp_file_name);
 
-    /* target file_name is an absolute pathname: see RM for detailed description */
+    /* Target file_name is an absolute pathname: see RM for detailed description */
     if(H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
         /* Try opening file */
-        if(NULL == (src_file = H5F_efc_open(primary_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id))) {
+       src_file = H5F__efc_open(primary_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+
+        /* Adjust temporary file name if file not opened */
+        if(NULL == src_file) {
             char *ptr;
 
+            /* Reset the error stack */
             H5E_clear_stack(NULL);
 
-            /* get last component of file_name */
+            /* Get last component of file_name */
             H5_GET_LAST_DELIMITER(file_name, ptr)
             HDassert(ptr);
 
@@ -598,32 +614,40 @@ H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_typ
     } /* end if */
     else if(H5_CHECK_ABS_DRIVE(file_name)) {
         /* Try opening file */
-        if(NULL == (src_file = H5F_efc_open(primary_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id))) {
+        src_file = H5F__efc_open(primary_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
 
+        /* Adjust temporary file name if file not opened */
+        if(NULL == src_file) {
+            /* Reset the error stack */
             H5E_clear_stack(NULL);
 
-            /* strip "<drive-letter>:" */
+            /* Strip "<drive-letter>:" */
             HDstrncpy(temp_file_name, &file_name[2], temp_file_name_len);
             temp_file_name[temp_file_name_len - 1] = '\0';
         } /* end if */
     } /* end if */
 
-    /* try searching from paths set in the environment variable */
+    /* Try searching from paths set in the environment variable */
     if(src_file == NULL) {
         char *env_prefix;
 
-        if (HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0)
+        /* Get the appropriate environment variable */
+        if(H5F_PREFIX_VDS == prefix_type)
             env_prefix = HDgetenv("HDF5_VDS_PREFIX");
-        else if (HDstrcmp(prefix_type, H5L_ACS_ELINK_PREFIX_NAME) == 0)
+        else if(H5F_PREFIX_ELINK == prefix_type)
             env_prefix = HDgetenv("HDF5_EXT_PREFIX");
         else
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "prefix name is not sensible")
+            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, NULL, "prefix type is not sensible")
+
+        /* If environment variable is defined, iterate through prefixes it defines */
         if(NULL != env_prefix) {
             char *tmp_env_prefix, *saved_env;
 
+            /* Make a copy of the environment variable string */
             if(NULL == (saved_env = tmp_env_prefix = H5MM_strdup(env_prefix)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+            /* Loop over prefixes in environment variable */
             while((tmp_env_prefix) && (*tmp_env_prefix)) {
                 char *out_prefix_name;
 
@@ -634,65 +658,74 @@ H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_typ
                         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
                     } /* end if */
 
-                    src_file = H5F_efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id);
+                    /* Try opening file */
+                    src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+
+                    /* Release copy of file name */
                     full_name = (char *)H5MM_xfree(full_name);
-                    if(src_file != NULL)
+
+                    /* Check for file not opened */
+                    if(NULL == src_file)
+                        /* Reset the error stack */
+                        H5E_clear_stack(NULL);
+                    /* Leave if file was opened */
+                    else
                         break;
-                    H5E_clear_stack(NULL);
                 } /* end if */
             } /* end while */
+
             saved_env = (char *)H5MM_xfree(saved_env);
         } /* end if */
     } /* end if */
 
-    /* try searching from property list */
-    if(src_file == NULL) {
-        ssize_t  size = 0;
-        H5E_BEGIN_TRY {
-            if (HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0)
-                size = H5Pget_virtual_prefix(plist_id, NULL, 0);
-            else if (HDstrcmp(prefix_type, H5L_ACS_ELINK_PREFIX_NAME) == 0)
-                size = H5Pget_elink_prefix(plist_id, NULL, 0);
-        } H5E_END_TRY;
-        if(size <= 0)
-            my_prefix = NULL;
-        else {
-            /* Allocate a buffer to hold the filename + prefix + possibly the delimiter + terminating null byte */
-            if(NULL == (my_prefix = (char *)H5MM_malloc((size_t)size + 1)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate prefix buffer")
-            if (HDstrcmp(prefix_type, H5D_ACS_VDS_PREFIX_NAME) == 0)
-                size = H5Pget_virtual_prefix(plist_id, my_prefix, (size_t)size+1);
-            else if (HDstrcmp(prefix_type, H5L_ACS_ELINK_PREFIX_NAME) == 0)
-                size = H5Pget_elink_prefix(plist_id, my_prefix, (size_t)size+1);
-            if(size < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file prefix")
-            if(my_prefix) {
-                if(H5F__build_name(my_prefix, temp_file_name, &full_name/*out*/) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
-                my_prefix = (char *)H5MM_xfree(my_prefix);
-                if(NULL == (src_file = H5F_efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
-                    H5E_clear_stack(NULL);
-                full_name = (char *)H5MM_xfree(full_name);
-            }
-        }
-    }
+    /* Try searching from property list */
+    if(src_file == NULL && prop_prefix) {
+        /* Construct name to open */
+        if(H5F__build_name(prop_prefix, temp_file_name, &full_name/*out*/) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
 
-    /* try searching from main file's "extpath": see description in H5F_open() & H5_build_extpath() */
+        /* Try opening file */
+        src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+
+        /* Release name */
+        full_name = (char *)H5MM_xfree(full_name);
+
+        /* Check for file not opened */
+        if(NULL == src_file)
+            /* Reset the error stack */
+            H5E_clear_stack(NULL);
+    } /* end if */
+
+    /* Try searching from main file's "extpath": see description in H5F_open() & H5_build_extpath() */
     if(src_file == NULL) {
         char *dspath;
 
         if(NULL != (dspath = H5F_EXTPATH(primary_file))) {
+            /* Construct name to open */
             if(H5F__build_name(dspath, temp_file_name, &full_name/*out*/) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
-            if(NULL == (src_file = H5F_efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
-                H5E_clear_stack(NULL);
+
+            /* Try opening file */
+            src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+
+            /* Release name */
             full_name = (char *)H5MM_xfree(full_name);
+
+            /* Check for file not opened */
+            if(NULL == src_file)
+                /* Reset the error stack */
+                H5E_clear_stack(NULL);
         } /* end if */
     } /* end if */
 
-    /* try the relative file_name stored in temp_file_name */
+    /* Try the relative file_name stored in temp_file_name */
     if(src_file == NULL) {
-        if(NULL == (src_file = H5F_efc_open(primary_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
+        /* Try opening file */
+        src_file = H5F__efc_open(primary_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+
+        /* Check for file not opened */
+        if(NULL == src_file)
+            /* Reset the error stack */
             H5E_clear_stack(NULL);
     } /* end if */
 
@@ -718,19 +751,24 @@ H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_typ
         actual_file_name = (char *)H5MM_xfree(actual_file_name);
 
         /* Try opening with the resolved name */
-        if(NULL == (src_file = H5F_efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file, file name = '%s', temp_file_name = '%s'", file_name, temp_file_name)
+        src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+
+        /* Release name */
         full_name = (char *)H5MM_xfree(full_name);
+
+        /* Check for file not opened */
+        if(NULL == src_file)
+            /* Reset the error stack */
+            H5E_clear_stack(NULL);
     } /* end if */
 
     /* Success */
     ret_value = src_file;
+
 done:
     if((NULL == ret_value) && src_file)
         if(H5F_efc_close(primary_file, src_file) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close source file")
-    if(my_prefix)
-        my_prefix = (char *)H5MM_xfree(my_prefix);
     if(full_name)
         full_name = (char *)H5MM_xfree(full_name);
     if(temp_file_name)
@@ -741,7 +779,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_prefix_open_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__is_hdf5
  *
@@ -782,7 +820,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__is_hdf5() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_new
  *
@@ -1046,7 +1084,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_new() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__dest
  *
@@ -1220,6 +1258,9 @@ H5F__dest(H5F_t *f, hbool_t flush)
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
         /* Shutdown the metadata cache */
+        /* (Flushes any remaining dirty entries, which should only be the
+         *      superblock and / or driver info at this point)
+         */
         if(H5AC_dest(f))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
@@ -1375,7 +1416,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__open() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_open
  *
@@ -1465,11 +1506,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t             set_flag = FALSE;   /*set the status_flags in the superblock */
     hbool_t             clear = FALSE;      /*clear the status_flags         */
     hbool_t             evict_on_close;     /* evict on close value from plist  */
-    H5F_t              *ret_value = NULL;   /*actual return value           */
     char               *lock_env_var = NULL;/*env var pointer               */
     hbool_t             use_file_locking;   /*read from env var             */
-    hbool_t      ci_load = FALSE;       /* whether MDC ci load requested */
-    hbool_t      ci_write = FALSE;      /* whether MDC CI write requested */
+    hbool_t             ci_load = FALSE;    /* whether MDC ci load requested */
+    hbool_t             ci_write = FALSE;   /* whether MDC CI write requested */
+    H5F_t              *ret_value = NULL;   /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1668,7 +1709,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     } /* end if */
     else if (1 == shared->nrefs) {
         /* Read the superblock if it hasn't been read before. */
-        if(H5F__super_read(file, fapl_id, TRUE) < 0)
+        if(H5F__super_read(file, a_plist, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
         /* Create the page buffer before initializing the superblock */
@@ -1797,7 +1838,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_flush_phase1
  *
@@ -1834,7 +1875,7 @@ H5F__flush_phase1(H5F_t *f)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase1() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__flush_phase2
  *
@@ -1858,16 +1899,17 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
-    /* Truncate the file to the current allocated size */
 #ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
         /* Since we just returned from a call to H5AC_flush(), we just 
          * passed through a barrier.  Hence we can skip the barrier on 
-         * entry to the mpio file driver call below.
+         * entry to the mpio file driver truncate call below, and the first
+         * barrier in the following call to flush the cache again.
          */
-        H5FD_mpio_mark_pre_trunc_barrier_unecessary(f->shared->lf);
-    }
+        H5CX_set_mpi_file_flushing(TRUE);
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Truncate the file to the current allocated size */
     if(H5FD_truncate(f->shared->lf, closing) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
@@ -1876,6 +1918,12 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
     if(H5AC_flush(f) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+
+#ifdef H5_HAVE_PARALLEL
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
+        /* Reset the "flushing the file" flag */
+        H5CX_set_mpi_file_flushing(FALSE);
+#endif /* H5_HAVE_PARALLEL */
 
     /* Flush out the metadata accumulator */
     if(H5F__accum_flush(f) < 0)
@@ -1895,7 +1943,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__flush_real
  *
@@ -1905,7 +1953,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__flush_real(H5F_t *f, hbool_t closing)
+H5F__flush_real(H5F_t *f)
 {
     herr_t   ret_value = SUCCEED;       /* Return value */
 
@@ -1920,7 +1968,7 @@ H5F__flush_real(H5F_t *f, hbool_t closing)
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush file data")
 
     /* Second phase of flushing data */
-    if(H5F__flush_phase2(f, closing) < 0)
+    if(H5F__flush_phase2(f, FALSE) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush file data")
 
@@ -1961,17 +2009,16 @@ H5F__flush(H5F_t *f, H5F_scope_t scope)
         if(H5F_flush_mounts(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
     } /* end if */
-    else {
+    else
         /* Call the flush routine, for this file */
-        if(H5F__flush_real(f, FALSE) < 0)
+        if(H5F__flush_real(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
-    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__flush() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__close
  *
@@ -2009,7 +2056,7 @@ H5F__close(hid_t file_id)
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get ID ref count")
         if(nref == 1)
-            if(H5F__flush_real(f, FALSE) < 0)
+            if(H5F__flush_real(f) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -2080,7 +2127,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F__close_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_try_close
  *
@@ -2254,7 +2301,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_try_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_get_id
  *
@@ -2290,7 +2337,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_id() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_incr_nopen_objs
  *
@@ -2311,7 +2358,7 @@ H5F_incr_nopen_objs(H5F_t *f)
     FUNC_LEAVE_NOAPI(++f->nopen_objs)
 } /* end H5F_incr_nopen_objs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_decr_nopen_objs
  *
@@ -2332,7 +2379,7 @@ H5F_decr_nopen_objs(H5F_t *f)
     FUNC_LEAVE_NOAPI(--f->nopen_objs)
 } /* end H5F_decr_nopen_objs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_build_actual_name
  *
@@ -2454,7 +2501,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_build_actual_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_encode_len
  *
@@ -2491,7 +2538,7 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp/*in,out*/, haddr_t addr)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_encode_len() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_encode
  *
@@ -2515,7 +2562,7 @@ H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_encode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_decode_len
  *
@@ -2579,7 +2626,7 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp/*in,out*/, haddr_t *addr
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_decode_len() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_addr_decode
  *
@@ -2606,7 +2653,7 @@ H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*o
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_decode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_grp_btree_shared
  *
@@ -2632,7 +2679,7 @@ H5F_set_grp_btree_shared(H5F_t *f, H5UC_t *rc)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_grp_btree_shared() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_sohm_addr
  *
@@ -2657,7 +2704,7 @@ H5F_set_sohm_addr(H5F_t *f, haddr_t addr)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_sohm_addr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_sohm_vers
  *
@@ -2682,7 +2729,7 @@ H5F_set_sohm_vers(H5F_t *f, unsigned vers)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_sohm_vers() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_sohm_nindexes
  *
@@ -2707,7 +2754,7 @@ H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_sohm_nindexes() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_store_msg_crt_idx
  *
@@ -2984,7 +3031,7 @@ done:
     FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* H5F__get_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_track_metadata_read_retries
  *
@@ -3032,7 +3079,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_track_metadata_read_retries() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F_set_retries
  *
@@ -3068,7 +3115,7 @@ H5F_set_retries(H5F_t *f)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_retries() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__get_free_sections
  *
@@ -3131,7 +3178,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_object_flush_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__set_base_addr
  *
@@ -3158,7 +3205,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_base_addr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__set_eoa
  *
@@ -3185,7 +3232,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_eoa() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5F__set_paged_aggr
  *
@@ -3213,6 +3260,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_paged_aggr() */
 
+
 /*-------------------------------------------------------------------------
  * Function: H5F__get_max_eof_eoa
  *
@@ -3251,7 +3299,7 @@ done:
 } /* end H5F__get_max_eof_eoa() */
 
 #ifdef H5_HAVE_PARALLEL
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_coll_md_read
  *
@@ -3457,7 +3505,7 @@ H5F__start_swmr_write(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush superblock extension")
 
     /* Flush data buffers */
-    if(H5F__flush_real(f, FALSE) < 0)
+    if(H5F__flush_real(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush f's cached information")
 
     /* Get the # of opened named datatypes and attributes */

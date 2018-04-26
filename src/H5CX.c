@@ -197,6 +197,7 @@ typedef struct H5CX_t {
     hbool_t coll_metadata_read; /* Whether to use collective I/O for metadata read */
     MPI_Datatype btype;         /* MPI datatype for buffer, when using collective I/O */
     MPI_Datatype ftype;         /* MPI datatype for file, when using collective I/O */
+    hbool_t mpi_file_flushing;  /* Whether an MPI-opened file is being flushed */
 #endif /* H5_HAVE_PARALLEL */
 
     /* Cached DXPL properties */
@@ -1116,6 +1117,32 @@ H5CX_get_mpi_coll_datatypes(MPI_Datatype *btype, MPI_Datatype *ftype)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_mpi_coll_datatypes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_mpi_file_flushing
+ *
+ * Purpose:     Retrieves the "flushing an MPI-opened file" flag for the current API call context.
+ *
+ * Return:      TRUE / FALSE on success / <can't fail>
+ *
+ * Programmer:  Quincey Koziol
+ *              March 17, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5CX_get_mpi_file_flushing(void)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    FUNC_LEAVE_NOAPI((*head)->ctx.mpi_file_flushing)
+} /* end H5CX_get_mpi_file_flushing() */
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -2229,6 +2256,34 @@ H5CX_set_mpio_coll_opt(H5FD_mpio_collective_opt_t mpio_coll_opt)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_mpio_coll_opt() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_mpi_file_flushing
+ *
+ * Purpose:     Sets the "flushing an MPI-opened file" flag for the current API call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Quincey Koziol
+ *              March 170 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_mpi_file_flushing(hbool_t flushing)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    (*head)->ctx.mpi_file_flushing = flushing;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_mpi_file_flushing() */
 #endif /* H5_HAVE_PARALLEL */
 
 

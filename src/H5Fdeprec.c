@@ -198,7 +198,7 @@ H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
         low = H5F_LIBVER_EARLIEST;
 
     /* Call private set_libver_bounds function to set the bounds */
-    if(H5F_set_libver_bounds(f, low, high) < 0)
+    if(H5F__set_libver_bounds(f, low, high) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
 done:

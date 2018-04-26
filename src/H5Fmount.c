@@ -635,7 +635,7 @@ H5F_flush_mounts_recurse(H5F_t *f)
             nerrors++;
 
     /* Call the "real" flush routine, for this file */
-    if(H5F__flush_real(f, FALSE) < 0)
+    if(H5F__flush_real(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
     /* Check flush errors for children - errors are already on the stack */

@@ -37,6 +37,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACpkg.h"		/* Metadata cache			*/
 #include "H5Cprivate.h"		/* Cache                                */
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
 #include "H5MMprivate.h"        /* Memory management                    */
@@ -1414,10 +1415,9 @@ H5AC__propagate_flushed_and_still_clean_entries_list(H5F_t  *f)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't broadcast clean slist.")
         HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
     } /* end if */
-    else {
+    else
         if(H5AC__receive_and_apply_clean_list(f) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't receive and/or process clean slist broadcast.")
-    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1426,7 +1426,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_receive_haddr_list()
+ * Function:    H5AC__receive_haddr_list()
  *
  * Purpose:     Receive the list of entry addresses from process 0,
  *		and return it in a buffer pointed to by *haddr_buf_ptr_ptr.
@@ -1493,7 +1493,7 @@ done:
             haddr_buf_ptr = (haddr_t *)H5MM_xfree((void *)haddr_buf_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_receive_haddr_list() */
+} /* H5AC__receive_haddr_list() */
 
 
 /*-------------------------------------------------------------------------
@@ -1693,9 +1693,14 @@ H5AC__rsp__dist_md_write__flush(H5F_t *f)
         if(H5AC__copy_candidate_list_to_buffer(cache_ptr, &num_entries, &haddr_buf_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate buffer.")
 
-        /* initial sync point barrier */
-        if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
+        /* Initial sync point barrier
+         * 
+         * When flushing from within the close operation from a file,
+         * it's possible to skip this barrier (on the second flush of the cache).
+         */
+        if(!H5CX_get_mpi_file_flushing())
+            if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
 
         /* Enable writes during this operation */
         aux_ptr->write_permitted = TRUE;
@@ -1893,12 +1898,16 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
 
-    /* to prevent "messages from the future" we must 
+    /* To prevent "messages from the future" we must 
      * synchronize all processes before we start the flush.  
      * Hence the following barrier.
+     *
+     * However, when flushing from within the close operation from a file,
+     * it's possible to skip this barrier (on the second flush of the cache).
      */
-    if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
+    if(!H5CX_get_mpi_file_flushing())
+        if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
 
     /* Flush data to disk, from rank 0 process */
     if(aux_ptr->mpi_rank == 0) {
@@ -1918,7 +1927,7 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
 
         /* this code exists primarily for the test bed -- it allows us to
-         * enforce posix semantics on the server that pretends to be a 
+         * enforce POSIX semantics on the server that pretends to be a 
          * file system in our parallel tests.
          */
         if(aux_ptr->write_done)

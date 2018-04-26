@@ -7058,7 +7058,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 
         if(!new_format) {
             /* Need to take up this space so that the free-space manager will go away */
-            if(HADDR_UNDEF == (addrx = H5MF_alloc(f, type, H5AC_ind_read_dxpl_id, (hsize_t)103)))
+            if(HADDR_UNDEF == (addrx = H5MF_alloc(f, type, (hsize_t)103)))
                 FAIL_STACK_ERROR
         }
 

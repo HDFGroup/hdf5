@@ -1637,7 +1637,6 @@ typedef struct H5C_cache_entry_t {
     /* FULLSWMR children pointers*/
     struct H5C_cache_entry_t ** flush_dep_children;
     unsigned                    flush_dep_children_nalloc;
-
     unsigned                    flush_dep_nchildren;
     unsigned                    flush_dep_ndirty_children;
     unsigned                    flush_dep_nunser_children;

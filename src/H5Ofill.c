@@ -21,15 +21,15 @@
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Sprivate.h"		/* Dataspaces				*/
+#include "H5private.h"      /* Generic Functions    */
+#include "H5Dprivate.h"     /* Datasets	            */
+#include "H5Eprivate.h"     /* Error handling       */
+#include "H5FLprivate.h"    /* Free Lists           */
+#include "H5Iprivate.h"     /* IDs                  */
+#include "H5MMprivate.h"    /* Memory management    */
+#include "H5Opkg.h"         /* Object headers       */
+#include "H5Pprivate.h"     /* Property lists       */
+#include "H5Sprivate.h"     /* Dataspaces           */
 
 
 static void  *H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
@@ -43,7 +43,7 @@ static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
 static void  *H5O_fill_copy(const void *_mesg, void *_dest);
 static herr_t H5O__fill_reset(void *_mesg);
 static herr_t H5O__fill_free(void *_mesg);
-static herr_t H5O_fill_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+static herr_t H5O__fill_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__fill_debug(H5F_t *f, const void *_mesg, FILE *stream,
     int indent, int fwidth);
@@ -107,51 +107,50 @@ static herr_t H5O__fill_debug(H5F_t *f, const void *_mesg, FILE *stream,
 
 /* This message derives from H5O message class, for old fill value before version 1.5 */
 const H5O_msg_class_t H5O_MSG_FILL[1] = {{
-    H5O_FILL_ID,                /*message id number                     */
-    "fill",                     /*message name for debugging            */
-    sizeof(H5O_fill_t),		/*native message size                   */
-    H5O_SHARE_IS_SHARABLE|H5O_SHARE_IN_OHDR,	/* messages are sharable?       */
-    H5O_fill_shared_decode,	/*decode message                        */
-    H5O_fill_shared_encode,	/*encode message                        */
-    H5O_fill_copy,		/*copy the native value                 */
-    H5O_fill_shared_size,	/*raw message size			*/
-    H5O__fill_reset,		/*free internal memory			*/
-    H5O__fill_free,		/* free method				*/
-    H5O__fill_shared_delete,	/* file delete method			*/
-    H5O__fill_shared_link,	/* link method				*/
-    NULL,			/* set share method			*/
-    NULL,		    	/*can share method		*/
-    NULL,			/* pre copy native value to file	*/
-    H5O_fill_pre_copy_file,     /* pre copy native value to file        */
-    H5O__fill_shared_copy_file,	/* copy native value to file		*/
-    H5O_fill_shared_post_copy_file,	/* post copy native value to file	*/
-    NULL,			/* get creation index		*/
-    NULL,			/* set creation index		*/
-    H5O_fill_shared_debug       /*debug the message			*/
+    H5O_FILL_ID,                /*message id number                         */
+    "fill",                     /*message name for debugging                */
+    sizeof(H5O_fill_t),         /*native message size                       */
+    H5O_SHARE_IS_SHARABLE|H5O_SHARE_IN_OHDR,    /* messages are sharable?   */
+    H5O_fill_shared_decode,     /*decode message                            */
+    H5O_fill_shared_encode,     /*encode message                            */
+    H5O_fill_copy,              /*copy the native value                     */
+    H5O_fill_shared_size,       /*raw message size                          */
+    H5O__fill_reset,            /*free internal memory                      */
+    H5O__fill_free,             /* free method                              */
+    H5O__fill_shared_delete,    /* file delete method                       */
+    H5O__fill_shared_link,      /* link method                              */
+    NULL,                       /* set share method                         */
+    NULL,                       /*can share method                          */
+    H5O__fill_pre_copy_file,    /* pre copy native value to file            */
+    H5O__fill_shared_copy_file, /* copy native value to file                */
+    H5O_fill_shared_post_copy_file, /* post copy native value to file       */
+    NULL,                       /* get creation index                       */
+    NULL,                       /* set creation index                       */
+    H5O_fill_shared_debug       /*debug the message                         */
 }};
 
 /* This message derives from H5O message class, for new fill value after version 1.4  */
 const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
-    H5O_FILL_NEW_ID,		/*message id number			*/
-    "fill_new", 		/*message name for debugging		*/
-    sizeof(H5O_fill_t),		/*native message size			*/
-    H5O_SHARE_IS_SHARABLE|H5O_SHARE_IN_OHDR,	/* messages are sharable?       */
-    H5O_fill_new_shared_decode,	/*decode message			*/
-    H5O_fill_new_shared_encode,	/*encode message			*/
-    H5O_fill_copy,		/*copy the native value			*/
-    H5O_fill_new_shared_size,	/*raw message size			*/
-    H5O__fill_reset,		/*free internal memory			*/
-    H5O__fill_free,		/* free method				*/
-    H5O__fill_new_shared_delete,/* file delete method			*/
-    H5O__fill_new_shared_link,	/* link method				*/
-    NULL,			/* set share method			*/
-    NULL,		    	/*can share method		*/
-    H5O_fill_pre_copy_file,     /* pre copy native value to file        */
-    H5O__fill_new_shared_copy_file, /* copy native value to file		*/
-    H5O_fill_new_shared_post_copy_file,	/* post copy native value to file	*/
-    NULL,			/* get creation index		*/
-    NULL,			/* set creation index		*/
-    H5O_fill_new_shared_debug	/*debug the message			*/
+    H5O_FILL_NEW_ID,                    /*message id number                 */
+    "fill_new",                         /*message name for debugging        */
+    sizeof(H5O_fill_t),                 /*native message size               */
+    H5O_SHARE_IS_SHARABLE|H5O_SHARE_IN_OHDR,    /* messages are sharable?   */
+    H5O_fill_new_shared_decode,         /*decode message                    */
+    H5O_fill_new_shared_encode,         /*encode message                    */
+    H5O_fill_copy,                      /*copy the native value             */
+    H5O_fill_new_shared_size,           /*raw message size                  */
+    H5O__fill_reset,                    /*free internal memory              */
+    H5O__fill_free,                     /* free method                      */
+    H5O__fill_new_shared_delete,        /* file delete method               */
+    H5O__fill_new_shared_link,          /* link method                      */
+    NULL,                               /* set share method                 */
+    NULL,                               /*can share method                  */
+    H5O__fill_pre_copy_file,            /* pre copy native value to file    */
+    H5O__fill_new_shared_copy_file,      /* copy native value to file        */
+    H5O_fill_new_shared_post_copy_file, /* post copy native value to file   */
+    NULL,                               /* get creation index               */
+    NULL,                               /* set creation index               */
+    H5O_fill_new_shared_debug           /*debug the message	                */
 }};
 
 /* Format version bounds for fill value */
@@ -591,9 +590,9 @@ done:
     if(!ret_value && dst) {
         if(dst->buf)
             H5MM_xfree(dst->buf);
-	if(dst->type)
+        if(dst->type)
             (void)H5T_close_real(dst->type);
-	if(!_dst)
+        if(!_dst)
             dst = H5FL_FREE(H5O_fill_t, dst);
     } /* end if */
 
@@ -804,7 +803,7 @@ H5O__fill_free(void *fill)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_pre_copy_file
+ * Function:    H5O__fill_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
  *              files.
@@ -817,13 +816,13 @@ H5O__fill_free(void *fill)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
+H5O__fill_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     const H5O_fill_t	*fill_src = (const H5O_fill_t *)mesg_src;   /* Source fill value */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(cpy_info);
@@ -836,7 +835,7 @@ H5O_fill_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fill_pre_copy_file() */
+} /* end H5O__fill_pre_copy_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -973,9 +972,9 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
     /* No-op cases */
     if(!fill->buf || !fill->type || 0 == H5T_cmp(fill->type, dset_type, FALSE)) {
         /* Don't need datatype for fill value */
-	if(fill->type)
+        if(fill->type)
             (void)H5T_close_real(fill->type);
-	fill->type = NULL;
+        fill->type = NULL;
 
         /* Note that the fill value info has changed */
         *fill_changed = TRUE;

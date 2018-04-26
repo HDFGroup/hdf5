@@ -120,7 +120,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_open
+ * Function:    H5F__efc_open
  *
  * Purpose:     Opens a file using the external file cache.  The target
  *              file is added to the external file cache of the parent
@@ -139,7 +139,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
+H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id)
 {
     H5F_efc_t   *efc = NULL;    /* External file cache for parent file */
@@ -147,7 +147,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
     hbool_t     open_file = FALSE; /* Whether ent->file needs to be closed in case of error */
     H5F_t       *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(parent);
@@ -308,7 +308,7 @@ done:
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_efc_open() */
+} /* end H5F__efc_open() */
 
 
 /*-------------------------------------------------------------------------

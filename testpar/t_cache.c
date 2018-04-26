@@ -3086,8 +3086,7 @@ expunge_entry(H5F_t * file_ptr,
 
     if ( nerrors == 0 ) {
 
-        result = H5AC_expunge_entry(file_ptr, &(types[0]),
-			            entry_ptr->header.addr, H5AC__NO_FLAGS_SET);
+        result = H5AC_expunge_entry(file_ptr, &(types[0]), entry_ptr->header.addr, H5AC__NO_FLAGS_SET);
 
         if ( result < 0 ) {
 
@@ -3571,7 +3570,7 @@ lock_entry(H5F_t * file_ptr,
 
     HDassert( ! (entry_ptr->locked) );
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5AC_protect(file_ptr, 
+        cache_entry_ptr = (H5C_cache_entry_t *)H5AC_protect(file_ptr,
                                         &(types[0]), entry_ptr->base_addr,
                                         &entry_ptr->base_addr,
                                         H5AC__NO_FLAGS_SET);

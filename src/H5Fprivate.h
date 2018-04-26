@@ -696,8 +696,16 @@ typedef enum H5F_mem_page_t {
     H5F_MEM_PAGE_NTYPES = 13       /* Sentinel value - must be last */
 } H5F_mem_page_t;
 
+/* Aliases for H5F_mem_page_t enum values */
 #define H5F_MEM_PAGE_META       H5F_MEM_PAGE_SUPER          /* Small-sized meta data */
 #define H5F_MEM_PAGE_GENERIC    H5F_MEM_PAGE_LARGE_SUPER    /* Large-sized generic: meta and raw */
+
+/* Type of prefix for opening prefixed files */
+typedef enum H5F_prefix_open_t {
+    H5F_PREFIX_VDS,             /* Virtual dataset prefix */
+    H5F_PREFIX_ELINK            /* External link prefix */
+} H5F_prefix_open_t;
+
 
 /*****************************/
 /* Library-private Variables */
@@ -707,7 +715,6 @@ typedef enum H5F_mem_page_t {
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
-
 
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
@@ -764,7 +771,6 @@ H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL unsigned H5F_use_latest_flags(const H5F_t *f, unsigned fl);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL herr_t H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag);
-H5_DLL herr_t H5F_set_libver_bounds(H5F_t * f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL struct H5UC_t *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5UC_t *rc);
 H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
@@ -840,13 +846,11 @@ H5_DLL herr_t H5F_get_mpi_info(const H5F_t *f, MPI_Info **f_info);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */
-H5_DLL H5F_t *H5F_efc_open(H5F_t *parent, const char *name, unsigned flags,
-    hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_efc_close(H5F_t *parent, H5F_t *file);
 
 /* File prefix routines */
-H5_DLL H5F_t *H5F_prefix_open_file(hid_t plist_id, H5F_t *primary_file, const char *prefix_type,
-        const char *file_name, unsigned file_intent, hid_t fapl_id, hid_t dxpl_id);
+H5_DLL H5F_t *H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type,
+    const char *prop_prefix, const char *file_name, unsigned file_intent, hid_t fapl_id);
 
 /* Global heap CWFS routines */
 H5_DLL herr_t H5F_cwfs_add(H5F_t *f, struct H5HG_heap_t *heap);

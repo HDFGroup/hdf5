@@ -57,9 +57,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static char *H5L__getenv_prefix_name(char **env_prefix/*in,out*/);
-static herr_t H5L__build_name(const char *prefix, const char *file_name,
-    char **full_name/*out*/);
 static hid_t H5L__extern_traverse(const char *link_name, hid_t cur_group,
     const void *udata, size_t udata_size, hid_t lapl_id, hid_t dxpl_id);
 static ssize_t H5L__extern_query(const char *link_name, const void *udata,
@@ -93,7 +90,6 @@ static const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
     H5L__extern_query           /* Query callback                 */
 }};
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5L__extern_traverse
  *
@@ -134,6 +130,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
     char        local_group_name[H5L_EXT_TRAVERSE_BUF_SIZE];  /* Local buffer to hold group name */
     H5P_genplist_t  *fa_plist;          /* File access property list pointer */
     H5F_close_degree_t 	fc_degree = H5F_CLOSE_WEAK;  /* File close degree for target file */
+    char        *elink_prefix;          /* Pointer to elink prefix */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_STATIC
@@ -223,142 +220,15 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
 
     /* Set file close degree for new file to "weak" */
     if(H5P_set(fa_plist, H5F_ACS_CLOSE_DEGREE_NAME, &fc_degree) < 0)
-	HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
 
-    /*
-     * Start searching for the target file
-     */
+    /* Get the current elink prefix */
+    if(H5P_peek(plist, H5L_ACS_ELINK_PREFIX_NAME, &elink_prefix) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
 
-    /* Simplify intent flags for open calls */
-    intent &= (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ);
-
-    /* Copy the file name to use */
-    if(NULL == (temp_file_name = H5MM_strdup(file_name)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    temp_file_name_len = HDstrlen(temp_file_name);
-
-    /* target file_name is an absolute pathname: see RM for detailed description */
-    if(H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
-        /* Try opening file */
-        if(NULL == (ext_file = H5F_efc_open(loc.oloc->file, file_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id))) {
-            char *ptr;
-
-            H5E_clear_stack(NULL);
-
-            /* get last component of file_name */
-	    H5_GET_LAST_DELIMITER(file_name, ptr)
-	    HDassert(ptr);
-
-            /* Increment past delimiter */
-            ptr++;
-
-            /* Copy into the temp. file name */
-	    HDstrncpy(temp_file_name, ptr, temp_file_name_len);
-            temp_file_name[temp_file_name_len - 1] = '\0';
-        } /* end if */
-    } /* end if */
-    else if(H5_CHECK_ABS_DRIVE(file_name)) {
-        /* Try opening file */
-        if(NULL == (ext_file = H5F_efc_open(loc.oloc->file, file_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id))) {
-
-            H5E_clear_stack(NULL);
-
-	    /* strip "<drive-letter>:" */
-	    HDstrncpy(temp_file_name, &file_name[2], temp_file_name_len);
-            temp_file_name[temp_file_name_len - 1] = '\0';
-	} /* end if */
-    } /* end if */
-
-    /* try searching from paths set in the environment variable */
-    if(ext_file == NULL) {
-        char *env_prefix;
-
-        if(NULL != (env_prefix = HDgetenv("HDF5_EXT_PREFIX"))) {
-            char *tmp_env_prefix, *saved_env;
-
-            if(NULL == (saved_env = tmp_env_prefix = H5MM_strdup(env_prefix)))
-                HGOTO_ERROR(H5E_LINK, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-            while((tmp_env_prefix) && (*tmp_env_prefix)) {
-                char *out_prefix_name;
-
-                out_prefix_name = H5L__getenv_prefix_name(&tmp_env_prefix/*in,out*/);
-                if(out_prefix_name && (*out_prefix_name)) {
-                    if(H5L__build_name(out_prefix_name, temp_file_name, &full_name/*out*/) < 0) {
-			saved_env = (char *)H5MM_xfree(saved_env);
-                        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
-		    } /* end if */
-
-                    ext_file = H5F_efc_open(loc.oloc->file, full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
-                    full_name = (char *)H5MM_xfree(full_name);
-                    if(ext_file != NULL)
-                        break;
-                    H5E_clear_stack(NULL);
-                } /* end if */
-            } /* end while */
-	    saved_env = (char *)H5MM_xfree(saved_env);
-        } /* end if */
-    } /* end if */
-
-    /* try searching from property list */
-    if(ext_file == NULL) {
-        if(H5P_peek(plist, H5L_ACS_ELINK_PREFIX_NAME, &my_prefix) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
-        if(my_prefix) {
-            if(H5L__build_name(my_prefix, temp_file_name, &full_name/*out*/) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
-            if(NULL == (ext_file = H5F_efc_open(loc.oloc->file, full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id)))
-                H5E_clear_stack(NULL);
-            full_name = (char *)H5MM_xfree(full_name);
-        } /* end if */
-    } /* end if */
-
-    /* try searching from main file's "extpath": see description in H5F_open() & H5_build_extpath() */
-    if(ext_file == NULL) {
-        char *extpath;
-
-        if(NULL != (extpath = H5F_EXTPATH(loc.oloc->file))) {
-            if(H5L__build_name(extpath, temp_file_name, &full_name/*out*/) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
-            if(NULL == (ext_file = H5F_efc_open(loc.oloc->file, full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id)))
-                H5E_clear_stack(NULL);
-            full_name = (char *)H5MM_xfree(full_name);
-        } /* end if */
-    } /* end if */
-
-    /* try the relative file_name stored in temp_file_name */
-    if(ext_file == NULL) {
-        if(NULL == (ext_file = H5F_efc_open(loc.oloc->file, temp_file_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id)))
-            H5E_clear_stack(NULL);
-    } /* end if */
-
-    /* try the 'resolved' name for the parent file (i.e. the name after symlinks
-     * were resolved)
-     */
-    if(ext_file == NULL) {
-        char *ptr = NULL;
-
-        /* Copy resolved file name */
-        if(NULL == (actual_file_name = H5MM_strdup(H5F_ACTUAL_NAME(loc.oloc->file))))
-            HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't duplicate resolved file name string")
-
-        /* get last component of file_name */
-        H5_GET_LAST_DELIMITER(actual_file_name, ptr)
-        if(!ptr)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTOPENFILE, FAIL, "unable to open external file, external link file name = '%s', temp_file_name = '%s'", file_name, temp_file_name)
-
-        /* Truncate filename portion from actual file name path */
-        *ptr = '\0';
-
-        /* Build new file name for the external file */
-        if(H5L__build_name(actual_file_name, temp_file_name, &full_name/*out*/) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
-
-        /* Try opening with the resolved name */
-        if(NULL == (ext_file = H5F_efc_open(loc.oloc->file, full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id)))
-            HGOTO_ERROR(H5E_LINK, H5E_CANTOPENFILE, FAIL, "unable to open external file, external link file name = '%s', temp_file_name = '%s'", file_name, temp_file_name)
-        full_name = (char *)H5MM_xfree(full_name);
-    } /* end if */
+    /* Search for the target file */
+    if(NULL == (ext_file = H5F_prefix_open_file(loc.oloc->file, H5F_PREFIX_ELINK, elink_prefix, file_name, intent, fapl_id)))
+        HGOTO_ERROR(H5E_LINK, H5E_CANTOPENFILE, FAIL, "unable to open external file, external link file name = '%s'", file_name)
 
     /* Retrieve the "group location" for the file's root group */
     if(H5G_root_loc(ext_file, &root_loc) < 0)

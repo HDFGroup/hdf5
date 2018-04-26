@@ -37,8 +37,8 @@
 #include "H5MFprivate.h"        /* File space management                 */
 
 /* Callbacks for message class */
-static void *H5O__mdci_decode(H5F_t *f, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, size_t p_size, const uint8_t *p);
+static void *H5O__mdci_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+    unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O__mdci_encode(H5F_t *f, hbool_t disable_shared, 
     uint8_t *p, const void *_mesg);
 static void *H5O__mdci_copy(const void *_mesg, void *_dest);

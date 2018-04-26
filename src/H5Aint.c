@@ -2072,7 +2072,7 @@ H5A__set_version(const H5F_t *f, H5A_t *attr)
     uint8_t version;                    /* Message version */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(f);
@@ -2107,7 +2107,8 @@ H5A__set_version(const H5F_t *f, H5A_t *attr)
     /* Set the message version */
     attr->shared->version = version;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__set_version() */
 
 

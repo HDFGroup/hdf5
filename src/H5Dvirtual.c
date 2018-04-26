@@ -46,6 +46,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Dpkg.h"             /* Dataset functions                    */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Fprivate.h"         /* Files                                */
@@ -882,10 +883,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
 {
     H5F_t       *src_file = NULL;       /* Source file */
     hbool_t     src_file_open = FALSE;  /* Whether we have opened and need to close src_file */
-    H5G_loc_t   src_root_loc;           /* Object location of source file root group */
     herr_t      ret_value = SUCCEED;    /* Return value */
-    hid_t       plist_id = -1;          /* Property list pointer */
-    unsigned    intent;                 /* File access permissions */
 
     FUNC_ENTER_STATIC
 
@@ -898,28 +896,42 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
 
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
-        /* Open the source file */
-        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl)))
-            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
-        else
+        unsigned    intent;                 /* File access permissions */
+
+        /* Get the virtual dataset's file open flags ("intent") */
+        intent = H5F_INTENT(vdset->oloc.file);
+
+        /* Try opening the file */
+        src_file = H5F_prefix_open_file(vdset->oloc.file, H5F_PREFIX_VDS, vdset->shared->vds_prefix, source_dset->file_name, intent, vdset->shared->layout.storage.u.virt.source_fapl);
+
+        /* If we opened the source file here, we should close it when leaving */
+        if(src_file)
             src_file_open = TRUE;
+        else
+            /* Reset the error stack */
+            H5E_clear_stack(NULL);
     } /* end if */
     else
         /* Source file is ".", use the virtual dataset's file */
         src_file = vdset->oloc.file;
 
     if(src_file) {
+        H5G_loc_t   src_root_loc;           /* Object location of source file root group */
+
         /* Set up the root group in the destination file */
         if(NULL == (src_root_loc.oloc = H5G_oloc(H5G_rootof(src_file))))
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get object location for root group")
         if(NULL == (src_root_loc.path = H5G_nameof(H5G_rootof(src_file))))
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
-        /* Open the source dataset */
-        if(NULL == (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl))) {
-            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Dopen with missing file is implemented */
+        /* Try opening the source dataset */
+        source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl);
 
-            /* Dataset does not exist */
+        /* Dataset does not exist */
+        if(NULL == source_dset->dset) {
+            /* Reset the error stack */
+            H5E_clear_stack(NULL);
+
             source_dset->dset_exists = FALSE;
         } /* end if */
         else {
@@ -936,9 +948,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     } /* end if */
 
 done:
-    if(plist_id >= 0)
-        H5Pclose(plist_id);
-    /* Close source file */
+    /* Release resources */
     if(src_file_open)
         if(H5F_efc_close(vdset->oloc.file, src_file) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close source file")
@@ -1694,7 +1704,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
 
         /* Mark the space as dirty, for later writing to the file */
-        if(H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR) 
+        if(H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR)
             if(H5D__mark(dset, H5D_MARK_SPACE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */

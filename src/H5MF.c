@@ -779,9 +779,6 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
     H5AC_ring_t orig_ring;              /* Original ring value */
     H5F_mem_page_t  fs_type;            /* Free space type (mapped from allocation type) */
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
-    hbool_t is_fs_queue_empty = FALSE;
-    H5MF_freedspace_t *fs = NULL; 
-    uint64_t time_limit;
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
@@ -819,28 +816,31 @@ HDfprintf(stderr, "%s: Check 1.0\n", FUNC);
      * calling H5MF_xfree_real() with their address and length (finally 
      * returning them to be recycled for use in file space allocations). 
      */
-    if (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
-        if (H5MF__freedspace_queue_is_empty(f->shared->freedspace_head, &is_fs_queue_empty) < 0) 
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
+        hbool_t is_fs_queue_empty = FALSE;
+        H5MF_freedspace_t *fs = NULL; 
+        uint64_t time_limit;
+
+        if(H5MF__freedspace_queue_is_empty(f->shared->freedspace_head, &is_fs_queue_empty) < 0) 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTGETSIZE, HADDR_UNDEF, "check freedspace queue failed")
                                             
         time_limit = 2 * f->shared->swmr_deltat;
-        /* Freedspace queue is not empty */
 
+        /* Freedspace queue is not empty */
         if(FALSE == is_fs_queue_empty) {
             /* Dequeue until all entries that are older than 2 deltat are freed */
             do {
-                if (H5MF__freedspace_dequeue_time_limit(&f->shared->freedspace_head, 
+                if(H5MF__freedspace_dequeue_time_limit(&f->shared->freedspace_head, 
                                                         &f->shared->freedspace_tail, &fs, time_limit) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, HADDR_UNDEF, "dequeue freedspace queue failed")
 
-                if(NULL != fs) {
+                if(NULL != fs)
                     if(H5MF__xfree_real(fs->f, fs->alloc_type, fs->dxpl_id, fs->addr, fs->size) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, HADDR_UNDEF, "unable to free data")
-                }
             } while(NULL != fs);
-        }
-    }
-                                
+        } /* end if */
+    } /* end if */
+
     /* Check if we are using the free space manager for this file */
     if(H5F_HAVE_FREE_SPACE_MANAGER(f)) {
         /* We are about to change the contents of the free space manager --
@@ -1695,13 +1695,11 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         if((ret_value = H5MF__close_pagefs(f)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'page' file space")
     } /* end if */
-    else {
+    else
         if((ret_value = H5MF__close_aggrfs(f)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'aggr' file space")
-    } /* end else */
 
 done:
-
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Leaving\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */

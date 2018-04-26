@@ -1342,7 +1342,6 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->flush_dep_parent             = NULL;
     entry_ptr->flush_dep_nparents           = 0;
     entry_ptr->flush_dep_parent_nalloc      = 0;
-
     entry_ptr->flush_dep_children           = NULL;
     entry_ptr->flush_dep_nchildren          = 0;
     entry_ptr->flush_dep_ndirty_children    = 0;
@@ -9089,7 +9088,7 @@ H5C_iterate(H5C_t *cache_ptr, H5AC_cache_iter_cb_t cb, void *cb_ctx)
             HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "SWMR cache entry iteration callback failed")
 
         entry_ptr = entry_ptr->il_next; 
-    }
+    } /* end while */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

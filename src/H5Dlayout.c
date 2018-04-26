@@ -694,7 +694,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__layout_oh_write(H5D_t *dataset, H5O_t *oh, unsigned update_flags)
+H5D__layout_oh_write(const H5D_t *dataset, H5O_t *oh, unsigned update_flags)
 {
     htri_t msg_exists;                  /* Whether the layout message exists */
     herr_t ret_value = SUCCEED;         /* Return value */

@@ -519,7 +519,6 @@ H5AC_dest(H5F_t *f)
     if(H5F_ACC_RDWR & H5F_INTENT(f))
         if(H5AC__flush_entries(f) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
-
 #endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */

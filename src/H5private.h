@@ -1991,6 +1991,11 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 #define H5_PACKAGE_INIT(pkg_init, err)
 #endif /* H5_MY_PKG */
 
+/* Forward declaration of H5CXpush() / H5CXpop() */
+/* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
+H5_DLL herr_t H5CX_push(void);
+H5_DLL herr_t H5CX_pop(void);
+
 
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                           \
@@ -2051,6 +2056,10 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     /* Push the name of this function on the function stack */                \
     H5_PUSH_FUNC                                                              \
                                                                               \
+    /* Push the API context */                                                \
+    if(H5CX_push() < 0)                                                       \
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context")      \
+                                                                              \
     BEGIN_MPE_LOG
 
 /* Use this macro for all "normal" API functions */
@@ -2073,7 +2082,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 /*
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, just perform tracing, etc.  Examples
- *      are: H5check_version, etc.
+ *      are: H5allocate_memory, H5is_library_threadsafe, etc.
  *
  */
 #define FUNC_ENTER_API_NOINIT {{                                              \
@@ -2288,11 +2297,15 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     H5_API_UNLOCK                                                             \
     H5_API_SET_CANCEL
 
-#define FUNC_LEAVE_API(ret_value)                                             \
+#define FUNC_LEAVE_API_COMMON(ret_value)                                      \
         ;                                                                     \
     } /*end scope from end of FUNC_ENTER*/                                    \
     FINISH_MPE_LOG                                                            \
-    H5TRACE_RETURN(ret_value);                                                \
+    H5TRACE_RETURN(ret_value);
+
+#define FUNC_LEAVE_API(ret_value)                                             \
+    FUNC_LEAVE_API_COMMON(ret_value);                                         \
+    (void)H5CX_pop();                                                         \
     H5_POP_FUNC                                                               \
     if(err_occurred)                                                          \
        (void)H5E_dump_api_stack(TRUE);                                        \
@@ -2300,12 +2313,19 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     return(ret_value);                                                        \
 }} /*end scope from beginning of FUNC_ENTER*/
 
-/* Use this macro to match the FUNC_ENTER_API_NOFS macro */
+/* Use this macro to match the FUNC_ENTER_API_NOINIT macro */
+#define FUNC_LEAVE_API_NOINIT(ret_value)                                      \
+    FUNC_LEAVE_API_COMMON(ret_value);                                         \
+    H5_POP_FUNC                                                               \
+    if(err_occurred)                                                          \
+       (void)H5E_dump_api_stack(TRUE);                                        \
+    FUNC_LEAVE_API_THREADSAFE                                                 \
+    return(ret_value);                                                        \
+}} /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOFS macro */
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
-        ;                                                                     \
-    } /*end scope from end of FUNC_ENTER*/                                    \
-    FINISH_MPE_LOG                                                            \
-    H5TRACE_RETURN(ret_value);                                                \
+    FUNC_LEAVE_API_COMMON(ret_value);                                         \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
 }} /*end scope from beginning of FUNC_ENTER*/

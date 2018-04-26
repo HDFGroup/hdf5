@@ -98,9 +98,9 @@ test_1 (hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
-    H5_FAILED();
-    puts("    Unable to create file");
-    goto error;
+        H5_FAILED();
+        puts("    Unable to create file");
+        goto error;
     }
 
     /*
@@ -109,37 +109,37 @@ test_1 (hid_t fapl)
      * be monotonically increasing.
      */
     for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
-	size = u + 1;
-	HDmemset(out, (int)('A' + u % 26), size);
-	H5Eclear2(H5E_DEFAULT);
-	status = H5HG_insert(f, size, out, obj + u);
-	if(status < 0) {
-	    H5_FAILED();
-	    puts("    Unable to insert object into global heap");
-	    nerrors++;
-	} else if(u && H5F_addr_gt(obj[u - 1].addr, obj[u].addr)) {
-	    H5_FAILED();
-	    puts("    Collection addresses are not monotonically increasing");
-	    nerrors++;
-	}
+        size = u + 1;
+        HDmemset(out, (int)('A' + u % 26), size);
+        H5Eclear2(H5E_DEFAULT);
+        status = H5HG_insert(f, size, out, obj + u);
+        if(status < 0) {
+            H5_FAILED();
+            puts("    Unable to insert object into global heap");
+            nerrors++;
+        } else if(u && H5F_addr_gt(obj[u - 1].addr, obj[u].addr)) {
+            H5_FAILED();
+            puts("    Collection addresses are not monotonically increasing");
+            nerrors++;
+        }
     }
 
     /*
      * Now try to read each object back.
      */
     for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
-	size = u + 1;
-	HDmemset(out, (int)('A' + u % 26), size);
-	H5Eclear2(H5E_DEFAULT);
-	if(NULL == H5HG_read(f, obj + u, in, NULL)) {
-	    H5_FAILED();
-	    puts("    Unable to read object");
-	    nerrors++;
-	} else if(HDmemcmp(in, out, size)) {
-	    H5_FAILED();
-	    puts("    Value read doesn't match value written");
-	    nerrors++;
-	}
+        size = u + 1;
+        HDmemset(out, (int)('A' + u % 26), size);
+        H5Eclear2(H5E_DEFAULT);
+        if(NULL == H5HG_read(f, obj + u, in, NULL)) {
+            H5_FAILED();
+            puts("    Unable to read object");
+            nerrors++;
+        } else if(HDmemcmp(in, out, size)) {
+            H5_FAILED();
+            puts("    Value read doesn't match value written");
+            nerrors++;
+        }
     }
 
     /* Release buffer */
@@ -203,41 +203,41 @@ test_2 (hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
-    H5_FAILED();
-    puts("    Unable to create file");
-    goto error;
+        H5_FAILED();
+        puts("    Unable to create file");
+        goto error;
     }
 
     /*
      * Write the objects, monotonically decreasing in length.
      */
     for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
-	size = GHEAP_TEST_NOBJS - u;
-	HDmemset(out, (int)('A' + u % 26), size);
-	H5Eclear2(H5E_DEFAULT);
-	if (H5HG_insert (f, size, out, obj + u) < 0) {
-	    H5_FAILED();
-	    puts("    Unable to insert object into global heap");
-	    nerrors++;
-	}
+        size = GHEAP_TEST_NOBJS - u;
+        HDmemset(out, (int)('A' + u % 26), size);
+        H5Eclear2(H5E_DEFAULT);
+        if (H5HG_insert (f, size, out, obj + u) < 0) {
+            H5_FAILED();
+            puts("    Unable to insert object into global heap");
+            nerrors++;
+        }
     }
 
     /*
      * Now try to read each object back.
      */
     for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
-	size = GHEAP_TEST_NOBJS - u;
-	HDmemset(out, (int)('A' + u % 26), size);
-	H5Eclear2(H5E_DEFAULT);
-	if (NULL==H5HG_read (f, obj + u, in, NULL)) {
-	    H5_FAILED();
-	    puts("    Unable to read object");
-	    nerrors++;
-	} else if (memcmp (in, out, size)) {
-	    H5_FAILED();
-	    puts("    Value read doesn't match value written");
-	    nerrors++;
-	}
+        size = GHEAP_TEST_NOBJS - u;
+        HDmemset(out, (int)('A' + u % 26), size);
+        H5Eclear2(H5E_DEFAULT);
+        if(NULL == H5HG_read(f, obj + u, in, NULL)) {
+            H5_FAILED();
+            puts("    Unable to read object");
+            nerrors++;
+        } else if (memcmp (in, out, size)) {
+            H5_FAILED();
+            puts("    Value read doesn't match value written");
+            nerrors++;
+        }
     }
 
     /* Release buffer */
@@ -308,25 +308,25 @@ test_3 (hid_t fapl)
 
     /* Create some stuff */
     for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
-	size = u % 30 + 100;
-	HDmemset(out, (int)('A' + u % 26), size);
-	H5Eclear2(H5E_DEFAULT);
-	status = H5HG_insert (f, size, out, obj + u);
-	if (status<0) {
-	    H5_FAILED();
-	    puts("    Unable to insert object into global heap");
-	    nerrors++;
-	}
+        size = u % 30 + 100;
+        HDmemset(out, (int)('A' + u % 26), size);
+        H5Eclear2(H5E_DEFAULT);
+        status = H5HG_insert(f, size, out, obj + u);
+        if (status<0) {
+            H5_FAILED();
+            puts("    Unable to insert object into global heap");
+            nerrors++;
+        }
     }
 
     /* Remove everything */
     for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
-	status = H5HG_remove (f, obj + u);
-	if (status<0) {
-	    H5_FAILED();
-	    puts("    Unable to remove object");
-	    nerrors++;
-	}
+        status = H5HG_remove(f, obj + u);
+        if (status<0) {
+            H5_FAILED();
+            puts("    Unable to remove object");
+            nerrors++;
+        }
     }
 
     /* Release buffer */
@@ -391,38 +391,38 @@ test_4 (hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
-    H5_FAILED();
-    puts("    Unable to create file");
-    goto error;
+        H5_FAILED();
+        puts("    Unable to create file");
+        goto error;
     }
 
     for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
-	/* Insert */
-	size = u % 30 + 100;
-	HDmemset(out, (int)('A' + u % 26), size);
-	H5Eclear2(H5E_DEFAULT);
-	status = H5HG_insert (f, size, out, obj + u);
-	if (status<0) {
-	    H5_FAILED();
-	    puts("    Unable to insert object into global heap");
-	    nerrors++;
-	}
+        /* Insert */
+        size = u % 30 + 100;
+        HDmemset(out, (int)('A' + u % 26), size);
+        H5Eclear2(H5E_DEFAULT);
+        status = H5HG_insert(f, size, out, obj + u);
+        if (status<0) {
+            H5_FAILED();
+            puts("    Unable to insert object into global heap");
+            nerrors++;
+        }
 
-	/*
-	 * Remove every third one beginning with the second, but after the
-	 * next one has already been inserted.  That is, insert A, B, C;
-	 * remove B, insert D, E, F; remove E; etc.
-	 */
-	if(1 == (u % 3)) {
-	    H5Eclear2(H5E_DEFAULT);
-	    status = H5HG_remove (f, obj + u - 1);
-	    if (status<0) {
-		H5_FAILED();
-		puts("    Unable to remove object");
-		nerrors++;
-	    }
-	    HDmemset(obj + u - 1, 0, sizeof *obj);
-	}
+        /*
+        * Remove every third one beginning with the second, but after the
+        * next one has already been inserted.  That is, insert A, B, C;
+        * remove B, insert D, E, F; remove E; etc.
+        */
+        if(1 == (u % 3)) {
+            H5Eclear2(H5E_DEFAULT);
+            status = H5HG_remove(f, obj + u - 1);
+            if (status<0) {
+                H5_FAILED();
+                puts("    Unable to remove object");
+                nerrors++;
+            }
+            HDmemset(obj + u - 1, 0, sizeof *obj);
+        }
     }
 
     /* Release buffer */

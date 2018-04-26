@@ -324,7 +324,7 @@ static int id_predefined_test(void )
 out:
     if(typeID != H5I_INVALID_HID)
         H5Tclose(typeID);
-        if(testObj != NULL)
+    if(testObj != NULL)
         HDfree(testObj);
 
     return -1;

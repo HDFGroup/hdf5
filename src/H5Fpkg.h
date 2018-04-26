@@ -413,7 +413,7 @@ H5_DLL H5F_t *H5F__create(const char *filename, unsigned flags, hid_t fcpl_id,
 H5_DLL H5F_t * H5F__open(const char *filename, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id);
 H5_DLL herr_t H5F__flush(H5F_t *f, H5F_scope_t scope);
-H5_DLL herr_t H5F__flush_real(H5F_t *f, hbool_t closing);
+H5_DLL herr_t H5F__flush_real(H5F_t *f);
 H5_DLL htri_t H5F__is_hdf5(const char *name);
 H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL herr_t H5F__get_freespace(H5F_t *f, hsize_t *tot_space);
@@ -426,6 +426,7 @@ H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(hid_t file_id);
 H5_DLL herr_t H5F__close_cb(H5F_t *f);
+H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__close_mounts(H5F_t *f);
@@ -434,7 +435,7 @@ H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nop
 
 /* Superblock related routines */
 H5_DLL herr_t H5F__super_init(H5F_t *f);
-H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t fapl_id, hbool_t initial_read);
+H5_DLL herr_t H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read);
 H5_DLL herr_t H5F__super_size(H5F_t *f, hsize_t *super_size, hsize_t *super_ext_size);
 H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
@@ -462,6 +463,8 @@ H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F_efc_create(unsigned max_nfiles);
+H5_DLL H5F_t *H5F__efc_open(H5F_t *parent, const char *name, unsigned flags,
+    hid_t fcpl_id, hid_t fapl_id);
 H5_DLL unsigned H5F_efc_max_nfiles(H5F_efc_t *efc);
 H5_DLL herr_t H5F__efc_release(H5F_efc_t *efc);
 H5_DLL herr_t H5F__efc_destroy(H5F_efc_t *efc);

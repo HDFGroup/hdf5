@@ -800,7 +800,6 @@ main(void)
     H5O_loc_t      oh_loc;    /* Object header locations */
     H5F_libver_t low, high;   /* File format bounds */
     time_t time_new, ro;
-    unsigned b;               /* Index for "new format" loop */
     char msg[80];             /* Message for file format version */
     int    i;                 /* Local index variable */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */

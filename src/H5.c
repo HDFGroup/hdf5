@@ -19,19 +19,18 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"          /* Generic Functions                    */
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dprivate.h"         /* Datasets                             */
-#include "H5Eprivate.h"         /* Error handling                       */
-#include "H5FLprivate.h"        /* Free lists                           */
-#include "H5FSprivate.h"        /* File free space                      */
-#include "H5Lprivate.h"         /* Links                                */
-#include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Pprivate.h"         /* Property lists                       */
-#include "H5SLprivate.h"        /* Skip lists                           */
-#include "H5Tprivate.h"         /* Datatypes                            */
-#include "H5FSprivate.h"        /* File free space                      */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dprivate.h"         /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free lists                               */
+#include "H5FSprivate.h"        /* File free space                          */
+#include "H5Lprivate.h"         /* Links                                    */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5SLprivate.h"        /* Skip lists                               */
+#include "H5Tprivate.h"         /* Datatypes                                */
 
 /****************/
 /* Local Macros */
@@ -916,7 +915,7 @@ H5allocate_memory(size_t size, hbool_t clear)
     else
         ret_value = H5MM_malloc(size);
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5allocate_memory() */
 
 
@@ -954,7 +953,7 @@ H5resize_memory(void *mem, size_t size)
 
     ret_value = H5MM_realloc(mem, size);
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5resize_memory() */
 
 
@@ -979,7 +978,7 @@ H5free_memory(void *mem)
     /* At this time, it is impossible for this to fail. */
     H5MM_xfree(mem);
 
-    FUNC_LEAVE_API(SUCCEED)
+    FUNC_LEAVE_API_NOINIT(SUCCEED)
 } /* end H5free_memory() */
 
 
@@ -996,20 +995,19 @@ H5free_memory(void *mem)
 herr_t
 H5is_library_threadsafe(hbool_t *is_ts)
 {
-    herr_t ret_value = SUCCEED;
-
     FUNC_ENTER_API_NOINIT
     H5TRACE1("e", "*b", is_ts);
 
     HDassert(is_ts);
  
+    /* At this time, it is impossible for this to fail. */
 #ifdef H5_HAVE_THREADSAFE
     *is_ts = TRUE;
 #else /* H5_HAVE_THREADSAFE */
     *is_ts = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_NOINIT(SUCCEED)
 } /* end H5is_library_threadsafe() */
 
 

@@ -176,11 +176,10 @@ typedef struct H5MF_freedspace_t {
     haddr_t    addr;                    /* Address of freed space */
     hsize_t    size;                    /* Size of freed space */
 
-    time_t    timestamp;      /* Use H5_now() */
+    time_t    timestamp;                /* Use H5_now() */
     struct H5MF_freedspace_t *next;
 
 } H5MF_freedspace_t;
-
 
 
 /*****************************/

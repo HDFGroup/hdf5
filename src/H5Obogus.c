@@ -38,7 +38,7 @@
 
 /* PRIVATE PROTOTYPES */
 static void *H5O__bogus_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
-    unsigned mesg_flags, unsigned *ioflags, size_t p_size, const uint8_t *p);
+    unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_bogus_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static size_t H5O_bogus_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__bogus_debug(H5F_t *f, const void *_mesg, FILE *stream,

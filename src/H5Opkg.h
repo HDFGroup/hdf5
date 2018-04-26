@@ -660,7 +660,6 @@ H5_DLLVAR const unsigned H5O_attr_ver_bounds[H5F_LIBVER_NBOUNDS];
 H5_DLLVAR const unsigned H5O_fill_ver_bounds[H5F_LIBVER_NBOUNDS];
 H5_DLLVAR const unsigned H5O_pline_ver_bounds[H5F_LIBVER_NBOUNDS];
 
-
 /* Testing functions */
 #ifdef H5O_TESTING
 H5_DLL htri_t H5O_is_attr_empty_test(hid_t oid);

@@ -790,7 +790,6 @@ typedef struct H5O_ainfo_t {
  */
 typedef unsigned H5O_swmr_deltat_t;        /* Contains # of links to object, if >1 */
 
-
 /*
  * Reference Count Message.
  * (Data structure in memory)
