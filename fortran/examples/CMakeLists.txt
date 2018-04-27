@@ -41,7 +41,7 @@ foreach (example ${examples})
       ${HDF5_LIB_TARGET}
   )
   target_include_directories (f90_ex_${example} PRIVATE
-      "${CMAKE_Fortran_MODULE_DIRECTORY}/static);${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
+      "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
   )
   set_target_properties (f90_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
