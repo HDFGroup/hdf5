@@ -242,7 +242,7 @@ macro (TARGET_FORTRAN_PROPERTIES forttarget libtype)
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
     )
   endif ()
-  target_link_libraries(${forttarget} INTERFACE
+  set_target_properties (${forttarget} PROPERTIES LINK_FLAGS
       $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
       $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
