@@ -2185,7 +2185,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5C__flush_recursive_by_dep(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
+H5C__flush_recursive_by_dep(H5F_t *f, H5C_cache_entry_t *entry_ptr,
     unsigned flags)
 {
     int i;                              /* Local index variable */
@@ -2197,11 +2197,11 @@ H5C__flush_recursive_by_dep(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_pt
     if(entry_ptr->flush_dep_ndirty_children > 0)
         /* Flush from the end so there is less memory movement. */
         for(i = (int)(entry_ptr->flush_dep_nchildren - 1); i >= 0; i--)
-            if(H5C__flush_recursive_by_dep(f, dxpl_id, entry_ptr->flush_dep_children[i], flags) < 0)
+            if(H5C__flush_recursive_by_dep(f, entry_ptr->flush_dep_children[i], flags) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush child entry")
 
     /* Reach the end of recursive process, do the actual entry flush */
-    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, flags) < 0)
+    if(H5C__flush_single_entry(f, entry_ptr, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush single entry failed")
 
 done:
@@ -2225,20 +2225,16 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__flush_by_timestamp(H5F_t *f, hid_t dxpl_id, unsigned flags)
+H5C__flush_by_timestamp(H5F_t *f, uint64_t too_old, unsigned flags)
 {
     H5C_cache_entry_t *entry_ptr;       /* Current entry to examine */
-    uint64_t too_old;                   /* Time boundary for old entries */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
-    /* Get the time boundary for entries that are too old and must be evicted */
-    too_old = H5_now_usec() - f->shared->swmr_deltat;
-
     /* Iterate over all entries in the cache, according to their timestamp order  */
     entry_ptr = f->shared->cache->ts_head;
-    while (entry_ptr != NULL) {
+    while(entry_ptr != NULL) {
         H5C_cache_entry_t *tmp_entry_ptr;
 
         /* Get pointer to next entry */
@@ -2251,7 +2247,7 @@ H5C__flush_by_timestamp(H5F_t *f, hid_t dxpl_id, unsigned flags)
                 continue;
             } /* end if */
 
-            if (H5C__flush_recursive_by_dep(f, dxpl_id, entry_ptr, flags) < 0)
+            if(H5C__flush_recursive_by_dep(f, entry_ptr, flags) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush recursive by flush dependency failed")
         } /* end if */
         else
@@ -2365,35 +2361,39 @@ H5C_protect(H5F_t *		f,
         /* Check for a file that has a SWMR delta-t value set by a SWMR writer */
         deltat = f->shared->swmr_deltat;
         if(deltat > 0) {
-            hbool_t is_api_call_start = FALSE;
+            uint64_t now_time;                  /* The current time */
+            hbool_t is_swmr_first_access;       /* Whether this is the first metadata access */
 
-            if(H5P_get_is_api_call_start(dxpl, &is_api_call_start) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "fail to get is_api_call_start")
+            /* Get the current time */
+            now_time = H5_now_usec();
 
-            if(FALSE == is_api_call_start) {
-                uint64_t api_call_start_time = 0;
-                uint64_t now_time;
+            is_swmr_first_access = H5CX_get_swmr_first_metadata_access();
+
+            /* Check for first metadata access */
+            if(is_swmr_first_access) {
+                uint64_t too_old;       /* Time boundary for old entries */
+
+                /* Record the SWMR "transaction" metadata access start time*/
+                H5CX_set_swmr_trans_start_time(now_time);
+
+                /* Get the time boundary for entries that are too old and must be evicted */
+                too_old = now_time - deltat;
+
+                /* Evict entries older than "delta-T" in the cache */
+                if(H5C__flush_by_timestamp(f, too_old, H5C__FLUSH_INVALIDATE_FLAG) < 0) 
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "fail to flush by timestamp")
+
+                /* Reset 'first metadata access' flag, for possible next metadata access */
+                H5CX_set_swmr_first_metadata_access(FALSE);
+            } /* end if */
+            else {
+                uint64_t swmr_start_time;       /* Timestamp for first SWMR metadata access */
 
                 /* Check if the entry is in cache more than 2 delta t since the transaction start
                  * time, if so, error */
-
-                if(H5P_get_api_call_start_time(dxpl, &api_call_start_time) < 0) 
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "fail to get api_call_start_time")
-
-                now_time = H5_now_usec();
-                if(now_time > api_call_start_time + (uint64_t)(2 * deltat)) 
+                swmr_start_time = H5CX_get_swmr_trans_start_time();
+                if(now_time > (swmr_start_time + (uint64_t)(2 * deltat))) 
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "entry in cache more than 2 delta t")
-            } /* end if */
-            else {
-                /* Record the transaction start time*/
-                if(H5P_set_api_call_start_time(dxpl) < 0) 
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, NULL, "fail to set api_call_start_time")
-
-                if(H5C__flush_by_timestamp(f, dxpl_id, H5C__FLUSH_INVALIDATE_FLAG) < 0) 
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "fail to flush by timestamp")
-
-                if(H5P_set_is_api_call_start(dxpl, FALSE) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, NULL, "fail to end transaction")
             } /* end else */
         } /* end if */
     } /* end if */

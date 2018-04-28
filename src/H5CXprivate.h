@@ -69,6 +69,8 @@ H5_DLL hid_t H5CX_get_dxpl(void);
 H5_DLL hid_t H5CX_get_lapl(void);
 H5_DLL haddr_t H5CX_get_tag(void);
 H5_DLL H5AC_ring_t H5CX_get_ring(void);
+H5_DLL hbool_t H5CX_get_swmr_first_metadata_access(void);
+H5_DLL uint64_t H5CX_get_swmr_trans_start_time(void);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL hbool_t H5CX_get_coll_metadata_read(void);
 H5_DLL herr_t H5CX_get_mpi_coll_datatypes(MPI_Datatype *btype, MPI_Datatype *ftype);
@@ -109,6 +111,8 @@ H5_DLL herr_t H5CX_get_nlinks(size_t *nlinks);
 /* "Setter" routines for API context info */
 H5_DLL void H5CX_set_tag(haddr_t tag);
 H5_DLL void H5CX_set_ring(H5AC_ring_t ring);
+H5_DLL void H5CX_set_swmr_first_metadata_access(hbool_t first_access);
+H5_DLL void H5CX_set_swmr_trans_start_time(uint64_t start_time);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL void H5CX_set_coll_metadata_read(hbool_t cmdr);
 H5_DLL herr_t H5CX_set_mpi_coll_datatypes(MPI_Datatype btype, MPI_Datatype ftype);

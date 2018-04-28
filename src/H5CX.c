@@ -192,6 +192,10 @@ typedef struct H5CX_t {
     /* Internal: Metadata cache info */
     H5AC_ring_t ring;           /* Current metadata cache ring for entries */
 
+    /* Internal: SWMR info */
+    hbool_t swmr_first_metadata_access;   /* If a first metadata access for SWMR has occurred */
+    uint64_t swmr_start_time;   /* Timestamp for SWMR transaction start */
+
 #ifdef H5_HAVE_PARALLEL
     /* Internal: Parallel I/O settings */
     hbool_t coll_metadata_read; /* Whether to use collective I/O for metadata read */
@@ -629,6 +633,7 @@ H5CX__push_common(H5CX_node_t *cnode)
     cnode->ctx.lapl_id = H5P_LINK_ACCESS_DEFAULT;
     cnode->ctx.tag = H5AC__INVALID_TAG;
     cnode->ctx.ring = H5AC_RING_USER;
+    cnode->ctx.swmr_first_metadata_access = TRUE;
 
     /* Push context node onto stack */
     cnode->next = *head;
@@ -1054,6 +1059,58 @@ H5CX_get_ring(void)
 
     FUNC_LEAVE_NOAPI((*head)->ctx.ring)
 } /* end H5CX_get_ring() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_swmr_first_metadata_access
+ *
+ * Purpose:     Get flag for first SWMR metadata access for an API call
+ *
+ * Return:      TRUE / FALSE on success / <can't fail>
+ *
+ * Programmer:  Quincey Koziol
+ *              April 27, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5CX_get_swmr_first_metadata_access(void)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    FUNC_LEAVE_NOAPI((*head)->ctx.swmr_first_metadata_access)
+} /* end H5CX_get_swmr_first_metadata_access() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_swmr_trans_start_time
+ *
+ * Purpose:     Get timestamp of first SWMR metadata access for an API call
+ *
+ * Return:      SWMR "start transaction" time on success / <can't fail>
+ *
+ * Programmer:  Quincey Koziol
+ *              April 27, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+uint64_t
+H5CX_get_swmr_trans_start_time(void)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    FUNC_LEAVE_NOAPI((*head)->ctx.swmr_start_time)
+} /* end H5CX_get_swmr_trans_start_time() */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -2124,6 +2181,62 @@ H5CX_set_ring(H5AC_ring_t ring)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_ring() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_swmr_set_first_metadata_access
+ *
+ * Purpose:     Set flag for first SWMR metadata access for an API call
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Quincey Koziol
+ *              April 27, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_swmr_first_metadata_access(hbool_t first_access)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    (*head)->ctx.swmr_first_metadata_access = first_access;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_swmr_first_metadata_access() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_swmr_trans_start_time
+ *
+ * Purpose:     Set timestamp of first SWMR metadata access for an API call
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Quincey Koziol
+ *              April 27, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_swmr_trans_start_time(uint64_t start_time)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(head && *head);
+
+    (*head)->ctx.swmr_start_time = start_time;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_swmr_trans_start_time() */
 
 #ifdef H5_HAVE_PARALLEL
 

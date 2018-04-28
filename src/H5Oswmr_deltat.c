@@ -26,13 +26,13 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
-static void  *H5O_swmr_deltat_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+static void  *H5O_swmr_deltat_decode(H5F_t *f, H5O_t *open_oh,
     unsigned mesg_flags, unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_swmr_deltat_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O_swmr_deltat_copy(const void *_mesg, void *_dest);
 static size_t H5O_swmr_deltat_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
-static herr_t H5O_swmr_deltat_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
-			     int indent, int fwidth);
+static herr_t H5O_swmr_deltat_debug(H5F_t *f, const void *_mesg, FILE *stream,
+    int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_SWMR_DELTAT[1] = {{
@@ -77,7 +77,7 @@ const H5O_msg_class_t H5O_MSG_SWMR_DELTAT[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_swmr_deltat_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+H5O_swmr_deltat_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
     size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
@@ -226,7 +226,7 @@ H5O_swmr_deltat_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disab
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_swmr_deltat_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE *stream,
+H5O_swmr_deltat_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
     int indent, int fwidth)
 {
     const H5O_swmr_deltat_t *mesg = (const H5O_swmr_deltat_t *)_mesg;

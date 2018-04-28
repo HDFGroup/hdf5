@@ -72,7 +72,7 @@ H5TEST_DLL H5F_t *fullswmr_setup_cache(hsize_t entry_size, int n_entry, unsigned
 H5TEST_DLL void   fullswmr_takedown_cache(H5F_t * file_ptr, hbool_t dump_stats, hbool_t dump_detailed_stats);
 H5TEST_DLL void   fullswmr_insert_entry(H5F_t * file_ptr, int idx, unsigned flags);
 H5TEST_DLL void   fullswmr_flush_cache(H5F_t * file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_t dump_detailed_stats);
-H5TEST_DLL void   fullswmr_expunge_entry(H5F_t * file_ptr, int32_t idx);
+H5TEST_DLL void   fullswmr_expunge_entry(H5F_t * file_ptr, unsigned idx);
 H5TEST_DLL void   fullswmr_addr_to_index(haddr_t addr, int *index_ptr);
 
 #ifdef __cplusplus

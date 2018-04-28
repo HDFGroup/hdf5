@@ -76,19 +76,19 @@ const H5C_class_t *fullswmr_test_classes_g[H5C__MAX_NUM_TYPE_IDS];
  */
 
 void
-fullswmr_expunge_entry(H5F_t * file_ptr, int32_t idx)
+fullswmr_expunge_entry(H5F_t * file_ptr, unsigned idx)
 {
     herr_t result;
     haddr_t entry_addr;
 
     if ( pass_g ) {
 
-        HDassert( ( 0 <= idx ) && ( (size_t)idx <= entry_array_nelem_g ) );
+        HDassert( idx <= entry_array_nelem_g );
 
-        entry_addr = allocated_base_addr_array_g + idx*entry_array_size_g;
+        entry_addr = allocated_base_addr_array_g + idx * entry_array_size_g;
 
-        result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                fullswmr_test_classes_g[entry_type_id_g], entry_addr, H5C__NO_FLAGS_SET);
+        result = H5C_expunge_entry(file_ptr, fullswmr_test_classes_g[entry_type_id_g],
+            entry_addr, H5C__NO_FLAGS_SET);
 
         if ( result < 0 ) {
             pass_g = FALSE;
@@ -475,6 +475,9 @@ fullswmr_setup_cache(hsize_t entry_size, int n_entry, unsigned file_flags)
         goto done;
     } /* end if */
 
+    /* Push API context */
+    H5CX_push();
+
     if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
         pass_g = FALSE;
         failure_mssg_g = "H5Fflush() failed.";
@@ -536,8 +539,7 @@ fullswmr_setup_cache(hsize_t entry_size, int n_entry, unsigned file_flags)
 
 
     /* allocate space for test entries */
-    allocated_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, 
-                                     (hsize_t)n_entry*entry_size);
+    allocated_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)n_entry*entry_size);
     if(allocated_base_addr == HADDR_UNDEF) {
         pass_g = FALSE;
         failure_mssg_g = "H5MF_alloc() failed.";
@@ -599,10 +601,10 @@ fullswmr_flush_cache(H5F_t * file_ptr, hbool_t destroy_entries, hbool_t dump_sta
         cache_ptr = file_ptr->shared->cache;
 
         if(destroy_entries)
-            result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+            result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         else
-            result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+            result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
 
         if(dump_stats)
             H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
@@ -671,14 +673,14 @@ fullswmr_takedown_cache(H5F_t * file_ptr,
             H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
         
 
-	if ( H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
+	if ( H5C_prep_for_file_close(file_ptr) < 0 ) {
             pass_g = FALSE;
             failure_mssg_g = "unexpected failure of prep for file close.\n";
         }
 
         fullswmr_flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
-        H5C_dest(file_ptr, H5AC_ind_read_dxpl_id);
+        H5C_dest(file_ptr);
         
         /* Give back the original saved cache */
         file_ptr->shared->cache = saved_cache_g;
@@ -693,9 +695,9 @@ fullswmr_takedown_cache(H5F_t * file_ptr,
                 HDassert(file_ptr);
             }
 
-            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, 
-                       allocated_base_addr_array_g+entry_array_freed_g*entry_array_size_g,
-                       entry_array_size_g*(entry_array_nelem_g-entry_array_freed_g));
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, 
+                       allocated_base_addr_array_g + entry_array_freed_g * entry_array_size_g,
+                       entry_array_size_g * (entry_array_nelem_g - entry_array_freed_g));
             allocated_base_addr_array_g = HADDR_UNDEF;
         }
 
@@ -705,8 +707,11 @@ fullswmr_takedown_cache(H5F_t * file_ptr,
 	} 
     }
 
-    HDfree(entry_array_g);
+    /* Pop API context */
+    H5CX_pop();
+
     /* Reset all global helper arrays */
+    HDfree(entry_array_g);
     entry_array_g                = NULL;
     entry_file_ptr_array_g       = NULL;
     entry_array_nelem_g          = 0;
@@ -742,7 +747,6 @@ fullswmr_insert_entry(H5F_t * file_ptr, int idx, unsigned flags)
 {
     H5C_t * cache_ptr;
     herr_t result;
-    hid_t xfer = H5AC_ind_read_dxpl_id;
     fullswmr_cache_entry_t * entry_ptr;
     haddr_t entry_addr;
 
@@ -758,7 +762,7 @@ fullswmr_insert_entry(H5F_t * file_ptr, int idx, unsigned flags)
 
         entry_ptr->is_dirty = TRUE;
 
-        result = H5C_insert_entry(file_ptr, xfer, fullswmr_test_classes_g[entry_type_id_g], entry_addr, 
+        result = H5C_insert_entry(file_ptr, fullswmr_test_classes_g[entry_type_id_g], entry_addr, 
                                   (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||

@@ -58,7 +58,7 @@ static unsigned check_freedspace_reuse_2deltat(void);
  *-------------------------------------------------------------------------
  */
 static unsigned
-fullswmr_free_entry(H5F_t *file_ptr, int idx)
+fullswmr_free_entry(H5F_t *file_ptr, unsigned idx)
 {
     haddr_t addr;
     hsize_t size;
@@ -66,7 +66,7 @@ fullswmr_free_entry(H5F_t *file_ptr, int idx)
     addr = allocated_base_addr_array_g + (haddr_t)(idx*entry_array_size_g);
     size = entry_array_size_g;
 
-    if (H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, addr, size) < 0) 
+    if (H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, addr, size) < 0) 
         CACHE_ERROR("H5MF_xfree failed")
 
     fullswmr_expunge_entry(file_ptr, idx);
@@ -97,7 +97,8 @@ static unsigned
 check_freedspace_without_swmr_write(void)
 {
     H5F_t * file_ptr = NULL;            /* File for this test */
-    int    u, n_entry, n_free_entry;
+    int    n_entry, n_free_entry;
+    unsigned    u;
     hsize_t entry_size;
     hsize_t freedspace_size = 0, meta_size = 0;
 
@@ -126,7 +127,7 @@ check_freedspace_without_swmr_write(void)
             if (!pass_g)
                 CACHE_ERROR("Free entry failed")
 
-            if (H5MF_get_freespace(file_ptr, H5AC_ind_read_dxpl_id, &freedspace_size, &meta_size) < 0)
+            if (H5MF_get_freespace(file_ptr, &freedspace_size, &meta_size) < 0)
                 CACHE_ERROR("H5MF_get_freespace failed")
 
             if (freedspace_size != (hsize_t)(u+1)*entry_array_size_g) {
@@ -197,7 +198,7 @@ check_holding_tank_with_swmr_write(void)
         if (!pass_g)
             CACHE_ERROR("Free entry failed")
 
-        if (H5MF_get_freespace(file_ptr, H5AC_ind_read_dxpl_id, &freedspace_size, &meta_size) < 0)
+        if (H5MF_get_freespace(file_ptr, &freedspace_size, &meta_size) < 0)
             CACHE_ERROR("H5MF_get_freespace failed")
 
         /* NOTE: the H5MF_get_freespace includes size of deferred space, so freedspace_size 
@@ -302,11 +303,11 @@ check_freedspace_flush_dependency(void)
 
     if(pass_g) {
 
-        raw_addr = H5MF_alloc(file_ptr, H5FD_MEM_DRAW, H5AC_ind_read_dxpl_id, entry_size);
+        raw_addr = H5MF_alloc(file_ptr, H5FD_MEM_DRAW, entry_size);
         if (raw_addr == HADDR_UNDEF) 
             CACHE_ERROR("H5MF_alloc failed")
 
-        if (H5MF_xfree(file_ptr, H5FD_MEM_DRAW, H5AC_ind_read_dxpl_id, raw_addr, entry_size) < 0) 
+        if (H5MF_xfree(file_ptr, H5FD_MEM_DRAW, raw_addr, entry_size) < 0) 
             CACHE_ERROR("H5MF_xfree failed")
 
         /* Each cache entry should have exactly one parent (freedspace entry) */
@@ -340,7 +341,7 @@ check_freedspace_flush_dependency(void)
 
             flush_flags = H5C__FLUSH_CLEAR_ONLY_FLAG;
 
-            if(H5C__flush_single_entry(file_ptr, H5AC_ind_read_dxpl_id, &entry_ptr->header, flush_flags) < 0)
+            if(H5C__flush_single_entry(file_ptr, &entry_ptr->header, flush_flags) < 0)
                 CACHE_ERROR("Error with flush single entry!")
         }
         
@@ -431,11 +432,11 @@ check_freedspace_reuse_2deltat(void)
         for (u = 1; u < n_entry; u++) {
             entry_ptr = &entry_array_g[u];
             flush_flags = H5C__FLUSH_CLEAR_ONLY_FLAG;
-            if(H5C__flush_single_entry(file_ptr, H5AC_ind_read_dxpl_id, &entry_ptr->header, flush_flags) < 0)
+            if(H5C__flush_single_entry(file_ptr, &entry_ptr->header, flush_flags) < 0)
                 CACHE_ERROR("Error with flush single entry!")
         }
         
-        new_alloc_addr1 = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, (hsize_t)(entry_size));
+        new_alloc_addr1 = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)(entry_size));
         if (new_alloc_addr1 == HADDR_UNDEF) 
             CACHE_ERROR("H5MF_alloc failed")
         else if (new_alloc_addr1 == allocated_base_addr_array_g)
@@ -444,7 +445,7 @@ check_freedspace_reuse_2deltat(void)
         /* Delta t is set to be FULLSWMR_DELTAT_SECONDS (1s) in setup_cache */
         sleep(2*FULLSWMR_DELTAT_SECONDS);
 
-        new_alloc_addr2 = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, (hsize_t)(entry_size));
+        new_alloc_addr2 = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)(entry_size));
         if (new_alloc_addr2 == HADDR_UNDEF) 
             CACHE_ERROR("H5MF_alloc failed")
         else if (new_alloc_addr2 != allocated_base_addr_array_g)
@@ -453,12 +454,12 @@ check_freedspace_reuse_2deltat(void)
 
 done:
     if (new_alloc_addr1 != HADDR_UNDEF) {
-        if (H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, new_alloc_addr1, entry_size) < 0) 
+        if (H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, new_alloc_addr1, entry_size) < 0) 
             CACHE_ERROR("H5MF_xfree failed")
     }
 
     if (new_alloc_addr2 != HADDR_UNDEF) {
-        if (H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, new_alloc_addr2, entry_size) < 0) 
+        if (H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, new_alloc_addr2, entry_size) < 0) 
             CACHE_ERROR("H5MF_xfree failed")
     }
 

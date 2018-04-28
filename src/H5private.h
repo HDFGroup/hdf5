@@ -2267,7 +2267,6 @@ H5_DLL herr_t H5CX_pop(void);
                                                                               \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
     H5AC_tag(tag, &prev_tag);                                                 \
-    H5AC_start_transaction(tag_dxpl_id);                                      \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2279,7 +2278,6 @@ H5_DLL herr_t H5CX_pop(void);
                                                                               \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
     H5AC_tag(tag, &prev_tag);                                                 \
-    H5AC_start_transaction(tag_dxpl_id);                                      \
     H5_PUSH_FUNC                                                              \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2635,8 +2633,7 @@ func_init_failed:                                                             \
  * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
 #define H5_BEGIN_TAG(tag) {                                                 \
     haddr_t prv_tag = HADDR_UNDEF;                                          \
-    H5AC_tag(tag, &prv_tag);                                                \
-    H5AC_start_transaction(my_dxpl_id);
+    H5AC_tag(tag, &prv_tag);
 
 #define H5_END_TAG                                                          \
     H5AC_tag(prv_tag, NULL);                                                \

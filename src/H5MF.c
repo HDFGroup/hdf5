@@ -37,7 +37,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
-#include "H5FSpkg.h"            /* File access              */
+#include "H5FSpkg.h"		/* File free space			*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFpkg.h"		/* File memory management		*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
@@ -818,24 +818,25 @@ HDfprintf(stderr, "%s: Check 1.0\n", FUNC);
      */
     if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
         hbool_t is_fs_queue_empty = FALSE;
-        H5MF_freedspace_t *fs = NULL; 
-        uint64_t time_limit;
 
         if(H5MF__freedspace_queue_is_empty(f->shared->freedspace_head, &is_fs_queue_empty) < 0) 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTGETSIZE, HADDR_UNDEF, "check freedspace queue failed")
                                             
-        time_limit = 2 * f->shared->swmr_deltat;
-
         /* Freedspace queue is not empty */
         if(FALSE == is_fs_queue_empty) {
+            H5MF_freedspace_t *fs; 
+            uint64_t time_limit;
+
+            time_limit = 2 * f->shared->swmr_deltat;
+
             /* Dequeue until all entries that are older than 2 deltat are freed */
             do {
-                if(H5MF__freedspace_dequeue_time_limit(&f->shared->freedspace_head, 
-                                                        &f->shared->freedspace_tail, &fs, time_limit) < 0)
+                fs = NULL;
+                if(H5MF__freedspace_dequeue_time_limit(f, &fs, time_limit) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, HADDR_UNDEF, "dequeue freedspace queue failed")
 
                 if(NULL != fs)
-                    if(H5MF__xfree_real(fs->f, fs->alloc_type, fs->dxpl_id, fs->addr, fs->size) < 0)
+                    if(H5MF__xfree_real(fs->f, fs->alloc_type, fs->addr, fs->size) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, HADDR_UNDEF, "unable to free data")
             } while(NULL != fs);
         } /* end if */
@@ -1124,7 +1125,7 @@ H5MF__xfree_real(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     H5AC_ring_t fsm_ring;               /* Ring of FSM */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1282,7 +1283,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
 #ifdef H5MF_ALLOC_DEBUG_DUMP
 H5MF_sects_dump(f, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF__xfree_real() */
 
 
@@ -1313,13 +1314,8 @@ H5MF__xfree_freedspace(H5MF_freedspace_t *freedspace)
     HDassert(freedspace->size > 0);
     HDassert(freedspace->f->shared->deferred_free_space >= freedspace->size);
 
-   /* if(H5MF__xfree_real(freedspace->f, freedspace->alloc_type, freedspace->dxpl_id, freedspace->addr, freedspace->size) < 0) */
-    /*     HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free data") */
-
-
     /* "Push" freedspace list */
-    if (H5MF__freedspace_push(&freedspace->f->shared->freedspace_head, &freedspace->f->shared->freedspace_tail, 
-                              freedspace) < 0)
+    if(H5MF__freedspace_push(&freedspace->f->shared->freedspace_head, &freedspace->f->shared->freedspace_tail, freedspace) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to push freedspace list to queue")
 
     /* Reduce the amount of deferred free space */
@@ -1346,7 +1342,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr, hsize_t size)
+H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1366,7 +1362,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
         H5MF_freedspace_t *fs = NULL;   /* Freed space object for space freed */
 
         /* Attempt to create freedspace object */
-        if(H5MF__freedspace_create(f, dxpl_id, alloc_type, addr, size, &fs) < 0)
+        if(H5MF__freedspace_create(f, alloc_type, addr, size, &fs) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, FAIL, "unable to create freed space entry")
 
         /* Check if a freed space entry is created */
@@ -1375,13 +1371,12 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
             f->shared->deferred_free_space += size;
         else
             /* If no freedspace object is needed, free now */
-            if(H5MF__xfree_real(f, alloc_type, dxpl_id, addr, size) < 0)
+            if(H5MF__xfree_real(f, alloc_type, addr, size) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free raw data")
     } /* end if */
-    else {  /* Raw data, call the normal xfree */
-        if(H5MF__xfree_real(f, alloc_type, dxpl_id, addr, size) < 0)
+    else        /* Raw data, call the normal xfree */
+        if(H5MF__xfree_real(f, alloc_type, addr, size) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free raw data")
-    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)

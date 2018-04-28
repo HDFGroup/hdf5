@@ -459,9 +459,6 @@ H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id,
     unsigned flags);
 H5_DLL herr_t H5AC_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
 
-/* SWMR Transaction routines */
-H5_DLL herr_t H5AC_start_transaction(hid_t dxpl_id);
-
 /* Virtual entry routines */
 H5_DLL H5AC_proxy_entry_t *H5AC_proxy_entry_create(void);
 H5_DLL herr_t H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *parent);

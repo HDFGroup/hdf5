@@ -24,6 +24,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #include "H5MFmodule.h"         /* This source code file is part of the H5MF module */
 
 
@@ -32,6 +33,7 @@
 /***********/
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error handling                       */
+#include "H5Fpkg.h"             /* File access				*/
 #include "H5MFpkg.h"		/* File memory management		*/
 
 
@@ -48,7 +50,6 @@
 typedef struct H5MF_freedspace_ctx_t {
     /* Down */
     H5F_t      *f;              /* File where space is being freed */
-    hid_t      dxpl_id;         /* DXPL for free operation */
     int        ring;            /* Metadata cache ring for object who's space is freed */
     H5FD_mem_t alloc_type;      /* File space type for freed space */
     haddr_t    addr;            /* Address for freed space */
@@ -100,10 +101,8 @@ static H5MF_freedspace_t *
 H5MF__freedspace_new(H5MF_freedspace_ctx_t *ctx)
 {
     H5MF_freedspace_t *fs;                  /* New freedspace entry */
-    H5P_genplist_t *dxpl = NULL;            /* DXPL for setting ring */
     haddr_t fs_addr;                        /* Address of freedspace entry */
     H5AC_ring_t orig_ring = H5AC_RING_INV;  /* Original ring value */
-    hbool_t reset_ring = FALSE;             /* Whether the ring was set */
     H5MF_freedspace_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -117,7 +116,6 @@ H5MF__freedspace_new(H5MF_freedspace_ctx_t *ctx)
 
     /* Initialize new freedspace object */
     fs->f           = ctx->f;
-    fs->dxpl_id     = ctx->dxpl_id;
     fs->alloc_type  = ctx->alloc_type;
     fs->addr        = ctx->addr;
     fs->size        = ctx->size;
@@ -129,22 +127,19 @@ H5MF__freedspace_new(H5MF_freedspace_ctx_t *ctx)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate temporary space for freed space entry")
 
     /* Set the ring for the new freedspace entry in the cache */
-    if(H5AC_set_ring(ctx->dxpl_id, ctx->ring, &dxpl, &orig_ring) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, NULL, "unable to set ring value")
-    reset_ring = TRUE;
+    H5AC_set_ring(ctx->ring, &orig_ring);
 
     /* Insert freedspace entry into the cache */
-    if(H5AC_insert_entry(ctx->f, ctx->dxpl_id, H5AC_FREEDSPACE, fs_addr, fs, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_insert_entry(ctx->f, H5AC_FREEDSPACE, fs_addr, fs, H5AC__PIN_ENTRY_FLAG) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, NULL, "unable to insert freedspace")
 
     /* Set the return value */
     ret_value = fs;
 
 done:
-    /* Reset the ring in the DXPL */
-    if(reset_ring)
-        if(H5AC_reset_ring(dxpl, orig_ring) < 0)
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTSET, NULL, "unable to reset ring value")
+    /* Reset the ring in the API context */
+    if(orig_ring != H5AC_RING_INV)
+        H5AC_set_ring(orig_ring, NULL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF__freedspace_new() */
@@ -232,8 +227,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF__freedspace_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type,
-    haddr_t addr, hsize_t size, H5MF_freedspace_t** fs)
+H5MF__freedspace_create(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr,
+    hsize_t size, H5MF_freedspace_t **fs)
 {
     htri_t cache_clean;         /* Whether the cache has any dirty entries */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -265,7 +260,6 @@ H5MF__freedspace_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type,
 
             /* Create a freed space ctx */
             fs_ctx.f           = f;
-            fs_ctx.dxpl_id     = dxpl_id;
             if(alloc_type == H5FD_MEM_DRAW)
                 fs_ctx.ring     = H5AC_RING_USER;
             else
@@ -333,17 +327,17 @@ H5MF__freedspace_push(H5MF_freedspace_t **head, H5MF_freedspace_t **tail, H5MF_f
     /* Sanity checks */
     HDassert(freedspace);
 
-    if (*head == NULL) {
+    if(NULL == *head) {
         /* Add the first node */
         *head = freedspace;
         *tail = freedspace;
-    }
+    } /* end if */
     else {
         /* Append to the linked list */
         (*tail)->next    = freedspace;
         *tail            = freedspace;
         freedspace->next = NULL;
-    }
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5MF__freedspace_push() */
@@ -364,35 +358,37 @@ H5MF__freedspace_push(H5MF_freedspace_t **head, H5MF_freedspace_t **tail, H5MF_f
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF__freedspace_dequeue_time_limit(H5MF_freedspace_t **head, H5MF_freedspace_t **tail, H5MF_freedspace_t **freedspace, uint64_t time_limit)
+H5MF__freedspace_dequeue_time_limit(H5F_t *f, H5MF_freedspace_t **freedspace,
+    uint64_t time_limit)
 {
-    uint64_t now_time, entry_time;
+    H5MF_freedspace_t **head = &f->shared->freedspace_head;     /* Pointer to head of freedspace list */
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(freedspace);
 
-    now_time = H5_now_usec();
-
-    if (*head == NULL) {
+    if(NULL == *head)
         *freedspace = NULL;
-    }
     else {
+        uint64_t now_time, entry_time;
+
+        /* Get relevant times */
+        now_time = H5_now_usec();
         entry_time = (*head)->timestamp;
+
         /* Only dequeue when the entry has been in the queue longer than time limit (2 deltat) */
-        if (now_time - entry_time > (uint64_t)time_limit) {
+        if(now_time - entry_time > (uint64_t)time_limit) {
             *freedspace = *head;
-            if (NULL != (*head)->next) {
+            if(NULL != (*head)->next)
                 *head = (*head)->next;
-            }
             else {
                 /* queue is empty now */
-                *head = NULL;
-                *tail = NULL;
-            }
-        }
-    }
+                f->shared->freedspace_head = NULL;
+                f->shared->freedspace_tail = NULL;
+            } /* end else */
+        } /* end if */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5MF__freedspace_dequeue() */
@@ -418,7 +414,7 @@ H5MF__freedspace_queue_is_empty(H5MF_freedspace_t *head, hbool_t *is_empty)
     /* Sanity checks */
     HDassert(is_empty);
 
-    if (head == NULL) 
+    if(NULL == head) 
         *is_empty = TRUE;
     else 
         *is_empty = FALSE;

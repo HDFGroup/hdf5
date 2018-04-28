@@ -1113,7 +1113,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
         /* FULLSWMR, delete delta t value at file close time */
         if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
             if(f->shared->swmr_deltat != 0 && H5F_addr_defined(f->shared->sblock->ext_addr) )
-                if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_SWMR_DELTAT_ID) < 0)
+                if(H5F__super_ext_remove_msg(f, H5O_SWMR_DELTAT_ID) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove SWMR delta t value")
 
         /* Flush at this point since the file will be closed (phase 1).
@@ -1791,7 +1791,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
                 /* Check for non-default SWMR delta t, and if so, write out the SWMR delta t message */
                 if(file->shared->swmr_deltat != 0)
-                    if(H5F_super_ext_write_msg(file, meta_dxpl_id, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0)
+                    if(H5F__super_ext_write_msg(file, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "error in writing deltat message to superblock extension")
             } /* end if */
 
@@ -3497,7 +3497,7 @@ H5F__start_swmr_write(H5F_t *f)
 
     /* Write SWMR delta-t message */
     if(f->shared->swmr_deltat != 0)
-        if(H5F_super_ext_write_msg(f, H5O_SWMR_DELTAT_ID, &file->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0)
+        if(H5F__super_ext_write_msg(f, H5O_SWMR_DELTAT_ID, &f->shared->swmr_deltat, TRUE, H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing deltat message to superblock extension")
 
     /* Flush the superblock extension */

@@ -509,9 +509,6 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME   "page_buffer_min_raw_perc" /* the min raw data percentage for the page buffer cache */
 #define H5F_ACS_SWMR_DELTAT_NAME                "swmr_deltat" /* The delta T value to recycling free space when SWMR is enabled */
 
-#define H5F_ACS_IS_START_TRANSACTION_NAME       "is_api_call_start" /* The value indicate whether transaction has started */
-#define H5F_ACS_TRANSACTION_START_TIME_NAME     "api_call_start_time" /* The value indicate the time when transaction has started */
-
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME         "local"                 /* Whether absolute symlinks local to file. */
 

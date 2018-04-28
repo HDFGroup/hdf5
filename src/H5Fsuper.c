@@ -710,13 +710,12 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 
         /* FULLSWMR */
         /* Check for the extension having a 'swmr delta t' message */
-        if((status = H5O_msg_exists(&ext_loc, H5O_SWMR_DELTAT_ID, meta_dxpl_id)) < 0)
+        if((status = H5O_msg_exists(&ext_loc, H5O_SWMR_DELTAT_ID)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header")
         if(status) {
-            /* Check for ignoring the SWMR delta t info for this file */
-                /* Retrieve the 'SWMR delta t' structure */
-                if(NULL == H5O_msg_read(&ext_loc, H5O_SWMR_DELTAT_ID, &swmr_deltat, meta_dxpl_id))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
+            /* Retrieve the 'SWMR delta t' structure */
+            if(NULL == H5O_msg_read(&ext_loc, H5O_SWMR_DELTAT_ID, &swmr_deltat))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
         } /* end if */
 
         /* Check for the extension having a 'driver info' message */
