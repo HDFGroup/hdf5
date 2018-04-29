@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
@@ -22,6 +20,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -41,7 +40,7 @@ CompType::CompType() : DataType() {}
 
 //--------------------------------------------------------------------------
 // Function:    CompType copy constructor
-///\brief       Copy constructor: makes copy of the original CompType object
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: Original CompType instance
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -126,6 +125,27 @@ CompType::CompType(const H5Location& loc, const H5std_string& dtype_name) : Data
 }
 
 //--------------------------------------------------------------------------
+// Function:    CompType::decode
+///\brief       Returns a CompType object via DataType* by decoding the
+///             binary object description of this datatype.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* CompType::decode() const
+{
+    hid_t encoded_cmptype_id = H5I_INVALID_HID;
+    try {
+        encoded_cmptype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    CompType *encoded_cmptype = new CompType;
+    encoded_cmptype->p_setId(encoded_cmptype_id);
+    return(encoded_cmptype);
+}
+
+//--------------------------------------------------------------------------
 // Function:    CompType::getNmembers
 ///\brief       Returns the number of members in this compound datatype.
 ///\return      Number of members
@@ -197,7 +217,6 @@ int CompType::getMemberIndex(const H5std_string& name) const
 ///             respect to the beginning of the compound data type datum.
 ///\param       member_num - IN: Zero-based index of the member
 ///\return      Byte offset
-///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 // Description
 ///             Members are stored in no particular order with numbers 0
@@ -285,7 +304,7 @@ DataType CompType::getMemberDataType(unsigned member_num) const
 ArrayType CompType::getMemberArrayType(unsigned member_num) const
 {
     try {
-        ArrayType arraytype(p_get_member_type(member_num));
+        ArrayType arraytype;
         f_DataType_setId(&arraytype, p_get_member_type(member_num));
         return(arraytype);
     }
@@ -305,10 +324,10 @@ ArrayType CompType::getMemberArrayType(unsigned member_num) const
 //--------------------------------------------------------------------------
 CompType CompType::getMemberCompType(unsigned member_num) const
 {
-   try {
-      CompType comptype(p_get_member_type(member_num));
+    try {
+        CompType comptype;
         f_DataType_setId(&comptype, p_get_member_type(member_num));
-      return(comptype);
+        return(comptype);
     }
     catch (DataTypeIException& E) {
         throw DataTypeIException("CompType::getMemberCompType", E.getDetailMsg());
@@ -326,10 +345,10 @@ CompType CompType::getMemberCompType(unsigned member_num) const
 //--------------------------------------------------------------------------
 EnumType CompType::getMemberEnumType(unsigned member_num) const
 {
-   try {
-      EnumType enumtype(p_get_member_type(member_num));
+    try {
+        EnumType enumtype;
         f_DataType_setId(&enumtype, p_get_member_type(member_num));
-      return(enumtype);
+        return(enumtype);
     }
     catch (DataTypeIException& E) {
         throw DataTypeIException("CompType::getMemberEnumType", E.getDetailMsg());
@@ -347,10 +366,10 @@ EnumType CompType::getMemberEnumType(unsigned member_num) const
 //--------------------------------------------------------------------------
 IntType CompType::getMemberIntType(unsigned member_num) const
 {
-   try {
-      IntType inttype(p_get_member_type(member_num));
+    try {
+        IntType inttype;
         f_DataType_setId(&inttype, p_get_member_type(member_num));
-      return(inttype);
+        return(inttype);
     }
     catch (DataTypeIException& E) {
         throw DataTypeIException("CompType::getMemberIntType", E.getDetailMsg());
@@ -368,10 +387,10 @@ IntType CompType::getMemberIntType(unsigned member_num) const
 //--------------------------------------------------------------------------
 FloatType CompType::getMemberFloatType(unsigned member_num) const
 {
-   try {
-      FloatType floatype(p_get_member_type(member_num));
+    try {
+        FloatType floatype;
         f_DataType_setId(&floatype, p_get_member_type(member_num));
-      return(floatype);
+        return(floatype);
     }
     catch (DataTypeIException& E) {
         throw DataTypeIException("CompType::getMemberFloatType", E.getDetailMsg());
@@ -389,10 +408,10 @@ FloatType CompType::getMemberFloatType(unsigned member_num) const
 //--------------------------------------------------------------------------
 StrType CompType::getMemberStrType(unsigned member_num) const
 {
-   try {
-      StrType strtype(p_get_member_type(member_num));
+    try {
+        StrType strtype;
         f_DataType_setId(&strtype, p_get_member_type(member_num));
-      return(strtype);
+        return(strtype);
     }
     catch (DataTypeIException& E) {
         throw DataTypeIException("CompType::getMemberStrType", E.getDetailMsg());
@@ -410,10 +429,10 @@ StrType CompType::getMemberStrType(unsigned member_num) const
 //--------------------------------------------------------------------------
 VarLenType CompType::getMemberVarLenType(unsigned member_num) const
 {
-   try {
-      VarLenType varlentype(p_get_member_type(member_num));
+    try {
+        VarLenType varlentype;
         f_DataType_setId(&varlentype, p_get_member_type(member_num));
-      return(varlentype);
+        return(varlentype);
     }
     catch (DataTypeIException& E) {
         throw DataTypeIException("CompType::getMemberVarLenType", E.getDetailMsg());

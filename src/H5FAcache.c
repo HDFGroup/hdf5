@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -90,7 +88,7 @@ static herr_t H5FA__cache_dblock_serialize(const H5F_t *f, void *image, size_t l
     void *thing);
 static herr_t H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FA__cache_dblock_free_icr(void *thing);
-static herr_t H5FA__cache_dblock_fsf_size(const void *thing, size_t *fsf_size);
+static herr_t H5FA__cache_dblock_fsf_size(const void *thing, hsize_t *fsf_size);
 
 static herr_t H5FA__cache_dblk_page_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5FA__cache_dblk_page_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
@@ -977,7 +975,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_free_icr() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_dblock_fsf_size(const void *_thing, size_t *fsf_size))
+H5FA__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size))
 
     const H5FA_dblock_t *dblock = (const H5FA_dblock_t *)_thing;    /* Pointer to the object */
 

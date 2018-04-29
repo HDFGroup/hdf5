@@ -81,11 +81,11 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
     Many other common questions and hints are located online and being updated
     in the HDF5 FAQ.  For Windows-specific questions, please see:
 
-        http://www.hdfgroup.org/HDF5/faq/windows.html
+        https://support.hdfgroup.org/HDF5/faq/windows.html
 
     For all other general questions, you can look in the general FAQ:
 
-        http://hdfgroup.org/HDF5-FAQ.html
+        https://support.hdfgroup.org/HDF5/HDF5-FAQ.html
 
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.

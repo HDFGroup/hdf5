@@ -37,7 +37,7 @@ I. Preconditions
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
       web site. The HDF5 1.10.x product requires a minimum CMake version
-      of 3.2.2.
+      of 3.10.1.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
@@ -101,10 +101,10 @@ These steps are described in more detail below.
             * Unix Makefiles
             * Visual Studio 12 2013
             * Visual Studio 12 2013 Win64
-            * Visual Studio 11 2012
-            * Visual Studio 11 2012 Win64
             * Visual Studio 14 2015
             * Visual Studio 14 2015 Win64
+            * Visual Studio 15 2017
+            * Visual Studio 15 2017 Win64
 
         <options> is:
             * BUILD_TESTING:BOOL=ON
@@ -180,7 +180,7 @@ Given the preconditions in section I, create a CMakeLists.txt file at the
 source root. Include the following text in the file:
 
 ##########################################################
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.10)
 project (HDF5MyApp C CXX)
 
 set (LIB_TYPE STATIC) # or SHARED
@@ -188,13 +188,12 @@ string(TOLOWER ${LIB_TYPE} SEARCH_TYPE)
 
 find_package (HDF5 NAMES hdf5 COMPONENTS C ${SEARCH_TYPE})
 # find_package (HDF5) # Find non-cmake built HDF5
-INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIR})
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIR}")
 set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
 
 set (example hdf_example)
 
 add_executable (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
-TARGET_NAMING (${example} ${LIB_TYPE})
 TARGET_C_PROPERTIES (${example} ${LIB_TYPE} " " " ")
 target_link_libraries (${example} ${LINK_LIBS})
 
@@ -217,132 +216,116 @@ adjust the forward slash to double backslashes, except for the HDF_DIR
 environment variable.
 
 NOTE: this file is available at the HDF web site:
-    http://www.hdfgroup.org/HDF5/release/cmakebuild.html
+    https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
 
     HDF5_Examples.cmake
+    HDF5_Examples_options.cmake
 
 Also available at the HDF web site is a CMake application framework template.
 You can quickly add files to the framework and execute the script to compile
 your application with an installed HDF5 binary.
 
 ========================================================================
-ctest
+ctest use of HDF5_Examples.cmake and HDF5_Examples_options.cmake
 ========================================================================
 
-cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.10)
 ###############################################################################################################
 # This script will build and run the examples from a folder
 # Execute from a command line:
-#     ctest -S HDF5_Examples.cmake,OPTION=VALUE -C Release -V -O test.log
+#     ctest -S HDF5_Examples.cmake,OPTION=VALUE -C Release -VV -O test.log
 ###############################################################################################################
 
-set (CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
-set (CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
+set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
+if("@CMAKE_GENERATOR_TOOLSET@")
+  set(CMAKE_GENERATOR_TOOLSET "@CMAKE_GENERATOR_TOOLSET@")
+endif()
+set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 
 # handle input parameters to script.
 #INSTALLDIR - HDF5 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF4Examples
-#STATIC_ONLY - Default is YES
-#FORTRAN_LIBRARIES - Default is NO
-#JAVA_LIBRARIES - Default is NO
-##NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac)
-if (DEFINED CTEST_SCRIPT_ARG)
-    # transform ctest script arguments of the form
-    # script.ctest,var1=value1,var2=value2
-    # to variables with the respective names set to the respective values
-    string (REPLACE "," ";" script_args "${CTEST_SCRIPT_ARG}")
-    foreach (current_var ${script_args})
-        if ("${current_var}" MATCHES "^([^=]+)=(.+)$")
-            set("${CMAKE_MATCH_1}" "${CMAKE_MATCH_2}")
-        endif ()
-    endforeach ()
-endif ()
-if (NOT DEFINED INSTALLDIR)
-    set (INSTALLDIR "@CMAKE_INSTALL_PREFIX@")
-endif ()
-if (NOT DEFINED CTEST_CONFIGURATION_TYPE)
-    set (CTEST_CONFIGURATION_TYPE "Release")
-endif ()
-if (NOT DEFINED CTEST_SOURCE_NAME)
-    set (CTEST_SOURCE_NAME "HDF5Examples")
-endif ()
-if (NOT DEFINED STATIC_ONLY)
-    set (STATICONLYLIBRARIES "YES")
-else ()
-    set (STATICONLYLIBRARIES "NO")
-endif ()
-if (NOT DEFINED FORTRAN_LIBRARIES)
-    set (FORTRANLIBRARIES "NO")
-else ()
-    set (FORTRANLIBRARIES "YES")
-endif ()
-if (NOT DEFINED JAVA_LIBRARIES)
-    set (JAVALIBRARIES "NO")
-else ()
-    set (JAVALIBRARIES "YES")
-endif ()
+#CTEST_SOURCE_NAME - name of source folder; HDF5Examples
+if(DEFINED CTEST_SCRIPT_ARG)
+  # transform ctest script arguments of the form
+  # script.ctest,var1=value1,var2=value2
+  # to variables with the respective names set to the respective values
+  string(REPLACE "," ";" script_args "${CTEST_SCRIPT_ARG}")
+  foreach(current_var ${script_args})
+    if("${current_var}" MATCHES "^([^=]+)=(.+)$")
+      set("${CMAKE_MATCH_1}" "${CMAKE_MATCH_2}")
+    endif()
+  endforeach()
+endif()
+
+###################################################################
+### Following Line is one of [Release, RelWithDebInfo, Debug] #####
+set(CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
+if(NOT DEFINED CTEST_CONFIGURATION_TYPE)
+  set(CTEST_CONFIGURATION_TYPE "Release")
+endif()
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCTEST_CONFIGURATION_TYPE:STRING=${CTEST_CONFIGURATION_TYPE}")
+##################################################################
+
+if(NOT DEFINED INSTALLDIR)
+  set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@")
+endif()
+
+if(NOT DEFINED CTEST_SOURCE_NAME)
+  set(CTEST_SOURCE_NAME "HDF5Examples")
+endif()
+
+if(NOT DEFINED HDF_LOCAL)
+  set(CDASH_LOCAL "NO")
+else()
+  set(CDASH_LOCAL "YES")
+endif()
+if(NOT DEFINED CTEST_SITE)
+  set(CTEST_SITE "local")
+endif()
+if(NOT DEFINED CTEST_BUILD_NAME)
+  set(CTEST_BUILD_NAME "examples")
+endif()
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 
 #TAR_SOURCE - name of tarfile
-#if (NOT DEFINED TAR_SOURCE)
-#  set (CTEST_USE_TAR_SOURCE "HDF5Examples-1.10.1-Source")
-#endif ()
+#if(NOT DEFINED TAR_SOURCE)
+#  set(CTEST_USE_TAR_SOURCE "HDF5Examples-1.10.7-Source")
+#endif()
 
 ###############################################################################################################
-#     Adjust the following SET Commands as needed
-###############################################################################################################
-if (WIN32)
-  if (${STATICONLYLIBRARIES})
-    set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
-  endif ()
-  set (ENV{HDF5_DIR} "${INSTALLDIR}/cmake")
-  set (CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}\\build)
-  set (CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_SOURCE_NAME}")
-  set (CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_BINARY_NAME}")
-else (WIN32)
-  if (${STATICONLYLIBRARIES})
-    set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
-  endif ()
-  set (ENV{HDF5_DIR} "${INSTALLDIR}/share/cmake")
-  set (ENV{LD_LIBRARY_PATH} "${INSTALLDIR}/lib")
-  set (CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}/build)
-  set (CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_SOURCE_NAME}")
-  set (CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
-endif(WIN32)
-if (${FORTRANLIBRARIES})
-  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
-else ()
-  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
-endif ()
-if (${JAVALIBRARIES})
-  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=ON")
-else ()
-  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=OFF")
-endif ()
-set (BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
+if(WIN32)
+  set(SITE_OS_NAME "Windows")
+  set(ENV{HDF5_DIR} "${INSTALLDIR}/cmake")
+  set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}\\build)
+  set(CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_SOURCE_NAME}")
+  set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_BINARY_NAME}")
+else()
+  set(ENV{HDF5_DIR} "${INSTALLDIR}/share/cmake")
+  set(ENV{LD_LIBRARY_PATH} "${INSTALLDIR}/lib")
+  set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}/build)
+  set(CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_SOURCE_NAME}")
+  set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
+endif()
+if(${CDASH_LOCAL})
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCDASH_LOCAL:BOOL=ON")
+endif()
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
 
 ###############################################################################################################
-# For any comments please contact cdashhelp@hdfgroup.org
+# For any comments please contact help@hdfgroup.org
 #
 ###############################################################################################################
 
-#-----------------------------------------------------------------------------
-# MAC machines need special option
-#-----------------------------------------------------------------------------
-if (APPLE)
-  # Compiler choice
-  execute_process (COMMAND xcrun --find cc OUTPUT_VARIABLE XCODE_CC OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process (COMMAND xcrun --find c++ OUTPUT_VARIABLE XCODE_CXX OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set (ENV{CC} "${XCODE_CC}")
-  set (ENV{CXX} "${XCODE_CXX}")
-  if (NOT NO_MAC_FORTRAN)
-    # Shared fortran is not supported, build static
-    set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
-  else ()
-    set (BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
-  endif ()
-  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
-endif ()
+#############################################################################################
+####  Change default configuration of options in config/cmake/cacheinit.cmake file        ###
+####  format for file: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")        ###
+#############################################################################################
+if(WIN32)
+  include(${CTEST_SCRIPT_DIRECTORY}\\HDF5_Examples_options.cmake)
+else()
+  include(${CTEST_SCRIPT_DIRECTORY}/HDF5_Examples_options.cmake)
+endif()
 
 #-----------------------------------------------------------------------------
 set (CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
@@ -415,6 +398,57 @@ if (res GREATER 0)
 endif ()
 #-----------------------------------------------------------------------------
 ##############################################################################################################
+
+##############################################################################################################
+####  HDF5_Examples_options.cmake                                                                          ###
+####          Change default configuration of options in config/cmake/cacheinit.cmake file                 ###
+##############################################################################################################
+#############################################################################################
+####  Change default configuration of options in config/cmake/cacheinit.cmake file        ###
+####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")                 ###
+####  DEFAULT:                                                                            ###
+####         BUILD_SHARED_LIBS:BOOL=OFF                                                   ###
+####         HDF_BUILD_C:BOOL=ON                                                          ###
+####         HDF_BUILD_CXX:BOOL=OFF                                                       ###
+####         HDF_BUILD_FORTRAN:BOOL=OFF                                                   ###
+####         HDF_BUILD_JAVA:BOOL=OFF                                                      ###
+####         BUILD_TESTING:BOOL=OFF                                                       ###
+####         HDF_ENABLE_PARALLEL:BOOL=OFF                                                 ###
+####         HDF_ENABLE_THREADSAFE:BOOL=OFF                                               ###
+#############################################################################################
+
+### uncomment/comment and change the following lines for other configuration options
+### build with shared libraries
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=ON")
+
+#############################################################################################
+####      languages       ####
+### disable C builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_C:BOOL=OFF")
+
+### enable C++ builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_CXX:BOOL=ON")
+
+### enable Fortran builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
+
+### enable JAVA builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=ON")
+
+#############################################################################################
+### enable parallel program builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_ENABLE_PARALLEL:BOOL=ON")
+
+#############################################################################################
+### enable threadsafe program builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_ENABLE_THREADSAFE:BOOL=ON")
+
+#############################################################################################
+### enable test program builds, requires reference files in testfiles subdirectory
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=ON")
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCOMPARE_TESTING:BOOL=ON")
+
+#############################################################################################
 
 
 

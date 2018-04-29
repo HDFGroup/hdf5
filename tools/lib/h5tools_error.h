@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -64,11 +62,19 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
 
 
 /*
+ * H5TOOLS_INFO macro, used to facilitate error reporting .  The arguments are the major
+ * error number, the minor error number, and a description of the error.
+ */
+#define H5TOOLS_INFO(min_id, ...) {                                                                        \
+        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, __VA_ARGS__);     \
+}
+
+/*
  * HERROR macro, used to facilitate error reporting .  The arguments are the major
  * error number, the minor error number, and a description of the error.
  */
-#define HERROR(maj_id, min_id, str) {                                                                        \
-        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, maj_id, min_id, str);     \
+#define HERROR(maj_id, min_id, ...) {                                                                        \
+        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, maj_id, min_id, __VA_ARGS__);     \
         ret_value = FAIL;                                                                                    \
 }
 
@@ -97,8 +103,8 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
  * The return value is assigned to a variable `ret_value' and control branches
  * to the `catch_except' label, if we're not already past it.
  */
-#define H5E_THROW(fail_value, min_id, str) {        \
-    H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, str);     \
+#define H5E_THROW(fail_value, min_id, ...) {        \
+    H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, __VA_ARGS__);     \
     H5_LEAVE(fail_value)                            \
 }
 
@@ -108,8 +114,8 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
  * error string.  The return value is assigned to a variable `ret_value' and
  * control branches to the `done' label.
  */
-#define HGOTO_ERROR(fail_value, min_id, str) {        \
-   HERROR(H5E_tools_g, min_id, str);                 \
+#define HGOTO_ERROR(fail_value, min_id, ...) {        \
+   HERROR(H5E_tools_g, min_id, __VA_ARGS__);                 \
    HGOTO_DONE(fail_value)                          \
 }
 

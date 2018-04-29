@@ -1,16 +1,5 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_TOOLS_TEST_PERFORM )
-
-#-----------------------------------------------------------------------------
-# Apply Definitions to compiler in this directory and below
-#-----------------------------------------------------------------------------
-add_definitions (${HDF_EXTRA_C_FLAGS})
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib )
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_TOOLS_TEST_PERFORM C)
 
 # --------------------------------------------------------------------
 # Add the executables
@@ -21,7 +10,7 @@ set (h5perf_serial_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/sio_engine.c
 )
 add_executable (h5perf_serial ${h5perf_serial_SOURCES})
-TARGET_NAMING (h5perf_serial STATIC)
+set_property(TARGET h5perf_serial APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (h5perf_serial STATIC " " " ")
 target_link_libraries (h5perf_serial ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (h5perf_serial PROPERTIES FOLDER perform)
@@ -33,7 +22,7 @@ if (HDF5_BUILD_PERFORM_STANDALONE)
       ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/sio_engine.c
   )
   add_executable (h5perf_serial_alone ${h5perf_serial_alone_SOURCES})
-  TARGET_NAMING (h5perf_serial_alone STATIC)
+  set_property(TARGET h5perf_serial_alone APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (h5perf_serial_alone STATIC " " " ")
   target_link_libraries (h5perf_serial_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (h5perf_serial_alone PROPERTIES FOLDER perform)
@@ -46,10 +35,10 @@ endif ()
 set (chunk_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/chunk.c
 )
-ADD_EXECUTABLE(chunk ${chunk_SOURCES})
-TARGET_NAMING (chunk STATIC)
+add_executable(chunk ${chunk_SOURCES})
+set_property(TARGET chunk APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (chunk STATIC " " " ")
-TARGET_LINK_LIBRARIES(chunk ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+target_link_libraries(chunk ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (chunk PROPERTIES FOLDER perform)
 
 #-- Adding test for iopipe
@@ -57,7 +46,7 @@ set (iopipe_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/iopipe.c
 )
 add_executable (iopipe ${iopipe_SOURCES})
-TARGET_NAMING (iopipe STATIC)
+set_property(TARGET iopipe APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (iopipe STATIC " " " ")
 target_link_libraries (iopipe ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (iopipe PROPERTIES FOLDER perform)
@@ -67,27 +56,27 @@ set (overhead_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/overhead.c
 )
 add_executable (overhead ${overhead_SOURCES})
-TARGET_NAMING (overhead STATIC)
+set_property(TARGET overhead APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (overhead STATIC " " " ")
 target_link_libraries (overhead ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (overhead PROPERTIES FOLDER perform)
 
 #-- Adding test for perf_meta
-  set (perf_meta_SOURCES
-      ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/perf_meta.c
-  )
-  add_executable (perf_meta ${perf_meta_SOURCES})
-  TARGET_NAMING (perf_meta STATIC)
-  TARGET_C_PROPERTIES (perf_meta STATIC " " " ")
-  target_link_libraries (perf_meta ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-  set_target_properties (perf_meta PROPERTIES FOLDER perform)
+set (perf_meta_SOURCES
+    ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/perf_meta.c
+)
+add_executable (perf_meta ${perf_meta_SOURCES})
+set_property(TARGET perf_meta APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
+TARGET_C_PROPERTIES (perf_meta STATIC " " " ")
+target_link_libraries (perf_meta ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (perf_meta PROPERTIES FOLDER perform)
 
 #-- Adding test for zip_perf
 set (zip_perf_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/zip_perf.c
 )
 add_executable (zip_perf ${zip_perf_SOURCES})
-TARGET_NAMING (zip_perf STATIC)
+set_property(TARGET zip_perf APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (zip_perf STATIC " " " ")
 target_link_libraries (zip_perf ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (zip_perf PROPERTIES FOLDER perform)
@@ -99,7 +88,7 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
       ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/pio_engine.c
   )
   add_executable (h5perf ${h5perf_SOURCES})
-  TARGET_NAMING (h5perf STATIC)
+  set_property(TARGET h5perf APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (h5perf STATIC " " " ")
   target_link_libraries (h5perf ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
   set_target_properties (h5perf PROPERTIES FOLDER perform)
@@ -111,7 +100,7 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
         ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/pio_engine.c
     )
     add_executable (h5perf_alone ${h5perf_alone_SOURCES})
-    TARGET_NAMING (h5perf_alone STATIC)
+    set_property(TARGET h5perf_alone APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
     TARGET_C_PROPERTIES (h5perf_alone STATIC " " " ")
     target_link_libraries (h5perf_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     set_target_properties (h5perf_alone PROPERTIES FOLDER perform)

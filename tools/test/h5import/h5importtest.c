@@ -5,15 +5,12 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdio.h>
 #include "H5private.h"
 
 #ifdef H5_HAVE_WIN32_API
@@ -27,7 +24,7 @@
  *      h5importtest
  *
  * Description:
- *      This program creates that can be
+ *      This program creates files that can be
  *      used to test the h5import program.
  *
  */
@@ -38,6 +35,7 @@ main(void)
     int       nrow = 3, ncol = 4, npln = 5;
     int       i, j, k;
     FILE      *sp;
+    char      machine_order[3] = {0, 0, 0};
 
     float     row4[3], col4[4], pln4[5];
     float     rowo4 = 11.0F, colo4 = 21.0F, plno4 = 51.0F;
@@ -68,6 +66,14 @@ main(void)
     double    row8[3], col8[4], pln8[5];
     double    rowo8 = 11.0F, colo8 = 21.0F, plno8 = 51.0F;
     double    rowi8 = 1.0F, coli8 = 2.0F, plni8 = 5.0F;
+
+    /* Initialize machine endian */
+    volatile uint32_t ibyte=0x01234567;
+    /* 0 for big endian, 1 for little endian. */
+    if ((*((uint8_t*)(&ibyte))) == 0x67)
+        strncpy(machine_order, "LE", 2);
+    else
+        strncpy(machine_order, "BE", 2);
 
 
     /*
@@ -219,7 +225,7 @@ main(void)
 #endif
 
  /*-------------------------------------------------------------------------
-  * TOOLTEST binin32.bin -c $srcdir/testfiles/binin32.conf -o binin32.h5
+  * TOOLTEST binin32.bin -c binin32.conf -o binin32.h5
   *-------------------------------------------------------------------------
   */
 
@@ -236,8 +242,21 @@ main(void)
     }
     (void) HDfclose(sp);
 
+    sp = HDfopen("binin32.conf", "w");
+    (void) fprintf(sp, "PATH /int/bin/32-bit\n");
+    (void) fprintf(sp, "INPUT-CLASS IN\n");
+    (void) fprintf(sp, "INPUT-SIZE    32\n");
+    (void) fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void) fprintf(sp, "RANK 3\n");
+    (void) fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void) fprintf(sp, "OUTPUT-BYTE-ORDER BE\n");
+    (void) fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
+    (void) fprintf(sp, "CHUNKED-DIMENSION-SIZES 1 2 1\n");
+    (void) fprintf(sp, "\n");
+    (void) HDfclose(sp);
+
  /*-------------------------------------------------------------------------
-  * TOOLTEST binuin32.bin -c $srcdir/testfiles/binuin32.conf -o binuin32.h5
+  * TOOLTEST binuin32.bin -c binuin32.conf -o binuin32.h5
   *-------------------------------------------------------------------------
   */
 
@@ -254,11 +273,20 @@ main(void)
     }
     (void) HDfclose(sp);
 
-
-
+    sp = HDfopen("binuin32.conf", "w");
+    (void) fprintf(sp, "PATH /int/buin/32-bit\n");
+    (void) fprintf(sp, "INPUT-CLASS UIN\n");
+    (void) fprintf(sp, "INPUT-SIZE    32\n");
+    (void) fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void) fprintf(sp, "RANK 3\n");
+    (void) fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void) fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+    (void) fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
+    (void) fprintf(sp, "\n");
+    (void) HDfclose(sp);
 
  /*-------------------------------------------------------------------------
-  * TOOLTEST binin16.bin -c $srcdir/testfiles/binin16.conf -o binin16.h5
+  * TOOLTEST binin16.bin -c binin16.conf -o binin16.h5
   *-------------------------------------------------------------------------
   */
 
@@ -275,8 +303,22 @@ main(void)
     }
     (void) HDfclose(sp);
 
+    sp = HDfopen("binin16.conf", "w");
+    (void) fprintf(sp, "PATH /int/bin/16-bit\n");
+    (void) fprintf(sp, "INPUT-CLASS IN\n");
+    (void) fprintf(sp, "INPUT-SIZE    16\n");
+    (void) fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void) fprintf(sp, "RANK 3\n");
+    (void) fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void) fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+    (void) fprintf(sp, "DIMENSION-SIZES 2 3 4\n");
+    (void) fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
+    (void) fprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 8\n");
+    (void) fprintf(sp, "\n");
+    (void) HDfclose(sp);
+
  /*-------------------------------------------------------------------------
-  * TOOLTEST binuin16.bin -c $srcdir/testfiles/binuin16.conf -o binuin16.h5
+  * TOOLTEST binuin16.bin -c binuin16.conf -o binuin16.h5
   *-------------------------------------------------------------------------
   */
     sp = HDfopen("binuin16.bin", OPEN_FLAGS);
@@ -292,10 +334,22 @@ main(void)
     }
     (void) HDfclose(sp);
 
-
+    sp = HDfopen("binuin16.conf", "w");
+    (void) fprintf(sp, "PATH /int/buin/16-bit\n");
+    (void) fprintf(sp, "INPUT-CLASS UIN\n");
+    (void) fprintf(sp, "INPUT-SIZE    16\n");
+    (void) fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void) fprintf(sp, "RANK 3\n");
+    (void) fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void) fprintf(sp, "OUTPUT-BYTE-ORDER BE\n");
+    (void) fprintf(sp, "DIMENSION-SIZES 2 3 4\n");
+    (void) fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
+    (void) fprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 8\n");
+    (void) fprintf(sp, "\n");
+    (void) HDfclose(sp);
 
  /*-------------------------------------------------------------------------
-  * TOOLTEST binin8.bin -c $srcdir/testfiles/binin8.conf  -o binin8.h5
+  * TOOLTEST binin8.bin -c binin8.conf  -o binin8.h5
   *-------------------------------------------------------------------------
   */
 
@@ -312,13 +366,27 @@ main(void)
     }
     (void) HDfclose(sp);
 
+    sp = HDfopen("binin8.conf", "w");
+    (void) fprintf(sp, "PATH /int/bin/8-bit\n");
+    (void) fprintf(sp, "INPUT-CLASS IN\n");
+    (void) fprintf(sp, "INPUT-SIZE    8\n");
+    (void) fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void) fprintf(sp, "RANK 3\n");
+    (void) fprintf(sp, "OUTPUT-CLASS IN\n");
+    (void) fprintf(sp, "OUTPUT-SIZE    16\n");
+    (void) fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void) fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+    (void) fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
+    (void) fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
+    (void) fprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 -1\n");
+    (void) fprintf(sp, "COMPRESSION-PARAM 3\n");
+    (void) fprintf(sp, "\n");
+    (void) HDfclose(sp);
+
 #endif /* UNICOS */
 
-
-
-
  /*-------------------------------------------------------------------------
-  * TOOLTEST binfp64.bin -c $srcdir/testfiles/binfp64.conf -o binfp64.h5
+  * TOOLTEST binfp64.bin -c binfp64.conf -o binfp64.h5
   *-------------------------------------------------------------------------
   */
 
@@ -339,10 +407,23 @@ main(void)
     }
     (void) HDfclose(sp);
 
-
+    sp = HDfopen("binfp64.conf", "w");
+    (void) fprintf(sp, "PATH /fp/bin/64-bit\n");
+    (void) fprintf(sp, "INPUT-CLASS FP\n");
+    (void) fprintf(sp, "INPUT-SIZE    64\n");
+    (void) fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void) fprintf(sp, "RANK 3\n");
+    (void) fprintf(sp, "OUTPUT-ARCHITECTURE IEEE\n");
+    (void) fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+    (void) fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
+    (void) fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
+    (void) fprintf(sp, "MAXIMUM-DIMENSIONS -1 6 7\n");
+    (void) fprintf(sp, "COMPRESSION-PARAM 8\n");
+    (void) fprintf(sp, "\n");
+    (void) HDfclose(sp);
 
  /*-------------------------------------------------------------------------
-  * TOOLTEST binin8w.bin -c $srcdir/testfiles/binin8w.conf -o binin8w.h5
+  * TOOLTEST binin8w.bin -c binin8w.conf -o binin8w.h5
   *-------------------------------------------------------------------------
   */
 
@@ -359,13 +440,20 @@ main(void)
         }
         HDfclose(sp);
 
+        sp = HDfopen("binin8w.conf", "w");
+        (void) fprintf(sp, "INPUT-CLASS IN\n");
+        (void) fprintf(sp, "INPUT-SIZE    8\n");
+        (void) fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+        (void) fprintf(sp, "RANK 1\n");
+        (void) fprintf(sp, "OUTPUT-CLASS IN\n");
+        (void) fprintf(sp, "OUTPUT-SIZE    8\n");
+        (void) fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+        (void) fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+        (void) fprintf(sp, "DIMENSION-SIZES 4\n");
+        (void) fprintf(sp, "\n");
+        (void) HDfclose(sp);
 
     }
-
-
-
-
-
     return (EXIT_SUCCESS);
 }
 

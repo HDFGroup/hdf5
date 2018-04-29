@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 include (CMakePackageConfigHelpers)
 
 #-----------------------------------------------------------------------------
@@ -12,16 +23,6 @@ if (WIN32)
   find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
 endif ()
 
-#-----------------------------------------------------------------------------
-# Add file(s) to CMake Install
-#-----------------------------------------------------------------------------
-if (NOT HDF5_INSTALL_NO_DEVELOPMENT)
-  install (
-      FILES ${PROJECT_BINARY_DIR}/H5pubconf.h
-      DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
-      COMPONENT headers
-  )
-endif ()
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
@@ -30,7 +31,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (HDF5_EXPORTED_TARGETS)
     install (
         EXPORT ${HDF5_EXPORTED_TARGETS}
-        DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+        DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/hdf5
         FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
         NAMESPACE ${HDF5_PACKAGE}::
         COMPONENT configinstall
@@ -73,7 +74,7 @@ set (CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
 configure_package_config_file (
     ${HDF_RESOURCES_DIR}/hdf5-config.cmake.in
     "${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
-    INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}"
+    INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}/hdf5"
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
     INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
 )
@@ -87,14 +88,14 @@ set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}" )
 configure_package_config_file (
     ${HDF_RESOURCES_DIR}/hdf5-config.cmake.in
     "${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
-    INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}"
+    INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}/hdf5"
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
 )
 
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   install (
       FILES ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake
-      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/hdf5
       COMPONENT configinstall
   )
 endif ()
@@ -109,7 +110,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   install (
       FILES ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake
-      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/hdf5
       COMPONENT configinstall
   )
 endif ()
@@ -131,24 +132,6 @@ install (
     DESTINATION ${HDF5_INSTALL_LIB_DIR}
     COMPONENT libraries
 )
-
-#-----------------------------------------------------------------------------
-# Create pkgconfig files
-#-----------------------------------------------------------------------------
-#foreach (libs ${LINK_LIBS})
-#  set (LIBS "${LIBS} -l${libs}")
-#endforeach ()
-#foreach (libs ${HDF5_LIBRARIES_TO_EXPORT})
-#  set (HDF5LIBS "${HDF5LIBS} -l${libs}")
-#endforeach ()
-#configure_file (
-#    ${HDF_RESOURCES_DIR}/libhdf5.pc.in
-#    ${HDF5_BINARY_DIR}/CMakeFiles/libhdf5.pc @ONLY
-#)
-#install (
-#    FILES ${HDF5_BINARY_DIR}/CMakeFiles/libhdf5.pc
-#    DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
-#)
 
 #-----------------------------------------------------------------------------
 # Configure the HDF518_Examples.cmake file and the examples
@@ -467,7 +450,7 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
   set (CPACK_INSTALL_CMAKE_PROJECTS "${HDF5_BINARY_DIR};HDF5;ALL;/")
 
   if (HDF5_PACKAGE_EXTLIBS)
-    if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
+    if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
       if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
         if (WIN32)
           set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};ZLIB;ALL;/")

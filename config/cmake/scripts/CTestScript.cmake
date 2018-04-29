@@ -1,4 +1,15 @@
-cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+cmake_minimum_required (VERSION 3.10)
 ########################################################
 # This dashboard is maintained by The HDF Group
 # For any comments please contact cdashhelp@hdfgroup.org
@@ -52,13 +63,6 @@ if (APPLE)
   execute_process (COMMAND xcrun --find c++ OUTPUT_VARIABLE XCODE_CXX OUTPUT_STRIP_TRAILING_WHITESPACE)
   set (ENV{CC} "${XCODE_CC}")
   set (ENV{CXX} "${XCODE_CXX}")
-
-  if (NOT NO_MAC_FORTRAN)
-    # Shared fortran is not supported, build static
-    set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
-  else ()
-    set (BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
-  endif ()
 
   set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
 endif ()

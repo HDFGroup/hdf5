@@ -1,10 +1,5 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_TOOLS_SRC_H5DIFF)
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_TOOLS_SRC_H5DIFF C)
 
 # --------------------------------------------------------------------
 # Add the h5diff executables
@@ -13,7 +8,7 @@ add_executable (h5diff
     ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
     ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
 )
-TARGET_NAMING (h5diff STATIC)
+set_property(TARGET h5diff APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (h5diff STATIC " " " ")
 target_link_libraries (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5diff PROPERTIES FOLDER tools)
@@ -26,7 +21,7 @@ if (BUILD_SHARED_LIBS)
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
   )
-  TARGET_NAMING (h5diff-shared SHARED)
+  set_property(TARGET h5diff-shared APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (h5diff-shared SHARED " " " ")
   target_link_libraries (h5diff-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5diff-shared PROPERTIES FOLDER tools)
@@ -40,7 +35,7 @@ if (H5_HAVE_PARALLEL)
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/ph5diff_main.c
   )
-  TARGET_NAMING (ph5diff STATIC)
+  set_property(TARGET ph5diff APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (ph5diff STATIC " " " ")
   target_link_libraries (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (ph5diff PROPERTIES FOLDER tools)
@@ -57,10 +52,9 @@ endif ()
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
-  if (BUILD_SHARED_LIBS)
-    INSTALL_PROGRAM_PDB (h5diff-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
-  endif ()
-  INSTALL_PROGRAM_PDB (h5diff ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  foreach (exec ${H5_DEP_EXECUTABLES})
+    INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endforeach ()
 
   install (
       TARGETS

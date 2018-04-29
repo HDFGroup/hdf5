@@ -35,6 +35,8 @@ To test the installation with the examples;
     Create a directory to run the examples.
     Copy HDF5Examples folder to this directory.
     Copy HDF5_Examples.cmake to this directory.
+    Copy HDF5_Examples_options.cmake to this directory.
+    Copy CTestScript.cmake to this directory.
     The default source folder is defined as "HDF5Examples". It can be changed
         with the CTEST_SOURCE_NAME script option.
     The default installation folder is defined as "@CMAKE_INSTALL_PREFIX@".
@@ -44,7 +46,7 @@ To test the installation with the examples;
         be the same as the value used with the -C command line option.
     The default build configuration is defined to build and use static libraries.
         Shared libraries can be used with the STATICONLYLIBRARIES script option set to "NO".
-    Other options can be changed by editing the HDF5_Examples.cmake file.
+    Other options can be changed by editing the HDF5_Examples_options.cmake file.
 
     If the defaults are okay, execute from this directory:
         ctest -S HDF5_Examples.cmake -C Release -V -O test.log

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -979,7 +977,7 @@ Wround(double arg)
 float
 Wroundf(float arg)
 {
-    return arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F);
+    return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
 }
 
 #endif /* H5_HAVE_WIN32_API */
@@ -1045,7 +1043,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
          * Unix: does not apply
          */
         if(H5_CHECK_ABS_DRIVE(name)) {
-            drive = name[0] - 'A' + 1;
+            drive = HDtoupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             HDstrncpy(new_name, &name[2], name_len);
         } /* end if */
@@ -1238,4 +1236,50 @@ H5_get_time(void)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_get_time() */
 
+
+#ifdef H5_HAVE_WIN32_API
+
+#define H5_WIN32_ENV_VAR_BUFFER_SIZE    32767
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_expand_windows_env_vars()
+ *
+ * Purpose:     Replaces windows environment variables of the form %foo%
+ *              with user-specific values.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_expand_windows_env_vars(char **env_var)
+{
+    long    n_chars = 0;
+    char   *temp_buf = NULL;
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Allocate buffer for expanded environment variable string */
+    if (NULL == (temp_buf = (char *)H5MM_calloc((size_t)H5_WIN32_ENV_VAR_BUFFER_SIZE)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for expanded path")
+
+    /* Expand the environment variable string */
+    if ((n_chars = ExpandEnvironmentStringsA(*env_var, temp_buf, H5_WIN32_ENV_VAR_BUFFER_SIZE)) > H5_WIN32_ENV_VAR_BUFFER_SIZE)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+
+    if (0 == n_chars)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+
+    *env_var = (char *)H5MM_xfree(*env_var);
+    *env_var = temp_buf;
+
+done:
+    if (FAIL == ret_value && temp_buf)
+        temp_buf = (char *)H5MM_xfree(temp_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_expand_windows_env_vars() */
+#endif /* H5_HAVE_WIN32_API */
 

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -56,7 +54,6 @@
 typedef struct H5A_fh_ud_cmp_t {
     /* downward */
     H5F_t       *f;                     /* Pointer to file that fractal heap is in */
-    hid_t       dxpl_id;                /* DXPL for operation                */
     const char  *name;                  /* Name of attribute to compare      */
     const H5A_dense_bt2_name_rec_t *record;     /* v2 B-tree record for attribute */
     H5A_bt2_found_t found_op;           /* Callback when correct attribute is found */
@@ -160,7 +157,7 @@ const H5B2_class_t H5A_BT2_CORDER[1]={{ /* B-tree class information */
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_fh_name_cmp(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
+H5A__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
 {
     H5A_fh_ud_cmp_t *udata = (H5A_fh_ud_cmp_t *)_udata;         /* User data for 'op' callback */
     H5A_t *attr = NULL;                 /* Pointer to attribute created from heap object */
@@ -170,7 +167,7 @@ H5A__dense_fh_name_cmp(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_ud
     FUNC_ENTER_STATIC
 
     /* Decode attribute information */
-    if(NULL == (attr = (H5A_t *)H5O_msg_decode(udata->f, udata->dxpl_id, NULL, H5O_ATTR_ID, (const unsigned char *)obj)))
+    if(NULL == (attr = (H5A_t *)H5O_msg_decode(udata->f, NULL, H5O_ATTR_ID, obj_len, (const unsigned char *)obj)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode attribute")
 
     /* Compare the string values */
@@ -272,7 +269,6 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
         /* Prepare user data for callback */
         /* down */
         fh_udata.f = bt2_udata->f;
-        fh_udata.dxpl_id = bt2_udata->dxpl_id;
         fh_udata.name = bt2_udata->name;
         fh_udata.record = bt2_rec;
         fh_udata.found_op = bt2_udata->found_op;
@@ -289,7 +285,7 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
         HDassert(fheap);
 
         /* Check if the user's attribute and the B-tree's attribute have the same name */
-        if(H5HF_op(fheap, bt2_udata->dxpl_id, &bt2_rec->id, H5A__dense_fh_name_cmp, &fh_udata) < 0)
+        if(H5HF_op(fheap, &bt2_rec->id, H5A__dense_fh_name_cmp, &fh_udata) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
 
         /* Callback will set comparison value */

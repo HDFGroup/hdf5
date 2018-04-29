@@ -1,32 +1,25 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_HL C CXX)
-
-#-----------------------------------------------------------------------------
-# Apply Definitions to compiler in this directory and below
-#-----------------------------------------------------------------------------
-add_definitions (${HDF_EXTRA_C_FLAGS})
-
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_HL C)
 
 #-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_HL_SOURCE_DIR}/src )
 
-add_subdirectory (${HDF5_HL_SOURCE_DIR}/src ${HDF5_HL_BINARY_DIR}/src)
+add_subdirectory (src)
 
 #-- Build the High level Tools
 if (HDF5_BUILD_TOOLS)
-  add_subdirectory (${HDF5_HL_SOURCE_DIR}/tools ${HDF5_HL_BINARY_DIR}/tools)
+  add_subdirectory (tools)
 endif ()
 
 #-- Add High Level Examples
 if (HDF5_BUILD_EXAMPLES)
-  add_subdirectory (${HDF5_HL_SOURCE_DIR}/examples ${HDF5_HL_BINARY_DIR}/examples)
+  add_subdirectory (examples)
 endif ()
 
 #-- Build the Unit testing if requested
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (BUILD_TESTING)
-    add_subdirectory (${HDF5_HL_SOURCE_DIR}/test ${HDF5_HL_BINARY_DIR}/test)
+    add_subdirectory (test)
   endif ()
 endif ()

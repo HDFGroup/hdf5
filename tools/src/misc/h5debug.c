@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -40,6 +38,7 @@
 #include "H5private.h"  /* Generic Functions    */
 #include "H5Apkg.h"     /* Attributes           */
 #include "H5B2pkg.h"    /* v2 B-trees           */
+#include "H5CXprivate.h" /* API Contexts        */
 #include "H5Dpkg.h"     /* Datasets             */
 #include "H5Eprivate.h" /* Error handling       */
 #include "H5EApkg.h"    /* Extensible Arrays    */
@@ -249,13 +248,14 @@ get_H5FA_class(const uint8_t *sig)
 int
 main(int argc, char *argv[])
 {
-    hid_t  fid, fapl, dxpl;
+    hid_t  fid, fapl;
     H5F_t       *f;
     haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     H5E_auto2_t func;
     void 	*edata;
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      status = SUCCEED;
 
     if(argc == 1) {
@@ -276,7 +276,6 @@ main(int argc, char *argv[])
     /*
      * Open the file and get the file descriptor.
      */
-    dxpl = H5AC_ind_read_dxpl_id;
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         HDfprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
@@ -290,6 +289,14 @@ main(int argc, char *argv[])
         HDfprintf(stderr, "cannot open file\n");
         HDexit(1);
     } /* end if */
+
+    /* Push API context */
+    if(H5CX_push() < 0) {
+        HDfprintf(stderr, "cannot set API context\n");
+        HDexit(1);
+    }
+    api_ctx_pushed = TRUE;
+
     if(NULL == (f = (H5F_t *)H5I_object(fid))) {
         HDfprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
@@ -319,7 +326,7 @@ main(int argc, char *argv[])
      * Read the signature at the specified file position.
      */
     HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
-    if(H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), dxpl, sig) < 0) {
+    if(H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), sig) < 0) {
         HDfprintf(stderr, "cannot read signature\n");
         HDexit(3);
     }
@@ -333,13 +340,13 @@ main(int argc, char *argv[])
         /*
          * Debug a local heap.
          */
-        status = H5HL_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL);
+        status = H5HL_debug(f, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp (sig, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
 	/*
 	 * Debug a global heap collection.
 	 */
-	status = H5HG_debug (f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL);
+	status = H5HG_debug (f, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp(sig, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -353,7 +360,7 @@ main(int argc, char *argv[])
             HDfprintf(stderr, "\th5debug <filename> <Symbol table node address> <address of local heap>\n\n");
         } /* end if */
 
-        status = H5G_node_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, extra);
+        status = H5G_node_debug(f, addr, stdout, 0, VCOL, extra);
 
     } else if(!HDmemcmp(sig, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -375,7 +382,7 @@ main(int argc, char *argv[])
                     HDexit(4);
                 } /* end if */
 
-                status = H5G_node_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, extra);
+                status = H5G_node_debug(f, addr, stdout, 0, VCOL, extra);
                 break;
 
             case H5B_CHUNK_ID:
@@ -413,7 +420,7 @@ main(int argc, char *argv[])
                 /* Set the last dimension (the element size) to zero */
                 dim[ndims] = 0;
 
-                status = H5D_btree_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, ndims, dim);
+                status = H5D_btree_debug(f, addr, stdout, 0, VCOL, ndims, dim);
                 break;
 
             case H5B_NUM_BTREE_ID:
@@ -436,7 +443,7 @@ main(int argc, char *argv[])
             HDexit(4);
 	    } /* end if */
 
-        status = H5B2__hdr_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
+        status = H5B2__hdr_debug(f, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -463,7 +470,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5B2__int_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
+        status = H5B2__int_debug(f, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
 
     } else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -488,13 +495,13 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5B2__leaf_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
+        status = H5B2__leaf_debug(f, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
 
     } else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a fractal heap header.
          */
-        status = H5HF_hdr_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL);
+        status = H5HF_hdr_debug(f, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp(sig, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -509,7 +516,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5HF_dblock_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, extra, (size_t)extra2);
+        status = H5HF_dblock_debug(f, addr, stdout, 0, VCOL, extra, (size_t)extra2);
 
     } else if(!HDmemcmp(sig, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -524,14 +531,14 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5HF_iblock_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, extra, (unsigned)extra2);
+        status = H5HF_iblock_debug(f, addr, stdout, 0, VCOL, extra, (unsigned)extra2);
 
     } else if(!HDmemcmp(sig, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a free space header.
          */
 
-        status = H5FS_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL);
+        status = H5FS_debug(f, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp(sig, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -546,14 +553,14 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5FS_sects_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, extra, extra2);
+        status = H5FS_sects_debug(f, addr, stdout, 0, VCOL, extra, extra2);
 
     } else if(!HDmemcmp(sig, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug shared message master table.
          */
 
-        status = H5SM_table_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, (unsigned) UFAIL, (unsigned) UFAIL);
+        status = H5SM_table_debug(f, addr, stdout, 0, VCOL, (unsigned) UFAIL, (unsigned) UFAIL);
 
     } else if(!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -568,7 +575,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5SM_list_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, (haddr_t)extra);
+        status = H5SM_list_debug(f, addr, stdout, 0, VCOL, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -585,7 +592,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5EA__hdr_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, extra);
+        status = H5EA__hdr_debug(f, addr, stdout, 0, VCOL, cls, extra);
 
     } else if(!HDmemcmp(sig, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -602,7 +609,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5EA__iblock_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, extra, extra2);
+        status = H5EA__iblock_debug(f, addr, stdout, 0, VCOL, cls, extra, extra2);
 
     } else if(!HDmemcmp(sig, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -619,7 +626,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5EA__sblock_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, extra3);
+        status = H5EA__sblock_debug(f, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, extra3);
 
     } else if(!HDmemcmp(sig, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -636,7 +643,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5EA__dblock_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2, extra3);
+        status = H5EA__dblock_debug(f, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2, extra3);
 
     } else if(!HDmemcmp(sig, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -653,7 +660,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5FA__hdr_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, extra);
+        status = H5FA__hdr_debug(f, addr, stdout, 0, VCOL, cls, extra);
 
     } else if(!HDmemcmp(sig, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -670,21 +677,21 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5FA__dblock_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, extra, extra2);
+        status = H5FA__dblock_debug(f, addr, stdout, 0, VCOL, cls, extra, extra2);
 
     } else if(!HDmemcmp(sig, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug v2 object header (which have signatures).
          */
 
-        status = H5O_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL);
+        status = H5O_debug(f, addr, stdout, 0, VCOL);
 
     } else if(sig[0] == H5O_VERSION_1) {
         /*
          * This could be a v1 object header.  Since they don't have a signature
          * it's a somewhat "ify" detection.
          */
-        status = H5O_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL);
+        status = H5O_debug(f, addr, stdout, 0, VCOL);
 
     } else {
         /*
@@ -715,6 +722,9 @@ main(int argc, char *argv[])
 
     H5Pclose(fapl);
     H5Fclose(fid);
+
+    /* Pop API context */
+    if(api_ctx_pushed) H5CX_pop();
 
     H5Eset_auto2(H5E_DEFAULT, func, edata);
 

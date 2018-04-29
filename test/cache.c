@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  John Mainzer
@@ -241,9 +239,15 @@ smoke_check_1(int express_test, unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache, paged aggregation")
+        TESTING("smoke check #1P -- all clean, ins, dest, ren, 4/2 MB cache")
     else
         TESTING("smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -442,9 +446,15 @@ smoke_check_2(int express_test, unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache, paged aggregation")
+        TESTING("smoke check #2P -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache")
     else
         TESTING("smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -642,9 +652,15 @@ smoke_check_3(int express_test, unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache, paged aggregation")
+        TESTING("smoke check #3P -- all clean, ins, dest, ren, 2/1 KB cache")
     else
         TESTING("smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -843,9 +859,15 @@ smoke_check_4(int express_test, unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache, paged aggregation")
+        TESTING("smoke check #4P -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache")
     else
         TESTING("smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -1092,9 +1114,15 @@ smoke_check_5(int express_test, unsigned paged)
     };
 
     if(paged)
-        TESTING("smoke check #5 -- all clean, ins, prot, unprot, AR cache 1, paged aggregation")
+        TESTING("smoke check #5P -- all clean, ins, prot, unprot, AR cache 1")
     else
         TESTING("smoke check #5 -- all clean, ins, prot, unprot, AR cache 1")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -1330,9 +1358,15 @@ smoke_check_6(int express_test, unsigned paged)
     };
 
     if(paged)
-        TESTING("smoke check #6 -- ~1/2 dirty, ins, prot, unprot, AR cache 1, paged aggregation")
+        TESTING("smoke check #6P -- ~1/2 dirty, ins, prot, unprot, AR cache 1")
     else
         TESTING("smoke check #6 -- ~1/2 dirty, ins, prot, unprot, AR cache 1")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     pass = TRUE;
 
@@ -1569,9 +1603,15 @@ smoke_check_7(int express_test, unsigned paged)
     };
 
     if(paged)
-        TESTING("smoke check #7 -- all clean, ins, prot, unprot, AR cache 2, paged aggregation")
+        TESTING("smoke check #7P -- all clean, ins, prot, unprot, AR cache 2")
     else
         TESTING("smoke check #7 -- all clean, ins, prot, unprot, AR cache 2")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -1808,9 +1848,15 @@ smoke_check_8(int express_test, unsigned paged)
     };
 
     if(paged)
-        TESTING("smoke check #8 -- ~1/2 dirty, ins, prot, unprot, AR cache 2, paged aggregation")
+        TESTING("smoke check #8P -- ~1/2 dirty, ins, prot, unprot, AR cache 2")
     else
         TESTING("smoke check #8 -- ~1/2 dirty, ins, prot, unprot, AR cache 2")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -2008,9 +2054,15 @@ smoke_check_9(int express_test, unsigned paged)
     H5C_t * cache_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked, paged aggregation")
+        TESTING("smoke check #9P -- all clean, ins, dest, ren, 4/2 MB, corked")
     else
         TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -2330,9 +2382,15 @@ smoke_check_10(int express_test, unsigned paged)
     H5C_t * cache_ptr = NULL;
 
     if(paged)
-        TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked, paged aggregation")
+        TESTING("smoke check #10P -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked")
     else
         TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked")
+
+    if ( paged && ( express_test > 0 ) ) {
+
+        SKIPPED();
+        return(0);
+    }
 
     switch (express_test)
     {
@@ -2646,7 +2704,7 @@ express_test, unsigned paged)
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     if(paged)
-        TESTING("write permitted check -- 1/0 MB cache, paged aggregation")
+        TESTING("write permitted check -- 1/0 MB cache (paged aggregation)")
     else
         TESTING("write permitted check -- 1/0 MB cache")
 
@@ -3058,13 +3116,14 @@ check_insert_entry(unsigned paged)
 	     (cache_ptr->pel_len != 2) ||
 	     (cache_ptr->pel_size != 2 * entry_sizes[entry_type]) ||
 	     (cache_ptr->LRU_list_len != 2) ||
-	     (cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type]) ||
+	     (cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type])
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
-	     (cache_ptr->dLRU_list_len != 2) ||
+	     || (cache_ptr->dLRU_list_len != 2) ||
 	     (cache_ptr->dLRU_list_size != 2 * entry_sizes[entry_type]) ||
-#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 	     (cache_ptr->cLRU_list_len != 0) ||
-	     (cache_ptr->cLRU_list_size != (size_t)0)) {
+	     (cache_ptr->cLRU_list_size != (size_t)0)
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+             ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected insert results 10.";
@@ -3250,7 +3309,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
 
         if(result < 0) {
 
@@ -3261,7 +3320,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -3272,7 +3331,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_CLEAR_ONLY_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG);
 
         if(result < 0) {
 
@@ -3284,7 +3343,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_MARKED_ENTRIES_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_MARKED_ENTRIES_FLAG);
 
         if(result < 0) {
 
@@ -4955,7 +5014,7 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, flush_flags);
+        result = H5C_flush_cache(file_ptr, flush_flags);
 
         if(result < 0) {
 
@@ -5029,7 +5088,7 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -5186,7 +5245,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, flush_flags);
+        result = H5C_flush_cache(file_ptr, flush_flags);
 
         if(result < 0) {
 
@@ -5260,7 +5319,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -9263,7 +9322,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, flush_flags);
+        result = H5C_flush_cache(file_ptr, flush_flags);
 
         if(result < 0) {
 
@@ -9455,7 +9514,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -10734,7 +10793,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -12463,7 +12522,7 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, flush_flags);
+        result = H5C_flush_cache(file_ptr, flush_flags);
 
         if(result < 0) {
 
@@ -12522,7 +12581,7 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -12655,7 +12714,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, flush_flags);
+        result = H5C_flush_cache(file_ptr, flush_flags);
 
         if(result < 0) {
 
@@ -12730,7 +12789,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -13329,7 +13388,7 @@ check_multiple_read_protect(unsigned paged)
     test_entry_t * entry_ptr;
 
     if(paged)
-        TESTING("multiple read only protects on a single entry (paged aggregation)")
+        TESTING("multiple read only protects on a single entry (paged aggr)")
     else
         TESTING("multiple read only protects on a single entry")
 
@@ -14292,7 +14351,7 @@ check_resize_entry(unsigned paged)
 
         } else {
 
-            result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
+            result = H5C_unprotect(file_ptr,
                        entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if(result < 0) {
@@ -14377,7 +14436,7 @@ check_resize_entry(unsigned paged)
 
         } else {
 
-            result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
+            result = H5C_unprotect(file_ptr,
                        entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if(result < 0) {
@@ -14737,7 +14796,7 @@ check_resize_entry(unsigned paged)
 
         } else {
 
-            result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
+            result = H5C_unprotect(file_ptr,
                        entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if(result < 0) {
@@ -14824,7 +14883,7 @@ check_resize_entry(unsigned paged)
 
         } else {
 
-            result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
+            result = H5C_unprotect(file_ptr,
                        entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if(result < 0) {
@@ -15897,7 +15956,7 @@ check_flush_protected_err(unsigned paged)
 
         protect_entry(file_ptr, 0, 0);
 
-        if(H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET) >= 0) {
+        if(H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET) >= 0) {
 
             pass = FALSE;
             failure_mssg = "flush succeeded on cache with protected entry.\n";
@@ -15906,7 +15965,7 @@ check_flush_protected_err(unsigned paged)
 
             unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
-            if(H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET) < 0) {
+            if(H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET) < 0) {
 
                 pass = FALSE;
                 failure_mssg = "flush failed after unprotect.\n";
@@ -15954,7 +16013,7 @@ check_destroy_pinned_err(unsigned paged)
     H5F_t * file_ptr = NULL;
 
     if(paged)
-        TESTING("destroy cache with permanently pinned entry error (paged aggregation)")
+        TESTING("destroy cache with permanently pinned entry error (pgd aggr)")
     else
         TESTING("destroy cache with permanently pinned entry error")
 
@@ -15973,19 +16032,19 @@ check_destroy_pinned_err(unsigned paged)
         protect_entry(file_ptr, 0, 0);
 	unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
-        if(H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0) {
+        if(H5C_prep_for_file_close(file_ptr) < 0) {
             pass = FALSE;
             failure_mssg = "unexpected failure of prep for file close.\n";
         } /* end if */
 
-        if(H5C_dest(file_ptr, H5AC_ind_read_dxpl_id) >= 0) {
+        if(H5C_dest(file_ptr) >= 0) {
             pass = FALSE;
             failure_mssg = "destroy succeeded on cache with pinned entry.\n";
         } /* end if */
 	else {
 	    unpin_entry(0, 0);
 
-            if(H5C_dest(file_ptr, H5AC_ind_read_dxpl_id) < 0) {
+            if(H5C_dest(file_ptr) < 0) {
                 pass = FALSE;
                 failure_mssg = "destroy failed after unpin.\n";
             } /* end if */
@@ -16063,20 +16122,20 @@ check_destroy_protected_err(unsigned paged)
          * we are trying to test, put the call to H5C_prep_for_file_close()
          * prior to the final protect call.
          */
-        if(H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0) {
+        if(H5C_prep_for_file_close(file_ptr) < 0) {
             pass = FALSE;
             failure_mssg = "unexpected failure of prep for file close.\n";
         } /* end if */
 
         protect_entry(file_ptr, 0, 0);
 
-        if(H5C_dest(file_ptr, H5AC_ind_read_dxpl_id) >= 0) {
+        if(H5C_dest(file_ptr) >= 0) {
             pass = FALSE;
             failure_mssg = "destroy succeeded on cache with protected entry.\n";
         } /* end if */
 	else {
             unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
-            if(H5C_dest(file_ptr, H5AC_ind_read_dxpl_id) < 0) {
+            if(H5C_dest(file_ptr) < 0) {
                 pass = FALSE;
                 failure_mssg = "destroy failed after unprotect.\n";
             } /* end if */
@@ -16156,7 +16215,7 @@ check_duplicate_insert_err(unsigned paged)
             base_addr = entries[0];
             entry_ptr = &(base_addr[0]);
 
-            result = H5C_insert_entry(file_ptr, H5AC_ind_read_dxpl_id,
+            result = H5C_insert_entry(file_ptr,
                                       types[0], entry_ptr->addr,
                                       (void *)entry_ptr, H5C__NO_FLAGS_SET);
 
@@ -16242,7 +16301,7 @@ check_double_pin_err(unsigned paged)
 
     if(pass) {
 
-        result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
+        result = H5C_unprotect(file_ptr,
                     entry_ptr->addr, (void *)entry_ptr, H5C__PIN_ENTRY_FLAG);
 
         if(result > 0) {
@@ -16328,7 +16387,7 @@ check_double_unpin_err(unsigned paged)
 
     if(pass) {
 
-        result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
+        result = H5C_unprotect(file_ptr,
                     entry_ptr->addr, (void *)entry_ptr, H5C__UNPIN_ENTRY_FLAG);
 
         if(result > 0) {
@@ -16532,7 +16591,7 @@ check_double_protect_err(unsigned paged)
 
     if(pass) {
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr,
 			               types[0], entry_ptr->addr,
 				       &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
@@ -16614,7 +16673,7 @@ check_double_unprotect_err(unsigned paged)
 
     if(pass) {
 
-        result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
+        result = H5C_unprotect(file_ptr,
                     entry_ptr->addr, (void *)entry_ptr, H5C__NO_FLAGS_SET);
 
         if(result > 0) {
@@ -16782,7 +16841,7 @@ check_expunge_entry_errs(unsigned paged)
 
     if(pass) {
 
-	result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
+	result = H5C_expunge_entry(file_ptr,
                 types[0], entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(result > 0) {
@@ -16800,7 +16859,7 @@ check_expunge_entry_errs(unsigned paged)
 
     if(pass) {
 
-	result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
+	result = H5C_expunge_entry(file_ptr,
                 types[0], entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(result > 0) {
@@ -16818,7 +16877,7 @@ check_expunge_entry_errs(unsigned paged)
 
     if(pass) {
 
-	result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
+	result = H5C_expunge_entry(file_ptr,
                 types[0], entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(result < 0) {
@@ -17115,7 +17174,7 @@ check_unprotect_ro_dirty_err(unsigned paged)
 
     if(pass) {
 
-        result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
+        result = H5C_unprotect(file_ptr,
                     entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
         if(result >= 0) {
@@ -17157,7 +17216,7 @@ check_unprotect_ro_dirty_err(unsigned paged)
 
     if(pass) {
 
-        result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
+        result = H5C_unprotect(file_ptr,
                     entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
         if(result > 0) {
@@ -17244,7 +17303,7 @@ check_protect_ro_rw_err(unsigned paged)
 
     if(pass) {
 
-        thing_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
+        thing_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr,
 			         types[0], entry_ptr->addr,
 				 &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
@@ -17339,7 +17398,7 @@ check_protect_retries(unsigned paged)
         entry_ptr->max_verify_ct = 3;
         entry_ptr->verify_ct = 0;
 
-	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
+	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr,
                 types[type], entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
 	if((cache_entry_ptr != (void *)entry_ptr) ||
@@ -17384,7 +17443,7 @@ check_protect_retries(unsigned paged)
         entry_ptr->max_verify_ct = 11;
         entry_ptr->verify_ct = 0;
 
-	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
+	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr,
                 types[type], entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
 	/* H5C_protect() should fail after all retries fail */
@@ -24438,7 +24497,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
     };
 
     if(paged)
-        TESTING("automatic cache resize epoch marker management (paged aggregation)")
+        TESTING("automatic cache resize epoch marker management (paged aggr)")
     else
         TESTING("automatic cache resize epoch marker management")
 
@@ -28230,13 +28289,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
 
     if(fill_via_insertion) {
         if(paged)
-            TESTING("to ensure metadata blizzard absence when inserting (paged aggregation)")
+            TESTING("to ensure metadata blizzard absence when inserting (pgd aggr)")
         else
             TESTING("to ensure metadata blizzard absence when inserting")
     } /* end if */
     else {
         if(paged)
-            TESTING("to ensure metadata blizzard absence on protect/unprotect (paged aggregation)")
+            TESTING("to ensure metadata blizzard absence on protect/unprotect (pa)")
         else
             TESTING("to ensure metadata blizzard absence on protect/unprotect")
     } /* end else */
@@ -30959,7 +31018,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31065,7 +31124,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31177,7 +31236,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31296,7 +31355,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31472,7 +31531,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31682,7 +31741,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31840,7 +31899,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31974,7 +32033,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32167,7 +32226,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32406,7 +32465,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32663,7 +32722,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32950,7 +33009,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -33266,7 +33325,7 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
         if(result < 0) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -34383,7 +34442,7 @@ check_entry_deletions_during_scans(unsigned paged)
     H5F_t *      file_ptr = NULL;
 
     if(paged)
-        TESTING("entry deletion during list scan detection and adaption (paged aggregation)")
+        TESTING("entry deletion during list scan detection and adaption (par)")
     else
         TESTING("entry deletion during list scan detection and adaption")
 
@@ -34604,7 +34663,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -34956,7 +35015,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -35392,7 +35451,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -35779,7 +35838,7 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -36252,7 +36311,7 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
     if(pass) {
 
-        result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
 
         if(result < 0) {
 
@@ -36394,6 +36453,18 @@ main(void)
     /* Test with paged aggregation enabled or not */
     /* Each test will call setup_cache() which set up the file space strategy according to "paged" */
     for(paged = FALSE; paged <= TRUE; paged++) {
+
+        if ( paged ) {
+
+            HDfprintf(stdout,
+                      "\n\nRe-running tests with paged aggregation:\n");
+
+            if ( express_test > 0 )
+                HDfprintf(stdout, "    Skipping smoke checks.\n");
+
+            HDfprintf(stdout, "\n");
+        }
+
         nerrs += smoke_check_1(express_test, paged);
         nerrs += smoke_check_2(express_test, paged);
         nerrs += smoke_check_3(express_test, paged);

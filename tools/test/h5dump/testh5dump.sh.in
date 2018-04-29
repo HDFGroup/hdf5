@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 # Tests for the h5dump tool
 
@@ -43,6 +41,8 @@ AWK='awk'
 
 # Skip plugin module to test missing filter
 ENVCMD="env HDF5_PLUGIN_PRELOAD=::"
+
+WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
 
 nerrors=0
 verbose=yes
@@ -99,6 +99,7 @@ $SRC_H5DUMP_TESTFILES/tattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tattrreg.h5
 $SRC_H5DUMP_TESTFILES/tbigdims.h5
 $SRC_H5DUMP_TESTFILES/tbinary.h5
+$SRC_H5DUMP_TESTFILES/tbitnopaque.h5
 $SRC_H5DUMP_TESTFILES/tchar.h5
 $SRC_H5DUMP_TESTFILES/tcmpdattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tcmpdintsize.h5
@@ -131,6 +132,7 @@ $SRC_H5DUMP_TESTFILES/tfpformat.h5
 $SRC_H5DUMP_TESTFILES/tfvalues.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
 $SRC_H5DUMP_TESTFILES/tgrp_comments.h5
+$SRC_H5DUMP_TESTFILES/tgrpnullspace.h5
 $SRC_H5DUMP_TESTFILES/thlink.h5
 $SRC_H5DUMP_TESTFILES/thyperslab.h5
 $SRC_H5DUMP_TESTFILES/tintsattrs.h5
@@ -219,6 +221,8 @@ $SRC_H5DUMP_TESTFILES/tbin3.ddl
 $SRC_H5DUMP_TESTFILES/tbin4.ddl
 $SRC_H5DUMP_TESTFILES/tbinregR.ddl
 $SRC_H5DUMP_TESTFILES/tbigdims.ddl
+$SRC_H5DUMP_TESTFILES/tbitnopaque_be.ddl
+$SRC_H5DUMP_TESTFILES/tbitnopaque_le.ddl
 $SRC_H5DUMP_TESTFILES/tboot1.ddl
 $SRC_H5DUMP_TESTFILES/tboot2.ddl
 $SRC_H5DUMP_TESTFILES/tboot2A.ddl
@@ -257,6 +261,7 @@ $SRC_H5DUMP_TESTFILES/tfpformat.ddl
 $SRC_H5DUMP_TESTFILES/tgroup-1.ddl
 $SRC_H5DUMP_TESTFILES/tgroup-2.ddl
 $SRC_H5DUMP_TESTFILES/tgrp_comments.ddl
+$SRC_H5DUMP_TESTFILES/tgrpnullspace.ddl
 $SRC_H5DUMP_TESTFILES/thlink-1.ddl
 $SRC_H5DUMP_TESTFILES/thlink-2.ddl
 $SRC_H5DUMP_TESTFILES/thlink-3.ddl
@@ -489,6 +494,8 @@ TOOLTEST() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $xCMP $expect $actual > /dev/null 2>&1 ; then
      echo " PASSED"
     else
@@ -531,11 +538,15 @@ TOOLTEST2() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       if [ ! -f $expectdata ]; then
       # Create the expect data file if it doesn't yet exist.
         echo " CREATED"
         cp $actualdata $expectdata
+        echo "    Expected data (*.exp) missing"
+        nerrors="`expr $nerrors + 1`"
       elif $CMP $expectdata $actualdata; then
         echo " PASSED"
       else
@@ -586,16 +597,22 @@ TOOLTEST2A() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       if [ ! -f $expectdata ]; then
       # Create the expect data file if it doesn't yet exist.
         echo " CREATED"
         cp $actualdata $expectdata
+        echo "    Expected data (*.exp) missing"
+        nerrors="`expr $nerrors + 1`"
       elif $DIFF $expectdata $actualdata; then
         if [ ! -f $expectmeta ]; then
         # Create the expect meta file if it doesn't yet exist.
           echo " CREATED"
           cp $actualmeta $expectmeta
+          echo "    Expected metafile (*.ddl) missing"
+          nerrors="`expr $nerrors + 1`"
         elif $CMP $expectmeta $actualmeta; then
           echo " PASSED"
         else
@@ -647,6 +664,8 @@ TOOLTEST2B() {
     # Create the expect data file if it doesn't yet exist.
       echo " CREATED"
       cp $actualdata $expectdata
+      echo "    Expected data (*.exp) missing"
+      nerrors="`expr $nerrors + 1`"
     elif $CMP $expectdata $actualdata; then
       echo " PASSED"
     else
@@ -702,6 +721,8 @@ TOOLTEST3() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      echo " PASSED"
     else
@@ -759,15 +780,17 @@ TOOLTEST4() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      if $CMP $expect_err $actual_ext; then
       echo " PASSED"
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.err) differs from actual result (*.oerr)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
-    fi
+     else
+      echo "*FAILED*"
+      echo "    Expected result (*.err) differs from actual result (*.oerr)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+     fi
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"
@@ -823,15 +846,17 @@ TOOLTEST5() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      if $CMP $expect_err $actual_ext; then
       echo " PASSED"
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.err) differs from actual result (*.oerr)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
-    fi
+     else
+      echo "*FAILED*"
+      echo "    Expected result (*.err) differs from actual result (*.oerr)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+     fi
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"
@@ -865,6 +890,8 @@ TOOLTEST_HELP() {
     # Create the expect data file if it doesn't yet exist.
       echo " CREATED"
       cp $actual $expect-CREATED
+      echo "    Expected output (*.txt) missing"
+      nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       echo " PASSED"
     else
@@ -1038,9 +1065,13 @@ TOOLTEST tcomp-2.ddl --enable-error-stack -N /type1 --any_path /type2 --any_path
 TOOLTEST4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl --enable-error-stack tcompound_complex.h5
-TOOLTEST tcompound_complex.ddl --enable-error-stack tcompound_complex2.h5
+TOOLTEST tcompound_complex2.ddl --enable-error-stack tcompound_complex2.h5
 # tests for bitfields and opaque data types
-TOOLTEST tbitnopaque.ddl --enable-error-stack tbitnopaque.h5
+if test $WORDS_BIGENDIAN != "yes"; then
+TOOLTEST tbitnopaque_le.ddl --enable-error-stack tbitnopaque.h5
+else
+TOOLTEST tbitnopaque_be.ddl --enable-error-stack tbitnopaque.h5
+fi
 
 #test for the nested compound type
 TOOLTEST tnestcomp-1.ddl --enable-error-stack tnestedcomp.h5
@@ -1239,6 +1270,7 @@ TOOLTEST thyperslab.ddl --enable-error-stack thyperslab.h5
 
 # test for displaying dataset and attribute of null space
 TOOLTEST tnullspace.ddl --enable-error-stack tnullspace.h5
+TOOLTEST tgrpnullspace.ddl -p --enable-error-stack tgrpnullspace.h5
 
 # test for displaying dataset and attribute of space with 0 dimension size
 TOOLTEST zerodim.ddl --enable-error-stack zerodim.h5
@@ -1262,7 +1294,7 @@ IMPORTTEST out1.bin -c out3.h5import -o out1.h5
 DIFFTEST   tbinary.h5 out1.h5 /integer /integer
 # Same but use h5dump as input to h5import
 IMPORTTEST out1.bin -c tbin1.ddl -o out1D.h5
-DIFFTEST   tbinary.h5 out1D.h5 /integer /integer
+#DIFFTEST   tbinary.h5 out1D.h5 /integer /integer
 
 TOOLTEST   tbin2.ddl --enable-error-stack -b BE -d float  -o out2.bin  tbinary.h5
 
@@ -1272,7 +1304,7 @@ IMPORTTEST out3.bin -c out3.h5import -o out3.h5
 DIFFTEST   tbinary.h5 out3.h5 /integer /integer
 # Same but use h5dump as input to h5import
 IMPORTTEST out3.bin -c tbin3.ddl -o out3D.h5
-DIFFTEST   tbinary.h5 out3D.h5 /integer /integer
+#DIFFTEST   tbinary.h5 out3D.h5 /integer /integer
 
 TOOLTEST   tbin4.ddl --enable-error-stack -d double  -b FILE -o out4.bin    tbinary.h5
 

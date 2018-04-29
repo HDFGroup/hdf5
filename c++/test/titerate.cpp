@@ -5,17 +5,15 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
-   FILE
-   titerate.cpp - HDF5 C++ testing iterate related functionality
+    FILE
+        titerate.cpp - HDF5 C++ testing iterate related functionality
 
  ***************************************************************************/
 #ifdef OLD_HEADER_FILENAME
@@ -80,24 +78,25 @@ typedef struct {
 
 int iter_strcmp(const void *s1, const void *s2);
 
-/****************************************************************
-**
-**  iter_strcmp(): String comparison routine for qsort
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    iter_strcmp
+ *
+ * Purpose      String comparison routine for qsort
+ *-------------------------------------------------------------------------
+ */
 int iter_strcmp(const void *s1, const void *s2)
 {
     return(HDstrcmp(*(const char * const *)s1,*(const char * const *)s2));
 }
 
-/****************************************************************
-**
-**  liter_cb(): Custom link iteration callback routine.
-**
-****************************************************************/
-static herr_t
-liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_info,
-    void *op_data)
+/*-------------------------------------------------------------------------
+ * Function:    liter_cb
+ *
+ * Purpose      Custom link iteration callback routine
+ *-------------------------------------------------------------------------
+ */
+static herr_t liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_info, void *op_data)
 {
     iter_info *info = (iter_info *)op_data;
     static int count = 0;
@@ -126,6 +125,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_
     } /* end switch */
 } /* end liter_cb() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_iter_group
  *
@@ -136,9 +136,6 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_
  *
  * Programmer   Binh-Minh Ribler
  *              Friday, September 9, 2016
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_iter_group(FileAccPropList& fapl)
@@ -210,7 +207,7 @@ static void test_iter_group(FileAccPropList& fapl)
         H5std_string obj_name;
         for (i = 0; i < nobjs; i++)
         {
-            //H5O_info_t oinfo;               /* Object info */
+            //H5O_info_t oinfo;                /* Object info */
 
             obj_name = root_group.getObjnameByIdx(i);
         //ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
@@ -351,13 +348,13 @@ static void test_iter_group(FileAccPropList& fapl)
 #endif
 } /* test_iter_group() */
 
-
-/****************************************************************
-**
-**  printelems(): Open an attribute and verify that it has a 
-**                the correct name
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    printelems
+ *
+ * Purpose      Open an attribute and verify that it has a the correct name
+ *-------------------------------------------------------------------------
+ */
 const H5std_string FILE_NAME("titerate.h5");
 const H5std_string GRP_NAME("/Group_A");
 const H5std_string FDATASET_NAME("file dset");
@@ -382,25 +379,14 @@ void printelems(const Group& group, const H5std_string& dsname, const H5std_stri
 
         a1.close();
   }
-   // catch failure caused by the DataSpace operations
-   catch( DataSpaceIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the Group operations
-   catch( GroupIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
-        error.printError();
-   }
+    // Catch all exceptions and rethrow so caller can handle
+    catch (Exception& E)
+    {
+        throw;
+    }
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_HDFFV_9920
  *
@@ -408,18 +394,15 @@ void printelems(const Group& group, const H5std_string& dsname, const H5std_stri
  *
  * Programmer   Binh-Minh Ribler
  *              Friday, September 9, 2016
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_HDFFV_9920()
 {
-   int attr_data[2] = { 100, 200};
-   hsize_t dims[1] = { DIM1 };
-   
-   try
-   {
+    int attr_data[2] = { 100, 200};
+    hsize_t dims[1] = { DIM1 };
+    
+    try
+    {
         // Create a new file and a group in it
         H5File file( FILE_NAME, H5F_ACC_TRUNC );
 
@@ -450,34 +433,16 @@ static void test_HDFFV_9920()
         printelems(file, FDATASET_NAME, FATTR_NAME);
         printelems(gr1, GDATASET_NAME, GATTR_NAME);
 
-   }  // end of try block
+    }  // end of try block
 
-   // catch failure caused by the H5File operations
-   catch( DataSpaceIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the H5File operations
-   catch( AttributeIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the H5File operations
-   catch( FileIException error )
-   {
-        error.printError();
-   }
-
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
-        error.printError();
-   }
+    // Catch all failures for handling in the same way
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_HDFFV_9920()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_iterate
  *
@@ -488,9 +453,6 @@ static void test_HDFFV_9920()
  *
  * Programmer   Binh-Minh Ribler
  *              Tuesday, September 6, 2016
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -505,21 +467,17 @@ void test_iterate()
 
     test_iter_group(fapl);    // Test iterating groups
     test_HDFFV_9920();        // Test the fix of HDFFV-9920
-    //test_iter_attr(fapl);   // Test iterating attributes
+    //test_iter_attr(fapl);    // Test iterating attributes
 
-}   // test_iterate
+}    // test_iterate
 
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_iterate
  *
  * Purpose      Cleanup temporary test files
  *
  * Return       none
- *
- * Programmer   (use C version)
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"

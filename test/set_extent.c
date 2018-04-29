@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -429,20 +427,50 @@ error:
 */
 static int do_layouts( hid_t fapl )
 {
+    hid_t new_fapl = -1;
+    H5F_libver_t low, high; /* Low and high bounds */
+    herr_t ret;      /* Generic return value */
 
-    TESTING("storage layout use");
+    TESTING("storage layout use - tested with all low/high library format bounds");
+    /* Loop through all the combinations of low/high library format bounds */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
-    if (test_layouts( H5D_COMPACT, fapl ) < 0)
-        goto error;
+            /* Copy plist to use locally to avoid modifying the original */
+            new_fapl = H5Pcopy(fapl);
 
-    if (test_layouts( H5D_CONTIGUOUS, fapl ) < 0)
-        goto error;
+            /* Set version bounds */
+            H5E_BEGIN_TRY {
+                ret = H5Pset_libver_bounds(new_fapl, low, high);
+            } H5E_END_TRY;
+
+            if (ret < 0) /* Invalid low/high combinations */
+            {
+                if (H5Pclose(new_fapl) < 0)
+                    goto error;
+                continue;
+            }
+
+            if (test_layouts( H5D_COMPACT, new_fapl ) < 0)
+                goto error;
+
+            if (test_layouts( H5D_CONTIGUOUS, new_fapl ) < 0)
+                goto error;
+
+            if (H5Pclose(new_fapl) < 0)
+                goto error;
+        } /* end for high */
+    } /* end for low */
 
     PASSED();
 
     return 0;
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(new_fapl);
+    } H5E_END_TRY;
     return -1;
 }
 
@@ -2603,15 +2631,6 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
     volatile unsigned i, j, k, l, m;            /* Local indices */
     char        filename[NAME_BUF_SIZE];
 
-    /* *** FIXME ***
-     * Skip the test if an extensible array index is requested, as resizing
-     * them is broken.
-     *
-     * Remove these lines as appropriate when these problems are fixed.
-     */
-    if(index_type == RANK4_INDEX_EARRAY)
-        return 0;
-
     /* create a new file */
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -2815,15 +2834,6 @@ static int test_random_rank4_vl( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
     unsigned    scalar_iter;                    /* Iteration to shrink dset to 1x1x1x1 */
     volatile unsigned i, j, k, l, m;            /* Local indices */
     char        filename[NAME_BUF_SIZE];
-
-    /* *** FIXME ***
-     * Skip the test if an extensible array index is requested, as resizing
-     * them is broken.
-     *
-     * Remove these lines as appropriate when these problems are fixed.
-     */
-    if(index_type == RANK4_INDEX_EARRAY)
-        return 0;
 
     /* Initialize fill value buffers so they aren't freed in case of an error */
     fill_value.len = 0;

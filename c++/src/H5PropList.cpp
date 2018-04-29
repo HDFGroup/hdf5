@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef OLD_HEADER_FILENAME
@@ -96,7 +94,7 @@ PropList::PropList() : IdComponent(), id(H5P_DEFAULT) {}
 
 //--------------------------------------------------------------------------
 // Function:    PropList copy constructor
-///\brief       Copy constructor
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: The original property list to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -140,6 +138,24 @@ PropList::PropList(const hid_t plist_id) : IdComponent()
               throw PropListIException("PropList constructor", "H5Pcopy failed");
           }
           break;
+        /* These should really be error cases, but changing that breaks
+         * the stated behavior and causes test failures.
+         * (DER, July 2017)
+         */
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_GROUP:
+        case H5I_DATATYPE:
+        case H5I_DATASPACE:
+        case H5I_DATASET:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        case H5I_UNINIT:
         default:
           id = H5P_DEFAULT;
           break;

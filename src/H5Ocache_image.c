@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -39,18 +37,17 @@
 #include "H5MFprivate.h"        /* File space management                 */
 
 /* Callbacks for message class */
-static void *H5O__mdci_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
+static void *H5O__mdci_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+    unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O__mdci_encode(H5F_t *f, hbool_t disable_shared, 
     uint8_t *p, const void *_mesg);
 static void *H5O__mdci_copy(const void *_mesg, void *_dest);
 static size_t H5O__mdci_size(const H5F_t *f, hbool_t disable_shared, 
     const void *_mesg);
 static herr_t H5O__mdci_free(void *mesg);
-static herr_t H5O__mdci_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    void *_mesg);
-static herr_t H5O__mdci_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
-    FILE *stream, int indent, int fwidth);
+static herr_t H5O__mdci_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
+static herr_t H5O__mdci_debug(H5F_t *f, const void *_mesg, FILE *stream,
+    int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_MDCI[1] = {{
@@ -99,9 +96,9 @@ H5FL_DEFINE(H5O_mdci_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__mdci_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, 
-    H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, 
-    unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
+H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
+    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_mdci_t      *mesg;                  /* Native message        */
     void            *ret_value = NULL;      /* Return value          */
@@ -278,7 +275,7 @@ H5O__mdci_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mdci_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
+H5O__mdci_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
 {
     H5O_mdci_t *mesg = (H5O_mdci_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -325,13 +322,13 @@ H5O__mdci_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
          * time constraints, I don't want to go there now.
          */
         if(H5F_FIRST_ALLOC_DEALLOC(f)) {
-            HDassert(HADDR_UNDEF !=H5F_EOA_PRE_FSM_FSALLOC(f));
+            HDassert(HADDR_UNDEF != H5F_EOA_PRE_FSM_FSALLOC(f));
             HDassert(H5F_addr_ge(mesg->addr, H5F_EOA_PRE_FSM_FSALLOC(f)));
-            if(H5MF_tidy_self_referential_fsm_hack(f, dxpl_id) < 0)
+            if(H5MF_tidy_self_referential_fsm_hack(f) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "tidy of self referential fsm hack failed")
         } /* end if */
         else {
-            if(H5MF_xfree(f, H5FD_MEM_SUPER, dxpl_id, mesg->addr, mesg->size) < 0)
+            if(H5MF_xfree(f, H5FD_MEM_SUPER, mesg->addr, mesg->size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block")
         } /* end else */
     } /* end if */
@@ -354,8 +351,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mdci_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, 
-    const void *_mesg, FILE * stream, int indent, int fwidth)
+H5O__mdci_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
+    int indent, int fwidth)
 {
     const H5O_mdci_t   *mdci = (const H5O_mdci_t *) _mesg;
 

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -18,6 +16,9 @@
  */
 #ifndef _H5Sprivate_H
 #define _H5Sprivate_H
+
+/* Early typedefs to avoid circular dependencies */
+typedef struct H5S_t H5S_t;
 
 /* Include package's public header */
 #include "H5Spublic.h"
@@ -46,7 +47,6 @@
 #define H5S_GET_SEQ_LIST_SORTED         0x0001
 
 /* Forward references of package typedefs */
-typedef struct H5S_t H5S_t;
 typedef struct H5S_extent_t H5S_extent_t;
 typedef struct H5S_pnt_node_t H5S_pnt_node_t;
 typedef struct H5S_hyper_span_t H5S_hyper_span_t;
@@ -207,10 +207,9 @@ H5_DLL hbool_t H5S_has_extent(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_ndims(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[]/*out*/,
     hsize_t max_dims[]/*out*/);
-H5_DLL herr_t H5S_write(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned update_flags,
-    H5S_t *ds);
-H5_DLL herr_t H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, H5S_t *ds);
-H5_DLL H5S_t *H5S_read(const struct H5O_loc_t *loc, hid_t dxpl_id);
+H5_DLL herr_t H5S_write(H5F_t *f, H5O_t *oh, unsigned update_flags, H5S_t *ds);
+H5_DLL herr_t H5S_append(H5F_t *f, struct H5O_t *oh, H5S_t *ds);
+H5_DLL H5S_t *H5S_read(const struct H5O_loc_t *loc);
 H5_DLL htri_t H5S_set_extent(H5S_t *space, const hsize_t *size);
 H5_DLL herr_t H5S_set_extent_real(H5S_t *space, const hsize_t *size);
 H5_DLL herr_t H5S_set_extent_simple(H5S_t *space, unsigned rank,
@@ -218,14 +217,11 @@ H5_DLL herr_t H5S_set_extent_simple(H5S_t *space, unsigned rank,
 H5_DLL H5S_t *H5S_create(H5S_class_t type);
 H5_DLL H5S_t *H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
     const hsize_t maxdims[/*rank*/]);
-H5_DLL herr_t H5S_set_latest_version(H5S_t *ds);
+H5_DLL herr_t H5S_set_version(H5F_t *f, H5S_t *ds);
 H5_DLL herr_t H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc);
 H5_DLL H5S_t *H5S_decode(const unsigned char **p);
-H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
-    int indent, int fwidth);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+H5_DLL herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent,
+    int fwidth);
 
 /* Operations on dataspace extents */
 H5_DLL hsize_t H5S_extent_nelem(const H5S_extent_t *ext);
@@ -312,6 +308,7 @@ H5_DLL herr_t H5S_select_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 H5_DLL herr_t H5S_select_iter_release(H5S_sel_iter_t *sel_iter);
 
 #ifdef H5_HAVE_PARALLEL
+H5_DLL hsize_t H5S_mpio_set_bigio_count(hsize_t new_count);
 H5_DLL herr_t H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
     /* out: */  MPI_Datatype *new_type,
                 int *count,

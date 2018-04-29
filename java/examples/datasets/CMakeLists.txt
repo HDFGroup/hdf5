@@ -1,12 +1,7 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDFJAVA_EXAMPLES_DATASETS Java)
+cmake_minimum_required (VERSION 3.10)
+project (HDFJAVA_EXAMPLES_DATASETS Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
-
-INCLUDE_DIRECTORIES (
-    ${HDF5_JAVA_JNI_BINARY_DIR}
-    ${HDF5_JAVA_HDF5_LIB_DIR}
-)
 
 set (HDF_JAVA_EXAMPLES
     H5Ex_D_Alloc
@@ -62,13 +57,7 @@ foreach (HDFJAVA_JAR ${CMAKE_JAVA_INCLUDE_PATH})
 endforeach ()
 
 MACRO (ADD_H5_TEST resultfile resultcode)
-  if (CMAKE_BUILD_TYPE MATCHES Debug)
-    if (WIN32)
-      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
-    else ()
-      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
-    endif ()
-  endif ()
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET},OUTPUT_NAME$<$<CONFIG:Debug>:_DEBUG>>;")
   add_test (
       NAME JAVA_datasets-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
@@ -101,7 +90,7 @@ if (BUILD_TESTING)
   endif (H5_HAVE_FILTER_SZIP)
 
   foreach (example ${HDF_JAVA_EXAMPLES})
-    if (${example} STREQUAL "H5Ex_D_External")
+    if ("${example}" STREQUAL "H5Ex_D_External")
       add_test (
           NAME JAVA_datasets-${example}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -129,7 +118,7 @@ if (BUILD_TESTING)
     )
     set_tests_properties (JAVA_datasets-${example}-copy-objects PROPERTIES DEPENDS JAVA_datasets-${example}-clear-objects)
     set (last_test "JAVA_datasets-${example}-copy-objects")
-    if (${example} STREQUAL "H5Ex_D_Szip")
+    if ("${example}" STREQUAL "H5Ex_D_Szip")
       if (USE_FILTER_SZIP)
         ADD_H5_TEST (${example} 0)
       endif ()

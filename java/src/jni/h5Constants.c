@@ -5,17 +5,15 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfdfgroup.org/HDF5/doc/
+ *    http://hdfgroup.org/HDF5/doc/
  *
  */
 
@@ -26,7 +24,9 @@ extern "C" {
 #include <jni.h>
 #include "hdf5.h"
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5_1QUARTER_1HADDR_1MAX(JNIEnv *env, jclass cls) { return (hsize_t)HADDR_MAX/4; }
@@ -140,6 +140,8 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5D_1VDS_1FIRST_1MISSING(JNIEnv *env, jclass cls) { return H5D_VDS_FIRST_MISSING; }
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5D_1VDS_1LAST_1AVAILABLE(JNIEnv *env, jclass cls) { return H5D_VDS_LAST_AVAILABLE; }
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5D_1CHUNK_1DONT_1FILTER_1PARTIAL_1CHUNKS(JNIEnv *env, jclass cls) { return H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS; }
 
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5E_1ALIGNMENT(JNIEnv *env, jclass cls) { return H5E_ALIGNMENT; }
@@ -378,7 +380,15 @@ Java_hdf_hdf5lib_HDF5Constants_H5F_1CLOSE_1STRONG(JNIEnv *env, jclass cls) { ret
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1CLOSE_1WEAK(JNIEnv *env, jclass cls) { return H5F_CLOSE_WEAK; }
 JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1ERROR(JNIEnv *env, jclass cls){return H5F_LIBVER_ERROR;}
+JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1EARLIEST(JNIEnv *env, jclass cls){return H5F_LIBVER_EARLIEST;}
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1V18(JNIEnv *env, jclass cls){return H5F_LIBVER_V18;}
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1V110(JNIEnv *env, jclass cls){return H5F_LIBVER_V110;}
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1NBOUNDS(JNIEnv *env, jclass cls){return H5F_LIBVER_NBOUNDS;}
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1LATEST(JNIEnv *env, jclass cls){return H5F_LIBVER_LATEST;}
 JNIEXPORT jint JNICALL

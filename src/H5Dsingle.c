@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer: 	Vailin Choi <vchoi@hdfgroup.org>
@@ -245,13 +243,11 @@ H5D__single_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
 	idx_info->storage->u.single.filter_mask = udata->filter_mask;
     } /* end if */
 
-    if(dset) {
-	if(dset->shared->dcpl_cache.fill.alloc_time != H5D_ALLOC_TIME_EARLY || idx_info->pline->nused > 0) {
+    if(dset)
+	if(dset->shared->dcpl_cache.fill.alloc_time != H5D_ALLOC_TIME_EARLY || idx_info->pline->nused > 0)
 	    /* Mark the layout dirty so that the address of the single chunk will be flushed later */
-	    if(H5D__mark(dset, idx_info->dxpl_id, H5D_MARK_LAYOUT) < 0)
+	    if(H5D__mark(dset, H5D_MARK_LAYOUT) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark layout as dirty")
-	} /* end if */
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -384,7 +380,7 @@ H5D__single_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     else
 	nbytes = idx_info->layout->size;
 
-    if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, idx_info->storage->idx_addr, nbytes) < 0)
+    if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->storage->idx_addr, nbytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free dataset chunks")
 
     idx_info->storage->idx_addr = HADDR_UNDEF;
@@ -463,14 +459,14 @@ H5D__single_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     HDassert(idx_info_dst->storage);
 
     /* Set copied metadata tag */
-    H5_BEGIN_TAG(idx_info_dst->dxpl_id, H5AC__COPIED_TAG, FAIL);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG);
 
     /* Set up information at the destination file */
     if(H5D__single_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
 
     /* Reset metadata tag */
-    H5_END_TAG(FAIL);
+    H5_END_TAG
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

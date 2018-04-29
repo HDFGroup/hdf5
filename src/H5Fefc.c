@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -59,14 +57,15 @@ struct H5F_efc_t {
     unsigned            nfiles;         /* Size of the external file cache */
     unsigned            max_nfiles;     /* Maximum size of the external file cache */
     unsigned            nrefs;          /* Number of times this file appears in another file's EFC */
-    int                 tag;            /* Temporary variable used by H5F_efc_try_close() */
-    H5F_file_t          *tmp_next;      /* Next file in temporary list used by H5F_efc_try_close() */
+    int                 tag;            /* Temporary variable used by H5F__efc_try_close() */
+    H5F_file_t          *tmp_next;      /* Next file in temporary list used by H5F__efc_try_close() */
 };
 
 /* Private prototypes */
-static herr_t H5F_efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent);
-static void H5F_efc_try_close_tag1(H5F_file_t *sf, H5F_file_t **tail);
-static void H5F_efc_try_close_tag2(H5F_file_t *sf, H5F_file_t **tail);
+static herr_t H5F__efc_release_real(H5F_efc_t *efc);
+static herr_t H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent);
+static void H5F__efc_try_close_tag1(H5F_file_t *sf, H5F_file_t **tail);
+static void H5F__efc_try_close_tag2(H5F_file_t *sf, H5F_file_t **tail);
 
 /* Free lists */
 H5FL_DEFINE_STATIC(H5F_efc_ent_t);
@@ -78,7 +77,7 @@ H5FL_DEFINE_STATIC(H5F_efc_t);
  *
  * Purpose:     Allocate and initialize a new external file cache object,
  *              which can the be used to cache open external files.
- *              the object must be freed with H5F_efc_destroy.
+ *              the object must be freed with H5F__efc_destroy.
  *
  * Return:      Pointer to new external file cache object on success
  *              NULL on failure
@@ -121,7 +120,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_open
+ * Function:    H5F__efc_open
  *
  * Purpose:     Opens a file using the external file cache.  The target
  *              file is added to the external file cache of the parent
@@ -140,15 +139,15 @@ done:
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
-    hid_t fapl_id, hid_t dxpl_id)
+H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
+    hid_t fapl_id)
 {
     H5F_efc_t   *efc = NULL;    /* External file cache for parent file */
     H5F_efc_ent_t *ent = NULL;  /* Entry for target file in efc */
     hbool_t     open_file = FALSE; /* Whether ent->file needs to be closed in case of error */
     H5F_t       *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(parent);
@@ -162,7 +161,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if(!efc) {
-        if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
+        if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
 
         /* Increment the number of open objects to prevent the file from being
@@ -227,14 +226,14 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
             /* Evict the file if found, otherwise just open the target file and
              * do not add it to cache */
             if(ent) {
-                if(H5F_efc_remove_ent(efc, ent) < 0)
+                if(H5F__efc_remove_ent(efc, ent) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, NULL, "can't remove entry from external file cache")
 
                 /* Do not free ent, we will recycle it below */
             } /* end if */
             else {
                 /* Cannot cache file, just open file and return */
-                if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
+                if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
 
                 /* Increment the number of open objects to prevent the file from
@@ -255,7 +254,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Open the file */
-        if(NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
+        if(NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
         open_file = TRUE;
 
@@ -309,7 +308,7 @@ done:
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_efc_open() */
+} /* end H5F__efc_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -402,7 +401,7 @@ H5F_efc_max_nfiles(H5F_efc_t *efc)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_release
+ * Function:    H5F__efc_release_real
  *
  * Purpose:     Releases the external file cache, potentially closing any
  *              cached files unless they are held open from somewhere
@@ -416,14 +415,14 @@ H5F_efc_max_nfiles(H5F_efc_t *efc)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5F_efc_release(H5F_efc_t *efc)
+static herr_t
+H5F__efc_release_real(H5F_efc_t *efc)
 {
     H5F_efc_ent_t *ent = NULL;          /* EFC entry */
     H5F_efc_ent_t *prev_ent = NULL;     /* Previous EFC entry */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(efc);
@@ -431,7 +430,7 @@ H5F_efc_release(H5F_efc_t *efc)
     /* Lock the EFC to prevent manipulation of the EFC wile we are releasing it.
      * The EFC should never be locked when we enter this function because that
      * would require a cycle, a cycle would necessarily invoke
-     * H5F_efc_try_close(), and that function checks the status of the lock
+     * H5F__efc_try_close(), and that function checks the status of the lock
      * before calling this one. */
     HDassert((efc->tag == H5F_EFC_TAG_DEFAULT)
             || (efc->tag == H5F_EFC_TAG_CLOSE));
@@ -442,7 +441,7 @@ H5F_efc_release(H5F_efc_t *efc)
     ent = efc->LRU_head;
     while(ent)
         if(!ent->nopen) {
-            if(H5F_efc_remove_ent(efc, ent) < 0)
+            if(H5F__efc_remove_ent(efc, ent) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "can't remove entry from external file cache")
 
             /* Free the entry and move to next entry in LRU list */
@@ -460,11 +459,45 @@ H5F_efc_release(H5F_efc_t *efc)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F__efc_release_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__efc_release
+ *
+ * Purpose:     Releases the external file cache, potentially closing any
+ *              cached files unless they are held open from somewhere
+ *              else (or are currently opened by a client).
+ *
+ * Return:      Non-negative on success
+ *              Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Sunday, February 18, 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__efc_release(H5F_efc_t *efc)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE_VOL
+
+    /* Sanity checks */
+    HDassert(efc);
+
+    /* Call 'real' routine */
+    if(H5F__efc_release_real(efc) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't remove entry from external file cache")
+
+done:
+    FUNC_LEAVE_NOAPI_VOL(ret_value)
 } /* end H5F_efc_release() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_destroy
+ * Function:    H5F__efc_destroy
  *
  * Purpose:     Frees an external file cache object, releasing it first
  *              if necessary.  If it cannot be fully released, for example
@@ -479,18 +512,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_efc_destroy(H5F_efc_t *efc)
+H5F__efc_destroy(H5F_efc_t *efc)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(efc);
 
     if(efc->nfiles > 0) {
         /* Release (clear) the efc */
-        if(H5F_efc_release(efc) < 0)
+        if(H5F__efc_release_real(efc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
 
         /* If there are still cached files, return an error */
@@ -512,11 +545,11 @@ H5F_efc_destroy(H5F_efc_t *efc)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5F_efc_destroy() */
+} /* end H5F__efc_destroy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_remove_ent
+ * Function:    H5F__efc_remove_ent
  *
  * Purpose:     Removes the specified entry from the specified EFC,
  *              closing the file if requested.  Does not free the entry.
@@ -530,11 +563,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
+H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(efc);
@@ -578,11 +611,11 @@ H5F_efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_efc_remove_ent() */
+} /* end H5F__efc_remove_ent() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_try_close_tag1
+ * Function:    H5F__efc_try_close_tag1
  *
  * Purpose:     Recursively traverse the EFC tree, keeping a temporary
  *              reference count on each file that assumes all reachable
@@ -596,12 +629,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-H5F_efc_try_close_tag1(H5F_file_t *sf, H5F_file_t **tail)
+H5F__efc_try_close_tag1(H5F_file_t *sf, H5F_file_t **tail)
 {
     H5F_efc_ent_t       *ent = NULL;    /* EFC entry */
     H5F_file_t          *esf;           /* Convenience pointer to ent->file->shared */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(sf);
@@ -646,17 +679,17 @@ H5F_efc_try_close_tag1(H5F_file_t *sf, H5F_file_t **tail)
                 } /* end if */
 
                 /* Recurse into the entry */
-                H5F_efc_try_close_tag1(ent->file->shared, tail);
+                H5F__efc_try_close_tag1(ent->file->shared, tail);
             } /* end if */
         } /* end if */
     } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5F_efc_try_close_tag1() */
+} /* end H5F__efc_try_close_tag1() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_try_close_tag2
+ * Function:    H5F__efc_try_close_tag2
  *
  * Purpose:     Recuresively mark all files reachable through this one as
  *              uncloseable, and add newly uncloseable files to the tail
@@ -670,12 +703,12 @@ H5F_efc_try_close_tag1(H5F_file_t *sf, H5F_file_t **tail)
  *-------------------------------------------------------------------------
  */
 static void
-H5F_efc_try_close_tag2(H5F_file_t *sf, H5F_file_t **tail)
+H5F__efc_try_close_tag2(H5F_file_t *sf, H5F_file_t **tail)
 {
     H5F_efc_ent_t       *ent = NULL;    /* EFC entry */
     H5F_file_t          *esf;           /* Convenience pointer to ent->file->shared */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(sf);
@@ -717,17 +750,17 @@ H5F_efc_try_close_tag2(H5F_file_t *sf, H5F_file_t **tail)
                 } /* end if */
 
                 /* Recurse into the entry */
-                H5F_efc_try_close_tag2(esf, tail);
+                H5F__efc_try_close_tag2(esf, tail);
             } /* end if */
         } /* end if */
     } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5F_efc_try_close_tag2() */
+} /* end H5F__efc_try_close_tag2() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_efc_try_close
+ * Function:    H5F__efc_try_close
  *
  * Purpose:     Attempts to close the provided (shared) file by checking
  *              to see if the releasing the EFC would cause its reference
@@ -743,7 +776,7 @@ H5F_efc_try_close_tag2(H5F_file_t *sf, H5F_file_t **tail)
  *              "callback" for the final pass (the one where the files are
  *              actually closed).  The code for the callback case is at
  *              the top of this function; luckily it only consists of a
- *              (possible) call to H5F_efc_release().
+ *              (possible) call to H5F__efc_release_real().
  *
  *              The algorithm basically consists of 3 passes over the EFC
  *              tree.  The first pass assumes that every reachable file is
@@ -759,8 +792,8 @@ H5F_efc_try_close_tag2(H5F_file_t *sf, H5F_file_t **tail)
  *              closeable only because the first pass assumed that an
  *              uncloseable file would be closed.
  *
- *              The final pass exploits the H5F_efc_release()->
- *              H5F_efc_remove_ent()->H5F_try_close()->H5F_efc_try_close()
+ *              The final pass exploits the H5F__efc_release_real()->
+ *              H5F_efc_remove_ent()->H5F_try_close()->H5F__efc_try_close()
  *              calling chain to recursively close the tree, but only the
  *              files that are still marked as closeable.  All files
  *              marked as closeable have their EFCs released, and will
@@ -777,7 +810,7 @@ H5F_efc_try_close_tag2(H5F_file_t *sf, H5F_file_t **tail)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_efc_try_close(H5F_t *f)
+H5F__efc_try_close(H5F_t *f)
 {
     H5F_file_t  *tail;                  /* Tail of linked list of found files.  Head will be f->shared. */
     H5F_file_t  *uncloseable_head = NULL; /* Head of linked list of files found to be uncloseable by the first pass */
@@ -800,8 +833,8 @@ H5F_efc_try_close(H5F_t *f)
         /* We must have reentered this function, and we should close this file.
          * In actuality, we just release the EFC, the recursion should
          * eventually reduce this file's reference count to 1 (though possibly
-         * not from this call to H5F_efc_release()). */
-        if(H5F_efc_release(f->shared->efc) < 0)
+         * not from this call to H5F__efc_release_real()). */
+        if(H5F__efc_release_real(f->shared->efc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
 
         /* If we marked the file as closeable, there must be no open files in
@@ -818,7 +851,7 @@ H5F_efc_try_close(H5F_t *f)
     /* Conditions where we should not do anything and just return immediately */
     /* If there are references that are not from an EFC or f, it will never
      * be possible to close the file.  Just return.  Note that this holds true
-     * for the case that this file is being closed through H5F_efc_release()
+     * for the case that this file is being closed through H5F__efc_release_real()
      * because that function (through H5F_efc_remove_ent()) decrements the EFC
      * reference count before it calls H5F_try_close(). This may occur if this
      * function is reentered. */
@@ -853,7 +886,7 @@ H5F_efc_try_close(H5F_t *f)
      * field to keep track of final reference count for each file (including
      * this one).  Keep list of files with starting reference count > 1 (head is
      * f->shared). */
-    H5F_efc_try_close_tag1(f->shared, &tail);
+    H5F__efc_try_close_tag1(f->shared, &tail);
 
     /* Check if f->shared->efc->tag dropped to 0.  If it did not,
      * we cannot close anything.  Just reset temporary values and return. */
@@ -911,7 +944,7 @@ H5F_efc_try_close(H5F_t *f)
         tail = uncloseable_tail;
         HDassert(tail);
         while(sf != tail->efc->tmp_next) {
-            H5F_efc_try_close_tag2(sf, &uncloseable_tail);
+            H5F__efc_try_close_tag2(sf, &uncloseable_tail);
             sf = sf->efc->tmp_next;
         } /* end while */
     } /* end if */
@@ -920,7 +953,7 @@ H5F_efc_try_close(H5F_t *f)
      * should start the recursive release that should close all closeable files.
      * Also, see the top of this function. */
     if(f->shared->efc->tag == H5F_EFC_TAG_CLOSE) {
-        if(H5F_efc_release(f->shared->efc) < 0)
+        if(H5F__efc_release_real(f->shared->efc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
 
         /* Make sure the file's reference count is now 1 and will be closed by
@@ -943,5 +976,5 @@ H5F_efc_try_close(H5F_t *f)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_efc_try_close() */
+} /* end H5F__efc_try_close() */
 

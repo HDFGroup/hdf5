@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 #-----------------------------------------------------------------------------
 # Include all the necessary files for macros
 #-----------------------------------------------------------------------------
@@ -168,7 +179,7 @@ endif ()
 # Macro to determine the various conversion capabilities
 #-----------------------------------------------------------------------------
 macro (H5ConversionTests TEST msg)
-  if ("${TEST}" MATCHES "^${TEST}$")
+  if (NOT DEFINED ${TEST})
    # message (STATUS "===> ${TEST}")
     TRY_RUN (${TEST}_RUN   ${TEST}_COMPILE
         ${CMAKE_BINARY_DIR}
@@ -195,21 +206,6 @@ macro (H5ConversionTests TEST msg)
       )
     endif ()
 
-  endif ()
-endmacro ()
-
-#-----------------------------------------------------------------------------
-# Macro to make some of the conversion tests easier to write/read
-#-----------------------------------------------------------------------------
-macro (H5MiscConversionTest VAR TEST msg)
-  if ("${TEST}" MATCHES "^${TEST}$")
-    if (${VAR})
-      set (${TEST} 1 CACHE INTERNAL ${msg})
-      message (STATUS "${msg}... yes")
-    else ()
-      set (${TEST} "" CACHE INTERNAL ${msg})
-      message (STATUS "${msg}... no")
-    endif ()
   endif ()
 endmacro ()
 
@@ -258,18 +254,3 @@ H5ConversionTests (H5_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting
 # Check if pointer alignments are enforced
 #
 H5ConversionTests (H5_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restrictions are strictly enforced")
-
-# -----------------------------------------------------------------------
-# wrapper script variables
-#
-set (prefix ${CMAKE_INSTALL_PREFIX})
-set (exec_prefix "\${prefix}")
-set (libdir "${exec_prefix}/lib")
-set (includedir "\${prefix}/include")
-set (host_os ${CMAKE_HOST_SYSTEM_NAME})
-set (CC ${CMAKE_C_COMPILER})
-set (CXX ${CMAKE_CXX_COMPILER})
-set (FC ${CMAKE_Fortran_COMPILER})
-foreach (LINK_LIB ${LINK_LIBS})
-  set (LIBS "${LIBS} -l${LINK_LIB}")
-endforeach ()

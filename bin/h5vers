@@ -12,12 +12,10 @@ use strict;
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 # Robb Matzke <matzke@llnl.gov>
 # 17 July 1998
@@ -200,7 +198,7 @@ my $H5_JAVA = $file;
 $H5_JAVA =~ s/[^\/]*$/..\/java\/src\/hdf\/hdf5lib\/H5.java/;
 die "unable to read file: $H5_JAVA\n" unless -r $file;
 my $TESTH5_JAVA = $file;
-$TESTH5_JAVA =~ s/[^\/]*$/..\/java\/test\/TestH5.java/; 
+$TESTH5_JAVA =~ s/[^\/]*$/..\/java\/test\/TestH5.java/;
 die "unable to read file: $TESTH5_JAVA\n" unless -r $file;
 my $REPACK_LAYOUT_PLUGIN_VERSION = $file;
 $REPACK_LAYOUT_PLUGIN_VERSION =~ s/[^\/]*$/..\/tools\/test\/h5repack\/testfiles\/h5repack_layout.h5-plugin_version_test.ddl/;
@@ -356,7 +354,7 @@ if ($HDF5CONFIGCMAKE) {
   my $sub_rel_ver_str = (
      $newver[3] eq "" 
      ? sprintf("\"%s\"", "") 
-     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
+     : sprintf("\"%s\"", "-".$newver[3])
      );
   my $version_string = sprintf("\"%d.%d.%d\"", @newver[0,1,2]);
 
@@ -379,7 +377,7 @@ if ($H5_JAVA) {
   my $version_string2 = sprintf("%d, %d, %d", @newver[0,1,2]);
 
   $data =~ s/\@version HDF5 .* <BR>/\@version HDF5 $version_string1 <BR>/;
-  $data =~ s/    public final static int LIB_VERSION\[\] = { \d*, \d*, \d* };/    public final static int LIB_VERSION[] = { $version_string2 };/;        
+  $data =~ s/    public final static int LIB_VERSION\[\] = { \d*, \d*, \d* };/    public final static int LIB_VERSION[] = { $version_string2 };/;
 
   write_file($H5_JAVA, $data);
 }
@@ -397,7 +395,7 @@ if ($TESTH5_JAVA) {
   my $version_string2 = sprintf("int majnum = %d, minnum = %d, relnum = %d", @newver[0,1,2]);
 
   $data =~ s/        int libversion\[\] = { .* };/        int libversion\[\] = { $version_string1 };/;
-  $data =~ s/        int majnum = \d*, minnum = \d*, relnum = \d*;/        $version_string2;/;        
+  $data =~ s/        int majnum = \d*, minnum = \d*, relnum = \d*;/        $version_string2;/;
 
   write_file($TESTH5_JAVA, $data);
 }
@@ -412,7 +410,7 @@ if ($REPACK_LAYOUT_PLUGIN_VERSION) {
   write_file($REPACK_LAYOUT_PLUGIN_VERSION, $data);
 }
 
-# helper function to read the file for updating c++/src/cpp_doc_config, 
+# helper function to read the file for updating c++/src/cpp_doc_config,
 # config/cmake/scripts/HDF5Config.cmake, and java files.
 # The version string in that file is not at the top, so the string replacement
 # is not for the first line, and reading/writing the entire file as one string

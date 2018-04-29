@@ -1,6 +1,18 @@
 	    Installation instructions for Parallel HDF5
 	    -------------------------------------------
 
+0. Use Build Scripts
+--------------------
+The HDF Group is accumulating build scripts to handle building parallel HDF5
+on various platforms (Cray, IBM, SGI, etc...). These scripts are being 
+maintained and updated continuously for current and future systems. The reader
+is strongly encouraged to consult the repository at,
+
+https://github.com/HDFGroup/build_hdf5
+
+for building parallel HDF5 on these system. All contributions, additions
+and fixes to the repository are welcomed and encouraged.
+
 
 1. Overview
 -----------
@@ -28,9 +40,11 @@ and the parallel file system.
 
 1.2. Further Help
 -----------------
-If you still have difficulties installing PHDF5 in your system, please send
-mail to
-	help@hdfgroup.org
+
+For help with installing, questions can be posted to the HDF Forum or sent to the HDF Helpdesk:
+
+   HDF Forum:     https://forum.hdfgroup.org/
+   HDF Helpdesk:  https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
 
 In your mail, please include the output of "uname -a". If you have run the
 "configure" command, attach the output of the command and the content of
@@ -75,12 +89,8 @@ The following steps are for building HDF5 for the Hopper compute
 nodes.  They would probably work for other Cray systems but have
 not been verified.
 
-Obtain a copy from the HDF ftp server:
-http://www.hdfgroup.org/ftp/HDF5/current/src/
-(link might change, so always double check the HDF group website).
-
-$ wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-x.x.x.tar.gz
-unpack the tarball
+Obtain the HDF5 source code:
+    https://portal.hdfgroup.org/display/support/Downloads
 
 The entire build process should be done on a MOM node in an interactive allocation and on a file system accessible by all compute nodes.
 Request an interactive allocation with qsub:

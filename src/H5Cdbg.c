@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -718,6 +716,7 @@ H5C_stats(H5C_t * cache_ptr,
               (long)(cache_ptr->LRU_list_size),
               (unsigned long)(cache_ptr->LRU_list_len));
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     HDfprintf(stdout,
               "%s  current clean LRU size / length    = %ld / %lu\n",
               cache_ptr->prefix,
@@ -729,6 +728,7 @@ H5C_stats(H5C_t * cache_ptr,
               cache_ptr->prefix,
               (long)(cache_ptr->dLRU_list_size),
               (unsigned long)(cache_ptr->dLRU_list_len));
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     HDfprintf(stdout,
               "%s  Total hits / misses / hit_rate     = %ld / %ld / %f\n",

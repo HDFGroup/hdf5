@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -201,7 +199,6 @@ struct H5SM_master_table_t {
 /* Typedef for searching an index (list or B-tree) */
 typedef struct {
     H5F_t *file;                        /* File in which sharing is happening */
-    hid_t dxpl_id;                      /* DXPL for sharing messages in heap */
     H5HF_t *fheap;    			/* The heap for this message type, open. */
     void *encoding; 		        /* The message encoded, or NULL */
     size_t encoding_size; 		/* Size of the encoding, or 0 */
@@ -226,7 +223,6 @@ typedef struct {
 typedef struct {
     H5SM_mesg_key_t *key;       /* IN: key for message being incremented */
     H5O_fheap_id_t fheap_id;    /* OUT: fheap ID of record */
-    hid_t dxpl_id;
 } H5SM_incr_ref_opdata;
 
 /* v2 B-tree client callback context */
@@ -282,8 +278,7 @@ herr_t H5SM_list_free(H5SM_list_t *list);
 
 /* Testing functions */
 #ifdef H5SM_TESTING
-H5_DLL herr_t H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
-    size_t *mesg_count);
+H5_DLL herr_t H5SM__get_mesg_count_test(H5F_t *f, unsigned type_id, size_t *mesg_count);
 #endif /* H5SM_TESTING */
 
 #endif /* _H5SMpkg_H */

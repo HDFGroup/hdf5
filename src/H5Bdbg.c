@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -55,7 +53,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
+H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 	  const H5B_class_t *type, void *udata)
 {
     H5B_t	*bt = NULL;
@@ -92,7 +90,7 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     cache_udata.f = f;
     cache_udata.type = type;
     cache_udata.rc_shared = rc_shared;
-    if(NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree node")
 
     /*
@@ -151,7 +149,7 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     } /* end for */
 
 done:
-    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+    if(bt && H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -174,7 +172,7 @@ done:
  */
 #ifdef H5B_DEBUG
 herr_t
-H5B__assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void *udata)
+H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 {
     H5B_t	*bt = NULL;
     H5UC_t	*rc_shared;             /* Ref-counted shared info */
@@ -209,7 +207,7 @@ H5B__assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void
     cache_udata.f = f;
     cache_udata.type = type;
     cache_udata.rc_shared = rc_shared;
-    bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG);
+    bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG);
     HDassert(bt);
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
@@ -219,7 +217,7 @@ H5B__assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void
     cur->level = bt->level;
     head = tail = cur;
 
-    status = H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET);
+    status = H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET);
     HDassert(status >= 0);
     bt = NULL;    /* Make certain future references will be caught */
 
@@ -230,7 +228,7 @@ H5B__assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void
      * test.
      */
     for(ncell = 0; cur; ncell++) {
-	bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, cur->addr, &cache_udata, H5AC__READ_ONLY_FLAG);
+	bt = (H5B_t *)H5AC_protect(f, H5AC_BT, cur->addr, &cache_udata, H5AC__READ_ONLY_FLAG);
 	HDassert(bt);
 
 	/* Check node header */
@@ -270,7 +268,7 @@ H5B__assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void
 	} /* end if */
 
 	/* Release node */
-	status = H5AC_unprotect(f, dxpl_id, H5AC_BT, cur->addr, bt, H5AC__NO_FLAGS_SET);
+	status = H5AC_unprotect(f, H5AC_BT, cur->addr, bt, H5AC__NO_FLAGS_SET);
 	HDassert(status >= 0);
         bt = NULL;    /* Make certain future references will be caught */
 

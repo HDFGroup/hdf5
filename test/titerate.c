@@ -5,25 +5,21 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
 *
-* Test program:	 titerate
+* Test program:     titerate
 *
 * Test the Group & Attribute functionality
 *
 *************************************************************/
 
 #include "testhdf5.h"
-
-#include "hdf5.h"
 
 #define DATAFILE   "titerate.h5"
 
@@ -40,8 +36,8 @@
 #define NAMELEN     80
 
 /* 1-D dataset with fixed dimensions */
-#define SPACE1_RANK	1
-#define SPACE1_DIM1	4
+#define SPACE1_RANK    1
+#define SPACE1_DIM1    4
 
 typedef enum {
     RET_ZERO,
@@ -133,7 +129,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     char dataset_name[NAMELEN];  /* dataset name */
     iter_info info;         /* Custom iteration information */
     H5G_info_t ginfo;       /* Buffer for querying object's info */
-    herr_t ret;		    /* Generic return value */
+    herr_t ret;            /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Group Iteration Functionality\n"));
@@ -161,7 +157,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
 
         /* Keep a copy of the dataset names around for later */
         lnames[i] = HDstrdup(name);
-        CHECK(lnames[i], NULL, "strdup");
+        CHECK_PTR(lnames[i], "strdup");
 
         ret = H5Dclose(dataset);
         CHECK(ret, FAIL, "H5Dclose");
@@ -172,13 +168,13 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(ret, FAIL, "H5Gcreate2");
 
     lnames[NDATASETS] = HDstrdup("grp");
-    CHECK(lnames[NDATASETS], NULL, "strdup");
+    CHECK_PTR(lnames[NDATASETS], "strdup");
 
     ret = H5Tcommit2(file, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
 
     lnames[NDATASETS + 1] = HDstrdup("dtype");
-    CHECK(lnames[NDATASETS], NULL, "strdup");
+    CHECK_PTR(lnames[NDATASETS], "strdup");
 
     /* Close everything up */
     ret = H5Tclose(datatype);
@@ -392,7 +388,7 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     char name[NAMELEN];     /* temporary name buffer */
     char *anames[NATTR];    /* Names of the attributes created */
     iter_info info;         /* Custom iteration information */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Iteration Functionality\n"));
@@ -414,7 +410,7 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
 
         /* Keep a copy of the attribute names around for later */
         anames[i] = HDstrdup(name);
-        CHECK(anames[i], NULL, "strdup");
+        CHECK_PTR(anames[i], "strdup");
 
         ret = H5Aclose(attribute);
         CHECK(ret, FAIL, "H5Aclose");
@@ -547,7 +543,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_
 {
     const iter_info *test_info = (const iter_info *)opdata;
     H5O_info_t oinfo;
-    herr_t ret;		/* Generic return value		*/
+    herr_t ret;        /* Generic return value        */
 
     if(HDstrcmp(name, test_info->name)) {
         TestErrPrintf("name = '%s', test_info = '%s'\n", name, test_info->name);
@@ -577,13 +573,13 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_
 static void
 test_iter_group_large(hid_t fapl)
 {
-    hid_t		file;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		group;      /* Group ID             */
-    hid_t		sid;       /* Dataspace ID			*/
-    hid_t		tid;       /* Datatype ID			*/
-    hsize_t		dims[] = {SPACE1_DIM1};
-    herr_t		ret;		/* Generic return value		*/
+    hid_t        file;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        group;      /* Group ID             */
+    hid_t        sid;       /* Dataspace ID            */
+    hid_t        tid;       /* Datatype ID            */
+    hsize_t        dims[] = {SPACE1_DIM1};
+    herr_t        ret;        /* Generic return value        */
     char gname[20];             /* Temporary group name */
     iter_info *names;           /* Names of objects in the root group */
     iter_info *curr_name;       /* Pointer to the current name in the root group */
@@ -598,7 +594,7 @@ test_iter_group_large(hid_t fapl)
 
     /* Allocate & initialize array */
     names = (iter_info *)HDcalloc(sizeof(iter_info), (ITER_NGROUPS + 2));
-    CHECK(names, NULL, "HDcalloc");
+    CHECK_PTR(names, "HDcalloc");
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
@@ -713,7 +709,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     char dataset_name[NAMELEN];  /* dataset name */
     ssize_t name_len;       /* Length of object's name */
     H5G_info_t ginfo;       /* Buffer for querying object's info */
-    herr_t ret = SUCCEED;	/* Generic return value */
+    herr_t ret = SUCCEED;    /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Group Member Information Functionality\n"));
@@ -735,7 +731,7 @@ static void test_grp_memb_funcs(hid_t fapl)
 
         /* Keep a copy of the dataset names around for later */
         dnames[i] = HDstrdup(name);
-        CHECK(dnames[i], NULL, "strdup");
+        CHECK_PTR(dnames[i], "strdup");
 
         ret = H5Dclose(dataset);
         CHECK(ret, FAIL, "H5Dclose");
@@ -746,13 +742,13 @@ static void test_grp_memb_funcs(hid_t fapl)
     CHECK(ret, FAIL, "H5Gcreate2");
 
     dnames[NDATASETS] = HDstrdup("grp");
-    CHECK(dnames[NDATASETS], NULL, "strdup");
+    CHECK_PTR(dnames[NDATASETS], "strdup");
 
     ret = H5Tcommit2(file, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
 
     dnames[NDATASETS + 1] = HDstrdup("dtype");
-    CHECK(dnames[NDATASETS], NULL, "strdup");
+    CHECK_PTR(dnames[NDATASETS], "strdup");
 
     /* Close everything up */
     ret = H5Tclose(datatype);
@@ -799,7 +795,7 @@ static void test_grp_memb_funcs(hid_t fapl)
 
         /* Keep a copy of the dataset names around for later */
         obj_names[i] = HDstrdup(dataset_name);
-        CHECK(obj_names[i], NULL, "strdup");
+        CHECK_PTR(obj_names[i], "strdup");
 
         ret = H5Oget_info_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Oget_info_by_idx");
@@ -853,7 +849,7 @@ static void test_links(hid_t fapl)
     hid_t    gid, gid1;
     H5G_info_t ginfo;       /* Buffer for querying object's info */
     hsize_t i;
-    herr_t ret;		    /* Generic return value */
+    herr_t ret;            /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Soft and Hard Link Iteration Functionality\n"));
@@ -929,7 +925,7 @@ test_iterate(void)
 {
     hid_t fapl, fapl2;          /* File access property lists */
     unsigned new_format;        /* Whether to use the new format or not */
-    herr_t ret;		        /* Generic return value */
+    herr_t ret;                /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Iteration Operations\n"));
@@ -962,15 +958,15 @@ test_iterate(void)
     CHECK(ret, FAIL, "H5Pclose");
 }   /* test_iterate() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_iterate
+ * Function:    cleanup_iterate
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              April 5, 2000
  *
  * Modifications:

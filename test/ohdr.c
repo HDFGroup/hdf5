@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Robb Matzke <matzke@llnl.gov>
@@ -23,15 +21,17 @@
  * This file needs to access private datatypes from the H5O package.
  * This file also needs to access the object header testing code.
  */
-#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#define H5O_FRIEND        /*suppress error about including H5Opkg      */
 #define H5O_TESTING
 #include "H5Opkg.h"
 
 /*
  * This file needs to access private datatypes from the H5G package.
  */
-#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
+#define H5G_FRIEND        /*suppress error about including H5Gpkg      */
 #include "H5Gpkg.h"
+
+#include "H5CXprivate.h"        /* API Contexts                         */
 
 const char *FILENAME[] = {
     "ohdr",
@@ -51,24 +51,24 @@ const char *FILENAME[] = {
 
 /*
  *  Verify that messages are moved forward into a "continuation message":
- *	Create an object header with several continuation chunks
- *	Remove a message in the last chunk
- *	The remaining message(s) in the last chunk should be moved forward into the continuation message
- *	The process will repeat when the continuation message is big enough to hold all the
- *		messages in the last chunk.
- *	Result: the number of chunks should be reduced
+ *    Create an object header with several continuation chunks
+ *    Remove a message in the last chunk
+ *    The remaining message(s) in the last chunk should be moved forward into the continuation message
+ *    The process will repeat when the continuation message is big enough to hold all the
+ *        messages in the last chunk.
+ *    Result: the number of chunks should be reduced
  */
 static herr_t
 test_cont(char *filename, hid_t fapl)
 {
-    hid_t	file=-1;
-    H5F_t	*f = NULL;
+    hid_t    file=-1;
+    H5F_t    *f = NULL;
     H5O_hdr_info_t hdr_info;
-    H5O_loc_t	oh_locA, oh_locB;
-    time_t	time_new;
-    const char	*short_name = "T";
-    const char	*long_name = "This is the message";
-    size_t	nchunks;
+    H5O_loc_t    oh_locA, oh_locB;
+    time_t    time_new;
+    const char    *short_name = "T";
+    const char    *long_name = "This is the message";
+    size_t    nchunks;
 
     TESTING("object header continuation block");
 
@@ -86,51 +86,51 @@ test_cont(char *filename, hid_t fapl)
         goto error;
     } /* end if */
 
-    if(H5O_create(f, H5AC_ind_read_dxpl_id, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_locA/*out*/) < 0)
+    if(H5O_create(f, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_locA/*out*/) < 0)
             FAIL_STACK_ERROR
 
-    if(H5O_create(f, H5AC_ind_read_dxpl_id, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_locB/*out*/) < 0)
+    if(H5O_create(f, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_locB/*out*/) < 0)
             FAIL_STACK_ERROR
 
     time_new = 11111111;
 
-    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &long_name, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &long_name) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
-    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
-    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
-        FAIL_STACK_ERROR
-
-    if(H5O_msg_create(&oh_locA, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locA, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &short_name, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
 
-    if(1 != H5O_link(&oh_locA, 1, H5AC_ind_read_dxpl_id))
-        FAIL_STACK_ERROR
-    if(1 != H5O_link(&oh_locB, 1, H5AC_ind_read_dxpl_id))
-        FAIL_STACK_ERROR
-    if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
-        FAIL_STACK_ERROR
-    if(H5O_expunge_chunks_test(&oh_locA, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &short_name) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_get_hdr_info(&oh_locA, H5AC_ind_read_dxpl_id, &hdr_info) < 0)
+    if(1 != H5O_link(&oh_locA, 1))
+        FAIL_STACK_ERROR
+    if(1 != H5O_link(&oh_locB, 1))
+        FAIL_STACK_ERROR
+    if(H5AC_flush(f) < 0)
+        FAIL_STACK_ERROR
+    if(H5O_expunge_chunks_test(&oh_locA) < 0)
+        FAIL_STACK_ERROR
+
+    if(H5O_get_hdr_info(&oh_locA, &hdr_info) < 0)
         FAIL_STACK_ERROR
     nchunks = hdr_info.nchunks;
 
     /* remove the 1st H5O_NAME_ID message */
-    if(H5O_msg_remove(&oh_locA, H5O_NAME_ID, 0, FALSE, H5AC_ind_read_dxpl_id) < 0)
+    if(H5O_msg_remove(&oh_locA, H5O_NAME_ID, 0, FALSE) < 0)
         FAIL_STACK_ERROR
 
-    if(H5O_get_hdr_info(&oh_locA, H5AC_ind_read_dxpl_id, &hdr_info) < 0)
+    if(H5O_get_hdr_info(&oh_locA, &hdr_info) < 0)
         FAIL_STACK_ERROR
 
     if(hdr_info.nchunks >= nchunks)
@@ -144,7 +144,6 @@ test_cont(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     PASSED();
-
 
     return SUCCEED;
 
@@ -169,15 +168,14 @@ error:
 static herr_t
 test_ohdr_cache(char *filename, hid_t fapl)
 {
-    hid_t	file = -1;              /* File ID */
+    hid_t    file = -1;              /* File ID */
     hid_t       my_fapl;                /* FAPL ID */
-    hid_t       my_dxpl;                /* DXPL ID */
     H5AC_cache_config_t mdc_config;     /* Metadata cache configuration info */
-    H5F_t	*f = NULL;              /* File handle */
+    H5F_t    *f = NULL;              /* File handle */
     H5HL_t      *lheap, *lheap2, *lheap3; /* Pointer to local heaps */
     haddr_t     lheap_addr, lheap_addr2, lheap_addr3; /* Local heap addresses */
-    H5O_loc_t	oh_loc;                 /* Object header location */
-    time_t	time_new;               /* Time value for modification time message */
+    H5O_loc_t    oh_loc;                 /* Object header location */
+    time_t    time_new;               /* Time value for modification time message */
     unsigned    rc;                     /* Refcount for object */
 
     TESTING("object header creation in cache");
@@ -197,10 +195,6 @@ test_ohdr_cache(char *filename, hid_t fapl)
     if(H5Pset_mdc_config(my_fapl, &mdc_config) < 0)
         FAIL_STACK_ERROR
 
-    /* Make a copy of the default DXPL */
-    if((my_dxpl = H5Pcopy(H5AC_ind_read_dxpl_id)) < 0)
-        FAIL_STACK_ERROR
-
     /* Create the file to operate on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
         FAIL_STACK_ERROR
@@ -212,31 +206,31 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create object (local heap) that occupies most of cache */
-    if(H5HL_create(f, my_dxpl, (31 * 1024), &lheap_addr) < 0)
+    if(H5HL_create(f, (31 * 1024), &lheap_addr) < 0)
         FAIL_STACK_ERROR
 
     /* Protect local heap (which actually pins it in the cache) */
-    if(NULL == (lheap = H5HL_protect(f, my_dxpl, lheap_addr, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (lheap = H5HL_protect(f, lheap_addr, H5AC__READ_ONLY_FLAG)))
         FAIL_STACK_ERROR
 
     /* Create an object header */
     HDmemset(&oh_loc, 0, sizeof(oh_loc));
-    if(H5O_create(f, my_dxpl, (size_t)2048, (size_t)1, H5P_GROUP_CREATE_DEFAULT, &oh_loc/*out*/) < 0)
+    if(H5O_create(f, (size_t)2048, (size_t)1, H5P_GROUP_CREATE_DEFAULT, &oh_loc/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Query object header information */
     rc = 0;
-    if(H5O_get_rc(&oh_loc, my_dxpl, &rc) < 0)
+    if(H5O_get_rc(&oh_loc, &rc) < 0)
         FAIL_STACK_ERROR
     if(0 != rc)
         TEST_ERROR
 
     /* Create object (local heap) that occupies most of cache */
-    if(H5HL_create(f, my_dxpl, (31 * 1024), &lheap_addr2) < 0)
+    if(H5HL_create(f, (31 * 1024), &lheap_addr2) < 0)
         FAIL_STACK_ERROR
 
     /* Protect local heap (which actually pins it in the cache) */
-    if(NULL == (lheap2 = H5HL_protect(f, my_dxpl, lheap_addr2, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (lheap2 = H5HL_protect(f, lheap_addr2, H5AC__READ_ONLY_FLAG)))
         FAIL_STACK_ERROR
 
     /* Unprotect local heap (which actually unpins it from the cache) */
@@ -245,15 +239,15 @@ test_ohdr_cache(char *filename, hid_t fapl)
 
     /* Create object header message in new object header */
     time_new = 11111111;
-    if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, my_dxpl) < 0)
+    if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
         FAIL_STACK_ERROR
 
     /* Create object (local heap) that occupies most of cache */
-    if(H5HL_create(f, my_dxpl, (31 * 1024), &lheap_addr3) < 0)
+    if(H5HL_create(f, (31 * 1024), &lheap_addr3) < 0)
         FAIL_STACK_ERROR
 
     /* Protect local heap (which actually pins it in the cache) */
-    if(NULL == (lheap3 = H5HL_protect(f, my_dxpl, lheap_addr3, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (lheap3 = H5HL_protect(f, lheap_addr3, H5AC__READ_ONLY_FLAG)))
         FAIL_STACK_ERROR
 
     /* Unprotect local heap (which actually unpins it from the cache) */
@@ -267,13 +261,13 @@ test_ohdr_cache(char *filename, hid_t fapl)
      *  a non-invasive way -QAK)
      */
     rc = 0;
-    if(H5O_get_rc(&oh_loc, my_dxpl, &rc) < 0)
+    if(H5O_get_rc(&oh_loc, &rc) < 0)
         FAIL_STACK_ERROR
     if(0 != rc)
         TEST_ERROR
 
     /* Decrement reference count o object header */
-    if(H5O_dec_rc_by_loc(&oh_loc, my_dxpl) < 0)
+    if(H5O_dec_rc_by_loc(&oh_loc) < 0)
         FAIL_STACK_ERROR
 
     /* Close object header created */
@@ -284,8 +278,6 @@ test_ohdr_cache(char *filename, hid_t fapl)
     if(H5HL_unprotect(lheap) < 0)
         FAIL_STACK_ERROR
 
-    if(H5Pclose(my_dxpl) < 0)
-        FAIL_STACK_ERROR
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -311,17 +303,17 @@ error:
 static herr_t
 test_ohdr_swmr(hbool_t new_format)
 {
-    hid_t fid = -1;			    /* File ID */
-    hid_t fapl = -1;			/* File access property list */
-    hid_t did = -1;			    /* Dataset ID */
+    hid_t fid = -1;                /* File ID */
+    hid_t fapl = -1;            /* File access property list */
+    hid_t did = -1;                /* Dataset ID */
     hid_t sid = -1;             /* Dataspace ID */
-    hid_t plist = -1;			/* Dataset creation property list */
-    size_t compact_size = 1024;	/* The size of compact dataset */
-    int *wbuf = NULL;			/* Buffer for writing */
-    hsize_t dims[1];			/* Dimension sizes */
-    size_t u;		            /* Iterator */
+    hid_t plist = -1;            /* Dataset creation property list */
+    size_t compact_size = 1024;    /* The size of compact dataset */
+    int *wbuf = NULL;            /* Buffer for writing */
+    hsize_t dims[1];            /* Dimension sizes */
+    size_t u;                    /* Iterator */
     int n;                      /* Data variable */
-    H5O_info_t obj_info;		/* Information for the object */
+    H5O_info_t obj_info;        /* Information for the object */
 
     if(new_format) {
         TESTING("exercise the coding for the re-read of the object header for SWMR access: latest-format");
@@ -357,7 +349,7 @@ test_ohdr_swmr(hbool_t new_format)
     dims[0] = (hsize_t)compact_size;
     if((sid = H5Screate_simple(1, dims, NULL)) < 0)
         FAIL_STACK_ERROR
-    
+
     /* Create property list for compact dataset creation */
     if((plist = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
@@ -394,8 +386,9 @@ test_ohdr_swmr(hbool_t new_format)
     if(H5Oget_info(did, &obj_info) < 0)
         FAIL_STACK_ERROR
 
-    if(obj_info.hdr.version != OBJ_VERSION_LATEST)
-        FAIL_STACK_ERROR
+    if(new_format)
+        if(obj_info.hdr.version != OBJ_VERSION_LATEST)
+            FAIL_STACK_ERROR
 
     /* The size of object header should be greater than the speculative read size of H5O_SPEC_READ_SIZE */
     /* This will exercise the coding for the re-read of the object header for SWMR access */
@@ -449,10 +442,10 @@ error:
 
 /*
  *  To test objects with unknown messages in a file with:
- *  	a) H5O_BOGUS_VALID_ID:
- *	   --the bogus_id is within the range of H5O_msg_class_g[]
- *  	b) H5O_BOGUS_INVALID_ID:
- *  	   --the bogus_id is outside the range of H5O_msg_class_g[]
+ *      a) H5O_BOGUS_VALID_ID:
+ *       --the bogus_id is within the range of H5O_msg_class_g[]
+ *      b) H5O_BOGUS_INVALID_ID:
+ *         --the bogus_id is outside the range of H5O_msg_class_g[]
  *
  *   The test file is FILE_BOGUS: "tbogus.h5" generated with gen_bogus.c
  *   --objects that have unknown header messages with H5O_BOGUS_VALID_ID in "/"
@@ -463,15 +456,15 @@ error:
 static herr_t
 test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 {
-    hid_t fid = -1;	/* file ID */
-    hid_t gid = -1;	/* group ID */
-    hid_t did = -1;	/* Dataset ID */
+    hid_t fid = -1;    /* file ID */
+    hid_t gid = -1;    /* group ID */
+    hid_t did = -1;    /* Dataset ID */
     hid_t sid = -1;     /* Dataspace ID */
     hid_t aid = -1;     /* Attribute ID */
-    hid_t loc = -1;	/* location: file or group ID */
-    hid_t fid_bogus = -1;	/* bogus file ID */
-    hid_t gid_bogus = -1;	/* bogus group ID */
-    hid_t loc_bogus = -1;	/* location: bogus file or group ID */
+    hid_t loc = -1;    /* location: file or group ID */
+    hid_t fid_bogus = -1;    /* bogus file ID */
+    hid_t gid_bogus = -1;    /* bogus group ID */
+    hid_t loc_bogus = -1;    /* location: bogus file or group ID */
     char testfile[256];
 
     /* create a different name for a local copy of the data file to be
@@ -498,7 +491,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID depending on bogus_id */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in FILE_BOGUS */
-        if((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0) 
+        if((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc_bogus = gid_bogus;
 
@@ -563,7 +556,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID depending on bogus_id */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in filename */
-        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0) 
+        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc = gid;
     } else
@@ -597,7 +590,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID depending on bogus_id */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in filename */
-        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0) 
+        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc = gid;
     } else
@@ -643,7 +636,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID depending on bogus_id */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in filename */
-        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0) 
+        if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc = gid;
     } else
@@ -661,7 +654,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     if(H5Dclose(did) < 0)
         FAIL_STACK_ERROR
 
-    /* Closing: filename */ 
+    /* Closing: filename */
     if(bogus_id == H5O_BOGUS_INVALID_ID)
         if(H5Gclose(gid) < 0)
             FAIL_STACK_ERROR
@@ -686,7 +679,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Set up location ID */
     if(bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in FILE_BOGUS */
-        if((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0) 
+        if((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR
         loc_bogus = gid_bogus;
     } else
@@ -717,7 +710,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Closing: FILE_BOGUS */
     if(bogus_id == H5O_BOGUS_INVALID_ID)
         if(H5Gclose(gid_bogus) < 0)
-	        FAIL_STACK_ERROR
+            FAIL_STACK_ERROR
     if(H5Fclose(fid_bogus) < 0)
         FAIL_STACK_ERROR
 
@@ -739,49 +732,110 @@ error:
     return FAIL;
 } /* test_unknown() */
 
-
+#define STR_EARLIEST "earliest"
+#define STR_V18 "v18"
+#define STR_LATEST "latest"
+static char *
+version_string(H5F_libver_t libver)
+{
+    char *str = NULL;
+
+    str = (char *) HDmalloc(20);
+    if (str == NULL) {
+        HDfprintf(stderr, "Allocation failed\n");
+        HDexit(1);
+    }
+
+    switch(libver) {
+      case H5F_LIBVER_EARLIEST:
+          HDstrcpy(str, STR_EARLIEST);
+          break;
+
+      case H5F_LIBVER_V18:
+          HDstrcpy(str, STR_V18);
+          break;
+
+      case H5F_LIBVER_V110:
+          HDassert(H5F_LIBVER_LATEST == H5F_LIBVER_V110);
+          HDstrcpy(str, STR_LATEST);
+          break;
+
+      case H5F_LIBVER_ERROR:
+      case H5F_LIBVER_NBOUNDS:
+      default:
+          HDsprintf(str, "%ld", (long)libver);
+          break;
+    } /* end switch */
+
+    /* Return the formed version bound string */
+    return str;
+} /* end of version_string */
+
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
  * Purpose:     Exercise private object header behavior and routines
  *
- * Return:	Success:        0
- *		Failure:        1
+ * Return:      Success: 0
+ *              Failure: 1
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
+ *
+ * Modification:
+ *              - Added loop of combinations of low/high library format bounds
+ *                (BMR, Feb 2018)
  *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    hid_t	fapl = -1, file = -1;
-    H5F_t	*f = NULL;
-    char	filename[1024];
-    H5O_hdr_info_t hdr_info;            /* Object info */
-    H5O_loc_t	oh_loc;                 /* Object header locations */
-    time_t	time_new, ro;
-    int		i;                      /* Local index variable */
-    unsigned    b;                      /* Index for "new format" loop */
-    herr_t      ret;                    /* Generic return value */
+    hid_t fapl = -1;
+    hid_t file = -1;
+    H5F_t *f = NULL;
+    char  filename[1024];
+    H5O_hdr_info_t hdr_info;  /* Object info */
+    H5O_loc_t      oh_loc;    /* Object header locations */
+    H5F_libver_t low, high;   /* File format bounds */
+    time_t time_new, ro;
+    char msg[80];             /* Message for file format version */
+    int    i;                 /* Local index variable */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    herr_t ret;               /* Generic return value */
 
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    /* Loop over old & new formats */
-    for(b = FALSE; b <= TRUE; b++) {
-        /* Display info about testing */
-        if(b)
-            HDputs("Using new file format:");
-        else
-            HDputs("Using default file format:");
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
 
-        /* Set the format to use for the file */
-        if(H5Pset_libver_bounds(fapl, (b ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST), H5F_LIBVER_LATEST) < 0)
-            FAIL_STACK_ERROR
+    /* Loop through all the combinations of low/high library format bounds */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+      for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+        char *low_string = NULL;
+        char *high_string = NULL;
+
+        /* Set version bounds before opening the file */
+        H5E_BEGIN_TRY {
+            ret = H5Pset_libver_bounds(fapl, low, high);
+        } H5E_END_TRY;
+
+        if (ret < 0) /* Invalid low/high combinations */
+            continue;
+
+        /* Display info about testing */
+        low_string = version_string(low);
+        high_string = version_string(high);
+        sprintf(msg, "Using file format version: (%s, %s)", low_string,
+                high_string);
+        HDputs(msg);
+        HDfree(high_string);
+        HDfree(low_string);
 
         /* test on object continuation block */
         if(test_cont(filename, fapl) < 0)
@@ -804,22 +858,22 @@ main(void)
          */
         TESTING("object header creation");
         HDmemset(&oh_loc, 0, sizeof(oh_loc));
-        if(H5O_create(f, H5AC_ind_read_dxpl_id, (size_t)64, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_loc/*out*/) < 0)
+        if(H5O_create(f, (size_t)64, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_loc/*out*/) < 0)
             FAIL_STACK_ERROR
         PASSED();
 
         /* create a new message */
         TESTING("message creation");
         time_new = 11111111;
-        if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
             FAIL_STACK_ERROR
-        if(1 != H5O_link(&oh_loc, 1, H5AC_ind_read_dxpl_id))
+        if(1 != H5O_link(&oh_loc, 1))
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+        if(H5AC_flush(f) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
-        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro))
             FAIL_STACK_ERROR
         if(ro != time_new)
             TEST_ERROR
@@ -830,19 +884,19 @@ main(void)
          */
         TESTING("message modification");
         time_new = 33333333;
-        if(H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+        if(H5AC_flush(f) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
-        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro))
             FAIL_STACK_ERROR
         if(ro != time_new)
             TEST_ERROR
 
         /* Make certain that chunk #0 in the object header can be encoded with a 1-byte size */
-        if(H5O_get_hdr_info(&oh_loc, H5AC_ind_read_dxpl_id, &hdr_info) < 0)
+        if(H5O_get_hdr_info(&oh_loc, &hdr_info) < 0)
             FAIL_STACK_ERROR
         if(hdr_info.space.total >=256)
             TEST_ERROR
@@ -860,16 +914,16 @@ main(void)
         TESTING("object header overflow in memory");
         for(i = 0; i < 40; i++) {
             time_new = (i + 1) * 1000 + 1000000;
-            if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+            if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
-        if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+        if(H5AC_flush(f) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that chunk #0 in the object header will be encoded with a 2-byte size */
-        if(H5O_get_hdr_info(&oh_loc, H5AC_ind_read_dxpl_id, &hdr_info) < 0)
+        if(H5O_get_hdr_info(&oh_loc, &hdr_info) < 0)
             FAIL_STACK_ERROR
         if(hdr_info.space.total < 256)
             TEST_ERROR
@@ -904,11 +958,11 @@ main(void)
         TESTING("object header overflow on disk");
         for(i = 0; i < 10; i++) {
             time_new = (i + 1) * 1000 + 10;
-            if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+            if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
                 FAIL_STACK_ERROR
-            if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+            if(H5AC_flush(f) < 0)
                 FAIL_STACK_ERROR
-            if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+            if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
         PASSED();
@@ -917,13 +971,13 @@ main(void)
          * Delete all time messages.
          */
         TESTING("message deletion");
-        if(H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE) < 0)
             FAIL_STACK_ERROR
-        if(H5O_msg_remove(&oh_loc, H5O_MTIME_ID, H5O_ALL, TRUE, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_remove(&oh_loc, H5O_MTIME_ID, H5O_ALL, TRUE) < 0)
             FAIL_STACK_ERROR
-        if(H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro))
             FAIL_STACK_ERROR
-        if(H5O_msg_read(&oh_loc, H5O_MTIME_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(H5O_msg_read(&oh_loc, H5O_MTIME_ID, &ro))
             FAIL_STACK_ERROR
         PASSED();
 
@@ -934,23 +988,23 @@ main(void)
          */
         TESTING("constant message handling");
         time_new = 22222222;
-        if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &time_new, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &time_new) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5AC_ind_read_dxpl_id) < 0)
+        if(H5AC_flush(f) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
-        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5AC_ind_read_dxpl_id))
+        if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro))
             FAIL_STACK_ERROR
         if(ro != time_new)
             TEST_ERROR
         time_new = 33333333;
         H5E_BEGIN_TRY {
-            ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5AC_ind_read_dxpl_id);
+            ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new);
         } H5E_END_TRY;
         if(ret >= 0)
             TEST_ERROR
-        if(H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE, H5AC_ind_read_dxpl_id) < 0)
+        if(H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE) < 0)
             FAIL_STACK_ERROR
         PASSED();
 
@@ -978,7 +1032,9 @@ main(void)
         /* Test object header creation metadata cache issues */
         if(test_ohdr_cache(filename, fapl) < 0)
             TEST_ERROR
-    } /* end for */
+
+      } /* high */
+    } /* low */
 
     /* Verify symbol table messages are cached */
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
@@ -986,6 +1042,10 @@ main(void)
     /* A test to exercise the re-read of the object header for SWMR access */
     if(test_ohdr_swmr(TRUE) < 0) TEST_ERROR
     if(test_ohdr_swmr(FALSE) < 0) TEST_ERROR
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
 
     HDputs("All object header tests passed.");
     h5_cleanup(FILENAME, fapl);
@@ -996,6 +1056,8 @@ error:
     H5E_BEGIN_TRY {
         H5Fclose(file);
     } H5E_END_TRY;
+
+    if(api_ctx_pushed) H5CX_pop();
 
     return 1;
 } /* end main() */

@@ -1,5 +1,19 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_CPP_TEST)
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_CPP_TEST CXX)
+
+#-----------------------------------------------------------------------------
+# Parallel/MPI, prevent spurious cpp/cxx warnings
+#-----------------------------------------------------------------------------
+if (H5_HAVE_PARALLEL)
+  add_definitions ("-DMPICH_SKIP_MPICXX")
+  add_definitions ("-DMPICH_IGNORE_CXX_SEEK")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Apply Definitions to compiler in this directory and below
+#-----------------------------------------------------------------------------
+add_definitions (${HDF_EXTRA_C_FLAGS})
+
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
 # with "cpp_". This allows for easier filtering of the test suite when
@@ -37,7 +51,7 @@ set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
 add_executable (cpp_testhdf5 ${CPP_TEST_SOURCES} )
-TARGET_NAMING (cpp_testhdf5 STATIC)
+set_property(TARGET cpp_testhdf5 APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR}")
 TARGET_C_PROPERTIES (cpp_testhdf5 STATIC " " " ")
 target_link_libraries (cpp_testhdf5
     ${HDF5_CPP_LIB_TARGET}

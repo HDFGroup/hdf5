@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -206,7 +204,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_sinfo_lock(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, unsigned accmode)
+H5FS_sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
 {
     H5FS_sinfo_cache_ud_t cache_udata; /* User-data for cache callback */
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -238,14 +236,13 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
             /* Check if we need to switch from read-only access to read-write */
 	    if(0 == (accmode & (unsigned)(~H5AC__READ_ONLY_FLAG))) {
                 /* Unprotect the read-only section info */
-                if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
+                if(H5AC_unprotect(f, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info")
 
                 /* Re-protect the section info with read-write access */
                 cache_udata.f = f;
-                cache_udata.dxpl_id = dxpl_id;
                 cache_udata.fspace = fspace;
-                if(NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, &cache_udata, H5AC__NO_FLAGS_SET)))
+                if(NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, H5AC_FSPACE_SINFO, fspace->sect_addr, &cache_udata, H5AC__NO_FLAGS_SET)))
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to load free space sections")
 
                 /* Switch the access mode we have */
@@ -265,9 +262,8 @@ HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %a\n", 
 #endif /* H5FS_SINFO_DEBUG */
             /* Protect the free space sections */
             cache_udata.f = f;
-            cache_udata.dxpl_id = dxpl_id;
             cache_udata.fspace = fspace;
-            if(NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, &cache_udata, accmode)))
+            if(NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, H5AC_FSPACE_SINFO, fspace->sect_addr, &cache_udata, accmode)))
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to load free space sections")
 
             /* Remember that we protected the section info & the access mode */
@@ -319,7 +315,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_sinfo_unlock(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, hbool_t modified)
+H5FS_sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -388,7 +384,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
 #ifdef H5FS_SINFO_DEBUG
 HDfprintf(stderr, "%s: Unprotecting section info, cache_flags = %u\n", FUNC, cache_flags);
 #endif /* H5FS_SINFO_DEBUG */
-            if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, cache_flags) < 0)
+            if(H5AC_unprotect(f, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, cache_flags) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info")
 
             /* Reset the protected flag on the section info */
@@ -453,10 +449,9 @@ HDfprintf(stderr, "%s: Relinquishing section info ownership\n", FUNC);
 HDfprintf(stderr, "%s: Freeing section info on disk, old_sect_addr = %a, old_alloc_sect_size = %Hu\n", FUNC, old_sect_addr, old_alloc_sect_size);
 #endif /* H5FS_SINFO_DEBUG */
             /* Release space for section info in file */
-            if(!H5F_IS_TMP_ADDR(f, old_sect_addr)) {
-                if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, old_sect_addr, old_alloc_sect_size) < 0)
+            if(!H5F_IS_TMP_ADDR(f, old_sect_addr))
+                if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, old_sect_addr, old_alloc_sect_size) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections")
-            } /* end if */
         } /* end if */
     } /* end if */
 
@@ -899,8 +894,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_sect_remove(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
-    H5FS_section_info_t *sect)
+H5FS_sect_remove(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect)
 {
     hbool_t sinfo_valid = FALSE;        /* Whether the section info is valid */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -913,7 +907,7 @@ H5FS_sect_remove(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     HDassert(sect);
 
     /* Get a pointer to the section info */
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(H5FS_sinfo_lock(f, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
 
@@ -923,7 +917,7 @@ H5FS_sect_remove(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
 
 done:
     /* Release the section info */
-    if(sinfo_valid && H5FS_sinfo_unlock(f, dxpl_id, fspace, TRUE) < 0)
+    if(sinfo_valid && H5FS_sinfo_unlock(f, fspace, TRUE) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1364,8 +1358,8 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_sect_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_section_info_t *sect,
-    unsigned flags, void *op_data)
+H5FS_sect_add(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flags,
+    void *op_data)
 {
     H5FS_section_class_t *cls;          /* Section's class */
     hbool_t sinfo_valid = FALSE;        /* Whether the section info is valid */
@@ -1385,16 +1379,15 @@ HDfprintf(stderr, "%s: *sect = {%a, %Hu, %u, %s}\n", FUNC, sect->addr, sect->siz
     HDassert(sect->size);
 
     /* Get a pointer to the section info */
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(H5FS_sinfo_lock(f, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
 
     /* Call "add" section class callback, if there is one */
     cls = &fspace->sect_cls[sect->type];
-    if(cls->add) {
+    if(cls->add)
         if((*cls->add)(&sect, &flags, op_data) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "'add' section class callback failed")
-    } /* end if */
 
     /* Check for merging returned space with existing section node */
     if(flags & H5FS_ADD_RETURNED_SPACE) {
@@ -1425,12 +1418,12 @@ HDfprintf(stderr, "%s: fspace->tot_space = %Hu\n", FUNC, fspace->tot_space);
 
 done:
     /* Release the section info */
-    if(sinfo_valid && H5FS_sinfo_unlock(f, dxpl_id, fspace, sinfo_modified) < 0)
+    if(sinfo_valid && H5FS_sinfo_unlock(f, fspace, sinfo_modified) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
 
 #ifdef H5FS_DEBUG_ASSERT
 if(!(flags & (H5FS_ADD_DESERIALIZING | H5FS_ADD_SKIP_VALID)))
-    H5FS_assert(fspace, dxpl_id);
+    H5FS__assert(fspace);
 #endif /* H5FS_DEBUG_ASSERT */
 #ifdef H5FS_SINFO_DEBUG
 HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
@@ -1452,7 +1445,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
  *-------------------------------------------------------------------------
  */
 htri_t
-H5FS_sect_try_extend(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, haddr_t addr,
+H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr,
     hsize_t size, hsize_t extra_requested, unsigned flags, void *op_data)
 {
     hbool_t sinfo_valid = FALSE;        /* Whether the section info is valid */
@@ -1482,7 +1475,7 @@ HDfprintf(stderr, "%s: fspace->ghost_sect_count = %Hu\n", FUNC, fspace->ghost_se
         H5FS_section_info_t *sect;      /* Temporary free space section */
 
         /* Get a pointer to the section info */
-        if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
+        if(H5FS_sinfo_lock(f, fspace, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
         sinfo_valid = TRUE;
 
@@ -1568,7 +1561,7 @@ if(_section_)
 
 done:
     /* Release the section info */
-    if(sinfo_valid && H5FS_sinfo_unlock(f, dxpl_id, fspace, sinfo_modified) < 0)
+    if(sinfo_valid && H5FS_sinfo_unlock(f, fspace, sinfo_modified) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1590,7 +1583,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5FS_sect_try_merge(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_section_info_t *sect,
+H5FS_sect_try_merge(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect,
     unsigned flags, void *op_data)
 {
     hbool_t sinfo_valid = FALSE;        /* Whether the section info is valid */
@@ -1608,7 +1601,7 @@ H5FS_sect_try_merge(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_section_info_t
     HDassert(sect->size);
 
     /* Get a pointer to the section info */
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(H5FS_sinfo_lock(f, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
     saved_fs_size = sect->size;
@@ -1634,7 +1627,7 @@ H5FS_sect_try_merge(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_section_info_t
 
 done:
     /* Release the section info */
-    if(sinfo_valid && H5FS_sinfo_unlock(f, dxpl_id, fspace, sinfo_modified) < 0)
+    if(sinfo_valid && H5FS_sinfo_unlock(f, fspace, sinfo_modified) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1804,8 +1797,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5FS_sect_find(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, hsize_t request,
-    H5FS_section_info_t **node)
+H5FS_sect_find(H5F_t *f, H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node)
 {
     hbool_t sinfo_valid = FALSE;        /* Whether the section info is valid */
     hbool_t sinfo_modified = FALSE;     /* Whether the section info was modified */
@@ -1831,7 +1823,7 @@ HDfprintf(stderr, "%s: fspace->ghost_sect_count = %Hu\n", FUNC, fspace->ghost_se
 #endif /* QAK */
     if(fspace->tot_sect_count > 0) {
         /* Get a pointer to the section info */
-        if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
+        if(H5FS_sinfo_lock(f, fspace, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
         sinfo_valid = TRUE;
 
@@ -1851,11 +1843,11 @@ HDfprintf(stderr, "%s: (*node)->size = %Hu, (*node)->addr = %a, (*node)->type = 
 
 done:
     /* Release the section info */
-    if(sinfo_valid && H5FS_sinfo_unlock(f, dxpl_id, fspace, sinfo_modified) < 0)
+    if(sinfo_valid && H5FS_sinfo_unlock(f, fspace, sinfo_modified) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
 
 #ifdef H5FS_DEBUG_ASSERT
-    H5FS_assert(fspace, dxpl_id);
+    H5FS__assert(fspace);
 #endif /* H5FS_DEBUG_ASSERT */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_sect_find() */
@@ -1947,7 +1939,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_sect_iterate(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_operator_t op, void *op_data)
+H5FS_sect_iterate(H5F_t *f, H5FS_t *fspace, H5FS_operator_t op, void *op_data)
 {
     H5FS_iter_ud_t udata;               /* User data for callbacks */
     hbool_t sinfo_valid = FALSE;        /* Whether the section info is valid */
@@ -1973,7 +1965,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", FUNC, fspace->tot_sect_c
         unsigned bin;           /* Current bin we are on */
 
         /* Get a pointer to the section info */
-        if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__READ_ONLY_FLAG) < 0)
+        if(H5FS_sinfo_lock(f, fspace, H5AC__READ_ONLY_FLAG) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
         sinfo_valid = TRUE;
 
@@ -1993,7 +1985,7 @@ HDfprintf(stderr, "%s: Iterate over section bins\n", FUNC);
 
 done:
     /* Release the section info */
-    if(sinfo_valid && H5FS_sinfo_unlock(f, dxpl_id, fspace, FALSE) < 0)
+    if(sinfo_valid && H5FS_sinfo_unlock(f, fspace, FALSE) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2044,8 +2036,8 @@ H5FS_sect_stats(const H5FS_t *fspace, hsize_t *tot_space, hsize_t *nsects)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_sect_change_class(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
-    H5FS_section_info_t *sect, uint16_t new_class)
+H5FS_sect_change_class(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect,
+    uint16_t new_class)
 {
     const H5FS_section_class_t *old_cls;        /* Old class of section */
     const H5FS_section_class_t *new_cls;        /* New class of section */
@@ -2062,7 +2054,7 @@ H5FS_sect_change_class(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     HDassert(new_class < fspace->nclasses);
 
     /* Get a pointer to the section info */
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(H5FS_sinfo_lock(f, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
 
@@ -2192,7 +2184,7 @@ HDfprintf(stderr, "%s: removing object from merge list, sect->type = %u\n", FUNC
 
 done:
     /* Release the section info */
-    if(sinfo_valid && H5FS_sinfo_unlock(f, dxpl_id, fspace, TRUE) < 0)
+    if(sinfo_valid && H5FS_sinfo_unlock(f, fspace, TRUE) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2201,7 +2193,7 @@ done:
 #ifdef H5FS_DEBUG_ASSERT
 
 /*-------------------------------------------------------------------------
- * Function:    H5FS_sect_assert
+ * Function:    H5FS__sect_assert
  *
  * Purpose:     Verify that the sections managed are mostly sane
  *
@@ -2213,13 +2205,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_sect_assert(const H5FS_t *fspace, hid_t dxpl_id)
+H5FS__sect_assert(const H5FS_t *fspace)
 {
     hsize_t separate_obj;       /* The number of separate objects managed */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 #ifdef QAK
-HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS_sect_assert", fspace->tot_sect_count);
+HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS__sect_assert", fspace->tot_sect_count);
 #endif /* QAK */
 
     /* Initialize state */
@@ -2278,14 +2270,14 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS_sect_assert", fspa
                         sect = H5SL_item(curr_sect_node);
                         cls = &fspace->sect_cls[sect->type];
 #ifdef QAK
-HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H5FS_assert", sect->size, sect->addr, sect->type);
+HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H5FS__sect_assert", sect->size, sect->addr, sect->type);
 #endif /* QAK */
 
                         /* Sanity check section */
                         HDassert(H5F_addr_defined(sect->addr));
                         HDassert(fspace_node->sect_size == sect->size);
                         if(cls->valid)
-                            (*cls->valid)(cls, sect, dxpl_id);
+                            (*cls->valid)(cls, sect);
 
                         /* Add to correct count */
                         if(cls->flags & H5FS_CLS_GHOST_OBJ)
@@ -2346,7 +2338,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H
         HDassert(fspace->tot_sect_count == (separate_obj + H5SL_count(fspace->sinfo->merge_list)));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FS_sect_assert() */
+} /* end H5FS__sect_assert() */
 #endif /* H5FS_DEBUG_ASSERT */
 
 
@@ -2364,7 +2356,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H
  *-------------------------------------------------------------------------
  */
 htri_t
-H5FS_sect_try_shrink_eoa(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, void *op_data)
+H5FS_sect_try_shrink_eoa(H5F_t *f, H5FS_t *fspace, void *op_data)
 {
     hbool_t sinfo_valid = FALSE;        /* Whether the section info is valid */
     hbool_t section_removed = FALSE;    /* Whether a section was removed */
@@ -2375,7 +2367,7 @@ H5FS_sect_try_shrink_eoa(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, void *op_data)
     /* Check arguments. */
     HDassert(fspace);
 
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(H5FS_sinfo_lock(f, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
 
@@ -2413,7 +2405,7 @@ H5FS_sect_try_shrink_eoa(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, void *op_data)
 
 done:
     /* Release the section info */
-    if(sinfo_valid && H5FS_sinfo_unlock(f, dxpl_id, fspace, section_removed) < 0)
+    if(sinfo_valid && H5FS_sinfo_unlock(f, fspace, section_removed) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2511,8 +2503,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, hid_t dxpl_id,
-    H5FS_t *fspace, haddr_t *fs_addr_ptr)
+H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace,
+    haddr_t *fs_addr_ptr)
 {
     hsize_t	hdr_alloc_size;
     hsize_t	sinfo_alloc_size;
@@ -2580,11 +2572,8 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, hid_t dxpl_id,
         } /* end if */
 
         /* allocate space for the hdr */
-        if(HADDR_UNDEF == (fspace->addr = H5FD_alloc(f->shared->lf, dxpl_id,
-                                                   H5FD_MEM_FSPACE_HDR, f, 
-                                                   hdr_alloc_size,
-                                                   &eoa_frag_addr,
-                                                   &eoa_frag_size)))
+        if(HADDR_UNDEF == (fspace->addr = H5FD_alloc(f->shared->lf, H5FD_MEM_FSPACE_HDR,
+                f, hdr_alloc_size, &eoa_frag_addr, &eoa_frag_size)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTALLOC, FAIL, "can't allocate file space for hdr")
 
         /* if the file alignement is 1, there should be no
@@ -2593,7 +2582,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, hid_t dxpl_id,
         HDassert((eoa_frag_size == 0) || (f->shared->alignment != 1));
 
         /* Cache the new free space header (pinned) */
-        if(H5AC_insert_entry(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
+        if(H5AC_insert_entry(f, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space header to cache")
 
         *fs_addr_ptr = fspace->addr;
@@ -2623,11 +2612,8 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, hid_t dxpl_id,
         } /* end if */
 
         /* allocate space for the section info */
-        if(HADDR_UNDEF == (sect_addr = H5FD_alloc(f->shared->lf, dxpl_id,
-                                                  H5FD_MEM_FSPACE_SINFO, f, 
-                                                  sinfo_alloc_size,
-                                                  &eoa_frag_addr,
-                                                  &eoa_frag_size)))
+        if(HADDR_UNDEF == (sect_addr = H5FD_alloc(f->shared->lf, H5FD_MEM_FSPACE_SINFO,
+                f, sinfo_alloc_size, &eoa_frag_addr, &eoa_frag_size)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTALLOC, FAIL, "can't allocate file space")
 
         /* if the file alignement is 1, there should be no
@@ -2664,7 +2650,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, hid_t dxpl_id,
          *
          *                                        JRM -- 11/4/16
          */
-        if(H5AC_insert_entry(f, dxpl_id, H5AC_FSPACE_SINFO, sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_insert_entry(f, H5AC_FSPACE_SINFO, sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sinfo to cache")
 
         /* We have changed the sinfo address -- Mark free space header dirty */

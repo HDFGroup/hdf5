@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __H5DSCreatPropList_H
@@ -19,15 +17,15 @@
 
 namespace H5 {
 
+// Class forwarding
 class DataType;
 class DataSpace;
 
 /*! \class DSetCreatPropList
     \brief Class DSetCreatPropList inherits from ObjCreatPropList and provides
     wrappers for the HDF5 dataset creation property functions.
-
-    Inheritance: ObjCreatPropList -> PropList -> IdComponent
 */
+//  Inheritance: ObjCreatPropList -> PropList -> IdComponent
 class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
    public:
         ///\brief Default dataset creation property list.
@@ -124,7 +122,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DSetCreatPropList"); }
 
-        // Copy constructor: creates a copy of a DSetCreatPropList object.
+        // Copy constructor - same as the original DSetCreatPropList.
         DSetCreatPropList(const DSetCreatPropList& orig);
 
         // Creates a copy of an existing dataset creation property list

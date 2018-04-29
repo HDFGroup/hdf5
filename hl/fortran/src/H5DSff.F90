@@ -5,12 +5,10 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!   of the source code distribution tree; Copyright.html can be found at the  *
-!   root level of an installed copy of the electronic HDF5 document set and   *
-!   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-!   access to either file, you may request a copy from help@hdfgroup.org.     *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
@@ -45,13 +43,6 @@ CONTAINS
   SUBROUTINE H5DSset_scale_f( dsid, errcode, dimname)
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsset_scale_f
-!DEC$endif
-!
 
     INTEGER(hid_t),   INTENT(in) :: dsid               ! The dataset to be made a Dimension Scale
     CHARACTER(LEN=*), INTENT(in), OPTIONAL :: dimname  ! The dimension name
@@ -101,12 +92,6 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsattach_scale_f
-!DEC$endif
-!
     INTEGER(hid_t), INTENT(in) :: did     ! the dataset
     INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be attached 
     INTEGER       , INTENT(in) :: idx     ! the dimension of did that dsid is associated with.
@@ -150,13 +135,7 @@ CONTAINS
   SUBROUTINE H5DSdetach_scale_f( did, dsid, idx, errcode)
     
     IMPLICIT NONE
-    
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsdetach_scale_f
-!DEC$endif
-!
+
     INTEGER(hid_t), INTENT(in) :: did     ! the dataset
     INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be detached 
     INTEGER       , INTENT(in) :: idx     ! the dimension of did to detach
@@ -201,13 +180,7 @@ CONTAINS
   SUBROUTINE H5DSis_attached_f( did, dsid, idx, is_attached, errcode)
     
     IMPLICIT NONE
-    
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsis_attached_f
-!DEC$endif
-!
+
     INTEGER(hid_t), INTENT(in)  :: did         ! the dataset
     INTEGER(hid_t), INTENT(in)  :: dsid        ! the scale to be attached
     INTEGER       , INTENT(in)  :: idx         ! the dimension of did that dsid is associated with
@@ -266,13 +239,7 @@ CONTAINS
   SUBROUTINE H5DSis_scale_f( did, is_scale, errcode)
     
     IMPLICIT NONE
-    
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsis_scale_f
-!DEC$endif
-!
+
     INTEGER(hid_t), INTENT(in)  :: did         ! the data set to query
     LOGICAL       , INTENT(out) :: is_scale    ! logical:  
                                                ! .TRUE. if did is a Dimension Scale
@@ -320,13 +287,6 @@ CONTAINS
   SUBROUTINE H5DSset_label_f( did, idx, label, errcode)
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsset_label_f
-!DEC$endif
-!
 
     INTEGER(hid_t),   INTENT(in) :: did    ! The dataset
     INTEGER       ,   INTENT(in) :: idx    ! The dimension
@@ -377,13 +337,6 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsget_label_f
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: did     ! The dataget
     INTEGER       ,   INTENT(in) :: idx     ! The dimension
     CHARACTER(LEN=*), INTENT(in) :: label   ! The label
@@ -432,13 +385,6 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsget_scale_name_f
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: did     ! The dataget
     CHARACTER(LEN=*), INTENT(out) :: name   ! The name
     INTEGER(size_t) , INTENT(inout) :: size ! The length of the name buffer
@@ -480,13 +426,6 @@ CONTAINS
   SUBROUTINE H5DSget_num_scales_f( did, idx, num_scales, errcode)
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5dsget_num_scales_f
-!DEC$endif
-!
     INTEGER(hid_t), INTENT(in)  :: did         ! the dataset
     INTEGER       , INTENT(in)  :: idx         ! the dimension of did to query
     INTEGER       , INTENT(out) :: num_scales  ! the number of Dimension Scales associated with did

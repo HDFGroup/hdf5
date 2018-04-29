@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __H5PropList_H
@@ -19,13 +17,11 @@
 
 namespace H5 {
 
-//! Class PropList provides operations for generic property lists.
 /*! \class PropList
     \brief Class PropList inherits from IdComponent and provides wrappers for
     the HDF5 generic property list.
-
-    Inheritance: IdComponent
 */
+//  Inheritance: IdComponent
 class H5_DLLCPP PropList : public IdComponent {
    public:
         ///\brief Default property list
@@ -110,7 +106,7 @@ class H5_DLLCPP PropList : public IdComponent {
         // Default constructor: creates a stub PropList object.
         PropList();
 
-        // Copy constructor: creates a copy of a PropList object.
+        // Copy constructor: same as the original PropList.
         PropList(const PropList& original);
 
         // Gets the property list id.

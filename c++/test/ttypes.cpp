@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -62,6 +60,7 @@ const char *FILENAME[] = {
     "dtypes1.h5",
     "dtypes2.h5",
     "dtypes3.h5",
+    "dtypes4.h5",
     NULL
 };
 
@@ -82,6 +81,13 @@ typedef enum int_t {
     INT_LONG, INT_ULONG, INT_LLONG, INT_ULLONG, INT_OTHER
 } int_t;
 
+typedef struct {
+    int    a;
+    float  b;
+    long   c;
+    double d;
+} src_typ_t;
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_classes
@@ -92,9 +98,6 @@ typedef enum int_t {
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_classes()
@@ -121,21 +124,17 @@ static void test_classes()
         issue_fail_msg("test_classes", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_copy
  *
  * Purpose      Test datatype copy functionality
  *
- * Return       Success: 0
- *
- *              Failure: number of errors
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (using C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_copy()
@@ -181,33 +180,288 @@ static void test_copy()
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_detect_type_class
+ *
+ * Purpose      Test DataType::detectClass()
+ *
+ * Return       None
+ *
+ * Programmer   Binh-Minh Ribler (using C version)
+ *              August, 2017
+ *-------------------------------------------------------------------------
+ */
+typedef struct {     /* Struct with atomic fields */
+        int i;
+        float f;
+        char c;
+        double d;
+        short s;
+} atomic_typ_t;
+
+typedef struct {    /* Struct with complex fields */
+        hobj_ref_t arr_r[3][3];
+        int i;
+        hvl_t vl_f;
+        hvl_t vl_s;
+        char c;
+        short s;
+} complex_typ_t;
+
+static void test_detect_type_class()
+{
+
+    SUBTEST("DataType::detectClass()");
+    try {
+        bool in_class = false;      // indicates whether a datatype is in a class
+
+        /*
+         * Test class of some atomic types.
+         */
+
+        // Native integers should be in the integer class
+        in_class = DataType::detectClass(PredType::NATIVE_INT, H5T_INTEGER);
+        verify_val(in_class, true, "DataType::detectClass() with H5T_INTEGER", __LINE__, __FILE__);
+
+        // Native integers should _not_ be in other classes
+        in_class = DataType::detectClass(PredType::NATIVE_INT, H5T_FLOAT);
+        verify_val(in_class, false, "DataType::detectClass() with H5T_FLOAT", __LINE__, __FILE__);
+        in_class = DataType::detectClass(PredType::NATIVE_INT, H5T_ARRAY);
+        verify_val(in_class, false, "DataType::detectClass() with H5T_ARRAY", __LINE__, __FILE__);
+        in_class = DataType::detectClass(PredType::NATIVE_INT, H5T_ENUM);
+        verify_val(in_class, false, "DataType::detectClass() with H5T_ENUM", __LINE__, __FILE__);
+
+        /*
+         *  Test class of a compound type with some atomic types as fields.
+         */
+
+        // Create a compound datatype and insert some atomic types
+        CompType atom_cmpd(sizeof(atomic_typ_t));
+        atom_cmpd.insertMember("i", HOFFSET(atomic_typ_t, i), PredType::NATIVE_INT);
+        atom_cmpd.insertMember("f", HOFFSET(atomic_typ_t, f), PredType::NATIVE_FLOAT);
+        atom_cmpd.insertMember("c", HOFFSET(atomic_typ_t, c), PredType::NATIVE_CHAR);
+        atom_cmpd.insertMember("d", HOFFSET(atomic_typ_t, d), PredType::NATIVE_DOUBLE);
+        atom_cmpd.insertMember("s", HOFFSET(atomic_typ_t, s), PredType::NATIVE_SHORT);
+
+        // Make certain that atom_cmpd is a compound type,
+        in_class = atom_cmpd.detectClass(H5T_COMPOUND);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_COMPOUND", __LINE__, __FILE__);
+        // and that it contains a field of type integer
+        in_class = atom_cmpd.detectClass(H5T_INTEGER);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__);
+        // and a field of type float,
+        in_class = atom_cmpd.detectClass(H5T_FLOAT);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_FLOAT", __LINE__, __FILE__);
+        // and that it doesn't contain any field of variable-length
+        in_class = atom_cmpd.detectClass(H5T_VLEN);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_VLEN", __LINE__, __FILE__);
+
+        /*
+         *  Test class of array datatype
+         */
+
+        // Create an array datatype with an atomic base type
+        unsigned rank = 2;          // Rank for array datatype
+        hsize_t dims[2] = {3,3};    // Dimensions for array datatype
+        ArrayType atom_arr(PredType::STD_REF_OBJ, rank, dims);
+
+        // Make certain that the correct classes can be detected
+        in_class = atom_arr.detectClass(H5T_ARRAY);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_ARRAY", __LINE__, __FILE__);
+        in_class = atom_arr.detectClass(H5T_REFERENCE);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_REFERENCE", __LINE__, __FILE__);
+
+        // Make certain that an incorrect class is not detected
+        in_class = atom_arr.detectClass(H5T_VLEN);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_VLEN", __LINE__, __FILE__);
+        in_class = atom_arr.detectClass(H5T_FLOAT);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_FLOAT", __LINE__, __FILE__);
+        in_class = atom_arr.detectClass(H5T_INTEGER);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__);
+
+        /*
+         *  Test class of VL datatype
+         */
+
+        // Create a VL datatype with an atomic base type of float
+        VarLenType atom_vlf(PredType::NATIVE_FLOAT);
+
+        // Make certain that the correct classes can be detected
+        in_class = atom_vlf.detectClass(H5T_VLEN);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_VLEN", __LINE__, __FILE__);
+        in_class = atom_vlf.detectClass(H5T_FLOAT);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_FLOAT", __LINE__, __FILE__);
+
+        // Make certain that an incorrect class is not detected
+        in_class = atom_vlf.detectClass(H5T_COMPOUND);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_COMPOUND", __LINE__, __FILE__);
+        in_class = atom_vlf.detectClass(H5T_INTEGER);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__);
+
+        /*
+         *  Test class of VL datatype
+         */
+
+        // Create a VL datatype with an atomic base type of char.  It should be a VL
+        // but not a string class.
+        VarLenType atom_vlc(PredType::NATIVE_CHAR);
+
+        // Make certain that the correct classes can be detected
+        in_class = atom_vlc.detectClass(H5T_VLEN);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_VLEN", __LINE__, __FILE__);
+        in_class = atom_vlc.detectClass(H5T_INTEGER);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__);
+
+        // Make certain that an incorrect class is not detected
+        in_class = atom_vlc.detectClass(H5T_STRING);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_STRING", __LINE__, __FILE__);
+
+        /*
+         *  Test class of VL string datatype
+         */
+
+        // Create a VL string.  It should be a string, not a VL class.
+        StrType atom_vls(0, H5T_VARIABLE);
+
+        // Make certain that the correct classes can be detected
+        in_class = atom_vls.detectClass(H5T_STRING);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_STRING", __LINE__, __FILE__);
+
+        // Make certain that an incorrect class is not detected
+        in_class = atom_vls.detectClass(H5T_VLEN);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_VLEN", __LINE__, __FILE__);
+
+        /*
+         *  Test class of a compound type with some complex types as fields.
+         */
+
+        // Create a compound datatype with complex type fields
+        CompType cplx_cmpd(sizeof(complex_typ_t));
+        cplx_cmpd.insertMember("arr_r", HOFFSET(complex_typ_t, arr_r), atom_arr);
+        cplx_cmpd.insertMember("i", HOFFSET(complex_typ_t, i), PredType::NATIVE_INT);
+        cplx_cmpd.insertMember("vl_f", HOFFSET(complex_typ_t, vl_f), atom_vlf);
+        cplx_cmpd.insertMember("vl_s", HOFFSET(complex_typ_t, vl_s), atom_vls);
+        cplx_cmpd.insertMember("c", HOFFSET(complex_typ_t, c), PredType::NATIVE_CHAR);
+        cplx_cmpd.insertMember("s", HOFFSET(complex_typ_t, s), PredType::NATIVE_SHORT);
+
+        // Make certain that the correct classes can be detected
+        in_class = cplx_cmpd.detectClass(H5T_COMPOUND);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_COMPOUND", __LINE__, __FILE__);
+        in_class = cplx_cmpd.detectClass(H5T_ARRAY);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_ARRAY", __LINE__, __FILE__);
+        in_class = cplx_cmpd.detectClass(H5T_REFERENCE);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_REFERENCE", __LINE__, __FILE__);
+        in_class = cplx_cmpd.detectClass(H5T_INTEGER);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_INTEGER", __LINE__, __FILE__);
+        in_class = cplx_cmpd.detectClass(H5T_FLOAT);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_FLOAT", __LINE__, __FILE__);
+        in_class = cplx_cmpd.detectClass(H5T_STRING);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_STRING", __LINE__, __FILE__);
+        in_class = cplx_cmpd.detectClass(H5T_VLEN);
+        verify_val(in_class, true, "CompType::detectClass() with H5T_VLEN", __LINE__, __FILE__);
+
+        // Make certain that an incorrect class is not detected
+        in_class = cplx_cmpd.detectClass(H5T_TIME);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_TIME", __LINE__, __FILE__);
+        in_class = cplx_cmpd.detectClass(H5T_ENUM);
+        verify_val(in_class, false, "CompType::detectClass() with H5T_ENUM", __LINE__, __FILE__);
+
+        PASSED();
+    }
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_detect_type_class", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_vltype
+ *
+ * Purpose      Tests VarLenType class
+ *
+ * Return       None
+ *
+ * Programmer   Binh-Minh Ribler (use C version)
+ *              August, 2017
+ *-------------------------------------------------------------------------
+ */
+static void test_vltype()
+{
+    // Output message about test being performed
+    SUBTEST("VarLenType functions");
+    try
+    {
+        VarLenType vltype(PredType::NATIVE_INT);
+        
+        bool in_class = vltype.detectClass(H5T_VLEN);
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN", __LINE__, __FILE__);
+        in_class = vltype.detectClass(H5T_INTEGER);
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_INTEGER", __LINE__, __FILE__);
+
+        // Test copy constructor
+        VarLenType vltype2(vltype);
+
+        // Verify that the copied type has a valid id
+        bool is_valid = IdComponent::isValid(vltype2.getId());
+        verify_val(in_class, true, "isValid on vltype2", __LINE__, __FILE__);
+
+        in_class = vltype2.detectClass(H5T_VLEN);
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN for vltype2", __LINE__, __FILE__);
+        in_class = vltype2.detectClass(H5T_INTEGER);
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_INTEGER for vltype2", __LINE__, __FILE__);
+        in_class = vltype2.detectClass(H5T_FLOAT);
+        verify_val(in_class, false, "VarLenType::detectClass() with H5T_FLOAT for vltype2", __LINE__, __FILE__);
+
+        // Create a new file to use in this test
+        H5File file(FILENAME[3], H5F_ACC_TRUNC);
+
+        // Create a group in the file, to hold some varlentype
+        Group top_group(file.createGroup("top group"));
+
+        // Create a variable-length type
+        VarLenType first_vlt(PredType::NATIVE_FLOAT);
+
+        // Commit the type to the group
+        first_vlt.commit(top_group, "first variable-length type");
+
+        // Close it
+        first_vlt.close();
+
+        // Reopen it
+        VarLenType first_vlt_again(top_group, "first variable-length type");
+
+        // Trying to detect H5T_VLEN and H5T_FLOAT classes on this type,
+        // should both be true
+        in_class = vltype2.detectClass(H5T_VLEN);
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN for vltype2", __LINE__, __FILE__);
+        in_class = first_vlt_again.detectClass(H5T_FLOAT);
+        verify_val(in_class, true, "VarLenType::detectClass() with H5T_FLOAT for first_vlt_again", __LINE__, __FILE__);
+
+        PASSED();
+    }   // end of try block
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_vltype", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   // test_vltype
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_query
  *
  * Purpose      Tests query functions of compound and enumeration types.
  *
- * Return       Success: 0
- *
- *              Failure: number of errors
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 const H5std_string CompT_NAME("Compound_type");
 const H5std_string EnumT_NAME("Enum_type");
 
 static void test_query()
 {
-    typedef struct {
-        int    a;
-        float  b;
-        long   c;
-        double d;
-    } src_typ_t;
     short        enum_val;
 
     // Output message about test being performed
@@ -319,18 +573,14 @@ static void test_query()
  *
  * Purpose      Tests transient datatypes.
  *
- * Return       Success: 0
- *
- *              Failure: number of errors
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 const char* filename1 = "dtypes1.h5";
+
 static void test_transient ()
 {
     static hsize_t        ds_size[2] = {10, 20};
@@ -398,18 +648,14 @@ static void test_transient ()
  *
  * Purpose      Tests named datatypes.
  *
- * Return       Success: 0
- *
- *              Failure: number of errors
+ * Return       None
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 const H5std_string filename2("dtypes2.h5");
+
 static void test_named ()
 {
     static hsize_t ds_size[2] = {10, 20};
@@ -558,11 +804,235 @@ static void test_named ()
 }   // test_named
 
 
-/****************************************************************
-**
-**  test_types(): Main datatypes testing routine.
-**
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:    test_encode_decode
+ *
+ * Purpose      Test datatype encode/decode functionality.
+ *
+ * Return       None
+ *
+ * Programmer   Binh-Minh Ribler (using C version)
+ *              August, 2017
+ *-------------------------------------------------------------------------
+ */
+const H5std_string filename3("encode_decode.h5");
+const int ARRAY1_RANK = 1;
+const int ARRAY1_DIM = 10;
+
+static void test_encode_decode()
+{
+    short        enum_val;
+
+    SUBTEST("DataType::encode() and DataType::decode()");
+    try {
+        // Create the file.
+        H5File file(filename3, H5F_ACC_TRUNC);
+
+        //
+        // Test with CompType
+        //
+
+        // Create a compound datatype
+        CompType cmptyp(sizeof(src_typ_t));
+
+        cmptyp.insertMember("a", HOFFSET(src_typ_t, a), PredType::NATIVE_INT);
+        cmptyp.insertMember("b", HOFFSET(src_typ_t, b), PredType::NATIVE_FLOAT);
+        cmptyp.insertMember("c", HOFFSET(src_typ_t, c), PredType::NATIVE_LONG);
+        cmptyp.insertMember("d", HOFFSET(src_typ_t, d), PredType::NATIVE_DOUBLE);
+
+        // Encode compound type in its buffer
+        cmptyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(cmptyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Decode compound type's buffer to a new CompType
+        CompType* decoded_cmp_ptr(static_cast<CompType *>(cmptyp.decode()));
+
+        // Verify that the datatype was copied exactly via encoding/decoding
+        verify_val(cmptyp == *decoded_cmp_ptr, true, "DataType::decode", __LINE__, __FILE__);
+
+        // Verify again via querying member number and member index by name.
+        verify_val(decoded_cmp_ptr->getNmembers(), 4, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_cmp_ptr->getMemberIndex("c"), 2, "DataType::decode", __LINE__, __FILE__);
+
+        // Create a CompType instance from the pointer and verify it
+        CompType cmptyp_clone(*decoded_cmp_ptr);
+        verify_val(cmptyp == cmptyp_clone, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(cmptyp_clone.getNmembers(), 4, "DataType::decode", __LINE__, __FILE__);
+        verify_val(cmptyp_clone.getMemberIndex("c"), 2, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_cmp_ptr;
+
+        //
+        // Test with EnumType
+        //
+
+        // Create a enumerate datatype
+        EnumType enumtyp(sizeof(short));
+
+        enumtyp.insert("RED", (enum_val=0,&enum_val));
+        enumtyp.insert("GREEN", (enum_val=1,&enum_val));
+        enumtyp.insert("BLUE", (enum_val=2,&enum_val));
+        enumtyp.insert("ORANGE", (enum_val=3,&enum_val));
+        enumtyp.insert("YELLOW", (enum_val=4,&enum_val));
+
+        // Encode compound type in a buffer
+        enumtyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(enumtyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Decode enumeration type's buffer to a new EnumType
+        EnumType* decoded_enum_ptr(static_cast<EnumType *>(enumtyp.decode()));
+
+        // Verify that the datatype was copied exactly via encoding/decoding
+        verify_val(enumtyp == *decoded_enum_ptr, true, "DataType::decode", __LINE__, __FILE__);
+
+        // Verify again via querying member number and member index by name.
+        verify_val(decoded_enum_ptr->getNmembers(), 5, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_enum_ptr->getMemberIndex("GREEN"), 1, "DataType::decode", __LINE__, __FILE__);
+
+        // Create a EnumType instance from the pointer and verify it
+        EnumType enumtyp_clone(*decoded_enum_ptr);
+        verify_val(enumtyp == enumtyp_clone, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(enumtyp_clone.getNmembers(), 5, "DataType::decode", __LINE__, __FILE__);
+        verify_val(enumtyp_clone.getMemberIndex("GREEN"), 1, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_enum_ptr;
+
+        //
+        // Test with variable-length string
+        //
+
+        // Create a variable-length string type
+        StrType vlsttyp(PredType::C_S1);
+        vlsttyp.setSize(H5T_VARIABLE);
+
+        // Encode the variable-length type in its buffer
+        vlsttyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(vlsttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Decode the variable-length type's buffer to a new StrType
+        StrType* decoded_str_ptr(static_cast<StrType *>(vlsttyp.decode()));
+
+        verify_val(vlsttyp == *decoded_str_ptr, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_str_ptr->isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_str_ptr;
+
+        // Test decoding the type by way of DataType*
+
+        // Decode variable-length string type to a new DataType
+        DataType* decoded_vlstr_ptr(vlsttyp.decode());
+
+        // Create a StrType instance from the DataType object and verify it
+        StrType decoded_vlsttyp(decoded_vlstr_ptr->getId());
+        verify_val(vlsttyp == decoded_vlsttyp, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_vlsttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_vlstr_ptr;
+
+        //
+        // Test with ArrayType
+        //
+
+        hsize_t tdims1[] = {ARRAY1_DIM};
+
+        // Create an array datatype of the compound datatype
+        ArrayType arrtyp(cmptyp, ARRAY1_RANK, tdims1);
+
+        // Encode the array type in its buffer
+        arrtyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(arrtyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Create an ArrayType instance from the decoded pointer and verify it
+        ArrayType* decoded_arr_ptr(static_cast<ArrayType *>(arrtyp.decode()));
+
+        verify_val(arrtyp == *decoded_arr_ptr, true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_arr_ptr;
+
+        // Test decoding the type by way of DataType*
+
+        // Decode the array type's buffer
+        DataType *decoded_dt_ptr = arrtyp.decode();
+
+        // Create a ArrayType instance from the decoded pointer and verify it
+        ArrayType decoded_arrtyp(decoded_dt_ptr->getId());
+        verify_val(arrtyp == decoded_arrtyp, true, "DataType::decode", __LINE__, __FILE__);
+        verify_val(decoded_arrtyp.getArrayNDims(), ARRAY1_RANK, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_dt_ptr;
+
+        //
+        // Test with IntType
+        //
+
+        // Create an int datatype
+        IntType inttyp(PredType::NATIVE_UINT);
+
+        // Encode the array type in its buffer
+        inttyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(inttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Create an IntType instance from the decoded pointer and verify it
+        IntType* decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
+        H5T_sign_t int_sign = decoded_int_ptr->getSign();
+        verify_val(int_sign, H5T_SGN_NONE, "DataType::decode", __LINE__, __FILE__);
+        verify_val(inttyp == *decoded_int_ptr, true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_int_ptr;
+
+        //
+        // Test decoding FloatType by way of DataType*
+        //
+
+        // Create a float datatype
+        FloatType flttyp(PredType::NATIVE_FLOAT);
+
+        // Encode the float type in its buffer
+        flttyp.encode();
+
+        // Verify that encoding had been done
+        verify_val(flttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
+
+        // Decode the array type's buffer
+        DataType* decoded_flt_ptr(flttyp.decode());
+
+        // Create a IntType instance from the decoded pointer and verify it
+        FloatType decoded_flttyp(decoded_flt_ptr->getId());
+        verify_val(flttyp == decoded_flttyp, true, "DataType::decode", __LINE__, __FILE__);
+
+        H5std_string norm_string;
+        H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
+        //verify_val(decoded_flttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
+
+        delete decoded_flt_ptr;
+
+        PASSED();
+    }
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_encode_decode", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_types
+ *
+ * Purpose      Main datatypes testing routine
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 extern "C"
 void test_types()
 {
@@ -572,9 +1042,12 @@ void test_types()
     // Test basic datatypes
     test_classes();
     test_copy();
+    test_detect_type_class();
+    test_vltype();
     test_query();
     test_transient();
     test_named();
+    test_encode_decode();
 
 }   // test_types()
 
@@ -584,13 +1057,7 @@ void test_types()
  *
  * Purpose      Cleanup temporary test files
  *
- * Return       none
- *
- * Programmer   Quincey Koziol
- *              September 10, 1999
- *
- * Modifications:
- *
+ * Return       None
  *-------------------------------------------------------------------------
  */
 extern "C"

@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __H5EnumType_H
@@ -22,9 +20,8 @@ namespace H5 {
 /*! \class EnumType
     \brief EnumType is a derivative of a DataType and operates on HDF5
     enum datatypes.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP EnumType : public DataType {
 
    public:
@@ -41,6 +38,10 @@ class H5_DLLCPP EnumType : public DataType {
         // Constructors that open an enum datatype, given a location.
         EnumType(const H5Location& loc, const char* name);
         EnumType(const H5Location& loc, const H5std_string& name);
+
+        // Returns an EnumType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
 
         // Returns the number of members in this enumeration datatype.
         int getNmembers () const;
@@ -74,7 +75,7 @@ class H5_DLLCPP EnumType : public DataType {
         // Creates an enumeration datatype using an existing id
         EnumType(const hid_t existing_id);
 
-        // Copy constructor: makes a copy of the original EnumType object.
+        // Copy constructor: same as the original EnumType.
         EnumType(const EnumType& original);
 
         virtual ~EnumType();

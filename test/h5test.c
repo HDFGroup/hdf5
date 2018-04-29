@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -1598,9 +1596,9 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
         goto error;
 
     /* Copy old file into temporary file */
-    if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0)
+    if((fd_old = HDopen(filename, O_RDONLY)) < 0)
         goto error;
-    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
         goto error;
 
     /* Copy data */
@@ -1829,4 +1827,81 @@ h5_wait_message(const char *waitfor)
 error:
     return FAIL;
 } /* h5_wait_message() */
+
+/* Functions for the dummy VFD class (see below).
+ *
+ * Useful for testing things like ID handling where we shouldn't mess with the
+ * real VFDs.
+ */
+static H5FD_t *dummy_vfd_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+static H5FD_t *dummy_vfd_open(const char H5_ATTR_UNUSED *name, unsigned H5_ATTR_UNUSED flags, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED maxaddr) { return NULL; }
+
+static herr_t dummy_vfd_close(H5FD_t *_file);
+static herr_t dummy_vfd_close(H5FD_t H5_ATTR_UNUSED *_file) { return FAIL; }
+
+static haddr_t dummy_vfd_get_eoa(const H5FD_t *file, H5FD_mem_t type);
+static haddr_t dummy_vfd_get_eoa(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
+
+static herr_t dummy_vfd_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
+static herr_t dummy_vfd_set_eoa(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t H5_ATTR_UNUSED addr) { return FAIL; }
+
+static haddr_t dummy_vfd_get_eof(const H5FD_t *file, H5FD_mem_t type);
+static haddr_t dummy_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
+
+static herr_t dummy_vfd_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, void *buf);
+static herr_t dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, void H5_ATTR_UNUSED *buf) { return FAIL; }
+
+static herr_t dummy_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, const void *buf);
+static herr_t dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf) { return FAIL; }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_dummy_vfd_class()
+ *
+ * Purpose:     Returns a disposable, generally non-functional,
+ *              VFD class struct.
+ *
+ *              In some of the test code, we need a disposable VFD but
+ *              we don't want to mess with the real VFDs and we also
+ *              don't have access to the internals of the real VFDs (which
+ *              use static globals and functions) to easily duplicate
+ *              them (e.g.: for testing VFD ID handling).
+ *
+ *              This API call will return a pointer to a VFD class that
+ *              can be used to construct a test VFD using H5FDregister().
+ *
+ * Return:      Success:    A pointer to a VFD class struct
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5FD_class_t *
+h5_get_dummy_vfd_class(void)
+{
+    H5FD_class_t *vfd_class = NULL;     /* Dummy VFD that will be returned */
+
+    /* Create the class and initialize everything to zero/NULL */
+    if(NULL == (vfd_class = (H5FD_class_t *)HDcalloc((size_t)1, sizeof(H5FD_class_t))))
+        TEST_ERROR;
+
+    /* Fill in the minimum parameters to make a VFD that
+     * can be registered.
+     */
+    vfd_class->name = "dummy";
+    vfd_class->maxaddr = 1;
+    vfd_class->open = dummy_vfd_open;
+    vfd_class->close = dummy_vfd_close;
+    vfd_class->get_eoa = dummy_vfd_get_eoa;
+    vfd_class->set_eoa = dummy_vfd_set_eoa;
+    vfd_class->get_eof = dummy_vfd_get_eof;
+    vfd_class->read = dummy_vfd_read;
+    vfd_class->write = dummy_vfd_write;
+
+    return vfd_class;
+
+error:
+    if(vfd_class)
+        HDfree(vfd_class);
+    return NULL;
+} /* h5_get_dummy_vfd_class */
 

@@ -5,17 +5,15 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfdfgroup.org/HDF5/doc/
+ *    http://hdfgroup.org/HDF5/doc/
  *
  */
 
@@ -2796,17 +2794,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1libver_1bounds
 {
     herr_t retVal = -1;
 
-    if ((H5F_libver_t)high != H5F_LIBVER_LATEST) {
-        h5badArgument(env, "H5Pset_libver_bounds:  invalid high library version bound");
-    } /* end if */
-    else if(((H5F_libver_t)low !=H5F_LIBVER_EARLIEST) && ((H5F_libver_t)low != H5F_LIBVER_LATEST)) {
-        h5badArgument(env, "H5Pset_libver_bounds:  invalid low library version bound");
-    } /* end else if */
-    else {
-        retVal = H5Pset_libver_bounds((hid_t)fapl_id, (H5F_libver_t)low, (H5F_libver_t)high);
-        if(retVal < 0)
-            h5libraryError(env);
-    } /* end else */
+    retVal = H5Pset_libver_bounds((hid_t)fapl_id, (H5F_libver_t)low, (H5F_libver_t)high);
+    if(retVal < 0)
+        h5libraryError(env);
 
     return (jint)retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1libver_1bounds */
@@ -5129,8 +5119,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options
         else {
             /* get the length of the filename */
             H5Pget_mdc_log_options((hid_t)fapl_id, &is_enabled, NULL, &location_size, &start_on_access);
-            if (location_size < 0) {
-                h5badArgument(env, "H5Pget_mdc_log_options:  location_size < 0");
+            if (location_size == 0) {
+                h5badArgument(env, "H5Pget_mdc_log_options:  location_size is 0");
             }/* end if */
             else if (location_size > 0) {
                 location_size++; /* add extra space for the null terminator */
@@ -5734,6 +5724,217 @@ Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts
             h5libraryError(env);
      } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts */
+
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_virtual_prefix
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1virtual_1prefix
+    (JNIEnv *env, jclass clss, jlong dapl_id, jstring prefix)
+{
+    herr_t      retVal = -1;
+    const char *aName;
+
+    PIN_JAVA_STRING(prefix, aName);
+    if (aName != NULL) {
+        retVal = H5Pset_virtual_prefix((hid_t)dapl_id, aName);
+
+        UNPIN_JAVA_STRING(prefix, aName);
+
+        if(retVal < 0)
+            h5libraryError(env);
+    }
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1virtual_1prefix */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_virtual_prefix
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix
+    (JNIEnv *env, jclass clss, jlong dapl_id)
+{
+    size_t  size = 0;
+    char   *pre;
+    jlong   prefix_size = -1;
+    jstring str = NULL;
+
+    prefix_size = (jlong)H5Pget_virtual_prefix((hid_t)dapl_id, (char*)NULL, size);
+    if(prefix_size < 0) {
+        h5libraryError(env);
+    } /* end if */
+    else {
+        size = (size_t)prefix_size + 1;/* add extra space for the null terminator */
+        pre = (char*)HDmalloc(sizeof(char)*size);
+        if (pre == NULL) {
+            h5outOfMemory(env, "H5Pget_virtual_prefix:  malloc failed ");
+        } /* end if */
+        else {
+            prefix_size = (jlong)H5Pget_virtual_prefix((hid_t)dapl_id, (char*)pre, size);
+
+            if (prefix_size >= 0) {
+                str = ENVPTR->NewStringUTF(ENVPAR pre);
+                HDfree(pre);
+                if (str == NULL)
+                    h5JNIFatalError( env, "H5Pget_virtual_prefix:  return string not allocated");
+            } /* end if */
+            else {
+                HDfree(pre);
+                h5libraryError(env);
+            } /* end else */
+        } /* end else */
+    } /* end else */
+
+    return (jstring)str;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_efile_prefix
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1efile_1prefix
+    (JNIEnv *env, jclass clss, jlong dapl_id, jstring prefix)
+{
+    herr_t      retVal = -1;
+    const char *aName;
+
+    PIN_JAVA_STRING(prefix, aName);
+    if (aName != NULL) {
+        retVal = H5Pset_efile_prefix((hid_t)dapl_id, aName);
+
+        UNPIN_JAVA_STRING(prefix, aName);
+
+        if(retVal < 0)
+            h5libraryError(env);
+    }
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1efile_1prefix */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_efile_prefix
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1efile_1prefix
+    (JNIEnv *env, jclass clss, jlong dapl_id)
+{
+    size_t  size = 0;
+    char   *pre;
+    jlong   prefix_size = -1;
+    jstring str = NULL;
+
+    prefix_size = (jlong)H5Pget_efile_prefix((hid_t)dapl_id, (char*)NULL, size);
+    if(prefix_size < 0) {
+        h5libraryError(env);
+    } /* end if */
+    else {
+        size = (size_t)prefix_size + 1;/* add extra space for the null terminator */
+        pre = (char*)HDmalloc(sizeof(char)*size);
+        if (pre == NULL) {
+            h5outOfMemory(env, "H5Pget_efile_prefix:  malloc failed ");
+        } /* end if */
+        else {
+            prefix_size = (jlong)H5Pget_efile_prefix((hid_t)dapl_id, (char*)pre, size);
+
+            if (prefix_size >= 0) {
+                str = ENVPTR->NewStringUTF(ENVPAR pre);
+                HDfree(pre);
+                if (str == NULL)
+                    h5JNIFatalError( env, "H5Pget_efile_prefix:  return string not allocated");
+            } /* end if */
+            else {
+                HDfree(pre);
+                h5libraryError(env);
+            } /* end else */
+        } /* end else */
+    } /* end else */
+
+    return (jstring)str;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1efile_1prefix */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_evict_on_close
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1evict_1on_1close
+    (JNIEnv *env, jclass clss, jlong fapl_id, jboolean evict_on_close)
+{
+    herr_t   retVal = -1;
+    hbool_t  evict_on_close_val;
+
+    if (evict_on_close == JNI_TRUE)
+        evict_on_close_val = TRUE;
+    else
+        evict_on_close_val = FALSE;
+
+    retVal = H5Pset_evict_on_close((hid_t)fapl_id, (hbool_t)evict_on_close_val);
+    if (retVal < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1evict_1on_1close */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_evict_on_close
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1evict_1on_1close
+    (JNIEnv *env, jclass clss, jlong fapl_id)
+{
+    hbool_t   evict_on_close_val = FALSE;
+    jboolean  bval = JNI_FALSE;
+
+    if (H5Pget_evict_on_close((hid_t)fapl_id, (hbool_t *)&evict_on_close_val) < 0) {
+        h5libraryError(env);
+    } /* end if */
+    else {
+        if (evict_on_close_val == TRUE)
+            bval =  JNI_TRUE;
+    } /* end else */
+
+    return bval;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1evict_1on_1close */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_chunk_opts
+ * Signature: (JI)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1chunk_1opts
+    (JNIEnv *env, jclass clss, jlong dcpl_id, jint opts)
+{
+    herr_t   retVal = -1;
+
+    retVal = H5Pset_chunk_opts((hid_t)dcpl_id, (unsigned)opts);
+    if (retVal < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1chunk_1opts */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_chunk_opts
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1chunk_1opts
+    (JNIEnv *env, jclass clss, jlong dcpl_id)
+{
+    unsigned   opts = 0;
+
+    if (H5Pget_chunk_opts((hid_t)dcpl_id, opts) < 0)
+        h5libraryError(env);
+
+    return (jint)opts;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1chunk_1opts */
 
 #ifdef __cplusplus
 } /* end extern "C" */

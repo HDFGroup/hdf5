@@ -5,17 +5,15 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfdfgroup.org/HDF5/doc/
+ *    http://hdfgroup.org/HDF5/doc/
  *
  */
 
@@ -42,6 +40,9 @@ jobject compare_callback;
 jobject get_callback;
 jobject set_callback;
 jobject delete_callback;
+
+H5E_auto2_t         efunc;
+void               *edata;
 
 /********************/
 /* Local Prototypes */
@@ -352,7 +353,7 @@ h5str_sprintf
             this_str = (char*)HDmalloc(4 * (nll + 1));
 
             if (1 == nll) {
-                sprintf(this_str, "0x%02x", ucptr[0]);
+                sprintf(this_str, "%#02x", ucptr[0]);
             }
             else {
                 for (i = 0; i < (int)nll; i++)
@@ -483,7 +484,7 @@ h5str_sprintf
         this_str = (char*)HDmalloc(4 * (nll + 1));
 
         if (1 == nll) {
-            sprintf(this_str, "0x%02x", ucptr[0]);
+            sprintf(this_str, "%#02x", ucptr[0]);
         }
         else {
             for (i = 0; i < (int)nll; i++)
@@ -1053,8 +1054,20 @@ h5str_get_little_endian_type
             p_type=H5Tcopy(H5T_IEEE_F64LE);
         break;
 
-    case H5T_TIME:
     case H5T_BITFIELD:
+    {
+        if ( size == 1)
+            p_type=H5Tcopy(H5T_STD_B8LE);
+        else if ( size == 2)
+            p_type=H5Tcopy(H5T_STD_B16LE);
+        else if ( size == 4)
+            p_type=H5Tcopy(H5T_STD_B32LE);
+        else if ( size == 8)
+            p_type=H5Tcopy(H5T_STD_B64LE);
+    }
+    break;
+
+    case H5T_TIME:
     case H5T_OPAQUE:
     case H5T_STRING:
     case H5T_COMPOUND:
@@ -1124,8 +1137,20 @@ h5str_get_big_endian_type
             p_type=H5Tcopy(H5T_IEEE_F64BE);
         break;
 
-    case H5T_TIME:
     case H5T_BITFIELD:
+    {
+        if ( size == 1)
+            p_type=H5Tcopy(H5T_STD_B8BE);
+        else if ( size == 2)
+            p_type=H5Tcopy(H5T_STD_B16BE);
+        else if ( size == 4)
+            p_type=H5Tcopy(H5T_STD_B32BE);
+        else if ( size == 8)
+            p_type=H5Tcopy(H5T_STD_B64BE);
+    }
+    break;
+
+    case H5T_TIME:
     case H5T_OPAQUE:
     case H5T_STRING:
     case H5T_COMPOUND:

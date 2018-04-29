@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -78,6 +76,31 @@
 /* Local Variables */
 /*******************/
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS_init
+ *
+ * Purpose:     Initialize the interface in case it is unable to initialize
+ *              itself soon enough.
+ *
+ * Return:      Success:    non-negative
+ *              Failure:    negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, March 4, 2000
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOERR
+    /* FUNC_ENTER() does all the work */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FS_init() */
 
 
 /*-------------------------------------------------------------------------

@@ -5,12 +5,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
@@ -27,22 +25,24 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       testerror.sh: err_compat, error_test
 #       testlibinfo.sh:
 #       testcheck_version.sh: tcheck_version
-#       tetlinks_env.sh: links_env
+#       testlinks_env.sh: links_env
 #       testflushrefresh.sh: flushrefresh
-#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh \
+#       test_filenotclosed.sh: filenotclosed.c
+#       test_filter_plugin.sh: filter_plugin.c
+#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filenotclosed.sh\
     testswmr.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) test_filenotclosed$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
     swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
     swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
     vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT += test_plugin.sh
-  SCRIPT_DEPEND += plugin$(EXEEXT)
+  TEST_SCRIPT += test_filter_plugin.sh
+  SCRIPT_DEPEND += filter_plugin$(EXEEXT)
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -67,6 +67,7 @@ TEST_PROG= testhdf5 \
 # accum_swmr_reader is used by accum.c.
 # atomic_writer and atomic_reader are standalone programs.
 # links_env is used by testlinks_env.sh
+# filenotclosed is used by test_filenotclosed.sh
 # flushrefresh is used by testflushrefresh.sh.
 # use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_usecases.sh
 # swmr_* files (besides swmr.c) are used by testswmr.sh.
@@ -76,12 +77,12 @@ TEST_PROG= testhdf5 \
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     testmeta accum_swmr_reader atomic_writer atomic_reader \
-    links_env flushrefresh use_append_chunk use_append_mchunks use_disable_mdc_flushes \
+    links_env filenotclosed flushrefresh use_append_chunk use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
     swmr_check_compat_vfd vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
-  check_PROGRAMS+= plugin
+  check_PROGRAMS+= filter_plugin
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -94,7 +95,7 @@ endif
 BUILD_ALL_PROGS=gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
     gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread \
-    gen_sizes_lheap gen_file_image gen_plist
+    gen_sizes_lheap gen_file_image gen_plist gen_bad_offset gen_bounds
 
 if BUILD_ALL_CONDITIONAL
   noinst_PROGRAMS=$(BUILD_ALL_PROGS)
@@ -102,19 +103,17 @@ endif
 
 if HAVE_SHARED_CONDITIONAL
   # The libh5test library provides common support code for the tests.
-  noinst_LTLIBRARIES=libh5test.la
-
-  # The libdynlib1, libdynlib2, libdynlib3, and libdynlib4 library for testing plugin module plugin.c.
-  # Build it as shared library if configure is enabled for shared library.
-  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
-  libdynlib1_la_SOURCES=dynlib1.c
-  libdynlib2_la_SOURCES=dynlib2.c
-  libdynlib3_la_SOURCES=dynlib3.c
-  libdynlib4_la_SOURCES=dynlib4.c
-
-install-exec-hook:
-	$(RM) $(DESTDIR)$(libdir)/*dynlib*
-
+  # The filter_plugin* libraries are for use in filter_plugin.c.
+  # Build them as shared libraries if that option was enabled in configure.
+  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la
+  libfilter_plugin1_dsets_la_SOURCES=filter_plugin1_dsets.c
+  libfilter_plugin2_dsets_la_SOURCES=filter_plugin2_dsets.c
+  libfilter_plugin3_dsets_la_SOURCES=filter_plugin3_dsets.c
+  libfilter_plugin4_groups_la_SOURCES=filter_plugin4_groups.c
+  libfilter_plugin1_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin2_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin3_dsets_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+  libfilter_plugin4_groups_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 else
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la
@@ -175,7 +174,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
     getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \
     family_file000[0-3][0-9].h5 new_family_v16_000[0-3][0-9].h5      \
-    multi_file-[rs].h5 core_file plugin.h5 \
+    multi_file-[rs].h5 core_file filter_plugin.h5 \
     new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 btree2_tmp.h5 objcopy_src.h5 objcopy_dst.h5 \
@@ -205,7 +204,7 @@ use_append_mchunks_SOURCES=use_append_mchunks.c use_common.c
 use_disable_mdc_flushes_SOURCES=use_disable_mdc_flushes.c
 
 # Temporary files.
-DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh \
-    testswmr.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh
+DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filter_plugin.sh \
+    testswmr.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh test_filenotclosed.sh
 
 include $(top_srcdir)/config/conclude.am

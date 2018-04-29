@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 # Tests for the h5dump tool with packed bits type files
 
@@ -243,6 +241,8 @@ TOOLTEST() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      echo " PASSED"
     else
@@ -284,11 +284,15 @@ TOOLTEST2() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       if [ ! -f $expectdata ]; then
       # Create the expect data file if it doesn't yet exist.
         echo " CREATED"
         cp $actualdata $expectdata
+        echo "    Expected data (*.exp) missing"
+        nerrors="`expr $nerrors + 1`"
       elif $CMP $expectdata $actualdata; then
         echo " PASSED"
       else
@@ -350,6 +354,8 @@ TOOLTEST3() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      echo " PASSED"
     else
@@ -406,15 +412,17 @@ TOOLTEST4() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
      if $CMP $expect_err $actual_ext; then
       echo " PASSED"
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.err) differs from actual result (*.oerr)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
-    fi
+     else
+      echo "*FAILED*"
+      echo "    Expected result (*.err) differs from actual result (*.oerr)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+     fi
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"

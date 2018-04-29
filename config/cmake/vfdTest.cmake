@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 # vfdTest.cmake executes a command and captures the output in a file. Command uses specified VFD.
 # Exit status of command can also be compared.
 
@@ -49,12 +60,12 @@ if (ERROR_APPEND AND EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.err)
 endif ()
 
 # if the return value is !=${TEST_EXPECT} bail out
-if (NOT ${TEST_RESULT} STREQUAL ${TEST_EXPECT})
+if (NOT "${TEST_RESULT}" STREQUAL "${TEST_EXPECT}")
   if (NOT TEST_NOERRDISPLAY)
     if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.out)
       file (READ ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.out TEST_STREAM)
-	  message (STATUS "Output USING ${TEST_VFD}:\n${TEST_STREAM}")
-	endif ()
+    message (STATUS "Output USING ${TEST_VFD}:\n${TEST_STREAM}")
+    endif ()
   endif ()
   message (FATAL_ERROR "Failed: Test program ${TEST_PROGRAM} exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
 endif ()

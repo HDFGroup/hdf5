@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 
 top_builddir=@top_builddir@
@@ -66,11 +64,11 @@ $HDFLIB_HOME/ext/slf4j-simple-1.7.5.jar
 $top_builddir/java/src/$JARFILE
 "
 LIST_DATA_FILES="
-$HDFTEST_HOME/JUnit-interface.txt
+$HDFTEST_HOME/JUnit-unit.txt
 $HDFTEST_HOME/JUnit-interface.ert
 "
 
-expect="JUnit-interface.txt"
+expect="JUnit-unit.txt"
 actual="JUnit-interface.out"
 actual_err="JUnit-interface.err"
 actual_ext="JUnit-interface.ext"
@@ -192,7 +190,7 @@ CLEAN_DATAFILES_AND_BLDDIR()
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
         $RM $BLDDIR/JUnit-interface.ert
         $RM $BLDDIR/JUnit-interface.txt
-    fi        
+    fi
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -259,8 +257,12 @@ esac
 
 export LD_LIBRARY_PATH
 
-echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestAll"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestAll 1>$actual_ext 2>$actual_err)
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestUnit"
+    # Run test.
+    TESTING JUnit
+    (
+    $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestUnit
+    ) >$actual_ext 2>$actual_err
 
 # Extract file name, line number, version and thread IDs because they may be different
 sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \

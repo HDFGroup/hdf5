@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -39,8 +50,10 @@
       ${HDF5_TOOLS_DIR}/testfiles/tname-quot.h5
       ${HDF5_TOOLS_DIR}/testfiles/tname-sp.h5
       ${HDF5_TOOLS_DIR}/testfiles/tnamed_dtype_attr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/test35.nc
       ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5
       ${HDF5_TOOLS_DIR}/testfiles/tnodata.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tnullspace.h5
       ${HDF5_TOOLS_DIR}/testfiles/tobjref.h5
       ${HDF5_TOOLS_DIR}/testfiles/topaque.h5
       ${HDF5_TOOLS_DIR}/testfiles/torderattr.h5
@@ -70,7 +83,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tarray6.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tarray7.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tattr.h5.xml
-      ${HDF5_TOOLS_DIR}/testfiles/tbitfields.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tbitfields_be.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tbitfields_le.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tcompound2.h5.xml
@@ -87,6 +101,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tempty-ns.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tempty-ns-2.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tenum.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/test35.nc.xml
       ${HDF5_TOOLS_DIR}/testfiles/textlink.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tfpformat.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5.xml
@@ -103,6 +118,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tname-sp.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tnodata.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tnullspace.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/tobjref.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/topaque.h5.xml
       ${HDF5_TOOLS_DIR}/testfiles/torderattr1.h5.xml
@@ -145,10 +161,10 @@
 ##############################################################################
 
   macro (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
-    if (${testtype} STREQUAL "SKIP")
+    if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
-            NAME H5DUMP-XML-${skipresultfile}-SKIPPED
+            NAME H5DUMP_XML-${skipresultfile}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
         )
       endif ()
@@ -159,17 +175,26 @@
 
   macro (ADD_XML_H5_TEST resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
-      set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
-      if (NOT ${resultcode} STREQUAL "0")
-        set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WILL_FAIL "true")
+      add_test (NAME H5DUMP_XML-${resultfile} COMMAND $<TARGET_FILE:h5dump> --xml ${ARGN})
+      set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
+      if (NOT "${resultcode}" STREQUAL "0")
+        set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_xml_test}" STREQUAL "")
-        set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
+        set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
       endif ()
     else ()
+      # Remove any output file left over from previous test run
       add_test (
-          NAME H5DUMP-XML-${resultfile}
+          NAME H5DUMP_XML-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${resultfile}.out
+              ${resultfile}.out.err
+      )
+      set_tests_properties (H5DUMP_XML-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
+      add_test (
+          NAME H5DUMP_XML-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=--xml;${ARGN}"
@@ -179,6 +204,7 @@
               -D "TEST_REFERENCE=${resultfile}.xml"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+      set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES DEPENDS H5DUMP_XML-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -210,8 +236,10 @@
           tarray7.h5.out.err
           tattr.h5.out
           tattr.h5.out.err
-          tbitfields.h5.out
-          tbitfields.h5.out.err
+          tbitfields_be.h5.out
+          tbitfields_be.h5.out.err
+          tbitfields_le.h5.out
+          tbitfields_le.h5.out.err
           tcompound.h5.out
           tcompound.h5.out.err
           tcompound2.h5.out
@@ -244,6 +272,8 @@
           tempty.h5.out.err
           tenum.h5.out
           tenum.h5.out.err
+          test35.nc.out
+          test35.nc.out.err
           textlink.h5.out
           textlink.h5.out.err
           tfpformat.h5.out
@@ -278,6 +308,8 @@
           tnodata.h5.out.err
           tnoname.h5.out
           tnoname.h5.out.err
+          tnullspace.h5.out
+          tnullspace.h5.out.err
           tobjref.h5.out
           tobjref.h5.out.err
           topaque.h5.out
@@ -333,7 +365,11 @@
   ########## test XML
   ADD_XML_H5_TEST (tall.h5 0 tall.h5)
   ADD_XML_H5_TEST (tattr.h5 0 tattr.h5)
-  ADD_XML_H5_TEST (tbitfields.h5 0 tbitfields.h5)
+  if (H5_WORDS_BIGENDIAN)
+    ADD_XML_H5_TEST (tbitfields_be.h5 0 tbitfields.h5)
+  else ()
+    ADD_XML_H5_TEST (tbitfields_le.h5 0 tbitfields.h5)
+  endif ()
   ADD_XML_H5_TEST (tcompound.h5 0 tcompound.h5)
   ADD_XML_H5_TEST (tcompound2.h5 0 tcompound2.h5)
   ADD_XML_H5_TEST (tdatareg.h5 0 tdatareg.h5)
@@ -380,9 +416,7 @@
   ADD_XML_H5_TEST (tsaf.h5 0 tsaf.h5)
   ADD_XML_H5_TEST (tempty.h5 0 tempty.h5)
   ADD_XML_H5_TEST (tnamed_dtype_attr.h5 0 tnamed_dtype_attr.h5)
-  ##Test dataset and attribute of null space.  Commented out:
-  ## wait until the XML schema is updated for null space.
-  ##  ADD_XML_H5_TEST (tnullspace.h5 0 tnulspace.h5)
+  ADD_XML_H5_TEST (tnullspace.h5 0 tnullspace.h5)
   ## So is dataspace with 0 dimension size.
   ##  ADD_XML_H5_TEST (zerodim.h5 0 zerodim.h5)
 
@@ -411,4 +445,7 @@
 
   # tests for floating point user defined printf format
   ADD_XML_H5_TEST (tfpformat.h5 0 -u -m %.7f tfpformat.h5)
+
+  # test for HDFFV-10256 issue
+  ADD_XML_H5_TEST (test35.nc 0 test35.nc)
 

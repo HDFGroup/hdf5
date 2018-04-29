@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -30,7 +41,7 @@
     set_tests_properties (f90_ex-clear-objects PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "f90_ex-clear-objects")
-  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  if (BUILD_SHARED_LIBS)
     add_test (
         NAME f90_ex-shared-clear-objects
         COMMAND    ${CMAKE_COMMAND}
@@ -76,7 +87,7 @@ foreach (example ${examples})
     set_tests_properties (f90_ex_${example} PROPERTIES DEPENDS ${last_test})
   endif ()
   set (last_test "f90_ex_${example}")
-  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  if (BUILD_SHARED_LIBS)
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME f90_ex-shared_${example} COMMAND $<TARGET_FILE:f90_ex_${example}-shared>)
     else ()
@@ -118,7 +129,7 @@ if (HDF5_ENABLE_F2003)
       set_tests_properties (f03_ex_${example} PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "f03_ex_${example}")
-    if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+    if (BUILD_SHARED_LIBS)
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (NAME f03_ex-shared_${example} COMMAND $<TARGET_FILE:f03_ex_${example}-shared>)
       else ()
@@ -142,8 +153,8 @@ if (HDF5_ENABLE_F2003)
 endif ()
 
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
-  add_test (NAME f90_ex_ph5example COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:f90_ex_ph5example>)
-  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-    add_test (NAME f90_ex-shared_ph5example COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:f90_ex_ph5example>)
+  add_test (NAME f90_ex_ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:f90_ex_ph5example> ${MPIEXEC_POSTFLAGS})
+  if (BUILD_SHARED_LIBS)
+    add_test (NAME f90_ex-shared_ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:f90_ex_ph5example> ${MPIEXEC_POSTFLAGS})
   endif ()
 endif ()

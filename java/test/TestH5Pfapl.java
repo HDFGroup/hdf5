@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 package test;
@@ -28,6 +26,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
+import hdf.hdf5lib.exceptions.HDF5PropertyListInterfaceException;
 import hdf.hdf5lib.structs.H5AC_cache_config_t;
 
 import org.junit.After;
@@ -1377,5 +1376,26 @@ public class TestH5Pfapl {
 
         deleteH5file();
         _deleteLogFile();
+    }
+
+    @Test
+    public void testH5P_evict_on_close() {
+        boolean ret_val_id = false;
+        try {
+            H5.H5Pset_evict_on_close(fapl_id, true);
+            ret_val_id = H5.H5Pget_evict_on_close(fapl_id);
+            assertTrue("H5P_evict_on_close", ret_val_id);
+        }
+        catch (HDF5PropertyListInterfaceException err) {
+            // parallel is not supported
+            if (err.getMinorErrorNumber() != HDF5Constants.H5E_UNSUPPORTED) {
+                err.printStackTrace();
+                fail("H5P_evict_on_close: " + err);
+            }
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5P_evict_on_close: " + err);
+        }
     }
 }

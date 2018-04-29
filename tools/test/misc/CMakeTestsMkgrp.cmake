@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -50,6 +61,8 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
                   ${resultfile}.h5
+                  ${resultfile}.out
+                  ${resultfile}.out.err
       )
       set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     endif ()
@@ -90,6 +103,8 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
                   ${resultfile}.h5
+                  ${resultfile}.out
+                  ${resultfile}.out.err
       )
       set_tests_properties (H5MKGRP_CMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       add_test (

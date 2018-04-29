@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -27,39 +25,9 @@
 /* See H5private.h for how to include system headers */
 #include "hdf5.h"
 #include "H5private.h"
-#ifdef H5_STDC_HEADERS
-#   include <ctype.h>
-#   include <errno.h>
-#   include <fcntl.h>
-#   include <stdio.h>
-#   include <stdlib.h>
-#   include <string.h>
-#endif
 
-#ifdef H5_HAVE_UNISTD_H
-#   include <sys/types.h>
-#   include <unistd.h>
-#endif
-
-#ifdef H5_HAVE_SYS_STAT_H
-#   include <sys/stat.h>
-#endif
-
-#ifndef FALSE
-#   define FALSE	0
-#endif
-#ifndef TRUE
-#   define TRUE 	1
-#endif
-#   define NAMELEN	4096
+#define NAMELEN	4096
 #define GB	*1024*1024*1024
-
-#ifndef MIN
-#   define MIN(X,Y)	((X)<(Y)?(X):(Y))
-#endif
-#ifndef MIN3
-#   define MIN3(X,Y,Z)	MIN(MIN(X,Y),Z)
-#endif
 
 /*Make these 2 private properties(defined in H5Fprivate.h) available to h5repart.
  *The first one updates the member file size in the superblock.  The second one
@@ -264,9 +232,9 @@ main (int argc, char *argv[])
     sprintf (src_name, src_gen_name, src_membno);
     src_is_family = strcmp (src_name, src_gen_name);
 
-    if ((src=HDopen(src_name, O_RDONLY,0))<0) {
-        perror (src_name);
-        exit (EXIT_FAILURE);
+    if ((src = HDopen(src_name, O_RDONLY)) < 0) {
+        HDperror(src_name);
+        HDexit(EXIT_FAILURE);
     }
 
     if (HDfstat(src, &sb)<0) {
@@ -284,9 +252,9 @@ main (int argc, char *argv[])
     sprintf (dst_name, dst_gen_name, dst_membno);
     dst_is_family = strcmp (dst_name, dst_gen_name);
 
-    if ((dst=HDopen (dst_name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
-	perror (dst_name);
-	exit (EXIT_FAILURE);
+    if ((dst = HDopen(dst_name, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
+        HDperror(dst_name);
+        HDexit(EXIT_FAILURE);
     }
     if (verbose) fprintf (stderr, "> %s\n", dst_name);
 
@@ -365,9 +333,9 @@ main (int argc, char *argv[])
 		break;
 	    }
 	    sprintf (src_name, src_gen_name, ++src_membno);
-	    if ((src=HDopen (src_name, O_RDONLY,0))<0 && ENOENT==errno) {
-                dst_offset = dst_offset + (off_t)n;
-		break;
+	    if ((src = HDopen(src_name, O_RDONLY)) < 0 && ENOENT == errno) {
+            dst_offset = dst_offset + (off_t)n;
+            break;
 	    } else if (src<0) {
 		perror (src_name);
 		exit (EXIT_FAILURE);
@@ -412,9 +380,9 @@ main (int argc, char *argv[])
 	    }
 	    HDclose (dst);
 	    sprintf (dst_name, dst_gen_name, ++dst_membno);
-	    if ((dst=HDopen (dst_name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
-		perror (dst_name);
-		exit (EXIT_FAILURE);
+	    if ((dst = HDopen(dst_name, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
+            HDperror(dst_name);
+            HDexit(EXIT_FAILURE);
 	    }
 	    dst_offset = 0;
 	    need_seek = FALSE;

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -63,14 +61,16 @@ typedef struct s1_t {
     float c;
 } s1_t;
 
-/****************************************************************
-**
-**  test_reference_params(): Test basic H5R (reference) parameters
-**                           for correct processing
-**
-****************************************************************/
-static void
-test_reference_params(void)
+
+/*-------------------------------------------------------------------------
+ * Function:    test_reference_params
+ *
+ * Purpose      Test basic H5R (reference) parameters for correct processing
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
+static void test_reference_params()
 {
     const char *write_comment = "Foo!"; /* Comments for group */
 
@@ -179,13 +179,17 @@ test_reference_params(void)
         delete file1;
 }   /* test_reference_param() */
 
-/****************************************************************
-**
-**  test_reference_obj(): Test basic object reference functions
-**                        to various kinds of objects
-**
-****************************************************************/
-static void test_reference_obj(void)
+
+/*-------------------------------------------------------------------------
+ * Function:    test_reference_obj
+ *
+ * Purpose      Test basic object reference functions to various kinds
+ *              of objects
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
+static void test_reference_obj()
 {
     int    i;          // counting variables
     const  H5std_string write_comment="Foo!"; // Comments for group
@@ -371,14 +375,15 @@ static void test_reference_obj(void)
         delete file1;
 }   // test_reference_obj()
 
-
-/****************************************************************
-**
-**  test_reference_group(): Test object reference functionality
-**      Tests for correct behavior of various routines on
-**        dereferenced group
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_reference_group
+ *
+ * Purpose      Test object reference functionality on group.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 #define GROUPNAME       "/group"
 #define GROUPNAME2      "group2"
 #define GROUPNAME3      "group3"
@@ -386,8 +391,7 @@ static void test_reference_obj(void)
 #define DSETNAME2       "dset2"
 #define NAME_SIZE       16
 
-static void
-test_reference_group(void)
+static void test_reference_group()
 {
     hobj_ref_t wref;        /* Reference to write */
     hobj_ref_t rref;        /* Reference to read */
@@ -500,14 +504,16 @@ test_reference_group(void)
         delete file1;
 }   /* test_reference_group() */
 
-/****************************************************************
-**
-**  test_reference_region_1D(): Test 1-D reference functionality
-**      Tests 1-D references to various kinds of objects
-**
-****************************************************************/
-static void
-test_reference_region_1D(void)
+
+/*-------------------------------------------------------------------------
+ * Function:    test_reference_region_1D
+ *
+ * Purpose      Test 1-D reference functionality on various kinds of objects.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
+static void test_reference_region_1D()
 {
     hsize_t        start[SPACE3_RANK];     /* Starting location of hyperslab */
     hsize_t        stride[SPACE3_RANK];    /* Stride of hyperslab */
@@ -789,26 +795,14 @@ test_reference_region_1D(void)
     }
 }   /* test_reference_region_1D() */
 
-
-/****************************************************************
-**
-**  test_reference_compat(): Test basic object reference functionality.
-**      Tests references to various kinds of objects using deprecated API.
-**
-****************************************************************/
-static void test_reference_compat(void)
-{
-   // Not yet
-}   // test_reference_compat()
-
-
-/****************************************************************
-**
-**  test_reference(): Main reference testing routine.
-**
-****************************************************************/
+/*-------------------------------------------------------------------------
+ *
+ *  test_reference(): Main reference testing routine.
+ *
+ *-------------------------------------------------------------------------
+ */
 extern "C"
-void test_reference(void)
+void test_reference()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing References\n"));
@@ -817,18 +811,20 @@ void test_reference(void)
     test_reference_obj();       // Test basic object reference functionality
     test_reference_group();     // Test group reference functionality
     test_reference_region_1D(); // Test 1-D reference functionality
-    test_reference_compat();    // Tests deprecated reference routines (not yet)
 
 }   // test_reference()
 
 
-/****************************************************************
-** Function:    cleanup_reference
-** Purpose      Cleanup temporary test files
-** Return       none
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:    cleanup_reference
+ *
+ * Purpose      Cleanup temporary test files
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 extern "C"
-void cleanup_reference(void)
+void cleanup_reference()
 {
     HDremove(FILE1.c_str());
     HDremove(FILE2.c_str());

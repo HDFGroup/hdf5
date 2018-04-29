@@ -1,40 +1,35 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_TOOLS_TEST)
-
-#-----------------------------------------------------------------------------
-# Apply Definitions to compiler in this directory and below
-#-----------------------------------------------------------------------------
-add_definitions (${HDF_EXTRA_C_FLAGS})
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_TOOLS_TEST C)
 
 #-- Add the h5diff tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/h5diff)
+add_subdirectory (h5diff)
 
 #-- Add the h5ls tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/h5ls)
+add_subdirectory (h5ls)
 
 #-- Misc tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/misc)
+add_subdirectory (misc)
 
 #-- Add the h5import tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/h5import)
+add_subdirectory (h5import)
 
 #-- h5Repack tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/h5repack)
+add_subdirectory (h5repack)
 
 #-- Add the h5jam tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/h5jam)
+add_subdirectory (h5jam)
 
 #-- Add the h5copy tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/h5copy)
+add_subdirectory (h5copy)
 
 #-- Add the h5stat tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/h5stat)
+add_subdirectory (h5stat)
 
 #-- Add the h5dump tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/h5dump)
+add_subdirectory (h5dump)
 
 #-- Add the h5format_convert and test executables
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/h5format_convert)
+add_subdirectory (h5format_convert)
 
 #-- Add the perform tests
-add_subdirectory (${HDF5_TOOLS_TEST_SOURCE_DIR}/perform)
+add_subdirectory (perform)

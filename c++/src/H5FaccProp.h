@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __H5FileAccPropList_H
@@ -22,9 +20,8 @@ namespace H5 {
 /*! \class FileAccPropList
     \brief Class FileAccPropList inherits from PropList and provides
     wrappers for the HDF5 file access property list.
-
-    Inheritance: PropList -> IdComponent
 */
+//  Inheritance: PropList -> IdComponent
 class H5_DLLCPP FileAccPropList : public PropList {
    public:
         ///\brief Default file access property list.
@@ -139,7 +136,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("FileAccPropList"); }
 
-        // Copy constructor: creates a copy of a FileAccPropList object.
+        // Copy constructor: same as the original FileAccPropList.
         FileAccPropList(const FileAccPropList& original);
 
         // Creates a copy of an existing file access property list

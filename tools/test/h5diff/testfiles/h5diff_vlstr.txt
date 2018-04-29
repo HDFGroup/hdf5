@@ -1,0 +1,16 @@
+
+file1     file2
+---------------------------------------
+    x      x    /              
+    x      x    /Dataset1      
+    x      x    /vl_string_type
+
+group  : </> and </>
+0 differences found
+attribute: <test_scalar of </>> and <test_scalar of </>>
+0 differences found
+dataset: </Dataset1> and </Dataset1>
+0 differences found
+datatype: </vl_string_type> and </vl_string_type>
+0 differences found
+EXIT CODE: 0

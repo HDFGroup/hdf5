@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.ued>
@@ -30,6 +28,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -101,6 +100,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
     size_t curr_file_seq;       /* Current file sequence to operate on */
     size_t mem_nseq;            /* Number of sequences generated in the file */
     size_t file_nseq;           /* Number of sequences generated in memory */
+    size_t dxpl_vec_size;       /* Vector length from API context's DXPL */
     size_t vec_size;            /* Vector length */
     ssize_t tmp_file_len;       /* Temporary number of bytes in file sequence */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -111,12 +111,15 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
     HDassert(io_info);
     HDassert(io_info->dset);
     HDassert(io_info->store);
-    HDassert(TRUE == H5P_isa_class(io_info->raw_dxpl_id, H5P_DATASET_XFER));
     HDassert(io_info->u.rbuf);
 
+    /* Get info from API context */
+    if(H5CX_get_vec_size(&dxpl_vec_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+
     /* Allocate the vector I/O arrays */
-    if(io_info->dxpl_cache->vec_size > H5D_IO_VECTOR_SIZE)
-        vec_size = io_info->dxpl_cache->vec_size;
+    if(dxpl_vec_size > H5D_IO_VECTOR_SIZE)
+        vec_size = dxpl_vec_size;
     else
         vec_size = H5D_IO_VECTOR_SIZE;
     if(NULL == (mem_len = H5FL_SEQ_MALLOC(size_t, vec_size)))

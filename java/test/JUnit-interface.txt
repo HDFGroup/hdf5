@@ -8,6 +8,19 @@ JUnit version 4.11
 .testH5check_version
 .testH5get_libversion
 .testH5set_free_list_limits
+.testH5EprintInt
+.testH5Eget_msg
+.testH5Eget_num
+.testH5Eget_class_name
+.testH5Eget_num_with_msg
+.testH5Eclear2
+.testH5Eprint2
+.testH5Ecreate_msg_major
+.testH5Ecreate_msg_minor
+.testH5Ecreate_stack
+.testH5Ecreate_msg_name_null
+.testH5Eauto_is_v2
+.testH5EclearInt
 .testH5Eregister_class_lib_name_null
 .testH5Eregister_class_version_null
 .testH5Eunregister_class_invalid_classid
@@ -41,23 +54,10 @@ JUnit version 4.11
 .testH5Ecreate_msg_invalid_errid
 .testH5Eclear2_invalid_stkid
 .testH5Eprint2_invalid_classid
-.testH5EprintInt
 .testH5Eget_msg_major
 .testH5Eget_msg_minor
-.testH5Eget_msg
-.testH5Eget_num
 .testH5Epush
 .testH5Ewalk
-.testH5Eget_class_name
-.testH5Eget_num_with_msg
-.testH5Eclear2
-.testH5Eprint2
-.testH5Ecreate_msg_major
-.testH5Ecreate_msg_minor
-.testH5Ecreate_stack
-.testH5Ecreate_msg_name_null
-.testH5Eauto_is_v2
-.testH5EclearInt
 .testH5Epop
 .testH5Fcreate_null
 .testH5Fflush_local
@@ -415,6 +415,7 @@ JUnit version 4.11
 .testH5PH5Pset_shared_mesg_phase_change_HighMaxlistValue
 .testH5P_layout
 .testH5Pget_link_creation_order
+.testH5Pget_efile_prefix
 .testH5Pset_shared_mesg_nindexes_InvalidHIGHnindexes
 .testH5P_file_space_page_size
 .testH5Pget_shared_mesg_index_Invalid_indexnum
@@ -444,6 +445,7 @@ JUnit version 4.11
 .testH5Pset_est_link_info_InvalidValues
 .testH5Pset_local_heap_size_hint
 .testH5Pget_est_link_info
+.testH5Pset_efile_prefix_null
 .testH5Pset_scaleoffset
 .testH5Pset_create_intermediate_group_invalidobject
 .testH5PH5Pset_shared_mesg_phase_change_HighMinbtreeValue
@@ -466,6 +468,7 @@ JUnit version 4.11
 .testH5Pget_sym_k_null
 .testH5Pset_nlinks
 .testH5P_obj_track_times
+.testH5Pset_efile_prefix
 .testH5P_userblock
 .testH5Pget_local_heap_size_hint
 .testH5Pset_shared_mesg_index_Invalid_indexnum
@@ -504,6 +507,7 @@ JUnit version 4.11
 .testH5Pset_mdc_config
 .testH5P_small_data_block_size
 .testH5Pset_fapl_log
+.testH5P_evict_on_close
 .testH5Pset_libver_bounds
 .testH5P_sieve_buf_size
 .testH5P_elink_file_cache_size
@@ -530,11 +534,14 @@ JUnit version 4.11
 .testH5Pget_source_datasetname
 .testH5Pvirtual_storage
 .testH5Pget_selection_source_dataset
+.testH5Pget_virtual_prefix
 .testH5Pget_source_filename
 .testH5Pset_get_virtual_printf_gap
 .testH5Pget_virtual_count
+.testH5Pset_virtual_prefix
 .testH5Pset_get_virtual_view
 .testH5Pget_mapping_parameters
+.testH5Pset_virtual_prefix_null
 .testH5P_genprop_basic_class
 .testH5P_genprop_class_iter
 .testH5P_genprop_basic_class_prop
@@ -640,25 +647,31 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (638 tests)
+OK (645 tests)
 
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Fopen(): can't set access and transfer property lists
+  #000: (file name) line (number) in H5Fopen(): unable to open file
     major: File accessibilty
-    minor: Can't set value
-  #001: (file name) line (number) in H5P_verify_apl_and_dxpl(): not the required access property list
-    major: Property lists
-    minor: Inappropriate type
-  #002: (file name) line (number) in H5P_isa_class(): not a property list
-    major: Invalid arguments to routine
-    minor: Inappropriate type
+    minor: Unable to open file
+  #001: (file name) line (number) in H5F__open(): unable to open file
+    major: File accessibilty
+    minor: Unable to open file
+  #002: (file name) line (number) in H5F_open(): unable to retrieve VFL class
+    major: File accessibilty
+    minor: Can't get value
+  #003: (file name) line (number) in H5FD_get_class(): can't find object for ID
+    major: Object atom
+    minor: Unable to find atom information (already closed?)
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Fopen(): can't set access and transfer property lists
+  #000: (file name) line (number) in H5Fopen(): unable to open file
     major: File accessibilty
-    minor: Can't set value
-  #001: (file name) line (number) in H5P_verify_apl_and_dxpl(): not the required access property list
-    major: Property lists
-    minor: Inappropriate type
-  #002: (file name) line (number) in H5P_isa_class(): not a property list
-    major: Invalid arguments to routine
-    minor: Inappropriate type
+    minor: Unable to open file
+  #001: (file name) line (number) in H5F__open(): unable to open file
+    major: File accessibilty
+    minor: Unable to open file
+  #002: (file name) line (number) in H5F_open(): unable to retrieve VFL class
+    major: File accessibilty
+    minor: Can't get value
+  #003: (file name) line (number) in H5FD_get_class(): can't find object for ID
+    major: Object atom
+    minor: Unable to find atom information (already closed?)

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -19,21 +17,22 @@
 
 #include "testphdf5.h"
 
-#include "H5PBprivate.h"
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
+#include "H5PBprivate.h"
 
 /*
  * This file needs to access private information from the H5F package.
  */
-#define H5C_FRIEND		/*suppress error about including H5Cpkg	  */
-#include "H5Cpkg.h"
 #define H5AC_FRIEND		/*suppress error about including H5ACpkg	  */
 #include "H5ACpkg.h"
-#define H5MF_FRIEND		/*suppress error about including H5MFpkg	  */
-#include "H5MFpkg.h"
+#define H5C_FRIEND		/*suppress error about including H5Cpkg	  */
+#include "H5Cpkg.h"
 #define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"
+#define H5MF_FRIEND		/*suppress error about including H5MFpkg	  */
+#include "H5MFpkg.h"
 
 #define NUM_DSETS               5
 
@@ -122,7 +121,6 @@ test_page_buffer_access(void)
 {
     hid_t file_id = -1;          /* File ID */
     hid_t fcpl, fapl, fapl_self;
-    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT;
     size_t page_count = 0;
     int i, num_elements = 200;
     haddr_t raw_addr, meta_addr;
@@ -130,6 +128,7 @@ test_page_buffer_access(void)
     H5F_t *f = NULL;
     herr_t ret;			/* generic return value */
     const char *filename;
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -196,25 +195,30 @@ test_page_buffer_access(void)
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl_self);
         VRFY((file_id >= 0), "");
 
+        /* Push API context */
+        ret = H5CX_push();
+        VRFY((ret == 0), "H5CX_push()");
+        api_ctx_pushed = TRUE;
+
         /* Get a pointer to the internal file object */
         f = (H5F_t *)H5I_object(file_id);
 
         VRFY((f->shared->page_buf != NULL), "Page Buffer created with 1 process");
 
         /* allocate space for 200 raw elements */
-        raw_addr = H5MF_alloc(f, H5FD_MEM_DRAW, H5AC_ind_read_dxpl_id, sizeof(int)*(size_t)num_elements);
+        raw_addr = H5MF_alloc(f, H5FD_MEM_DRAW, sizeof(int)*(size_t)num_elements);
         VRFY((raw_addr != HADDR_UNDEF), "");
 
         /* allocate space for 200 metadata elements */
-        meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, H5AC_ind_read_dxpl_id, sizeof(int)*(size_t)num_elements);
+        meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, sizeof(int)*(size_t)num_elements);
         VRFY((meta_addr != HADDR_UNDEF), "");
 
         page_count = 0;
 
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*(size_t)num_elements, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*(size_t)num_elements, data);
         VRFY((ret == 0), "");
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*(size_t)num_elements, H5AC_ind_read_dxpl_id, data);
-        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*(size_t)num_elements, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*(size_t)num_elements, data);
+        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*(size_t)num_elements, data);
         VRFY((ret == 0), "");
 
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
@@ -222,10 +226,10 @@ test_page_buffer_access(void)
         /* update the first 50 elements */
         for(i=0 ; i<50 ; i++)
             data[i] = i;
-        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, data);
         H5Eprint2(H5E_DEFAULT, stderr);
         VRFY((ret == 0), "");
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         page_count += 2;
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
@@ -233,43 +237,43 @@ test_page_buffer_access(void)
         /* update the second 50 elements */
         for(i=0 ; i<50 ; i++)
             data[i] = i+50;
-        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*50), sizeof(int)*50, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*50), sizeof(int)*50, data);
         VRFY((ret == 0), "");
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*50), sizeof(int)*50, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*50), sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
 
         /* update 100 - 200 */
         for(i=0 ; i<100 ; i++)
             data[i] = i+100;
-        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*100), sizeof(int)*100, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*100), sizeof(int)*100, data);
         VRFY((ret == 0), "");
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*100), sizeof(int)*100, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*100), sizeof(int)*100, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
 
-        ret = H5PB_flush(f, dxpl_id, FALSE);
+        ret = H5PB_flush(f, FALSE);
         VRFY((ret == 0), "");
 
         /* read elements 0 - 200 */
-        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*200, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*200, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
         for (i=0; i < 200; i++)
             VRFY((data[i] == i), "Read different values than written");
-        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*200, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*200, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
         for (i=0; i < 200; i++)
             VRFY((data[i] == i), "Read different values than written");
 
         /* read elements 0 - 50 */
-        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
         for (i=0; i < 50; i++)
             VRFY((data[i] == i), "Read different values than written");
-        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
         for (i=0; i < 50; i++)
@@ -280,6 +284,9 @@ test_page_buffer_access(void)
         VRFY((ret >= 0), "H5Fclose succeeded");
         ret = H5Pclose(fapl_self);
         VRFY((ret>=0), "H5Pclose succeeded");
+
+        /* Pop API context */
+        if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
     }
 #endif
 
@@ -295,23 +302,28 @@ test_page_buffer_access(void)
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
         VRFY((file_id >= 0), "");
 
+        /* Push API context */
+        ret = H5CX_push();
+        VRFY((ret == 0), "H5CX_push()");
+        api_ctx_pushed = TRUE;
+
         /* Get a pointer to the internal file object */
         f = (H5F_t *)H5I_object(file_id);
 
         VRFY((f->shared->page_buf != NULL), "Page Buffer created with 1 process");
 
         /* allocate space for 200 raw elements */
-        raw_addr = H5MF_alloc(f, H5FD_MEM_DRAW, H5AC_ind_read_dxpl_id, sizeof(int)*(size_t)num_elements);
+        raw_addr = H5MF_alloc(f, H5FD_MEM_DRAW, sizeof(int)*(size_t)num_elements);
         VRFY((raw_addr != HADDR_UNDEF), "");
         /* allocate space for 200 metadata elements */
-        meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, H5AC_ind_read_dxpl_id, sizeof(int)*(size_t)num_elements);
+        meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, sizeof(int)*(size_t)num_elements);
         VRFY((meta_addr != HADDR_UNDEF), "");
 
         page_count = 0;
 
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*(size_t)num_elements, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*(size_t)num_elements, data);
         VRFY((ret == 0), "");
-        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*(size_t)num_elements, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*(size_t)num_elements, data);
         VRFY((ret == 0), "");
 
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
@@ -319,27 +331,27 @@ test_page_buffer_access(void)
         /* update the first 50 elements */
         for(i=0 ; i<50 ; i++)
             data[i] = i;
-        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
 
         /* update the second 50 elements */
         for(i=0 ; i<50 ; i++)
             data[i] = i+50;
-        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*50), sizeof(int)*50, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*50), sizeof(int)*50, data);
         VRFY((ret == 0), "");
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*50), sizeof(int)*50, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*50), sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
 
         /* update 100 - 200 */
         for(i=0 ; i<100 ; i++)
             data[i] = i+100;
-        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*100), sizeof(int)*100, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*100), sizeof(int)*100, data);
         VRFY((ret == 0), "");
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*100), sizeof(int)*100, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*100), sizeof(int)*100, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
 
@@ -347,24 +359,24 @@ test_page_buffer_access(void)
         VRFY((ret == 0), "");
 
         /* read elements 0 - 200 */
-        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*200, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*200, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
         for (i=0; i < 200; i++)
             VRFY((data[i] == i), "Read different values than written");
-        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*200, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*200, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
         for (i=0; i < 200; i++)
             VRFY((data[i] == i), "Read different values than written");
 
         /* read elements 0 - 50 */
-        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
         for (i=0; i < 50; i++)
             VRFY((data[i] == i), "Read different values than written");
-        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         page_count += 1;
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
@@ -375,20 +387,20 @@ test_page_buffer_access(void)
         /* reset the first 50 elements to -1*/
         for(i=0 ; i<50 ; i++)
             data[i] = -1;
-        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
-        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
 
         /* read elements 0 - 50 */
-        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, H5AC_rawdata_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_DRAW, raw_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
         for (i=0; i < 50; i++)
             VRFY((data[i] == -1), "Read different values than written");
-        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, H5AC_ind_read_dxpl_id, data);
+        ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
         for (i=0; i < 50; i++) 
@@ -403,6 +415,9 @@ test_page_buffer_access(void)
     VRFY((ret>=0), "H5Pclose succeeded");
     ret = H5Pclose(fcpl);
     VRFY((ret>=0), "H5Pclose succeeded");
+
+    /* Pop API context */
+    if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
 
     HDfree(data);
     data = NULL;
@@ -426,6 +441,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     H5F_t       *f = NULL;
     H5C_t       *cache_ptr = NULL;
     H5AC_cache_config_t config;
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
@@ -433,6 +449,11 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
 
     ret = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
     VRFY((ret == 0), "");
+
+    /* Push API context */
+    ret = H5CX_push();
+    VRFY((ret == 0), "H5CX_push()");
+    api_ctx_pushed = TRUE;
 
     f = (H5F_t *)H5I_object(file_id);
     VRFY((f != NULL), "");
@@ -551,6 +572,9 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     ret = H5Sclose(mem_dataspace);
     VRFY((ret == 0), "");
 
+    /* Pop API context */
+    if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+
     MPI_Barrier(MPI_COMM_WORLD);
     HDfree(data_array);
     return 0;
@@ -574,6 +598,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
     H5F_t       *f = NULL;
     H5C_t       *cache_ptr = NULL;
     H5AC_cache_config_t config;
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      ret;
 
     config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -588,6 +613,11 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
     file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     H5Eprint2(H5E_DEFAULT, stderr);
     VRFY((file_id >= 0), "");
+
+    /* Push API context */
+    ret = H5CX_push();
+    VRFY((ret == 0), "H5CX_push()");
+    api_ctx_pushed = TRUE;
 
     ret = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
     VRFY((ret == 0), "");
@@ -679,7 +709,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
             HDassert(entry_ptr->is_dirty == FALSE);
 
             if(!entry_ptr->is_pinned && !entry_ptr->is_protected) {
-                ret = H5AC_expunge_entry(f, H5AC_ind_read_dxpl_id, entry_ptr->type, entry_ptr->addr, 0);
+                ret = H5AC_expunge_entry(f, entry_ptr->type, entry_ptr->addr, 0);
                 VRFY((ret == 0), "");
             }
 
@@ -701,6 +731,10 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
     VRFY((ret == 0), "");
     ret = H5Sclose(mem_dataspace);
     VRFY((ret == 0), "");
+
+    /* Pop API context */
+    if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
+
     HDfree(data_array);
 
     return nerrors;

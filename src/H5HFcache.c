@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -81,9 +79,8 @@ static htri_t H5HF__cache_hdr_verify_chksum(const void *image_ptr, size_t len, v
 static void *H5HF__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HF__cache_hdr_image_len(const void *thing, size_t *image_len);
-static herr_t H5HF__cache_hdr_pre_serialize(H5F_t *f, hid_t dxpl_id,
-    void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len, 
-    unsigned *flags); 
+static herr_t H5HF__cache_hdr_pre_serialize(H5F_t *f, void *thing, haddr_t addr,
+    size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags); 
 static herr_t H5HF__cache_hdr_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
 static herr_t H5HF__cache_hdr_free_icr(void *thing);
@@ -93,9 +90,8 @@ static htri_t H5HF__cache_iblock_verify_chksum(const void *image_ptr, size_t len
 static void *H5HF__cache_iblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HF__cache_iblock_image_len(const void *thing, size_t *image_len);
-static herr_t H5HF__cache_iblock_pre_serialize(H5F_t *f, hid_t dxpl_id,
-    void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
-    unsigned *flags); 
+static herr_t H5HF__cache_iblock_pre_serialize(H5F_t *f, void *thing,
+    haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags); 
 static herr_t H5HF__cache_iblock_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
 static herr_t H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *thing); 
@@ -106,26 +102,26 @@ static htri_t H5HF__cache_dblock_verify_chksum(const void *image_ptr, size_t len
 static void *H5HF__cache_dblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HF__cache_dblock_image_len(const void *thing, size_t *image_len);
-static herr_t H5HF__cache_dblock_pre_serialize(H5F_t *f, hid_t dxpl_id,
-    void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
-    unsigned *flags); 
+static herr_t H5HF__cache_dblock_pre_serialize(H5F_t *f, void *thing, haddr_t addr,
+    size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags); 
 static herr_t H5HF__cache_dblock_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
 static herr_t H5HF__cache_dblock_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5HF__cache_dblock_free_icr(void *thing);
+static herr_t H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size);
 
 /* Debugging Function Prototypes */
 #ifndef NDEBUG
-static herr_t H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, hid_t dxpl_id,
-    H5HF_hdr_t *hdr, hbool_t *fd_clean, hbool_t *clean);
+static herr_t H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr,
+    hbool_t *fd_clean, hbool_t *clean);
 static herr_t H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, 
-    hid_t dxpl_id, haddr_t fd_parent_addr, H5HF_indirect_t *iblock, 
-    unsigned *iblock_status, hbool_t *fd_clean, hbool_t *clean);
+    haddr_t fd_parent_addr, H5HF_indirect_t *iblock, unsigned *iblock_status,
+    hbool_t *fd_clean, hbool_t *clean);
 static herr_t H5HF__cache_verify_iblocks_dblocks_clean(H5F_t *f, 
     haddr_t fd_parent_addr, H5HF_indirect_t *iblock, hbool_t *fd_clean, 
     hbool_t *clean, hbool_t *has_dblocks);
 static herr_t H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, 
-    hid_t dxpl_id, haddr_t fd_parent_addr, H5HF_indirect_t *iblock, 
+    haddr_t fd_parent_addr, H5HF_indirect_t *iblock, 
     hbool_t *fd_clean, hbool_t *clean, hbool_t *has_iblocks);
 #endif /* NDEBUG */
 
@@ -185,7 +181,7 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
     H5HF__cache_dblock_serialize,       /* 'serialize' callback */
     H5HF__cache_dblock_notify,          /* 'notify' callback */
     H5HF__cache_dblock_free_icr,        /* 'free_icr' callback */
-    NULL,                               /* 'fsf_size' callback */
+    H5HF__cache_dblock_fsf_size,        /* 'fsf_size' callback */
 }};
 
 
@@ -574,7 +570,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
         UINT32DECODE(image, hdr->pline_root_direct_filter_mask);
 
         /* Decode I/O filter information */
-        if(NULL == (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, udata->dxpl_id, NULL, H5O_PLINE_ID, image)))
+        if(NULL == (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, NULL, H5O_PLINE_ID, len, image)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode I/O pipeline filters")
 
         /* Advance past filter info to checksum */
@@ -667,9 +663,9 @@ H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_hdr_pre_serialize(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    void *_thing, haddr_t addr, size_t len, haddr_t H5_ATTR_UNUSED *new_addr,
-    size_t H5_ATTR_UNUSED *new_len, unsigned *flags)
+H5HF__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t len,
+    haddr_t H5_ATTR_UNUSED *new_addr, size_t H5_ATTR_UNUSED *new_len,
+    unsigned *flags)
 {
     H5HF_hdr_t *hdr = (H5HF_hdr_t *)_thing;     /* Fractal heap info */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -718,7 +714,7 @@ H5HF__cache_hdr_pre_serialize(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id,
      * call still looks for dirty descendants.  At present we do not check
      * this value.
      */
-    if(H5HF__cache_verify_hdr_descendants_clean((H5F_t *)f, dxpl_id, hdr, &fd_children_clean, &descendants_clean) < 0)
+    if(H5HF__cache_verify_hdr_descendants_clean((H5F_t *)f, hdr, &fd_children_clean, &descendants_clean) < 0)
          HGOTO_ERROR(H5E_HEAP, H5E_SYSTEM, FAIL, "can't verify hdr descendants clean.")
     HDassert(fd_children_clean);
 }
@@ -1046,7 +1042,10 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t len, void *_udata,
     /* this copy of the parent pointer is needed by the notify callback so */
     /* that it can take down flush dependencies on eviction even if        */
     /* the parent pointer has been nulled out.             JRM -- 5/18/14  */
-    iblock->fd_parent = udata->par_info->iblock;
+    if(udata->par_info->iblock)
+        iblock->fd_parent = udata->par_info->iblock;
+    else
+        iblock->fd_parent = udata->par_info->hdr;
     iblock->par_entry = udata->par_info->entry;
     if(iblock->parent) {
         /* Share parent block */
@@ -1205,9 +1204,9 @@ H5HF__cache_iblock_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_iblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
-    haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t *new_addr,
-    size_t H5_ATTR_UNUSED *new_len, unsigned *flags)
+H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr,
+    size_t H5_ATTR_UNUSED len, haddr_t *new_addr, size_t H5_ATTR_UNUSED *new_len,
+    unsigned *flags)
 {
     H5HF_hdr_t          *hdr;                   /* Shared fractal heap information */
     H5HF_indirect_t     *iblock = (H5HF_indirect_t *)_thing;    /* Indirect block info */
@@ -1249,7 +1248,7 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
      * there is no need to check to see if it is pinned or protected, or to
      * protect it if it is not.
      */
-    if(H5HF__cache_verify_iblock_descendants_clean((H5F_t *)f, dxpl_id, iblock->addr, iblock, &iblock_status, &fd_children_clean, &descendants_clean) < 0)
+    if(H5HF__cache_verify_iblock_descendants_clean((H5F_t *)f, iblock->addr, iblock, &iblock_status, &fd_children_clean, &descendants_clean) < 0)
          HGOTO_ERROR(H5E_HEAP, H5E_SYSTEM, FAIL, "can't verify descendants clean.")
     HDassert(fd_children_clean);
 }
@@ -1262,14 +1261,14 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
         haddr_t iblock_addr;
 
         /* Allocate 'normal' space for the new indirect block on disk */
-        if(HADDR_UNDEF == (iblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
+        if(HADDR_UNDEF == (iblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_IBLOCK, (hsize_t)iblock->size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
 
         /* Sanity check */
         HDassert(!H5F_addr_eq(iblock->addr, iblock_addr));
 
         /* Let the metadata cache know the block moved */
-        if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_IBLOCK, iblock->addr, iblock_addr, dxpl_id) < 0)
+        if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_IBLOCK, iblock->addr, iblock_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move indirect block")
 
         /* Update the internal address for the block */
@@ -1461,9 +1460,6 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(iblock->hdr);
 
-    if(action == H5AC_NOTIFY_ACTION_BEFORE_EVICT)
-        HDassert((iblock->parent == iblock->fd_parent) || ((NULL == iblock->parent) && (iblock->fd_parent)));
-
     /* further sanity checks */
     if(iblock->parent == NULL) {
         /* pointer from hdr to root iblock will not be set up unless */
@@ -1494,16 +1490,10 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
     switch(action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
-            if(iblock->parent) {        /* this is a child iblock */
-                /* create flush dependency with parent iblock */
-                if(H5AC_create_flush_dependency(iblock->parent, iblock) < 0)
+            /* Create flush dependency with parent, if there is one */
+            if(iblock->fd_parent)
+                if(H5AC_create_flush_dependency(iblock->fd_parent, iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
-            } /* end if */
-            else {      /* this is the root iblock */
-                /* create flush dependency with header */
-                if(H5AC_create_flush_dependency(iblock->hdr, iblock) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
-            } /* end else */
             break;
 
 	case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -1517,16 +1507,12 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
 	    break;
 
         case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-            if(iblock->fd_parent) {     /* this is a child iblock */
-                /* destroy flush dependency with parent iblock */
+            if(iblock->fd_parent) {
+                /* Destroy flush dependency with parent */
                 if(H5AC_destroy_flush_dependency(iblock->fd_parent, iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                iblock->fd_parent = NULL;
             } /* end if */
-            else {      /* this is the root iblock */
-                /* destroy flush dependency with header */
-                if(H5AC_destroy_flush_dependency(iblock->hdr, iblock) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-            } /* end else */
             break;
 
         default:
@@ -1673,9 +1659,13 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
 	HGOTO_DONE(TRUE);
 
     if(hdr->filter_len > 0) {
-	size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
-	unsigned filter_mask;	/* Excluded filters for direct block */
-	H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+        size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
+        unsigned filter_mask;	/* Excluded filters for direct block */
+        H5Z_cb_t filter_cb;     /* Filter callback structure */
+
+        /* Initialize the filter callback struct */
+        filter_cb.op_data = NULL;
+        filter_cb.func = NULL;      /* no callback function when failed */
 
         /* Allocate buffer to perform I/O filtering on and copy image into
          * it.  Must do this as H5Z_pipeline() may re-size the buffer 
@@ -1684,17 +1674,17 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
         if(NULL == (read_buf = H5MM_malloc(len)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline buffer")
 
-	/* Set up parameters for filter pipeline */
-	nbytes = len;
-	filter_mask = udata->filter_mask;
+        /* Set up parameters for filter pipeline */
+        nbytes = len;
+        filter_mask = udata->filter_mask;
         HDmemcpy(read_buf, image, len);
 
-	/* Push direct block data through I/O filter pipeline */
-	if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed")
+        /* Push direct block data through I/O filter pipeline */
+        if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed")
 
         /* Update info about direct block */
-	udata->decompressed = TRUE;
+        udata->decompressed = TRUE;
         len = nbytes;
     } /* end if */
     else
@@ -1820,45 +1810,49 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
             udata->dblk = NULL;
         } /* end if */
         else {
-            H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+            H5Z_cb_t filter_cb;     /* Filter callback structure */
             size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
             unsigned filter_mask;   /* Excluded filters for direct block */
 
             /* Sanity check */
-	    HDassert(udata->dblk == NULL);
+            HDassert(udata->dblk == NULL);
 
-	    /* Allocate buffer to perform I/O filtering on and copy image into
-	     * it.  Must do this as H5Z_pipeline() may resize the buffer 
-	     * provided to it.
-	     */
-	    if(NULL == (read_buf = H5MM_malloc(len)))
-		HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for pipeline buffer")
+            /* Initialize the filter callback struct */
+            filter_cb.op_data = NULL;
+            filter_cb.func = NULL;      /* no callback function when failed */
+
+            /* Allocate buffer to perform I/O filtering on and copy image into
+             * it.  Must do this as H5Z_pipeline() may resize the buffer 
+             * provided to it.
+             */
+            if (NULL == (read_buf = H5MM_malloc(len)))
+                HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for pipeline buffer")
 
             /* Copy compressed image into buffer */
-	    HDmemcpy(read_buf, image, len);
+            HDmemcpy(read_buf, image, len);
 
-	    /* Push direct block data through I/O filter pipeline */
-	    nbytes = len;
-	    filter_mask = udata->filter_mask;
-	    if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
-		HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed")
+            /* Push direct block data through I/O filter pipeline */
+            nbytes = len;
+            filter_mask = udata->filter_mask;
+            if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed")
 
-	    /* Sanity check */
-	    HDassert(nbytes == dblock->size);
+            /* Sanity check */
+            HDassert(nbytes == dblock->size);
 
-	    /* Copy un-filtered data into block's buffer */
-	    HDmemcpy(dblock->blk, read_buf, dblock->size);
-	} /* end if */
+            /* Copy un-filtered data into block's buffer */
+            HDmemcpy(dblock->blk, read_buf, dblock->size);
+        } /* end if */
     } /* end if */
     else {
         /* Sanity checks */
-	HDassert(udata->dblk == NULL);
-	HDassert(!udata->decompressed);
+        HDassert(udata->dblk == NULL);
+        HDassert(!udata->decompressed);
 
-	/* Allocate block buffer */
-/* XXX: Change to using free-list factories */
-	if(NULL == (dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        /* Allocate block buffer */
+        /* XXX: Change to using free-list factories */
+        if  (NULL == (dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Copy image to dblock->blk */
         HDassert(dblock->size == len);
@@ -1884,7 +1878,10 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
 
     /* Address of parent block */
     dblock->parent = par_info->iblock;
-    dblock->fd_parent = par_info->iblock;
+    if(par_info->iblock)
+        dblock->fd_parent = par_info->iblock;
+    else
+        dblock->fd_parent = par_info->hdr;
     dblock->par_entry = par_info->entry;
     if(dblock->parent) {
         /* Share parent block */
@@ -1897,9 +1894,9 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
 
     /* Decode checksum on direct block, if requested */
     if(hdr->checksum_dblocks) {
-	uint32_t stored_chksum;         /* Metadata checksum value */
+        uint32_t stored_chksum;         /* Metadata checksum value */
 
-	/* checksum verification already done in verify_chksum cb */
+        /* checksum verification already done in verify_chksum cb */
 
         /* Metadata checksum */
         UINT32DECODE(image, stored_chksum);
@@ -2074,7 +2071,7 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_dblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
+H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing,
     haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags)
 {
     hbool_t 		 at_tmp_addr;  /* Flag to indicate direct block is */
@@ -2190,9 +2187,13 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
 
     /* Check for I/O filters on this heap */
     if(hdr->filter_len > 0) {
-        H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+        H5Z_cb_t filter_cb;                 /* Filter callback structure */
         size_t nbytes;                      /* Number of bytes used */
         unsigned filter_mask = 0;           /* Filter mask for block */
+
+        /* Initialize the filter callback struct */
+        filter_cb.op_data = NULL;
+        filter_cb.func = NULL;      /* no callback function when failed */
 
         /* Allocate buffer to perform I/O filtering on */
         write_size = dblock->size;
@@ -2247,11 +2248,11 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
                  */
                 if(!at_tmp_addr)
                     /* Release direct block's current disk space */
-                    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)hdr->pline_root_direct_size) < 0)
+                    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, addr, (hsize_t)hdr->pline_root_direct_size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
 
                 /* Allocate space for the compressed direct block */
-                if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+                if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
                 /* Update information about compressed direct block's 
@@ -2299,11 +2300,11 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
                  */
                 if(!at_tmp_addr)
                     /* Release direct block's current disk space */
-                    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)par_iblock->filt_ents[par_entry].size) < 0)
+                    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, addr, (hsize_t)par_iblock->filt_ents[par_entry].size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
 
                 /* Allocate space for the compressed direct block */
-                if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+                if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
                 /* Update information about compressed direct block's 
@@ -2343,7 +2344,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
          */
         if(at_tmp_addr) {
             /* Allocate 'normal' space for the direct block */
-            if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+            if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, (hsize_t)write_size)))
                 HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
             /* Check for root direct block */
@@ -2502,23 +2503,14 @@ H5HF__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
     HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     HDassert(dblock->hdr);
-    HDassert((dblock->fd_parent) ||
-             ((dblock->hdr->man_dtable.curr_root_rows == 0) && (dblock->block_off == (hsize_t)0)));
 
     switch(action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
-            HDassert(dblock->parent == dblock->fd_parent);
-            if(dblock->parent) {        /* this is a leaf dblock */
-                /* create flush dependency with parent iblock */
-                if(H5AC_create_flush_dependency(dblock->parent, dblock) < 0)
+            /* Create flush dependency with parent, if there is one */
+            if(dblock->fd_parent)
+                if(H5AC_create_flush_dependency(dblock->fd_parent, dblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
-            } /* end if */
-            else {      /* this is a root dblock */
-                /* create flush dependency with header */
-                if(H5AC_create_flush_dependency(dblock->hdr, dblock) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
-            } /* end else */
             break;
 
 	case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -2532,18 +2524,12 @@ H5HF__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
 	    break;
 
         case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-            HDassert((dblock->parent == dblock->fd_parent) ||
-                     ((NULL == dblock->parent) && (dblock->fd_parent)));
-            if(dblock->fd_parent) {     /* this is a leaf dblock */
-                /* destroy flush dependency with parent iblock */
+            if(dblock->fd_parent) {
+                /* Destroy flush dependency with parent */
                 if(H5AC_destroy_flush_dependency(dblock->fd_parent, dblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                dblock->fd_parent = NULL;
             } /* end if */
-            else {      /* this is a root dblock */
-                /* destroy flush dependency with header */
-                if(H5AC_destroy_flush_dependency(dblock->hdr, dblock) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-            } /* end else */
             break;
 
         default:
@@ -2594,6 +2580,42 @@ H5HF__cache_dblock_free_icr(void *_thing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_dblock_free_icr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF__cache_dblock_fsf_size
+ *
+ * Purpose:     Tell the metadata cache the actual amount of file space
+ *              to free when a dblock entry is destroyed with the free
+ *              file space flag set.
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		1/5/18
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
+{
+    const H5HF_direct_t *dblock = (const H5HF_direct_t *)_thing;      /* Fractal heap direct block */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(dblock);
+    HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
+    HDassert(dblock->file_size > 0);
+    HDassert(fsf_size);
+
+    /* Set free space in file size */
+    *fsf_size = dblock->file_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF__cache_dblock_fsf_size() */
 
 
 /*------------------------------------------------------------------------
@@ -2661,8 +2683,8 @@ done:
  */
 #ifndef NDEBUG
 static herr_t
-H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, hid_t dxpl_id,
-    H5HF_hdr_t *hdr, hbool_t *fd_clean, hbool_t *clean)
+H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr,
+    hbool_t *fd_clean, hbool_t *clean)
 {
     hbool_t     fd_exists = FALSE;      /* whether flush dependency exists. */
     haddr_t	hdr_addr;               /* Address of header */
@@ -2783,19 +2805,19 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, hid_t dxpl_id,
                      * in this case, since we know that the entry is in cache,
                      * we can pass NULL udata.
                      *
-                     * The tag specified in the dxpl we received
-                     * as a parameter (via dxpl_id) may not be correct.
+                     * The tag specified in the API context we received
+                     * as a parameter (via API context) may not be correct.
                      * Grab the (hopefully) correct tag from the header,
-                     * and load it into the dxpl via the H5_BEGIN_TAG and 
+                     * and load it into the API context via the H5_BEGIN_TAG and 
                      * H5_END_TAG macros.  Note that any error bracked by
                      * these macros must be reported with HGOTO_ERROR_TAG. 
                      */
-                    H5_BEGIN_TAG(dxpl_id, hdr->heap_addr, FAIL)
+                    H5_BEGIN_TAG(hdr->heap_addr)
 
-                    if(NULL == (root_iblock = (H5HF_indirect_t *)H5AC_protect(f, dxpl_id, H5AC_FHEAP_IBLOCK, root_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
+                    if(NULL == (root_iblock = (H5HF_indirect_t *)H5AC_protect(f, H5AC_FHEAP_IBLOCK, root_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
                         HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() faild.")
 
-                    H5_END_TAG(FAIL)
+                    H5_END_TAG
 
                     unprotect_root_iblock = TRUE;
                 } /* end if */
@@ -2857,19 +2879,19 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, hid_t dxpl_id,
                      * in this case, since we know that the entry is in cache,
                      * we can pass NULL udata.
                      *
-                     * The tag associated specified in the dxpl we received
-                     * as a parameter (via dxpl_id) may not be correct.
+                     * The tag associated specified in the API context we received
+                     * as a parameter (via API context) may not be correct.
                      * Grab the (hopefully) correct tag from the header,
-                     * and load it into the dxpl via the H5_BEGIN_TAG and 
+                     * and load it into the API context via the H5_BEGIN_TAG and 
                      * H5_END_TAG macros.  Note that any error bracked by
                      * these macros must be reported with HGOTO_ERROR_TAG. 
                      */
-                    H5_BEGIN_TAG(dxpl_id, hdr->heap_addr, FAIL)
+                    H5_BEGIN_TAG(hdr->heap_addr)
 
-                    if(NULL == (iblock = (H5HF_indirect_t *)H5AC_protect(f, dxpl_id, H5AC_FHEAP_IBLOCK, root_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
+                    if(NULL == (iblock = (H5HF_indirect_t *)H5AC_protect(f, H5AC_FHEAP_IBLOCK, root_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
                         HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() faild.")
 
-                    H5_END_TAG(FAIL)
+                    H5_END_TAG
 
                     unprotect_root_iblock = TRUE;
                     HDassert(iblock == root_iblock);
@@ -2883,13 +2905,13 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, hid_t dxpl_id,
              HDassert(root_iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
              HDassert(root_iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
 
-             if(H5HF__cache_verify_iblock_descendants_clean(f, dxpl_id, hdr->heap_addr, root_iblock, &root_iblock_status, fd_clean, clean) < 0)
+             if(H5HF__cache_verify_iblock_descendants_clean(f, hdr->heap_addr, root_iblock, &root_iblock_status, fd_clean, clean) < 0)
                  HGOTO_ERROR(H5E_HEAP, H5E_SYSTEM, FAIL, "can't verify root iblock & descendants clean.")
 
              /* Unprotect the root indirect block if required */
              if(unprotect_root_iblock) {
                 HDassert(root_iblock);
-                if(H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_IBLOCK, root_iblock_addr, root_iblock, H5AC__NO_FLAGS_SET) < 0)
+                if(H5AC_unprotect(f, H5AC_FHEAP_IBLOCK, root_iblock_addr, root_iblock, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "H5AC_unprotect() faild.")
             } /* end if */
         } /* end else */
@@ -3026,9 +3048,9 @@ done:
  */
 #ifndef NDEBUG
 static herr_t
-H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, hid_t dxpl_id,
-    haddr_t fd_parent_addr, H5HF_indirect_t *iblock, unsigned *iblock_status, 
-    hbool_t * fd_clean, hbool_t *clean)
+H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, haddr_t fd_parent_addr,
+    H5HF_indirect_t *iblock, unsigned *iblock_status, hbool_t * fd_clean,
+    hbool_t *clean)
 {
     hbool_t	has_dblocks = FALSE;
     hbool_t	has_iblocks = FALSE;
@@ -3050,7 +3072,7 @@ H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, hid_t dxpl_id,
     if((*fd_clean) && H5HF__cache_verify_iblocks_dblocks_clean(f, fd_parent_addr, iblock, fd_clean, clean, &has_dblocks) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_SYSTEM, FAIL, "can't verify dblocks clean.")
 
-    if((*fd_clean) && H5HF__cache_verify_descendant_iblocks_clean(f, dxpl_id, fd_parent_addr, iblock, fd_clean, clean, &has_iblocks) < 0)
+    if((*fd_clean) && H5HF__cache_verify_descendant_iblocks_clean(f, fd_parent_addr, iblock, fd_clean, clean, &has_iblocks) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_SYSTEM, FAIL, "can't verify iblocks clean.")
 
     /* verify that flush dependency setup is plausible */
@@ -3308,9 +3330,9 @@ done:
  */
 #ifndef NDEBUG
 static herr_t
-H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, hid_t dxpl_id,
-    haddr_t fd_parent_addr, H5HF_indirect_t *iblock, hbool_t *fd_clean,
-    hbool_t *clean, hbool_t *has_iblocks)
+H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr,
+    H5HF_indirect_t *iblock, hbool_t *fd_clean, hbool_t *clean,
+    hbool_t *has_iblocks)
 {
     unsigned	      first_iblock_index;
     unsigned	      last_iblock_index;
@@ -3432,23 +3454,23 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, hid_t dxpl_id,
                             /* in this case, since we know that the      */
                             /* entry is in cache, we can pass NULL udata */
                             /*                                           */
-                            /* The tag associated specified in the dxpl  */
-                            /* we received as a parameter (via dxpl_id)  */
+                            /* The tag associated specified in the API context  */
+                            /* we received as a parameter (via API context)  */
                             /* may not be correct.                       */
                             /*                                           */
                             /* Grab the (hopefully) correct tag from the */
-                            /* parent iblock, and load it into the dxpl  */
+                            /* parent iblock, and load it into the API context  */
                             /* via the H5_BEGIN_TAG and H5_END_TAG       */
                             /* macros.  Note that any error bracked by   */
                             /* these macros must be reported with        */
                             /* HGOTO_ERROR_TAG.                          */
 
-                            H5_BEGIN_TAG(dxpl_id, iblock->hdr->heap_addr, FAIL)
+                            H5_BEGIN_TAG(iblock->hdr->heap_addr)
 
-                            if(NULL == (child_iblock = (H5HF_indirect_t *) H5AC_protect(f, dxpl_id, H5AC_FHEAP_IBLOCK, child_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
+                            if(NULL == (child_iblock = (H5HF_indirect_t *) H5AC_protect(f, H5AC_FHEAP_IBLOCK, child_iblock_addr, NULL, H5AC__READ_ONLY_FLAG)))
                                 HGOTO_ERROR_TAG(H5E_HEAP, H5E_CANTPROTECT, FAIL, "H5AC_protect() faild.")
 
-                            H5_END_TAG(FAIL)
+                            H5_END_TAG
 
                             unprotect_child_iblock = TRUE;
                         } /* end if */
@@ -3479,7 +3501,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, hid_t dxpl_id,
                     HDassert(child_iblock->addr == child_iblock_addr);
 
                     /* now make the recursive call */
-                    if(H5HF__cache_verify_iblock_descendants_clean(f, dxpl_id, fd_parent_addr, child_iblock, &child_iblock_status, fd_clean, clean) < 0)
+                    if(H5HF__cache_verify_iblock_descendants_clean(f, fd_parent_addr, child_iblock, &child_iblock_status, fd_clean, clean) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_SYSTEM, FAIL, "can't verify child iblock clean.")
 
                     /* if iblock_addr != fd_parent_addr, verify that a flush 
@@ -3496,7 +3518,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, hid_t dxpl_id,
 
                     /* if we protected the child iblock, unprotect it now */
                     if(unprotect_child_iblock) {
-                        if(H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_IBLOCK, child_iblock_addr, child_iblock, H5AC__NO_FLAGS_SET) < 0)
+                        if(H5AC_unprotect(f, H5AC_FHEAP_IBLOCK, child_iblock_addr, child_iblock, H5AC__NO_FLAGS_SET) < 0)
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "H5AC_unprotect() faild.")
                     } /* end if */
                 } /* end if */

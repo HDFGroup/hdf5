@@ -5,17 +5,15 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
 *
-* Test program:	 tvlstr
+* Test program:     tvlstr
 *
 * Test the Variable-Length String functionality
 *
@@ -23,14 +21,12 @@
 
 #include "testhdf5.h"
 
-#include "hdf5.h"
-
 #define DATAFILE   "tvlstr.h5"
 #define DATAFILE2  "tvlstr2.h5"
 
 /* 1-D dataset with fixed dimensions */
-#define SPACE1_RANK	1
-#define SPACE1_DIM1	4
+#define SPACE1_RANK    1
+#define SPACE1_DIM1    4
 
 #define VLSTR_TYPE      "vl_string_type"
 
@@ -117,17 +113,17 @@ test_vlstrings_basic(void)
     char *rdata[SPACE1_DIM1];   /* Information read in */
     char *wdata2;
     hid_t dataspace, dataset2;
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Datatype ID			*/
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1;       /* Dataspace ID            */
+    hid_t        tid1;       /* Datatype ID            */
     hid_t       xfer_pid;   /* Dataset transfer property list ID */
-    hsize_t		dims1[] = {SPACE1_DIM1};
+    hsize_t        dims1[] = {SPACE1_DIM1};
     hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i;          /* counting variable */
     size_t         str_used;   /* String data in memory */
     size_t         mem_used=0; /* Memory used during allocation */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic VL String Functionality\n"));
@@ -249,14 +245,14 @@ test_vlstrings_special(void)
     const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
     char *rdata[SPACE1_DIM1];   /* Information read in */
     char *fill;                 /* Fill value */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Datatype ID			*/
-    hid_t		dcpl;       /* Dataset creation property list ID */
-    hsize_t		dims1[] = {SPACE1_DIM1};
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1;       /* Dataspace ID            */
+    hid_t        tid1;       /* Datatype ID            */
+    hid_t        dcpl;       /* Dataset creation property list ID */
+    hsize_t        dims1[] = {SPACE1_DIM1};
     unsigned       i;          /* counting variable */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Special VL Strings\n"));
@@ -479,14 +475,14 @@ test_compact_vlstring(void)
 {
     const char *wdata[SPACE1_DIM1] = {"one", "two", "three", "four"};
     char *rdata[SPACE1_DIM1];   /* Information read in */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Datatype ID			*/
-    hid_t		plist;      /* Dataset creation property list	*/
-    hsize_t		dims1[] = {SPACE1_DIM1};
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1;       /* Dataspace ID            */
+    hid_t        tid1;       /* Datatype ID            */
+    hid_t        plist;      /* Dataset creation property list    */
+    hsize_t        dims1[] = {SPACE1_DIM1};
     unsigned       i;          /* counting variable */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing VL Strings in compact dataset\n"));
@@ -875,15 +871,15 @@ test_vlstrings(void)
     test_vl_rewrite();
 }   /* test_vlstrings() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_vlstrings
+ * Function:    cleanup_vlstrings
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              September 10, 1999
  *
  * Modifications:

@@ -10,12 +10,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  ******
@@ -2640,7 +2638,7 @@ h5pget_hyper_vector_size_c ( hid_t_f *prp_id , size_t_f *size)
  * INPUTS
  *  parent - property list class identifier
  *  name   - name of the new class
- *  name_len - lenght of the "name" buffer
+ *  name_len - length of the "name" buffer
  * OUTPUTS
  *  class - new class identifier
  * RETURNS
@@ -3417,8 +3415,8 @@ h5pset_family_offset_c ( hid_t_f *prp_id , hsize_t_f *offset)
  *  mem_map - memory mapping array
  *  memb_fapl - property list for each memory usage type
  *  memb_name - array with members names
- *  len - array with the lenght of each name
- *  lenmax - lenght of the name a sdeclared in Fortran
+ *  len - array with the length of each name
+ *  lenmax - length of the name a sdeclared in Fortran
  *  flag - flag allowing partila access when one of the files is missing
  * RETURNS
  *  0 on success, -1 on failure
@@ -3539,12 +3537,12 @@ h5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag)
  *  Call H5Pget_fapl_multi to set multi file dirver
  * INPUTS
  *  prp_id - file_creation property list identifier
- *  lenmax - lenght of the name a sdeclared in Fortran
+ *  lenmax - length of the name a sdeclared in Fortran
  * OUTPUTS
  *  memb_map - memory mapping array
  *  memb_fapl - property list for each memory usage type
  *  memb_name - array with members names
- *  len - array with the lenght of each name
+ *  len - array with the length of each name
  *  flag - flag allowing partila access when one of the files is missing
  * RETURNS
  *  0 on success, -1 on failure

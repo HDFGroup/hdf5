@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -3523,7 +3521,7 @@ external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
     hid_t	lapl_idA=-1, lapl_idB=-1;
     H5FD_mem_t	mt, memb_map[H5FD_MEM_NTYPES];
     hid_t	memb_fapl[H5FD_MEM_NTYPES];
-    char        sv[H5FD_MEM_NTYPES][500];
+    char        sv[H5FD_MEM_NTYPES][64];
     const	char *memb_name[H5FD_MEM_NTYPES];
     haddr_t	memb_addr[H5FD_MEM_NTYPES];
 
@@ -3732,7 +3730,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
         TESTING("H5Pset/get_elink_fapl() with same physical layout")
 
     if((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) || (NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE)))
-	TEST_ERROR
+        TEST_ERROR
 
     /*
      * set up name for main file:
@@ -3782,7 +3780,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
 
     /* Create external link to target file: ext_link->extlinks17:/A/Dataset */
     if(H5Lcreate_external(filename2, "/A/Dataset", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* create fapl to be a "core" file without backing store */
     if(H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, FALSE) < 0)
@@ -3795,9 +3793,9 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     /* try to open the external linked target dataset */
     did = H5Dopen2(fid, "ext_link", dapl_id);
     if(did < 0) {
-	H5_FAILED();
-	HDputs("    Should succeed in opening the target dataset");
-	goto error;
+        H5_FAILED();
+        HDputs("    Should succeed in opening the target dataset");
+        goto error;
     }
 
     /* Initialize the dataset */
@@ -3807,7 +3805,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
 
     /* Write the data to the dataset */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     if(H5Pclose(dapl_id) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -7764,7 +7762,8 @@ done:
 /* Traverse a hard link by opening the object */
 static hid_t
 UD_hard_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t H5_ATTR_UNUSED lapl_id)
+    const void *udata, size_t udata_size, hid_t H5_ATTR_UNUSED lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     haddr_t addr;
     hid_t ret_value = -1;
@@ -8000,7 +7999,8 @@ ud_hard_links(hid_t fapl)
  */
 static hid_t
 UD_rereg_traverse(const char H5_ATTR_UNUSED * link_name, hid_t cur_group,
-    const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id)
+    const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     hid_t ret_value;
 
@@ -8203,7 +8203,7 @@ error:
 
 static hid_t
 UD_cb_traverse(const char * link_name, hid_t cur_group, const void *udata,
-    size_t udata_size, hid_t lapl_id)
+    size_t udata_size, hid_t lapl_id, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     const char *target = (const char *)udata;
     hid_t ret_value;
@@ -8439,7 +8439,8 @@ error:
  */
 static hid_t
 UD_plist_traverse(const char H5_ATTR_UNUSED * link_name, hid_t cur_group,
-    const void H5_ATTR_UNUSED *udata, size_t udata_size, hid_t lapl_id)
+    const void H5_ATTR_UNUSED *udata, size_t udata_size, hid_t lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     char target[NAME_BUF_SIZE];
     hid_t ret_value;
@@ -8589,7 +8590,8 @@ UD_cbsucc_create(const char H5_ATTR_UNUSED * link_name, hid_t H5_ATTR_UNUSED loc
 
 static hid_t
 UD_cbsucc_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
-    const void *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id)
+    const void *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     const char *target = (const char *)udata;
     hid_t ret_value;

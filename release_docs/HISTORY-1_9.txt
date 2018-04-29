@@ -1,6 +1,0 @@
- HDF5 HISTORY
- ============
- This file contains history of the HDF5 1.9 branch
- 
- CONTENTS
-

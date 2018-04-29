@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_HL_TOOLS_GIF2H5)
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_HL_TOOLS_GIF2H5 C)
 
 #-----------------------------------------------------------------------------
 # Define Sources
@@ -14,11 +14,8 @@ set (GIF2H5_SOURCES
 )
 
 #-- Add gif2hdf5 program
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
-INCLUDE_DIRECTORIES (${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR})
-
 add_executable (gif2h5 ${GIF2H5_SOURCES})
-TARGET_NAMING (gif2h5 STATIC)
+set_property(TARGET gif2h5 APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (gif2h5 STATIC " " " ")
 target_link_libraries (gif2h5 ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (gif2h5 PROPERTIES FOLDER tools/hl)
@@ -30,7 +27,7 @@ set (hdf2gif_SOURCES
     ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/hdfgifwr.c
 )
 add_executable (h52gif ${hdf2gif_SOURCES})
-TARGET_NAMING (h52gif STATIC)
+set_property(TARGET h52gif APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (h52gif STATIC " " " ")
 target_link_libraries (h52gif ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (h52gif PROPERTIES FOLDER tools/hl)
@@ -44,7 +41,7 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS)
       add_executable (hl_h52gifgentest ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/h52gifgentst.c)
-      TARGET_NAMING (hl_h52gifgentest STATIC)
+      set_property(TARGET hl_h52gifgentest APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
       TARGET_C_PROPERTIES (hl_h52gifgentest STATIC " " " ")
       target_link_libraries (hl_h52gifgentest ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
       set_target_properties (hl_h52gifgentest PROPERTIES FOLDER generator/tools/hl)

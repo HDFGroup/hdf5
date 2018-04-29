@@ -24,13 +24,13 @@ Obtaining HDF5 source code
    1. Create a directory for your development; for example, "myhdfstuff".
 
    2. Obtain compressed (*.tar or *.zip) HDF5 source from
-        http://www.hdfgroup.org/ftp/HDF5/current/src/
+         https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
       and put it in "myhdfstuff".
       Uncompress the file. There should be a hdf5-1.10."X" folder.
 
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
-      The HDF5 1.10."X" product requires a minimum CMake version 3.2.2,
+      The HDF5 1.10."X" product requires a minimum CMake version 3.10,
       where "X" is the current HDF5 release version.
 
 Note:
@@ -48,12 +48,12 @@ the config/cmake/cacheinit.cmake file.
 HDF Group recommends using the ctest script mode to build HDF5.
 
 The following files referenced below are available at the HDF web site:
-    http://www.hdfgroup.org/HDF5/release/cmakebuild.html
+     https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
 
 Single compressed file with all the files needed, including source:
-    hdf5-1.10.X-CMake.zip or hdf5-1.10.X-CMake.tar.gz
+    CMake-hdf5-1.10.X.zip or CMake-hdf5-1.10.X.tar.gz
 
-Individual files
+Individual files included in the above mentioned compressed files
 -----------------------------------------------
 CMake build script:
     CTestScript.cmake
@@ -62,37 +62,44 @@ External compression szip and zlib libraries:
     SZip.tar.gz
     ZLib.tar.gz
 
-Platform configuration files:
-    HDF518config.cmake
+Examples Source package:
+    HDF5Examples-1.10.x-Source.tar.gz
+
+Configuration files:
+    HDF5config.cmake
+    HDF5options.cmake
+
+Build scripts for windows or linux
 -----------------------------------------------
 
 To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
    1. Change to the development directory "myhdfstuff".
 
-   2. Download the SZip.tar.gz and ZLib.tar.gz to "myhdfstuff".
-      Do not uncompress the files.
+   2. Download the CMake-hdf5-1.10.X.zip(.tar.gz) file to "myhdfstuff".
+      Uncompress the file.
 
-   3. Download the CTestScript.cmake file to "myhdfstuff".
+   3. Change to the source directory "hdf5-1.10.x".
       CTestScript.cmake file should not be modified.
 
-   4. Download the platform configuration file, HDF518config.cmake,
-      to "myhdfstuff". Do not modify the file unless you want to change
-      default build environment. (See http://www.hdfgroup.org/HDF5/release/chgcmkbuild.html)
+   4. Edit the platform configuration file, HDF5options.cmake, if you want to change
+      the default build environment.
+      (See  https://portal.hdfgroup.org/display/support/How+to+Change+HDF5+CMake+Build+Options)
 
    5. From the "myhdfstuff" directory execute the CTest Script with the
       following options:
 
-      On 32-bit Windows with Visual Studio 2012, execute:
-         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2012 -C Release -VV -O hdf5.log
-      On 64-bit Windows with Visual Studio 2012, execute:
-         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -VV -O hdf5.log
+      On 32-bit Windows with Visual Studio 2015, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2015 -C Release -VV -O hdf5.log
+      On 64-bit Windows with Visual Studio 2015, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201564 -C Release -VV -O hdf5.log
       On 32-bit Windows with Visual Studio 2013, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2013 -C Release -VV -O hdf5.log
       On 64-bit Windows with Visual Studio 2013, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201364 -C Release -VV -O hdf5.log
       On Linux and Mac, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -VV -O hdf5.log
+      The supplied build scripts are versions of the above.
 
       The command above will configure, build, test, and create an install
       package in the myhdfstuff folder. It will have the format:
@@ -103,19 +110,20 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
           installer on your system, you will also see a similar file that ends
           in either .exe (NSIS) or .msi (WiX).
 
-      The -S option uses the script version of ctest.
+      Notes on the command line options.
+          The -S option uses the script version of ctest.
 
-      The value for the -C option (as shown above, "-C Release") must
-      match the setting for CTEST_CONFIGURATION_TYPE in the platform
-      configuration file.
+          The value for the -C option (as shown above, "-C Release") must
+          match the setting for CTEST_CONFIGURATION_TYPE in the platform
+          configuration file.
 
-      The -VV option is for most verbose; use -V for less verbose.
+          The -VV option is for most verbose; use -V for less verbose.
 
-      The "-O hdf5.log" option saves the output to a log file hdf5.log.
+          The "-O hdf5.log" option saves the output to a log file hdf5.log.
 
    6. To install, "X" is the current release version
 
-      On Windows, execute:
+      On Windows (with WiX installed), execute:
                 HDF5-1.10."X"-win32.msi or HDF5-1.10."X"-win64.msi
       By default this program will install the hdf5 library into the
       "C:\Program Files" directory and will create the following
@@ -165,8 +173,9 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 III. Quick Step Building HDF5 C Static Libraries and Tools with CMake
 ========================================================================
 Notes: This short set of instructions is written for users who want to
-       quickly build the just the HDF5 C static library and tools from
+       quickly build just the HDF5 C static library and tools from
        the HDF5 source code package using the CMake command line tools.
+       Avoid the use of drive letters in paths on Windows.
 
    Go through these steps:
 
@@ -201,7 +210,7 @@ Notes: This short set of instructions is written for users who want to
            cpack -C Release CPackConfig.cmake
 
       9. To install
-         On Windows, execute:
+         On Windows (with WiX installed), execute:
                 HDF5-1.10."X"-win32.msi or HDF5-1.10."X"-win64.msi
          By default this program will install the hdf5 library into the
          "C:\Program Files" directory and will create the following
@@ -249,7 +258,7 @@ IV. Further considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.10."X" product requires a minimum CMake version 3.2.2.
+      web site. The HDF5 1.10."X" product requires a minimum CMake version 3.10.
 
    2. If you plan to use Zlib or Szip:
       A. Download the binary packages and install them in a central location.
@@ -261,7 +270,7 @@ IV. Further considerations
             -DSZIP_INCLUDE_DIR:PATH=some_location/include
          where "some_location" is the full path to the extlibs folder.
 
-      B. Use source packages from an SVN server by adding the following CMake
+      B. Use source packages from an GIT server by adding the following CMake
          options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
             ZLIB_GIT_URL:STRING="http://some_location/zlib"
@@ -314,9 +323,21 @@ Notes: CMake and HDF5
       how CMake support can be improved on any system. Visit the
       KitWare site for more information about CMake.
 
-   3. Build and test results can be submitted to our CDash server,
-      please read the HDF and CDash document at:
-                 www.hdfgroup.org/CDash/HowToSubmit.
+   3. Build and test results can be submitted to our CDash server:
+      The CDash server for community submissions of hdf5 is at
+          https://cdash.hdfgroup.org.
+
+      Submitters are requested to register their name and contact info and
+      maintain their test sites. After your first submission, login and go
+      to your "My CDash" link and claim your site.
+
+      We ask that all submissions include the configuration information and
+      contact information in the CTest Notes Files upload step. See the
+      current reports on CDash for examples.
+
+      Please follow the convention that "NIGHTLY" submissions maintain the same
+      configuration every time. "EXPERIMENTAL" submissions can be expected to
+      be different for each submission.
 
    4. See the appendix at the bottom of this file for examples of using
       a ctest script for building and testing. Using a ctest script is
@@ -396,34 +417,16 @@ These five steps are described in detail below.
                 # EXTERNAL cache entries
                 ########################
                 set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
-                set (HDF5_GENERATE_HEADERS ON CACHE BOOL "Rebuild Generated Files" FORCE)
                 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
                 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
-                set (HDF5_BUILD_GENERATORS OFF CACHE BOOL "Build Test Generators" FORCE)
                 set (HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
                 set (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
                 set (HDF5_ENABLE_SZIP_ENCODING ON CACHE BOOL "Use SZip Encoding" FORCE)
-                set (HDF5_ENABLE_HSIZET ON CACHE BOOL "Enable datasets larger than memory" FORCE)
-                set (ALLOW_UNSUPPORTED OFF CACHE BOOL "Enable unsupported combinations of configuration options" FORCE)
-                set (HDF5_ENABLE_DEPRECATED_SYMBOLS ON CACHE BOOL "Enable deprecated public API symbols" FORCE)
-                set (HDF5_ENABLE_DIRECT_VFD OFF CACHE BOOL "Build the Direct I/O Virtual File Driver" FORCE)
-                set (HDF5_ENABLE_PARALLEL OFF CACHE BOOL "Enable parallel build (requires MPI)" FORCE)
                 set (MPIEXEC_MAX_NUMPROCS "3" CACHE STRING "Minimum number of processes for HDF parallel tests" FORCE)
-                set (HDF5_BUILD_PARALLEL_ALL OFF CACHE BOOL "Build Parallel Programs" FORCE)
-                set (HDF5_ENABLE_COVERAGE OFF CACHE BOOL "Enable code coverage for Libraries and Programs" FORCE)
-                set (HDF5_ENABLE_USING_MEMCHECKER OFF CACHE BOOL "Indicate that a memory checker is used" FORCE)
-                set (HDF5_MEMORY_ALLOC_SANITY_CHECK OFF CACHE BOOL "Indicate that internal memory allocation sanity checks are enabled" FORCE)
-                set (HDF5_DISABLE_COMPILER_WARNINGS OFF CACHE BOOL "Disable compiler warnings" FORCE)
                 set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
-                set (HDF5_USE_FOLDERS ON CACHE BOOL "Enable folder grouping of projects in IDEs." FORCE)
-                set (HDF5_USE_16_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.6.x API by default" FORCE)
-                set (HDF5_USE_18_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.8.x API by default" FORCE)
-                set (HDF5_ENABLE_THREADSAFE OFF CACHE BOOL "(WINDOWS)Enable Threadsafety" FORCE)
                 set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
-                set (HDF5_PACKAGE_EXTLIBS OFF CACHE BOOL "(WINDOWS)CPACK - include external libraries" FORCE)
-                set (HDF5_NO_PACKAGES OFF CACHE BOOL "CPACK - Disable packaging" FORCE)
-                set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT SVN TGZ)" FORCE)
-                set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT SVN TGZ)
+                set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
+                set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
                 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
                 set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
                 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
@@ -433,7 +436,7 @@ These five steps are described in detail below.
 
       2.1  Visual CMake users, click the Configure button. If this is the first time you are
            running cmake-gui in this directory, you will be prompted for the
-           generator you wish to use (for example on Windows, Visual Studio 11).
+           generator you wish to use (for example on Windows, Visual Studio 12).
            CMake will read in the CMakeLists.txt files from the source directory and
            display options for the HDF5 project. After the first configure you
            can adjust the cache settings and/or specify the locations of other programs.
@@ -580,7 +583,7 @@ HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
 ---------------- HDF5 Advanced Options ---------------------
 ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"          OFF
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                    OFF
-HDF5_ENABLE_INSTRUMENT         "Instrument The library"                                       OFF
+HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                          OFF
 HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)." OFF
 HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"              OFF
 HDF5_ENABLE_DEBUG_APIS         "Turn on extra debug output in all packages"                   OFF
@@ -588,32 +591,33 @@ HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"           
 HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"                     OFF
 HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                          ON
 HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"                           ON
-HDF5_ENABLE_LARGE_FILE         "Enable support for large (64-bit) files on Linux."            ON
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
-HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      OFF
+HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
+HDF5_BUILD_GENERATORS          "Build Test Generators"                                        OFF
 HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                            OFF
 HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
 HDF5_METADATA_TRACE_FILE       "Enable metadata trace file collection"                        OFF
 HDF5_NO_PACKAGES               "Do not include CPack Packaging"                               OFF
 HDF5_PACK_EXAMPLES             "Package the HDF5 Library Examples Compressed File"            OFF
 HDF5_PACK_MACOSX_FRAMEWORK     "Package the HDF5 Library in a Frameworks"                     OFF
+HDF5_BUILD_FRAMEWORKS          "TRUE to build as frameworks libraries,
+                                FALSE to build according to BUILD_SHARED_LIBS"                FALSE
 HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                           OFF
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                 OFF
 HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "0"
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
 HDF5_USE_18_API_DEFAULT        "Use the HDF5 1.8.x API by default"                            OFF
-HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  OFF
+HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  ON
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
-SKIP_HDF5_FORTRAN_SHARED       "Do not build the fortran shared libraries"                    OFF
 if (APPLE)
     HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    HDF5_ENABLE_TRACE          "Enable API tracing capability"               ON
+    HDF5_ENABLE_INSTRUMENT     "Instrument The library"                      OFF
 if (HDF5_TEST_VFD)
     HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"      ON
 
@@ -659,34 +663,30 @@ adding an option (${CTEST_SCRIPT_ARG}) to the platform configuration script.
 
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
-### BUILD_GENERATOR required [Unix, VS2015, VS201564, VS2013, VS201364, VS2012, VS201264] ###
-### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -VV -O hdf5.log         ###
+### BUILD_GENERATOR required [Unix, VS2017, VS201764, VS2015, VS201564, VS2013, VS201364] ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
-cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.10)
 ############################################################################
 # Usage:
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
-#            Unix    * Unix Makefiles
+#            Unix      * Unix Makefiles
+#            VS2017    * Visual Studio 15 2017
+#            VS201764  * Visual Studio 15 2017 Win64
 #            VS2015    * Visual Studio 14 2015
-#            VS201564 * Visual Studio 14 2015 Win64
+#            VS201564  * Visual Studio 14 2015 Win64
 #            VS2013    * Visual Studio 12 2013
-#            VS201364 * Visual Studio 12 2013 Win64
-#            VS2012    * Visual Studio 11 2012
-#            VS201264 * Visual Studio 11 2012 Win64
+#            VS201364  * Visual Studio 12 2013 Win64
 #
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATIC_ONLY  -  Build/use static libraries
-#     FORTRAN_LIBRARIES -  Build/use fortran libraries
-#     JAVA_LIBRARIES -  Build/use java libraries
-#     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION 1.10.1)
+set (CTEST_SOURCE_VERSION "1.11.0")
 set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
@@ -695,10 +695,6 @@ set (CTEST_SOURCE_VERSEXT "")
 #INSTALLDIR - HDF5-1.10.0 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
-#STATIC_ONLY - Default is YES
-#FORTRAN_LIBRARIES - Default is NO
-#JAVA_LIBRARIES - Default is NO
-#NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -713,25 +709,7 @@ endif ()
 
 # build generator must be defined
 if (NOT DEFINED BUILD_GENERATOR)
-  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
-else ()
-  if (${BUILD_GENERATOR} STREQUAL "Unix")
-    set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS2015")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS201564")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015 Win64")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS2013")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS201364")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS2012")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS201264")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
-  else ()
-    message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
-  endif ()
+  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
 endif ()
 
 ###################################################################
@@ -783,30 +761,48 @@ endif ()
 if (WIN32)
   set (SITE_OS_NAME "Windows")
   set (SITE_OS_VERSION "WIN7")
-  if (${BUILD_GENERATOR} STREQUAL "VS201564")
+  if (${BUILD_GENERATOR} STREQUAL "VS201764")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017 Win64")
+    set (SITE_OS_BITS "64")
+    set (SITE_COMPILER_NAME "vs2017")
+    set (SITE_COMPILER_VERSION "15")
+  elseif (${BUILD_GENERATOR} STREQUAL "VS2017")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017")
+    set (SITE_OS_BITS "32")
+    set (SITE_COMPILER_NAME "vs2017")
+    set (SITE_COMPILER_VERSION "15")
+  elseif (${BUILD_GENERATOR} STREQUAL "VS201564")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015 Win64")
     set (SITE_OS_BITS "64")
     set (SITE_COMPILER_NAME "vs2015")
     set (SITE_COMPILER_VERSION "14")
   elseif (${BUILD_GENERATOR} STREQUAL "VS2015")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015")
     set (SITE_OS_BITS "32")
     set (SITE_COMPILER_NAME "vs2015")
     set (SITE_COMPILER_VERSION "14")
   elseif (${BUILD_GENERATOR} STREQUAL "VS201364")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
     set (SITE_OS_BITS "64")
     set (SITE_COMPILER_NAME "vs2013")
     set (SITE_COMPILER_VERSION "12")
   elseif (${BUILD_GENERATOR} STREQUAL "VS2013")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013")
     set (SITE_OS_BITS "32")
     set (SITE_COMPILER_NAME "vs2013")
     set (SITE_COMPILER_VERSION "12")
   elseif (${BUILD_GENERATOR} STREQUAL "VS201264")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
     set (SITE_OS_BITS "64")
     set (SITE_COMPILER_NAME "vs2012")
     set (SITE_COMPILER_VERSION "11")
   elseif (${BUILD_GENERATOR} STREQUAL "VS2012")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012")
     set (SITE_OS_BITS "32")
     set (SITE_COMPILER_NAME "vs2012")
     set (SITE_COMPILER_VERSION "11")
+  else ()
+    message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
   endif ()
 ##  Set the following to unique id your computer  ##
   set (CTEST_SITE "WIN7${BUILD_GENERATOR}.XXXX")

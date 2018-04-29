@@ -5,15 +5,11 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#include <stdlib.h>
 
 #include "H5private.h"
 #include "h5tools.h"
@@ -25,25 +21,25 @@
 /*-------------------------------------------------------------------------
  * Function: print_objname
  *
- * Purpose: check if object name is to be printed, only when:
- *  1) verbose mode
- *  2) when diff was found (normal mode)
+ * Purpose:  check if object name is to be printed, only when:
+ *             1) verbose mode
+ *             2) when diff was found (normal mode)
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE int
-print_objname (diff_opt_t * options, hsize_t nfound)
+print_objname (diff_opt_t * opts, hsize_t nfound)
 {
-    return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
+    return ((opts->m_verbose || nfound) && !opts->m_quiet) ? 1 : 0;
 }
 
 /*-------------------------------------------------------------------------
  * Function: do_print_objname
  *
- * Purpose: print object name
- *
+ * Purpose:  print object name
  *-------------------------------------------------------------------------
  */
-void do_print_objname (const char *OBJ, const char *path1, const char *path2, diff_opt_t * opts)
+void
+do_print_objname (const char *OBJ, const char *path1, const char *path2, diff_opt_t * opts)
 {
     /* if verbose level is higher than 0, put space line before
      * displaying any object or symbolic links. This improves
@@ -57,8 +53,7 @@ void do_print_objname (const char *OBJ, const char *path1, const char *path2, di
 /*-------------------------------------------------------------------------
  * Function: do_print_attrname
  *
- * Purpose: print attribute name
- *
+ * Purpose:  print attribute name
  *-------------------------------------------------------------------------
  */
 void
@@ -70,17 +65,16 @@ do_print_attrname (const char *attr, const char *path1, const char *path2)
 /*-------------------------------------------------------------------------
  * Function: print_warn
  *
- * Purpose: check print warning condition.
+ * Purpose:  check print warning condition.
  * Return:
- *    1 if verbose mode
- *    0 if not verbos mode
- * Programmer: Jonathan Kim
- * Date: Feb 4, 2010
+ *           1 if verbose mode
+ *           0 if not verbos mode
  *-------------------------------------------------------------------------
  */
-static int print_warn(diff_opt_t *options)
+static int
+print_warn(diff_opt_t *opts)
 {
-    return ((options->m_verbose))?1:0;
+    return ((opts->m_verbose)) ? 1: 0;
 }
 
 
@@ -88,20 +82,16 @@ static int print_warn(diff_opt_t *options)
 /*-------------------------------------------------------------------------
  * Function: phdiff_dismiss_workers
  *
- * Purpose: tell all workers to end.
+ * Purpose:  tell all workers to end.
  *
- * Return: none
- *
- * Programmer: Albert Cheng
- *
- * Date: Feb 6, 2005
- *
+ * Return:   none
  *-------------------------------------------------------------------------
  */
-void phdiff_dismiss_workers(void)
+void
+phdiff_dismiss_workers(void)
 {
     int i;
-    for(i=1; i<g_nTasks; i++)
+    for (i = 1; i < g_nTasks; i++)
         MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
 }
 
@@ -109,29 +99,23 @@ void phdiff_dismiss_workers(void)
 /*-------------------------------------------------------------------------
  * Function: print_incoming_data
  *
- * Purpose: special function that prints any output that has been sent to the manager
- *      and is currently sitting in the incoming message queue
+ * Purpose:  special function that prints any output that has been sent to the manager
+ *           and is currently sitting in the incoming message queue
  *
- * Return: none
- *
- * Programmer: Leon Arber
- *
- * Date: March 7, 2005
- *
+ * Return:   none
  *-------------------------------------------------------------------------
  */
 
-static void print_incoming_data(void)
+static void
+print_incoming_data(void)
 {
-    char data[PRINT_DATA_MAX_SIZE+1];
+    char data[PRINT_DATA_MAX_SIZE + 1];
     int  incomingMessage;
     MPI_Status Status;
 
-    do
-    {
+    do {
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &incomingMessage, &Status);
-        if(incomingMessage)
-        {
+        if(incomingMessage) {
             HDmemset(data, 0, PRINT_DATA_MAX_SIZE+1);
             MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
 
@@ -144,81 +128,68 @@ static void print_incoming_data(void)
 /*-------------------------------------------------------------------------
  * Function: is_valid_options
  *
- * Purpose: check if options are valid
+ * Purpose:  check if options are valid
  *
  * Return:
- *  1 : Valid
- *  0 : Not valid
- *
- * Programmer: Jonathan Kim
- *
- * Date: Feb 17, 2010
- *
+ *           1 : Valid
+ *           0 : Not valid
  *------------------------------------------------------------------------*/
-static int is_valid_options(diff_opt_t *options)
+static int
+is_valid_options(diff_opt_t *opts)
 {
-    int ret=1; /* init to valid */
+    int ret_value = 1; /* init to valid */
 
     /*-----------------------------------------------
      * no -q(quiet) with -v (verbose) or -r (report) */
-    if(options->m_quiet && (options->m_verbose || options->m_report))
-    {
+    if(opts->m_quiet && (opts->m_verbose || opts->m_report)) {
         parallel_print("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
-        options->err_stat=1;
-        ret = 0;
-        goto out;
+        opts->err_stat = 1;
+        HGOTO_DONE(0);
     }
 
     /* -------------------------------------------------------
      * only allow --no-dangling-links along with --follow-symlinks */
-    if(options->no_dangle_links && !options->follow_links)
-    {
+    if(opts->no_dangle_links && !opts->follow_links) {
         parallel_print("Error: --no-dangling-links must be used along with --follow-symlinks option.\n");
-        options->err_stat=1;
-        ret = 0;
-        goto out;
+        opts->err_stat = 1;
+        HGOTO_DONE(0);
     }
 
-out:
+done:
 
-    return ret;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
  * Function: is_exclude_path
  *
- * Purpose: check if 'paths' are part of exclude path list
+ * Purpose:  check if 'paths' are part of exclude path list
  *
  * Return:
- *   1 - excluded path
- *   0 - not excluded path
- *
- * Programmer: Jonathan Kim
- * Date: Aug 23, 2010
+ *           1 - excluded path
+ *           0 - not excluded path
  *------------------------------------------------------------------------*/
-static int is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *options)
+static int
+is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *opts)
 {
     struct exclude_path_list * exclude_path_ptr;
-    int ret_cmp;
-    int ret = 0;
+    int   ret_cmp;
+    int   ret_value = 0;
 
     /* check if exclude path option is given */
-    if (!options->exclude_path)
-        goto out;
+    if (!opts->exclude_path)
+        HGOTO_DONE(0);
 
     /* assign to local exclude list pointer */
-    exclude_path_ptr = options->exclude;
+    exclude_path_ptr = opts->exclude;
 
     /* search objects in exclude list */
-    while (NULL != exclude_path_ptr)
-    {
+    while (NULL != exclude_path_ptr) {
         /* if exclude path is is group, exclude its members as well */
-        if (exclude_path_ptr->obj_type == H5TRAV_TYPE_GROUP)
-        {
+        if (exclude_path_ptr->obj_type == H5TRAV_TYPE_GROUP) {
             ret_cmp = HDstrncmp(exclude_path_ptr->obj_path, path,
                                 HDstrlen(exclude_path_ptr->obj_path));
-            if (ret_cmp == 0)  /* found matching members */
-            {
+            if (ret_cmp == 0) {  /* found matching members */
                 size_t len_grp;
 
                 /* check if given path belong to an excluding group, if so
@@ -227,22 +198,19 @@ static int is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *options
                  * not under “/grp1xxx/” group.
                  */
                 len_grp = HDstrlen(exclude_path_ptr->obj_path);
-                if (path[len_grp] == '/')
-                {
+                if (path[len_grp] == '/') {
                     /* belong to excluded group! */
-                    ret = 1;
+                    ret_value = 1;
                     break;  /* while */
                 }
             }
         }
         /* exclude target is not group, just exclude the object */
-        else
-        {
+        else {
             ret_cmp = HDstrcmp(exclude_path_ptr->obj_path, path);
-            if (ret_cmp == 0)  /* found matching object */
-            {
+            if (ret_cmp == 0) {  /* found matching object */
                 /* excluded non-group object */
-                ret = 1;
+                ret_value = 1;
                 /* remember the type of this maching object.
                  * if it's group, it can be used for excluding its member
                  * objects in this while() loop */
@@ -253,26 +221,23 @@ static int is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *options
         exclude_path_ptr = exclude_path_ptr->next;
     }
 
-out:
-    return  ret;
+done:
+    return  ret_value;
 }
 
 
 /*-------------------------------------------------------------------------
  * Function: free_exclude_path_list
  *
- * Purpose: free exclud object list from diff options
- *
- * Programmer: Jonathan Kim
- * Date: Aug 23, 2010
+ * Purpose:  free exclude object list from diff options
  *------------------------------------------------------------------------*/
-static void free_exclude_path_list(diff_opt_t *options)
+static void
+free_exclude_path_list(diff_opt_t *opts)
 {
-    struct exclude_path_list * curr = options->exclude;
-    struct exclude_path_list * next;
+    struct exclude_path_list *curr = opts->exclude;
+    struct exclude_path_list *next;
 
-    while (NULL != curr)
-    {
+    while (NULL != curr) {
         next = curr->next;
         HDfree(curr);
         curr = next;
@@ -282,44 +247,43 @@ static void free_exclude_path_list(diff_opt_t *options)
 /*-------------------------------------------------------------------------
  * Function: build_match_list
  *
- * Purpose: get list of matching path_name from info1 and info2
+ * Purpose:  get list of matching path_name from info1 and info2
  *
  * Note:
- *  Find common objects; the algorithm used for this search is the
- *  cosequential match algorithm and is described in
- *  Folk, Michael; Zoellick, Bill. (1992). File Structures. Addison-Wesley.
- *  Moved out from diff_match() to make code more flexible.
+ *           Find common objects; the algorithm used for this search is the
+ *           cosequential match algorithm and is described in
+ *           Folk, Michael; Zoellick, Bill. (1992). File Structures. Addison-Wesley.
+ *           Moved out from diff_match() to make code more flexible.
  *
  * Parameter:
- *  table_out [OUT] : return the list
- *
- * Programmer: Jonathan Kim
- *
- * Date: Aug 18, 2010
+ *           table_out [OUT] : return the list
  *------------------------------------------------------------------------*/
-static void build_match_list (const char *objname1, trav_info_t *info1, const char *objname2, trav_info_t *info2, trav_table_t ** table_out, diff_opt_t *options)
+static void
+build_match_list (const char *objname1, trav_info_t *info1, const char *objname2, trav_info_t *info2,
+        trav_table_t ** table_out, diff_opt_t *opts)
 {
-    size_t curr1 = 0;
-    size_t curr2 = 0;
+    size_t   curr1 = 0;
+    size_t   curr2 = 0;
     unsigned infile[2];
-    char * path1_lp;
-    char * path2_lp;
+    char    *path1_lp = NULL;
+    char    *path2_lp = NULL;
     h5trav_type_t type1_l;
     h5trav_type_t type2_l;
-    size_t path1_offset = 0;
-    size_t path2_offset = 0;
-    int cmp;
-    trav_table_t *table;
-    size_t  idx;
+    size_t   path1_offset = 0;
+    size_t   path2_offset = 0;
+    int      cmp;
+    trav_table_t *table = NULL;
+    size_t   idx;
 
     h5difftrace("build_match_list start\n");
     /* init */
-    trav_table_init( &table );
-
+    trav_table_init(&table);
+    if (table == NULL)
+        H5TOOLS_INFO(H5E_tools_min_id_g, "Cannot create tarverse table");
     /*
      * This is necessary for the case that given objects are group and
      * have different names (ex: obj1 is /grp1 and obj2 is /grp5).
-     * All the objects belong to given groups are the cadidates.
+     * All the objects belong to given groups are the candidates.
      * So prepare to compare paths without the group names.
      */
 
@@ -333,8 +297,7 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     /*--------------------------------------------------
     * build the list
     */
-    while(curr1 < info1->nused && curr2 < info2->nused)
-    {
+    while(curr1 < info1->nused && curr2 < info2->nused) {
         path1_lp = (info1->paths[curr1].path) + path1_offset;
         path2_lp = (info2->paths[curr2].path) + path2_offset;
         type1_l = info1->paths[curr1].type;
@@ -342,19 +305,15 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
 
         /* criteria is string compare */
         cmp = HDstrcmp(path1_lp, path2_lp);
-
-        if(cmp == 0)
-        {
-            if(!is_exclude_path(path1_lp, type1_l, options))
-            {
+        if(cmp == 0) {
+            if(!is_exclude_path(path1_lp, type1_l, opts)) {
                 infile[0] = 1;
                 infile[1] = 1;
                 trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
                 /* if the two point to the same target object,
                  * mark that in table */
                 if (info1->paths[curr1].fileno == info2->paths[curr2].fileno &&
-                    info1->paths[curr1].objno == info2->paths[curr2].objno )
-                {
+                    info1->paths[curr1].objno == info2->paths[curr2].objno) {
                     idx = table->nobjs - 1;
                     table->objs[idx].is_same_trgobj = 1;
                 }
@@ -362,20 +321,16 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
             curr1++;
             curr2++;
         } /* end if */
-        else if(cmp < 0)
-        {
-            if(!is_exclude_path(path1_lp, type1_l, options))
-            {
+        else if(cmp < 0) {
+            if(!is_exclude_path(path1_lp, type1_l, opts)) {
                 infile[0] = 1;
                 infile[1] = 0;
                 trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
             }
             curr1++;
         } /* end else-if */
-        else
-        {
-            if (!is_exclude_path(path2_lp, type2_l, options))
-            {
+        else {
+            if (!is_exclude_path(path2_lp, type2_l, opts)) {
                 infile[0] = 0;
                 infile[1] = 1;
                 trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
@@ -387,13 +342,11 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     /* list1 did not end */
     infile[0] = 1;
     infile[1] = 0;
-    while(curr1 < info1->nused)
-    {
+    while(curr1 < info1->nused) {
         path1_lp = (info1->paths[curr1].path) + path1_offset;
         type1_l = info1->paths[curr1].type;
 
-        if(!is_exclude_path(path1_lp, type1_l, options))
-        {
+        if(!is_exclude_path(path1_lp, type1_l, opts)) {
             trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
         }
         curr1++;
@@ -402,19 +355,17 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     /* list2 did not end */
     infile[0] = 0;
     infile[1] = 1;
-    while(curr2 < info2->nused)
-    {
+    while(curr2 < info2->nused) {
         path2_lp = (info2->paths[curr2].path) + path2_offset;
         type2_l = info2->paths[curr2].type;
 
-        if (!is_exclude_path(path2_lp, type2_l, options))
-        {
+        if (!is_exclude_path(path2_lp, type2_l, opts)) {
             trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
         }
         curr2++;
     } /* end while */
 
-    free_exclude_path_list (options);
+    free_exclude_path_list (opts);
 
     *table_out = table;
     h5difftrace("build_match_list finish\n");
@@ -424,15 +375,11 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
 /*-------------------------------------------------------------------------
  * Function: trav_grp_objs
  *
- * Purpose:
- *  Call back function from h5trav_visit().
- *
- * Programmer: Jonathan Kim
- *
- * Date: Aug 16, 2010
+ * Purpose:  Call back function from h5trav_visit().
  *------------------------------------------------------------------------*/
-static herr_t trav_grp_objs(const char *path, const H5O_info_t *oinfo,
-    const char *already_visited, void *udata)
+static herr_t
+trav_grp_objs(const char *path, const H5O_info_t *oinfo,
+        const char *already_visited, void *udata)
 {
     trav_info_visit_obj(path, oinfo, already_visited, udata);
 
@@ -442,99 +389,86 @@ static herr_t trav_grp_objs(const char *path, const H5O_info_t *oinfo,
 /*-------------------------------------------------------------------------
  * Function: trav_grp_symlinks
  *
- * Purpose:
- *  Call back function from h5trav_visit().
- *  Track and extra checkings while visiting all symbolic-links.
- *
- * Programmer: Jonathan Kim
- *
- * Date: Aug 16, 2010
+ * Purpose:  Call back function from h5trav_visit().
+ *           Track and extra checkings while visiting all symbolic-links.
  *------------------------------------------------------------------------*/
-static herr_t trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
-                               void *udata)
+static herr_t
+trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
 {
-    trav_info_t *tinfo = (trav_info_t *)udata;
-    diff_opt_t *opts = (diff_opt_t *)tinfo->opts;
-    int ret;
+    herr_t         ret_value = 0;
+    trav_info_t   *tinfo = (trav_info_t *)udata;
+    diff_opt_t    *opts = (diff_opt_t *)tinfo->opts;
     h5tool_link_info_t lnk_info;
-    const char *ext_fname;
-    const char *ext_path;
+    const char    *ext_fname;
+    const char    *ext_path;
 
     /* init linkinfo struct */
     HDmemset(&lnk_info, 0, sizeof(h5tool_link_info_t));
 
-    if (!opts->follow_links)
-    {
+    if (!opts->follow_links) {
         trav_info_visit_lnk(path, linfo, tinfo);
-        goto done;
+        HGOTO_DONE(0);
     }
 
-    switch(linfo->type)
-    {
+    switch(linfo->type) {
         case H5L_TYPE_SOFT:
-            ret = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links);
-            /* error */
-            if (ret < 0)
-                goto done;
-            /* no dangling link option given and detect dangling link */
-            else if (ret == 0)
-            {
-                tinfo->symlink_visited.dangle_link = TRUE;
+            if((ret_value = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links)) < 0) {
+                HGOTO_DONE(FAIL);
+            }
+            else if (ret_value == 0) {
+             /* no dangling link option given and detect dangling link */
+               tinfo->symlink_visited.dangle_link = TRUE;
                 trav_info_visit_lnk(path, linfo, tinfo);
                 if (opts->no_dangle_links)
                     opts->err_stat = 1; /* make dangling link is error */
-                goto done;
+                HGOTO_DONE(0);
             }
 
             /* check if already visit the target object */
             if(symlink_is_visited( &(tinfo->symlink_visited), linfo->type, NULL, lnk_info.trg_path))
-                goto done;
+                HGOTO_DONE(0);
 
             /* add this link as visited link */
             if(symlink_visit_add( &(tinfo->symlink_visited), linfo->type, NULL, lnk_info.trg_path) < 0)
-                goto done;
+                HGOTO_DONE(0);
 
             if(h5trav_visit(tinfo->fid, path, TRUE, TRUE,
-                         trav_grp_objs,trav_grp_symlinks, tinfo) < 0)
-            {
+                         trav_grp_objs,trav_grp_symlinks, tinfo) < 0) {
                 parallel_print("Error: Could not get file contents\n");
                 opts->err_stat = 1;
-                goto done;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Error: Could not get file contents");
             }
             break;
 
         case H5L_TYPE_EXTERNAL:
-            ret = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links);
-            /* error */
-            if (ret < 0)
-                goto done;
+            if ((ret_value = H5tools_get_symlink_info(tinfo->fid, path, &lnk_info, opts->follow_links)) < 0) {
+                HGOTO_DONE(FAIL);
+            }
+            else if (ret_value == 0) {
             /* no dangling link option given and detect dangling link */
-            else if (ret == 0)
-            {
                 tinfo->symlink_visited.dangle_link = TRUE;
                 trav_info_visit_lnk(path, linfo, tinfo);
                 if (opts->no_dangle_links)
                     opts->err_stat = 1; /* make dangling link is error */
-                goto done;
+                HGOTO_DONE(0);
             }
 
             if(H5Lunpack_elink_val(lnk_info.trg_path, linfo->u.val_size, NULL, &ext_fname, &ext_path) < 0)
-                goto done;
+                HGOTO_DONE(0);
 
             /* check if already visit the target object */
             if(symlink_is_visited( &(tinfo->symlink_visited), linfo->type, ext_fname, ext_path))
-                goto done;
+                HGOTO_DONE(0);
 
             /* add this link as visited link */
             if(symlink_visit_add( &(tinfo->symlink_visited), linfo->type, ext_fname, ext_path) < 0)
-                goto done;
+                HGOTO_DONE(0);
 
             if(h5trav_visit(tinfo->fid, path, TRUE, TRUE,
-                            trav_grp_objs,trav_grp_symlinks, tinfo) < 0)
-            {
+                            trav_grp_objs,trav_grp_symlinks, tinfo) < 0) {
                 parallel_print("Error: Could not get file contents\n");
                 opts->err_stat = 1;
-                goto done;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Error: Could not get file contents\n");
             }
             break;
 
@@ -544,51 +478,48 @@ static herr_t trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
         default:
             parallel_print("Error: Invalid link type\n");
             opts->err_stat = 1;
-            goto done;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Error: Invalid link type");
             break;
     } /* end of switch */
 
 done:
     if (lnk_info.trg_path)
         HDfree(lnk_info.trg_path);
-    return 0;
+    return ret_value;
 }
 
 
 /*-------------------------------------------------------------------------
  * Function: h5diff
  *
- * Purpose: public function, can be called in an application program.
- *   return differences between 2 HDF5 files
+ * Purpose:  public function, can be called in an application program.
+ *           return differences between 2 HDF5 files
  *
- * Return: Number of differences found.
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: October 22, 2003
- *
+ * Return:   Number of differences found.
  *-------------------------------------------------------------------------
  */
-hsize_t h5diff(const char *fname1,
+hsize_t
+h5diff(const char *fname1,
                const char *fname2,
                const char *objname1,
                const char *objname2,
-               diff_opt_t *options)
+               diff_opt_t *opts)
 {
-    hid_t        file1_id = (-1);
-    hid_t        file2_id = (-1);
-    char         filenames[2][MAX_FILENAME];
-    hsize_t      nfound = 0;
-    int l_ret1 = -1;
-    int l_ret2 = -1;
-    char * obj1fullname = NULL;
-    char * obj2fullname = NULL;
-    int both_objs_grp = 0;
+    int           ret_value = 0;
+    hid_t         file1_id = -1;
+    hid_t         file2_id = -1;
+    char          filenames[2][MAX_FILENAME];
+    hsize_t       nfound = 0;
+    int           l_ret1 = -1;
+    int           l_ret2 = -1;
+    char         *obj1fullname = NULL;
+    char         *obj2fullname = NULL;
+    int           both_objs_grp = 0;
     /* init to group type */
     h5trav_type_t obj1type = H5TRAV_TYPE_GROUP;
     h5trav_type_t obj2type = H5TRAV_TYPE_GROUP;
     /* for single object */
-    H5O_info_t oinfo1, oinfo2; /* object info */
+    H5O_info_t    oinfo1, oinfo2; /* object info */
     trav_info_t  *info1_obj = NULL;
     trav_info_t  *info2_obj = NULL;
     /* for group object */
@@ -598,8 +529,8 @@ hsize_t h5diff(const char *fname1,
     trav_info_t  *info1_lp = NULL;
     trav_info_t  *info2_lp = NULL;
     /* link info from specified object */
-    H5L_info_t src_linfo1;
-    H5L_info_t src_linfo2;
+    H5L_info_t    src_linfo1;
+    H5L_info_t    src_linfo2;
     /* link info from member object */
     h5tool_link_info_t trg_linfo1;
     h5tool_link_info_t trg_linfo2;
@@ -616,37 +547,28 @@ hsize_t h5diff(const char *fname1,
    /*-------------------------------------------------------------------------
     * check invalid combination of options
     *-----------------------------------------------------------------------*/
-    if(!is_valid_options(options))
-        goto out;
+    if(!is_valid_options(opts))
+        HGOTO_DONE(0);
 
-    options->cmn_objs = 1; /* eliminate warning */
+    opts->cmn_objs = 1; /* eliminate warning */
+    opts->err_stat = 0; /* initialize error status */
 
     /*-------------------------------------------------------------------------
     * open the files first; if they are not valid, no point in continuing
     *-------------------------------------------------------------------------
     */
-
-    /* disable error reporting */
-    H5E_BEGIN_TRY
-    {
-        /* open file 1 */
-        if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0)
-        {
-            parallel_print("h5diff: <%s>: unable to open file\n", fname1);
-            options->err_stat = 1;
-            goto out;
-        } /* end if */
+    /* open file 1 */
+    if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
+        parallel_print("h5diff: <%s>: unable to open file\n", fname1);
+        HGOTO_ERROR(1, H5E_tools_min_id_g, "<%s>: unable to open file\n", fname1);
+    } /* end if */
 
 
-        /* open file 2 */
-        if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0)
-        {
-            parallel_print("h5diff: <%s>: unable to open file\n", fname2);
-            options->err_stat = 1;
-            goto out;
-        } /* end if */
-    /* enable error reporting */
-    } H5E_END_TRY;
+    /* open file 2 */
+    if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
+        parallel_print("h5diff: <%s>: unable to open file\n", fname2);
+        HGOTO_ERROR(1, H5E_tools_min_id_g, "<%s>: unable to open file\n", fname2);
+    } /* end if */
 
     /*-------------------------------------------------------------------------
     * Initialize the info structs
@@ -657,18 +579,18 @@ hsize_t h5diff(const char *fname1,
 
     h5difftrace("trav_info_init initialized\n");
     /* if any object is specified */
-    if (objname1)
-    {
+    if (objname1) {
         /* make the given object1 fullpath, start with "/"  */
-        if (HDstrncmp(objname1, "/", 1))
-        {
+        if (HDstrncmp(objname1, "/", 1)) {
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if(HDasprintf(&obj1fullname, "/%s", objname1) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
 #else /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
-            obj1fullname = (char*)HDmalloc(HDstrlen(objname1) + 2);
+            if ((obj1fullname = (char*)HDmalloc(HDstrlen(objname1) + 2)) == NULL)
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
+
             HDstrcpy(obj1fullname, "/");
             HDstrcat(obj1fullname, objname1);
 #endif /* H5_HAVE_ASPRINTF */
@@ -677,15 +599,15 @@ hsize_t h5diff(const char *fname1,
             obj1fullname = HDstrdup(objname1);
 
         /* make the given object2 fullpath, start with "/" */
-        if (HDstrncmp(objname2, "/", 1))
-        {
+        if (HDstrncmp(objname2, "/", 1)) {
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if(HDasprintf(&obj2fullname, "/%s", objname2) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
 #else /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
-            obj2fullname = (char*)HDmalloc(HDstrlen(objname2) + 2);
+            if ((obj2fullname = (char*)HDmalloc(HDstrlen(objname2) + 2)) == NULL)
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
             HDstrcpy(obj2fullname, "/");
             HDstrcat(obj2fullname, objname2);
 #endif /* H5_HAVE_ASPRINTF */
@@ -697,24 +619,19 @@ hsize_t h5diff(const char *fname1,
          * check if obj1 is root, group, single object or symlink
          */
         h5difftrace("h5diff check if obj1 is root, group, single object or symlink\n");
-        if(!HDstrcmp(obj1fullname, "/"))
-        {
+        if(!HDstrcmp(obj1fullname, "/")) {
             obj1type = H5TRAV_TYPE_GROUP;
         }
-        else
-        {
+        else {
             /* check if link itself exist */
-            if(H5Lexists(file1_id, obj1fullname, H5P_DEFAULT) <= 0)
-            {
+            if(H5Lexists(file1_id, obj1fullname, H5P_DEFAULT) <= 0) {
                 parallel_print ("Object <%s> could not be found in <%s>\n", obj1fullname, fname1);
-                options->err_stat = 1;
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Object could not be found");
             }
             /* get info from link */
-            if(H5Lget_info(file1_id, obj1fullname, &src_linfo1, H5P_DEFAULT) < 0)
-            {
+            if(H5Lget_info(file1_id, obj1fullname, &src_linfo1, H5P_DEFAULT) < 0) {
                 parallel_print("Unable to get link info from <%s>\n", obj1fullname);
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Lget_info failed");
             }
 
             info1_lp = info1_obj;
@@ -722,18 +639,15 @@ hsize_t h5diff(const char *fname1,
             /*
              * check the type of specified path for hard and symbolic links
              */
-            if(src_linfo1.type == H5L_TYPE_HARD)
-            {
+            if(src_linfo1.type == H5L_TYPE_HARD) {
                 size_t idx;
 
                 /* optional data pass */
-                info1_obj->opts = (diff_opt_t*)options;
+                info1_obj->opts = (diff_opt_t*)opts;
 
-                if(H5Oget_info_by_name(file1_id, obj1fullname, &oinfo1, H5P_DEFAULT) < 0)
-                {
+                if(H5Oget_info_by_name(file1_id, obj1fullname, &oinfo1, H5P_DEFAULT) < 0) {
                     parallel_print("Error: Could not get file contents\n");
-                    options->err_stat = 1;
-                    goto out;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Could not get file contents");
                 }
                 obj1type = (h5trav_type_t)oinfo1.type;
                 trav_info_add(info1_obj, obj1fullname, obj1type);
@@ -741,13 +655,11 @@ hsize_t h5diff(const char *fname1,
                 info1_obj->paths[idx].objno = oinfo1.addr;
                 info1_obj->paths[idx].fileno = oinfo1.fileno;
             }
-            else if (src_linfo1.type == H5L_TYPE_SOFT)
-            {
+            else if (src_linfo1.type == H5L_TYPE_SOFT) {
                 obj1type = H5TRAV_TYPE_LINK;
                 trav_info_add(info1_obj, obj1fullname, obj1type);
             }
-            else if (src_linfo1.type == H5L_TYPE_EXTERNAL)
-            {
+            else if (src_linfo1.type == H5L_TYPE_EXTERNAL) {
                 obj1type = H5TRAV_TYPE_UDLINK;
                 trav_info_add(info1_obj, obj1fullname, obj1type);
             }
@@ -757,24 +669,19 @@ hsize_t h5diff(const char *fname1,
          * check if obj2 is root, group, single object or symlink
          */
         h5difftrace("h5diff check if obj2 is root, group, single object or symlink\n");
-        if(!HDstrcmp(obj2fullname, "/"))
-        {
+        if(!HDstrcmp(obj2fullname, "/")) {
             obj2type = H5TRAV_TYPE_GROUP;
         }
-        else
-        {
+        else {
             /* check if link itself exist */
-            if(H5Lexists(file2_id, obj2fullname, H5P_DEFAULT) <= 0)
-            {
+            if(H5Lexists(file2_id, obj2fullname, H5P_DEFAULT) <= 0) {
                 parallel_print ("Object <%s> could not be found in <%s>\n", obj2fullname, fname2);
-                options->err_stat = 1;
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Object could not be found");
             }
             /* get info from link */
-            if(H5Lget_info(file2_id, obj2fullname, &src_linfo2, H5P_DEFAULT) < 0)
-            {
+            if(H5Lget_info(file2_id, obj2fullname, &src_linfo2, H5P_DEFAULT) < 0) {
                 parallel_print("Unable to get link info from <%s>\n", obj2fullname);
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Lget_info failed");
             }
 
             info2_lp = info2_obj;
@@ -782,18 +689,15 @@ hsize_t h5diff(const char *fname1,
             /*
              * check the type of specified path for hard and symbolic links
              */
-            if(src_linfo2.type == H5L_TYPE_HARD)
-            {
+            if(src_linfo2.type == H5L_TYPE_HARD) {
                 size_t idx;
 
                 /* optional data pass */
-                info2_obj->opts = (diff_opt_t*)options;
+                info2_obj->opts = (diff_opt_t*)opts;
 
-                if(H5Oget_info_by_name(file2_id, obj2fullname, &oinfo2, H5P_DEFAULT) < 0)
-                {
+                if(H5Oget_info_by_name(file2_id, obj2fullname, &oinfo2, H5P_DEFAULT) < 0) {
                     parallel_print("Error: Could not get file contents\n");
-                    options->err_stat = 1;
-                    goto out;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "Error: Could not get file contents");
                 }
                 obj2type = (h5trav_type_t)oinfo2.type;
                 trav_info_add(info2_obj, obj2fullname, obj2type);
@@ -801,21 +705,18 @@ hsize_t h5diff(const char *fname1,
                 info2_obj->paths[idx].objno = oinfo2.addr;
                 info2_obj->paths[idx].fileno = oinfo2.fileno;
             }
-            else if (src_linfo2.type == H5L_TYPE_SOFT)
-            {
+            else if (src_linfo2.type == H5L_TYPE_SOFT) {
                 obj2type = H5TRAV_TYPE_LINK;
                 trav_info_add(info2_obj, obj2fullname, obj2type);
             }
-            else if (src_linfo2.type == H5L_TYPE_EXTERNAL)
-            {
+            else if (src_linfo2.type == H5L_TYPE_EXTERNAL) {
                 obj2type = H5TRAV_TYPE_UDLINK;
                 trav_info_add(info2_obj, obj2fullname, obj2type);
             }
         }
     }
     /* if no object specified */
-    else
-    {
+    else {
         h5difftrace("h5diff no object specified\n");
         /* set root group */
         obj1fullname = (char*)HDstrdup("/");
@@ -824,18 +725,17 @@ hsize_t h5diff(const char *fname1,
         obj2type = H5TRAV_TYPE_GROUP;
     }
 
-
+    h5diffdebug2("get any symbolic links info - errstat:%d\n", opts->err_stat);
     /* get any symbolic links info */
-    l_ret1 = H5tools_get_symlink_info(file1_id, obj1fullname, &trg_linfo1, options->follow_links);
-    l_ret2 = H5tools_get_symlink_info(file2_id, obj2fullname, &trg_linfo2, options->follow_links);
+    l_ret1 = H5tools_get_symlink_info(file1_id, obj1fullname, &trg_linfo1, opts->follow_links);
+    l_ret2 = H5tools_get_symlink_info(file2_id, obj2fullname, &trg_linfo2, opts->follow_links);
 
     /*---------------------------------------------
      * check for following symlinks
      */
-    if (options->follow_links)
-    {
+    if (opts->follow_links) {
         /* pass how to handle printing warning to linkinfo option */
-        if(print_warn(options))
+        if(print_warn(opts))
             trg_linfo1.opt.msg_mode = trg_linfo2.opt.msg_mode = 1;
 
         /*-------------------------------
@@ -843,37 +743,29 @@ hsize_t h5diff(const char *fname1,
          */
         h5difftrace("h5diff check symbolic link (object1)\n");
         /* dangling link */
-        if (l_ret1 == 0)
-        {
+        if (l_ret1 == 0) {
             h5difftrace("h5diff ... dangling link\n");
-            if (options->no_dangle_links)
-            {
-                /* treat dangling link is error */
-                if(options->m_verbose)
+            if (opts->no_dangle_links) {
+                /* treat dangling link as error */
+                if(opts->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", obj1fullname);
-                options->err_stat = 1;
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "treat dangling link as error");
             }
-            else
-            {
-                if(options->m_verbose)
+            else {
+                if(opts->m_verbose)
                     parallel_print("obj1 <%s> is a dangling link.\n", obj1fullname);
-                if (l_ret1 != 0 ||  l_ret2 != 0)
-                {
+                if (l_ret1 != 0 ||  l_ret2 != 0) {
                     nfound++;
                     print_found(nfound);
-                    goto out;
+                    HGOTO_DONE(0);
                 }
             }
         }
-        else if(l_ret1 < 0) /* fail */
-        {
+        else if(l_ret1 < 0) { /* fail */
             parallel_print ("Object <%s> could not be found in <%s>\n", obj1fullname, fname1);
-            options->err_stat = 1;
-            goto out;
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "Object could not be found");
         }
-        else if(l_ret1 != 2) /* symbolic link */
-        {
+        else if(l_ret1 != 2) { /* symbolic link */
             obj1type = (h5trav_type_t)trg_linfo1.trg_type;
             h5difftrace("h5diff ... ... trg_linfo1.trg_type == H5L_TYPE_HARD\n");
             if (info1_lp != NULL) {
@@ -892,37 +784,29 @@ hsize_t h5diff(const char *fname1,
          */
         h5difftrace("h5diff check symbolic link (object2)\n");
         /* dangling link */
-        if (l_ret2 == 0)
-        {
+        if (l_ret2 == 0) {
             h5difftrace("h5diff ... dangling link\n");
-            if (options->no_dangle_links)
-            {
-                /* treat dangling link is error */
-                if(options->m_verbose)
+            if (opts->no_dangle_links) {
+                /* treat dangling link as error */
+                if(opts->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", obj2fullname);
-                options->err_stat = 1;
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "treat dangling link as error");
             }
-            else
-            {
-                if(options->m_verbose)
+            else {
+                if(opts->m_verbose)
                     parallel_print("obj2 <%s> is a dangling link.\n", obj2fullname);
-                if (l_ret1 != 0 ||  l_ret2 != 0)
-                {
+                if (l_ret1 != 0 || l_ret2 != 0) {
                     nfound++;
                     print_found(nfound);
-                    goto out;
+                    HGOTO_DONE(0);
                 }
             }
         }
-        else if(l_ret2 < 0) /* fail */
-        {
+        else if(l_ret2 < 0) { /* fail */
             parallel_print ("Object <%s> could not be found in <%s>\n", obj2fullname, fname2);
-            options->err_stat = 1;
-            goto out;
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "Object could not be found");
         }
-        else if(l_ret2 != 2)  /* symbolic link */
-        {
+        else if(l_ret2 != 2) {  /* symbolic link */
             obj2type = (h5trav_type_t)trg_linfo2.trg_type;
             if (info2_lp != NULL) {
                 size_t idx = info2_lp->nused - 1;
@@ -943,32 +827,28 @@ hsize_t h5diff(const char *fname1,
     * comparing details of same objects.
     */
 
-    if(!(options->m_verbose || options->m_report))
-    {
-        h5difftrace("h5diff NOT (options->m_verbose || options->m_report)\n");
+    if(!(opts->m_verbose || opts->m_report)) {
+        h5difftrace("h5diff NOT (opts->m_verbose || opts->m_report)\n");
         /* if no danglink links */
-        if ( l_ret1 > 0 && l_ret2 > 0 )
-            if (h5tools_is_obj_same(file1_id, obj1fullname, file2_id, obj2fullname)!=0)
-                goto out;
+        if (l_ret1 > 0 && l_ret2 > 0)
+            if (h5tools_is_obj_same(file1_id, obj1fullname, file2_id, obj2fullname) != 0)
+                HGOTO_DONE(0);
     }
 
     both_objs_grp = (obj1type == H5TRAV_TYPE_GROUP && obj2type == H5TRAV_TYPE_GROUP);
-    if (both_objs_grp)
-    {
+    if (both_objs_grp) {
         h5difftrace("h5diff both_objs_grp TRUE\n");
         /*
          * traverse group1
          */
         trav_info_init(fname1, file1_id, &info1_grp);
         /* optional data pass */
-        info1_grp->opts = (diff_opt_t*)options;
+        info1_grp->opts = (diff_opt_t*)opts;
 
         if(h5trav_visit(file1_id, obj1fullname, TRUE, TRUE,
-                        trav_grp_objs, trav_grp_symlinks, info1_grp) < 0)
-        {
+                        trav_grp_objs, trav_grp_symlinks, info1_grp) < 0) {
             parallel_print("Error: Could not get file contents\n");
-            options->err_stat = 1;
-            goto out;
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "Could not get file contents");
         }
         info1_lp = info1_grp;
 
@@ -977,25 +857,22 @@ hsize_t h5diff(const char *fname1,
          */
         trav_info_init(fname2, file2_id, &info2_grp);
         /* optional data pass */
-        info2_grp->opts = (diff_opt_t*)options;
+        info2_grp->opts = (diff_opt_t*)opts;
 
         if(h5trav_visit(file2_id, obj2fullname, TRUE, TRUE,
-                        trav_grp_objs, trav_grp_symlinks, info2_grp) < 0)
-        {
+                        trav_grp_objs, trav_grp_symlinks, info2_grp) < 0) {
             parallel_print("Error: Could not get file contents\n");
-            options->err_stat = 1;
-            goto out;
-        } /* end if */
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "Could not get file contents");
+       } /* end if */
         info2_lp = info2_grp;
     }
+    h5diffdebug2("groups traversed - errstat:%d\n", opts->err_stat);
 
 #ifdef H5_HAVE_PARALLEL
-    if(g_Parallel)
-    {
+    if(g_Parallel) {
         int i;
 
-        if((HDstrlen(fname1) > MAX_FILENAME) || (HDstrlen(fname2) > MAX_FILENAME))
-        {
+        if((HDstrlen(fname1) > MAX_FILENAME) || (HDstrlen(fname2) > MAX_FILENAME)) {
             HDfprintf(stderr, "The parallel diff only supports path names up to %d characters\n", MAX_FILENAME);
             MPI_Abort(MPI_COMM_WORLD, 0);
         } /* end if */
@@ -1010,15 +887,12 @@ hsize_t h5diff(const char *fname1,
 #endif
 
     /* process the objects */
-    build_match_list (obj1fullname, info1_lp, obj2fullname, info2_lp,
-                     &match_list, options);
-    if (both_objs_grp)
-    {
+    build_match_list (obj1fullname, info1_lp, obj2fullname, info2_lp, &match_list, opts);
+    if (both_objs_grp) {
         /*------------------------------------------------------
          * print the list
          */
-         if(options->m_verbose)
-         {
+         if(opts->m_verbose) {
              unsigned u;
 
              parallel_print("\n");
@@ -1028,8 +902,7 @@ hsize_t h5diff(const char *fname1,
              else
                  parallel_print("file1     file2\n");
              parallel_print("---------------------------------------\n");
-             for(u = 0; u < match_list->nobjs; u++)
-             {
+             for(u = 0; u < match_list->nobjs; u++) {
                  char c1, c2;
                  c1 = (match_list->objs[u].flags[0]) ? 'x' : ' ';
                  c2 = (match_list->objs[u].flags[1]) ? 'x' : ' ';
@@ -1040,9 +913,11 @@ hsize_t h5diff(const char *fname1,
     }
     nfound = diff_match(file1_id, obj1fullname, info1_lp,
                         file2_id, obj2fullname, info2_lp,
-                        match_list, options);
+                        match_list, opts);
 
-out:
+done:
+    opts->err_stat = opts->err_stat | ret_value;
+
 #ifdef H5_HAVE_PARALLEL
     if(g_Parallel)
         /* All done at this point, let tasks know that they won't be needed */
@@ -1077,6 +952,7 @@ out:
         H5Fclose(file1_id);
         H5Fclose(file2_id);
     } H5E_END_TRY;
+
     h5difftrace("h5diff finish\n");
 
     return nfound;
@@ -1087,43 +963,34 @@ out:
 /*-------------------------------------------------------------------------
  * Function: diff_match
  *
- * Purpose:
- *  Compare common objects in given groups according to table structure.
- *  The table structure has flags which can be used to find common objects
- *  and will be compared.
- *  Common object means same name (absolute path) objects in both location.
+ * Purpose:  Compare common objects in given groups according to table structure.
+ *           The table structure has flags which can be used to find common objects
+ *           and will be compared.
+ *           Common object means same name (absolute path) objects in both location.
  *
- * Return: Number of differences found
+ * Return:   Number of differences found
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Modifications: Jan 2005 Leon Arber, larber@uiuc.edu
- *    Added support for parallel diffing
- *
- * Pedro Vicente, pvn@hdfgroup.org, Nov 4, 2008
- *    Compare the graph and make h5diff return 1 for difference if
- * 1) the number of objects in file1 is not the same as in file2
- * 2) the graph does not match, i.e same names (absolute path)
- * 3) objects with the same name are not of the same type
+ * Modifications: Compare the graph and make h5diff return 1 for difference if
+ *           1) the number of objects in file1 is not the same as in file2
+ *           2) the graph does not match, i.e same names (absolute path)
+ *           3) objects with the same name are not of the same type
  *-------------------------------------------------------------------------
  */
-hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
+hsize_t
+diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                    hid_t file2_id, const char *grp2, trav_info_t *info2,
-                   trav_table_t *table, diff_opt_t *options)
+                   trav_table_t *table, diff_opt_t *opts)
 {
     hsize_t      nfound = 0;
     unsigned     i;
-
-    const char * grp1_path = "";
-    const char * grp2_path = "";
-    char * obj1_fullpath = NULL;
-    char * obj2_fullpath = NULL;
-    diff_args_t argdata;
-    size_t idx1 = 0;
-    size_t idx2 = 0;
-
+    int          ret_value = opts->err_stat;
+    const char  *grp1_path = "";
+    const char  *grp2_path = "";
+    char        *obj1_fullpath = NULL;
+    char        *obj2_fullpath = NULL;
+    diff_args_t  argdata;
+    size_t       idx1 = 0;
+    size_t       idx2 = 0;
 
     h5difftrace("diff_match start\n");
     /*
@@ -1136,85 +1003,89 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
         grp2_path = grp2;
 
     /*-------------------------------------------------------------------------
-    * regarding the return value of h5diff (0, no difference in files, 1 difference )
-    * 1) the number of objects in file1 must be the same as in file2
-    * 2) the graph must match, i.e same names (absolute path)
-    * 3) objects with the same name must be of the same type
-    *-------------------------------------------------------------------------
-    */
+     * regarding the return value of h5diff (0, no difference in files, 1 difference )
+     * 1) the number of objects in file1 must be the same as in file2
+     * 2) the graph must match, i.e same names (absolute path)
+     * 3) objects with the same name must be of the same type
+     *-------------------------------------------------------------------------
+     */
 
     /* not valid compare used when --exclude-path option is used */
-    if (!options->exclude_path)
-    {
+    if (!opts->exclude_path) {
         /* number of different objects */
-        if ( info1->nused != info2->nused )
-        {
-            options->contents = 0;
+        if (info1->nused != info2->nused) {
+            opts->contents = 0;
         }
     }
 
     /* objects in one file and not the other */
-    for( i = 0; i < table->nobjs; i++)
-    {
-        if( table->objs[i].flags[0] != table->objs[i].flags[1] )
-        {
-            options->contents = 0;
+    for(i = 0; i < table->nobjs; i++) {
+        if(table->objs[i].flags[0] != table->objs[i].flags[1]) {
+            opts->contents = 0;
             break;
         }
     }
 
-
     /*-------------------------------------------------------------------------
-    * do the diff for common objects
-    *-------------------------------------------------------------------------
-    */
+     * do the diff for common objects
+     *-------------------------------------------------------------------------
+     */
 #ifdef H5_HAVE_PARALLEL
     {
-    char *workerTasks = (char*)HDmalloc((g_nTasks - 1) * sizeof(char));
-    int n;
-    int busyTasks = 0;
-    struct diffs_found nFoundbyWorker;
-    struct diff_mpi_args args;
-    int havePrintToken = 1;
-    MPI_Status Status;
+        char *workerTasks = (char*)HDmalloc((g_nTasks - 1) * sizeof(char));
+        int   n;
+        int   busyTasks = 0;
+        struct diffs_found nFoundbyWorker;
+        struct diff_mpi_args args;
+        int   havePrintToken = 1;
+        MPI_Status Status;
 
-    /*set all tasks as free */
-    HDmemset(workerTasks, 1, (g_nTasks - 1));
+        /*set all tasks as free */
+        HDmemset(workerTasks, 1, (g_nTasks - 1));
 #endif
 
-    for(i = 0; i < table->nobjs; i++)
-    {
-        if( table->objs[i].flags[0] && table->objs[i].flags[1])
-        {
+    for(i = 0; i < table->nobjs; i++) {
+        h5diffdebug3("diff for common objects[%d] - errstat:%d\n", i, opts->err_stat);
+        if(table->objs[i].flags[0] && table->objs[i].flags[1]) {
             /* make full path for obj1 */
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            if(HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0)
-                goto out;
+            if(HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0) {
+                HERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
+            }
 #else /* H5_HAVE_ASPRINTF */
-            obj1_fullpath = (char*)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1);
-            HDstrcpy(obj1_fullpath, grp1_path);
-            HDstrcat(obj1_fullpath, table->objs[i].name);
+            if((obj1_fullpath = (char*)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1)) == NULL) {
+                HERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
+            }
+            else {
+                HDstrcpy(obj1_fullpath, grp1_path);
+                HDstrcat(obj1_fullpath, table->objs[i].name);
+            }
 #endif /* H5_HAVE_ASPRINTF */
+            h5diffdebug2("diff_match path1 - %s\n", obj1_fullpath);
 
             /* make full path for obj2 */
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            if(HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name) < 0)
-                goto out;
+            if(HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name) < 0) {
+                HERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
+            }
 #else /* H5_HAVE_ASPRINTF */
-            obj2_fullpath = (char*)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1);
-            HDstrcpy(obj2_fullpath, grp2_path);
-            HDstrcat(obj2_fullpath, table->objs[i].name);
+            if((obj2_fullpath = (char*)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1)) == NULL) {
+                HERROR(1, H5E_tools_min_id_g, "name buffer allocation failed");
+            }
+            else {
+                HDstrcpy(obj2_fullpath, grp2_path);
+                HDstrcat(obj2_fullpath, table->objs[i].name);
+            }
 #endif /* H5_HAVE_ASPRINTF */
+            h5diffdebug2("diff_match path2 - %s\n", obj2_fullpath);
 
             /* get index to figure out type of the object in file1 */
-            while(info1->paths[idx1].path &&
-                    (HDstrcmp(obj1_fullpath, info1->paths[idx1].path) != 0))
+            while(info1->paths[idx1].path && (HDstrcmp(obj1_fullpath, info1->paths[idx1].path) != 0))
                 idx1++;
             /* get index to figure out type of the object in file2 */
-            while(info2->paths[idx2].path &&
-                    (HDstrcmp(obj2_fullpath, info2->paths[idx2].path) != 0))
+            while(info2->paths[idx2].path && (HDstrcmp(obj2_fullpath, info2->paths[idx2].path) != 0))
                 idx2++;
 
             /* Set argdata to pass other args into diff() */
@@ -1222,16 +1093,14 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             argdata.type[1] = info2->paths[idx2].type;
             argdata.is_same_trgobj = table->objs[i].is_same_trgobj;
 
-            options->cmn_objs = 1;
-            if(!g_Parallel)
-            {
+            opts->cmn_objs = 1;
+            if(!g_Parallel) {
                 nfound += diff(file1_id, obj1_fullpath,
                                file2_id, obj2_fullpath,
-                               options, &argdata);
+                            opts, &argdata);
             } /* end if */
 #ifdef H5_HAVE_PARALLEL
-            else
-            {
+            else {
                 int workerFound = 0;
 
                 h5difftrace("Beginning of big else block\n");
@@ -1245,8 +1114,7 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
                 /*Set up args to pass to worker task. */
                 if(HDstrlen(obj1_fullpath) > 255 ||
-                   HDstrlen(obj2_fullpath) > 255)
-                {
+                   HDstrlen(obj2_fullpath) > 255) {
                     printf("The parallel diff only supports object names up to 255 characters\n");
                     MPI_Abort(MPI_COMM_WORLD, 0);
                 } /* end if */
@@ -1254,32 +1122,29 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 /* set args struct to pass */
                 HDstrcpy(args.name1, obj1_fullpath);
                 HDstrcpy(args.name2, obj2_fullpath);
-                args.options = *options;
+                args.opts = *opts;
                 args.argdata.type[0] = info1->paths[idx1].type;
                 args.argdata.type[1] = info2->paths[idx2].type;
                 args.argdata.is_same_trgobj = table->objs[i].is_same_trgobj;
 
                 /* if there are any outstanding print requests, let's handle one. */
-                if(busyTasks > 0)
-                {
+                if(busyTasks > 0) {
                     int incomingMessage;
 
                     /* check if any tasks freed up, and didn't need to print. */
                     MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &incomingMessage, &Status);
 
                     /* first block*/
-                    if(incomingMessage)
-                    {
+                    if(incomingMessage) {
                         workerTasks[Status.MPI_SOURCE - 1] = 1;
                         MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
                         nfound += nFoundbyWorker.nfound;
-                        options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                        opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                         busyTasks--;
                     } /* end if */
 
                     /* check to see if the print token was returned. */
-                    if(!havePrintToken)
-                    {
+                    if(!havePrintToken) {
                         /* If we don't have the token, someone is probably sending us output */
                         print_incoming_data();
 
@@ -1291,19 +1156,17 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                             workerTasks[Status.MPI_SOURCE - 1] = 1;
                             MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                             nfound += nFoundbyWorker.nfound;
-                            options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                            opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                             busyTasks--;
                             havePrintToken = 1;
                         } /* end if */
                     } /* end if */
 
                     /* check to see if anyone needs the print token. */
-                    if(havePrintToken)
-                    {
+                    if(havePrintToken) {
                         /* check incoming queue for print token requests */
                         MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &incomingMessage, &Status);
-                        if(incomingMessage)
-                        {
+                        if(incomingMessage) {
                             MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
                             MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
                             havePrintToken = 0;
@@ -1314,10 +1177,8 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 /* check array of tasks to see which ones are free.
                 * Manager task never does work, so freeTasks[0] is really
                 * worker task 0. */
-                for(n = 1; (n < g_nTasks) && !workerFound; n++)
-                {
-                    if(workerTasks[n-1])
-                    {
+                for(n = 1; (n < g_nTasks) && !workerFound; n++) {
+                    if(workerTasks[n-1]) {
                         /* send file id's and names to first free worker */
                         MPI_Send(&args, sizeof(args), MPI_BYTE, n, MPI_TAG_ARGS, MPI_COMM_WORLD);
 
@@ -1330,55 +1191,47 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                     } /* end if */
                 } /* end for */
 
-                if(!workerFound)
-                {
+                if(!workerFound) {
                     /* if they were all busy, we've got to wait for one free up
                      *  before we can move on.  If we don't have the token, some
                      * task is currently printing so we'll wait for that task to
                      * return it.
                      */
 
-                    if(!havePrintToken)
-                    {
-                        while(!havePrintToken)
-                        {
+                    if(!havePrintToken) {
+                        while(!havePrintToken) {
                             int incomingMessage;
 
                             print_incoming_data();
                             MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
-                            if(incomingMessage)
-                            {
+                            if(incomingMessage) {
                                 MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                                 havePrintToken = 1;
                                 nfound += nFoundbyWorker.nfound;
-                                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                                opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                                 /* send this task the work unit. */
                                 MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                             } /* end if */
                         } /* end while */
                     } /* end if */
                     /* if we do have the token, check for task to free up, or wait for a task to request it */
-                    else
-                    {
+                    else {
                         /* But first print all the data in our incoming queue */
                         print_incoming_data();
                         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-                        if(Status.MPI_TAG == MPI_TAG_DONE)
-                        {
+                        if(Status.MPI_TAG == MPI_TAG_DONE) {
                             MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
                             nfound += nFoundbyWorker.nfound;
-                            options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                            opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                             MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                         } /* end if */
-                        else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST)
-                        {
+                        else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST) {
                             int incomingMessage;
 
                             MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
                             MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
 
-                            do
-                            {
+                            do {
                                 MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
 
                                 print_incoming_data();
@@ -1386,11 +1239,10 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
                             MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                             nfound += nFoundbyWorker.nfound;
-                            options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                            opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                             MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                         } /* end else-if */
-                        else
-                        {
+                        else {
                             printf("ERROR: Invalid tag (%d) received \n", Status.MPI_TAG);
                             MPI_Abort(MPI_COMM_WORLD, 0);
                             MPI_Finalize();
@@ -1405,27 +1257,22 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 HDfree(obj2_fullpath);
         } /* end if */
     } /* end for */
-    h5difftrace("done with for loop\n");
+    h5diffdebug2("done with for loop - errstat:%d\n", opts->err_stat);
 
 #ifdef H5_HAVE_PARALLEL
-    if(g_Parallel)
-    {
+    if(g_Parallel) {
         /* make sure all tasks are done */
-        while(busyTasks > 0)
-        {
+        while(busyTasks > 0) {
             MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-            if(Status.MPI_TAG == MPI_TAG_DONE)
-            {
+            if(Status.MPI_TAG == MPI_TAG_DONE) {
                 MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
                 nfound += nFoundbyWorker.nfound;
-                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                 busyTasks--;
             } /* end if */
-            else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST)
-            {
+            else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST) {
                 MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
-                if(havePrintToken)
-                {
+                if(havePrintToken) {
                     int incomingMessage;
 
                     MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
@@ -1438,17 +1285,15 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
                     MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                     nfound += nFoundbyWorker.nfound;
-                    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                    opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                     busyTasks--;
                 } /* end if */
                 /* someone else must have it...wait for them to return it, then give it to the task that just asked for it. */
-                else
-                {
+                else {
                     int source = Status.MPI_SOURCE;
                     int incomingMessage;
 
-                    do
-                    {
+                    do {
                         MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
 
                         print_incoming_data();
@@ -1457,21 +1302,19 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
                     MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                     nfound += nFoundbyWorker.nfound;
-                    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                    opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                     busyTasks--;
                     MPI_Send(NULL, 0, MPI_BYTE, source, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
                 } /* end else */
             } /* end else-if */
-            else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
-            {
+            else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN) {
                 MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                 nfound += nFoundbyWorker.nfound;
-                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                opts->not_cmp = opts->not_cmp | nFoundbyWorker.not_cmp;
                 busyTasks--;
                 havePrintToken = 1;
             } /* end else-if */
-            else if(Status.MPI_TAG == MPI_TAG_PRINT_DATA)
-            {
+            else if(Status.MPI_TAG == MPI_TAG_PRINT_DATA) {
                 char  data[PRINT_DATA_MAX_SIZE + 1];
                 HDmemset(data, 0, PRINT_DATA_MAX_SIZE + 1);
 
@@ -1479,8 +1322,7 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
                 printf("%s", data);
             } /* end else-if */
-            else
-            {
+            else {
                 printf("ph5diff-manager: ERROR!! Invalid tag (%d) received \n", Status.MPI_TAG);
                 MPI_Abort(MPI_COMM_WORLD, 0);
             } /* end else */
@@ -1499,10 +1341,12 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 #endif /* H5_HAVE_PARALLEL */
 
 out:
-    /* free table */
+    opts->err_stat = opts->err_stat | ret_value;
+
+/* free table */
     if (table)
         trav_table_free(table);
-    h5difftrace("diff_match finish\n");
+    h5diffdebug2("diff_match finish:%d\n", nfound);
 
     return nfound;
 }
@@ -1511,47 +1355,36 @@ out:
 /*-------------------------------------------------------------------------
  * Function: diff
  *
- * Purpose: switch between types and choose the diff function
- * TYPE is either
- *  H5G_GROUP         Object is a group
- *  H5G_DATASET       Object is a dataset
- *  H5G_TYPE          Object is a named data type
- *  H5G_LINK          Object is a symbolic link
+ * Purpose:  switch between types and choose the diff function
+ *           TYPE is either
+ *               H5G_GROUP         Object is a group
+ *               H5G_DATASET       Object is a dataset
+ *               H5G_TYPE          Object is a named data type
+ *               H5G_LINK          Object is a symbolic link
  *
- * Return: Number of differences found
- *
- * Programmer: Jonathan Kim
- *  - Move follow symlinks code toward top. (March 2812)
- *  - Add following symlinks feature (Feb 11,2010)
- *  - Change to use diff_args_t to pass the rest of args.
- *    Passing through it instead of individual args provides smoother
- *    extensibility through its members along with MPI code update for ph5diff
- *    as it doesn't require interface change.
- *    (May 6,2011)
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- * Date: May 9, 2003
+ * Return:   Number of differences found
  *-------------------------------------------------------------------------
  */
-
-hsize_t diff(hid_t file1_id,
+hsize_t
+diff(hid_t file1_id,
               const char *path1,
               hid_t file2_id,
               const char *path2,
-              diff_opt_t * options,
+              diff_opt_t * opts,
               diff_args_t *argdata)
 {
-    hid_t   dset1_id = (-1);
-    hid_t   dset2_id = (-1);
-    hid_t   type1_id = (-1);
-    hid_t   type2_id = (-1);
-    hid_t   grp1_id = (-1);
-    hid_t   grp2_id = (-1);
-    int     ret;
-    hbool_t     is_dangle_link1 = FALSE;
-    hbool_t     is_dangle_link2 = FALSE;
-    hbool_t     is_hard_link = FALSE;
-    hsize_t nfound = 0;
+    int           ret_value = opts->err_stat;
+    int           status = -1;
+    hid_t         dset1_id = -1;
+    hid_t         dset2_id = -1;
+    hid_t         type1_id = -1;
+    hid_t         type2_id = -1;
+    hid_t         grp1_id = -1;
+    hid_t         grp2_id = -1;
+    hbool_t       is_dangle_link1 = FALSE;
+    hbool_t       is_dangle_link2 = FALSE;
+    hbool_t       is_hard_link = FALSE;
+    hsize_t       nfound = 0;
     h5trav_type_t object_type;
 
     /* to get link info */
@@ -1561,11 +1394,11 @@ hsize_t diff(hid_t file1_id,
     h5difftrace("diff start\n");
 
     /*init link info struct */
-    HDmemset(&linkinfo1,0,sizeof(h5tool_link_info_t));
-    HDmemset(&linkinfo2,0,sizeof(h5tool_link_info_t));
+    HDmemset(&linkinfo1, 0, sizeof(h5tool_link_info_t));
+    HDmemset(&linkinfo2, 0, sizeof(h5tool_link_info_t));
 
     /* pass how to handle printing warnings to linkinfo option */
-    if(print_warn(options))
+    if(print_warn(opts))
         linkinfo1.opt.msg_mode = linkinfo2.opt.msg_mode = 1;
 
     /* for symbolic links, take care follow symlink and no dangling link
@@ -1573,78 +1406,69 @@ hsize_t diff(hid_t file1_id,
     if (argdata->type[0] == H5TRAV_TYPE_LINK ||
         argdata->type[0] == H5TRAV_TYPE_UDLINK ||
         argdata->type[1] == H5TRAV_TYPE_LINK ||
-        argdata->type[1] == H5TRAV_TYPE_UDLINK )
-    {
+        argdata->type[1] == H5TRAV_TYPE_UDLINK) {
         /*
          * check dangling links for path1 and path2
          */
 
         /* target object1 - get type and name */
-        ret = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, options->follow_links);
+        if ((status = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, opts->follow_links)) < 0)
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "H5tools_get_symlink_info failed");
+
         /* dangling link */
-        if (ret == 0)
-        {
-            if (options->no_dangle_links)
-            {
+        if (status == 0) {
+            if (opts->no_dangle_links) {
                 /* dangling link is error */
-                if(options->m_verbose)
+                if(opts->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", path1);
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "dangling link is error");
             }
             else
                 is_dangle_link1 = TRUE;
         }
-        else if (ret < 0)
-            goto out;
 
         /* target object2 - get type and name */
-        ret = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, options->follow_links );
+        if ((status = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, opts->follow_links)) < 0)
+            HGOTO_ERROR(1, H5E_tools_min_id_g, "H5tools_get_symlink_info failed");
         /* dangling link */
-        if (ret == 0)
-        {
-            if (options->no_dangle_links)
-            {
+        if (status == 0) {
+            if (opts->no_dangle_links) {
                 /* dangling link is error */
-                if(options->m_verbose)
+                if(opts->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", path2);
-                goto out;
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "dangling link is error");
             }
             else
                 is_dangle_link2 = TRUE;
         }
-        else if (ret < 0)
-            goto out;
 
         /* found dangling link */
-        if (is_dangle_link1 || is_dangle_link2)
-            goto out2;
+        if (is_dangle_link1 || is_dangle_link2) {
+            HGOTO_DONE(0);
+        }
 
         /* follow symbolic link option */
-        if (options->follow_links)
-        {
+        if (opts->follow_links) {
             if (linkinfo1.linfo.type == H5L_TYPE_SOFT ||
                     linkinfo1.linfo.type == H5L_TYPE_EXTERNAL)
                 argdata->type[0] = (h5trav_type_t)linkinfo1.trg_type;
 
-            if (linkinfo2.linfo.type == H5L_TYPE_SOFT ||
-                    linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
+            if (linkinfo2.linfo.type == H5L_TYPE_SOFT || linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
                 argdata->type[1] = (h5trav_type_t)linkinfo2.trg_type;
         }
     }
     /* if objects are not the same type */
-    if (argdata->type[0] != argdata->type[1])
-    {
-        if (options->m_verbose||options->m_list_not_cmp)
-        {
+    if (argdata->type[0] != argdata->type[1]) {
+        if (opts->m_verbose||opts->m_list_not_cmp) {
             parallel_print("Not comparable: <%s> is of type %s and <%s> is of type %s\n",
             path1, get_type(argdata->type[0]),
             path2, get_type(argdata->type[1]));
         }
-        options->not_cmp=1;
+        opts->not_cmp = 1;
         /* TODO: will need to update non-comparable is different
-         * options->contents = 0;
+         * opts->contents = 0;
          */
-        goto out2;
+        HGOTO_DONE(0);
     }
     else /* now both object types are same */
         object_type = argdata->type[0];
@@ -1657,88 +1481,79 @@ hsize_t diff(hid_t file1_id,
      *
      * Perform this to match the outputs as bypassing.
      */
-     if (argdata->is_same_trgobj)
-     {
+     if (argdata->is_same_trgobj) {
         h5difftrace("argdata->is_same_trgobj\n");
         is_hard_link = (object_type == H5TRAV_TYPE_DATASET ||
                         object_type == H5TRAV_TYPE_NAMED_DATATYPE ||
                         object_type == H5TRAV_TYPE_GROUP);
-        if (options->follow_links || is_hard_link)
-        {
+        if (opts->follow_links || is_hard_link) {
             /* print information is only verbose option is used */
-            if(options->m_verbose || options->m_report)
-            {
-                switch(object_type)
-                {
+            if(opts->m_verbose || opts->m_report) {
+                switch(object_type) {
                     case H5TRAV_TYPE_DATASET:
-                        do_print_objname("dataset", path1, path2, options);
+                        do_print_objname("dataset", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_NAMED_DATATYPE:
-                        do_print_objname("datatype", path1, path2, options);
+                        do_print_objname("datatype", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_GROUP:
-                        do_print_objname("group", path1, path2, options);
+                        do_print_objname("group", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_LINK:
-                        do_print_objname("link", path1, path2, options);
+                        do_print_objname("link", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_UDLINK:
                         if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
-                            do_print_objname("external link", path1, path2, options);
+                            do_print_objname("external link", path1, path2, opts);
                         else
-                            do_print_objname ("user defined link", path1, path2, options);
+                            do_print_objname ("user defined link", path1, path2, opts);
                         break;
                     case H5TRAV_TYPE_UNKNOWN:
                     default:
                         parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
                             path1, path2, get_type(object_type) );
-                        options->not_cmp = 1;
+                        opts->not_cmp = 1;
                         break;
                 } /* switch(type)*/
 
                 print_found(nfound);
-            } /* if(options->m_verbose || options->m_report) */
+            } /* if(opts->m_verbose || opts->m_report) */
 
             /* exact same, so comparison is done */
-            goto out2;
+            HGOTO_DONE(0);
         }
     }
 
-    switch(object_type)
-    {
+    switch(object_type) {
        /*----------------------------------------------------------------------
         * H5TRAV_TYPE_DATASET
         *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_DATASET:
             if((dset1_id = H5Dopen2(file1_id, path1, H5P_DEFAULT)) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Dopen2 failed");
             if((dset2_id = H5Dopen2(file2_id, path2, H5P_DEFAULT)) < 0)
-                goto out;
-      /* verbose (-v) and report (-r) mode */
-            if(options->m_verbose || options->m_report)
-            {
-                do_print_objname("dataset", path1, path2, options);
-                nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Dopen2 failed");
+            /* verbose (-v) and report (-r) mode */
+            if(opts->m_verbose || opts->m_report) {
+                do_print_objname("dataset", path1, path2, opts);
+                nfound = diff_dataset(file1_id, file2_id, path1, path2, opts);
                 print_found(nfound);
             }
             /* quiet mode (-q), just count differences */
-            else if(options->m_quiet)
-            {
-                nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+            else if(opts->m_quiet) {
+                nfound = diff_dataset(file1_id, file2_id, path1, path2, opts);
             }
-      /* the rest (-c, none, ...) */
-            else
-            {
-                nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+            /* the rest (-c, none, ...) */
+            else {
+                nfound = diff_dataset(file1_id, file2_id, path1, path2, opts);
                 /* print info if difference found  */
-                if (nfound)
-                {
-                    do_print_objname("dataset", path1, path2, options);
+                if (nfound) {
+                    do_print_objname("dataset", path1, path2, opts);
                     print_found(nfound);
                 }
             }
-
+            h5diffdebug2("diff after dataset:%d\n", nfound);
 
             /*---------------------------------------------------------
              * compare attributes
@@ -1747,13 +1562,13 @@ hsize_t diff(hid_t file1_id,
              *---------------------------------------------------------
              */
             if(path1)
-                nfound += diff_attr(dset1_id, dset2_id, path1, path2, options);
+                nfound += diff_attr(dset1_id, dset2_id, path1, path2, opts);
 
 
             if(H5Dclose(dset1_id) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Dclose failed");
             if(H5Dclose(dset2_id) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Dclose failed");
             break;
 
        /*----------------------------------------------------------------------
@@ -1762,21 +1577,21 @@ hsize_t diff(hid_t file1_id,
         */
         case H5TRAV_TYPE_NAMED_DATATYPE:
             if((type1_id = H5Topen2(file1_id, path1, H5P_DEFAULT)) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Topen2 failed");
             if((type2_id = H5Topen2(file2_id, path2, H5P_DEFAULT)) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Topen2 failed");
 
-            if((ret = H5Tequal(type1_id, type2_id)) < 0)
-                goto out;
+            if((status = H5Tequal(type1_id, type2_id)) < 0)
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tequal failed");
 
             /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
-            nfound = (ret > 0) ? 0 : 1;
+            nfound = (status > 0) ? 0 : 1;
 
-            if(print_objname(options,nfound))
-                do_print_objname("datatype", path1, path2, options);
+            if(print_objname(opts, nfound))
+                do_print_objname("datatype", path1, path2, opts);
 
             /* always print the number of differences found in verbose mode */
-            if(options->m_verbose)
+            if(opts->m_verbose)
                 print_found(nfound);
 
             /*-----------------------------------------------------------------
@@ -1786,12 +1601,12 @@ hsize_t diff(hid_t file1_id,
              *-----------------------------------------------------------------
              */
             if(path1)
-                nfound += diff_attr(type1_id, type2_id, path1, path2, options);
+                nfound += diff_attr(type1_id, type2_id, path1, path2, opts);
 
             if(H5Tclose(type1_id) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose failed");
             if(H5Tclose(type2_id) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose failed");
             break;
 
        /*----------------------------------------------------------------------
@@ -1799,17 +1614,17 @@ hsize_t diff(hid_t file1_id,
         *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_GROUP:
-            if(print_objname(options, nfound))
-                do_print_objname("group", path1, path2, options);
+            if(print_objname(opts, nfound))
+                do_print_objname("group", path1, path2, opts);
 
             /* always print the number of differences found in verbose mode */
-            if(options->m_verbose)
+            if(opts->m_verbose)
                 print_found(nfound);
 
             if((grp1_id = H5Gopen2(file1_id, path1, H5P_DEFAULT)) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Gclose failed");
             if((grp2_id = H5Gopen2(file2_id, path2, H5P_DEFAULT)) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Gclose failed");
 
             /*-----------------------------------------------------------------
              * compare attributes
@@ -1818,12 +1633,12 @@ hsize_t diff(hid_t file1_id,
              *-----------------------------------------------------------------
              */
             if(path1)
-                nfound += diff_attr(grp1_id, grp2_id, path1, path2, options);
+                nfound += diff_attr(grp1_id, grp2_id, path1, path2, opts);
 
             if(H5Gclose(grp1_id) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Gclose failed");
             if(H5Gclose(grp2_id) < 0)
-                goto out;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Gclose failed");
             break;
 
 
@@ -1833,19 +1648,19 @@ hsize_t diff(hid_t file1_id,
         */
         case H5TRAV_TYPE_LINK:
             {
-            ret = HDstrcmp(linkinfo1.trg_path, linkinfo2.trg_path);
+                status = HDstrcmp(linkinfo1.trg_path, linkinfo2.trg_path);
 
-            /* if the target link name is not same then the links are "different" */
-            nfound = (ret != 0) ? 1 : 0;
+                /* if the target link name is not same then the links are "different" */
+                nfound = (status != 0) ? 1 : 0;
 
-            if(print_objname(options, nfound))
-                do_print_objname("link", path1, path2, options);
+                if(print_objname(opts, nfound))
+                    do_print_objname("link", path1, path2, opts);
 
-            /* always print the number of differences found in verbose mode */
-            if(options->m_verbose)
-                print_found(nfound);
+                /* always print the number of differences found in verbose mode */
+                if(opts->m_verbose)
+                    print_found(nfound);
 
-            }
+                }
             break;
 
        /*----------------------------------------------------------------------
@@ -1854,101 +1669,85 @@ hsize_t diff(hid_t file1_id,
         */
         case H5TRAV_TYPE_UDLINK:
             {
-            /* Only external links will have a query function registered */
-            if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
-            {
-                /* If the buffers are the same size, compare them */
-                if(linkinfo1.linfo.u.val_size == linkinfo2.linfo.u.val_size)
-                {
-                    ret = HDmemcmp(linkinfo1.trg_path, linkinfo2.trg_path, linkinfo1.linfo.u.val_size);
-                }
-                else
-                    ret = 1;
+                /* Only external links will have a query function registered */
+                if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL) {
+                    /* If the buffers are the same size, compare them */
+                    if(linkinfo1.linfo.u.val_size == linkinfo2.linfo.u.val_size) {
+                        status = HDmemcmp(linkinfo1.trg_path, linkinfo2.trg_path, linkinfo1.linfo.u.val_size);
+                    }
+                    else
+                        status = 1;
 
-                /* if "linkinfo1.trg_path" != "linkinfo2.trg_path" then the links
-                 * are "different" extlinkinfo#.path is combination string of
-                 * file_name and obj_name
-                 */
-                nfound = (ret != 0) ? 1 : 0;
+                    /* if "linkinfo1.trg_path" != "linkinfo2.trg_path" then the links
+                     * are "different" extlinkinfo#.path is combination string of
+                     * file_name and obj_name
+                     */
+                    nfound = (status != 0) ? 1 : 0;
 
-                if(print_objname(options, nfound))
-                    do_print_objname("external link", path1, path2, options);
+                    if(print_objname(opts, nfound))
+                        do_print_objname("external link", path1, path2, opts);
 
-            } /* end if */
-            else
-            {
-                /* If one or both of these links isn't an external link, we can only
-                 * compare information from H5Lget_info since we don't have a query
-                 * function registered for them.
-                 *
-                 * If the link classes or the buffer length are not the
-                 * same, the links are "different"
-                 */
-                if((linkinfo1.linfo.type != linkinfo2.linfo.type) ||
-                   (linkinfo1.linfo.u.val_size != linkinfo2.linfo.u.val_size))
-                    nfound = 1;
-                else
-                    nfound = 0;
+                } /* end if */
+                else {
+                    /* If one or both of these links isn't an external link, we can only
+                     * compare information from H5Lget_info since we don't have a query
+                     * function registered for them.
+                     *
+                     * If the link classes or the buffer length are not the
+                     * same, the links are "different"
+                     */
+                    if((linkinfo1.linfo.type != linkinfo2.linfo.type) ||
+                    (linkinfo1.linfo.u.val_size != linkinfo2.linfo.u.val_size))
+                        nfound = 1;
+                    else
+                        nfound = 0;
 
-                if (print_objname (options, nfound))
-                    do_print_objname ("user defined link", path1, path2, options);
-            } /* end else */
+                    if (print_objname (opts, nfound))
+                        do_print_objname ("user defined link", path1, path2, opts);
+                } /* end else */
 
-            /* always print the number of differences found in verbose mode */
-            if(options->m_verbose)
-                print_found(nfound);
+                /* always print the number of differences found in verbose mode */
+                if(opts->m_verbose)
+                    print_found(nfound);
             }
             break;
 
         case H5TRAV_TYPE_UNKNOWN:
         default:
-            if(options->m_verbose)
+            if(opts->m_verbose)
                 parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
                     path1, path2, get_type(object_type) );
-            options->not_cmp = 1;
+            opts->not_cmp = 1;
             break;
      }
 
-    /* free link info buffer */
-    if (linkinfo1.trg_path)
-        HDfree(linkinfo1.trg_path);
-    if (linkinfo2.trg_path)
-        HDfree(linkinfo2.trg_path);
+done:
+    opts->err_stat = opts->err_stat | ret_value;
 
-    return nfound;
-
-out:
-    options->err_stat = 1;
-
-out2:
     /*-----------------------------------
      * handle dangling link(s)
      */
     /* both path1 and path2 are dangling links */
-    if(is_dangle_link1 && is_dangle_link2)
-    {
-        if(print_objname(options, nfound))
-        {
-            do_print_objname("dangling link", path1, path2, options);
+    if(is_dangle_link1 && is_dangle_link2) {
+        if(print_objname(opts, nfound)) {
+            do_print_objname("dangling link", path1, path2, opts);
             print_found(nfound);
         }
     }
     /* path1 is dangling link */
-    else if (is_dangle_link1)
-    {
-        if(options->m_verbose)
+    else if (is_dangle_link1) {
+        if(opts->m_verbose)
            parallel_print("obj1 <%s> is a dangling link.\n", path1);
         nfound++;
-        if(print_objname(options, nfound))
+        if(print_objname(opts, nfound))
             print_found(nfound);
     }
     /* path2 is dangling link */
-    else if (is_dangle_link2)
-    {
-        if(options->m_verbose)
+    else if (is_dangle_link2) {
+        if(opts->m_verbose)
             parallel_print("obj2 <%s> is a dangling link.\n", path2);
         nfound++;
-        if(print_objname(options, nfound))
+        if(print_objname(opts, nfound))
             print_found(nfound);
     }
 
@@ -1961,13 +1760,16 @@ out2:
     /* close */
     /* disable error reporting */
     H5E_BEGIN_TRY {
+        H5Dclose(dset1_id);
+        H5Dclose(dset2_id);
         H5Tclose(type1_id);
         H5Tclose(type2_id);
         H5Gclose(grp1_id);
-        H5Tclose(grp2_id);
+        H5Gclose(grp2_id);
         /* enable error reporting */
     } H5E_END_TRY;
-    h5difftrace("diff finish\n");
+
+    h5diffdebug3("diff finish:%d - errstat:%d\n", nfound, opts->err_stat);
 
     return nfound;
 }

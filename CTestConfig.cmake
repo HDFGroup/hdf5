@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 ## This file should be placed in the root directory of your project.
 ## Then modify the CMakeLists.txt file in the root directory of your
 ## project to incorporate the testing dashboard.
@@ -13,7 +24,7 @@ if (CDASH_LOCAL)
   set (CTEST_DROP_LOCATION "/submit.php?project=HDF5Trunk")
 else ()
   set (CTEST_DROP_SITE "cdash.hdfgroup.org")
-  set (CTEST_DROP_LOCATION "/submit.php?project=HDF5+Trunk")
+  set (CTEST_DROP_LOCATION "/submit.php?project=HDF5")
 endif ()
 set (CTEST_DROP_SITE_CDASH TRUE)
 

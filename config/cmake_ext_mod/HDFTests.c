@@ -1,3 +1,14 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define SIMPLE_TEST(x) int main(){ x; return 0; }
 
 #ifdef HAVE_C99_DESIGNATED_INITIALIZER
@@ -211,12 +222,26 @@ SIMPLE_TEST(struct stat sb; sb.st_blocks=0);
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_MSC_VER) && defined(_DEBUG)
+# include <crtdbg.h>
+int DebugReport(int reportType, char* message, int* returnValue)
+{
+  (void)reportType;
+  (void)message;
+  (void)returnValue;
+  return 1; /* no further handling required */
+}
+#endif
+
 int main(void)
 {
   char *llwidthArgs[] = { "I64", "l64", "l", "L", "q", "ll", NULL };
   char *s = malloc(128);
   char **currentArg = NULL;
   LL_TYPE x = (LL_TYPE)1048576 * (LL_TYPE)1048576;
+  #if defined(_MSC_VER) && defined(_DEBUG)
+    _CrtSetReportHook(DebugReport);
+  #endif
   for (currentArg = llwidthArgs; *currentArg != NULL; currentArg++)
     {
     char formatString[64];

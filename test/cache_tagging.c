@@ -1,14 +1,13 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Mike McGreevy
@@ -23,6 +22,7 @@
 #include "testhdf5.h"
 #include "cache_common.h"
 
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5HLprivate.h"
 
 /* ============ */
@@ -350,7 +350,7 @@ evict_entries(hid_t fid)
     /* Evict all we can from the cache to examine full tag creation tree */
         /* This function will likely return failure since the root group
          * is still protected. Thus, don't check its return value. */
-    H5C_flush_cache(f, H5P_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+    H5C_flush_cache(f, H5C__FLUSH_INVALIDATE_FLAG);
 
     return 0;
 
@@ -3632,11 +3632,14 @@ error:
 static unsigned
 check_invalid_tag_application(void)
 {
+#if H5C_DO_TAGGING_SANITY_CHECKS
     /* Variables */
     H5F_t * f = NULL;
-    hid_t fid, dxpl_id = -1;
+    hid_t fid = -1;
     haddr_t addr;
     H5HL_t * lheap = NULL;
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+#endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     /* Testing Macro */
     TESTING("failure on invalid tag application");
@@ -3645,37 +3648,42 @@ check_invalid_tag_application(void)
     /* Create a test file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
+    /* Push API context */
+    if(H5CX_push() < 0) TEST_ERROR
+    api_ctx_pushed = TRUE;
+
     /* Get internal file pointer*/
     if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
 
-    /* Create dxpl */
-    if ( (dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
-
     /* Call H5HL_create, an internal function that calls H5AC_insert_entry without setting up a tag */
     /* Ensure this returns FAILURE, as a tag has not been set up. */
-    if ( H5HL_create(f, H5AC_ind_read_dxpl_id, (size_t)1024, &addr) >= 0) TEST_ERROR;
+    if ( H5HL_create(f, (size_t)1024, &addr) >= 0) TEST_ERROR;
 
-    /* Now set up a tag in the dxpl */
-    if ( H5AC_tag(H5AC_ind_read_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
+    /* Now set up a tag in the API context */
+    H5AC_tag((haddr_t)25, NULL);
 
     /* Verify the same call to H5HL_create now works as intended, with a tag set up. */
-    if ( H5HL_create(f, H5AC_ind_read_dxpl_id, (size_t)1024, &addr) < 0) TEST_ERROR;
+    if ( H5HL_create(f, (size_t)1024, &addr) < 0) TEST_ERROR;
 
-    /* Reset dxpl to use invalid tag. */
-    if ( H5AC_tag(H5AC_ind_read_dxpl_id, H5AC__INVALID_TAG, NULL) < 0) TEST_ERROR;
+    /* Reset API context to use invalid tag. */
+    H5AC_tag(H5AC__INVALID_TAG, NULL);
 
     /* Call H5HL_protect to protect the local heap created above. */
     /* This should fail as no tag is set up during the protect call */
-    if (( lheap = H5HL_protect(f, H5AC_ind_read_dxpl_id, addr, H5AC__NO_FLAGS_SET)) != NULL ) TEST_ERROR;
+    if (( lheap = H5HL_protect(f, addr, H5AC__NO_FLAGS_SET)) != NULL ) TEST_ERROR;
 
     /* Again, set up a valid tag in the DXPL */
-    if ( H5AC_tag(H5AC_ind_read_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
+    H5AC_tag((haddr_t)25, NULL);
 
     /* Call H5HL_protect again to protect the local heap. This should succeed. */
-    if (( lheap = H5HL_protect(f, H5AC_ind_read_dxpl_id, addr, H5AC__NO_FLAGS_SET)) == NULL ) TEST_ERROR;
+    if (( lheap = H5HL_protect(f, addr, H5AC__NO_FLAGS_SET)) == NULL ) TEST_ERROR;
 
     /* Now unprotect the heap, as we're done with the test. */
     if ( H5HL_unprotect(lheap) < 0 ) TEST_ERROR;
+
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) TEST_ERROR
+    api_ctx_pushed = FALSE;
 
     /* Close open objects and file */
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
@@ -3684,12 +3692,16 @@ check_invalid_tag_application(void)
     PASSED();
 #else
     SKIPPED();
-    printf("    test skipped because sanity checking on tag value is disabled.\n");
-#endif
+    HDprintf("    test skipped because sanity checking on tag value is disabled.\n");
+#endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     return 0;
 
 error:
+#if H5C_DO_TAGGING_SANITY_CHECKS
+    if(api_ctx_pushed) H5CX_pop();
+#endif /* H5C_DO_TAGGING_SANITY_CHECKS */
+
     return 1;
 } /* check_invalid_tag_application */
 
@@ -3792,10 +3804,10 @@ main(void)
     HDremove(FILENAME2);
 
     /* Return Errors */
-    return(nerrs > 0);
+    return nerrs > 0;
 
 error:
     /* Return with Error */
-    return(1);
+    return 1;
 
 } /* main */

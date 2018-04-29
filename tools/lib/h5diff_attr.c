@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5private.h"
@@ -93,7 +91,7 @@ static void table_attrs_free( table_attrs_t *table )
 /*-------------------------------------------------------------------------
  * Function: table_attr_mark_exist
  *
- * Purpose: mark given attribute name to table as sign of exsit
+ * Purpose: mark given attribute name to table as sign of exist
  *
  * Parameter:
  *  - exist [IN]
@@ -138,52 +136,55 @@ static void table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *ta
  *
  * Parameter:
  *  table_out [OUT] : return the list
- *
- * Programmer: Jonathan Kim
- *
- * Date: March 15, 2011
  *------------------------------------------------------------------------*/
-static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t ** table_out,  diff_opt_t *options)
+static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t ** table_out,  diff_opt_t *opts)
 {
-    H5O_info_t oinfo1, oinfo2;  /* Object info */
-    hid_t      attr1_id=-1;     /* attr ID */
-    hid_t      attr2_id=-1;     /* attr ID */
-    size_t curr1 = 0;
-    size_t curr2 = 0;
-    unsigned infile[2];
-    char  name1[ATTR_NAME_MAX];
-    char  name2[ATTR_NAME_MAX];
-    int cmp;
-    unsigned i;
+    int        ret_value = 0;
+    H5O_info_t oinfo1, oinfo2;    /* Object info */
+    hid_t      attr1_id = -1;     /* attr ID */
+    hid_t      attr2_id = -1;     /* attr ID */
+    size_t     curr1 = 0;
+    size_t     curr2 = 0;
+    unsigned   infile[2];
+    char       name1[ATTR_NAME_MAX];
+    char       name2[ATTR_NAME_MAX];
+    int        cmp;
+    unsigned   i;
     table_attrs_t *table_lp = NULL;
 
+    h5difftrace("build_match_list_attrs start\n");
+
     if(H5Oget_info(loc1_id, &oinfo1) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info first object failed");
     if(H5Oget_info(loc2_id, &oinfo2) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info second object failed");
 
-    table_attrs_init( &table_lp );
-
+    table_attrs_init(&table_lp);
+    if (table_lp == NULL)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Table allocation failed");
 
     /*--------------------------------------------------
      * build the list
      */
     while(curr1 < oinfo1.num_attrs && curr2 < oinfo2.num_attrs) {
+        h5diffdebug3("build_match_list_attrs 1: %ld - %ld\n", curr1, oinfo1.num_attrs);
+        h5diffdebug3("build_match_list_attrs 2: %ld - %ld\n", curr2, oinfo2.num_attrs);
+
         /*------------------
         * open attribute1 */
         if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aopen_by_idx first attribute failed");
         /* get name */
         if(H5Aget_name(attr1_id, (size_t)ATTR_NAME_MAX, name1) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aget_name first attribute failed");
 
         /*------------------
         * open attribute2 */
         if((attr2_id = H5Aopen_by_idx(loc2_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr2, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aopen_by_idx second attribute failed");
         /* get name */
         if(H5Aget_name(attr2_id, (size_t)ATTR_NAME_MAX, name2) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aget_name second attribute failed");
 
         /* criteria is string compare */
         cmp = HDstrcmp(name1, name2);
@@ -221,13 +222,16 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
     infile[0] = 1;
     infile[1] = 0;
     while(curr1 < oinfo1.num_attrs) {
+        h5diffdebug3("build_match_list_attrs 1: %ld - %ld\n", curr1, oinfo1.num_attrs);
+
         /*------------------
         * open attribute1 */
         if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aopen_by_idx first attribute failed");
         /* get name */
         if(H5Aget_name(attr1_id, (size_t)ATTR_NAME_MAX, name1) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aget_name first attribute failed");
+        h5diffdebug2("build_match_list_attrs #1 name - %s\n", name1);
 
         table_attr_mark_exist(infile, name1, table_lp);
         table_lp->nattrs_only1++;
@@ -242,13 +246,15 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
     infile[0] = 0;
     infile[1] = 1;
     while(curr2 < oinfo2.num_attrs) {
+        h5diffdebug3("build_match_list_attrs 2: %ld - %ld\n", curr2, oinfo2.num_attrs);
         /*------------------
         * open attribute2 */
         if((attr2_id = H5Aopen_by_idx(loc2_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr2, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aopen_by_idx second attribute failed");
         /* get name */
         if(H5Aget_name(attr2_id, (size_t)ATTR_NAME_MAX, name2) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aget_name second attribute failed");
+        h5diffdebug2("build_match_list_attrs #2 name - %s\n", name2);
 
         table_attr_mark_exist(infile, name2, table_lp);
         table_lp->nattrs_only2++;
@@ -256,12 +262,13 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr2_id);
+        attr2_id = -1;
     }
 
     /*------------------------------------------------------
      * print the list
      */
-    if(options->m_verbose_level == 2) {
+    if(opts->m_verbose_level == 2) {
         /* if '-v2' is detected */
         parallel_print("   obj1   obj2\n");
         parallel_print(" --------------------------------------\n");
@@ -273,42 +280,35 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         } /* end for */
     }
 
-    if(options->m_verbose_level >= 1)
+    if(opts->m_verbose_level >= 1)
         parallel_print("Attributes status:  %d common, %d only in obj1, %d only in obj2\n",
                 table_lp->nattrs - table_lp->nattrs_only1 - table_lp->nattrs_only2,
                 table_lp->nattrs_only1, table_lp->nattrs_only2);
 
+done:
     *table_out = table_lp;
 
-    return 0;
-
-error:
-    if (0 < attr1_id)
+    /* disable error reporting */
+    H5E_BEGIN_TRY {
         H5Aclose(attr1_id);
-    if (0 < attr2_id)
         H5Aclose(attr2_id);
+    } H5E_END_TRY;
 
-    return -1;
+    h5diffdebug2("build_match_list_attrs end - errstat:%d\n", opts->err_stat);
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
  * Function: diff_attr
  *
- * Purpose: compare attributes located in LOC1_ID and LOC2_ID, which are
- *  obtained either from
- * loc_id = H5Gopen2(fid, name, H5P_DEFAULT);
- * loc_id = H5Dopen2(fid, name);
- * loc_id = H5Topen2(fid, name, H5P_DEFAULT);
+ * Purpose:  compare attributes located in LOC1_ID and LOC2_ID, which are
+ *           obtained either from
+ *               loc_id = H5Gopen2(fid, name, H5P_DEFAULT);
+ *               loc_id = H5Dopen2(fid, name);
+ *               loc_id = H5Topen2(fid, name, H5P_DEFAULT);
  *
- * Return: number of differences found
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November, 03, 2003
- *
- * Modifications:
- *  March, 02, 2007: return the number of differences found
- *
+ * Return:   number of differences found
  *-------------------------------------------------------------------------
  */
 
@@ -316,107 +316,96 @@ hsize_t diff_attr(hid_t loc1_id,
                   hid_t loc2_id,
                   const char *path1,
                   const char *path2,
-                  diff_opt_t *options)
+                  diff_opt_t *opts)
 {
-    hid_t      attr1_id=-1;     /* attr ID */
-    hid_t      attr2_id=-1;     /* attr ID */
-    hid_t      space1_id=-1;    /* space ID */
-    hid_t      space2_id=-1;    /* space ID */
-    hid_t      ftype1_id=-1;    /* file data type ID */
-    hid_t      ftype2_id=-1;    /* file data type ID */
-    int	       vstrtype1=0;     /* ftype1 is a variable string */
-    int	       vstrtype2=0;     /* ftype2 is a variable string */
-    hid_t      mtype1_id=-1;    /* memory data type ID */
-    hid_t      mtype2_id=-1;    /* memory data type ID */
-    size_t     msize1;          /* memory size of memory type */
-    size_t     msize2;          /* memory size of memory type */
-    void       *buf1=NULL;      /* data buffer */
-    void       *buf2=NULL;      /* data buffer */
-    hbool_t    buf1hasdata=FALSE;    /* buffer has data */
-    hbool_t    buf2hasdata=FALSE;    /* buffer has data */
-    hsize_t    nelmts1;         /* number of elements in dataset */
-    int        rank1;           /* rank of dataset */
-    int        rank2;           /* rank of dataset */
-    hsize_t    dims1[H5S_MAX_RANK];/* dimensions of dataset */
-    hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
-    char       *name1;
-    char       *name2;
+    int        ret_value = opts->err_stat;
+    hid_t      attr1_id = -1;     /* attr ID */
+    hid_t      attr2_id = -1;     /* attr ID */
+    hid_t      space1_id = -1;    /* space ID */
+    hid_t      space2_id = -1;    /* space ID */
+    hid_t      ftype1_id = -1;    /* file data type ID */
+    hid_t      ftype2_id = -1;    /* file data type ID */
+    hid_t      mtype1_id = -1;    /* memory data type ID */
+    hid_t      mtype2_id = -1;    /* memory data type ID */
+    size_t     msize1;            /* memory size of memory type */
+    size_t     msize2;            /* memory size of memory type */
+    void       *buf1 = NULL;      /* data buffer */
+    void       *buf2 = NULL;      /* data buffer */
+    hbool_t    buf1hasdata = FALSE;    /* buffer has data */
+    hbool_t    buf2hasdata = FALSE;    /* buffer has data */
+    hsize_t    nelmts1;           /* number of elements in dataset */
+    int        rank1;             /* rank of dataset */
+    int        rank2;             /* rank of dataset */
+    hsize_t    dims1[H5S_MAX_RANK];    /* dimensions of dataset */
+    hsize_t    dims2[H5S_MAX_RANK];    /* dimensions of dataset */
+    char       *name1 = NULL;
+    char       *name2 = NULL;
     char       np1[512];
     char       np2[512];
-    unsigned   u;                  /* Local index variable */
+    unsigned   u;                 /* Local index variable */
     hsize_t    nfound = 0;
     hsize_t    nfound_total = 0;
     int       j;
 
-    table_attrs_t * match_list_attrs = NULL;
-    if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, options) < 0)
-        goto error;
+    table_attrs_t *match_list_attrs = NULL;
+    h5difftrace("diff_attr start\n");
+
+    if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, opts) < 0) {
+        HGOTO_ERROR(1, H5E_tools_min_id_g, "build_match_list_attrs failed");
+    }
+    h5diffdebug2("build_match_list_attrs - errstat:%d\n", opts->err_stat);
 
     /* if detect any unique extra attr */
     if(match_list_attrs->nattrs_only1 || match_list_attrs->nattrs_only2) {
+        h5difftrace("diff_attr attributes only in one file\n");
         /* exit will be 1 */
-        options->contents = 0;
+        opts->contents = 0;
     }
+    h5diffdebug2("match_list_attrs info - errstat:%d\n", opts->err_stat);
 
     for(u = 0; u < (unsigned)match_list_attrs->nattrs; u++) {
+        h5diffdebug3("match_list_attrs loop[%d] - errstat:%d\n", u, opts->err_stat);
         if((match_list_attrs->attrs[u].exist[0]) && (match_list_attrs->attrs[u].exist[1])) {
             name1 = name2 = match_list_attrs->attrs[u].name;
+            h5diffdebug2("diff_attr name - %s\n", name1);
 
             /*--------------
             * attribute 1 */
             if((attr1_id = H5Aopen(loc1_id, name1, H5P_DEFAULT)) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aopen first attribute failed");
 
             /*--------------
             * attribute 2 */
             if((attr2_id = H5Aopen(loc2_id, name2, H5P_DEFAULT)) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aopen second attribute failed");
 
+            h5difftrace("diff_attr got attributes\n");
             /* get the datatypes  */
             if((ftype1_id = H5Aget_type(attr1_id)) < 0)
-                goto error;
-            vstrtype1 = H5Tis_variable_str(ftype1_id);
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type first attribute failed");
             if((ftype2_id = H5Aget_type(attr2_id)) < 0)
-                goto error;
-            vstrtype2 = H5Tis_variable_str(ftype2_id);
-            /* no compare if either one but not both are variable string type */
-            if (vstrtype1 != vstrtype2) {
-                if((options->m_verbose || options->m_list_not_cmp))
-                    parallel_print("Not comparable: one of attribute <%s/%s> or <%s/%s> is of variable length type\n",
-                            path1, name1, path2, name2);
-                options->not_cmp = 1;
-                if (H5Tclose(ftype1_id) < 0)
-                    goto error;
-                if (H5Tclose(ftype2_id) < 0)
-                    goto error;
-                if (H5Aclose(attr1_id) < 0)
-                    goto error;
-                if (H5Aclose(attr2_id) < 0)
-                    goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type second attribute failed");
 
-                continue;
-            }
-
-            if((mtype1_id = h5tools_get_native_type(ftype1_id)) < 0)
-                goto error;
-            if((mtype2_id = h5tools_get_native_type(ftype2_id)) < 0)
-                goto error;
+            if((mtype1_id = H5Tget_native_type(ftype1_id, H5T_DIR_DEFAULT)) < 0)
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tget_native_type first attribute ftype failed");
+            if((mtype2_id = H5Tget_native_type(ftype2_id, H5T_DIR_DEFAULT)) < 0)
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tget_native_type second attribute ftype failed");
             if((msize1 = H5Tget_size(mtype1_id)) == 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tget_size first attribute mtype failed");
             if((msize2 = H5Tget_size(mtype2_id)) == 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tget_size second attribute mtype failed");
 
             /* get the dataspace   */
             if((space1_id = H5Aget_space(attr1_id)) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_space first attribute failed");
             if((space2_id = H5Aget_space(attr2_id)) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_space second attribute failed");
 
             /* get dimensions  */
             if((rank1 = H5Sget_simple_extent_dims(space1_id, dims1, NULL)) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Sget_simple_extent_dims first attribute failed");
             if((rank2 = H5Sget_simple_extent_dims(space2_id, dims2, NULL)) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Sget_simple_extent_dims second attribute failed");
 
             /*----------------------------------------------------------------------
             * check for comparable TYPE and SPACE
@@ -426,23 +415,23 @@ hsize_t diff_attr(hid_t loc1_id,
             /* pass dims1 and dims2 for maxdims as well since attribute's maxdims
             * are always same */
             if(diff_can_type(ftype1_id, ftype2_id, rank1, rank2, dims1, dims2,
-                    dims1, dims2, name1, name2, options, 0) != 1) {
+                    dims1, dims2, name1, name2, opts, 0) != 1) {
                 if(H5Tclose(ftype1_id) < 0)
-                    goto error;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose first attribute ftype failed");
                 if(H5Tclose(ftype2_id) < 0)
-                    goto error;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose second attribute ftype failed");
                 if(H5Sclose(space1_id) < 0)
-                    goto error;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Sclose first attribute failed");
                 if(H5Sclose(space2_id) < 0)
-                    goto error;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Sclose second attribute failed");
                 if(H5Aclose(attr1_id) < 0)
-                    goto error;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aclose first attribute failed");
                 if(H5Aclose(attr2_id) < 0)
-                    goto error;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aclose second attribute failed");
                 if(H5Tclose(mtype1_id) < 0)
-                    goto error;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose first attribute mtype failed");
                 if(H5Tclose(mtype2_id) < 0)
-                    goto error;
+                    HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose second attribute mtype failed");
 
                 continue;
             }
@@ -453,7 +442,7 @@ hsize_t diff_attr(hid_t loc1_id,
             */
             if(FAIL == match_up_memsize(ftype1_id, ftype2_id, &mtype1_id,
                             &mtype2_id, &msize1, &msize2))
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "match_up_memsize failed");
 
             /*---------------------------------------------------------------------
             * read
@@ -463,22 +452,22 @@ hsize_t diff_attr(hid_t loc1_id,
             for(j = 0; j < rank1; j++)
                 nelmts1 *= dims1[j];
 
-            buf1 = (void *)HDmalloc((size_t)(nelmts1 * msize1));
-            buf2 = (void *)HDmalloc((size_t)(nelmts1 * msize2));
+            buf1 = (void *)HDcalloc((size_t)(nelmts1), msize1);
+            buf2 = (void *)HDcalloc((size_t)(nelmts1), msize2);
             if(buf1 == NULL || buf2 == NULL) {
                 parallel_print("cannot read into memory\n");
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "buffer allocation failed");
             }
             if(H5Aread(attr1_id, mtype1_id, buf1) < 0) {
                 parallel_print("Failed reading attribute1 %s/%s\n", path1, name1);
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type first attribute failed");
             }
             else
                 buf1hasdata = TRUE;
 
             if(H5Aread(attr2_id, mtype2_id, buf2) < 0) {
                 parallel_print("Failed reading attribute2 %s/%s\n", path2, name2);
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type second attribute failed");
             }
             else
                 buf2hasdata = TRUE;
@@ -494,22 +483,22 @@ hsize_t diff_attr(hid_t loc1_id,
 
             /* always print name */
             /* verbose (-v) and report (-r) mode */
-            if(options->m_verbose || options->m_report) {
+            if(opts->m_verbose || opts->m_report) {
                 do_print_attrname("attribute", np1, np2);
 
                 nfound = diff_array(buf1, buf2, nelmts1, (hsize_t) 0, rank1,
-                        dims1, options, np1, np2, mtype1_id, attr1_id, attr2_id);
+                        dims1, opts, np1, np2, mtype1_id, attr1_id, attr2_id);
                 print_found(nfound);
             }
             /* quiet mode (-q), just count differences */
-            else if(options->m_quiet) {
+            else if(opts->m_quiet) {
                 nfound = diff_array(buf1, buf2, nelmts1, (hsize_t) 0, rank1,
-                        dims1, options, np1, np2, mtype1_id, attr1_id, attr2_id);
+                        dims1, opts, np1, np2, mtype1_id, attr1_id, attr2_id);
             }
             /* the rest (-c, none, ...) */
             else {
                 nfound = diff_array(buf1, buf2, nelmts1, (hsize_t) 0, rank1,
-                        dims1, options, np1, np2, mtype1_id, attr1_id, attr2_id);
+                        dims1, opts, np1, np2, mtype1_id, attr1_id, attr2_id);
 
                 /* print info if compatible and difference found */
                 if (nfound) {
@@ -536,31 +525,29 @@ hsize_t diff_attr(hid_t loc1_id,
             buf2 = NULL;
 
             if(H5Tclose(ftype1_id) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type first attribute failed");
             if(H5Tclose(ftype2_id) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type second attribute failed");
             if(H5Sclose(space1_id) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type first attribute failed");
             if(H5Sclose(space2_id) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type second attribute failed");
             if(H5Aclose(attr1_id) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type first attribute failed");
             if(H5Aclose(attr2_id) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Aget_type second attribute failed");
             if(H5Tclose(mtype1_id) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose first attribute mtype failed");
             if(H5Tclose(mtype2_id) < 0)
-                goto error;
+                HGOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose second attribute mtype failed");
 
             nfound_total += nfound;
         }
     } /* u */
 
-    table_attrs_free(match_list_attrs);
+done:
+    opts->err_stat = opts->err_stat | ret_value;
 
-    return nfound_total;
-
-error:
     H5E_BEGIN_TRY {
         if(buf1) {
             if(buf1hasdata && TRUE == h5tools_detect_vlen(mtype1_id))
@@ -585,7 +572,7 @@ error:
         H5Aclose(attr2_id);
     } H5E_END_TRY;
 
-    options->err_stat = 1;
+    h5diffdebug2("diff_attr end - errstat:%d\n", opts->err_stat);
     return nfound_total;
 }
 

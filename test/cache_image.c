@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  John Mainzer
@@ -7714,6 +7712,7 @@ get_free_sections_test(void)
 static unsigned
 evict_on_close_test(void)
 {
+#ifndef H5_HAVE_PARALLEL
     const char * fcn_name = "evict_on_close_test()";
     char filename[512];
     hbool_t show_progress = FALSE;
@@ -7722,8 +7721,15 @@ evict_on_close_test(void)
     H5F_t *file_ptr = NULL;
     H5C_t *cache_ptr = NULL;
     int cp = 0;
+#endif /* H5_HAVE_PARALLEL */
 
     TESTING("Cache image / evict on close interaction");
+
+#ifdef H5_HAVE_PARALLEL
+    SKIPPED();
+    HDputs("    EoC not supported in the parallel library.");
+    return 0;
+#else
 
     pass = TRUE;
 
@@ -8013,6 +8019,7 @@ evict_on_close_test(void)
                   FUNC, failure_mssg);
 
     return !pass;
+#endif /* H5_HAVE_PARALLEL */
 
 } /* evict_on_close_test() */
 
@@ -8071,5 +8078,4 @@ main(void)
     return(nerrs > 0);
 
 } /* main() */
-
 

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
@@ -230,9 +228,9 @@ test_select_hyper(hid_t xfer_plist)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -434,9 +432,9 @@ test_select_point(hid_t xfer_plist)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -712,9 +710,9 @@ test_select_all(hid_t xfer_plist)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE4_DIM1 * SPACE4_DIM2 * SPACE4_DIM3);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE4_DIM1 * SPACE4_DIM2 * SPACE4_DIM3));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE4_DIM1; i++)
@@ -799,9 +797,9 @@ test_select_all_hyper(hid_t xfer_plist)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -941,9 +939,9 @@ test_select_combo(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -1108,9 +1106,9 @@ test_select_hyper_stride(hid_t xfer_plist)
 
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)HDmalloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint16_t *)HDcalloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -1236,9 +1234,9 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
 
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)HDmalloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint16_t *)HDcalloc(sizeof(uint16_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -1366,9 +1364,9 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
 
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)HDmalloc(sizeof(uint16_t) * SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint16_t *)HDcalloc(sizeof(uint16_t), (size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE8_DIM1; i++)
@@ -1493,9 +1491,9 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
 
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)HDmalloc(sizeof(uint16_t) * SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint16_t *)HDcalloc(sizeof(uint16_t), (size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE8_DIM4; i++)
@@ -1737,9 +1735,9 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
 
     /* Allocate buffers */
     small_cube_buf_1 = (uint16_t *)HDcalloc(sizeof(uint16_t), small_cube_size);
-    CHECK(small_cube_buf_1, NULL, "HDcalloc");
+    CHECK_PTR(small_cube_buf_1, "HDcalloc");
     large_cube_buf_1 = (uint16_t *)HDcalloc(sizeof(uint16_t), large_cube_size);
-    CHECK(large_cube_buf_1, NULL, "HDcalloc");
+    CHECK_PTR(large_cube_buf_1, "HDcalloc");
 
     /* Create a dataset transfer property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -2344,7 +2342,7 @@ test_select_hyper_contig_dr(hid_t dset_type, hid_t xfer_plist)
 
     /* Allocate cube buffer for writing values */
     cube_buf = (uint16_t *)HDmalloc(sizeof(uint16_t) * max_cube_size);
-    CHECK(cube_buf, NULL, "HDmalloc");
+    CHECK_PTR(cube_buf, "HDmalloc");
 
     /* Initialize the cube buffer */
     cube_ptr = cube_buf;
@@ -2353,7 +2351,7 @@ test_select_hyper_contig_dr(hid_t dset_type, hid_t xfer_plist)
 
     /* Allocate cube buffer for zeroing values on disk */
     zero_buf = (uint16_t *)HDcalloc(sizeof(uint16_t), max_cube_size);
-    CHECK(zero_buf, NULL, "HDcalloc");
+    CHECK_PTR(zero_buf, "HDcalloc");
 
     for(large_rank = 1; large_rank <= max_rank; large_rank++) {
         for(small_rank = 1; small_rank < large_rank; small_rank++) {
@@ -2813,9 +2811,9 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
 
     /* Allocate & initialize buffers */
     small_cube_buf_1 = (uint16_t *)HDcalloc(sizeof(uint16_t), small_cube_size);
-    CHECK(small_cube_buf_1, NULL, "HDcalloc");
+    CHECK_PTR(small_cube_buf_1, "HDcalloc");
     large_cube_buf_1 = (uint16_t *)HDcalloc(sizeof(uint16_t), large_cube_size);
-    CHECK(large_cube_buf_1, NULL, "HDcalloc");
+    CHECK_PTR(large_cube_buf_1, "HDcalloc");
 
 
     /* Create a dataset transfer property list */
@@ -3576,7 +3574,7 @@ test_select_hyper_checker_board_dr(hid_t dset_type, hid_t xfer_plist)
 
     /* Allocate cube buffer for writing values */
     cube_buf = (uint16_t *)HDmalloc(sizeof(uint16_t) * max_cube_size);
-    CHECK(cube_buf, NULL, "HDmalloc");
+    CHECK_PTR(cube_buf, "HDmalloc");
 
     /* Initialize the cube buffer */
     cube_ptr = cube_buf;
@@ -3585,7 +3583,7 @@ test_select_hyper_checker_board_dr(hid_t dset_type, hid_t xfer_plist)
 
     /* Allocate cube buffer for zeroing values on disk */
     zero_buf = (uint16_t *)HDcalloc(sizeof(uint16_t), max_cube_size);
-    CHECK(zero_buf, NULL, "HDcalloc");
+    CHECK_PTR(zero_buf, "HDcalloc");
 
     for(large_rank = 1; large_rank <= max_rank; large_rank++) {
         for(small_rank = 1; small_rank < large_rank; small_rank++) {
@@ -3653,11 +3651,11 @@ test_select_hyper_copy(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)HDmalloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint16_t *)HDcalloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
     rbuf2 = (uint16_t *)HDcalloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf2, NULL, "HDcalloc");
+    CHECK_PTR(rbuf2, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -3815,11 +3813,11 @@ test_select_point_copy(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)HDmalloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint16_t *)HDcalloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
     rbuf2 = (uint16_t *)HDcalloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf2, NULL, "HDcalloc");
+    CHECK_PTR(rbuf2, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -3993,9 +3991,9 @@ test_select_hyper_offset(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -4151,9 +4149,9 @@ test_select_hyper_offset2(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE7_DIM1 * SPACE7_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
@@ -4274,9 +4272,9 @@ test_select_point_offset(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -4454,9 +4452,9 @@ test_select_hyper_union(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -5321,9 +5319,9 @@ test_select_hyper_and_2d(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -5450,9 +5448,9 @@ test_select_hyper_xor_2d(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -5581,9 +5579,9 @@ test_select_hyper_notb_2d(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -5711,9 +5709,9 @@ test_select_hyper_nota_2d(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
@@ -5871,9 +5869,9 @@ test_select_hyper_union_random_5d(hid_t read_plist)
 
     /* Allocate write & read buffers */
     wbuf = (int *)HDmalloc(sizeof(int) * SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (int *)HDcalloc(sizeof(int), (size_t)(SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5));
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE5_DIM1; i++)
@@ -6063,9 +6061,9 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
 
     /* Allocate the transfer buffers */
     data = (short *)HDmalloc(sizeof(short) * X * Y * Z);
-    CHECK(data, NULL, "HDmalloc");
+    CHECK_PTR(data, "HDmalloc");
     data_out = (short *)HDcalloc((size_t)(NX * NY * NZ), sizeof(short));
-    CHECK(data_out, NULL, "HDcalloc");
+    CHECK_PTR(data_out, "HDcalloc");
 
     /*
      * Data buffer initialization.
@@ -6298,9 +6296,9 @@ test_select_point_chunk(void)
 
     /* Allocate the transfer buffers */
     data = (unsigned *)HDmalloc(sizeof(unsigned) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(data, NULL, "HDmalloc");
+    CHECK_PTR(data, "HDmalloc");
     data_out = (unsigned *)HDcalloc((size_t)(SPACE7_DIM1 * SPACE7_DIM2), sizeof(unsigned));
-    CHECK(data_out, NULL, "HDcalloc");
+    CHECK_PTR(data_out, "HDcalloc");
 
     /*
      * Data buffer initialization.
@@ -7059,7 +7057,7 @@ test_select_fill_all(void)
 
     /* Allocate memory buffer */
     wbuf = (unsigned *)HDmalloc(sizeof(unsigned) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
 
     /* Initialize memory buffer */
     for(u = 0, tbuf = wbuf; u < SPACE7_DIM1; u++)
@@ -7135,7 +7133,7 @@ test_select_fill_point(hssize_t *offset)
 
     /* Allocate memory buffer */
     wbuf = (unsigned *)HDmalloc(sizeof(unsigned) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
 
     /* Initialize memory buffer */
     for(u = 0, tbuf = wbuf; u < SPACE7_DIM1; u++)
@@ -7232,7 +7230,7 @@ test_select_fill_hyper_simple(hssize_t *offset)
 
     /* Allocate memory buffer */
     wbuf = (unsigned *)HDmalloc(sizeof(unsigned) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
 
     /* Initialize memory buffer */
     for(u = 0, tbuf = wbuf; u < SPACE7_DIM1; u++)
@@ -7339,7 +7337,7 @@ test_select_fill_hyper_regular(hssize_t *offset)
 
     /* Allocate memory buffer */
     wbuf = (unsigned *)HDmalloc(sizeof(unsigned) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
 
     /* Initialize memory buffer */
     for(u = 0, tbuf = wbuf; u < SPACE7_DIM1; u++)
@@ -7458,7 +7456,7 @@ test_select_fill_hyper_irregular(hssize_t *offset)
 
     /* Allocate memory buffer */
     wbuf = (unsigned *)HDmalloc(sizeof(unsigned) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
 
     /* Initialize memory buffer */
     for(u = 0, tbuf = wbuf; u < SPACE7_DIM1; u++)
@@ -7560,9 +7558,9 @@ test_select_none(void)
 
     /* Allocate write & read buffers */
     wbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
@@ -7663,9 +7661,9 @@ test_scalar_select(void)
 
     /* Allocate write & read buffers */
     wbuf_uint8 = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(wbuf_uint8, NULL, "HDmalloc");
+    CHECK_PTR(wbuf_uint8, "HDmalloc");
     wbuf_ushort = (unsigned short *)HDmalloc(sizeof(unsigned short) * SPACE7_DIM1 * SPACE7_DIM2);
-    CHECK(wbuf_ushort, NULL, "HDmalloc");
+    CHECK_PTR(wbuf_ushort, "HDmalloc");
 
     /* Initialize write buffers */
     for(i=0, tbuf_uint8=wbuf_uint8, tbuf_ushort=wbuf_ushort; i<SPACE7_DIM1; i++)
@@ -12584,9 +12582,9 @@ test_select_hyper_chunk_offset(void)
 
     /* Allocate buffers */
     wbuf = (int *)HDmalloc(sizeof(int) * SPACE10_DIM1);
-    CHECK(wbuf, NULL, "HDmalloc");
+    CHECK_PTR(wbuf, "HDmalloc");
     rbuf = (int *)HDcalloc(sizeof(int), SPACE10_DIM1);
-    CHECK(rbuf, NULL, "HDcalloc");
+    CHECK_PTR(rbuf, "HDcalloc");
 
     /* Initialize the write buffer */
     for(i=0; i<SPACE10_DIM1; i++)

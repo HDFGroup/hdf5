@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __H5AtomType_H
@@ -25,9 +23,8 @@ namespace H5 {
 
     AtomType provides operations on HDF5 atomic datatypes.  It also inherits
     from DataType.
-
-    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
+// Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP AtomType : public DataType {
    public:
         // Returns the byte order of an atomic datatype.
@@ -63,7 +60,7 @@ class H5_DLLCPP AtomType : public DataType {
         virtual H5std_string fromClass () const { return("AtomType"); }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-        // Copy constructor - makes copy of the original object
+        // Copy constructor: same as the original AtomType.
         AtomType(const AtomType& original);
 
         // Noop destructor

@@ -5,12 +5,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
@@ -37,8 +35,7 @@ AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
 noinst_JAVA = \
 	TestH5.java \
-    TestH5E.java \
-    TestH5Edefault.java \
+    TestH5Eparams.java \
     TestH5Eregister.java \
     TestH5Fparams.java \
     TestH5Fbasic.java \
@@ -46,7 +43,6 @@ noinst_JAVA = \
     TestH5Fswmr.java \
     TestH5Gbasic.java \
     TestH5G.java \
-    TestH5Giterate.java \
     TestH5Sbasic.java \
     TestH5S.java \
     TestH5Tparams.java \
@@ -71,7 +67,7 @@ noinst_JAVA = \
     TestH5Ocopy.java \
     TestH5PL.java \
     TestH5Z.java \
-    TestAll.java
+    TestUnit.java
 
 $(jarfile): classnoinst.stamp classes
 	$(JAR) cvf $@ -C $(JAVAROOT)/ $(pkgpath)
@@ -93,7 +89,7 @@ TESTS_JUNIT = AllJunitTests
 
 AllJunitTests :
 	echo "#! /bin/sh" > $@
-	echo "exec @JUNIT@ test.TestAll" >> $@
+	echo "exec @JUNIT@ test.TestUnit" >> $@
 	chmod +x $@
 
 clean:

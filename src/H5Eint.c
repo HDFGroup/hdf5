@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -35,6 +33,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Epkg.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs                                  */
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -664,7 +663,7 @@ H5E_set_auto(H5E_t *estack, const H5E_auto_op_t *op, void *client_data)
 /*-------------------------------------------------------------------------
  * Function:	H5E_printf_stack
  *
- * Purpose:	Printf-like wrapper around H5E_push_stack.
+ * Purpose:	Printf-like wrapper around H5E__push_stack.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -737,7 +736,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 #endif /* H5_HAVE_VASPRINTF */
 
     /* Push the error on the stack */
-    if(H5E_push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp) < 0)
+    if(H5E__push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp) < 0)
         HGOTO_DONE(FAIL)
 
 done:
@@ -759,7 +758,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5E_push_stack
+ * Function:	H5E__push_stack
  *
  * Purpose:	Pushes a new error record onto error stack for the current
  *		thread.  The error has major and minor IDs MAJ_ID and
@@ -779,7 +778,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
+H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
     hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc)
 {
     herr_t	ret_value = SUCCEED;      /* Return value */
@@ -791,7 +790,7 @@ H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
      *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
      *		be called by FUNC_ENTER().
      */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(cls_id > 0);
@@ -842,7 +841,7 @@ H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E_push_stack() */
+} /* end H5E__push_stack() */
 
 
 /*-------------------------------------------------------------------------

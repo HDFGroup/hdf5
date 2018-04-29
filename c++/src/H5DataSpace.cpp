@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef OLD_HEADER_FILENAME
@@ -135,7 +133,7 @@ DataSpace::DataSpace(const hid_t existing_id) : IdComponent(), id(existing_id)
 
 //--------------------------------------------------------------------------
 // Function:    DataSpace copy constructor
-///\brief       Copy constructor: makes a copy of the original DataSpace object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: DataSpace object to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -468,9 +466,8 @@ hssize_t DataSpace::getSelectElemNpoints () const
 ///\param       buf - IN: List of element points selected
 ///\exception   H5::DataSpaceIException
 ///\par Description
-///             For more information, please refer to the C layer Reference
-///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectElemPointList
+///             For information, please refer to the C API
+///             H5Sget_select_elem_pointlist in the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::getSelectElemPointlist (hsize_t startpoint, hsize_t numpoints, hsize_t *buf) const
@@ -492,9 +489,8 @@ void DataSpace::getSelectElemPointlist (hsize_t startpoint, hsize_t numpoints, h
 ///             the coordinates of the diagonally opposite corner
 ///\exception   H5::DataSpaceIException
 ///\par Description
-///             For more information, please refer to the C layer Reference
-///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectBounds
+///             For information, please refer to the H5Sget_select_bounds API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::getSelectBounds (hsize_t* start, hsize_t* end) const
@@ -518,9 +514,8 @@ void DataSpace::getSelectBounds (hsize_t* start, hsize_t* end) const
 ///             specifying the coordinates of the elements being selected
 ///\exception   H5::DataSpaceIException
 ///\par Description
-///             For more information, please refer to the C layer Reference
-///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectElements
+///             For information, please refer to the H5Sselect_elements API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::selectElements (H5S_seloper_t op, const size_t num_elements, const hsize_t *coord) const
@@ -600,9 +595,8 @@ bool DataSpace::selectValid () const
 ///\param       block - IN: Size of block in the hyperslab - default to \c NULL
 ///\exception   H5::DataSpaceIException
 ///\par Description
-///             For more information, please refer to the C layer Reference
-///             Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5S.html#Dataspace-SelectHyperslab
+///             For information, please refer to the H5Sselect_hyperslab API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::selectHyperslab(H5S_seloper_t op, const hsize_t *count, const hsize_t *start, const hsize_t *stride, const hsize_t *block) const

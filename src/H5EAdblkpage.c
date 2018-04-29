@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -150,8 +148,7 @@ END_FUNC(PKG)   /* end H5EA__dblk_page_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__dblk_page_create(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
-    haddr_t addr))
+H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr))
 
     /* Local variables */
     H5EA_dblk_page_t *dblk_page = NULL; /* Extensible array data block page */
@@ -173,13 +170,13 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
         H5E_THROW(H5E_CANTSET, "can't set extensible array data block page elements to class's fill value")
 
     /* Cache the new extensible array data block page */
-    if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_insert_entry(hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array data block page to cache")
     inserted = TRUE;
 
     /* Add data block page as child of 'top' proxy */
     if(hdr->top_proxy) {
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblk_page) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblk_page) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
         dblk_page->top_proxy = hdr->top_proxy;
     } /* end if */
@@ -216,7 +213,7 @@ END_FUNC(PKG)   /* end H5EA__dblk_page_create() */
  */
 BEGIN_FUNC(PKG, ERR,
 H5EA_dblk_page_t *, NULL, NULL,
-H5EA__dblk_page_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
+H5EA__dblk_page_protect(H5EA_hdr_t *hdr, H5EA_sblock_t *parent,
     haddr_t dblk_page_addr, unsigned flags))
 
     /* Local variables */
@@ -236,13 +233,13 @@ H5EA__dblk_page_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
     udata.dblk_page_addr = dblk_page_addr;
 
     /* Protect the data block page */
-    if(NULL == (dblk_page = (H5EA_dblk_page_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page_addr, &udata, flags)))
+    if(NULL == (dblk_page = (H5EA_dblk_page_t *)H5AC_protect(hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
     /* Create top proxy, if it doesn't exist */
     if(hdr->top_proxy && NULL == dblk_page->top_proxy) {
         /* Add data block page as child of 'top' proxy */
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblk_page) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblk_page) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
         dblk_page->top_proxy = hdr->top_proxy;
     } /* end if */
@@ -254,7 +251,7 @@ CATCH
     /* Clean up on error */
     if(!ret_value) {
         /* Release the data block page, if it was protected */
-        if(dblk_page && H5AC_unprotect(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
+        if(dblk_page && H5AC_unprotect(hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
             H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array data block page, address = %llu", (unsigned long long)dblk_page->addr)
     } /* end if */
 
@@ -277,8 +274,7 @@ END_FUNC(PKG)   /* end H5EA__dblk_page_protect() */
  */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page, hid_t dxpl_id,
-    unsigned cache_flags))
+H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page, unsigned cache_flags))
 
     /* Local variables */
 
@@ -286,7 +282,7 @@ H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page, hid_t dxpl_id,
     HDassert(dblk_page);
 
     /* Unprotect the data block page */
-    if(H5AC_unprotect(dblk_page->hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, cache_flags) < 0)
+    if(H5AC_unprotect(dblk_page->hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array data block page, address = %llu", (unsigned long long)dblk_page->addr)
 
 CATCH

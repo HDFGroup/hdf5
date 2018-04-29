@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
@@ -275,16 +273,15 @@ const H5P_libclass_t H5P_CLS_TACC[1] = {{
 
 
 /* Library property list classes defined in other code modules */
+/* (And not present in src/H5Pprivate.h) */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_OCRT[1];         /* Object creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_GCRT[1];         /* Group create */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_OCPY[1];         /* Object copy */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FCRT[1];         /* File creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DCRT[1];         /* Dataset creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_LCRT[1];         /* Link creation */
 
 
 /*****************************/
@@ -2860,6 +2857,7 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
 {
     H5P_prop_set_ud_t *udata = (H5P_prop_set_ud_t *)_udata;    /* User data for callback */
     void *tmp_value = NULL;     /* Temporary value for property */
+    const void *prp_value = NULL;	/* Property value */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2883,10 +2881,13 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Call user's callback */
         if((*(prop->set))(plist->plist_id, name, prop->size, tmp_value) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value")
+
+	/* Set the pointer for copying */
+	prp_value = tmp_value;
     } /* end if */
     /* No 'set' callback, just copy value */
     else
-        tmp_value = (void *)udata->value;       /* Casting away const OK -QAK */
+        prp_value = udata->value;
 
     /* Free any previous value for the property */
     if(NULL != prop->del) {
@@ -2896,11 +2897,11 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     } /* end if */
 
     /* Copy new [possibly unchanged] value into property value */
-    HDmemcpy(prop->value, tmp_value, prop->size);
+    HDmemcpy(prop->value, prp_value, prop->size);
 
 done:
     /* Free the temporary value buffer */
-    if(tmp_value != NULL && tmp_value != udata->value)
+    if(tmp_value != NULL)
         H5MM_xfree(tmp_value);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2935,6 +2936,7 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     H5P_prop_set_ud_t *udata = (H5P_prop_set_ud_t *)_udata;    /* User data for callback */
     H5P_genprop_t *pcopy = NULL;        /* Copy of property to insert into skip list */
     void *tmp_value = NULL;             /* Temporary value for property */
+    const void *prp_value = NULL;	/* Property value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2959,16 +2961,19 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
         /* Call user's callback */
         if((*(prop->set))(plist->plist_id, name, prop->size, tmp_value) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value")
+
+	/* Set the pointer for copying */
+	prp_value = tmp_value;
     } /* end if */
     /* No 'set' callback, just copy value */
     else
-        tmp_value = (void *)udata->value;       /* Casting away const OK -QAK */
+        prp_value = udata->value;
 
     /* Make a copy of the class's property */
     if(NULL == (pcopy = H5P_dup_prop(prop, H5P_PROP_WITHIN_LIST)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property")
 
-    HDmemcpy(pcopy->value, tmp_value, pcopy->size);
+    HDmemcpy(pcopy->value, prp_value, pcopy->size);
 
     /* Insert the changed property into the property list */
     if(H5P_add_prop(plist->props, pcopy) < 0)
@@ -2976,7 +2981,7 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
 
 done:
     /* Free the temporary value buffer */
-    if(tmp_value != NULL && tmp_value != udata->value)
+    if(tmp_value != NULL)
         H5MM_xfree(tmp_value);
 
     /* Cleanup on failure */
@@ -5437,90 +5442,30 @@ H5P_get_class(const H5P_genplist_t *plist)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_verify_apl_and_dxpl
+ * Function:	H5P_get_default
  *
- * Purpose:	Validate access property list and/or switch from generic
- *		property list to default of correct type.
+ * Purpose:	Get the default property list ID, for a property class.
  *
- *		Also, if using internal DXPL and collective flag is set,
- *		switch to internal collective DXPL.
+ * Return:      Success:        Non-negative ID of property list.
+ *              Failure:        negative.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *              Sunday, June 21, 2015
+ * Programmer:	Quincey Koziol <koziol@lbl.gov>
+ *		December 29, 2017
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
-H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *dxpl_id, 
-                        hid_t
-#ifndef H5_HAVE_PARALLEL
-                        H5_ATTR_UNUSED
-#endif /* H5_HAVE_PARALLEL */
-                        loc_id, hbool_t
-#ifndef H5_HAVE_PARALLEL
-                        H5_ATTR_UNUSED
-#endif /* H5_HAVE_PARALLEL */
-                        is_collective)
+hid_t
+H5P_get_default(const H5P_libclass_t *libclass)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    /* Sanity check */
-    HDassert(acspl_id);
     HDassert(libclass);
-    HDassert(dxpl_id);
 
-#ifdef H5_HAVE_PARALLEL
-    /* If parallel is enabled and the file driver used in the MPI-IO
-    VFD, issue an MPI barrier for easier debugging if the API function
-    calling this is supposed to be called collectively. Note that this
-    happens only when the environment variable H5_COLL_BARRIER is set
-    to non 0. */
-    if(is_collective && H5_coll_api_sanity_check_g) {
-        MPI_Comm mpi_comm; /* file communicator */
-
-        /* retrieve the MPI communicator from the loc_id or the fapl_id */
-        if(H5F_mpi_retrieve_comm(loc_id, *acspl_id, &mpi_comm) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
-
-        /* issue the barrier */
-        if(mpi_comm != MPI_COMM_NULL)
-            MPI_Barrier(mpi_comm);
-    }
-#endif /* H5_HAVE_PARALLEL */
-
-    /* Set access plist to the default property list of the appropriate class if it's the generic default */
-    if(H5P_DEFAULT == *acspl_id)
-        *acspl_id = *libclass->def_plist_id;
-    else {
-#ifdef H5_HAVE_PARALLEL
-        H5P_coll_md_read_flag_t md_coll_read;      /* Collective metadata read flag */
-        H5P_genplist_t *plist;          /* Property list pointer */
-#endif /* H5_HAVE_PARALLEL */
-
-        /* Sanity check the access property list class */
-        if(TRUE != H5P_isa_class(*acspl_id, *libclass->class_id))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not the required access property list")
-
-#ifdef H5_HAVE_PARALLEL
-        /* Get the plist structure for the access property list */
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(*acspl_id)))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
-
-        /* Get the collective metadata read flag */
-        if(H5P_peek(plist, H5_COLL_MD_READ_FLAG_NAME, &md_coll_read) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core collective metadata read flag")
-
-        /* If collective metadata read requested and using internal DXPL, switch to internal collective DXPL */
-        if(H5P_USER_TRUE == md_coll_read)
-            *dxpl_id = H5AC_coll_read_dxpl_id;
-#endif /* H5_HAVE_PARALLEL */
-    } /* end else */
+    ret_value = *libclass->def_plist_id;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_verify_apl_and_dxpl() */
+} /* end H5P_get_default() */
 

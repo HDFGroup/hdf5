@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
@@ -776,7 +774,7 @@ test_h5o_link(void)
     hid_t lcpl_id=-1;
     hsize_t dims[2] = {TEST6_DIM1, TEST6_DIM2};
     htri_t committed;           /* Whether the named datatype is committed */
-    unsigned new_format;        /* Whether to use the new format or not */
+    H5F_libver_t low, high; /* File format bounds */
     int *wdata;
     int *rdata;
     int i, n;
@@ -785,9 +783,9 @@ test_h5o_link(void)
     /* Allocate memory buffers */
     /* (These are treated as 2-D buffers) */
     wdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
-    CHECK(wdata, NULL, "HDmalloc");
+    CHECK_PTR(wdata, "HDmalloc");
     rdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
-    CHECK(rdata, NULL, "HDmalloc");
+    CHECK_PTR(rdata, "HDmalloc");
 
     /* Initialize the raw data */
     for(i = n = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
@@ -803,98 +801,103 @@ test_h5o_link(void)
     ret = H5Pset_create_intermediate_group(lcpl_id, TRUE);
     CHECK(ret, FAIL, "H5Pset_create_intermediate_group");
 
-    /* Loop over using new group format */
-    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+    /* Create a file access property list */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl_id, FAIL, "H5Pcreate");
 
-        /* Make a FAPL that uses the "use the latest version of the format" bounds */
-        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-        CHECK(fapl_id, FAIL, "H5Pcreate");
+    /* Loop through all the combinations of low/high library format bounds */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
-        /* Set the "use the latest version of the format" bounds for creating objects in the file */
-        ret = H5Pset_libver_bounds(fapl_id, (new_format ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST), H5F_LIBVER_LATEST);
-        CHECK(ret, FAIL, "H5Pset_libver_bounds");
+            /* Set version bounds */
+            H5E_BEGIN_TRY {
+                ret = H5Pset_libver_bounds(fapl_id, low, high);
+            } H5E_END_TRY;
 
-        /* Create a new HDF5 file */
-        file_id = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-        CHECK(file_id, FAIL, "H5Fcreate");
+            if (ret < 0) /* Invalid low/high combinations */
+                continue;
 
-        /* Close the FAPL */
-        ret = H5Pclose(fapl_id);
-        CHECK(ret, FAIL, "H5Pclose");
+            /* Create a new HDF5 file */
+            file_id = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+            CHECK(file_id, FAIL, "H5Fcreate");
 
+            /* Close the FAPL */
+            ret = H5Pclose(fapl_id);
+            CHECK(ret, FAIL, "H5Pclose");
 
-        /* Create and commit a datatype with no name */
-        type_id = H5Tcopy(H5T_NATIVE_INT);
-        CHECK(type_id, FAIL, "H5Fcreate");
-        ret = H5Tcommit_anon(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Tcommit_anon");
-        committed = H5Tcommitted(type_id);
-        VERIFY(committed, TRUE, "H5Tcommitted");
+            /* Create and commit a datatype with no name */
+            type_id = H5Tcopy(H5T_NATIVE_INT);
+            CHECK(type_id, FAIL, "H5Fcreate");
+            ret = H5Tcommit_anon(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Tcommit_anon");
+            committed = H5Tcommitted(type_id);
+            VERIFY(committed, TRUE, "H5Tcommitted");
 
-        /* Create a dataset with no name using the committed datatype*/
-        dset_id = H5Dcreate_anon(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
-        CHECK(dset_id, FAIL, "H5Dcreate_anon");
+            /* Create a dataset with no name using the committed datatype*/
+            dset_id = H5Dcreate_anon(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(dset_id, FAIL, "H5Dcreate_anon");
 
-        /* Verify that we can write to and read from the dataset */
+            /* Verify that we can write to and read from the dataset */
 
-        /* Write the data to the dataset */
-        ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
-        CHECK(ret, FAIL, "H5Dwrite");
+            /* Write the data to the dataset */
+            ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+            CHECK(ret, FAIL, "H5Dwrite");
 
-        /* Read the data back */
-        ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-        CHECK(ret, FAIL, "H5Dread");
+            /* Read the data back */
+            ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+            CHECK(ret, FAIL, "H5Dread");
 
-        /* Verify the data */
-        for(i = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
-            VERIFY(wdata[i], rdata[i], "H5Dread");
+            /* Verify the data */
+            for(i = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
+                VERIFY(wdata[i], rdata[i], "H5Dread");
+    
+            /* Create a group with no name*/
+            group_id = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(group_id, FAIL, "H5Gcreate_anon");
 
-        /* Create a group with no name*/
-        group_id = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT);
-        CHECK(group_id, FAIL, "H5Gcreate_anon");
+            /* Link nameless datatype into nameless group */
+            ret = H5Olink(type_id, group_id, "datatype", H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Olink");
 
-        /* Link nameless datatype into nameless group */
-        ret = H5Olink(type_id, group_id, "datatype", H5P_DEFAULT, H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Olink");
+            /* Link nameless dataset into nameless group with intermediate group */
+            ret = H5Olink(dset_id, group_id, "inter_group/dataset", lcpl_id, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Olink");
 
-        /* Link nameless dataset into nameless group with intermediate group */
-        ret = H5Olink(dset_id, group_id, "inter_group/dataset", lcpl_id, H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Olink");
+            /* Close IDs for dataset and datatype */
+            ret = H5Dclose(dset_id);
+            CHECK(ret, FAIL, "H5Dclose");
+            ret = H5Tclose(type_id);
+            CHECK(ret, FAIL, "H5Tclose");
 
-        /* Close IDs for dataset and datatype */
-        ret = H5Dclose(dset_id);
-        CHECK(ret, FAIL, "H5Dclose");
-        ret = H5Tclose(type_id);
-        CHECK(ret, FAIL, "H5Tclose");
+            /* Re-open datatype using new link */
+            type_id = H5Topen2(group_id, "datatype", H5P_DEFAULT);
+            CHECK(type_id, FAIL, "H5Topen2");
 
-        /* Re-open datatype using new link */
-        type_id = H5Topen2(group_id, "datatype", H5P_DEFAULT);
-        CHECK(type_id, FAIL, "H5Topen2");
+            /* Link nameless group to root group and close the group ID*/
+            ret = H5Olink(group_id, file_id, "/group", H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Olink");
+            ret = H5Gclose(group_id);
+            CHECK(ret, FAIL, "H5Gclose");
 
-        /* Link nameless group to root group and close the group ID*/
-        ret = H5Olink(group_id, file_id, "/group", H5P_DEFAULT, H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Olink");
-        ret = H5Gclose(group_id);
-        CHECK(ret, FAIL, "H5Gclose");
+            /* Open dataset through root group and verify its data */
+            dset_id = H5Dopen2(file_id, "/group/inter_group/dataset", H5P_DEFAULT);
+            CHECK(dset_id, FAIL, "H5Dopen2");
 
-        /* Open dataset through root group and verify its data */
-        dset_id = H5Dopen2(file_id, "/group/inter_group/dataset", H5P_DEFAULT);
-        CHECK(dset_id, FAIL, "H5Dopen2");
+            /* Read data from dataset */
+            ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+            CHECK(ret, FAIL, "H5Dread");
+            for(i = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
+                VERIFY(wdata[i], rdata[i], "H5Dread");
 
-        /* Read data from dataset */
-        ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-        CHECK(ret, FAIL, "H5Dread");
-        for(i = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
-            VERIFY(wdata[i], rdata[i], "H5Dread");
-
-        /* Close open IDs */
-        ret = H5Dclose(dset_id);
-        CHECK(ret, FAIL, "H5Dclose");
-        ret = H5Tclose(type_id);
-        CHECK(ret, FAIL, "H5Tclose");
-        ret = H5Fclose(file_id);
-        CHECK(ret, FAIL, "H5Fclose");
-    } /* end for */
+            /* Close open IDs */
+            ret = H5Dclose(dset_id);
+            CHECK(ret, FAIL, "H5Dclose");
+            ret = H5Tclose(type_id);
+            CHECK(ret, FAIL, "H5Tclose");
+            ret = H5Fclose(file_id);
+            CHECK(ret, FAIL, "H5Fclose");
+        } /* for high */
+    } /* for low */
 
     /* Close remaining IDs */
     ret = H5Sclose(space_id);

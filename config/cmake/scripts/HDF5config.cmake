@@ -1,33 +1,40 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
-### BUILD_GENERATOR required [Unix, VS2015, VS201564, VS2013, VS201364, VS2012, VS201264] ###
-### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -VV -O hdf5.log         ###
+### BUILD_GENERATOR required [Unix, VS2017, VS201764, VS2015, VS201564, VS2013, VS201364] ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
-cmake_minimum_required (VERSION 3.2.2 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.10)
 ############################################################################
 # Usage:
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
-#            Unix    * Unix Makefiles
+#            Unix      * Unix Makefiles
+#            VS2017    * Visual Studio 15 2017
+#            VS201764  * Visual Studio 15 2017 Win64
 #            VS2015    * Visual Studio 14 2015
-#            VS201564 * Visual Studio 14 2015 Win64
+#            VS201564  * Visual Studio 14 2015 Win64
 #            VS2013    * Visual Studio 12 2013
-#            VS201364 * Visual Studio 12 2013 Win64
-#            VS2012    * Visual Studio 11 2012
-#            VS201264 * Visual Studio 11 2012 Win64
+#            VS201364  * Visual Studio 12 2013 Win64
 #
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATIC_ONLY  -  Build/use static libraries
-#     FORTRAN_LIBRARIES -  Build/use fortran libraries
-#     JAVA_LIBRARIES -  Build/use java libraries
-#     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.11.0")
+set (CTEST_SOURCE_VERSION "1.11.2")
 set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
@@ -36,10 +43,6 @@ set (CTEST_SOURCE_VERSEXT "")
 #INSTALLDIR - HDF5-1.10.0 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
-#STATIC_ONLY - Default is YES
-#FORTRAN_LIBRARIES - Default is NO
-#JAVA_LIBRARIES - Default is NO
-#NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -54,29 +57,12 @@ endif ()
 
 # build generator must be defined
 if (NOT DEFINED BUILD_GENERATOR)
-  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
-else ()
-  if (${BUILD_GENERATOR} STREQUAL "Unix")
-    set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS2015")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS201564")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015 Win64")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS2013")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS201364")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS2012")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012")
-  elseif (${BUILD_GENERATOR} STREQUAL "VS201264")
-    set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
-  else ()
-    message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
-  endif ()
+  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
 endif ()
 
 ###################################################################
 ### Following Line is one of [Release, RelWithDebInfo, Debug] #####
+###        (default use command line -C value)
 set (CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
 ###################################################################
 
@@ -92,21 +78,6 @@ if (NOT DEFINED CTEST_CONFIGURATION_TYPE)
 endif ()
 if (NOT DEFINED CTEST_SOURCE_NAME)
   set (CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
-endif ()
-if (NOT DEFINED STATIC_ONLY)
-  set (STATICONLYLIBRARIES "YES")
-else ()
-  set (STATICONLYLIBRARIES "NO")
-endif ()
-if (NOT DEFINED FORTRAN_LIBRARIES)
-  set (FORTRANLIBRARIES "NO")
-else ()
-  set(FORTRANLIBRARIES "YES")
-endif ()
-if (NOT DEFINED JAVA_LIBRARIES)
-  set (JAVALIBRARIES "NO")
-else ()
-  set (JAVALIBRARIES "YES")
 endif ()
 
 set (CTEST_BINARY_NAME "build")
@@ -124,30 +95,48 @@ endif ()
 if (WIN32)
   set (SITE_OS_NAME "Windows")
   set (SITE_OS_VERSION "WIN7")
-  if (${BUILD_GENERATOR} STREQUAL "VS201564")
+  if (${BUILD_GENERATOR} STREQUAL "VS201764")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017 Win64")
+    set (SITE_OS_BITS "64")
+    set (SITE_COMPILER_NAME "vs2017")
+    set (SITE_COMPILER_VERSION "15")
+  elseif (${BUILD_GENERATOR} STREQUAL "VS2017")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017")
+    set (SITE_OS_BITS "32")
+    set (SITE_COMPILER_NAME "vs2017")
+    set (SITE_COMPILER_VERSION "15")
+  elseif (${BUILD_GENERATOR} STREQUAL "VS201564")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015 Win64")
     set (SITE_OS_BITS "64")
     set (SITE_COMPILER_NAME "vs2015")
     set (SITE_COMPILER_VERSION "14")
   elseif (${BUILD_GENERATOR} STREQUAL "VS2015")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 14 2015")
     set (SITE_OS_BITS "32")
     set (SITE_COMPILER_NAME "vs2015")
     set (SITE_COMPILER_VERSION "14")
   elseif (${BUILD_GENERATOR} STREQUAL "VS201364")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
     set (SITE_OS_BITS "64")
     set (SITE_COMPILER_NAME "vs2013")
     set (SITE_COMPILER_VERSION "12")
   elseif (${BUILD_GENERATOR} STREQUAL "VS2013")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 12 2013")
     set (SITE_OS_BITS "32")
     set (SITE_COMPILER_NAME "vs2013")
     set (SITE_COMPILER_VERSION "12")
   elseif (${BUILD_GENERATOR} STREQUAL "VS201264")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
     set (SITE_OS_BITS "64")
     set (SITE_COMPILER_NAME "vs2012")
     set (SITE_COMPILER_VERSION "11")
   elseif (${BUILD_GENERATOR} STREQUAL "VS2012")
+    set (CTEST_CMAKE_GENERATOR "Visual Studio 11 2012")
     set (SITE_OS_BITS "32")
     set (SITE_COMPILER_NAME "vs2012")
     set (SITE_COMPILER_VERSION "11")
+  else ()
+    message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
   endif ()
 ##  Set the following to unique id your computer  ##
   set (CTEST_SITE "WIN7${BUILD_GENERATOR}.XXXX")
@@ -201,34 +190,6 @@ set (REPOSITORY_BRANCH "develop")
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
 ###################################################################
 
-###################################################################
-if (${STATICONLYLIBRARIES})
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
-  #########       Following describes computer           ############
-  ## following is optional to describe build                       ##
-  set (SITE_BUILDNAME_SUFFIX "STATIC")
-endif ()
-###################################################################
-####      fortran       ####
-if (${FORTRANLIBRARIES})
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
-  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
-else ()
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
-  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=OFF")
-endif ()
-####      java       ####
-if (${JAVALIBRARIES})
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
-else ()
-  set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
-endif ()
-
-### change install prefix
-set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALLDIR}")
-set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCTEST_CONFIGURATION_TYPE:STRING=$ENV{CMAKE_CONFIG_TYPE}")
 
 ###################################################################
 

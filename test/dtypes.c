@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -20,7 +18,7 @@
  * Purpose:     Tests the datatype interface (H5T)
  */
 
-#include "h5test.h"
+#include "testhdf5.h"
 #include "H5srcdir.h"
 #include "H5Iprivate.h"     /* For checking that datatype id's don't leak */
 
@@ -48,6 +46,16 @@
 #define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 #include "H5Tpkg.h"
 #endif
+
+/* Use in version bound test */
+#define H5F_FRIEND      /*suppress error about including H5Fpkg */
+#define H5F_TESTING
+#include "H5Fpkg.h"     /* File access                          */
+
+/* Use in version bound test */
+#define H5O_FRIEND      /*suppress error about including H5Opkg */
+#include "H5Opkg.h"     /* Object headers                       */
+
 #define SET_ALIGNMENT(TYPE,VAL) \
     H5T_NATIVE_##TYPE##_ALIGN_g=MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
 
@@ -94,7 +102,15 @@ typedef enum dtype_t {
     INT_SCHAR, INT_UCHAR, INT_SHORT, INT_USHORT, INT_INT, INT_UINT,
     INT_LONG, INT_ULONG, INT_LLONG, INT_ULLONG, FLT_FLOAT, FLT_DOUBLE,
     FLT_LDOUBLE, OTHER
-} dtype_t;
+} dtype_t; /* This doesn't seem to be used anywhere... -BMR */
+
+typedef enum {
+    E1_RED,
+    E1_GREEN,
+    E1_BLUE,
+    E1_ORANGE,
+    E1_YELLOW
+} color_t;
 
 /* Constant for size of conversion buffer for int <-> float exception test */
 #define CONVERT_SIZE    4
@@ -1680,7 +1696,7 @@ test_compound_9(void)
 {
     typedef struct cmpd_struct {
        int    i1;
-       char*  str;
+       const char* str;
        int    i2;
     } cmpd_struct;
 
@@ -2528,7 +2544,7 @@ test_compound_14(void)
     typedef struct cmpd_struct_1 {
        char         c1;
        char         c2;
-       char*        str;
+       const char*  str;
     } cmpd_struct_1;
 
     typedef struct cmpd_struct_2 {
@@ -3301,7 +3317,7 @@ test_compound_18(void)
 
     /* Create compound datatype, but don't insert fields */
     tid = H5Tcreate(H5T_COMPOUND, (size_t)8);
-    assert(tid > 0);
+    HDassert(tid > 0);
 
     /* Attempt to create file with compound datatype that has no fields */
     /* Create File */
@@ -3310,7 +3326,7 @@ test_compound_18(void)
 
     /* Create a dataspace to use */
     sid = H5Screate_simple(1, &dim, NULL);
-    assert(sid > 0);
+    HDassert(sid > 0);
 
     /* Create a dataset with the bad compound datatype */
     H5E_BEGIN_TRY {
@@ -3323,7 +3339,7 @@ test_compound_18(void)
 
     /* Create a group */
     gid = H5Gcreate2(file, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(gid > 0);
+    HDassert(gid > 0);
 
     /* Create an attribute with the bad compound datatype */
     H5E_BEGIN_TRY {
@@ -4674,7 +4690,7 @@ test_conv_enum_2(void)
 
     /* Destination enum type */
     dsttype = H5Tenum_create(H5T_NATIVE_INT);
-    assert(H5Tget_size(dsttype) > H5Tget_size(srctype));
+    HDassert(H5Tget_size(dsttype) > H5Tget_size(srctype));
     for (i=0; i<8; i++)
         H5Tenum_insert(dsttype, mname[i], &i);
 
@@ -6684,7 +6700,7 @@ error:
 } /* end test_named_indirect_reopen() */
 
 static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
-    hbool_t new_format)
+    H5F_libver_t low, H5F_libver_t high)
 {
     hid_t file;         /* File ID */
     hid_t type;         /* Datatype ID */
@@ -6694,93 +6710,97 @@ static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
     hid_t fcpl;         /* File creation property list ID */
     hid_t my_fapl;      /* Copy of file access property list ID */
     hid_t dcpl;         /* Dataset creation property list ID */
+    unsigned use_at_least_v18;/* Whether to use old or new format */
     herr_t status;      /* Generic return value */
 
     /* Make copy of FAPL */
     my_fapl = H5Pcopy(fapl);
-    assert(my_fapl > 0);
+    HDassert(my_fapl > 0);
 
-    if(new_format) {
-        /* Use latest version of file format */
-        status = H5Pset_libver_bounds(my_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
-        assert(status >= 0);
-    } /* end if */
+    /* Use low/high version of file format */
+    status = H5Pset_libver_bounds(my_fapl, low, high);
+    HDassert(status >= 0);
+
+    /* Set new format flag.  Note: the case high < low should be caught in the caller */
+    use_at_least_v18 = 0;
+    if (low >= H5F_LIBVER_V18)
+        use_at_least_v18 = 1;
 
     /* Create a file creation property list (used for the root group's creation property list) */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    assert(fcpl > 0);
+    HDassert(fcpl > 0);
 
-    if(new_format) {
+    if(use_at_least_v18) {
         /* Use dense link storage for all links in root group */
         status = H5Pset_link_phase_change(fcpl, 0, 0);
-        assert(status >= 0);
+        HDassert(status >= 0);
     } /* end if */
 
     /* Create file with attribute that uses committed datatype */
     file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, my_fapl);
-    assert(file > 0);
+    HDassert(file > 0);
 
     /* Close FCPL */
     status = H5Pclose(fcpl);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* Close FAPL */
     status = H5Pclose(my_fapl);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* Create datatype to commit */
     type = H5Tvlen_create(H5T_NATIVE_INT);
-    assert(type > 0);
+    HDassert(type > 0);
 
     /* Commit datatype */
     status = H5Tcommit2(file, DEL_OBJ_NAMED_NAMED_DTYPE, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* Create scalar dataspace */
     space = H5Screate(H5S_SCALAR);
-    assert(space > 0);
+    HDassert(space > 0);
 
     /* Create a dataset creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    assert(dcpl > 0);
+    HDassert(dcpl > 0);
 
-    if(new_format) {
+    if(use_at_least_v18) {
         /* Use dense attribute storage for all attributes on dataset */
         status = H5Pset_attr_phase_change(dcpl, 0, 0);
-        assert(status >= 0);
+        HDassert(status >= 0);
     } /* end if */
 
     /* Create dataset */
     dset = H5Dcreate2(file, DEL_OBJ_NAMED_DATASET, type, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    assert(dset > 0);
+    HDassert(dset > 0);
 
     /* Close DCPL */
     status = H5Pclose(dcpl);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* Close dataset */
     status = H5Dclose(dset);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* Create attribute */
     attr = H5Acreate_by_name(file, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(attr > 0);
+    HDassert(attr > 0);
 
     /* Close dataspace */
     status = H5Sclose(space);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* Close datatype */
     status = H5Tclose(type);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* Close attribute */
     status = H5Aclose(attr);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* Close file */
     status = H5Fclose(file);
-    assert(status >= 0);
+    HDassert(status >= 0);
 } /* end create_del_obj_named_test_file() */
 
 
@@ -6805,7 +6825,7 @@ test_delete_obj_named(hid_t fapl)
     hid_t attr = -1;            /* Attribute ID */
     hid_t dset = -1;            /* Dataset ID */
     hid_t fapl2 = -1;           /* File access property list ID */
-    unsigned new_format;        /* Whether to use old or new format */
+    H5F_libver_t low, high;     /* File format bounds */
     char filename[1024], filename2[1024];
 
     TESTING("deleting objects that use named datatypes");
@@ -6815,47 +6835,54 @@ test_delete_obj_named(hid_t fapl)
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
     h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
 
-    /* Loop over old & new format files */
-    for(new_format = FALSE; new_format <= TRUE; new_format++) {
-        /* Create test file, with attribute that uses committed datatype */
-        create_del_obj_named_test_file(filename, fapl, new_format);
+    /* Loop through all valid the combinations of low/high library format bounds,
+       to test delete objects that use named datatypes through different file IDs */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
-/* Test deleting dataset opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            /* Skip invalid low/high combination */
+            if ((high == H5F_LIBVER_EARLIEST) || (low > high))
+                continue;
 
-        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+            /* Create test file, with attribute that uses committed datatype */
+            create_del_obj_named_test_file(filename, fapl, low, high);
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+            /* Test deleting dataset opened through different file ID */
+            if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
-        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+            if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+            if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
 
-        if(H5Ldelete(filea2, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
 
-        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+            if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
 
+            if(H5Ldelete(filea2, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-        /* Create test file, with attribute that uses committed datatype */
-        create_del_obj_named_test_file(filename, fapl, new_format);
+            if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
 
-/* Test deleting attribute opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            /* Create test file, with attribute that uses committed datatype */
+            create_del_obj_named_test_file(filename, fapl, low, high);
 
-        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+            /* Test deleting attribute opened through different file ID */
+            if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+            if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+            if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
 
-        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
 
-        if(H5Adelete_by_name(filea2, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
 
-        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
-    } /* end for */
+            if(H5Adelete_by_name(filea2, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+            if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+        } /* end high */
+    } /* end low */
 
     if(H5Pclose(fapl2) < 0) FAIL_STACK_ERROR
 
@@ -6900,7 +6927,7 @@ test_delete_obj_named_fileid(hid_t fapl)
     hid_t attr = -1;            /* Attribute ID */
     hid_t dset = -1;            /* Dataset ID */
     hid_t fapl2 = -1;           /* File access property list ID */
-    unsigned new_format;        /* Whether to use old or new format */
+    H5F_libver_t low, high;     /* File format bounds */
     char filename[1024], filename2[1024];
 
     TESTING("deleting objects that use named datatypes");
@@ -6910,108 +6937,115 @@ test_delete_obj_named_fileid(hid_t fapl)
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
     h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
 
-    /* Loop over old & new format files */
-    for(new_format = FALSE; new_format <= TRUE; new_format++) {
-        /* Create test file, with attribute that uses committed datatype */
-        create_del_obj_named_test_file(filename, fapl, new_format);
+    /* Loop through all the combinations of low/high library format bounds */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
-/* Test getting file ID for dataset opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            /* Skip invalid low/high combination */
+            if ((high == H5F_LIBVER_EARLIEST) || (low > high))
+                continue;
 
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            /* Create test file, with attribute that uses committed datatype */
+            create_del_obj_named_test_file(filename, fapl, low, high);
 
-        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+            /* Test getting file ID for dataset opened through different file ID */
+            if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
-        /* Verify file ID from dataset matches correct file */
-        dset_fid = H5Iget_file_id(dset);
-        if(dset_fid != filea1) TEST_ERROR
-        H5Fclose(dset_fid);
+            if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
-        /* Verify file ID from datatype (from dataset) matches correct file */
-        type = H5Dget_type(dset);
-        type_fid = H5Iget_file_id(type);
-        if(type_fid != filea1) TEST_ERROR
-        H5Fclose(type_fid);
-        H5Tclose(type);
+            if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+            /* Verify file ID from dataset matches correct file */
+            dset_fid = H5Iget_file_id(dset);
+            if(dset_fid != filea1) TEST_ERROR
+            H5Fclose(dset_fid);
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+            /* Verify file ID from datatype (from dataset) matches correct file */
+            type = H5Dget_type(dset);
+            type_fid = H5Iget_file_id(type);
+            if(type_fid != filea1) TEST_ERROR
+            H5Fclose(type_fid);
+            H5Tclose(type);
 
-        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+            if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
 
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
 
-        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+            if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
 
-        /* Verify file ID from dataset matches correct file */
-        dset_fid = H5Iget_file_id(dset);
-        if(dset_fid != filea1) TEST_ERROR
-        H5Fclose(dset_fid);
+            if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
-        /* Verify file ID from datatype (from dataset) matches correct file */
-        type = H5Dget_type(dset);
-        type_fid = H5Iget_file_id(type);
-        if(type_fid != filea1) TEST_ERROR
-        H5Fclose(type_fid);
-        H5Tclose(type);
+            if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+            /* Verify file ID from dataset matches correct file */
+            dset_fid = H5Iget_file_id(dset);
+            if(dset_fid != filea1) TEST_ERROR
+            H5Fclose(dset_fid);
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+            /* Verify file ID from datatype (from dataset) matches correct file */
+            type = H5Dget_type(dset);
+            type_fid = H5Iget_file_id(type);
+            if(type_fid != filea1) TEST_ERROR
+            H5Fclose(type_fid);
+            H5Tclose(type);
+
+            if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+
+            if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
 
 
-        /* Create test file, with attribute that uses committed datatype */
-        create_del_obj_named_test_file(filename, fapl, new_format);
+            /* Create test file, with attribute that uses committed datatype */
+            create_del_obj_named_test_file(filename, fapl, low, high);
 
-/* Test getting file ID for attribute opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            /* Test getting file ID for attribute opened through different file ID */
+            if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
-        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+            if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-        /* Verify file ID from dataset matches correct file */
-        attr_fid = H5Iget_file_id(attr);
-        if(attr_fid != filea1) TEST_ERROR
-        H5Fclose(attr_fid);
+            /* Verify file ID from dataset matches correct file */
+            attr_fid = H5Iget_file_id(attr);
+            if(attr_fid != filea1) TEST_ERROR
+            H5Fclose(attr_fid);
 
-        /* Verify file ID from datatype (from dataset) matches correct file */
-        type = H5Aget_type(attr);
-        type_fid = H5Iget_file_id(type);
-        if(type_fid != filea1) TEST_ERROR
-        H5Fclose(type_fid);
-        H5Tclose(type);
+            /* Verify file ID from datatype (from dataset) matches correct file */
+            type = H5Aget_type(attr);
+            type_fid = H5Iget_file_id(type);
+            if(type_fid != filea1) TEST_ERROR
+            H5Fclose(type_fid);
+            H5Tclose(type);
 
-        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+            if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
 
-        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+            if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
 
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+            if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
-        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+            if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-        /* Verify file ID from dataset matches correct file */
-        attr_fid = H5Iget_file_id(attr);
-        if(attr_fid != filea1) TEST_ERROR
-        H5Fclose(attr_fid);
+            /* Verify file ID from dataset matches correct file */
+            attr_fid = H5Iget_file_id(attr);
+            if(attr_fid != filea1) TEST_ERROR
+            H5Fclose(attr_fid);
 
-        /* Verify file ID from datatype (from dataset) matches correct file */
-        type = H5Aget_type(attr);
-        type_fid = H5Iget_file_id(type);
-        if(type_fid != filea1) TEST_ERROR
-        H5Fclose(type_fid);
-        H5Tclose(type);
+            /* Verify file ID from datatype (from dataset) matches correct file */
+            type = H5Aget_type(attr);
+            type_fid = H5Iget_file_id(type);
+            if(type_fid != filea1) TEST_ERROR
+            H5Fclose(type_fid);
+            H5Tclose(type);
 
-        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+            if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
 
-        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
-        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
-    } /* end for */
+            if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+            if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+        } /* end high */
+    } /* end low */
 
     if(H5Pclose(fapl2) < 0) FAIL_STACK_ERROR
 
@@ -7020,12 +7054,15 @@ test_delete_obj_named_fileid(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-	H5Tclose(attr);
+	H5Aclose(attr);
+	H5Tclose(type);
 	H5Dclose(dset);
 	H5Pclose(fapl2);
 	H5Fclose(filea1);
 	H5Fclose(filea2);
 	H5Fclose(fileb);
+	H5Fclose(attr_fid);
+	H5Fclose(type_fid);
     } H5E_END_TRY;
     return 1;
 } /* end test_delete_obj_named_fileid() */
@@ -7390,7 +7427,369 @@ error:
     return 1;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    verify_version
+ *
+ * Purpose: Utility function to verify the datatype versions of nested
+ *          datatype.
+ *
+ * Description:
+ *      Verify the datatype message version
+ *      --H5T_COMPOUND, H5T_ENUM, H5T_ARRAY:
+ *          the library will set version according to low_bound
+ *      --H5T_ARRAY:
+ *          the earliest version the library will set is 2
+ *      --H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, H5T_BITFIELD,
+ *        H5T_OPAQUE, H5T_REFERENCE:
+ *          the library will only use basic version
+ *
+ *************************************************************************/
+static herr_t verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
+{
+    hid_t base_dtype = -1;
+    hid_t mem_dtype = -1;
+    H5T_t *dtypep = NULL;    /* Internal structure of a datatype */
+    H5T_class_t type_cls = H5T_NO_CLASS; /* Temporary var for datatype class */
+    int nmembers = 0;
+    unsigned i;
+    herr_t ret = SUCCEED;         /* Generic return value */
 
+    dtypep = (H5T_t *)H5I_object(dtype);
+    if (dtypep == NULL) TEST_ERROR
+
+    /* Carry out the verification according to the class of the datatype.
+       For compound datatype, its members will be verified, recursively.
+       For array datatype, its element datatype will be verified, recursively.*/
+    type_cls = dtypep->shared->type;
+    switch (type_cls)
+    {
+      case H5T_ARRAY:
+      {
+        H5T_t *base_dtypep = NULL;    /* Internal structure of a datatype */
+
+        if (low == H5F_LIBVER_EARLIEST)
+            VERIFY(dtypep->shared->version, H5O_DTYPE_VERSION_2, "H5O_dtype_ver_bounds");
+        else
+            VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[low], "H5O_dtype_ver_bounds");
+
+        /* Get the base datatype of this array type */
+        base_dtype = H5Tget_super(dtype);
+        CHECK(base_dtype, FAIL, "H5Tget_super");
+
+        /* Get the base type's internal structure for version */
+        base_dtypep = (H5T_t *)H5I_object(base_dtype);
+        if (base_dtypep == NULL) TEST_ERROR
+
+            /* Reset highest version if this datatype has higher version than
+               its outer type */
+        if (*highest_version < base_dtypep->shared->version)
+            *highest_version = base_dtypep->shared->version;
+
+        /* Verify the base datatype recursively */
+        ret = verify_version(base_dtype, low, highest_version);
+
+        /* Close the member datatype before checking for failure */
+        if ((H5Tclose(base_dtype)) < 0) TEST_ERROR
+
+        /* Check if verify_version fails */
+        if (ret < 0) TEST_ERROR
+
+        break;
+      }
+      case H5T_COMPOUND:
+      {
+        H5T_t *mem_dtypep = NULL;    /* Internal structure of a datatype */
+        /* Get the number of members of this compound type */
+        if ((nmembers = H5Tget_nmembers(dtype)) < 0) TEST_ERROR
+
+        /* Go through all its member datatypes */
+        for (i = 0; i < (unsigned)nmembers; i++)
+        {
+            /* Get the member datatype to verify it recursively */
+            mem_dtype = H5Tget_member_type(dtype, i);
+            if (mem_dtype < 0) TEST_ERROR
+
+            /* Get the member type's internal structure for version */
+            mem_dtypep = (H5T_t *)H5I_object(mem_dtype);
+            if (mem_dtypep == NULL) TEST_ERROR
+
+            /* Reset highest version if this datatype has higher version than
+               its outer type */
+            if (*highest_version < mem_dtypep->shared->version)
+            *highest_version = mem_dtypep->shared->version;
+
+            /* Verify the datatype recursively */
+            ret = verify_version(mem_dtype, low, highest_version);
+
+            /* Close the member datatype before checking for failure */
+            if ((H5Tclose(mem_dtype)) < 0) TEST_ERROR
+
+            /* Check if verify_version fails */
+            if (ret < 0) TEST_ERROR
+        }
+        /* If this compound datatype contains a datatype of higher version, it
+           will be promoted to that version, thus, verify with highest version */
+        if (*highest_version > H5O_dtype_ver_bounds[low])
+            VERIFY(dtypep->shared->version, *highest_version, "verify_version");
+        else
+            VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[low], "verify_version");
+        break;
+      }
+      case H5T_ENUM:
+        VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[low], "verify_version");
+        break;
+      case H5T_VLEN:
+      case H5T_FLOAT:
+      case H5T_INTEGER:
+        VERIFY(dtypep->shared->version, H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST], "verify_version");
+        break;
+      case H5T_NCLASSES:
+      case H5T_NO_CLASS:
+      case H5T_TIME:
+      case H5T_STRING:
+      case H5T_BITFIELD:
+      case H5T_OPAQUE:
+      case H5T_REFERENCE:
+      default:
+        TEST_ERROR
+    } /* end switch */
+
+error:
+    H5E_BEGIN_TRY {
+      H5Tclose(base_dtype);
+      H5Tclose(mem_dtype);
+    } H5E_END_TRY;
+    return ret;
+} /* end of verify_version */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_versionbounds
+ *
+ * Purpose:     Tests version bounds.
+ *
+ * Description:
+ *      This function creates a datatype for a dataset as followed:
+ *          outer_arr_type
+ *              outer_cmp_type
+ *                  inner_cmp_type
+ *                      inner_arr_type
+ *                          simple_cmp_type
+ *                              H5T_NATIVE_INT
+ *                              H5T_ARRAY of H5T_NATIVE_CHAR
+ *                      vlen_floattype
+ *                  enum_type
+ *      It then loops through all valid combination of the library version
+ *      bounds to verify each datatype's version.
+ *
+ * Return:      Success:	0
+ *              Failure:	number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+#define VERFNAME    "tverbounds_dtype.h5"
+#define VERDSNAME   "dataset 1"
+#define ARRAY_RANK  1
+#define ARRAY_LEN   10
+static int
+test_versionbounds(void)
+{
+    typedef struct {     /* Struct for the simple compound type */
+        int single_int;
+        char char_arr[ARRAY_LEN];
+    } simple_cmp_t;
+
+    typedef struct {     /* Struct for the inner compound type */
+        simple_cmp_t inner_arr[ARRAY_LEN];
+        hvl_t vlen_float;
+    } inner_cmp_t;
+
+    typedef struct {     /* Struct for the outer compound type */
+        inner_cmp_t inner_cmp;
+        color_t enum_color;
+    } outer_cmp_t;
+
+    hid_t file = -1;    /* File ID */
+    hid_t space = -1;   /* Dataspace ID */
+    hid_t dset = -1;    /* Dataset ID */
+    hid_t fcpl = -1;    /* File creation property list ID */
+    hid_t fapl = -1;    /* Copy of file access property list ID */
+    hid_t dcpl = -1;    /* Dataset creation property list ID */
+    hid_t dset_dtype = -1;     /* Dataset's datatype */
+    hid_t arr_chartype = -1;   /* Array of characters datatype */
+    hid_t vlen_floattype = -1; /* Vlen of float datatype */
+    hid_t enum_type = -1;      /* Enumeration datatype */
+    hid_t outer_cmp_type = -1; /* Outer compound datatype */
+    hid_t inner_cmp_type = -1; /* Inner compound datatype */
+    hid_t simple_cmp_type = -1;/* Simple cmpd dtype, contains no other cmpd */
+    hid_t outer_arr_type = -1; /* Outermost array datatype */
+    hid_t inner_arr_type = -1; /* Inner array datatype */
+    H5F_t *filep = NULL;       /* Pointer to internal structure of a file */
+    H5T_t *dtypep = NULL;      /* Pointer to internal structure of a datatype */
+    hsize_t arr_dim[] = {ARRAY_LEN}; /* Length of the array */
+    H5F_libver_t low, high;    /* File format bounds */
+    unsigned highest_version;  /* Highest version in nested datatypes */
+    color_t enum_val;          /* Enum type index */
+    herr_t ret = 0;            /* Generic return value */
+
+    TESTING("version bounds with nested datatypes");
+
+    /* Create a file access property list */
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR
+
+    /* Create a file creation property list */
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR
+
+    /* Create a scalar dataspace */
+    if ((space = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
+
+    /* Create a dataset creation property list */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+
+    /* Create an array datatype of chars */
+    arr_chartype = H5Tarray_create2(H5T_NATIVE_CHAR, ARRAY_RANK, arr_dim);
+    if (arr_chartype < 0) TEST_ERROR
+
+    /* Create the simple compound datatype that has an integer and an
+       array of chars */
+    simple_cmp_type = H5Tcreate(H5T_COMPOUND, sizeof(simple_cmp_t));
+    if (simple_cmp_type < 0) TEST_ERROR
+
+    /* Insert integer field */
+    ret = H5Tinsert(simple_cmp_type, "single_int", HOFFSET(simple_cmp_t, single_int), H5T_NATIVE_INT);
+    if (ret < 0) TEST_ERROR
+
+    /* Insert array field */
+    ret = H5Tinsert(simple_cmp_type, "char_arr", HOFFSET(simple_cmp_t, char_arr), arr_chartype);
+    if (ret < 0) TEST_ERROR
+
+    /* Create an array datatype containing simple compound datatype */
+    inner_arr_type = H5Tarray_create2(simple_cmp_type, ARRAY_RANK, arr_dim);
+    if (inner_arr_type < 0) TEST_ERROR
+
+    /* Create a VL datatype of floats */
+    vlen_floattype = H5Tvlen_create(H5T_NATIVE_FLOAT);
+    if (vlen_floattype < 0) TEST_ERROR
+
+    /* Create the innermost compound datatype that houses inner_arr_type and vlen_floattype */
+    inner_cmp_type = H5Tcreate(H5T_COMPOUND, sizeof(inner_cmp_t));
+    if (inner_cmp_type < 0) TEST_ERROR
+
+    /* Insert integer field */
+    ret = H5Tinsert(inner_cmp_type, "inner_arr", HOFFSET(inner_cmp_t, inner_arr), inner_arr_type);
+    if (ret < 0) TEST_ERROR
+
+    /* Insert integer field */
+    ret = H5Tinsert(inner_cmp_type, "vlen_float", HOFFSET(inner_cmp_t, vlen_float), vlen_floattype);
+    if (ret < 0) TEST_ERROR
+
+    /* Create a enumerate datatype */
+    enum_type = H5Tcreate(H5T_ENUM, sizeof(color_t));
+    if (enum_type < 0) TEST_ERROR
+
+    enum_val = E1_RED;
+    ret = H5Tenum_insert(enum_type, "RED", &enum_val);
+    if (ret < 0) TEST_ERROR
+
+    enum_val++;
+    ret = H5Tenum_insert(enum_type, "GREEN", &enum_val);
+    if (ret < 0) TEST_ERROR
+
+    enum_val++;
+    ret = H5Tenum_insert(enum_type, "BLUE", &enum_val);
+    if (ret < 0) TEST_ERROR
+
+    enum_val++;
+    ret = H5Tenum_insert(enum_type, "ORANGE", &enum_val);
+    if (ret < 0) TEST_ERROR
+
+    enum_val++;
+    ret = H5Tenum_insert(enum_type, "YELLOW", &enum_val);
+    if (ret < 0) TEST_ERROR
+
+    /* Create the outer compound datatype that contains the inner compound datatype and the enum datatype */
+    outer_cmp_type = H5Tcreate(H5T_COMPOUND, sizeof(outer_cmp_t));
+    if (ret < 0) TEST_ERROR
+
+    /* Insert integer field */
+    ret = H5Tinsert(outer_cmp_type, "inner_cmp", HOFFSET(outer_cmp_t, inner_cmp), inner_cmp_type);
+    if (ret < 0) TEST_ERROR
+
+    /* Insert enum field */
+    ret = H5Tinsert(outer_cmp_type, "enum_color", HOFFSET(outer_cmp_t, enum_color), enum_type);
+    if (ret < 0) TEST_ERROR
+
+    /* Create an array datatype containing the outer compound datatype */
+    if ((outer_arr_type = H5Tarray_create2(outer_cmp_type, ARRAY_RANK, arr_dim)) < 0)
+        TEST_ERROR
+
+    /* Loop through all the combinations of low/high library format bounds,
+       skipping invalid combinations */
+    /* Create the file, create and write to a dataset with compound datatype */
+    /* Verify the dataset's datatype and its members */
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+
+            /* Set version bounds */
+            H5E_BEGIN_TRY {
+                ret = H5Pset_libver_bounds(fapl, low, high);
+            } H5E_END_TRY;
+
+            if (ret < 0) /* Invalid low/high combinations */
+                continue;
+
+            /* Create a file */
+            file = H5Fcreate(VERFNAME, H5F_ACC_TRUNC, fcpl, fapl);
+            if (file < 0) TEST_ERROR
+
+            /* Get the internal file pointer if the create succeeds */
+            if ((filep = (H5F_t *)H5I_object(file)) == NULL) TEST_ERROR
+
+            /* Create dataset using the array type */
+            dset = H5Dcreate2(file, VERDSNAME, outer_arr_type, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+            if (dset < 0) TEST_ERROR
+
+            /* Get the dataset's datatype */
+            if ((dset_dtype = H5Dget_type(dset)) < 0) TEST_ERROR
+
+            /* Get the version of this datatype */
+            dtypep = (H5T_t *)H5I_object(dset_dtype);
+            if (dtypep == NULL) TEST_ERROR
+            highest_version = dtypep->shared->version;
+
+            /* Verify version of the datatype recursevily */
+            ret = verify_version(dset_dtype, low, &highest_version);
+
+            /* Close the dataset's datatype */
+            if (H5Tclose(dset_dtype) < 0) TEST_ERROR
+
+            /* Close dataset and file */
+            if (H5Dclose(dset) < 0) TEST_ERROR
+            if (H5Fclose(file) < 0) TEST_ERROR
+
+        } /* for high */
+    } /* for low */
+
+    /* Close dataspace and property lists */
+    if (H5Sclose(space) < 0) TEST_ERROR
+	if (H5Pclose(fcpl) < 0) TEST_ERROR
+	if (H5Pclose(fapl) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	    H5Dclose(dset);
+	    H5Sclose(space);
+	    H5Tclose(dset_dtype);
+	    H5Pclose(dcpl);
+	    H5Pclose(fcpl);
+	    H5Pclose(fapl);
+	    H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_versionbounds() */
 
 
 /*-------------------------------------------------------------------------
@@ -7413,7 +7812,7 @@ int
 main(void)
 {
     long	nerrors = 0;
-    hid_t		fapl = -1;
+    hid_t	fapl = -1;
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -7430,7 +7829,6 @@ main(void)
     nerrors += test_detect();
     nerrors += test_compound_1();
     nerrors += test_query();
-
     nerrors += test_transient(fapl);
     nerrors += test_named(fapl);
     nerrors += test_encode();
@@ -7475,6 +7873,7 @@ main(void)
     nerrors += test_opaque();
     nerrors += test_set_order();
     nerrors += test_utf_ascii_conv();
+    nerrors += test_versionbounds();
 
     if(nerrors) {
         printf("***** %lu FAILURE%s! *****\n",

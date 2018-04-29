@@ -5,17 +5,15 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  *  For details of the HDF libraries, see the HDF Documentation at:
- *    http://hdfdfgroup.org/HDF5/doc/
+ *    http://hdfgroup.org/HDF5/doc/
  *
  */
 
@@ -55,6 +53,7 @@ extern jobject visit_callback;
 /* Local Prototypes */
 /********************/
 
+static herr_t H5DreadVL_asstr (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hid_t xfer_plist_id, jobjectArray buf);
 static herr_t H5DreadVL_str (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hid_t xfer_plist_id, jobjectArray buf);
 static herr_t H5DreadVL_array (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hid_t xfer_plist_id, jobjectArray buf);
 static herr_t H5DwriteVL_str (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hid_t xfer_plist_id, jobjectArray buf);
@@ -991,6 +990,96 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1double
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Dwrite_1double */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5DreadVL
+ * Signature: (JJJJJ[Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5DreadVL
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+          jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
+{
+    herr_t  status = -1;
+    htri_t  isVlenStr=0;
+
+    if (buf == NULL) {
+        h5nullArgument(env, "H5DreadVL:  buf is NULL");
+    } /* end if */
+    else {
+        isVlenStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING);
+
+        if (isVlenStr)
+            h5badArgument(env, "H5DreadVL: type is not variable length non-string");
+        else
+            status = H5DreadVL_asstr(env, (hid_t)dataset_id, (hid_t)mem_type_id,
+                                        (hid_t)mem_space_id, (hid_t)file_space_id,
+                                        (hid_t)xfer_plist_id, buf);
+    } /* end else */
+
+    return (jint)status;
+} /* end Java_hdf_hdf5lib_H5_H5Dread_1VL */
+
+herr_t
+H5DreadVL_asstr
+    (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hid_t xfer_plist_id, jobjectArray buf)
+{
+    jint    i;
+    jint    n;
+    jstring jstr;
+    h5str_t h5str;
+    hvl_t  *rdata;
+    size_t  size;
+    size_t  max_len = 0;
+    herr_t  status = -1;
+
+    n = ENVPTR->GetArrayLength(ENVPAR buf);
+    rdata = (hvl_t*)HDcalloc((size_t)n, sizeof(hvl_t));
+    if (rdata == NULL) {
+        h5JNIFatalError(env, "H5DreadVL_notstr:  failed to allocate buff for read");
+    } /* end if */
+    else {
+        status = H5Dread(did, tid, mem_sid, file_sid, xfer_plist_id, rdata);
+
+        if (status < 0) {
+            H5Dvlen_reclaim(tid, mem_sid, xfer_plist_id, rdata);
+            HDfree(rdata);
+            h5JNIFatalError(env, "H5DreadVL_notstr: failed to read data");
+        } /* end if */
+        else {
+            max_len = 1;
+            for (i=0; i < n; i++) {
+                if ((rdata + i)->len > max_len)
+                    max_len = (rdata + i)->len;
+            }
+
+            size = H5Tget_size(tid) * max_len;
+            HDmemset(&h5str, 0, sizeof(h5str_t));
+            h5str_new(&h5str, 4 * size);
+
+            if (h5str.s == NULL) {
+                H5Dvlen_reclaim(tid, mem_sid, xfer_plist_id, rdata);
+                HDfree(rdata);
+                h5JNIFatalError(env, "H5DreadVL_notstr:  failed to allocate buf");
+            } /* end if */
+            else {
+                for (i=0; i < n; i++) {
+                    h5str.s[0] = '\0';
+                    h5str_sprintf(&h5str, did, tid, rdata+i, 0);
+                    jstr = ENVPTR->NewStringUTF(ENVPAR h5str.s);
+                    ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
+                } /* end for */
+                h5str_free(&h5str);
+
+                H5Dvlen_reclaim(tid, mem_sid, xfer_plist_id, rdata);
+                HDfree(rdata);
+            } /* end else */
+        } /* end else */
+    } /* end else */
+
+    return status;
+}
 
 /*
  * Class:     hdf_hdf5lib_H5

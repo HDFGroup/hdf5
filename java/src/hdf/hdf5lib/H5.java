@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
@@ -216,7 +214,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * exception handlers to print out the HDF-5 error stack.
  * <hr>
  *
- * @version HDF5 1.11.0 <BR>
+ * @version HDF5 1.11.2 <BR>
  *          <b>See also: <a href ="./hdf.hdf5lib.HDFArray.html"> hdf.hdf5lib.HDFArray</a> </b><BR>
  *          <a href ="./hdf.hdf5lib.HDF5Constants.html"> hdf.hdf5lib.HDF5Constants</a><BR>
  *          <a href ="./hdf.hdf5lib.HDF5CDataTypes.html"> hdf.hdf5lib.HDF5CDataTypes</a><BR>
@@ -239,7 +237,7 @@ public class H5 implements java.io.Serializable {
      *
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = { 1, 11, 0 };
+    public final static int LIB_VERSION[] = { 1, 11, 2 };
 
     public final static String H5PATH_PROPERTY_KEY = "hdf.hdf5lib.H5.hdf5lib";
 
@@ -426,12 +424,18 @@ public class H5 implements java.io.Serializable {
     private synchronized static native int H5dont_atexit() throws HDF5LibraryException;
 
     /**
-     * Turn off error handling By default, the C library prints the error stack of the HDF-5 C library on stdout. This
+     * Turn off error handling. By default, the C library prints the error stack of the HDF-5 C library on stdout. This
      * behavior may be disabled by calling H5error_off().
      *
      * @return a non-negative value if successful
      */
     public synchronized static native int H5error_off();
+
+    /**
+     * Turn on error handling. By default, the C library prints the error stack of the HDF-5 C library on stdout. This
+     * behavior may be reenabled by calling H5error_on().
+     */
+    public synchronized static native void H5error_on();
 
     /**
      * H5garbage_collect collects on all free-lists of all types.
@@ -1272,6 +1276,38 @@ public class H5 implements java.io.Serializable {
 
     // ////////////////////////////////////////////////////////////
     // //
+    // H5AC: Cache Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // No public Functions
+
+    // ////////////////////////////////////////////////////////////
+    // //
+    // H5B: B-link-tree Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // No public Functions
+
+    // ////////////////////////////////////////////////////////////
+    // //
+    // H5B2: v2 B-tree Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // No public Functions
+
+    // ////////////////////////////////////////////////////////////
+    // //
+    // H5C: Cache Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // No public Functions
+
+    // ////////////////////////////////////////////////////////////
+    // //
     // H5D: Datasets Interface Functions //
     // //
     // ////////////////////////////////////////////////////////////
@@ -1798,6 +1834,9 @@ public class H5 implements java.io.Serializable {
         return H5Dread_short(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf, true);
     }
 
+    public synchronized static native int H5DreadVL(long dataset_id, long mem_type_id, long mem_space_id,
+            long file_space_id, long xfer_plist_id, Object[] buf) throws HDF5LibraryException, NullPointerException;
+
     public synchronized static native int H5Dread_string(long dataset_id, long mem_type_id, long mem_space_id,
             long file_space_id, long xfer_plist_id, String[] buf) throws HDF5LibraryException, NullPointerException;
 
@@ -2102,6 +2141,10 @@ public class H5 implements java.io.Serializable {
 
     // /////// unimplemented ////////
     // H5_DLL herr_t H5Ddebug(hid_t dset_id);
+    // H5_DLL herr_t H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_bytes);
+    // H5_DLL herr_t H5Dformat_convert(hid_t dset_id);
+    // H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
+
     // herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
     //                  size_t dst_buf_size, void *dst_buf, H5D_gather_func_t op, void *op_data);
     // herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_id, void *dst_buf);
@@ -2892,7 +2935,8 @@ public class H5 implements java.io.Serializable {
      * @param file_id
      *            IN: Identifier of the target file.
      *
-     * @param mdc_logging_status, the status
+     * @param mdc_logging_status
+     *          the status
      *             mdc_logging_status[0] = is_enabled, whether logging is enabled
      *             mdc_logging_status[1] = is_currently_logging, whether events are currently being logged
      *
@@ -2904,12 +2948,22 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Fget_mdc_logging_status(long file_id, boolean[] mdc_logging_status)
             throws HDF5LibraryException, NullPointerException;
 
-
-
     // /////// unimplemented ////////
+    // H5_DLL herr_t H5Fget_eoa(hid_t file_id, haddr_t *eoa);
+    // H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
     // ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
     // herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
     // ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects, H5F_sect_info_t *sect_info/*out*/);
+    // H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high);
+    // H5_DLL herr_t H5Fformat_convert(hid_t fid);
+    // H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
+    // H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
+    //     unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
+    // H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_size);
+    // #ifdef H5_HAVE_PARALLEL
+    //   H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
+    //   H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
+    // #endif /* H5_HAVE_PARALLEL */
 
     // /**
     // * H5Fget_vfd_handle returns a pointer to the file handle from the
@@ -2960,6 +3014,41 @@ public class H5 implements java.io.Serializable {
     // **/
     // public synchronized static native int H5Fset_mdc_config(int file_id, H5AC_cache_config_t config_ptr)
     //             throws HDF5LibraryException, NullPointerException;
+
+    // ////////////////////////////////////////////////////////////
+    // //
+    // H5FD: File Driver Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // /////// unimplemented ////////
+    // H5_DLL hid_t H5FDregister(const H5FD_class_t *cls);
+    // H5_DLL herr_t H5FDunregister(hid_t driver_id);
+    // H5_DLL H5FD_t *H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+    // H5_DLL herr_t H5FDclose(H5FD_t *file);
+    // H5_DLL int H5FDcmp(const H5FD_t *f1, const H5FD_t *f2);
+    // H5_DLL int H5FDquery(const H5FD_t *f, unsigned long *flags);
+    // H5_DLL haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
+    // H5_DLL herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size);
+    // H5_DLL haddr_t H5FDget_eoa(H5FD_t *file, H5FD_mem_t type);
+    // H5_DLL herr_t H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t eoa);
+    // H5_DLL haddr_t H5FDget_eof(H5FD_t *file, H5FD_mem_t type);
+    // H5_DLL herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void**file_handle);
+    // H5_DLL herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *buf/*out*/);
+    // H5_DLL herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf);
+    // H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+    // H5_DLL herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+    // H5_DLL herr_t H5FDlock(H5FD_t *file, hbool_t rw);
+    // H5_DLL herr_t H5FDunlock(H5FD_t *file);
+    // H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags/*out*/);
+
+    // ////////////////////////////////////////////////////////////
+    // //
+    // H5FS: File Free Space Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // No public Functions
 
     // ////////////////////////////////////////////////////////////
     // //
@@ -3397,6 +3486,30 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library.
      **/
     public synchronized static native void H5Grefresh(long group_id) throws HDF5LibraryException;
+
+    // ////////////////////////////////////////////////////////////
+    // //
+    // H5HF: Fractal Heap Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // No public Functions
+
+    // ////////////////////////////////////////////////////////////
+    // //
+    // H5HG: Global Heap Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // No public Functions
+
+    // ////////////////////////////////////////////////////////////
+    // //
+    // H5HL: Local Heap Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // No public Functions
 
     // ////////////////////////////////////////////////////////////
     // //
@@ -4025,6 +4138,15 @@ public class H5 implements java.io.Serializable {
     //        H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     //        void *buf/*out*/, size_t size, hid_t lapl_id);
 
+    // ////////////////////////////////////////////////////////////
+    // //
+    // H5MM: Memory Management Interface API Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+
+    // /////// unimplemented ////////
+    // typedef void *(*H5MM_allocate_t)(size_t size, void *alloc_info);
+    // typedef void (*H5MM_free_t)(void *mem, void *free_info);
 
     // ////////////////////////////////////////////////////////////
     // //
@@ -4442,6 +4564,9 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Orefresh(long object_id) throws HDF5LibraryException;
 
     // /////// unimplemented ////////
+    // H5_DLL herr_t H5Odisable_mdc_flushes(hid_t object_id);
+    // H5_DLL herr_t H5Oenable_mdc_flushes(hid_t object_id);
+    // H5_DLL herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
 
     // ////////////////////////////////////////////////////////////
     // //
@@ -4449,7 +4574,7 @@ public class H5 implements java.io.Serializable {
     // //
     // ////////////////////////////////////////////////////////////
 
-    // Generic property list routines
+    // /////// Generic property list routines ///////
 
     /**
      * H5Pget_class_name retrieves the name of a generic property list class
@@ -4765,7 +4890,7 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static native int H5Piterate(long plist, int[] idx, H5P_iterate_cb op, H5P_iterate_t op_data) throws HDF5LibraryException;
 
-    // Object creation property list (OCPL) routines
+    // /////// Object creation property list (OCPL) routines ///////
 
     /**
      * H5Pget_attr_phase_change retrieves attribute storage phase change thresholds.
@@ -5069,7 +5194,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fletcher32(long plist) throws HDF5LibraryException,
     NullPointerException;
 
-    // File creation property list (FCPL) routines
+    // /////// File creation property list (FCPL) routines ///////
 
     /**
      * H5Pget_userblock retrieves the size of a user block in a file creation property list.
@@ -5478,7 +5603,7 @@ public class H5 implements java.io.Serializable {
            throws HDF5LibraryException, IllegalArgumentException;
 
 
-    // File access property list (FAPL) routines
+    // /////// File access property list (FAPL) routines ///////
 
     /**
      * H5Pget_alignment retrieves the current settings for alignment properties from a file access property list.
@@ -5810,7 +5935,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param fapl_id
      *            IN: File access property list identifier
-     * @param mdc_log_options, the options
+     * @param mdc_log_options
+     *         the options
      *             mdc_logging_options[0] = is_enabled, whether logging is enabled
      *             mdc_logging_options[1] = start_on_access, whether the logging begins as soon as the file is opened or created
      *
@@ -5855,6 +5981,37 @@ public class H5 implements java.io.Serializable {
      *
      **/
     public synchronized static native void H5Pset_metadata_read_attempts(long plist_id, long attempts)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pget_evict_on_close retrieves the file access property list setting that determines whether an HDF5 object
+     * will be evicted from the library's metadata cache when it is closed.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     *
+     * @return indication if the object will be evicted on close.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native boolean H5Pget_evict_on_close(long fapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pset_evict_on_close controls the library's behavior of evicting metadata associated with a closed object.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     * @param evict_on_close
+     *            IN: Whether the HDF5 object should be evicted on close.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native void H5Pset_evict_on_close(long fapl_id, boolean evict_on_close)
             throws HDF5LibraryException;
 
     // Dataset creation property list (DCPL) routines //
@@ -6062,6 +6219,36 @@ public class H5 implements java.io.Serializable {
      *                - An id is &lt;=0
      **/
     public synchronized static native String H5Pget_virtual_dsetname(long dcpl_id, long index) throws HDF5LibraryException, IllegalArgumentException;
+
+//    /////  unimplemented /////
+//    /**
+//     * H5Pget_vds_file_cache_size retrieves the size of the vds link open file cache.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     *
+//     * @return VDS link open file cache size in number of files.
+//     *
+//     * @exception HDF5LibraryException
+//     *                - Error from the HDF-5 Library.
+//     *
+//     **/
+//    public synchronized static native int H5Pget_vds_file_cache_size(long fapl_id) throws HDF5LibraryException;
+//
+//    /**
+//     * H5Pset_vds_file_cache_size sets the number of files that can be held open in an vds link open file cache.
+//     *
+//     * @param fapl_id
+//     *            IN: File access property list identifier
+//     * @param efc_size
+//     *            IN: VDS link open file cache size in number of files.
+//     *
+//     * @exception HDF5LibraryException
+//     *                - Error from the HDF-5 Library.
+//     *
+//     **/
+//    public synchronized static native void H5Pset_vds_file_cache_size(long fapl_id, int efc_size)
+//            throws HDF5LibraryException;
 
     /**
      * H5Pget_external returns information about an external file.
@@ -6282,7 +6469,37 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fill_time(long plist_id, int fill_time) throws HDF5LibraryException,
     NullPointerException;
 
-    // Dataset access property list (DAPL) routines //
+    // /////// Dataset creation property list (DCPL) routines ///////
+
+    /**
+     * H5Pset_chunk_opts Sets the edge chunk option in a dataset creation property list.
+     *
+     * @param dcpl_id
+     *            IN: Dataset creation property list identifier
+     * @param opts
+     *            IN: Edge chunk option flag. Valid values are:
+     *                H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS - filters are not applied to partial edge chunks.
+     *                0 - Disables option; partial edge chunks will be compressed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library
+     **/
+    public synchronized static native void H5Pset_chunk_opts(long dcpl_id, int opts) throws HDF5LibraryException;
+
+    /**
+     * H5Pget_chunk_opts retrieves the edge chunk option setting stored in the dataset creation property list .
+     *
+     * @param dcpl_id
+     *            IN: Dataset creation property list
+
+     * @return The edge chunk option setting.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library
+     **/
+    public synchronized static native int H5Pget_chunk_opts(long dcpl_id) throws HDF5LibraryException;
+
+    // /////// Dataset access property list (DAPL) routines ///////
 
     /**
      * Retrieves the maximum possible number of elements in the meta data cache and the maximum possible number of bytes
@@ -6385,12 +6602,76 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native long H5Pget_virtual_printf_gap(long dapl_id) throws HDF5LibraryException;
 
+    /**
+     * H5Pget_virtual_prefix Retrieves prefix applied to virtual file paths.
+     *
+     * @param dapl_id
+     *            IN: Link access property list identifier
+     *
+     * @return the prefix to be applied to virtual file paths.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native String H5Pget_virtual_prefix(long dapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pset_virtual_prefix Sets prefix to be applied to virtual file paths.
+     *
+     * @param dapl_id
+     *            IN: Dataset access property list identifier
+     * @param prefix
+     *            IN: Prefix to be applied to virtual file paths
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - prefix is null.
+     *
+     **/
+    public synchronized static native void H5Pset_virtual_prefix(long dapl_id, String prefix)
+            throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Pget_efile_prefix Retrieves prefix applied to external file paths.
+     *
+     * @param dapl_id
+     *            IN: Link access property list identifier
+     *
+     * @return the prefix to be applied to external file paths.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native String H5Pget_efile_prefix(long dapl_id)
+            throws HDF5LibraryException;
+
+    /**
+     * H5Pset_efile_prefix Sets prefix to be applied to external file paths.
+     *
+     * @param dapl_id
+     *            IN: Dataset access property list identifier
+     * @param prefix
+     *            IN: Prefix to be applied to external file paths
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - prefix is null.
+     *
+     **/
+    public synchronized static native void H5Pset_efile_prefix(long dapl_id, String prefix)
+            throws HDF5LibraryException, NullPointerException;
+
     // public synchronized static native void H5Pset_append_flush(long plist_id, int ndims, long[] boundary, H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
 
     // public synchronized static native void H5Pget_append_flush(long plist_id, int dims, long[] boundary, H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
 
 
-    // Dataset xfer property list (DXPL) routines //
+    // /////// Dataset xfer property list (DXPL) routines ///////
 
     /**
      * H5Pget_data_transform retrieves the data transform expression previously set in the dataset transfer property
@@ -6541,7 +6822,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_hyper_vector_size(long dxpl_id, long vector_size)
             throws HDF5LibraryException, NullPointerException;
 
-    // Link creation property list (LCPL) routines //
+    // /////// Link creation property list (LCPL) routines ///////
 
     /**
      * H5Pget_create_intermediate_group determines whether property is set to enable creating missing intermediate
@@ -6576,7 +6857,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_create_intermediate_group(long lcpl_id, boolean crt_intermed_group)
             throws HDF5LibraryException;
 
-    // Group creation property list (GCPL) routines //
+    // /////// Group creation property list (GCPL) routines ///////
 
     /**
      * H5Pget_local_heap_size_hint Retrieves the anticipated size of the local heap for original-style groups.
@@ -6733,14 +7014,14 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_link_creation_order(long gcpl_id, int crt_order_flags)
             throws HDF5LibraryException;
 
-    // String creation property list (STRCPL) routines //
+    // /////// String creation property list (STRCPL) routines ///////
 
     public synchronized static native int H5Pget_char_encoding(long plist_id) throws HDF5LibraryException;
 
     public synchronized static native void H5Pset_char_encoding(long plist_id, int encoding)
             throws HDF5LibraryException;
 
-    // Link access property list (LAPL) routines //
+    // /////// Link access property list (LAPL) routines ///////
 
     /**
      * H5Pget_nlinks retrieves the maximum number of soft or user-defined link traversals allowed, nlinks, before the
@@ -6893,7 +7174,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_elink_acc_flags(long lapl_id, int flags) throws HDF5LibraryException,
     IllegalArgumentException;
 
-    // Object copy property list (OCPYPL) routines //
+    // /////// Object copy property list (OCPYPL) routines ///////
 
     /**
      * H5Pget_copy_object retrieves the properties to be used when an object is copied.
@@ -6924,7 +7205,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Pset_copy_object(long ocp_plist_id, int copy_options)
             throws HDF5LibraryException;
 
-    // Other/Older property list routines //
+    // /////// Other/Older property list routines ///////
 
     /**
      * H5Pget_version retrieves the version information of various objects for a file creation property list.
@@ -6952,7 +7233,7 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pget_version(long plist, int[] version_info) throws HDF5LibraryException,
     NullPointerException, IllegalArgumentException;
 
-    // file drivers property list routines //
+    // /////// file drivers property list routines ///////
 
     public synchronized static native void H5Pget_fapl_core(long fapl_id, long[] increment, boolean[] backing_store)
             throws HDF5LibraryException, NullPointerException;
@@ -7099,20 +7380,34 @@ public class H5 implements java.io.Serializable {
     // File creation property list (FCPL) routines //
 
     // File access property list (FAPL) routines //
-    // herr_t H5Pset_driver( hid_t plist_id, hid_t new_driver_id, const void *new_driver_info )
-    // const void *H5Pget_driver_info( hid_t plist_id )
-    // herr_t H5Pget_multi_type ( hid_t fapl_id, H5FD_mem_t *type )
-    // herr_t H5Pset_multi_type ( hid_t fapl_id, H5FD_mem_t type )
+    // herr_t H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
+    // const void *H5Pget_driver_info(hid_t plist_id)
+    // herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
+    // herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
     // herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr);
     // herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
     // herr_t H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
     // herr_t H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr);
     // herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size);
     // herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, size_t *page_size);
+    // #ifdef H5_HAVE_PARALLEL
+    // herr_t H5Pset_all_coll_metadata_ops(hid_t accpl_id, hbool_t is_collective);
+    // H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
+    // herr_t H5Pset_coll_metadata_write(hid_t fapl_id, hbool_t is_collective);
+    // herr_t H5Pget_coll_metadata_write(hid_t fapl_id, hbool_t *is_collective);
+    // #endif /* H5_HAVE_PARALLEL */
+    // H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr);
+    // H5_DLL herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr /*out*/);
+    // H5_DLL herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_per, unsigned min_raw_per);
+    // herr_t H5Pget_page_buffer_size(hid_t fapl_id, size_t *buf_size, unsigned *min_meta_perc, unsigned *min_raw_perc);
+    // herr_t H5Pset_object_flush_cb (hid_t fapl_id, H5F_flush_cb_t func, void *user_data);
+    // herr_t H5Pget_object_flush_cb (hid_t fapl_id, H5F_flush_cb_t *func, void **user_data);
 
     // Dataset creation property list (DCPL) routines //
 
     // Dataset access property list (DAPL) routines //
+    // herr_t H5Pset_append_flush (hid_t dapl_id, int ndims, const hsize_t boundary[], H5D_append_cb_t func, void *user_data);
+    // herr_t H5Pget_append_flush(hid_t dapl_id, int ndims, hsize_t boundary[], H5D_append_cb_t *func, void **user_data)
 
     // Dataset xfer property list (DXPL) routines //
     // herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);
@@ -7125,6 +7420,11 @@ public class H5 implements java.io.Serializable {
     // *free_info )
     // herr_t H5Pget_type_conv_cb(hid_t plist, H5T_conv_except_func_t *func, void **op_data)
     // herr_t H5Pset_type_conv_cb( hid_t plist, H5T_conv_except_func_t func, void *op_data)
+    // #ifdef H5_HAVE_PARALLEL
+    // H5_DLL herr_t H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode);
+    // H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode);
+    // H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause, uint32_t *global_no_collective_cause);
+    // #endif /* H5_HAVE_PARALLEL */
 
     // Link creation property list (LCPL) routines //
 
@@ -7141,21 +7441,6 @@ public class H5 implements java.io.Serializable {
     // herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id);
     // herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data);
     // herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data);
-
-
-    // Other/Older property list routines //
-    // herr_t H5Pget_fapl_mpio( int fapl_id, MPI_Comm *comm, MPI_Info *info )
-    // herr_t H5Pset_fapl_mpio( int fapl_id, MPI_Comm comm, MPI_Info info )
-
-    // herr_t H5Pget_fapl_mpiposix( int fapl_id, MPI_Comm *comm, hbool_t *use_gpfs_hints )
-    // herr_t H5Pset_fapl_mpiposix( int fapl_id, MPI_Comm comm, hbool_t use_gpfs_hints )
-
-    // herr_t H5Pget_dxpl_mpio( hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode )
-    // herr_t H5Pset_dxpl_mpio( hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode )
-    // herr_t H5Pset_dxpl_mpio_chunk_opt (hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
-    // herr_t H5Pset_dxpl_mpio_chunk_opt_num (hid_t dxpl_id, unsigned num_chunk_per_proc)
-    // herr_t H5Pset_dxpl_mpio_chunk_opt_ratio (hid_t dxpl_id, unsigned percent_proc_per_chunk)
-    // herr_t H5Pset_dxpl_mpio_collective_opt (hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mode)
 
     // ////////////////////////////////////////////////////////////
     // //
@@ -8080,6 +8365,17 @@ public class H5 implements java.io.Serializable {
      public synchronized static native boolean H5Sis_regular_hyperslab(long space_id) throws HDF5LibraryException;
 
     // /////// unimplemented ////////
+    // #ifdef NEW_HYPERSLAB_API
+    // H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
+    //                                  const hsize_t start[],
+    //                                  const hsize_t _stride[],
+    //                                  const hsize_t count[],
+    //                                  const hsize_t _block[]);
+    // H5_DLL herr_t H5Sselect_select(hid_t space1_id, H5S_seloper_t op,
+    //                                  hid_t space2_id);
+    // H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op,
+    //                                  hid_t space2_id);
+    // #endif /* NEW_HYPERSLAB_API */
 
 
 

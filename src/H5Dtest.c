@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
@@ -140,6 +138,47 @@ H5D__layout_contig_size_test(hid_t did, hsize_t *size)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5D__layout_contig_size_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5D__layout_compact_dirty_test
+ PURPOSE
+    Determine the "dirty" flag of a compact layout for a dataset's layout information
+ USAGE
+    herr_t H5D__layout_compact_dirty_test(did, dirty)
+        hid_t did;              IN: Dataset to query
+        hbool_t *dirty;         OUT: Pointer to location to place "dirty" info
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Checks the "dirty" flag of a compact dataset.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5D__layout_compact_dirty_test(hid_t did, hbool_t *dirty)
+{
+    H5D_t *dset;                /* Pointer to dataset to query */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
+
+    if(dirty) {
+        HDassert(dset->shared->layout.type == H5D_COMPACT);
+        *dirty = dset->shared->layout.storage.u.compact.dirty;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5D__layout_compact_dirty_test() */
 
 
 /*--------------------------------------------------------------------------

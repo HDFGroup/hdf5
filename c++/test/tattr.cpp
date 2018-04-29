@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -103,12 +101,15 @@ float attr_data5 = (float)-5.123;     // Test data for 5th attribute
 const H5std_string ATTR1A_NAME("Attr1_a");
 int attr_data1a[ATTR1_DIM1]={256,11945,-22107};
 
-/****************************************************************
-**
-**  test_attr_basic_write(): Test basic write attribute.
-**      Tests integer attributes on both datasets and groups
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_basic_write
+ *
+ * Purpose      Test basic write attribute on both datasets and groups.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_basic_write()
 {
     hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
@@ -235,29 +236,34 @@ static void test_attr_basic_write()
     }
 }   // test_attr_basic_write()
 
-/****************************************************************
-**
-**  test_attr_getname(): Test getting attribute name functions.
-**
-**  Test these functions:
-**  A. ssize_t Attribute::getName(char* attr_name, size_t buf_size)
-**    1. With arbitrary buf_size that is larger than the name size
-**    2. With arbitrary buf_size that is smaller than the name's length.
-**    3. With a buf_size that equals the name's length.
-**
-**  B. ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
-**    1. With buffer smaller than the actual name
-**    2. Same test but with retiring overloaded function
-**        ssize_t Attribute::getName(size_t buf_size, H5std_string& attr_name)
-**
-**  C. H5std_string Attribute::getName()
-**
-**  D. H5std_string Attribute::getName(size_t len)
-**
-**  E. ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
-**        With buffer size equals the name's length, i.e., buf_size=0
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_getname
+ *
+ * Purpose      Test getting attribute name.
+ *
+ * Description
+ *  Test these functions:
+ *  A. ssize_t Attribute::getName(char* attr_name, size_t buf_size)
+ *    1. With arbitrary buf_size that is larger than the name size
+ *    2. With arbitrary buf_size that is smaller than the name's length.
+ *    3. With a buf_size that equals the name's length.
+ *
+ *  B. ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
+ *    1. With buffer smaller than the actual name
+ *    2. Same test but with retiring overloaded function
+ *        ssize_t Attribute::getName(size_t buf_size, H5std_string& attr_name)
+ *
+ *  C. H5std_string Attribute::getName()
+ *
+ *  D. H5std_string Attribute::getName(size_t len)
+ *
+ *  E. ssize_t Attribute::getName(H5std_string& attr_name, size_t buf_size)
+ *        With buffer size equals the name's length, i.e., buf_size=0
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_getname()
 {
     // Output message about test being performed
@@ -370,11 +376,15 @@ static void test_attr_getname()
     }
 }   // test_attr_getname()
 
-/****************************************************************
-**
-**  test_attr_rename(): Test renaming attribute function.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_rename
+ *
+ * Purpose      Test renaming attribute function.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_rename()
 {
     int read_data1[ATTR1_DIM1]={0}; // Buffer for reading the attribute
@@ -481,11 +491,15 @@ static void test_attr_rename()
     }
 }   // test_attr_rename()
 
-/********************************************************************
-**
-**  test_attr_basic_read(): Test basic read attribute.
-**
-********************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_basic_read
+ *
+ * Purpose      Test basic read attribute.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_basic_read()
 {
     hsize_t i, j;
@@ -550,11 +564,15 @@ static void test_attr_basic_read()
     }
 }   // test_attr_basic_read()
 
-/****************************************************************
-**
-**  test_attr_compound_write(): Tests compound datatype attributes
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_compound_write
+ *
+ * Purpose      Test writing attributes with compound datatype.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_compound_write()
 {
 
@@ -610,11 +628,15 @@ static void test_attr_compound_write()
     }
 }   // test_attr_compound_write()
 
-/****************************************************************
-**
-**  test_attr_compound_read(): Test basic H5A (attribute) code.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_compound_read
+ *
+ * Purpose      Test reading attributes with compound datatype.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_compound_read()
 {
     hsize_t dims[ATTR_MAX_DIMS];        // Attribute dimensions
@@ -762,11 +784,15 @@ static void test_attr_compound_read()
     }
 }   // test_attr_compound_read()
 
-/****************************************************************
-**
-**  test_attr_scalar_write(): Test scalar attribute writing functionality.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_scalar_write
+ *
+ * Purpose      Test scalar attribute writing functionality.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_scalar_write()
 {
     // Output message about test being performed
@@ -817,11 +843,15 @@ static void test_attr_scalar_write()
     }
 }   // test_attr_scalar_write()
 
-/****************************************************************
-**
-**  test_attr_scalar_read(): Test scalar attribute reading functionality.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_scalar_read
+ *
+ * Purpose      Test scalar attribute reading functionality.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 /* Epsilon for floating-point comparisons */
 #define FP_EPSILON 0.000001F
 
@@ -866,11 +896,15 @@ static void test_attr_scalar_read()
     }
 }   // test_attr_scalar_read()
 
-/****************************************************************
-**
-**  test_attr_mult_write(): Test multiple attributes
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_mult_write
+ *
+ * Purpose      Test writing multiple attributes.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_mult_write()
 {
     // Output message about test being performed
@@ -939,11 +973,15 @@ static void test_attr_mult_write()
     }
 }   // test_attr_mult_write()
 
-/****************************************************************
-**
-**  test_attr_mult_read(): Test reading multiple attributes.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_mult_read
+ *
+ * Purpose      Test reading multiple attributes.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_mult_read()
 {
     int     read_data1[ATTR1_DIM1]={0}; // Buffer for reading 1st attribute
@@ -1130,12 +1168,15 @@ static void test_attr_mult_read()
     }
 }   // test_attr_mult_read()
 
-/****************************************************************
-**
-**  test_attr_delete(): Test deleting attribute from different
-**                      hdf5 objects.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_delete
+ *
+ * Purpose      Test deleting attribute from different hdf5 objects.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_delete()
 {
     H5std_string  attr_name; // Buffer for attribute names
@@ -1247,20 +1288,23 @@ static void test_attr_delete()
     }
 }   // test_attr_delete()
 
-/****************************************************************
-**
-**  test_attr_dtype_shared(): Test code for using shared datatypes
-**                            in attributes.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_dtype_shared
+ *
+ * Purpose      Test accessing attributes using shared datatypes.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_dtype_shared()
 {
-    int data=8;                 /* Data to write */
-    int rdata=0;                /* Read read in */
+    int data=8;                 // Data to write
+    int rdata=0;                // Data read in
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    H5G_stat_t statbuf;         /* Object's information */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-    h5_stat_size_t filesize;             /* Size of file after modifications */
+    H5G_stat_t statbuf;         // Object's information
+#endif
+    h5_stat_size_t filesize;    // Size of file after modifications
 
     // Output message about test being performed
     SUBTEST("Shared Datatypes with Attributes");
@@ -1296,7 +1340,7 @@ static void test_attr_dtype_shared()
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
         verify_val((int)statbuf.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif
 
         // Create dataspace for dataset
         DataSpace dspace;
@@ -1307,7 +1351,7 @@ static void test_attr_dtype_shared()
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
         verify_val((int)statbuf.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif
 
         // Create attribute on dataset
         Attribute attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
@@ -1316,7 +1360,7 @@ static void test_attr_dtype_shared()
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
         verify_val((int)statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif
 
         // Close attribute
         attr.close();
@@ -1328,7 +1372,7 @@ static void test_attr_dtype_shared()
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
         verify_val((int)statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif
 
         // Create attribute on dataset
         attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
@@ -1337,7 +1381,7 @@ static void test_attr_dtype_shared()
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
         verify_val((int)statbuf.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif
 
         // Write data into the attribute
         attr.write(PredType::NATIVE_INT,&data);
@@ -1374,7 +1418,7 @@ static void test_attr_dtype_shared()
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
         verify_val((int)statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif
         } // end of second enclosing
 
         // Unlink the dataset
@@ -1384,7 +1428,7 @@ static void test_attr_dtype_shared()
         // Check reference count on named datatype
         fid1.getObjinfo(TYPE1_NAME, statbuf);
         verify_val((int)statbuf.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#endif
 
         // Unlink the named datatype
         fid1.unlink(TYPE1_NAME);
@@ -1405,12 +1449,15 @@ static void test_attr_dtype_shared()
     }
 }   // test_attr_dtype_shared()
 
-/****************************************************************
-**
-**  test_string_attr(): Test read/write string attribute.
-**      Tests string attributes on groups.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_string_attr
+ *
+ * Purpose      Test read/write string attribute.
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 /* Info for a string attribute */
 const H5std_string ATTR1_FL_STR_NAME("String_attr 1");
 const H5std_string ATTR2_FL_STR_NAME("String_attr 2");
@@ -1530,12 +1577,18 @@ static void test_string_attr()
     }
 }   // test_string_attr()
 
-/****************************************************************
-**
-**  test_attr_exists(): Test checking for attribute existence.
-**        (additional attrExists tests are in test_attr_rename())
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_exists
+ *
+ * Purpose      Test checking for attribute existence.
+ *
+ * Return       None
+ *
+ * Note
+ *              Additional attrExists tests are in test_attr_rename().
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_exists()
 {
     // Output message about test being performed
@@ -1579,12 +1632,15 @@ static void test_attr_exists()
     }
 }   // test_attr_exists()
 
-/****************************************************************
-**
-**  test_attr_dense_create(): Test phase change properties
-**      Tests "dense" attribute storage creation
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_dense_create
+ *
+ * Purpose      Test phase change properties
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 const H5std_string FILE_CRTPROPS("tattr_crt_properties.h5");
 const int NAME_BUF_SIZE = 1024;
 const unsigned MAX_COMPACT_DEF = 8;
@@ -1688,12 +1744,15 @@ static void test_attr_dense_create(FileCreatPropList& fcpl,
     }
 }   // test_attr_dense_create()
 
-/****************************************************************
-**
-**  test_attr_corder_create_basic(): Test creation order properties
-**      Tests creating an object w/attribute creation order info
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr_corder_create_basic
+ *
+ * Purpose      Test creation order properties
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 static void test_attr_corder_create_basic(FileCreatPropList& fcpl,
                                    FileAccPropList& fapl)
 {
@@ -1773,11 +1832,15 @@ static void test_attr_corder_create_basic(FileCreatPropList& fcpl,
     }
 }   // test_attr_corder_create_basic()
 
-/****************************************************************
-**
-**  test_attr(): Main attribute testing routine.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_attr
+ *
+ * Purpose      Main attribute testing routine
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 extern "C"
 void test_attr()
 {
@@ -1860,19 +1923,14 @@ void test_attr()
         issue_fail_msg("test_attr()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr()
+
 
 /*-------------------------------------------------------------------------
- * Function     cleanup_attr
+ * Function:    cleanup_attr
  *
  * Purpose      Cleanup temporary test files
  *
- * Return       none
- *
- * Programmer   Albert Cheng
- *              July 2, 1998
- *
- * Modifications:
- *
+ * Return       None
  *-------------------------------------------------------------------------
  */
 extern "C"

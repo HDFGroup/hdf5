@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5test.h"
@@ -50,6 +48,8 @@ parse_option(int argc, char * const argv[])
 {
     int ret_value=0;
     int c;
+    int use_swmr;       /* Need an int to detect errors */
+
     /* command line options: See function usage for a description */
     const char *nagg_options = "f:hi:l:n:s:y:z:";
 
@@ -98,11 +98,13 @@ parse_option(int argc, char * const argv[])
 	    };
 	    break;
 	  case 's':	/* use swmr file open mode */
-	    if ((UC_opts.use_swmr = HDatoi(optarg)) < 0) {
-		fprintf(stderr, "swmr value should be 0(no) or 1(yes)\n");
-		usage(progname_g);
-		Hgoto_error(-1);
-	    };
+        use_swmr = HDatoi(optarg);
+	    if (use_swmr != 0 && use_swmr != 1) {
+            HDfprintf(stderr, "swmr value should be 0(no) or 1(yes)\n");
+            usage(progname_g);
+            Hgoto_error(-1);
+	    }
+        UC_opts.use_swmr = (hbool_t)use_swmr;
 	    break;
 	  case 'y':	/* Number of planes per chunk */
 	    if ((UC_opts.chunkplanes = HDstrtoul(optarg, NULL, 0)) <= 0) {

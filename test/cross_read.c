@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -228,7 +226,9 @@ check_file(char *filename)
     const char *pathname = H5_get_srcdir_filename(filename);    /* Corrected test file name     */
     hid_t       fid = -1;                                       /* file ID                      */
     int         nerrors = 0;                                    /* # of datasets with errors    */
+#if !defined(H5_HAVE_FILTER_DEFLATE) || !defined(H5_HAVE_FILTER_SZIP)
     const char  *not_supported= "    filter is not enabled.";   /* no filter message            */
+#endif
 
     /* Open the file. */
     if((fid = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)

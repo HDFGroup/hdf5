@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -59,10 +57,9 @@
 
 /* 'simple/small/large' section callbacks */
 static H5FS_section_info_t *H5MF_sect_deserialize(const H5FS_section_class_t *cls,
-    hid_t dxpl_id, const uint8_t *buf, haddr_t sect_addr, hsize_t sect_size,
-    unsigned *des_flags);
+    const uint8_t *buf, haddr_t sect_addr, hsize_t sect_size, unsigned *des_flags);
 static herr_t H5MF_sect_valid(const H5FS_section_class_t *cls,
-    const H5FS_section_info_t *sect, hid_t dxpl_id);
+    const H5FS_section_info_t *sect);
 static H5FS_section_info_t *H5MF_sect_split(H5FS_section_info_t *sect,
     hsize_t frag_size);
 
@@ -132,27 +129,27 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1] = {{
 /* Class info for "small" free space sections */
 H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1] = {{
     /* Class variables */
-    H5MF_FSPACE_SECT_SMALL,		/* Section type                 */
-    0,					/* Extra serialized size        */
-    H5FS_CLS_MERGE_SYM | H5FS_CLS_ADJUST_OK, /* Class flags                  */
-    NULL,				/* Class private info           */
+    H5MF_FSPACE_SECT_SMALL,     /* Section type                 */
+    0,                          /* Extra serialized size        */
+    H5FS_CLS_MERGE_SYM | H5FS_CLS_ADJUST_OK,    /* Class flags                  */
+    NULL,                       /* Class private info           */
 
     /* Class methods */
-    NULL,				/* Initialize section class     */
-    NULL,				/* Terminate section class      */
+    NULL,                       /* Initialize section class     */
+    NULL,                       /* Terminate section class      */
 
     /* Object methods */
-    H5MF_sect_small_add,		/* Add section                  */
-    NULL,				/* Serialize section            */
+    H5MF_sect_small_add,        /* Add section                  */
+    NULL,                       /* Serialize section            */
     H5MF_sect_deserialize,		/* Deserialize section          */
-    H5MF_sect_small_can_merge,		/* Can sections merge?          */
-    H5MF_sect_small_merge,		/* Merge sections               */
-    H5MF_sect_small_can_shrink,		/* Can section shrink container?*/
-    H5MF_sect_small_shrink,		/* Shrink container w/section   */
-    H5MF_sect_free,			/* Free section                 */
-    H5MF_sect_valid,			/* Check validity of section    */
-    H5MF_sect_split,			/* Split section node for alignment */
-    NULL,				/* Dump debugging for section   */
+    H5MF_sect_small_can_merge,  /* Can sections merge?          */
+    H5MF_sect_small_merge,      /* Merge sections               */
+    NULL,			/* Can section shrink container?*/
+    NULL,			/* Shrink container w/section   */
+    H5MF_sect_free,             /* Free section                 */
+    H5MF_sect_valid,            /* Check validity of section    */
+    H5MF_sect_split,            /* Split section node for alignment */
+    NULL,                       /* Dump debugging for section   */
 }};
 
 /* Class info for "large" free space sections */
@@ -287,7 +284,7 @@ H5MF_sect_free(H5FS_section_info_t *_sect)
  */
 static H5FS_section_info_t *
 H5MF_sect_deserialize(const H5FS_section_class_t *cls,
-    hid_t H5_ATTR_UNUSED dxpl_id, const uint8_t H5_ATTR_UNUSED *buf, haddr_t sect_addr,
+    const uint8_t H5_ATTR_UNUSED *buf, haddr_t sect_addr,
     hsize_t sect_size, unsigned H5_ATTR_UNUSED *des_flags)
 {
     H5MF_free_section_t *sect;          /* New section */
@@ -331,7 +328,7 @@ H5MF_sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
 #ifdef NDEBUG
     H5_ATTR_UNUSED
 #endif /* NDEBUG */
-    *_sect, hid_t H5_ATTR_UNUSED dxpl_id)
+    *_sect)
 {
 #ifndef NDEBUG
     const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;   /* File free section */
@@ -362,7 +359,7 @@ H5MF_sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
 static H5FS_section_info_t *
 H5MF_sect_split(H5FS_section_info_t *sect, hsize_t frag_size)
 {
-    H5MF_free_section_t *ret_value;     /* Return value */
+    H5MF_free_section_t *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -596,7 +593,7 @@ H5MF_sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
         HDassert(H5F_INTENT(udata->f) & H5F_ACC_RDWR);
 
         /* Release section's space at EOA */
-        if(H5F_free(udata->f, udata->dxpl_id, udata->alloc_type, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
+        if(H5F__free(udata->f, udata->alloc_type, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "driver free request failed")
     } /* end if */
     else {
@@ -676,7 +673,7 @@ HDfprintf(stderr, "%s: Entering, section {%a, %Hu}\n", FUNC, (*sect)->sect_info.
 HDfprintf(stderr, "%s: section is dropped\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     } /* end if */
-    /* Adjust the section if it is not at page end but its size + pgend threshold is at page end */
+    /* Adjust the section if it is not at page end but its size + prem is at page end */
     else
         if(prem <= H5F_PGEND_META_THRES(udata->f)) {
             (*sect)->sect_info.size += prem;
@@ -696,6 +693,12 @@ done:
  * Purpose:	Can this section shrink the container?
  *
  * Note: 	A small section is allowed to shrink only at closing.
+ *
+ * Note:	This is unused currently, to maintain the invariant that the
+ *		file size is always a multiple of the page size.
+ *
+ *		(This function should probably be deleted, or the invariant
+ *		relaxed)
  *
  * Return:	Success:	non-negative (TRUE/FALSE)
  *          Failure:	negative
@@ -749,6 +752,12 @@ done:
  *
  * Purpose:	Shrink container with section
  *
+ * Note:	This is unused currently, to maintain the invariant that the
+ *		file size is always a multiple of the page size.
+ *
+ *		(This function should probably be deleted, or the invariant
+ *		relaxed)
+ *
  * Return:	Success:	non-negative
  *          Failure:	negative 
  * 
@@ -774,7 +783,7 @@ H5MF_sect_small_shrink(H5FS_section_info_t **_sect, void *_udata)
     HDassert(H5F_INTENT(udata->f) & H5F_ACC_RDWR);
 
     /* Release section's space at EOA */
-    if(H5F_free(udata->f, udata->dxpl_id, udata->alloc_type, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
+    if(H5F__free(udata->f, udata->alloc_type, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "driver free request failed")
 
     /* Free section */
@@ -874,7 +883,7 @@ H5MF_sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
     (*sect1)->sect_info.size += sect2->sect_info.size;
 
     if((*sect1)->sect_info.size == udata->f->shared->fs_page_size) {
-        if(H5MF_xfree(udata->f, udata->alloc_type, udata->dxpl_id, (*sect1)->sect_info.addr, (*sect1)->sect_info.size) < 0)
+        if(H5MF_xfree(udata->f, udata->alloc_type, (*sect1)->sect_info.addr, (*sect1)->sect_info.size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free merged section")
 
         /* Need to free possible metadata page in the PB cache */
@@ -1075,7 +1084,7 @@ H5MF_sect_large_shrink(H5FS_section_info_t **_sect, void *_udata)
 
     /* Free full pages from EOA */
     /* Retain partial page in the free-space manager so as to keep EOA at page boundary */
-    if(H5F_free(udata->f, udata->dxpl_id, udata->alloc_type, (*sect)->sect_info.addr+frag_size, (*sect)->sect_info.size-frag_size) < 0)
+    if(H5F__free(udata->f, udata->alloc_type, (*sect)->sect_info.addr+frag_size, (*sect)->sect_info.size-frag_size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "driver free request failed")
 
     if(frag_size) /* Adjust section size for the partial page */

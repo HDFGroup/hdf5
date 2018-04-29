@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
@@ -22,6 +20,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -121,7 +120,7 @@ StrType::StrType(const hid_t existing_id) : AtomType( existing_id ) {}
 
 //--------------------------------------------------------------------------
 // Function:    StrType copy constructor
-///\brief       Copy constructor: makes a copy of the original StrType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 StrType::StrType(const StrType& original) : AtomType ( original ) {}
@@ -180,6 +179,27 @@ StrType::StrType(const H5Location& loc, const char *dtype_name) : AtomType()
 StrType::StrType(const H5Location& loc, const H5std_string& dtype_name) : AtomType()
 {
     id = p_opentype(loc, dtype_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    StrType::decode
+///\brief       Returns an StrType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* StrType::decode() const
+{
+    hid_t encoded_strtype_id = H5I_INVALID_HID;
+    try {
+        encoded_strtype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    StrType *encoded_strtype = new StrType;
+    encoded_strtype->p_setId(encoded_strtype_id);
+    return(encoded_strtype);
 }
 
 //--------------------------------------------------------------------------
@@ -262,8 +282,8 @@ H5T_str_t StrType::getStrpad() const
 ///\param       strpad - IN: String padding type
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For detail, please refer to the C layer Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetStrpad
+///             For information, please refer to the H5Tset_strpad API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void StrType::setStrpad(H5T_str_t strpad) const

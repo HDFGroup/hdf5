@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 #-------------------------------------------------------------------------------
 macro (EXTERNAL_JPEG_LIBRARY compress_type jpeg_pic)
   # May need to build JPEG with PIC on x64 machines with gcc
@@ -63,14 +74,14 @@ macro (EXTERNAL_JPEG_LIBRARY compress_type jpeg_pic)
   HDF_IMPORT_SET_LIB_OPTIONS (jpeg-static "jpeg" STATIC "")
   add_dependencies (JPEG jpeg-static)
   set (JPEG_STATIC_LIBRARY "jpeg-static")
-  set (JPEG_LIBRARIES ${JPEG_static_LIBRARY})
+  set (JPEG_LIBRARIES ${JPEG_STATIC_LIBRARY})
   if (BUILD_SHARED_LIBS)
     # Create imported target jpeg-shared
     add_library(jpeg-shared SHARED IMPORTED)
     HDF_IMPORT_SET_LIB_OPTIONS (jpeg-shared "jpeg" SHARED "")
     add_dependencies (JPEG jpeg-shared)
     set (JPEG_SHARED_LIBRARY "jpeg-shared")
-    set (JPEG_LIBRARIES ${JPEG_LIBRARIES} ${JPEG_shared_LIBRARY})
+    set (JPEG_LIBRARIES ${JPEG_LIBRARIES} ${JPEG_SHARED_LIBRARY})
   endif ()
 
   set (JPEG_INCLUDE_DIR_GEN "${BINARY_DIR}")
@@ -156,14 +167,14 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
   HDF_IMPORT_SET_LIB_OPTIONS (szip-static "szip" STATIC "")
   add_dependencies (SZIP szip-static)
   set (SZIP_STATIC_LIBRARY "szip-static")
-  set (SZIP_LIBRARIES ${SZIP_static_LIBRARY})
+  set (SZIP_LIBRARIES ${SZIP_STATIC_LIBRARY})
   if (BUILD_SHARED_LIBS)
     # Create imported target szip-shared
     add_library(szip-shared SHARED IMPORTED)
     HDF_IMPORT_SET_LIB_OPTIONS (szip-shared "szip" SHARED "")
     add_dependencies (SZIP szip-shared)
     set (SZIP_SHARED_LIBRARY "szip-shared")
-    set (SZIP_LIBRARIES ${SZIP_LIBRARIES} ${SZIP_shared_LIBRARY})
+    set (SZIP_LIBRARIES ${SZIP_LIBRARIES} ${SZIP_SHARED_LIBRARY})
   endif ()
 
   set (SZIP_INCLUDE_DIR_GEN "${BINARY_DIR}")
@@ -251,7 +262,7 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
   HDF_IMPORT_SET_LIB_OPTIONS (zlib-static ${ZLIB_LIB_NAME} STATIC "")
   add_dependencies (ZLIB zlib-static)
   set (ZLIB_STATIC_LIBRARY "zlib-static")
-  set (ZLIB_LIBRARIES ${ZLIB_static_LIBRARY})
+  set (ZLIB_LIBRARIES ${ZLIB_STATIC_LIBRARY})
   if (BUILD_SHARED_LIBS)
     # Create imported target zlib-shared
     add_library(zlib-shared SHARED IMPORTED)

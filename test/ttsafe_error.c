@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /********************************************************************
@@ -91,7 +89,7 @@ void tts_error(void)
     expected[2].maj_num = H5E_LINK;
     expected[2].min_num = H5E_CANTINIT;
 
-    expected[3].maj_num = H5E_SYM;
+    expected[3].maj_num = H5E_LINK;
     expected[3].min_num = H5E_CANTINSERT;
 
     expected[4].maj_num = H5E_SYM;
@@ -100,7 +98,7 @@ void tts_error(void)
     expected[5].maj_num = H5E_SYM;
     expected[5].min_num = H5E_CALLBACK;
 
-    expected[6].maj_num = H5E_SYM;
+    expected[6].maj_num = H5E_LINK;
     expected[6].min_num = H5E_EXISTS;
 
     /* set up mutex for global count of errors */

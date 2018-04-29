@@ -1,3 +1,16 @@
+! COPYRIGHT
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!   Copyright by The HDF Group.                                               *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!
 ! This file contains all the configure test programs 
 ! used by autotools and cmake. This avoids having to
 ! duplicate code for both cmake and autotool tests.
@@ -45,7 +58,7 @@ END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS
 !---- START ----- Check to see C_LONG_DOUBLE is different from C_DOUBLE
 MODULE type_mod
   USE ISO_C_BINDING
-  INTERFACE h5t	
+  INTERFACE h5t
      MODULE PROCEDURE h5t_c_double
      MODULE PROCEDURE h5t_c_long_double
   END INTERFACE

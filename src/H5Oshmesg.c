@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
@@ -29,13 +27,13 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
-static void  *H5O_shmesg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
+static void  *H5O__shmesg_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+    unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_shmesg_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O_shmesg_copy(const void *_mesg, void *_dest);
 static size_t H5O_shmesg_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
-static herr_t H5O_shmesg_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
-			     int indent, int fwidth);
+static herr_t H5O__shmesg_debug(H5F_t *f, const void *_mesg, FILE *stream,
+    int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
@@ -43,7 +41,7 @@ const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
     "shared message table",     /*message name for debugging            */
     sizeof(H5O_shmesg_table_t),	/*native message size                   */
     0,				/* messages are sharable?       */
-    H5O_shmesg_decode,		/*decode message                        */
+    H5O__shmesg_decode,		/*decode message                        */
     H5O_shmesg_encode,		/*encode message                        */
     H5O_shmesg_copy,            /*copy the native value                 */
     H5O_shmesg_size,		/*raw message size			*/
@@ -58,12 +56,12 @@ const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
     NULL,			/* post copy native value to file	*/
     NULL,			/* get creation index		        */
     NULL,			/* set creation index		        */
-    H5O_shmesg_debug              /*debug the message			*/
+    H5O__shmesg_debug           /*debug the message			*/
 }};
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_decode
+ * Function:	H5O__shmesg_decode
  *
  * Purpose:	Decode a shared message table message and return a pointer
  *              to a newly allocated H5O_shmesg_table_t struct.
@@ -77,13 +75,14 @@ const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shmesg_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
-    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
+H5O__shmesg_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
+    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_shmesg_table_t	*mesg;                  /* Native message */
     void		*ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -102,7 +101,7 @@ H5O_shmesg_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shmesg_decode() */
+} /* end H5O__shmesg_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -211,7 +210,7 @@ H5O_shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_debug
+ * Function:	H5O__shmesg_debug
  *
  * Purpose:	Prints debugging info for the message.
  *
@@ -223,12 +222,12 @@ H5O_shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shmesg_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE *stream,
+H5O__shmesg_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
     int indent, int fwidth)
 {
     const H5O_shmesg_table_t *mesg = (const H5O_shmesg_table_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -245,5 +244,5 @@ H5O_shmesg_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
 	      "Number of indexes:", mesg->nindexes);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_shmesg_debug() */
+} /* end H5O__shmesg_debug() */
 

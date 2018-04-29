@@ -1,12 +1,7 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDFJAVA_EXAMPLES_GROUPS Java)
+cmake_minimum_required (VERSION 3.10)
+project (HDFJAVA_EXAMPLES_GROUPS Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
-
-INCLUDE_DIRECTORIES (
-    ${HDF5_JAVA_JNI_BINARY_DIR}
-    ${HDF5_JAVA_HDF5_LIB_DIR}
-)
 
 set (HDF_JAVA_EXAMPLES
     H5Ex_G_Create
@@ -61,13 +56,7 @@ endforeach ()
 add_custom_target(H5Ex_G_Visit_files ALL COMMENT "Copying files needed by H5Ex_G_Visit tests" DEPENDS ${H5Ex_G_Visit_files_list})
 
 MACRO (ADD_H5_TEST resultfile resultcode)
-  if (CMAKE_BUILD_TYPE MATCHES Debug)
-    if (WIN32)
-      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
-    else ()
-      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
-    endif ()
-  endif ()
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=$<TARGET_PROPERTY:${HDF5_JAVA_JNI_LIB_TARGET},OUTPUT_NAME$<$<CONFIG:Debug>:_DEBUG>>;")
   add_test (
       NAME JAVA_groups-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
@@ -90,8 +79,8 @@ ENDMACRO ()
 
 if (BUILD_TESTING)
   foreach (example ${HDF_JAVA_EXAMPLES})
-    if (NOT ${example} STREQUAL "H5Ex_G_Iterate" AND NOT ${example} STREQUAL "H5Ex_G_Visit")
-      if (${example} STREQUAL "H5Ex_G_Compact")
+    if (NOT "${example}" STREQUAL "H5Ex_G_Iterate" AND NOT "${example}" STREQUAL "H5Ex_G_Visit")
+      if ("${example}" STREQUAL "H5Ex_G_Compact")
         add_test (
             NAME JAVA_groups-${example}-clear-h5s
             COMMAND    ${CMAKE_COMMAND}

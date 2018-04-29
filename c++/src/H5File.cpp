@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef OLD_HEADER_FILENAME
@@ -29,6 +27,7 @@
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -47,7 +46,7 @@ namespace H5 {
 //--------------------------------------------------------------------------
 // Function     H5File default constructor
 ///\brief       Default constructor: creates a stub H5File object.
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 H5File::H5File() : Group(), id(H5I_INVALID_HID) {}
 
@@ -74,13 +73,12 @@ H5File::H5File() : Group(), id(H5I_INVALID_HID) {}
 ///                             exists, and fail, otherwise
 ///\par
 ///             For info on file creation in the case of an already-open file,
-///             please refer to the \b Special \b case section in the C layer
-///             Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5F.html#File-Create
+///             please refer to the \b Special \b case section of the H5Fcreate
+///             API in the C Reference Manual.
 // Notes        With a PGI compiler (~2012-2013,) the exception thrown by
 //              p_get_file could not be caught in the applications.  Added try
 //              block here to catch then re-throw it. -BMR 2013/03/21
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 H5File::H5File(const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist) : Group(), id(H5I_INVALID_HID)
 {
@@ -105,7 +103,7 @@ H5File::H5File(const char* name, unsigned int flags, const FileCreatPropList& cr
 // Notes        With a PGI compiler (~2012-2013,) the exception thrown by
 //              p_get_file could not be caught in the applications.  Added try
 //              block here to catch then re-throw it. -BMR 2013/03/21
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 H5File::H5File(const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist) : Group(), id(H5I_INVALID_HID)
 {
@@ -120,7 +118,6 @@ H5File::H5File(const H5std_string& name, unsigned int flags, const FileCreatProp
 //--------------------------------------------------------------------------
 // This function is private and contains common code between the
 // constructors taking a string or a char*
-// Programmer   Binh-Minh Ribler - 2000
 // Modification
 //              - removed H5F_ACC_CREAT because H5Fcreate will fail with
 //              H5F_ACC_CREAT. - BMR, Sep 17, 2014
@@ -155,7 +152,6 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 // Function:    H5File overloaded constructor
 ///\brief       Creates an H5File object using an existing file id.
 ///\param       existing_id - IN: Id of an existing file
-// Programmer   Binh-Minh Ribler - 2015
 // Description
 //      Mar 29, 2015
 //              Added in responding to a request from user Jason Newton.
@@ -174,10 +170,10 @@ H5File::H5File(hid_t existing_id) : Group()
 
 //--------------------------------------------------------------------------
 // Function:    H5File copy constructor
-///\brief       Copy constructor: makes a copy of the original
+///\brief       Copy constructor: same HDF5 object as \a original
 ///             H5File object.
 ///\param       original - IN: H5File instance to copy
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 H5File::H5File(const H5File& original) : Group()
 {
@@ -191,7 +187,7 @@ H5File::H5File(const H5File& original) : Group()
 ///\param       name - IN: Name of the file
 ///\return      true if the file is in HDF5 format, and false, otherwise
 ///\exception   H5::FileIException
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 bool H5File::isHdf5(const char* name)
 {
@@ -213,7 +209,7 @@ bool H5File::isHdf5(const char* name)
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It takes an \c H5std_string for \a name. (Static)
 ///\param       name - IN: Name of the file - \c H5std_string
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 bool H5File::isHdf5(const H5std_string& name)
 {
@@ -236,7 +232,7 @@ bool H5File::isHdf5(const H5std_string& name)
 ///
 ///             H5F_ACC_RDONLY: Open with read only access. - default
 ///
-// Programmer   Binh-Minh Ribler - Oct, 2005
+// October 2005
 //--------------------------------------------------------------------------
 void H5File::openFile(const char* name, unsigned int flags, const FileAccPropList& access_plist)
 {
@@ -263,7 +259,7 @@ void H5File::openFile(const char* name, unsigned int flags, const FileAccPropLis
 ///\param       flags        - IN: File access flags
 ///\param       access_plist - IN: File access property list.  Default to
 ///             FileAccPropList::DEFAULT
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 void H5File::openFile(const H5std_string& name, unsigned int flags, const FileAccPropList& access_plist)
 {
@@ -278,7 +274,6 @@ void H5File::openFile(const H5std_string& name, unsigned int flags, const FileAc
 // Description
 //              If this object has represented another HDF5 file, the previous
 //              HDF5 file need to be closed first.
-// Programmer   Binh-Minh Ribler - 2000
 // Note:        This wrapper doesn't seem right regarding the 'id' and should
 //              be investigated.  BMR - 2/20/2005
 // Modification
@@ -305,10 +300,10 @@ void H5File::reOpen()
 
 //--------------------------------------------------------------------------
 // Function:    H5File::getCreatePlist
-///\brief       Returns the creation property list of this file
+///\brief       Returns a copy of the creation property list of this file
 ///\return      FileCreatPropList object
 ///\exception   H5::FileIException
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 FileCreatPropList H5File::getCreatePlist() const
 {
@@ -329,10 +324,10 @@ FileCreatPropList H5File::getCreatePlist() const
 
 //--------------------------------------------------------------------------
 // Function:    H5File::getAccessPlist
-///\brief       Returns the access property list of this file
+///\brief       Returns a copy of the access property list of this file
 ///\return      FileAccPropList object
 ///\exception   H5::FileIException
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 FileAccPropList H5File::getAccessPlist() const
 {
@@ -359,7 +354,7 @@ FileAccPropList H5File::getAccessPlist() const
 ///\par Description
 ///             The retrieved information may include information about
 ///             superblock extension, free space management, and shared object
-// Programmer   Binh-Minh Ribler - February 2017
+// February 2017
 //--------------------------------------------------------------------------
 void H5File::getFileInfo(H5F_info2_t& file_info) const
 {
@@ -375,7 +370,7 @@ void H5File::getFileInfo(H5F_info2_t& file_info) const
 ///\brief       Returns the amount of free space in the file.
 ///\return      Amount of free space
 ///\exception   H5::FileIException
-// Programmer   Binh-Minh Ribler - May 2004
+// May 2004
 //--------------------------------------------------------------------------
 hssize_t H5File::getFreeSpace() const
 {
@@ -407,7 +402,7 @@ hssize_t H5File::getFreeSpace() const
 ///                         | \c H5F_OBJ_DATATYPE | \c H5F_OBJ_ATTR
 ///\par
 /// Multiple object types can be combined with the logical OR operator (|).
-// Programmer   Binh-Minh Ribler - May 2004
+// May 2004
 //--------------------------------------------------------------------------
 ssize_t H5File::getObjCount(unsigned types) const
 {
@@ -442,7 +437,7 @@ ssize_t H5File::getObjCount(unsigned types) const
 /// Multiple object types can be combined with the logical OR operator (|).
 //
 // Notes: will do the overload for this one after hearing from Quincey???
-// Programmer   Binh-Minh Ribler - May 2004
+// May 2004
 //--------------------------------------------------------------------------
 void H5File::getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const
 {
@@ -470,7 +465,7 @@ void H5File::getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const
 ///             The obtained file handle is dynamic and is valid only while
 ///             the file remains open; it will be invalid if the file is
 ///             closed and reopened or opened during a subsequent session.
-// Programmer   Binh-Minh Ribler - May 2004
+// May 2004
 //--------------------------------------------------------------------------
 void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 {
@@ -491,7 +486,7 @@ void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 // Param        file_handle - Pointer to the file handle being used by
 //                            the low-level virtual file driver
 // Exception    H5::FileIException
-// Programmer   Binh-Minh Ribler - May 2004
+// May 2004
 // Modification
 //              Planned for removal. -BMR, 2014/04/16
 //              Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
@@ -510,7 +505,7 @@ void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 ///\param       file_handle - Pointer to the file handle being used by
 ///                     the low-level virtual file driver
 ///\exception   H5::FileIException
-// Programmer   Binh-Minh Ribler - May 2004
+// May 2004
 //--------------------------------------------------------------------------
 void H5File::getVFDHandle(void **file_handle) const
 {
@@ -552,7 +547,7 @@ hsize_t H5File::getFileSize() const
 //              AbstractDS and Attribute are moved out of H5Object.  In
 //              addition, member IdComponent::id is moved into subclasses, and
 //              IdComponent::getId now becomes pure virtual function.
-// Programmer   Binh-Minh Ribler - May, 2008
+// May, 2008
 //--------------------------------------------------------------------------
 hid_t H5File::getId() const
 {
@@ -566,7 +561,7 @@ hid_t H5File::getId() const
 // Exception    H5::FileIException
 // Description
 //              This function is replaced by the above function reOpen.
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 void H5File::reopen()
 {
@@ -579,7 +574,7 @@ void H5File::reopen()
 // Description
 //              This function is a redefinition of CommonFG::getLocId.  It
 //              is used by CommonFG member functions to get the file id.
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 // Deprecated:
 //      Aug 18, 2016 -BMR
 //              After HDFFV-9920, the Group's methods can use getId() and
@@ -600,7 +595,7 @@ hid_t H5File::getLocId() const
 //              The underlaying reference counting in the C library ensures
 //              that the current valid id of this object is properly closed.
 //              Then the object's id is reset to the new id.
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 void H5File::p_setId(const hid_t new_id)
 {
@@ -621,7 +616,7 @@ void H5File::p_setId(const hid_t new_id)
 ///\brief       Closes this HDF5 file.
 ///
 ///\exception   H5::FileIException
-// Programmer   Binh-Minh Ribler - Mar 9, 2005
+// March 2005
 //--------------------------------------------------------------------------
 void H5File::close()
 {
@@ -648,7 +643,7 @@ void H5File::close()
 //              proper exception can be thrown for file or group.  The
 //              "H5File::" will be inserted to indicate the function called is
 //              an implementation of H5File.
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 //--------------------------------------------------------------------------
 void H5File::throwException(const H5std_string& func_name, const H5std_string& msg) const
 {
@@ -660,7 +655,7 @@ void H5File::throwException(const H5std_string& func_name, const H5std_string& m
 //--------------------------------------------------------------------------
 // Function:    H5File destructor
 ///\brief       Properly terminates access to this file.
-// Programmer   Binh-Minh Ribler - 2000
+// December 2000
 // Modification
 //              - Replaced resetIdComponent() with decRefCount() to use C
 //              library ID reference counting mechanism - BMR, Feb 20, 2005

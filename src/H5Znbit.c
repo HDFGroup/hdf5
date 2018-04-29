@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
@@ -288,7 +286,7 @@ H5Z_calc_parms_array(const H5T_t *type, size_t *cd_values_actual_nparms)
 
 done:
     if(dtype_base)
-        if(H5T_close(dtype_base) < 0)
+        if(H5T_close_real(dtype_base) < 0)
             HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close base datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -387,14 +385,14 @@ H5Z_calc_parms_compound(const H5T_t *type, size_t *cd_values_actual_nparms)
         } /* end switch */
 
         /* Close member datatype */
-        if(H5T_close(dtype_member) < 0)
+        if(H5T_close_real(dtype_member) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype")
         dtype_member = NULL;
     } /* end for */
 
 done:
     if(dtype_member)
-        if(H5T_close(dtype_member) < 0)
+        if(H5T_close_real(dtype_member) < 0)
             HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -635,7 +633,7 @@ H5Z_set_parms_array(const H5T_t *type, unsigned *cd_values_index,
 
 done:
     if(dtype_base)
-        if(H5T_close(dtype_base) < 0)
+        if(H5T_close_real(dtype_base) < 0)
             HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close base datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -776,14 +774,14 @@ H5Z_set_parms_compound(const H5T_t *type, unsigned *cd_values_index,
         } /* end switch */
 
         /* Close member datatype */
-        if(H5T_close(dtype_member) < 0)
+        if(H5T_close_real(dtype_member) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype")
         dtype_member = NULL;
     } /* end for */
 
 done:
     if(dtype_member)
-        if(H5T_close(dtype_member) < 0)
+        if(H5T_close_real(dtype_member) < 0)
             HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "Unable to close member datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)

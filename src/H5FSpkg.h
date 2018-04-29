@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -106,7 +104,6 @@ typedef struct H5FS_hdr_cache_ud_t {
 typedef struct H5FS_sinfo_cache_ud_t {
     H5F_t *f;                  /* File that free space section info is within */
     H5FS_t *fspace;            /* free space manager */
-    hid_t dxpl_id;
 } H5FS_sinfo_cache_ud_t;
 
 /* Free space section bin info */
@@ -239,8 +236,8 @@ H5_DLL herr_t H5FS_sinfo_dest(H5FS_sinfo_t *sinfo);
 
 /* Sanity check routines */
 #ifdef H5FS_DEBUG
-H5_DLL herr_t H5FS_assert(const H5FS_t *fspace, hid_t dxpl_id);
-H5_DLL herr_t H5FS_sect_assert(const H5FS_t *fspace, hid_t dxpl_id);
+H5_DLL herr_t H5FS__assert(const H5FS_t *fspace);
+H5_DLL herr_t H5FS__sect_assert(const H5FS_t *fspace);
 #endif /* H5FS_DEBUG */
 
 /* Testing routines */

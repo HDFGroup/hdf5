@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
@@ -22,6 +20,7 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -67,13 +66,13 @@ FloatType::FloatType(const hid_t existing_id) : AtomType( existing_id ) {}
 
 //--------------------------------------------------------------------------
 // Function:    FloatType copy constructor
-///\brief       Copy constructor: makes a copy of the original FloatType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType::FloatType(const FloatType&  original) : AtomType( original ){}
 
 //--------------------------------------------------------------------------
-// Function:    EnumType overloaded constructor
+// Function:    FloatType overloaded constructor
 ///\brief       Gets the floating-point datatype of the specified dataset
 ///\param       dataset - IN: Dataset that this floating-point datatype
 ///             associates with
@@ -127,6 +126,27 @@ FloatType::FloatType(const H5Location& loc, const char *dtype_name) : AtomType()
 FloatType::FloatType(const H5Location& loc, const H5std_string& dtype_name) : AtomType()
 {
     id = p_opentype(loc, dtype_name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    FloatType::decode
+///\brief       Returns an FloatType object via DataType* by decoding the
+///             binary object description of this type.
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Aug 2017
+//--------------------------------------------------------------------------
+DataType* FloatType::decode() const
+{
+    hid_t encoded_flttype_id = H5I_INVALID_HID;
+    try {
+        encoded_flttype_id = p_decode();
+    }
+    catch (DataTypeIException &err) {
+        throw;
+    }
+    FloatType *encoded_flttype = new FloatType;
+    encoded_flttype->p_setId(encoded_flttype_id);
+    return(encoded_flttype);
 }
 
 //--------------------------------------------------------------------------

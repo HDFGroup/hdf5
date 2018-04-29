@@ -1,8 +1,27 @@
 #
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+#
 # This file provides functions for Fortran support.
 #
 #-------------------------------------------------------------------------------
 ENABLE_LANGUAGE (Fortran)
+
+#-------------------------------------------------------------------------------
+#  Fix Fortran flags if we are compiling staticly on Windows using
+#  Windows_MT.cmake from config/cmake/UserMacros
+#-------------------------------------------------------------------------------
+if (BUILD_STATIC_CRT_LIBS)
+  TARGET_STATIC_CRT_FLAGS ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Detect name mangling convention used between Fortran and C

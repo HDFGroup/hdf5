@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -308,7 +306,7 @@ H5HF__huge_bt2_indir_remove(const void *nrecord, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Free the space in the file for the object being removed */
-    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
+    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free space for huge object on disk")
 
     /* Set the length of the object removed */
@@ -511,7 +509,7 @@ H5HF__huge_bt2_filt_indir_remove(const void *nrecord, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Free the space in the file for the object being removed */
-    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->len) < 0)
+    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free space for huge object on disk")
 
     /* Set the length of the object removed */
@@ -693,7 +691,7 @@ H5HF__huge_bt2_dir_remove(const void *nrecord, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Free the space in the file for the object being removed */
-    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
+    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free space for huge object on disk")
 
     /* Set the length of the object removed */
@@ -905,7 +903,7 @@ H5HF__huge_bt2_filt_dir_remove(const void *nrecord, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* Free the space in the file for the object being removed */
-    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->len) < 0)
+    if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free space for huge object on disk")
 
     /* Set the length of the object removed */

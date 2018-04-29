@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_HL_EXAMPLES )
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_HL_EXAMPLES C)
 
 #-----------------------------------------------------------------------------
 # Define Sources
@@ -28,7 +28,7 @@ set (examples
 
 foreach (example ${examples})
   add_executable (hl_ex_${example} ${HDF5_HL_EXAMPLES_SOURCE_DIR}/${example}.c)
-  TARGET_NAMING (hl_ex_${example} STATIC)
+  set_property(TARGET hl_ex_${example} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (hl_ex_${example} STATIC " " " ")
   target_link_libraries (hl_ex_${example} ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (hl_ex_${example} PROPERTIES FOLDER examples/hl)

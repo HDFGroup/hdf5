@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -22,7 +20,6 @@
  * trying it on a new platform, ...), you need to verify the correctness
  * of the expected output and update the corresponding *.ddl files.
  */
-#include <limits.h>
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -115,6 +112,7 @@
 #define FILE82  "tcompound_complex2.h5"
 #define FILE83  "tvlenstr_array.h5"
 #define FILE84  "tudfilter.h5"
+#define FILE85  "tgrpnullspace.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -174,7 +172,8 @@ const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
 
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t UD_traverse(H5_ATTR_UNUSED const char * link_name, H5_ATTR_UNUSED hid_t cur_group,
-        H5_ATTR_UNUSED const void * udata, H5_ATTR_UNUSED size_t udata_size, H5_ATTR_UNUSED hid_t lapl_id)
+    H5_ATTR_UNUSED const void * udata, H5_ATTR_UNUSED size_t udata_size, H5_ATTR_UNUSED hid_t lapl_id,
+    H5_ATTR_UNUSED hid_t dxpl_id)
 {
     return -1;
 }
@@ -289,9 +288,9 @@ typedef struct s1_t {
 #define F64_DIM1            (F64_ARRAY_BUF_LEN / sizeof(int) + 1)
 
 /* File 65 macros */
-#define STRATEGY  H5F_FSPACE_STRATEGY_NONE 	/* File space handling strategy */
-#define THRESHOLD10   		10   		/* Free-space section threshold */
-#define FSPACE_PAGE_SIZE     	8192 		/* File space page size */
+#define STRATEGY  H5F_FSPACE_STRATEGY_NONE     /* File space handling strategy */
+#define THRESHOLD10           10           /* Free-space section threshold */
+#define FSPACE_PAGE_SIZE         8192         /* File space page size */
 
 /* "FILE66" macros and for FILE69 */
 #define F66_XDIM        8
@@ -3481,7 +3480,7 @@ static void gent_array8(void)
     unsigned int i;
 
     /* Allocate data buffer */
-    wdata = HDmalloc(F64_DIM1 * sizeof(int));
+    wdata = (int *)HDmalloc(F64_DIM1 * sizeof(int));
     HDassert(wdata);
 
     /*
@@ -7044,8 +7043,8 @@ gent_extlinks(void)
  * Function:    gent_fs_strategy_threshold
  *
  * Purpose:     Generate a file with non-default file space strategy,
- *    		non-default free-space section threshold,
- *		non-default file space page size.
+ *            non-default free-space section threshold,
+ *        non-default file space page size.
  *-------------------------------------------------------------------------
  */
 static void
@@ -9719,18 +9718,19 @@ static void gent_bitnopaquefields(void)
     /* Compound datatype */
     typedef struct s_t
     {
-        unsigned char   a;
-        unsigned int    b;
-        unsigned long    c;
-        unsigned long long    d;
+        uint8_t     a;
+        uint16_t    b;
+        uint32_t    c;
+        uint64_t    d;
     } s_t;
+
     hid_t  file, grp=-1, type=-1, space=-1, dset=-1;
     size_t  i;
     hsize_t  nelmts = F80_DIM32;
-    unsigned char buf[F80_DIM32];    /* bitfield, opaque */
-    unsigned int buf2[F80_DIM32];    /* bitfield, opaque */
-    unsigned long buf3[F80_DIM32];    /* bitfield, opaque */
-    unsigned long long buf4[F80_DIM32];    /* bitfield, opaque */
+    uint8_t buf[F80_DIM32];    /* bitfield, opaque */
+    uint16_t buf2[F80_DIM32];    /* bitfield, opaque */
+    uint32_t buf3[F80_DIM32];    /* bitfield, opaque */
+    uint64_t buf4[F80_DIM32];    /* bitfield, opaque */
     s_t      buf5[F80_DIM32];        /* compound */
 
     file = H5Fcreate(FILE80, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -9741,7 +9741,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                        buf[i] = (uint8_t)0xff ^ (uint8_t)i;
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                     H5Dclose(dset);
@@ -9756,7 +9756,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                        buf2[i] = (uint16_t)0xffff ^ (uint16_t)(i * 16);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                     H5Dclose(dset);
@@ -9771,7 +9771,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_3", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf3[i] = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                        buf3[i] = (uint32_t)0xffffffff ^ (uint32_t)(i * 32);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf3);
                     H5Dclose(dset);
@@ -9786,7 +9786,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_4", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf4[i] = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                        buf4[i] = (uint64_t)0xffffffffffffffff ^ (uint64_t)(i * 64);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf4);
                     H5Dclose(dset);
@@ -9806,7 +9806,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                            buf[i] = (uint8_t)0xff ^ (uint8_t)i;
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                         H5Dclose(dset);
                     }
@@ -9822,7 +9822,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                            buf2[i] = (uint16_t)0xffff ^ (uint16_t)(i * 16);
 
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                         H5Dclose(dset);
@@ -9845,10 +9845,10 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for(i = 0; i < nelmts; i++) {
-                        buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
-                        buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
-                        buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
-                        buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                        buf5[i].a = (uint8_t)0xff ^ (uint8_t)i;
+                        buf5[i].b = (uint16_t)0xffff ^ (uint16_t)(i * 16);
+                        buf5[i].c = (uint32_t)0xffffffff ^ (uint32_t)(i * 32);
+                        buf5[i].d = (uint64_t)0xffffffffffffffff ^ (uint64_t)(i * 64);
                     }
 
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
@@ -10319,7 +10319,6 @@ static void gent_udfilter(void)
     hid_t    dcpl; /* dataset creation property list */
     hid_t    dsid;  /* dataset ID */
     hid_t    sid;  /* dataspace ID */
-    hid_t    tid;  /* datatype ID */
 
     hsize_t  dims1[RANK]      = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
@@ -10440,6 +10439,43 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
  *-------------------------------------------------------------------------
  */
 
+/*-------------------------------------------------------------------------
+ * Function: gent_null_space_group
+ *
+ * Purpose: generates dataset and attribute of null dataspace in a group
+ *-------------------------------------------------------------------------
+ */
+static void gent_null_space_group(void)
+{
+    hid_t fid, root, group, dataset, space, attr;
+    int dset_buf = 10;
+    int point = 4;
+
+    fid = H5Fcreate(FILE85, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    root = H5Gopen2(fid, "/", H5P_DEFAULT);
+
+    group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* null space */
+    space = H5Screate(H5S_NULL);
+
+    /* dataset */
+    dataset = H5Dcreate2(group, "dset", H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    /* nothing should be written */
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dset_buf);
+
+    /* attribute */
+    attr = H5Acreate2(group, "attr", H5T_NATIVE_UINT, space, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, H5T_NATIVE_INT, &point); /* Nothing can be written */
+
+    H5Dclose(dataset);
+    H5Aclose(attr);
+    H5Gclose(group);
+    H5Gclose(root);
+    H5Sclose(space);
+    H5Fclose(fid);
+}
+
 int main(void)
 {
     gent_group();
@@ -10529,6 +10565,7 @@ int main(void)
     gent_bitnopaquefields();
 
     gent_intsfourdims();
+    gent_null_space_group();
 
     gent_udfilter();
 

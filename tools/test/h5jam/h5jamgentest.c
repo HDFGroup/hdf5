@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -22,8 +20,6 @@
  * trying it on a new platform, ...), you need to verify the correctness
  * of the expected output and update the corresponding *.ddl files.
  */
-#include <assert.h>
-#include <limits.h>
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -91,7 +87,8 @@ typedef struct s1_t {
 
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t UD_traverse(const char H5_ATTR_UNUSED * link_name, hid_t H5_ATTR_UNUSED cur_group,
-    const void H5_ATTR_UNUSED * udata, size_t H5_ATTR_UNUSED udata_size, hid_t H5_ATTR_UNUSED lapl_id)
+    const void H5_ATTR_UNUSED * udata, size_t H5_ATTR_UNUSED udata_size, hid_t H5_ATTR_UNUSED lapl_id,
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     return -1;
 }
@@ -279,7 +276,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
 
     HDassert(ub_size <= BUF_SIZE);
 
-    fd = HDopen(filename, O_RDWR, 0);
+    fd = HDopen(filename, O_RDWR);
     HDassert(fd >= 0);
 
     /* fill buf with pattern */

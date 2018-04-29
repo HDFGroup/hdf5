@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5tools.h"
@@ -33,7 +31,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:S:P:T:G:E";
+static const char *s_opts = "hVvf:l:m:e:nLj:k:c:d:s:u:b:M:t:a:i:o:S:P:T:G:q:z:E";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -44,6 +42,8 @@ static struct long_options l_opts[] = {
     { "file", require_arg, 'e' },
     { "native", no_arg, 'n' },
     { "latest", no_arg, 'L' },
+    { "low", require_arg, 'j' },
+    { "high", require_arg, 'k' },
     { "compact", require_arg, 'c' },
     { "indexed", require_arg, 'd' },
     { "ssize", require_arg, 's' },
@@ -58,6 +58,8 @@ static struct long_options l_opts[] = {
     { "fs_persist", require_arg, 'P' },
     { "fs_threshold", require_arg, 'T' },
     { "fs_pagesize", require_arg, 'G' },
+    { "sort_by", require_arg, 'q' },
+    { "sort_order", require_arg, 'z' },
     { "enable-error-stack", no_arg, 'E' },
     { NULL, 0, '\0' }
 };
@@ -81,7 +83,13 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -v, --verbose           Verbose mode, print object information\n");
     PRINTVALSTREAM(rawoutstream, "   -V, --version           Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
+    PRINTVALSTREAM(rawoutstream, "   --enable-error-stack    Prints messages from the HDF5 error stack as they occur\n");
     PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
+    PRINTVALSTREAM(rawoutstream, "                           This option will take precedence over the -j and -k options\n");
+    PRINTVALSTREAM(rawoutstream, "   --low=BOUND             The low bound for library release versions to use when creating\n");
+    PRINTVALSTREAM(rawoutstream, "                           objects in the file (default is H5F_LIBVER_EARLIEST)\n");
+    PRINTVALSTREAM(rawoutstream, "   --high=BOUND            The high bound for library release versions to use when creating\n");
+    PRINTVALSTREAM(rawoutstream, "                           objects in the file (default is H5F_LIBVER_LATEST)\n");
     PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
     PRINTVALSTREAM(rawoutstream, "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
     PRINTVALSTREAM(rawoutstream, "   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
@@ -92,6 +100,8 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
     PRINTVALSTREAM(rawoutstream, "   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
     PRINTVALSTREAM(rawoutstream, "   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
+    PRINTVALSTREAM(rawoutstream, "   -q Q, --sort_by=Q       Sort groups and attributes by index Q\n");
+    PRINTVALSTREAM(rawoutstream, "   -z Z, --sort_order=Z    Sort groups and attributes by order Z\n");
     PRINTVALSTREAM(rawoutstream, "   -f FILT, --filter=FILT  Filter type\n");
     PRINTVALSTREAM(rawoutstream, "   -l LAYT, --layout=LAYT  Layout type\n");
     PRINTVALSTREAM(rawoutstream, "   -S FS_STRATEGY, --fs_strategy=FS_STRATEGY  File space management strategy for H5Pset_file_space_strategy\n");
@@ -99,19 +109,25 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -T FS_THRESHOLD, --fs_threshold=FS_THRESHOLD   Free-space section threshold for H5Pset_file_space_strategy\n");
     PRINTVALSTREAM(rawoutstream, "   -G FS_PAGESIZE, --fs_pagesize=FS_PAGESIZE   File space page size for H5Pset_file_space_page_size\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
+    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0)\n");
     PRINTVALSTREAM(rawoutstream, "    E - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "    S - is an integer\n");
     PRINTVALSTREAM(rawoutstream, "    U - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "    T - is an integer\n");
     PRINTVALSTREAM(rawoutstream, "    A - is an integer greater than zero\n");
+    PRINTVALSTREAM(rawoutstream, "    Q - is the sort index type for the input file. It can be \"name\" or \"creation_order\" (default)\n");
+    PRINTVALSTREAM(rawoutstream, "    Z - is the sort order type for the input file. It can be \"descending\" or \"ascending\" (default)\n");
     PRINTVALSTREAM(rawoutstream, "    B - is the user block size, any value that is 512 or greater and is\n");
     PRINTVALSTREAM(rawoutstream, "        a power of 2 (1024 default)\n");
     PRINTVALSTREAM(rawoutstream, "    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
     PRINTVALSTREAM(rawoutstream, "        pline|attr>. If F is not specified, S applies to all messages\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
-    PRINTVALSTREAM(rawoutstream, "                          occur.\n");
+    PRINTVALSTREAM(rawoutstream, "    BOUND is an integer indicating the library release versions to use when creating\n");
+    PRINTVALSTREAM(rawoutstream, "          objects in the file (see H5Pset_libver_bounds()):\n");
+    PRINTVALSTREAM(rawoutstream, "        0: This is H5F_LIBVER_EARLIEST in H5F_libver_t struct\n");
+    PRINTVALSTREAM(rawoutstream, "        1: This is H5F_LIBVER_V18 in H5F_libver_t struct\n");
+    PRINTVALSTREAM(rawoutstream, "        2: This is H5F_LIBVER_V110 in H5F_libver_t struct\n");
+    PRINTVALSTREAM(rawoutstream, "           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V110 for this release\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    FS_STRATEGY is a string indicating the file space strategy used:\n");
     PRINTVALSTREAM(rawoutstream, "        FSM_AGGR:\n");
@@ -160,8 +176,8 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "        NBIT (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
     PRINTVALSTREAM(rawoutstream, "            is either IN or DS\n");
-    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>\n");
-    PRINTVALSTREAM(rawoutstream, "            required values for filter_number,cd_value_count,value_1\n");
+    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,filter_flag,cd_value_count,value_1[,value_2,...,value_N]>\n");
+    PRINTVALSTREAM(rawoutstream, "            required values for filter_number,filter_flag,cd_value_count,value_1\n");
     PRINTVALSTREAM(rawoutstream, "            optional values for value_2 to value_N\n");
     PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -196,16 +212,21 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2\n");
     PRINTVALSTREAM(rawoutstream, "   and remove filters to objects dset3, dset4, dset5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "4) h5repack -L -c 10 -s 20:dtype file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "4) h5repack -L -c 10 -s 20:dtype file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Using latest file format with maximum compact group size of 10 and\n");
     PRINTVALSTREAM(rawoutstream, "   and minimum shared datatype size of 20\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "5) h5repack --low=0 --high=1 file1 file2\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via H5Pset_libver_bounds() when\n");
+    PRINTVALSTREAM(rawoutstream, "   creating the repacked file: file2\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add both filters SHUF and GZIP in this order to all datasets\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,1,9 file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,0,1,9 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add bzip2 filter to all datasets\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -217,10 +238,6 @@ static void usage(const char *prog) {
  * Purpose:     Shutdown MPI & HDF5 and call exit()
  *
  * Return:      Does not return
- *
- * Programmer:  Quincey Koziol
- *              Saturday, 31. January 2004
- *
  *-------------------------------------------------------------------------
  */
 static void leave(int ret)
@@ -235,11 +252,6 @@ static void leave(int ret)
  * Purpose: read comp and chunk options from a file
  *
  * Return: void, exit on error
- *
- * Programmer: pvn@ncsa.uiuc.edu
- *
- * Date: September, 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -372,10 +384,55 @@ done:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    set_sort_by
+ *
+ * Purpose: set the "by" form of sorting by translating from a string input
+ *          parameter to a H5_index_t return value
+ *          current sort values are [creation_order | name]
+ *
+ * Return: H5_index_t form of sort or H5_INDEX_UNKNOWN if none found
+ *-------------------------------------------------------------------------
+ */
+static H5_index_t
+set_sort_by(const char *form)
+{
+    H5_index_t idx_type = H5_INDEX_UNKNOWN;
+
+    if (HDstrcmp(form,"name")==0) /* H5_INDEX_NAME */
+        idx_type = H5_INDEX_NAME;
+    else if (HDstrcmp(form,"creation_order")==0) /* H5_INDEX_CRT_ORDER */
+        idx_type = H5_INDEX_CRT_ORDER;
+
+    return idx_type;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    set_sort_order
+ *
+ * Purpose: set the order of sorting by translating from a string input
+ *          parameter to a H5_iter_order_t return value
+ *          current order values are [ascending | descending ]
+ *
+ * Return: H5_iter_order_t form of order or H5_ITER_UNKNOWN if none found
+ *-------------------------------------------------------------------------
+ */
+static H5_iter_order_t
+set_sort_order(const char *form)
+{
+    H5_iter_order_t iter_order = H5_ITER_UNKNOWN;
+
+    if (HDstrcmp(form,"ascending")==0) /* H5_ITER_INC */
+        iter_order = H5_ITER_INC;
+    else if (HDstrcmp(form,"descending")==0) /* H5_ITER_DEC */
+        iter_order = H5_ITER_DEC;
+
+    return iter_order;
+}
+
+/*-------------------------------------------------------------------------
  * Function: parse_command_line
  *
  * Purpose: parse command line input
- *
  *-------------------------------------------------------------------------
  */
 static
@@ -388,13 +445,13 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char) opt) {
 
-            /* -i for backward compability */
+            /* -i for backward compatibility */
             case 'i':
                 infile = opt_arg;
                 has_i_o = 1;
                 break;
 
-            /* -o for backward compability */
+            /* -o for backward compatibility */
             case 'o':
                 outfile = opt_arg;
                 has_i_o = 1;
@@ -458,6 +515,22 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
             case 'L':
                 options->latest = TRUE;
+                break;
+
+            case 'j':
+                options->low_bound = (H5F_libver_t)HDatoi(opt_arg);
+                if(options->low_bound < H5F_LIBVER_EARLIEST || options->low_bound > H5F_LIBVER_LATEST) {
+                    error_msg("in parsing low bound\n");
+                    goto done;
+                }
+                break;
+
+            case 'k':
+                options->high_bound = (H5F_libver_t)HDatoi(opt_arg);
+                if(options->high_bound < H5F_LIBVER_EARLIEST || options->high_bound > H5F_LIBVER_LATEST) {
+                    error_msg("in parsing high bound\n");
+                    goto done;
+                }
                 break;
 
             case 'c':
@@ -555,14 +628,14 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'P':
-                options->fs_persist = HDatoi( opt_arg );
+                options->fs_persist = HDatoi(opt_arg);
                 if(options->fs_persist == 0)
                     /* To distinguish the "specified" zero value */
                     options->fs_persist = -1;
                 break;
 
             case 'T':
-                options->fs_threshold = HDatol( opt_arg );
+                options->fs_threshold = HDatol(opt_arg);
                 if(options->fs_threshold == 0)
                     /* To distinguish the "specified" zero value */
                     options->fs_threshold = -1;
@@ -572,12 +645,30 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 options->fs_pagesize = HDstrtoll(opt_arg, NULL, 0);
                 if(options->fs_pagesize == 0)
                     /* To distinguish the "specified" zero value */
-                   options->fs_pagesize = -1;	
+                   options->fs_pagesize = -1;
                 break;
 
-	    case 'E':
-		enable_error_stack = TRUE;
-		break;
+            case 'q':
+                if((sort_by = set_sort_by(opt_arg)) < 0) {
+                    error_msg(" failed to set sort by form <%s>\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
+
+            case 'z':
+                if((sort_order = set_sort_order(opt_arg)) < 0) {
+                    error_msg(" failed to set sort order form <%s>\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
+
+            case 'E':
+                enable_error_stack = 1;
+                break;
 
             default:
                 break;
@@ -606,13 +697,6 @@ done:
  * Return: Success: EXIT_SUCCESS(0)
  *
  * Failure: EXIT_FAILURE(1)
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
  *-------------------------------------------------------------------------
  */
 int main(int argc, const char **argv)
@@ -644,7 +728,12 @@ int main(int argc, const char **argv)
     }
 
     /* initialize options  */
-    h5repack_init(&options, 0, FALSE);
+    if (h5repack_init(&options, 0, FALSE) < 0) {
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
+    /* Initialize default indexing options */
+    sort_by = H5_INDEX_CRT_ORDER;
 
     if (parse_command_line(argc, argv, &options) < 0)
         goto done;
@@ -671,7 +760,7 @@ int main(int argc, const char **argv)
         }
     }
 
-    if (enable_error_stack) {
+    if (enable_error_stack > 0) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
         H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
     }

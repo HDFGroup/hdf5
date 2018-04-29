@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -357,8 +355,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_free_elmts() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
-    void *ctx_udata))
+H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata))
 
     /* Local variables */
     H5EA_hdr_t *hdr = NULL;     /* Extensible array header */
@@ -417,7 +414,7 @@ H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
         H5E_THROW(H5E_CANTINIT, "initialization failed for extensible array header")
 
     /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_EARRAY_HDR, dxpl_id, (hsize_t)hdr->size)))
+    if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_EARRAY_HDR, (hsize_t)hdr->size)))
         H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array header")
 
     /* Create 'top' proxy for extensible array entries */
@@ -426,13 +423,13 @@ H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
             H5E_THROW(H5E_CANTCREATE, "can't create extensible array entry proxy")
 
     /* Cache the new extensible array header */
-    if(H5AC_insert_entry(f, dxpl_id, H5AC_EARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_insert_entry(f, H5AC_EARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTINSERT, "can't add extensible array header to cache")
     inserted = TRUE;
 
     /* Add header as child of 'top' proxy */
     if(hdr->top_proxy)
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, dxpl_id, hdr) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
 
     /* Set address of array header to return */
@@ -447,7 +444,7 @@ CATCH
                     H5E_THROW(H5E_CANTREMOVE, "unable to remove extensible array header from cache")
 
             /* Release header's disk space */
-            if(H5F_addr_defined(hdr->addr) && H5MF_xfree(f, H5FD_MEM_EARRAY_HDR, dxpl_id, hdr->addr, (hsize_t)hdr->size) < 0)
+            if(H5F_addr_defined(hdr->addr) && H5MF_xfree(f, H5FD_MEM_EARRAY_HDR, hdr->addr, (hsize_t)hdr->size) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to free extensible array header")
 
             /* Destroy header */
@@ -628,7 +625,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_modified() */
  */
 BEGIN_FUNC(PKG, ERR,
 H5EA_hdr_t *, NULL, NULL,
-H5EA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata,
+H5EA__hdr_protect(H5F_t *f, haddr_t ea_addr, void *ctx_udata,
     unsigned flags))
 
     /* Local variables */
@@ -648,7 +645,7 @@ H5EA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata,
     udata.ctx_udata = ctx_udata;
 
     /* Protect the header */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, &udata, flags)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, H5AC_EARRAY_HDR, ea_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
     hdr->f = f;   /* (Must be set again here, in case the header was already in the cache -QAK) */
 
@@ -659,7 +656,7 @@ H5EA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata,
             H5E_THROW(H5E_CANTCREATE, "can't create extensible array entry proxy")
 
         /* Add header as child of 'top' proxy */
-        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, dxpl_id, hdr) < 0)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, hdr) < 0)
             H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
     } /* end if */
 
@@ -686,7 +683,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_protect() */
  */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__hdr_unprotect(H5EA_hdr_t *hdr, hid_t dxpl_id, unsigned cache_flags))
+H5EA__hdr_unprotect(H5EA_hdr_t *hdr, unsigned cache_flags))
 
     /* Local variables */
 
@@ -694,7 +691,7 @@ H5EA__hdr_unprotect(H5EA_hdr_t *hdr, hid_t dxpl_id, unsigned cache_flags))
     HDassert(hdr);
 
     /* Unprotect the header */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_EARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
+    if(H5AC_unprotect(hdr->f, H5AC_EARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array hdr, address = %llu", (unsigned long long)hdr->addr)
 
 CATCH
@@ -717,7 +714,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_unprotect() */
  */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__hdr_delete(H5EA_hdr_t *hdr, hid_t dxpl_id))
+H5EA__hdr_delete(H5EA_hdr_t *hdr))
 
     /* Local variables */
     unsigned cache_flags = H5AC__NO_FLAGS_SET;  /* Flags for unprotecting header */
@@ -743,7 +740,7 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr, hid_t dxpl_id))
     /* Check for index block */
     if(H5F_addr_defined(hdr->idx_blk_addr)) {
         /* Delete index block */
-        if(H5EA__iblock_delete(hdr, dxpl_id) < 0)
+        if(H5EA__iblock_delete(hdr) < 0)
             H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array index block")
     } /* end if */
 
@@ -753,7 +750,7 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr, hid_t dxpl_id))
 CATCH
 
     /* Unprotect the header, deleting it if an error hasn't occurred */
-    if(H5EA__hdr_unprotect(hdr, dxpl_id, cache_flags) < 0)
+    if(H5EA__hdr_unprotect(hdr, cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PKG)   /* end H5EA__hdr_delete() */

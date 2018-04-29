@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 ##
 require 5.003;
 $Source = "";
@@ -78,7 +76,7 @@ $Source = "";
                "off_t"                      => "o",
                "H5O_type_t"                 => "Ot",
                "H5P_class_t"                => "p",
-               "hobj_ref_t"		    => "r",
+               "hobj_ref_t"                 => "r",
                "H5R_type_t"                 => "Rt",
                "char"                       => "s",
                "unsigned char"              => "s",
@@ -126,7 +124,7 @@ $Source = "";
                "H5G_iterate_t"              => "x",
                "H5G_info_t"                 => "x",
                "H5I_free_t"                 => "x",
-               "H5I_search_func_t"         => "x",
+               "H5I_search_func_t"          => "x",
                "H5L_class_t"                => "x",
                "H5L_elink_traverse_t"       => "x",
                "H5L_iterate_t"              => "x",
@@ -163,6 +161,8 @@ $Source = "";
 ##############################################################################
 # Print an error message.
 #
+my $found_errors = 0;
+
 sub errmesg ($$@) {
   my ($file, $func, @mesg) = @_;
   my ($mesg) = join "", @mesg;
@@ -171,6 +171,8 @@ sub errmesg ($$@) {
     local $_ = $1;
     $lineno = tr/\n/\n/;
   }
+
+  $found_errors = 1;
 
   print "$file: in function \`$func\':\n";
   print "$file:$lineno: $mesg\n";
@@ -341,4 +343,13 @@ for $file (@ARGV) {
   }
 }
 
-printf "Finished processing HDF5 API calls\n"
+if ($found_errors eq 1) {
+    printf "\n";
+    printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    printf "*** ERRORS FOUND *** ERRORS FOUND *** ERRORS FOUND ****\n";
+    printf "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    exit 1;
+} else {
+    printf "Finished processing HDF5 API calls\n";
+}
+

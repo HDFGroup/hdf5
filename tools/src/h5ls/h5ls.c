@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -1619,38 +1617,39 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
 
         info = &outputformat;
 
-        if(hexdump_g)
-           p_type = H5Tcopy(type);
-        else
-           p_type = h5tools_get_native_type(type);
+        if(space_type != H5S_NULL && space_type != H5S_NO_CLASS) {
+            if(hexdump_g)
+                p_type = H5Tcopy(type);
+            else
+                p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
 
-        if(p_type >= 0) {
-            /* VL data special information */
-            unsigned int        vl_data = 0; /* contains VL datatypes */
+            if(p_type >= 0) {
+                /* VL data special information */
+                unsigned int        vl_data = 0; /* contains VL datatypes */
 
-            /* Check if we have VL data in the dataset's datatype */
-            if (h5tools_detect_vlen(p_type) == TRUE)
-                vl_data = TRUE;
+                /* Check if we have VL data in the dataset's datatype */
+                if (h5tools_detect_vlen(p_type) == TRUE)
+                    vl_data = TRUE;
 
-            temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-            HDassert(temp_need == (hsize_t)((size_t)temp_need));
-            need = (size_t)temp_need;
-            buf = HDmalloc(need);
-            HDassert(buf);
-            if(H5Aread(attr, p_type, buf) >= 0) {
-                ctx.need_prefix = TRUE;
-                ctx.indent_level = 2;
-                ctx.cur_column = (size_t)curr_pos;
-                h5tools_dump_mem(rawoutstream, info, &ctx, attr, p_type, space, buf);
-            }
+                temp_need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+                need = (size_t)temp_need;
+                if((buf = HDmalloc(need)) != NULL) {
+                    if(H5Aread(attr, p_type, buf) >= 0) {
+                        ctx.need_prefix = TRUE;
+                        ctx.indent_level = 2;
+                        ctx.cur_column = (size_t)curr_pos;
+                        h5tools_dump_mem(rawoutstream, info, &ctx, attr, p_type, space, buf);
+                    }
 
-            /* Reclaim any VL memory, if necessary */
-            if (vl_data)
-                H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+                    /* Reclaim any VL memory, if necessary */
+                    if (vl_data)
+                        H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
 
-            HDfree(buf);
-            H5Tclose(p_type);
-        } /* end if */
+                    HDfree(buf);
+                }
+                H5Tclose(p_type);
+            } /* end if */
+        }
 
         H5Sclose(space);
         H5Tclose(type);
@@ -1875,7 +1874,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
             default:
-                HDassert(0);
+                h5tools_str_append(&buffer, "layout information not available");
                 break;
         }
         /* Print total raw storage size */
@@ -2710,6 +2709,7 @@ main(int argc, const char *argv[])
                     case 'h': /* --help */
                         usage();
                         leave(EXIT_SUCCESS);
+                        break;
 
                     case 'a': /* --address */
                         address_g = TRUE;
@@ -2760,6 +2760,7 @@ main(int argc, const char *argv[])
                     case 'V': /* --version */
                         print_version(h5tools_getprogname());
                         leave(EXIT_SUCCESS);
+                        break;
 
                     case 'x': /* --hexdump */
                         hexdump_g = TRUE;

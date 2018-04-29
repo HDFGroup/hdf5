@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 
 ##############################################################################
 ##############################################################################
@@ -22,6 +33,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/textlinktar.h5
       ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5
       ${HDF5_TOOLS_DIR}/testfiles/tgrp_comments.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.h5
       ${HDF5_TOOLS_DIR}/testfiles/thlink.h5
       ${HDF5_TOOLS_DIR}/testfiles/tloop.h5
       ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5
@@ -78,6 +90,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-1.ls
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-2.ls
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-3.ls
+      ${HDF5_TOOLS_DIR}/testfiles/tgrpnullspace.ls
       ${HDF5_TOOLS_DIR}/testfiles/thlink-1.ls
       ${HDF5_TOOLS_DIR}/testfiles/tloop-1.ls
       ${HDF5_TOOLS_DIR}/testfiles/tmultifile.ls
@@ -116,13 +129,21 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (${resultcode} STREQUAL "1")
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else ()
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5LS-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/${resultfile}.out
+              testfiles/${resultfile}.out.err
+      )
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -134,6 +155,7 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS H5LS-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -141,7 +163,7 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
-          NAME H5LS_UD-${testname}-clearall-objects
+          NAME H5LS_UD-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               testfiles/${resultfile}.out
@@ -160,7 +182,7 @@
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5LS_UD-${testname} PROPERTIES DEPENDS H5LS_UD-${testname}-clearall-objects)
+      set_tests_properties (H5LS_UD-${testname} PROPERTIES DEPENDS H5LS_UD-${testname}-clear-objects)
     endif ()
   endmacro ()
 
@@ -230,6 +252,8 @@
           textlinksrc-7-old.out.err
           tgrp_comments.out
           tgrp_comments.out.err
+          tgrpnullspace.out
+          tgrpnullspace.out.err
           tsoftlinks-1.out
           tsoftlinks-1.out.err
           tsoftlinks-2.out
@@ -403,6 +427,9 @@
 
   # test for empty data
   ADD_H5_TEST (tempty 0 -w80 -d tempty.h5)
+
+ # test for displaying dataset and attribute of null space
+  ADD_H5_TEST (tgrpnullspace 0 -w80 -v -S tgrpnullspace.h5)
 
   # test for all dataset types written to attributes
   # enable -S for avoiding printing NATIVE types

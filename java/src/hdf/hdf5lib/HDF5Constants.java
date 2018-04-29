@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
@@ -90,6 +88,7 @@ public class HDF5Constants {
     public static final int H5D_VDS_ERROR = H5D_VDS_ERROR();
     public static final int H5D_VDS_FIRST_MISSING = H5D_VDS_FIRST_MISSING();
     public static final int H5D_VDS_LAST_AVAILABLE = H5D_VDS_LAST_AVAILABLE();
+    public static final int H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS = H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS();
 
     public static final int H5E_MAJOR = H5E_MAJOR();
     public static final int H5E_MINOR = H5E_MINOR();
@@ -207,7 +206,11 @@ public class HDF5Constants {
     public static final int H5F_CLOSE_SEMI = H5F_CLOSE_SEMI();
     public static final int H5F_CLOSE_STRONG = H5F_CLOSE_STRONG();
     public static final int H5F_CLOSE_WEAK = H5F_CLOSE_WEAK();
+    public static final int H5F_LIBVER_ERROR = H5F_LIBVER_ERROR();
     public static final int H5F_LIBVER_EARLIEST = H5F_LIBVER_EARLIEST();
+    public static final int H5F_LIBVER_V18 = H5F_LIBVER_V18();
+    public static final int H5F_LIBVER_V110 = H5F_LIBVER_V110();
+    public static final int H5F_LIBVER_NBOUNDS = H5F_LIBVER_NBOUNDS();
     public static final int H5F_LIBVER_LATEST = H5F_LIBVER_LATEST();
     public static final int H5F_OBJ_ALL = H5F_OBJ_ALL();
     public static final int H5F_OBJ_ATTR = H5F_OBJ_ATTR();
@@ -770,6 +773,8 @@ public class HDF5Constants {
 
     private static native final int H5D_VDS_LAST_AVAILABLE();
 
+    private static native final int H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS();
+
     private static native final long H5E_ALIGNMENT();
 
     private static native final long H5E_ALREADYEXISTS();
@@ -998,7 +1003,15 @@ public class HDF5Constants {
 
     private static native final int H5F_CLOSE_WEAK();
 
+    private static native final int H5F_LIBVER_ERROR();
+
     private static native final int H5F_LIBVER_EARLIEST();
+
+    private static native final int H5F_LIBVER_V18();
+
+    private static native final int H5F_LIBVER_V110();
+
+    private static native final int H5F_LIBVER_NBOUNDS();
 
     private static native final int H5F_LIBVER_LATEST();
 

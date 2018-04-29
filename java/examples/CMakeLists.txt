@@ -1,7 +1,7 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDFJAVA_EXAMPLES)
+cmake_minimum_required (VERSION 3.10)
+project (HDFJAVA_EXAMPLES Java)
 
-add_subdirectory (${HDFJAVA_EXAMPLES_SOURCE_DIR}/datasets     datasets)
-add_subdirectory (${HDFJAVA_EXAMPLES_SOURCE_DIR}/datatypes   datatypes)
-add_subdirectory (${HDFJAVA_EXAMPLES_SOURCE_DIR}/groups      groups)
-add_subdirectory (${HDFJAVA_EXAMPLES_SOURCE_DIR}/intro       intro)
+add_subdirectory (datasets)
+add_subdirectory (datatypes)
+add_subdirectory (groups)
+add_subdirectory (intro)

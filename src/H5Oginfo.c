@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -34,14 +32,14 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_ginfo_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
+static void *H5O_ginfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags,
+    unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_ginfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_ginfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_ginfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
-static herr_t H5O_ginfo_free(void *_mesg);
-static herr_t H5O_ginfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
-			     FILE * stream, int indent, int fwidth);
+static herr_t H5O__ginfo_free(void *_mesg);
+static herr_t H5O__ginfo_debug(H5F_t *f, const void *_mesg, FILE * stream,
+    int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
@@ -54,7 +52,7 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
     H5O_ginfo_copy,          	/*copy the native value         */
     H5O_ginfo_size,          	/*size of symbol table entry    */
     NULL,                   	/*default reset method          */
-    H5O_ginfo_free,	        /* free method			*/
+    H5O__ginfo_free,	        /* free method			*/
     NULL,	        	/* file delete method		*/
     NULL,			/* link method			*/
     NULL, 			/*set share method		*/
@@ -64,7 +62,7 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
     NULL,			/* post copy native value to file    */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
-    H5O_ginfo_debug          	/*debug the message             */
+    H5O__ginfo_debug          	/*debug the message             */
 }};
 
 /* Current version of group info information */
@@ -96,8 +94,9 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_ginfo_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
-    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
+H5O_ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
+    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_ginfo_t         *ginfo = NULL;  /* Pointer to group information message */
     unsigned char       flags;          /* Flags for encoding group info */
@@ -287,9 +286,9 @@ H5O_ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_ginfo_free
+ * Function:	H5O__ginfo_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -299,7 +298,7 @@ H5O_ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ginfo_free(void *mesg)
+H5O__ginfo_free(void *mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -308,11 +307,11 @@ H5O_ginfo_free(void *mesg)
     mesg = H5FL_FREE(H5O_ginfo_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_ginfo_free() */
+} /* end H5O__ginfo_free() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_ginfo_debug
+ * Function:    H5O__ginfo_debug
  *
  * Purpose:     Prints debugging info for a message.
  *
@@ -325,12 +324,12 @@ H5O_ginfo_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ginfo_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE * stream,
-	       int indent, int fwidth)
+H5O__ginfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream,
+    int indent, int fwidth)
 {
     const H5O_ginfo_t       *ginfo = (const H5O_ginfo_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -349,5 +348,5 @@ H5O_ginfo_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const voi
 	      "Estimated length of object in group's name:", ginfo->est_name_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_ginfo_debug() */
+} /* end H5O__ginfo_debug() */
 

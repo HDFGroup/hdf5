@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
@@ -3082,7 +3080,7 @@ static int test_simple(void)
 
 
     /*-------------------------------------------------------------------------
-    * get the label using a static buffer smaller than the string lenght
+    * get the label using a static buffer smaller than the string length
     *-------------------------------------------------------------------------
     */
 
@@ -3120,7 +3118,7 @@ static int test_simple(void)
     *-------------------------------------------------------------------------
     */
 
-    /* get the lenght of the scale name (pass NULL in name) */
+    /* get the length of the scale name (pass NULL in name) */
     if((name_len=H5DSget_scale_name(dsid,NULL,(size_t)0)) < 0)
         goto out;
 
@@ -3153,7 +3151,7 @@ static int test_simple(void)
         goto out;
 
     /*-------------------------------------------------------------------------
-    * get the scale name using a static buffer smaller than the string lenght
+    * get the scale name using a static buffer smaller than the string length
     *-------------------------------------------------------------------------
     */
 
@@ -4927,7 +4925,7 @@ static int test_errors2(void)
     hsize_t dimd[2]  = {3,3};                 /* size of data dataset */
     hsize_t dims[1]  = {3};                   /* size of scale dataset */
     char    lbuf[255];                        /* label buffer */
-    ssize_t label_len;                        /* label lenght */
+    ssize_t label_len;                        /* label length */
     int     scale_idx;                        /* scale index */
     int     nscales;                          /* number of scales in DIM */
     int     count;                            /* visitor data */

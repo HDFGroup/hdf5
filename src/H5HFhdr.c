@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -339,7 +337,7 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
+H5HF_hdr_create(H5F_t *f, const H5HF_create_t *cparam)
 {
     H5HF_hdr_t *hdr = NULL;     /* The new fractal heap header information */
     size_t dblock_overhead;     /* Direct block's overhead */
@@ -426,11 +424,9 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
         if(NULL == H5O_msg_copy(H5O_PLINE_ID, &(cparam->pline), &(hdr->pline)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOPY, HADDR_UNDEF, "can't copy I/O filter pipeline")
 
-        /* Pay attention to the latest version flag for the file */
-        if(H5F_USE_LATEST_FLAGS(hdr->f, H5F_LATEST_PLINE_MSG))
-            /* Set the latest version for the I/O pipeline message */
-            if(H5O_pline_set_latest_version(&(hdr->pline)) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "can't set latest version of I/O filter pipeline")
+        /* Set the version for the I/O pipeline message */
+        if(H5O_pline_set_version(hdr->f, &(hdr->pline)) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "can't set version of I/O filter pipeline")
 
         /* Compute the I/O filters' encoded size */
         if(0 == (hdr->filter_len = (unsigned)H5O_msg_raw_size(hdr->f, H5O_PLINE_ID, FALSE, &(hdr->pline))))
@@ -497,11 +493,11 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not large enough to hold all managed blocks")
 
     /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (hdr->heap_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)hdr->heap_size)))
+    if(HADDR_UNDEF == (hdr->heap_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, (hsize_t)hdr->heap_size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for fractal heap header")
 
     /* Cache the new fractal heap header */
-    if(H5AC_insert_entry(f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_insert_entry(f, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, HADDR_UNDEF, "can't add fractal heap header to cache")
 
     /* Set address of heap header to return */
@@ -517,7 +513,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_protect
+ * Function:	H5HF__hdr_protect
  *
  * Purpose:	Convenience wrapper around H5AC_protect on an indirect block
  *
@@ -530,13 +526,13 @@ done:
  *-------------------------------------------------------------------------
  */
 H5HF_hdr_t *
-H5HF_hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags)
+H5HF__hdr_protect(H5F_t *f, haddr_t addr, unsigned flags)
 {
     H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     H5HF_hdr_t *hdr;                    /* Fractal heap header */
     H5HF_hdr_t *ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);
@@ -547,10 +543,9 @@ H5HF_hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags)
 
     /* Set up userdata for protect call */
     cache_udata.f = f;
-    cache_udata.dxpl_id = dxpl_id;
 
     /* Lock the heap header into memory */
-    if(NULL == (hdr = (H5HF_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, addr, &cache_udata, flags)))
+    if(NULL == (hdr = (H5HF_hdr_t *)H5AC_protect(f, H5AC_FHEAP_HDR, addr, &cache_udata, flags)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header")
 
     /* Set the header's address */
@@ -564,7 +559,7 @@ H5HF_hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_protect() */
+} /* end H5HF__hdr_protect() */
 
 
 /*-------------------------------------------------------------------------
@@ -923,7 +918,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_skip_blocks
+ * Function:	H5HF__hdr_skip_blocks
  *
  * Purpose:	Add skipped direct blocks to free space for heap
  *
@@ -936,14 +931,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_skip_blocks(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *iblock,
+H5HF__hdr_skip_blocks(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock,
     unsigned start_entry, unsigned nentries)
 {
     unsigned row, col;                  /* Row & column of entry */
     hsize_t sect_size;                  /* Size of section in heap space */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -963,16 +958,16 @@ H5HF_hdr_skip_blocks(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *iblock,
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size")
 
     /* Add 'indirect' section for blocks skipped in this row */
-    if(H5HF_sect_indirect_add(hdr, dxpl_id, iblock, start_entry, nentries) < 0)
+    if(H5HF__sect_indirect_add(hdr, iblock, start_entry, nentries) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section for indirect block's free space")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_skip_blocks() */
+} /* end H5HF__hdr_skip_blocks() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_update_iter
+ * Function:	H5HF__hdr_update_iter
  *
  * Purpose:	Update state of heap to account for current iterator
  *              position.
@@ -988,11 +983,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
+H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1002,7 +997,7 @@ H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
 
     /* Check for creating first indirect block */
     if(hdr->man_dtable.curr_root_rows == 0) {
-        if(H5HF_man_iblock_root_create(hdr, dxpl_id, min_dblock_size) < 0)
+        if(H5HF__man_iblock_root_create(hdr, min_dblock_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "unable to create root indirect block")
     } /* end if */
     else {
@@ -1018,7 +1013,7 @@ H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
         /* Initialize block iterator, if necessary */
         if(!H5HF_man_iter_ready(&hdr->next_block)) {
             /* Start iterator with previous offset of iterator */
-            if(H5HF_man_iter_start_offset(hdr, dxpl_id, &hdr->next_block, hdr->man_iter_off) < 0)
+            if(H5HF__man_iter_start_offset(hdr, &hdr->next_block, hdr->man_iter_off) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to set block iterator location")
         } /* end if */
 
@@ -1039,7 +1034,7 @@ H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
                 skip_entries = min_entry - next_entry;
 
             /* Add skipped direct blocks to heap's free space */
-            if(H5HF_hdr_skip_blocks(hdr, dxpl_id, iblock, next_entry, skip_entries) < 0)
+            if(H5HF__hdr_skip_blocks(hdr, iblock, next_entry, skip_entries) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
 
             /* Get information about new iterator location */
@@ -1056,7 +1051,7 @@ H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
             while(next_row >= iblock->nrows) {
                 /* Check for needing to expand root indirect block */
                 if(iblock->parent == NULL) {
-                    if(H5HF_man_iblock_root_double(hdr, dxpl_id, min_dblock_size) < 0)
+                    if(H5HF__man_iblock_root_double(hdr, min_dblock_size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "unable to double root indirect block")
                 } /* end if */
                 else {
@@ -1101,7 +1096,7 @@ H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
                         child_entry = iblock->nrows * hdr->man_dtable.cparam.width;
 
                     /* Add skipped indirect blocks to heap's free space */
-                    if(H5HF_hdr_skip_blocks(hdr, dxpl_id, iblock, next_entry, (child_entry - next_entry)) < 0)
+                    if(H5HF__hdr_skip_blocks(hdr, iblock, next_entry, (child_entry - next_entry)) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
                 } /* end if */
                 else {
@@ -1110,11 +1105,11 @@ H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
                     haddr_t new_iblock_addr;        /* New indirect block's address */
 
                     /* Allocate new indirect block */
-                    if(H5HF_man_iblock_create(hdr, dxpl_id, iblock, next_entry, child_nrows, child_nrows, &new_iblock_addr) < 0)
+                    if(H5HF__man_iblock_create(hdr, iblock, next_entry, child_nrows, child_nrows, &new_iblock_addr) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap indirect block")
 
                     /* Lock new indirect block */
-                    if(NULL == (new_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, new_iblock_addr, child_nrows, iblock, next_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
+                    if(NULL == (new_iblock = H5HF__man_iblock_protect(hdr, new_iblock_addr, child_nrows, iblock, next_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
                     /* Move iterator down one level (pins indirect block) */
@@ -1129,12 +1124,12 @@ H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
                         new_entry = hdr->man_dtable.cparam.width * min_dblock_row;
 
                         /* Add skipped blocks to heap's free space */
-                        if(H5HF_hdr_skip_blocks(hdr, dxpl_id, new_iblock, 0, new_entry) < 0)
+                        if(H5HF__hdr_skip_blocks(hdr, new_iblock, 0, new_entry) < 0)
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't add skipped blocks to heap's free space")
                     } /* end if */
 
                     /* Unprotect child indirect block */
-                    if(H5HF_man_iblock_unprotect(new_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+                    if(H5HF__man_iblock_unprotect(new_iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
                 } /* end else */
 
@@ -1150,7 +1145,7 @@ H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_update_iter() */
+} /* end H5HF__hdr_update_iter() */
 
 
 /*-------------------------------------------------------------------------
@@ -1193,7 +1188,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_reverse_iter
+ * Function:	H5HF__hdr_reverse_iter
  *
  * Purpose:	Walk "next block" iterator backwards until the correct
  *              location to allocate next block from is found
@@ -1207,7 +1202,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
+H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
 {
     H5HF_indirect_t *iblock;            /* Indirect block where iterator is located */
     unsigned curr_entry;                /* Current entry for iterator */
@@ -1215,7 +1210,7 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
     hbool_t walked_up;                  /* Loop flag */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1225,7 +1220,7 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
     /* Initialize block iterator, if necessary */
     if(!H5HF_man_iter_ready(&hdr->next_block))
         /* Start iterator with previous offset of iterator */
-        if(H5HF_man_iter_start_offset(hdr, dxpl_id, &hdr->next_block, hdr->man_iter_off) < 0)
+        if(H5HF__man_iter_start_offset(hdr, &hdr->next_block, hdr->man_iter_off) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to set block iterator location")
 
     /* Walk backwards through heap, looking for direct block to place iterator after */
@@ -1308,7 +1303,7 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
                 child_nrows = H5HF_dtable_size_to_rows(&hdr->man_dtable, hdr->man_dtable.row_block_size[row]);
 
                 /* Lock child indirect block */
-                if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock->ents[curr_entry].addr, child_nrows, iblock, curr_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
+                if(NULL == (child_iblock = H5HF__man_iblock_protect(hdr, iblock->ents[curr_entry].addr, child_nrows, iblock, curr_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
                 /* Set the current location of the iterator */
@@ -1324,7 +1319,7 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
                 curr_entry = (child_iblock->nrows * hdr->man_dtable.cparam.width) - 1;
 
                 /* Unprotect child indirect block */
-                if(H5HF_man_iblock_unprotect(child_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+                if(H5HF__man_iblock_unprotect(child_iblock, H5AC__NO_FLAGS_SET, did_protect) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
                 /* Note that we walked down */
@@ -1335,11 +1330,11 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_reverse_iter() */
+} /* end H5HF__hdr_reverse_iter() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_empty
+ * Function:	H5HF__hdr_empty
  *
  * Purpose:	Reset heap header to 'empty heap' state
  *
@@ -1352,11 +1347,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_empty(H5HF_hdr_t *hdr)
+H5HF__hdr_empty(H5HF_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(hdr);
@@ -1371,6 +1366,10 @@ H5HF_hdr_empty(H5HF_hdr_t *hdr)
     hdr->man_size = 0;
     hdr->man_alloc_size = 0;
 
+    /* Reset root pointer information */
+    hdr->man_dtable.curr_root_rows = 0;
+    hdr->man_dtable.table_addr = HADDR_UNDEF;
+
     /* Reset the 'next block' iterator location */
     hdr->man_iter_off = 0;
 
@@ -1383,7 +1382,7 @@ H5HF_hdr_empty(H5HF_hdr_t *hdr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_empty() */
+} /* end H5HF__hdr_empty() */
 
 
 /*-------------------------------------------------------------------------
@@ -1429,7 +1428,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_delete
+ * Function:	H5HF__hdr_delete
  *
  * Purpose:	Delete a fractal heap, starting with the header
  *
@@ -1442,12 +1441,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
+H5HF__hdr_delete(H5HF_hdr_t *hdr)
 {
     unsigned cache_flags = H5AC__NO_FLAGS_SET;  /* Flags for unprotecting heap header */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1473,35 +1472,35 @@ H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
     /* (must occur before attempting to delete the heap, so indirect blocks
      *  will get unpinned)
      */
-    if(H5F_addr_defined(hdr->fs_addr)) {
+    if(H5F_addr_defined(hdr->fs_addr))
         /* Delete free space manager for heap */
-        if(H5HF_space_delete(hdr, dxpl_id) < 0)
+        if(H5HF__space_delete(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap free space manager")
-    } /* end if */
 
     /* Check for root direct/indirect block */
     if(H5F_addr_defined(hdr->man_dtable.table_addr)) {
         if(hdr->man_dtable.curr_root_rows == 0) {
-            hsize_t dblock_size;        /* Size of direct block */
+            hsize_t dblock_size;                /* Size of direct block on disk */
 
             /* Check for I/O filters on this heap */
             if(hdr->filter_len > 0) {
-                dblock_size = (hsize_t)hdr->pline_root_direct_size;
+                /* Set the dblock's size */
+                dblock_size = hdr->pline_root_direct_size;
 
                 /* Reset the header's pipeline information */
                 hdr->pline_root_direct_size = 0;
                 hdr->pline_root_direct_filter_mask = 0;
-            } /* end else */
+            } /* end if */
             else
-                dblock_size = (hsize_t)hdr->man_dtable.cparam.start_block_size;
+                dblock_size = hdr->man_dtable.cparam.start_block_size;
 
             /* Delete root direct block */
-            if(H5HF_man_dblock_delete(hdr->f, dxpl_id, hdr->man_dtable.table_addr, dblock_size) < 0)
+            if(H5HF__man_dblock_delete(hdr->f, hdr->man_dtable.table_addr, dblock_size) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root direct block")
         } /* end if */
         else {
             /* Delete root indirect block */
-            if(H5HF_man_iblock_delete(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, NULL, 0) < 0)
+            if(H5HF__man_iblock_delete(hdr, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, NULL, 0) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root indirect block")
         } /* end else */
     } /* end if */
@@ -1509,7 +1508,7 @@ H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
     /* Check for 'huge' objects in heap */
     if(H5F_addr_defined(hdr->huge_bt2_addr)) {
         /* Delete huge objects in heap and their tracker */
-        if(H5HF_huge_delete(hdr, dxpl_id) < 0)
+        if(H5HF__huge_delete(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap 'huge' objects and tracker")
     } /* end if */
 
@@ -1518,9 +1517,9 @@ H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
 
 done:
     /* Unprotect the header with appropriate flags */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, cache_flags) < 0)
+    if(H5AC_unprotect(hdr->f, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, cache_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HF_hdr_delete() */
+} /* end H5HF__hdr_delete() */
 

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -427,8 +425,8 @@ H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr,
 H5_DLL herr_t H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr,
     haddr_t new_addr);
-H5_DLL herr_t H5AC__flush_entries(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5AC__run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op);
+H5_DLL herr_t H5AC__flush_entries(H5F_t *f);
+H5_DLL herr_t H5AC__run_sync_point(H5F_t *f, int sync_point_op);
 H5_DLL herr_t H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
     void (*sync_point_done)(unsigned num_writes, haddr_t *written_entries_tbl));
 H5_DLL herr_t H5AC__set_write_done_callback(H5C_t * cache_ptr,

@@ -5,25 +5,21 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
 *
-* Test program:	 ttime
+* Test program:     ttime
 *
 * Test the Time Datatype functionality
 *
 *************************************************************/
 
 #include "testhdf5.h"
-
-#include "hdf5.h"
 
 #define DATAFILE   "ttime.h5"
 #ifdef NOT_YET
@@ -217,15 +213,15 @@ test_time(void)
 
 }   /* test_time() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_time
+ * Function:    cleanup_time
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              October 19, 2000
  *
  * Modifications:

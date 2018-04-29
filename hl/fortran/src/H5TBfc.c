@@ -5,12 +5,10 @@
 *                                                                           *
 * This file is part of HDF5.  The full HDF5 copyright notice, including     *
 * terms governing use, modification, and redistribution, is contained in    *
-* the files COPYING and Copyright.html.  COPYING can be found at the root   *
-* of the source code distribution tree; Copyright.html can be found at the  *
-* root level of an installed copy of the electronic HDF5 document set and   *
-* is linked from the top-level documents page.  It can also be found at     *
-* http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-* access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <math.h>
@@ -40,7 +38,7 @@ int_f
 h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *namelen, _fcd name,
 		 hsize_t_f *nfields, hsize_t_f *nrecords, size_t_f *type_size, size_t_f *field_offset,
 		 hid_t_f *field_types, hsize_t_f *chunk_size, int_f *compress,
-		 size_t_f *char_len_field_names, /* field_names lenghts */
+		 size_t_f *char_len_field_names, /* field_names lengths */
 		 size_t_f *max_char_size_field_names, /* char len of fields */
 		 char *field_names)            /* field_names */
 {
@@ -145,7 +143,7 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
 		     _fcd name, hsize_t_f *nfields, hsize_t_f *nrecords, size_t_f *type_size,
 		     size_t_f *field_offset, hid_t_f *field_types, hsize_t_f *chunk_size,
 		     void *fill_data, int_f *compress, 
-		     size_t_f *char_len_field_names, /* field_names lenghts */
+		     size_t_f *char_len_field_names, /* field_names lengths */
 		     size_t_f *max_char_size_field_names, /* char len of fields */
 		     char *field_names,
 		     void *data)            /* field_names */
@@ -640,7 +638,7 @@ done:
 int_f
 h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *nfields,
 		     size_t_f *field_sizes, size_t_f *field_offsets, size_t_f *type_size,
-		     size_t_f *namelen2,       /* field_names lenghts */
+		     size_t_f *namelen2,       /* field_names lengths */
 		     size_t_f *lenmax,         /* character len max */
 		     _fcd field_names,      /* field_names */
 		     size_t_f *maxlen_out)

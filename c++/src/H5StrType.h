@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __H5StrType_H
@@ -22,9 +20,8 @@ namespace H5 {
 /*! \class StrType
     \brief StrType is a derivative of a DataType and operates on HDF5
     string datatype.
-
-    Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
 */
+//  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP StrType : public AtomType {
    public:
         // Creates a string type using a predefined type
@@ -42,6 +39,10 @@ class H5_DLLCPP StrType : public AtomType {
         // Constructors that open an HDF5 string datatype, given a location.
         StrType(const H5Location& loc, const char* name);
         StrType(const H5Location& loc, const H5std_string& name);
+
+        // Returns an StrType object via DataType* by decoding the
+        // binary object description of this type.
+        virtual DataType* decode() const;
 
         // Retrieves the character set type of this string datatype.
         H5T_cset_t getCset() const;
@@ -64,7 +65,7 @@ class H5_DLLCPP StrType : public AtomType {
         // Creates a string datatype using an existing id
         StrType(const hid_t existing_id);
 
-        // Copy constructor - makes a copy of the original object
+        // Copy constructor: same as the original StrType.
         StrType(const StrType& original);
 
         // Noop destructor.

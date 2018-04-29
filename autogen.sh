@@ -5,12 +5,10 @@
 #                                                                          
 # This file is part of HDF5. The full HDF5 copyright notice, including     
 # terms governing use, modification, and redistribution, is contained in   
-# the files COPYING and Copyright.html.  COPYING can be found at the root  
-# of the source code distribution tree; Copyright.html can be found at the 
-# root level of an installed copy of the electronic document set and is    
-# linked from the top-level documents page.  It can also be found at       
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have access  
-# to either file, you may request a copy from help@hdfgroup.org.           
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 
 # A script to reconfigure autotools for HDF5, and to recreate other
@@ -205,6 +203,39 @@ Darwin*)
     ;;
 esac
 
+# Run scripts that process source.
+#
+# These should be run before the autotools so that failures here block
+# compilation.
+
+# Run trace script
+# The trace script adds H5TRACE macros to library source files.  It should
+# have no effect on files that don't have HDF5 API macros in them.
+echo "Running trace script:"
+bin/trace src/H5*.c || exit 1
+echo
+
+# Run make_err
+# make_err automatically generates the H5E headers that create error message
+# types for HDF5.
+echo "Running error generation script:"
+bin/make_err src/H5err.txt || exit 1
+echo
+
+# Run make_vers
+# make_vers automatically generates the public headers that define the API version
+# macros for HDF5.
+echo "Running API version generation script:"
+bin/make_vers src/H5vers.txt || exit 1
+echo
+
+# Run make_overflow
+# make_overflow automatically generates macros for detecting overflows for type
+# conversion.
+echo "Running overflow macro generation script:"
+bin/make_overflow src/H5overflow.txt || exit 1
+echo
+
 # Run autotools in order
 #
 # When available, we use the --force option to ensure all files are
@@ -267,35 +298,7 @@ fi
 ${autoconf_cmd} || exit 1
 echo
 
-# Run scripts that process source.
-
-# Run trace script
-# The trace script adds H5TRACE macros to library source files.  It should
-# have no effect on files that don't have HDF5 API macros in them.
-echo
-echo "Running trace script:"
-bin/trace src/H5*.c || exit 1
-
-# Run make_err
-# make_err automatically generates the H5E headers that create error message
-# types for HDF5.
-echo
-echo "Running error generation script:"
-bin/make_err src/H5err.txt || exit 1
-
-# Run make_vers
-# make_vers automatically generates the public headers that define the API version
-# macros for HDF5.
-echo
-echo "Running API version generation script:"
-bin/make_vers src/H5vers.txt || exit 1
-
-# Run make_overflow
-# make_overflow automatically generates macros for detecting overflows for type
-# conversion.
-echo
-echo "Running overflow macro generation script:"
-bin/make_overflow src/H5overflow.txt || exit 1
+echo "*** SUCCESS ***"
 
 echo
 exit 0

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -67,6 +65,7 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
     (H5Z_func_t)filter_bogus,   /* The actual filter function   */
 }};
 
+
 /*-------------------------------------------------------------------------
  * Function:    filter_bogus
  *
@@ -78,9 +77,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *
  * Programmer   Robb Matzke
  *              Tuesday, April 21, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -94,6 +90,7 @@ filter_bogus(size_t nbytes)
     return nbytes;
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_null_filter
  *
@@ -106,11 +103,8 @@ filter_bogus(size_t nbytes)
  *
  * Modifications:
  *              Note: H5Z interface is not implemented yet.
- *
  *-------------------------------------------------------------------------
  */
-
-// Chunk dimensions
 const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};
 
 static void test_null_filter()
@@ -146,6 +140,7 @@ static void test_null_filter()
     }
 }  // test_null_filter
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_szip_filter
  *
@@ -158,11 +153,9 @@ static void test_null_filter()
  *
  * Modifications:
  *              Note: H5Z interface is not implemented yet.
- *
  *-------------------------------------------------------------------------
  */
-
-const H5std_string      DSET_SZIP_NAME("szipped dataset");
+const H5std_string DSET_SZIP_NAME("szipped dataset");
 
 static void test_szip_filter(H5File& file1)
 {
@@ -244,11 +237,14 @@ static void test_szip_filter(H5File& file1)
 }  // test_szip_filter
 
 
-/****************************************************************
-**
-**  test_filters(): Main routine for testing filters.
-**
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:    test_filters
+ *
+ * Purpose      Main routine for testing filters
+ *
+ * Return       None
+ *-------------------------------------------------------------------------
+ */
 const H5std_string      FILE1("tfilters.h5");
 extern "C"
 void test_filters()
@@ -276,18 +272,13 @@ void test_filters()
     }
 }   // test_filters()
 
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_filters
  *
  * Purpose      Cleanup temporary test files
  *
  * Return       none
- *
- * Programmer   Quincey Koziol
- *              September 10, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"

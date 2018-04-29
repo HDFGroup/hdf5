@@ -5,32 +5,28 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:	Robb Matzke <matzke@llnl.gov>
- *		Wednesday, October 15, 1997
+/* Programmer:    Robb Matzke <matzke@llnl.gov>
+ *        Wednesday, October 15, 1997
  *
- * Purpose:	Tests various aspects of indexed raw data storage.
+ * Purpose:    Tests various aspects of indexed raw data storage.
  */
 
-#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND        /*suppress error about including H5Fpkg      */
 
 #include "h5test.h"
-#include "H5private.h"
+
 #include "H5Dprivate.h"
-#include "H5Eprivate.h"
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
 #include "H5Fpkg.h"
 #include "H5Gprivate.h"
 #include "H5Oprivate.h"
-#include "H5Pprivate.h"
 #include "H5VMprivate.h"
 
 const char *FILENAME[] = {
@@ -39,9 +35,9 @@ const char *FILENAME[] = {
 };
 
 
-#define TEST_SMALL	0x0001
-#define TEST_MEDIUM	0x0002
-#define TEST_LARGE	0x0004
+#define TEST_SMALL    0x0001
+#define TEST_MEDIUM    0x0002
+#define TEST_LARGE    0x0004
 
 /* The datatype of the dataset operated on by this test */
 #define TEST_DATATYPE   H5T_NATIVE_UCHAR
@@ -52,19 +48,19 @@ const char *FILENAME[] = {
 hsize_t chunk_dims[H5O_LAYOUT_NDIMS];
 hsize_t zero[H5O_LAYOUT_NDIMS];
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	is_sparse
+ * Function:    is_sparse
  *
- * Purpose:	Determines if the file system of the current working
- *		directory supports holes.
+ * Purpose:    Determines if the file system of the current working
+ *        directory supports holes.
  *
- * Return:	Success:	Non-zero if holes are supported; zero
- *				otherwise.
+ * Return:    Success:    Non-zero if holes are supported; zero
+ *                otherwise.
  *
- *		Failure:	zero
+ *        Failure:    zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, July 15, 1998
  *
  *-------------------------------------------------------------------------
@@ -72,10 +68,10 @@ hsize_t zero[H5O_LAYOUT_NDIMS];
 static int
 is_sparse(void)
 {
-    int		fd;
-    h5_stat_t	sb;
+    int        fd;
+    h5_stat_t    sb;
 
-    if ((fd=HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0) return 0;
+    if ((fd = HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0) return 0;
     if (HDlseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
     if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
     if (HDclose(fd) < 0) return 0;
@@ -88,16 +84,16 @@ is_sparse(void)
 #endif
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	print_array
+ * Function:    print_array
  *
- * Purpose:	Prints the values in an array
+ * Purpose:    Prints the values in an array
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	Robb Matzke
- *		Friday, October 10, 1997
+ * Programmer:    Robb Matzke
+ *        Friday, October 10, 1997
  *
  * Modifications:
  *
@@ -106,41 +102,41 @@ is_sparse(void)
 static void
 print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
 {
-    size_t	i, j, k;
+    size_t    i, j, k;
 
     for (i = 0; i < nx; i++) {
-	if (nz > 1) {
-	    fprintf(stderr,"i=%lu:\n", (unsigned long)i);
-	} else {
-	    fprintf(stderr,"%03lu:", (unsigned long)i);
-	}
+    if (nz > 1) {
+        fprintf(stderr,"i=%lu:\n", (unsigned long)i);
+    } else {
+        fprintf(stderr,"%03lu:", (unsigned long)i);
+    }
 
-	for (j = 0; j < ny; j++) {
-	    if (nz > 1)
-		fprintf(stderr,"%03lu:", (unsigned long)j);
-	    for (k = 0; k < nz; k++) {
-		fprintf(stderr," %3d", *array++);
-	    }
-	    if (nz > 1)
-		fprintf(stderr,"\n");
-	}
-	fprintf(stderr,"\n");
+    for (j = 0; j < ny; j++) {
+        if (nz > 1)
+        fprintf(stderr,"%03lu:", (unsigned long)j);
+        for (k = 0; k < nz; k++) {
+        fprintf(stderr," %3d", *array++);
+        }
+        if (nz > 1)
+        fprintf(stderr,"\n");
+    }
+    fprintf(stderr,"\n");
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	new_object
+ * Function:    new_object
  *
- * Purpose:	Creates a new object that refers to a indexed storage of raw
- *		data.  No raw data is stored.
+ * Purpose:    Creates a new object that refers to a indexed storage of raw
+ *        data.  No raw data is stored.
  *
- * Return:	Success:	ID of dataset
+ * Return:    Success:    ID of dataset
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Robb Matzke
- *		Wednesday, October 15, 1997
+ * Programmer:    Robb Matzke
+ *        Wednesday, October 15, 1997
  *
  * Modifications:
  *              Converted to use datasets instead of directly messing with
@@ -184,19 +180,19 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_create
+ * Function:    test_create
  *
- * Purpose:	Creates a named object that refers to indexed storage of raw
- *		data.  No raw data is stored.
+ * Purpose:    Creates a named object that refers to indexed storage of raw
+ *        data.  No raw data is stored.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Wednesday, October 15, 1997
+ * Programmer:    Robb Matzke
+ *        Wednesday, October 15, 1997
  *
  * Modifications:
  *
@@ -219,9 +215,9 @@ test_create(hid_t f, const char *prefix)
         dims[u] = my_chunk_dims[u] = 2;
 
         /* Create chunked dataset of this dimensionality */
-	HDsnprintf(name, sizeof name, "%s_%02u", prefix, u);
-	if ((dataset=new_object(f, name, (int)u, dims, my_chunk_dims)) < 0)
-	    return FAIL;
+        HDsnprintf(name, sizeof name, "%s_%02u", prefix, u);
+        if ((dataset=new_object(f, name, (int)u, dims, my_chunk_dims)) < 0)
+            return FAIL;
 
         /* Close dataset created */
         if(H5Dclose(dataset) < 0)
@@ -232,20 +228,20 @@ test_create(hid_t f, const char *prefix)
     return SUCCEED;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_extend
+ * Function:    test_extend
  *
- * Purpose:	Creates an empty object and then writes to it in such a way
- *		as to always extend the object's domain without creating
- *		holes and without causing the object to become concave.
+ * Purpose:    Creates an empty object and then writes to it in such a way
+ *        as to always extend the object's domain without creating
+ *        holes and without causing the object to become concave.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Wednesday, October 15, 1997
+ * Programmer:    Robb Matzke
+ *        Wednesday, October 15, 1997
  *
  * Modifications:
  *
@@ -253,35 +249,35 @@ test_create(hid_t f, const char *prefix)
  */
 static herr_t
 test_extend(hid_t f, const char *prefix,
-	    size_t nx, size_t ny, size_t nz)
+        size_t nx, size_t ny, size_t nz)
 {
     hid_t               dataset;        /* Dataset ID */
     hid_t               fspace;         /* Dataset's file dataspace */
     hid_t               mspace;         /* Dataset's memory dataspace */
-    size_t		i, j, k, ctr;
-    int			ndims;
-    uint8_t		*buf = NULL, *check = NULL, *whole = NULL;
-    char		dims[64], s[256], name[256];
-    hsize_t		offset[3];
-    hsize_t		max_corner[3];
-    hsize_t		size[3];
-    hsize_t		whole_size[3];
-    hsize_t		nelmts;
+    size_t        i, j, k, ctr;
+    int            ndims;
+    uint8_t        *buf = NULL, *check = NULL, *whole = NULL;
+    char        dims[64], s[256], name[256];
+    hsize_t        offset[3];
+    hsize_t        max_corner[3];
+    hsize_t        size[3];
+    hsize_t        whole_size[3];
+    hsize_t        nelmts;
 
     if (!nz) {
-	if (!ny) {
-	    ndims = 1;
-	    ny = nz = 1;
-	    sprintf(dims, "%lu", (unsigned long) nx);
-	} else {
-	    ndims = 2;
-	    nz = 1;
-	    sprintf(dims, "%lux%lu", (unsigned long) nx, (unsigned long) ny);
-	}
+    if (!ny) {
+        ndims = 1;
+        ny = nz = 1;
+        sprintf(dims, "%lu", (unsigned long) nx);
     } else {
-	ndims = 3;
-	sprintf(dims, "%lux%lux%lu",
-		(unsigned long) nx, (unsigned long) ny, (unsigned long) nz);
+        ndims = 2;
+        nz = 1;
+        sprintf(dims, "%lux%lu", (unsigned long) nx, (unsigned long) ny);
+    }
+    } else {
+    ndims = 3;
+    sprintf(dims, "%lux%lux%lu",
+        (unsigned long) nx, (unsigned long) ny, (unsigned long) nz);
     }
 
     sprintf(s, "istore extend: %s", dims);
@@ -300,57 +296,57 @@ test_extend(hid_t f, const char *prefix,
     /* Build the new empty object */
     sprintf(name, "%s_%s", prefix, dims);
     if ((dataset=new_object(f, name, ndims, whole_size, whole_size)) < 0) {
-	fprintf(stderr,"    Cannot create %u-d object `%s'\n", ndims, name);
-	goto error;
+    fprintf(stderr,"    Cannot create %u-d object `%s'\n", ndims, name);
+    goto error;
     }
 
     /* Get dataset's dataspace */
     if((fspace=H5Dget_space(dataset)) < 0) TEST_ERROR;
 
     for (ctr = 0;
-	 H5VM_vector_lt_u((unsigned)ndims, max_corner, whole_size);
-	 ctr++) {
+    H5VM_vector_lt_u((unsigned)ndims, max_corner, whole_size);
+    ctr++) {
 
-	/* Size and location */
-	if (0 == ctr) {
-	    offset[0] = offset[1] = offset[2] = 0;
-	    size[0] = size[1] = size[2] = 1;
-	    nelmts = 1;
-	} else {
-	    for (i=0, nelmts=1; i<(size_t)ndims; i++) {
-		if (ctr % (size_t)ndims == i) {
-		    offset[i] = max_corner[i];
-		    size[i] = MIN(1, whole_size[i] - offset[i]);
-		} else {
-		    offset[i] = 0;
-		    size[i] = max_corner[i];
-		}
-		nelmts *= size[i];
-	    }
-	}
+    /* Size and location */
+    if (0 == ctr) {
+        offset[0] = offset[1] = offset[2] = 0;
+        size[0] = size[1] = size[2] = 1;
+        nelmts = 1;
+    } else {
+        for (i=0, nelmts=1; i<(size_t)ndims; i++) {
+        if (ctr % (size_t)ndims == i) {
+            offset[i] = max_corner[i];
+            size[i] = MIN(1, whole_size[i] - offset[i]);
+        } else {
+            offset[i] = 0;
+            size[i] = max_corner[i];
+        }
+        nelmts *= size[i];
+        }
+    }
 
 #if 0
-	if (0 == ctr)
-	    fprintf(stderr,"\n");
-	fprintf(stderr,"    Insert: ctr=%lu, corner=(%ld", (unsigned long)ctr, (long)offset[0]);
-	if (ndims > 1)
-	    fprintf(stderr,",%ld", (long)offset[1]);
-	if (ndims > 2)
-	    fprintf(stderr,",%ld", (long)offset[2]);
-	fprintf(stderr,"), size=(%lu", (unsigned long)size[0]);
-	if (ndims > 1)
-	    fprintf(stderr,",%lu", (unsigned long)size[1]);
-	if (ndims > 2)
-	    fprintf(stderr,",%lu", (unsigned long)size[2]);
-	fprintf(stderr,"), %lu element%s", (unsigned long)nelmts, 1 == nelmts ? "" : "s");
-	if (0 == nelmts)
-	    fprintf(stderr," *SKIPPED*");
-	fprintf(stderr,"\n");
+    if (0 == ctr)
+        fprintf(stderr,"\n");
+    fprintf(stderr,"    Insert: ctr=%lu, corner=(%ld", (unsigned long)ctr, (long)offset[0]);
+    if (ndims > 1)
+        fprintf(stderr,",%ld", (long)offset[1]);
+    if (ndims > 2)
+        fprintf(stderr,",%ld", (long)offset[2]);
+    fprintf(stderr,"), size=(%lu", (unsigned long)size[0]);
+    if (ndims > 1)
+        fprintf(stderr,",%lu", (unsigned long)size[1]);
+    if (ndims > 2)
+        fprintf(stderr,",%lu", (unsigned long)size[2]);
+    fprintf(stderr,"), %lu element%s", (unsigned long)nelmts, 1 == nelmts ? "" : "s");
+    if (0 == nelmts)
+        fprintf(stderr," *SKIPPED*");
+    fprintf(stderr,"\n");
 #endif
 
-	/* Fill the source array */
-	if (0 == nelmts) continue;
-	HDmemset(buf, (signed)(128+ctr), (size_t)nelmts);
+    /* Fill the source array */
+    if (0 == nelmts) continue;
+    HDmemset(buf, (signed)(128+ctr), (size_t)nelmts);
 
         /* Create dataspace for selection in memory */
         if((mspace=H5Screate_simple(1,&nelmts,NULL)) < 0) TEST_ERROR;
@@ -358,72 +354,72 @@ test_extend(hid_t f, const char *prefix,
         /* Select region in file dataspace */
         if(H5Sselect_hyperslab(fspace,H5S_SELECT_SET,offset,NULL,size,NULL) < 0) TEST_ERROR;
 
-	/* Write to disk */
-	if (H5Dwrite(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, buf) < 0) {
-	    H5_FAILED();
-	    fprintf(stderr,"    Write failed: ctr=%lu\n", (unsigned long)ctr);
-	    goto error;
-	}
+    /* Write to disk */
+    if (H5Dwrite(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, buf) < 0) {
+        H5_FAILED();
+        fprintf(stderr,"    Write failed: ctr=%lu\n", (unsigned long)ctr);
+        goto error;
+    }
 
-	/* Read from disk */
-	HDmemset(check, 0xff, (size_t)nelmts);
-	if (H5Dread(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, check) < 0) {
-	    H5_FAILED();
-	    fprintf(stderr,"    Read failed: ctr=%lu\n", (unsigned long)ctr);
-	    goto error;
-	}
-	if (HDmemcmp(buf, check, (size_t)nelmts)) {
-	    H5_FAILED();
-	    fprintf(stderr,"    Read check failed: ctr=%lu\n", (unsigned long)ctr);
-	    fprintf(stderr,"    Wrote:\n");
-	    print_array(buf, (size_t)size[0], (size_t)size[1],
-			(size_t)size[2]);
-	    fprintf(stderr,"    Read:\n");
-	    print_array(check, (size_t)size[0], (size_t)size[1],
-			(size_t)size[2]);
-	    goto error;
-	}
+    /* Read from disk */
+    HDmemset(check, 0xff, (size_t)nelmts);
+    if (H5Dread(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, check) < 0) {
+        H5_FAILED();
+        fprintf(stderr,"    Read failed: ctr=%lu\n", (unsigned long)ctr);
+        goto error;
+    }
+    if (HDmemcmp(buf, check, (size_t)nelmts)) {
+        H5_FAILED();
+        fprintf(stderr,"    Read check failed: ctr=%lu\n", (unsigned long)ctr);
+        fprintf(stderr,"    Wrote:\n");
+        print_array(buf, (size_t)size[0], (size_t)size[1],
+            (size_t)size[2]);
+        fprintf(stderr,"    Read:\n");
+        print_array(check, (size_t)size[0], (size_t)size[1],
+            (size_t)size[2]);
+        goto error;
+    }
 
         /* Close memory dataspace */
         if(H5Sclose(mspace) < 0) TEST_ERROR;
 
-	/* Write to `whole' buffer for later checking */
-	H5VM_hyper_copy((unsigned)ndims, size,
-		       whole_size, offset, whole,	/*dst*/
-		       size, H5VM_ZERO, buf);		/*src*/
+    /* Write to `whole' buffer for later checking */
+    H5VM_hyper_copy((unsigned)ndims, size,
+            whole_size, offset, whole,    /*dst*/
+            size, H5VM_ZERO, buf);        /*src*/
 
-	/* Update max corner */
-	for (i=0; i<(size_t)ndims; i++)
-	    max_corner[i] = MAX(max_corner[i], offset[i]+size[i]);
+    /* Update max corner */
+    for (i=0; i<(size_t)ndims; i++)
+        max_corner[i] = MAX(max_corner[i], offset[i]+size[i]);
     }
 
     /* Now read the entire array back out and check it */
     HDmemset(buf, 0xff, nx * ny * nz);
     if (H5Dread(dataset, TEST_DATATYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
-	H5_FAILED();
-	fprintf(stderr,"    Read failed for whole array.\n");
-	goto error;
+    H5_FAILED();
+    fprintf(stderr,"    Read failed for whole array.\n");
+    goto error;
     }
     for (i=0; i<nx; i++) {
-	for (j=0; j<ny; j++) {
-	    for (k=0; k<nz; k++) {
-		if (whole[i*ny*nz + j*nz + k] != buf[i*ny*nz + j*nz + k]) {
-		    H5_FAILED();
-		    fprintf(stderr,"    Check failed at i=%lu", (unsigned long)i);
-		    if (ndims > 1) {
-			fprintf(stderr,", j=%lu", (unsigned long)j);
-		    }
-		    if (ndims > 2) {
-			fprintf(stderr,", k=%lu", (unsigned long)k);
-		    }
-		    fprintf(stderr,"\n    Check array is:\n");
-		    print_array(whole, nx, ny, nz);
-		    fprintf(stderr,"    Value read is:\n");
-		    print_array(buf, nx, ny, nz);
-		    goto error;
-		}
-	    }
-	}
+    for (j=0; j<ny; j++) {
+        for (k=0; k<nz; k++) {
+        if (whole[i*ny*nz + j*nz + k] != buf[i*ny*nz + j*nz + k]) {
+            H5_FAILED();
+            fprintf(stderr,"    Check failed at i=%lu", (unsigned long)i);
+            if (ndims > 1) {
+            fprintf(stderr,", j=%lu", (unsigned long)j);
+            }
+            if (ndims > 2) {
+            fprintf(stderr,", k=%lu", (unsigned long)k);
+            }
+            fprintf(stderr,"\n    Check array is:\n");
+            print_array(whole, nx, ny, nz);
+            fprintf(stderr,"    Value read is:\n");
+            print_array(buf, nx, ny, nz);
+            goto error;
+        }
+        }
+    }
     }
 
     /* Close dataset's dataspace */
@@ -447,19 +443,19 @@ error:
     return FAIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_sparse
+ * Function:    test_sparse
  *
- * Purpose:	Creates a sparse matrix consisting of NBLOCKS randomly placed
- *		blocks each of size NX,NY,NZ.
+ * Purpose:    Creates a sparse matrix consisting of NBLOCKS randomly placed
+ *        blocks each of size NX,NY,NZ.
  *
- * Return:	Success:	SUCCEED
+ * Return:    Success:    SUCCEED
  *
- *		Failure:	FAIL
+ *        Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *		Wednesday, October 22, 1997
+ * Programmer:    Robb Matzke
+ *        Wednesday, October 22, 1997
  *
  * Modifications:
  *
@@ -467,34 +463,34 @@ error:
  */
 static herr_t
 test_sparse(hid_t f, const char *prefix, size_t nblocks,
-	    size_t nx, size_t ny, size_t nz, int skip_test)
+        size_t nx, size_t ny, size_t nz, int skip_test)
 {
     hid_t               dataset;        /* Dataset ID */
     hid_t               fspace;         /* Dataset's file dataspace */
     hid_t               mspace;         /* Dataset's memory dataspace */
-    int			ndims;
-    hsize_t		ctr;
-    char		dims[64], s[256], name[256];
-    hsize_t		offset[3];
-    hsize_t		size[3], total = 0;
-    uint8_t		*buf = NULL;
-    hsize_t		whole_size[3];  /* Size of dataset's dataspace */
+    int            ndims;
+    hsize_t        ctr;
+    char        dims[64], s[256], name[256];
+    hsize_t        offset[3];
+    hsize_t        size[3], total = 0;
+    uint8_t        *buf = NULL;
+    hsize_t        whole_size[3];  /* Size of dataset's dataspace */
     size_t              u;              /* Local index variable */
 
     if (!nz) {
-	if (!ny) {
-	    ndims = 1;
-	    ny = nz = 1;
-	    sprintf(dims, "%lu", (unsigned long) nx);
-	} else {
-	    ndims = 2;
-	    nz = 1;
-	    sprintf(dims, "%lux%lu", (unsigned long) nx, (unsigned long) ny);
-	}
+    if (!ny) {
+        ndims = 1;
+        ny = nz = 1;
+        sprintf(dims, "%lu", (unsigned long) nx);
     } else {
-	ndims = 3;
-	sprintf(dims, "%lux%lux%lu",
-		(unsigned long) nx, (unsigned long) ny, (unsigned long) nz);
+        ndims = 2;
+        nz = 1;
+        sprintf(dims, "%lux%lu", (unsigned long) nx, (unsigned long) ny);
+    }
+    } else {
+    ndims = 3;
+    sprintf(dims, "%lux%lux%lu",
+        (unsigned long) nx, (unsigned long) ny, (unsigned long) nz);
     }
 
     sprintf(s, "istore sparse: %s", dims);
@@ -518,8 +514,8 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
     /* Build the new empty object */
     sprintf(name, "%s_%s", prefix, dims);
     if ((dataset=new_object(f, name, ndims, whole_size, chunk_dims)) < 0) {
-	printf("    Cannot create %u-d object `%s'\n", ndims, name);
-	goto error;
+    printf("    Cannot create %u-d object `%s'\n", ndims, name);
+    goto error;
     }
 
     /* Get dataset's dataspace */
@@ -536,29 +532,29 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
         /* Select region in file dataspace */
         if(H5Sselect_hyperslab(fspace,H5S_SELECT_SET,offset,NULL,size,NULL) < 0) TEST_ERROR;
 
-	/* write to disk */
-	if (H5Dwrite(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, buf) < 0) {
-	    H5_FAILED();
-	    printf("    Write failed: ctr=%lu\n", (unsigned long)ctr);
-	    printf("    offset=(%lu", (unsigned long) (offset[0]));
-	    if (ndims > 1)
-		printf(",%lu", (unsigned long) (offset[1]));
-	    if (ndims > 2)
-		printf(",%lu", (unsigned long) (offset[2]));
-	    printf("), size=(%lu", (unsigned long) (size[0]));
-	    if (ndims > 1)
-		printf(",%lu", (unsigned long) (size[1]));
-	    if (ndims > 2)
-		printf(",%lu", (unsigned long) (size[2]));
-	    printf(")\n");
-	    goto error;
-	}
-	total += nx * ny * nz;
+    /* write to disk */
+    if (H5Dwrite(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, buf) < 0) {
+        H5_FAILED();
+        printf("    Write failed: ctr=%lu\n", (unsigned long)ctr);
+        printf("    offset=(%lu", (unsigned long) (offset[0]));
+        if (ndims > 1)
+        printf(",%lu", (unsigned long) (offset[1]));
+        if (ndims > 2)
+        printf(",%lu", (unsigned long) (offset[2]));
+        printf("), size=(%lu", (unsigned long) (size[0]));
+        if (ndims > 1)
+        printf(",%lu", (unsigned long) (size[1]));
+        if (ndims > 2)
+        printf(",%lu", (unsigned long) (size[2]));
+        printf(")\n");
+        goto error;
+    }
+    total += nx * ny * nz;
 #if 0
-	HDfprintf(stderr,"ctr: ctr=%Zu, total=%Zu\n", ctr, total);
+    HDfprintf(stderr,"ctr: ctr=%Zu, total=%Zu\n", ctr, total);
 #endif
 
-	/* We don't test reading yet.... */
+    /* We don't test reading yet.... */
     }
 
     /* Close memory dataspace */
@@ -579,18 +575,18 @@ error:
     return FAIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Tests indexed storage stuff.
+ * Purpose:    Tests indexed storage stuff.
  *
- * Return:	Success:	exit(EXIT_SUCCESS)
+ * Return:    Success:    exit(EXIT_SUCCESS)
  *
- *		Failure:	exit(EXIT_FAILURE)
+ *        Failure:    exit(EXIT_FAILURE)
  *
- * Programmer:	Robb Matzke
- *		Wednesday, October 15, 1997
+ * Programmer:    Robb Matzke
+ *        Wednesday, October 15, 1997
  *
  * Modifications:
  *
@@ -599,12 +595,12 @@ error:
 int
 main(int argc, char *argv[])
 {
-    hid_t		fapl=-1, file=-1, fcpl=-1;
-    herr_t		status;
-    int			nerrors = 0;
-    unsigned		size_of_test;
+    hid_t        fapl=-1, file=-1, fcpl=-1;
+    herr_t        status;
+    int            nerrors = 0;
+    unsigned        size_of_test;
     unsigned            u;              /* Local index variable */
-    char		filename[1024];
+    char        filename[1024];
     int                 skip_test = 0;
     int                 has_sparse_support = 0;
 
@@ -612,7 +608,7 @@ main(int argc, char *argv[])
     if (1 == argc) {
         size_of_test = TEST_SMALL | TEST_MEDIUM | TEST_LARGE;
     } else {
-        int			i;
+        int            i;
         for (i = 1, size_of_test = 0; i < argc; i++) {
             if (!strcmp(argv[i], "small")) {
                 size_of_test |= TEST_SMALL;

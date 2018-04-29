@@ -1,23 +1,18 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_TOOLS_SRC_H5JAM)
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_TOOLS_SRC_H5JAM C)
 
 # --------------------------------------------------------------------
 # Add the h5jam executables
 # --------------------------------------------------------------------
 add_executable (h5jam ${HDF5_TOOLS_SRC_H5JAM_SOURCE_DIR}/h5jam.c)
-TARGET_NAMING (h5jam STATIC)
+set_property(TARGET h5jam APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (h5jam STATIC " " " ")
 target_link_libraries (h5jam  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5jam PROPERTIES FOLDER tools)
 set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5jam")
 
 add_executable (h5unjam ${HDF5_TOOLS_SRC_H5JAM_SOURCE_DIR}/h5unjam.c)
-TARGET_NAMING (h5unjam STATIC)
+set_property(TARGET h5unjam APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (h5unjam STATIC " " " ")
 target_link_libraries (h5unjam  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5unjam PROPERTIES FOLDER tools)
@@ -38,11 +33,13 @@ set (H5_DEP_EXECUTABLES
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
-  INSTALL_PROGRAM_PDB (h5jam ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  foreach (exec ${H5_DEP_EXECUTABLES})
+    INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endforeach ()
 
   install (
       TARGETS
-          h5jam h5unjam
+          ${H5_DEP_EXECUTABLES}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications

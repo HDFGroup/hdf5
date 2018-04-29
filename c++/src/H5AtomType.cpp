@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
@@ -21,6 +19,7 @@
 #include "H5PropList.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -48,7 +47,7 @@ AtomType::AtomType(const hid_t existing_id) : DataType(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    AtomType copy constructor
-///\brief       Copy constructor: makes a copy of the original AtomType object.
+///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 AtomType::AtomType(const AtomType& original) : DataType(original) {}
@@ -177,8 +176,8 @@ size_t AtomType::getPrecision() const
 ///\param       precision - IN: Number of bits of precision
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For information, please see C layer Reference Manuat at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetPrecision
+///             For information, please refer to the H5Tset_precision API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::setPrecision(size_t precision) const
@@ -197,8 +196,8 @@ void AtomType::setPrecision(size_t precision) const
 ///\return      Offset value
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For information, please see C layer Reference Manuat at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-GetOffset
+///             For information, please refer to the H5Tget_offset API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 // Modification
 //              12/05/00: due to C API change
@@ -224,8 +223,8 @@ int AtomType::getOffset() const
 ///\param       offset - IN: Offset of first significant bit
 ///\exception   H5::DataTypeIException
 ///\par Description
-///             For information, please see C layer Reference Manuat at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-SetOffset
+///             For information, please refer to the H5Tset_offset API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::setOffset(size_t offset) const

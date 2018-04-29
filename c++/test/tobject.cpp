@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -47,6 +45,7 @@ const H5std_string        DSET_IN_GRP1_PATH("/Top Group/Dataset_in_Group_1");
 const H5std_string        DSET_IN_GRP1_2("Dataset_in_Group_1.2");
 const H5std_string        DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset_in_Group_1.2");
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_get_objname
  *
@@ -67,9 +66,6 @@ const H5std_string        DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset_
  *
  * Programmer   Binh-Minh Ribler
  *              Friday, March 4, 2014
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_get_objname()
@@ -155,6 +151,7 @@ static void test_get_objname()
     }
 }   // test_get_objname
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_existance
  *
@@ -175,9 +172,6 @@ static void test_get_objname()
  *
  * Programmer   Binh-Minh Ribler
  *              Friday, March 4, 2014
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_existance()
@@ -189,18 +183,30 @@ static void test_existance()
         H5File file(FILE_OBJECTS, H5F_ACC_RDONLY);
 
         // Check if GROUP1 exists in the file
-        bool exists = file.exists(GROUP1);
+        bool exists = file.nameExists(GROUP1);
+        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
+        // Deprecated
+        exists = file.exists(GROUP1);
+        verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__);
 
         // Open GROUP1
         Group grp1 = file.openGroup(GROUP1);
 
         // Check if GROUP1_1 and GROUP1_2 exist in GROUP1
+        exists = grp1.nameExists(GROUP1_1);
+        verify_val(exists, TRUE, "Group::nameExists GROUP1_1", __LINE__, __FILE__);
+        exists = grp1.nameExists(GROUP1_2);
+        verify_val(exists, TRUE, "Group::nameExists GROUP1_2", __LINE__, __FILE__);
+        // Deprecated
         exists = grp1.exists(GROUP1_1);
         verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__);
         exists = grp1.exists(GROUP1_2);
         verify_val(exists, TRUE, "Group::exists GROUP1_2", __LINE__, __FILE__);
 
         // Check if DSET_IN_GRP1 exists in GROUP1
+        exists = grp1.nameExists(DSET_IN_GRP1);
+        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
+        // Deprecated
         exists = grp1.exists(DSET_IN_GRP1);
         verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
 
@@ -208,14 +214,22 @@ static void test_existance()
         Group grp1_2 = grp1.openGroup(GROUP1_2);
 
         // Check if DSET_IN_GRP1_2 exists in GROUP1_2
+        exists = grp1_2.nameExists(DSET_IN_GRP1_2);
+        verify_val(exists, TRUE, "Group::nameExists DSET_IN_GRP1_2", __LINE__, __FILE__);
+        // Deprecated
         exists = grp1_2.exists(DSET_IN_GRP1_2);
         verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1_2", __LINE__, __FILE__);
 
         // Check if a dataset exists given dataset as location with full path name
         DataSet dset1 = file.openDataSet(DSET_IN_FILE);
+        exists = dset1.nameExists("/Top Group/Dataset_in_Group_1");
+        verify_val(exists, TRUE, "Group::nameExists given dataset with full path name", __LINE__, __FILE__);
+
+        exists = grp1_2.nameExists(DSET_IN_GRP1);
+        verify_val(exists, FALSE, "Group::nameExists DSET_IN_GRP1", __LINE__, __FILE__);
+        // Deprecated
         exists = dset1.exists("/Top Group/Dataset_in_Group_1");
         verify_val(exists, TRUE, "Group::exists given dataset with full path name", __LINE__, __FILE__);
-
         exists = grp1_2.exists(DSET_IN_GRP1);
         verify_val(exists, FALSE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
 
@@ -231,6 +245,7 @@ static void test_existance()
     }
 }   // test_existance
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_get_objname_ontypes
  *
@@ -241,9 +256,6 @@ static void test_existance()
  *
  * Programmer   Binh-Minh Ribler
  *              March 4, 2014
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_get_objname_ontypes()
@@ -332,6 +344,7 @@ static void test_get_objname_ontypes()
     }
 }   // test_get_objname_ontypes
 
+
 /*-------------------------------------------------------------------------
  * Function:    test_get_objtype
  *
@@ -342,9 +355,6 @@ static void test_get_objname_ontypes()
  *
  * Programmer   Binh-Minh Ribler
  *              Friday, March 4, 2014
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void test_get_objtype()
@@ -396,6 +406,7 @@ static void test_get_objtype()
         issue_fail_msg("test_get_objtype", __LINE__, __FILE__);
     }
 }   // test_get_objtype
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_open_object_header
@@ -406,9 +417,6 @@ static void test_get_objtype()
  *
  * Programmer   Binh-Minh Ribler (use C version)
  *              March, 2017
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 const H5std_string GROUPNAME("group");
@@ -418,6 +426,7 @@ const H5std_string DSETNAME("dataset");
 #define RANK 2
 #define DIM0 5
 #define DIM1 10
+
 static void test_open_object_header()
 {
     hsize_t     dims[2];
@@ -515,6 +524,7 @@ static void test_open_object_header()
         issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } /* test_open_object_header() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_objects
@@ -526,9 +536,6 @@ static void test_open_object_header()
  *
  * Programmer   Binh-Minh Ribler
  *              Friday, Mar 4, 2014
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"
@@ -545,17 +552,13 @@ void test_object()
 
 }   // test_objects
 
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_objects
  *
  * Purpose      Cleanup temporary test files
  *
- * Return       none
- *
- * Programmer   (use C version)
- *
- * Modifications:
- *
+ * Return       None
  *-------------------------------------------------------------------------
  */
 extern "C"

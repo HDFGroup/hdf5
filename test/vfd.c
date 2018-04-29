@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -88,6 +86,8 @@ test_sec2(void)
     hid_t       fid = -1;                   /* file ID                      */
     hid_t       fapl_id = -1;               /* file access property list ID */
     hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char        filename[1024];             /* filename                     */
     void        *os_file_handle = NULL;     /* OS file handle               */
     hsize_t     file_size;                  /* file size                    */
@@ -100,6 +100,28 @@ test_sec2(void)
     if(H5Pset_fapl_sec2(fapl_id) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))  TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_POSIX_COMPAT_HANDLE
+                        | H5FD_FEAT_SUPPORTS_SWMR_IO
+                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
+        TEST_ERROR
 
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
@@ -176,6 +198,8 @@ test_core(void)
     hid_t       fid = -1;                   /* file ID                      */
     hid_t       fapl_id = -1;               /* file access property list ID */
     hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     hid_t       did = -1;                   /* dataset ID                   */
     hid_t       sid = -1;                   /* dataspace ID                 */
     char        filename[1024];             /* filename                     */
@@ -210,9 +234,34 @@ test_core(void)
     if(HDaccess(filename, F_OK) != -1)
         if(HDremove(filename) < 0)
             FAIL_PUTS_ERROR("unable to remove backing store file");
+
     /* Create and close file w/ backing store off */
     if(H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
         TEST_ERROR;
+
+    /* Check that the VFD feature flags are correct.
+     * Note that the H5FDdriver_query() API call does not require a file
+     * so backing-store related flags will not be returned here.
+     */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))             TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))                      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))             TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ALLOW_FILE_IMAGE))                TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))    TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_ALLOW_FILE_IMAGE 
+                        | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
+        TEST_ERROR
+
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
     if(H5Fclose(fid) < 0)
@@ -220,7 +269,6 @@ test_core(void)
     /* Check for the backing store file */
     if(HDaccess(filename, F_OK) != -1)
         FAIL_PUTS_ERROR("file created when backing store set to FALSE");
-
 
     /************************************************************************
      * Check basic core VFD operation and properties. This is done with the
@@ -797,6 +845,8 @@ test_family(void)
 {
     hid_t       file=-1, fapl=-1, fapl2=-1, space=-1, dset=-1;
     hid_t       access_fapl = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char        filename[1024];
     char        dname[]="dataset";
     unsigned int i, j;
@@ -813,6 +863,22 @@ test_family(void)
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA))
+        TEST_ERROR
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1098,6 +1164,8 @@ test_multi(void)
     hid_t       file=-1, fapl=-1, fapl2=-1, dset=-1, space=-1;
     hid_t       root=-1, attr=-1, aspace=-1, atype=-1;
     hid_t       access_fapl = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char        filename[1024];
     int         *fhandle2=NULL, *fhandle=NULL;
     hsize_t     file_size;
@@ -1153,6 +1221,22 @@ test_multi(void)
     if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_USE_ALLOC_SIZE))          TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_PAGED_AGGR))              TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_USE_ALLOC_SIZE
+                        | H5FD_FEAT_PAGED_AGGR))
+        TEST_ERROR
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1486,6 +1570,8 @@ test_log(void)
     hid_t        file            = -1;
     hid_t        fapl            = -1;
     hid_t        access_fapl     = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char         filename[1024];
     int          *fhandle        = NULL;
     hsize_t      file_size       = 0;
@@ -1500,6 +1586,28 @@ test_log(void)
     if(H5Pset_fapl_log(fapl, LOG_FILENAME, flags, buf_size) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))  TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_POSIX_COMPAT_HANDLE
+                        | H5FD_FEAT_SUPPORTS_SWMR_IO
+                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
+        TEST_ERROR
 
     /* Create the test file */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -1573,6 +1681,8 @@ test_stdio(void)
     hid_t        file            = -1;
     hid_t        fapl            = -1;
     hid_t        access_fapl     = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char         filename[1024];
     FILE         *fhandle        = NULL;
     hsize_t      file_size       = 0;
@@ -1585,6 +1695,24 @@ test_stdio(void)
     if(H5Pset_fapl_stdio(fapl) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[7], fapl, filename, sizeof filename);
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))  TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
+        TEST_ERROR
 
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1660,6 +1788,8 @@ test_windows(void)
     hid_t        file            = -1;
     hid_t        fapl            = -1;
     hid_t        access_fapl     = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char         filename[1024];
     int          *fhandle        = NULL;
     hsize_t      file_size       = 0;
@@ -1681,6 +1811,28 @@ test_windows(void)
     if(H5Pset_fapl_windows(fapl) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))  TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_POSIX_COMPAT_HANDLE
+                        | H5FD_FEAT_SUPPORTS_SWMR_IO
+                        | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
+        TEST_ERROR
 
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;

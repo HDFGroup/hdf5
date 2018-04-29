@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -49,9 +47,6 @@ using namespace H5;
  *
  * Programmer   Binh-Minh Ribler (using C code segment for reporting tests)
  *              Friday, February 6, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int test_report( int nerrors, const H5std_string& testname )
@@ -137,9 +132,6 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
  *
  * Programmer   Binh-Minh Ribler (using C code segment for checking values)
  *              Friday, February 6, 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
@@ -193,9 +185,6 @@ void check_values(const char *value, const char* msg, int line, const char* file
  *
  * Programmer   Binh-Minh Ribler
  *              May 2, 2010
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void verify_val(const char* x, const char* value, const char* where, int line, const char* file_name)

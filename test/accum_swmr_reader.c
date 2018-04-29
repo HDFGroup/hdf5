@@ -4,12 +4,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "h5test.h"
 
@@ -19,6 +17,8 @@
 
 #include "H5Fpkg.h"
 #include "H5FDpkg.h"
+
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
 
 /* Filename: this is the same as the define in accum.c used by test_swmr_write_big() */
@@ -50,6 +50,7 @@ main(void)
     uint8_t rbuf[1024];	    /* Buffer for reading */
     uint8_t buf[1024];	    /* Buffer for holding the expected data */
     char *driver = NULL;    /* VFD string (from env variable) */
+    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
@@ -72,12 +73,16 @@ main(void)
     if((fid = H5Fopen(SWMR_FILENAME, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
 	    FAIL_STACK_ERROR
 
+    /* Push API context */
+    if(H5CX_push() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = TRUE;
+
     /* Get H5F_t * to internal file structure */
     if(NULL == (f = (H5F_t *)H5I_object(fid))) 
 	    FAIL_STACK_ERROR
 
     /* Should read in [1024, 2024] with buf data */
-    if(H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5AC_ind_read_dxpl_id, rbuf) < 0)
+    if(H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, rbuf) < 0)
 	    FAIL_STACK_ERROR;
 
     /* Verify the data read is correct */
@@ -90,10 +95,17 @@ main(void)
     if(H5Fclose(fid) < 0)
 	    FAIL_STACK_ERROR;
 
+    /* Pop API context */
+    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
+
     return EXIT_SUCCESS;
 
 error: 
     H5Fclose(fid);
+
+    if(api_ctx_pushed) H5CX_pop();
+
     return EXIT_FAILURE;
 } /* end main() */
 

@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.2.2)
-PROJECT ( HDF5_JAVA_SRC C Java )
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_JAVA_SRC C)
 
 #-----------------------------------------------------------------------------
 # Traverse source subdirectory
 #-----------------------------------------------------------------------------
-add_subdirectory (${HDF5_JAVA_SRC_SOURCE_DIR}/jni ${HDF5_JAVA_SRC_BINARY_DIR}/jni)
-add_subdirectory (${HDF5_JAVA_SRC_SOURCE_DIR}/hdf ${HDF5_JAVA_SRC_BINARY_DIR}/hdf)
+add_subdirectory (jni)
+add_subdirectory (hdf)

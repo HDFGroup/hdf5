@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __H5DSetMemXferPropList_H
@@ -22,9 +20,8 @@ namespace H5 {
 /*! \class DSetMemXferPropList
     \brief Class DSetCreatPropList inherits from PropList and provides
     wrappers for the HDF5 dataset memory and transfer property list.
-
-    Inheritance: ObjCreatPropList -> PropList -> IdComponent
 */
+//  Inheritance: PropList -> IdComponent
 class H5_DLLCPP DSetMemXferPropList : public PropList {
    public:
         ///\brief Default dataset memory and transfer property list.
@@ -105,7 +102,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         ///\brief Returns this class name.
         virtual H5std_string fromClass () const { return("DSetMemXferPropList"); }
 
-        // Copy constructor: makes a copy of a DSetMemXferPropList object.
+        // Copy constructor - same as the original DSetMemXferPropList.
         DSetMemXferPropList(const DSetMemXferPropList& orig);
 
         // Creates a copy of an existing dataset memory and transfer

@@ -5,28 +5,16 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/*
- * Programmer:  Bill Wendling <wendling@ncsa.uiuc.edu>
- *              Tuesday, 6. March 2001
- */
 
 /*
  * Portions of this work are derived from _Obfuscated C and Other Mysteries_,
  * by Don Libes, copyright (c) 1993 by John Wiley & Sons, Inc.
  */
-
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "h5tools.h"
 #include "h5tools_utils.h"
@@ -70,15 +58,11 @@ static void add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t 
 /*-------------------------------------------------------------------------
  * Function: parallel_print
  *
- * Purpose: wrapper for printf for use in parallel mode.
- *
- * Programmer: Leon Arber
- *
- * Date: December 1, 2004
- *
+ * Purpose:  wrapper for printf for use in parallel mode.
  *-------------------------------------------------------------------------
  */
-void parallel_print(const char* format, ...)
+void
+parallel_print(const char* format, ...)
 {
     int  bytes_written;
     va_list ap;
@@ -115,18 +99,12 @@ void parallel_print(const char* format, ...)
 
 
 /*-------------------------------------------------------------------------
- * Function:    error_msg
+ * Function: error_msg
  *
- * Purpose: Print a nicely formatted error message to stderr flushing the
+ * Purpose:  Print a nicely formatted error message to stderr flushing the
  *              stdout stream first.
  *
- * Return:  Nothing
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 20. February 2001
- *
- * Modifications:
- *
+ * Return:   Nothing
  *-------------------------------------------------------------------------
  */
 void
@@ -146,18 +124,12 @@ error_msg(const char *fmt, ...)
 
 
 /*-------------------------------------------------------------------------
- * Function:    warn_msg
+ * Function: warn_msg
  *
- * Purpose: Print a nicely formatted warning message to stderr flushing
+ * Purpose:  Print a nicely formatted warning message to stderr flushing
  *              the stdout stream first.
  *
- * Return:  Nothing
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 20. February 2001
- *
- * Modifications:
- *
+ * Return:   Nothing
  *-------------------------------------------------------------------------
  */
 void
@@ -175,14 +147,11 @@ warn_msg(const char *fmt, ...)
 }
 
 /*-------------------------------------------------------------------------
- * Function:  help_ref_msg
+ * Function: help_ref_msg
  *
- * Purpose: Print a message to refer help page
+ * Purpose:  Print a message to refer help page
  *
- * Return:  Nothing
- *
- * Modifications:
- *
+ * Return:   Nothing
  *-------------------------------------------------------------------------
  */
 void
@@ -194,24 +163,16 @@ help_ref_msg(FILE *output)
 
 
 /*-------------------------------------------------------------------------
- * Function:    get_option
+ * Function: get_option
  *
- * Purpose: Determine the command-line options a user specified. We can
- *      accept both short and long type command-lines.
+ * Purpose:  Determine the command-line options a user specified. We can
+ *           accept both short and long type command-lines.
  *
  * Return:  Success:    The short valued "name" of the command line
  *              parameter or EOF if there are no more
  *              parameters to process.
  *
- *      Failure:    A question mark.
- *
- * Programmer:  Bill Wendling
- *              Friday, 5. January 2001
- *
- * Modifications: Pedro Vicente
- *                October, 27 2008
- * Wilcard "*" argument type
- *
+ *          Failure:    A question mark.
  *-------------------------------------------------------------------------
  */
 int
@@ -363,16 +324,11 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
 
 /*-------------------------------------------------------------------------
- * Function:    indentation
+ * Function: indentation
  *
- * Purpose:     Print spaces for indentation
+ * Purpose:  Print spaces for indentation
  *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
+ * Return:   void
  *-------------------------------------------------------------------------
  */
 void
@@ -390,17 +346,12 @@ indentation(unsigned x)
 
 
 /*-------------------------------------------------------------------------
- * Function:    print_version
+ * Function: print_version
  *
- * Purpose:     Print the program name and the version information which is
- *      defined the same as the HDF5 library version.
+ * Purpose:  Print the program name and the version information which is
+ *           defined the same as the HDF5 library version.
  *
- * Return:      void
- *
- * Programmer:  unknown
- *
- * Modifications:
- *
+ * Return:   void
  *-------------------------------------------------------------------------
  */
 void
@@ -419,11 +370,6 @@ print_version(const char *progname)
  *              and committed types
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -446,11 +392,6 @@ init_table(table_t **tbl)
  *              and committed types
  *
  * Return:      void
- *
- * Programmer:  Paul Harten
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -474,11 +415,6 @@ free_table(table_t *table)
  * Purpose:     display the contents of tables for debugging purposes
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -500,11 +436,6 @@ dump_table(char* tablename, table_t *table)
  * Purpose:     display the contents of tables for debugging purposes
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -525,11 +456,6 @@ dump_tables(find_objs_t *info)
  * Return:      Success:    an integer, the location of the object
  *
  *              Failure:    FAIL   if object is not found
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE obj_t *
@@ -553,16 +479,10 @@ search_obj(table_t *table, haddr_t objno)
  * Return:      Success:    SUCCEED
  *
  *              Failure:    FAIL
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen,
-    void *op_data)
+find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen, void *op_data)
 {
     find_objs_t *info = (find_objs_t*)op_data;
     herr_t ret_value = 0;
@@ -575,7 +495,7 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
 
         case H5O_TYPE_DATASET:
             if(NULL == already_seen) {
-                hid_t dset;
+                hid_t dset = -1;
 
                 /* Add the dataset to the list of objects */
                 add_obj(info->dset_table, oinfo->addr, name, TRUE);
@@ -620,7 +540,6 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:
-            HDassert(0);
             break;
     } /* end switch */
 
@@ -636,11 +555,6 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
  * Return:      Success:    SUCCEED
  *
  *              Failure:    FAIL
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -670,11 +584,6 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
  *              realloc the table if necessary
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -708,11 +617,6 @@ add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
  *
  * Return:      a stream description when succeeds.
  *              NULL if fails.
- *
- * Programmer:  Albert Cheng, 2005/8/9
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 FILE *
@@ -736,67 +640,61 @@ tmpfile(void)
  *
  * Return:
  *   2 : given pathname is object
- *   1 : Succed to get link info.
+ *   1 : Succeed to get link info.
  *   0 : Detected as a dangling link
  *  -1 : H5 API failed.
  *
  * NOTE:
  *  link_info->trg_path must be freed out of this function
- *
- * Programmer: Jonathan Kim
- *
- * Date: Feb 8, 2010
  *-------------------------------------------------------------------------*/
 int
-H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info,
-    hbool_t get_obj_type)
+H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info, hbool_t get_obj_type)
 {
     htri_t l_ret;
     H5O_info_t trg_oinfo;
     hid_t fapl = H5P_DEFAULT;
     hid_t lapl = H5P_DEFAULT;
-    int ret = -1; /* init to fail */
+    int   ret_value = -1; /* init to fail */
 
     /* init */
     link_info->trg_type = H5O_TYPE_UNKNOWN;
 
     /* if path is root, return group type */
-    if(!HDstrcmp(linkpath,"/"))
-    {
+    if(!HDstrcmp(linkpath,"/")) {
         link_info->trg_type = H5O_TYPE_GROUP;
-        ret = 2;
-        goto out;
+        HGOTO_DONE(2);
     }
 
     /* check if link itself exist */
     if(H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: link <%s> doesn't exist \n",linkpath);
-        goto out;
+        HGOTO_DONE(FAIL);
     } /* end if */
 
     /* get info from link */
     if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
-        goto out;
+        HGOTO_DONE(FAIL);
     } /* end if */
 
     /* given path is hard link (object) */
-    if(link_info->linfo.type == H5L_TYPE_HARD) {
-        ret = 2;
-        goto out;
-    } /* end if */
+    if(link_info->linfo.type == H5L_TYPE_HARD)
+        HGOTO_DONE(2);
 
     /* trg_path must be freed out of this function when finished using */
-    link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char));
-    HDassert(link_info->trg_path);
+    if((link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char))) == NULL) {
+        if(link_info->opt.msg_mode == 1)
+            parallel_print("Warning: unable to allocate buffer for <%s>\n",linkpath);
+        HGOTO_DONE(FAIL);
+    } /* end if */
 
     /* get link value */
     if(H5Lget_val(file_id, linkpath, (void *)link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link value from <%s>\n",linkpath);
-        goto out;
+        HGOTO_DONE(FAIL);
     } /* end if */
 
     /*-----------------------------------------------------
@@ -805,13 +703,13 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
      */
     if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
         if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            goto out;
+            HGOTO_DONE(FAIL);
         if(H5Pset_fapl_sec2(fapl) < 0)
-            goto out;
+            HGOTO_DONE(FAIL);
         if((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
-            goto out;
+            HGOTO_DONE(FAIL);
         if(H5Pset_elink_fapl(lapl, fapl) < 0)
-            goto out;
+            HGOTO_DONE(FAIL);
     } /* end if */
 
     /* Check for retrieving object info */
@@ -824,25 +722,24 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
 
         /* detect dangling link */
         if(l_ret == FALSE) {
-            ret = 0;
-            goto out;
-        } /* end if */
-        /* function failed */
-        else if(l_ret < 0)
-            goto out;
+            HGOTO_DONE(0);
+        }
+        else if(l_ret < 0) {       /* function failed */
+            HGOTO_DONE(FAIL);
+        }
 
         /* get target object info */
         if(H5Oget_info_by_name(file_id, linkpath, &trg_oinfo, lapl) < 0) {
             if(link_info->opt.msg_mode == 1)
                 parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
-            goto out;
+            HGOTO_DONE(FAIL);
         } /* end if */
 
         /* check unknown type */
         if(trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES) {
             if(link_info->opt.msg_mode == 1)
                 parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
-            goto out;
+            HGOTO_DONE(FAIL);
         }  /* end if */
 
         /* set target obj type to return */
@@ -854,31 +751,34 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
         link_info->trg_type = H5O_TYPE_UNKNOWN;
 
     /* succeed */
-    ret = 1;
+    ret_value = 1;
 
-out:
+done:
     if(fapl != H5P_DEFAULT)
         H5Pclose(fapl);
     if(lapl != H5P_DEFAULT)
         H5Pclose(lapl);
 
-    return ret;
+    return ret_value;
 } /* end H5tools_get_symlink_info() */
 
 /*-------------------------------------------------------------------------
  * Audience:    Public
- * Chapter:     H5Tools Library
+ *
  * Purpose:     Initialize the name and operation status of the H5 Tools library
+ *
  * Description:
  *      These are utility functions to set/get the program name and operation status.
  *-------------------------------------------------------------------------
  */
-void h5tools_setprogname(const char *Progname)
+void
+h5tools_setprogname(const char *Progname)
 {
     h5tools_progname = Progname;
 }
 
-void h5tools_setstatus(int D_status)
+void
+h5tools_setstatus(int D_status)
 {
     h5tools_d_status = D_status;
 }
@@ -902,25 +802,19 @@ h5tools_getstatus(void)
  * This can be called from each tools main() as part of initial act.
  * Note: this is more of debugging purpose for now.
  */
-int h5tools_getenv_update_hyperslab_bufsize(void)
+int
+h5tools_getenv_update_hyperslab_bufsize(void)
 {
     const char *env_str = NULL;
     long hyperslab_bufsize_mb;
+    int ret_value = 1;
 
     /* check if environment variable is set for the hyperslab buffer size */
-    if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE")))
-    {
+    if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE"))) {
         errno = 0;
         hyperslab_bufsize_mb = HDstrtol(env_str, (char**)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
-        {
-            /* TODO: later when pubilshed
-            HDfprintf(rawerrorstream,"Error: Invalid environment variable \"H5TOOLS_BUFSIZE\" : %s\n", env_str);
-            */
-
-            goto error;
-        }
-
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "hyperslab buffer size failed");
 
         /* convert MB to byte */
         H5TOOLS_BUFSIZE = (hsize_t)hyperslab_bufsize_mb * 1024 * 1024;
@@ -928,9 +822,7 @@ int h5tools_getenv_update_hyperslab_bufsize(void)
         H5TOOLS_MALLOCSIZE = MAX(H5TOOLS_BUFSIZE, H5TOOLS_MALLOCSIZE);
     }
 
-    return (1);
-
-error:
-    return (-1);
+done:
+    return ret_value;
 }
 

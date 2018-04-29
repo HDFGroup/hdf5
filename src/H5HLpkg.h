@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -149,6 +147,6 @@ H5_DLL herr_t H5HL__prfx_dest(H5HL_prfx_t *prfx);
 /* Heap data block routines */
 H5_DLL H5HL_dblk_t *H5HL__dblk_new(H5HL_t *heap);
 H5_DLL herr_t H5HL__dblk_dest(H5HL_dblk_t *dblk);
-H5_DLL herr_t H5HL__dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size);
+H5_DLL herr_t H5HL__dblk_realloc(H5F_t *f, H5HL_t *heap, size_t new_heap_size);
 
 #endif /* _H5HLpkg_H */

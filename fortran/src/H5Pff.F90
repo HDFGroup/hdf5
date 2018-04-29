@@ -14,12 +14,10 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!   of the source code distribution tree; Copyright.html can be found at the  *
-!   root level of an installed copy of the electronic HDF5 document set and   *
-!   is linked from the top-level documents page.  It can also be found at     *
-!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-!   access to either file, you may request a copy from help@hdfgroup.org.     *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! NOTES
@@ -5315,7 +5313,7 @@ CONTAINS
 !  
 !  expression - buffer to hold transform expression
 !  hdferr     - Error code
-!                 Success:  Actual lenght of the expression
+!                 Success:  Actual length of the expression
 !                           If provided buffer "expression" is 
 !                           smaller, than expression will be 
 !                           truncated to fit into
@@ -7771,8 +7769,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER, INTENT(OUT)         :: hdferr
 !*****
     INTERFACE
-       INTEGER(HID_T) FUNCTION h5pget_virtual_count(dcpl_id, count) BIND(C,NAME='H5Pget_virtual_count')
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION h5pget_virtual_count(dcpl_id, count) BIND(C,NAME='H5Pget_virtual_count')
+         IMPORT :: HID_T, SIZE_T, C_INT
          IMPLICIT NONE
          INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
          INTEGER(SIZE_T), INTENT(OUT) :: count

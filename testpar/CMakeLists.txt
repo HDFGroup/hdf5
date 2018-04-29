@@ -1,13 +1,11 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_TEST_PAR)
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_TEST_PAR C)
 
 #-----------------------------------------------------------------------------
 # Apply Definitions to compiler in this directory and below
 #-----------------------------------------------------------------------------
 add_definitions (${HDF_EXTRA_C_FLAGS})
 
-INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib )
 #-----------------------------------------------------------------------------
 # Define Tests
 #-----------------------------------------------------------------------------
@@ -28,28 +26,38 @@ set (testphdf5_SOURCES
 
 #-- Adding test for testhdf5
 add_executable (testphdf5 ${testphdf5_SOURCES})
-TARGET_NAMING (testphdf5 STATIC)
+set_property(TARGET testphdf5 APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
 TARGET_C_PROPERTIES (testphdf5 STATIC " " " ")
-target_link_libraries (testphdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
+target_link_libraries (testphdf5 PUBLIC ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+  target_link_libraries (testphdf5 PRIVATE ${MPI_C_LIBRARIES})
+endif ()
 set_target_properties (testphdf5 PROPERTIES FOLDER test/par)
 
 MACRO (ADD_H5P_EXE file)
   add_executable (${file} ${HDF5_TEST_PAR_SOURCE_DIR}/${file}.c)
-  TARGET_NAMING (${file} STATIC)
+  set_property(TARGET ${file} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (${file} STATIC " " " ")
-  target_link_libraries (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
+  target_link_libraries (${file} PUBLIC ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    target_link_libraries (${file} PRIVATE ${MPI_C_LIBRARIES})
+  endif ()
   set_target_properties (${file} PROPERTIES FOLDER test/par)
 ENDMACRO (ADD_H5P_EXE file)
 
 set (H5P_TESTS
     t_mpi
+    t_bigio
     t_cache
+    t_cache_image
     t_pflush1
     t_pflush2
+    t_pread
     t_pshutdown
     t_prestart
     t_init_term
     t_shapesame
+    t_filters_parallel
 )
 
 foreach (testp ${H5P_TESTS})

@@ -5,23 +5,20 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  John Mainzer
  *              7/13/15
  *
- *              This file contains tests specific to the cache image 
- *		feature implemented in H5C.c
+ *              This file contains tests specific to the cache image
+ *        feature implemented in H5C.c
  */
-#include "h5test.h"
 #include "testphdf5.h"
-#include "testpar.h"
+
 #include "cache_common.h"
 #include "genall5.h"
 
@@ -30,7 +27,7 @@
 #define DSET_SIZE               (40 * CHUNK_SIZE)
 #define MAX_NUM_DSETS           256
 #define PAR_NUM_DSETS           32
-#define PAGE_SIZE		(4 * 1024)
+#define PAGE_SIZE        (4 * 1024)
 #define PB_SIZE                 (64 * PAGE_SIZE)
 
 /* global variable declarations: */
@@ -61,8 +58,8 @@ static void open_hdf5_file(const hbool_t create_file,
     hid_t * file_id_ptr,
     H5F_t ** file_ptr_ptr,
     H5C_t ** cache_ptr_ptr,
-    MPI_Comm comm, 
-    MPI_Info info, 
+    MPI_Comm comm,
+    MPI_Info info,
    int l_facc_type,
    const hbool_t all_coll_metadata_ops,
    const hbool_t coll_metadata_write,
@@ -72,11 +69,11 @@ static void verify_data_sets(hid_t file_id, int min_dset, int max_dset);
 
 /* local test function declarations */
 
-static hbool_t parse_flags(int argc, char * argv[], hbool_t * setup_ptr, 
+static hbool_t parse_flags(int argc, char * argv[], hbool_t * setup_ptr,
     hbool_t * ici_ptr, int * file_idx_ptr, int * mpi_size_ptr, hbool_t display);
 static void usage(void);
 static unsigned construct_test_file(int test_file_index);
-static void par_create_dataset(int dset_num, hid_t file_id, int mpi_rank, 
+static void par_create_dataset(int dset_num, hid_t file_id, int mpi_rank,
     int mpi_size);
 static void par_delete_dataset(int dset_num, hid_t file_id, int mpi_rank);
 static void par_verify_dataset(int dset_num, hid_t file_id, int mpi_rank);
@@ -85,15 +82,15 @@ static hbool_t serial_insert_cache_image(int file_name_idx, int mpi_size);
 static void serial_verify_dataset(int dset_num, hid_t file_id, int mpi_size);
 
 /* top level test function declarations */
-static unsigned verify_cache_image_RO(int file_name_id, 
+static unsigned verify_cache_image_RO(int file_name_id,
     int md_write_strat, int mpi_rank);
-static unsigned verify_cache_image_RW(int file_name_id, 
+static unsigned verify_cache_image_RW(int file_name_id,
     int md_write_strat, int mpi_rank);
 
-static hbool_t smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, 
+static hbool_t smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info,
     int mpi_rank, int mpi_size);
 
-
+
 /****************************************************************************/
 /***************************** Utility Functions ****************************/
 /****************************************************************************/
@@ -101,52 +98,52 @@ static hbool_t smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info,
 /*-------------------------------------------------------------------------
  * Function:    construct_test_file()
  *
- * Purpose:     This function attempts to mimic the typical "poor man's 
- *		parallel use case in which the file is passed between
- *		processes, each of which open the file, write some data,
- *		close the file, and then pass control on to the next 
- *		process.
+ * Purpose:     This function attempts to mimic the typical "poor man's
+ *        parallel use case in which the file is passed between
+ *        processes, each of which open the file, write some data,
+ *        close the file, and then pass control on to the next
+ *        process.
  *
- *		In this case, we create one group for each process, and
- *		populate it with a "zoo" of HDF5 objects selected to 
- *		(ideally) exercise all HDF5 on disk data structures.
+ *        In this case, we create one group for each process, and
+ *        populate it with a "zoo" of HDF5 objects selected to
+ *        (ideally) exercise all HDF5 on disk data structures.
  *
- *		The end result is a test file used verify that PHDF5 
- *		can open a file with a cache image.
+ *        The end result is a test file used verify that PHDF5
+ *        can open a file with a cache image.
  *
- *		Cycle of operation
+ *        Cycle of operation
  *
- *		1) Create a HDF5 file with the cache image FAPL entry.  
+ *        1) Create a HDF5 file with the cache image FAPL entry.
  *
- *		   Verify that the cache is informed of the cache image 
- *		   FAPL entry.
+ *           Verify that the cache is informed of the cache image
+ *           FAPL entry.
  *
- *		   Set all cache image flags, forcing full functionality.
+ *           Set all cache image flags, forcing full functionality.
  *
- *		2) Create a data set in the file.
+ *        2) Create a data set in the file.
  *
- *		3) Close the file.
+ *        3) Close the file.
  *
- *		4) Open the file.
+ *        4) Open the file.
  *
- *		   Verify that the metadata cache is instructed to load 
+ *           Verify that the metadata cache is instructed to load
  *                 the metadata cache image.
  *
- *		5) Create a data set in the file.
+ *        5) Create a data set in the file.
  *
- *		6) Close the file.  If enough datasets have been created
+ *        6) Close the file.  If enough datasets have been created
  *                 goto 7.  Otherwise return to 4.
  *
- *		7) Open the file R/O.
+ *        7) Open the file R/O.
  *
  *                 Verify that the file contains a metadata cache image
  *                 superblock extension message.
- *		
- *		8) Verify all data sets.
  *
- *		   Verify that the cache image has been loaded.
+ *        8) Verify all data sets.
  *
- *	        9) close the file.
+ *           Verify that the cache image has been loaded.
+ *
+ *            9) close the file.
  *
  * Return:      void
  *
@@ -155,7 +152,7 @@ static hbool_t smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info,
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -177,7 +174,7 @@ construct_test_file(int test_file_index)
 
     pass = TRUE;
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -186,7 +183,7 @@ construct_test_file(int test_file_index)
 
         HDassert(FILENAMES[test_file_index]);
 
-        if ( h5_fixname(FILENAMES[test_file_index], H5P_DEFAULT, 
+        if ( h5_fixname(FILENAMES[test_file_index], H5P_DEFAULT,
                                   filename, sizeof(filename))
             == NULL ) {
 
@@ -195,13 +192,13 @@ construct_test_file(int test_file_index)
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 1) Create a HDF5 file with the cache image FAPL entry. 
+    /* 1) Create a HDF5 file with the cache image FAPL entry.
      *
-     *	  Verify that the cache is informed of the cache image FAPL entry.
+     *      Verify that the cache is informed of the cache image FAPL entry.
      *
      *    Set flags forcing full function of the cache image feature.
      */
@@ -212,7 +209,7 @@ construct_test_file(int test_file_index)
                        /* mdci_sbem_expected    */ FALSE,
                        /* read_only             */ FALSE,
                        /* set_mdci_fapl         */ TRUE,
-		       /* config_fsm            */ TRUE,
+            /* config_fsm            */ TRUE,
                        /* enable_page_buffer    */ FALSE,
                        /* hdf_file_name         */ filename,
                        /* cache_image_flags     */ H5C_CI__ALL_FLAGS,
@@ -227,7 +224,7 @@ construct_test_file(int test_file_index)
                        /* md_write_strat        */ 0);
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -249,7 +246,7 @@ construct_test_file(int test_file_index)
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -265,7 +262,7 @@ construct_test_file(int test_file_index)
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -284,7 +281,7 @@ construct_test_file(int test_file_index)
                            /* mdci_sbem_expected    */ TRUE,
                            /* read_only             */ FALSE,
                            /* set_mdci_fapl         */ TRUE,
-		           /* config_fsm            */ FALSE,
+                /* config_fsm            */ FALSE,
                            /* enable_page_buffer    */ FALSE,
                            /* hdf_file_name         */ filename,
                            /* cache_image_flags     */ H5C_CI__ALL_FLAGS,
@@ -358,7 +355,7 @@ construct_test_file(int test_file_index)
                        /* mdci_sbem_expected    */ TRUE,
                        /* read_only             */ TRUE,
                        /* set_mdci_fapl         */ FALSE,
-	               /* config_fsm            */ FALSE,
+                /* config_fsm            */ FALSE,
                        /* enable_page_buffer    */ FALSE,
                        /* hdf_file_name         */ filename,
                        /* cache_image_flags     */ H5C_CI__ALL_FLAGS,
@@ -377,7 +374,7 @@ construct_test_file(int test_file_index)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 8) Open and close all data sets. 
+    /* 8) Open and close all data sets.
      *
      *    Verify that the cache image has been loaded.
      */
@@ -416,15 +413,15 @@ construct_test_file(int test_file_index)
 
 } /* construct_test_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_data_sets()
  *
  * Purpose:     If pass is TRUE on entry, create the specified data sets
- *		in the indicated file.
+ *        in the indicated file.
  *
- *		Data sets and their contents must be well know, as we 
- *		will verify that they contain the expected data later.
+ *        Data sets and their contents must be well know, as we
+ *        will verify that they contain the expected data later.
  *
  *              On failure, set pass to FALSE, and set failure_mssg
  *              to point to an appropriate failure message.
@@ -438,15 +435,15 @@ construct_test_file(int test_file_index)
  *
  * Modifications:
  *
- *              Added min_dset and max_dset parameters and supporting 
- *		code.  This allows the caller to specify a range of 
- *		datasets to create.
- *						JRM -- 8/20/15
+ *              Added min_dset and max_dset parameters and supporting
+ *        code.  This allows the caller to specify a range of
+ *        datasets to create.
+ *                        JRM -- 8/20/15
  *
  *-------------------------------------------------------------------------
  */
 
-static void 
+static void
 create_data_sets(hid_t file_id, int min_dset, int max_dset)
 {
     const char * fcn_name = "create_data_sets()";
@@ -668,8 +665,8 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
                 /* read the chunk from file */
                 if ( pass ) {
 
-                    status = H5Dread(dataset_ids[m], H5T_NATIVE_INT, 
-                                     memspace_id, filespace_ids[m], 
+                    status = H5Dread(dataset_ids[m], H5T_NATIVE_INT,
+                                     memspace_id, filespace_ids[m],
                                      H5P_DEFAULT, data_chunk);
 
                     if ( status < 0 ) {
@@ -694,7 +691,7 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
 
                                 valid_chunk = FALSE;
 
-				if ( verbose ) {
+                if ( verbose ) {
 
                                     HDfprintf(stdout,
                                     "data_chunk[%0d][%0d] = %0d, expect %0d.\n",
@@ -704,7 +701,7 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
                                     HDfprintf(stdout,
                                     "m = %d, i = %d, j = %d, k = %d, l = %d\n",
                                     m, i, j, k, l);
-				}
+                }
                             }
                         }
                     }
@@ -714,12 +711,12 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
                         pass = FALSE;
                         failure_mssg = "slab validation failed.";
 
-			if ( verbose ) {
+            if ( verbose ) {
 
-                            fprintf(stdout, 
+                            fprintf(stdout,
                                   "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                                   i, j, m);
-			}
+            }
                     }
                 }
                 m++;
@@ -770,16 +767,16 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
 
 } /* create_data_sets() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    delete_data_sets()
  *
- * Purpose:     If pass is TRUE on entry, verify and then delete the 
- *		dataset(s) indicated by min_dset and max_dset in the 
- *		indicated file.
+ * Purpose:     If pass is TRUE on entry, verify and then delete the
+ *        dataset(s) indicated by min_dset and max_dset in the
+ *        indicated file.
  *
- *		Data sets and their contents must be well know, as we 
- *		will verify that they contain the expected data later.
+ *        Data sets and their contents must be well know, as we
+ *        will verify that they contain the expected data later.
  *
  *              On failure, set pass to FALSE, and set failure_mssg
  *              to point to an appropriate failure message.
@@ -794,17 +791,17 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
  * Modifications:
  *
  *              None.
- *						JRM -- 8/20/15
+ *                        JRM -- 8/20/15
  *
  *-------------------------------------------------------------------------
  */
-#if 0 
+#if 0
 /* this code will be needed to test full support of cache image
  * in parallel -- keep it around against that day.
  *
  *                                      -- JRM
  */
-static void 
+static void
 delete_data_sets(hid_t file_id, int min_dset, int max_dset)
 {
     const char * fcn_name = "delete_data_sets()";
@@ -835,11 +832,11 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
         {
             sprintf(dset_name, "/dset%03d", i);
 
-	    if ( H5Ldelete(file_id, dset_name, H5P_DEFAULT) < 0) {
+        if ( H5Ldelete(file_id, dset_name, H5P_DEFAULT) < 0) {
 
                 pass = FALSE;
                 failure_mssg = "H5Ldelete() failed.";
-	    }
+        }
 
             i++;
         }
@@ -852,32 +849,32 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
 } /* delete_data_sets() */
 #endif
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    open_hdf5_file()
  *
- * Purpose:     If pass is true on entry, create or open the specified HDF5 
- *		and test to see if it has a metadata cache image superblock 
- *		extension message.  
+ * Purpose:     If pass is true on entry, create or open the specified HDF5
+ *        and test to see if it has a metadata cache image superblock
+ *        extension message.
  *
- *		Set pass to FALSE and issue a suitable failure 
- *		message if either the file contains a metadata cache image
- *		superblock extension and mdci_sbem_expected is TRUE, or 
- *		vise versa.
+ *        Set pass to FALSE and issue a suitable failure
+ *        message if either the file contains a metadata cache image
+ *        superblock extension and mdci_sbem_expected is TRUE, or
+ *        vise versa.
  *
- *		If mdci_sbem_expected is TRUE, also verify that the metadata 
- *		cache has been advised of this.
+ *        If mdci_sbem_expected is TRUE, also verify that the metadata
+ *        cache has been advised of this.
  *
- *		If read_only is TRUE, open the file read only.  Otherwise
- *		open the file read/write.
+ *        If read_only is TRUE, open the file read only.  Otherwise
+ *        open the file read/write.
  *
- *		If set_mdci_fapl is TRUE, set the metadata cache image 
- *		FAPL entry when opening the file, and verify that the 
- *		metadata cache is notified.
+ *        If set_mdci_fapl is TRUE, set the metadata cache image
+ *        FAPL entry when opening the file, and verify that the
+ *        metadata cache is notified.
  *
- *		If config_fsm is TRUE, setup the persistant free space 
- *		manager.  Note that this flag may only be set if 
- *		create_file is also TRUE.
+ *        If config_fsm is TRUE, setup the persistant free space
+ *        manager.  Note that this flag may only be set if
+ *        create_file is also TRUE.
  *
  *              Return pointers to the cache data structure and file data
  *              structures.
@@ -895,10 +892,10 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
  * Modifications:
  *
  *              Modified function to handle parallel file creates / opens.
- *              
+ *
  *                                                 JRM -- 2/1/17
  *
- *              Modified function to handle 
+ *              Modified function to handle
  *
  *-------------------------------------------------------------------------
  */
@@ -906,17 +903,17 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
 static void
 open_hdf5_file(const hbool_t create_file,
                const hbool_t mdci_sbem_expected,
-	       const hbool_t read_only,
-	       const hbool_t set_mdci_fapl,
-	       const hbool_t config_fsm,
+        const hbool_t read_only,
+        const hbool_t set_mdci_fapl,
+        const hbool_t config_fsm,
                const hbool_t enable_page_buffer,
-	       const char * hdf_file_name,
+        const char * hdf_file_name,
                const unsigned cache_image_flags,
                hid_t * file_id_ptr,
                H5F_t ** file_ptr_ptr,
                H5C_t ** cache_ptr_ptr,
-               MPI_Comm comm, 
-               MPI_Info info, 
+               MPI_Comm comm,
+               MPI_Info info,
                int l_facc_type,
                const hbool_t all_coll_metadata_ops,
                const hbool_t coll_metadata_write,
@@ -943,8 +940,8 @@ open_hdf5_file(const hbool_t create_file,
 
     if ( pass )
     {
-	/* opening the file both read only and with a cache image 
-         * requested is a contradiction.  We resolve it by ignoring 
+    /* opening the file both read only and with a cache image
+         * requested is a contradiction.  We resolve it by ignoring
          * the cache image request silently.
          */
         if ( ( create_file && mdci_sbem_expected ) ||
@@ -971,7 +968,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* create a file access propertly list. */
@@ -986,13 +983,13 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass ) {
 
-        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) 
+        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)
                 < 0 ) {
 
             pass = FALSE;
@@ -1000,7 +997,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* get metadata cache image config -- verify that it is the default */
@@ -1018,7 +1015,7 @@ open_hdf5_file(const hbool_t create_file,
                H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION ) ||
              ( cache_image_config.generate_image != FALSE ) ||
              ( cache_image_config.save_resize_status != FALSE ) ||
-             ( cache_image_config.entry_ageout != 
+             ( cache_image_config.entry_ageout !=
                H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE ) ) {
 
             pass = FALSE;
@@ -1026,7 +1023,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* set metadata cache image fapl entry if indicated */
@@ -1046,24 +1043,24 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the persistant free space manager if indicated */
     if ( ( pass ) && ( config_fsm ) ) {
 
-	fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+    fcpl_id = H5Pcreate(H5P_FILE_CREATE);
 
-	if ( fcpl_id <= 0 ) {
+    if ( fcpl_id <= 0 ) {
 
-	    pass = FALSE;
-	    failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.";
-	}
+        pass = FALSE;
+        failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.";
+    }
     }
 
     if ( ( pass ) && ( config_fsm ) ) {
 
-        if ( H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, 
+        if ( H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE,
                                         TRUE, (hsize_t)1) == FAIL ) {
             pass = FALSE;
             failure_mssg = "H5Pset_file_space_strategy() failed.\n";
@@ -1079,7 +1076,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the page buffer if indicated */
@@ -1089,10 +1086,10 @@ open_hdf5_file(const hbool_t create_file,
 
             pass = FALSE;
             failure_mssg = "H5Pset_page_buffer_size() failed.\n";
-        } 
+        }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -1100,13 +1097,13 @@ open_hdf5_file(const hbool_t create_file,
 
         /* set Parallel access with communicator */
         if ( H5Pset_fapl_mpio(fapl_id, comm, info) < 0 ) {
- 
+
             pass = FALSE;
             failure_mssg = "H5Pset_fapl_mpio() failed.\n";
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ( ( pass ) && ( l_facc_type == FACC_MPIO ) ) {
@@ -1118,7 +1115,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ( ( pass ) && ( l_facc_type == FACC_MPIO ) ) {
@@ -1130,7 +1127,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ( ( pass ) && ( l_facc_type == FACC_MPIO ) ) {
@@ -1139,7 +1136,7 @@ open_hdf5_file(const hbool_t create_file,
         H5AC_cache_config_t mdc_config;
 
         mdc_config.version = H5C__CURR_AUTO_SIZE_CTL_VER;
-        
+
         if ( H5Pget_mdc_config(fapl_id, &mdc_config) < 0 ) {
 
             pass = FALSE;
@@ -1155,7 +1152,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* open the file */
@@ -1163,13 +1160,13 @@ open_hdf5_file(const hbool_t create_file,
 
         if ( create_file ) {
 
-	    if ( fcpl_id != -1 )
+        if ( fcpl_id != -1 )
 
-                file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC, 
-				    fcpl_id, fapl_id);
-	    else
+                file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC,
+                    fcpl_id, fapl_id);
+        else
 
-		file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC, 
+        file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC,
                                     H5P_DEFAULT, fapl_id);
 
         } else {
@@ -1204,7 +1201,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* get a pointer to the files internal data structure and then
@@ -1223,12 +1220,12 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* verify expected page buffer status.  At present, page buffering 
-     * must be disabled in parallel -- hopefully this will change in the 
+    /* verify expected page buffer status.  At present, page buffering
+     * must be disabled in parallel -- hopefully this will change in the
      * future.
      */
     if ( pass ) {
@@ -1247,7 +1244,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -1267,7 +1264,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -1275,26 +1272,26 @@ open_hdf5_file(const hbool_t create_file,
 
         if ( set_mdci_fapl ) {
 
-	    if ( read_only ) {
+        if ( read_only ) {
 
-                if ( ( image_ctl.version != 
+                if ( ( image_ctl.version !=
                        H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION ) ||
                      ( image_ctl.generate_image != FALSE ) ||
                      ( image_ctl.save_resize_status != FALSE ) ||
-                     ( image_ctl.entry_ageout != 
+                     ( image_ctl.entry_ageout !=
                        H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE ) ||
                      ( image_ctl.flags != H5C_CI__ALL_FLAGS ) ) {
 
                     pass = FALSE;
                     failure_mssg = "Unexpected image_ctl values(1).\n";
                 }
-	    } else {
+        } else {
 
-                if ( ( image_ctl.version != 
+                if ( ( image_ctl.version !=
                        H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION ) ||
-                     ( image_ctl.generate_image != TRUE ) || 
+                     ( image_ctl.generate_image != TRUE ) ||
                      ( image_ctl.save_resize_status != FALSE ) ||
-                     ( image_ctl.entry_ageout != 
+                     ( image_ctl.entry_ageout !=
                        H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE ) ||
                      ( image_ctl.flags != H5C_CI__ALL_FLAGS ) ) {
 
@@ -1304,11 +1301,11 @@ open_hdf5_file(const hbool_t create_file,
             }
         } else {
 
-            if ( ( image_ctl.version != 
+            if ( ( image_ctl.version !=
                    H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION ) ||
                  ( image_ctl.generate_image != FALSE ) ||
                  ( image_ctl.save_resize_status != FALSE ) ||
-                 ( image_ctl.entry_ageout != 
+                 ( image_ctl.entry_ageout !=
                    H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE ) ||
                  ( image_ctl.flags != H5C_CI__ALL_FLAGS ) ) {
 
@@ -1318,7 +1315,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ( ( pass ) && ( set_mdci_fapl ) ) {
@@ -1332,7 +1329,7 @@ open_hdf5_file(const hbool_t create_file,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ( pass ) {
@@ -1361,19 +1358,19 @@ open_hdf5_file(const hbool_t create_file,
                     pass = FALSE;
                     failure_mssg = "mdci sb extension message not present?\n";
                 }
-	    }
+        }
         } else {
 
-	    if ( ( cache_ptr->load_image == TRUE ) ||
+        if ( ( cache_ptr->load_image == TRUE ) ||
                  ( cache_ptr->delete_image == TRUE ) ) {
 
                 pass = FALSE;
                 failure_mssg = "mdci sb extension message present?\n";
-	    }
+        }
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ( pass ) {
@@ -1384,11 +1381,11 @@ open_hdf5_file(const hbool_t create_file,
     }
 
     if ( show_progress ) {
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- exiting.\n", 
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- exiting.\n",
                   fcn_name, cp++, pass);
 
         if ( ! pass )
-            HDfprintf(stdout, "%s: failure_mssg = %s\n", 
+            HDfprintf(stdout, "%s: failure_mssg = %s\n",
                       fcn_name, failure_mssg);
     }
 
@@ -1396,11 +1393,11 @@ open_hdf5_file(const hbool_t create_file,
 
 } /* open_hdf5_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    par_create_dataset()
  *
- * Purpose:     Collectively create a chunked dataset, and fill it with 
+ * Purpose:     Collectively create a chunked dataset, and fill it with
  *              known values.
  *
  *              On failure, set pass to FALSE, and set failure_mssg
@@ -1471,7 +1468,7 @@ par_create_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* set the dataset creation plist to specify that the raw data is
@@ -1489,7 +1486,7 @@ par_create_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ( pass ) {
@@ -1505,7 +1502,7 @@ par_create_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* create the dataset */
@@ -1522,7 +1519,7 @@ par_create_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* get the file space ID */
@@ -1537,7 +1534,7 @@ par_create_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* create the mem space to be used to read and write chunks */
@@ -1555,7 +1552,7 @@ par_create_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* select in memory hyperslab */
@@ -1577,7 +1574,7 @@ par_create_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the DXPL for collective I/O */
@@ -1592,7 +1589,7 @@ par_create_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ( pass ) {
@@ -1604,7 +1601,7 @@ par_create_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* initialize the dataset with collective writes */
@@ -1615,8 +1612,8 @@ par_create_dataset(int dset_num,
         while ( ( pass ) && ( j < DSET_SIZE ) )
         {
 
-            if ( show_progress ) 
-                HDfprintf(stdout, "%s: cp = %d.0, pass = %d.\n", 
+            if ( show_progress )
+                HDfprintf(stdout, "%s: cp = %d.0, pass = %d.\n",
                           fcn_name, cp, pass);
 
             /* initialize the slab */
@@ -1630,8 +1627,8 @@ par_create_dataset(int dset_num,
                 }
             }
 
-            if ( show_progress ) 
-                HDfprintf(stdout, "%s: cp = %d.1, pass = %d.\n", 
+            if ( show_progress )
+                HDfprintf(stdout, "%s: cp = %d.1, pass = %d.\n",
                           fcn_name, cp, pass);
 
             /* select on disk hyperslab */
@@ -1639,7 +1636,7 @@ par_create_dataset(int dset_num,
             offset[1] = (hsize_t)i;
             offset[2] = (hsize_t)j;
             a_size[0] = (hsize_t)1;        /* size of hyperslab */
-            a_size[1] = CHUNK_SIZE;  
+            a_size[1] = CHUNK_SIZE;
             a_size[2] = CHUNK_SIZE;
             status = H5Sselect_hyperslab(filespace_id, H5S_SELECT_SET,
                                          offset, NULL, a_size, NULL);
@@ -1650,8 +1647,8 @@ par_create_dataset(int dset_num,
                 failure_mssg = "disk H5Sselect_hyperslab() failed.";
             }
 
-            if ( show_progress ) 
-                HDfprintf(stdout, "%s: cp = %d.2, pass = %d.\n", 
+            if ( show_progress )
+                HDfprintf(stdout, "%s: cp = %d.2, pass = %d.\n",
                           fcn_name, cp, pass);
 
             /* write the chunk to file */
@@ -1664,8 +1661,8 @@ par_create_dataset(int dset_num,
                 failure_mssg = "H5Dwrite() failed.";
             }
 
-            if ( show_progress ) 
-                HDfprintf(stdout, "%s: cp = %d.3, pass = %d.\n", 
+            if ( show_progress )
+                HDfprintf(stdout, "%s: cp = %d.3, pass = %d.\n",
                           fcn_name, cp, pass);
 
             j += CHUNK_SIZE;
@@ -1675,7 +1672,7 @@ par_create_dataset(int dset_num,
     }
 
     cp++;
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* read data from data sets and validate it */
@@ -1764,7 +1761,7 @@ par_create_dataset(int dset_num,
         i += CHUNK_SIZE;
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* close the data space */
@@ -1809,14 +1806,14 @@ par_create_dataset(int dset_num,
         failure_mssg = "H5Pclose(dxpl) failed.";
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     return;
 
 } /* par_create_dataset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    par_delete_dataset()
  *
@@ -1864,7 +1861,7 @@ par_delete_dataset(int dset_num,
         par_verify_dataset(dset_num, file_id, mpi_rank);
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* delete the target dataset */
@@ -1877,21 +1874,29 @@ par_delete_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     return;
 
 } /* par_delete_dataset() */
 
-
+
+/* This test uses many POSIX things that are not available on
+ * Windows. We're using a check for fork(2) here as a proxy for
+ * all POSIX/Unix/Linux things until this test can be made
+ * more platform-independent.
+ */
+#ifdef H5_HAVE_FORK
+
+
 /*-------------------------------------------------------------------------
  * Function:    par_insert_cache_image()
  *
  * Purpose:     Insert a cache image in the supplied file.
  *
- *              At present, cache image is not enabled in the parallel 
- *              so we have to insert the cache image with a serial 
+ *              At present, cache image is not enabled in the parallel
+ *              so we have to insert the cache image with a serial
  *              process.  Do this via a fork and an execv from process 0.
  *              All processes wait until the child process completes, and
  *              then return.
@@ -1937,22 +1942,22 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size )
                 /* fun and games to shutup the compiler */
                 char param0[32] = "t_cache_image";
                 char param1[32] = "ici";
-                char * child_argv[] = {param0, 
-                                       param1, 
-                                       file_name_idx_str, 
-                                       mpi_size_str, 
+                char * child_argv[] = {param0,
+                                       param1,
+                                       file_name_idx_str,
+                                       mpi_size_str,
                                        NULL};
 
                 /* we may need to play with the path here */
                 if ( execv("t_cache_image", child_argv) == -1 ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                              "execl() of ici process failed. errno = %d(%s)\n",
                              errno, strerror(errno));
                     exit(1);
                 }
 
-            } else if ( child_pid != -1 ) {  
+            } else if ( child_pid != -1 ) {
                 /* this is the parent process -- wait until child is done */
                 if ( -1 == waitpid(child_pid, &child_status, WUNTRACED)) {
 
@@ -1975,7 +1980,7 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size )
                 }
             } else { /* fork failed */
 
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                           "can't create process to insert cache image.\n");
                 pass = FALSE;
             }
@@ -1984,8 +1989,8 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size )
 
     if ( pass ) {
 
-        /* make sure insertion of the cache image is complete 
-         * before proceeding 
+        /* make sure insertion of the cache image is complete
+         * before proceeding
          */
         MPI_Barrier(MPI_COMM_WORLD);
     }
@@ -1993,8 +1998,17 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size )
     return;
 
 } /* par_insert_cache_image() */
+#else /* H5_HAVE_FORK */
 
-
+static void
+par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size )
+{
+    return;
+} /* par_insert_cache_image() */
+
+#endif /* H5_HAVE_FORK */
+
+
 /*-------------------------------------------------------------------------
  * Function:    par_verify_dataset()
  *
@@ -2074,7 +2088,7 @@ par_verify_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* create the mem space to be used to read */
@@ -2092,7 +2106,7 @@ par_verify_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* select in memory hyperslab */
@@ -2114,7 +2128,7 @@ par_verify_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* setup the DXPL for collective I/O */
@@ -2129,7 +2143,7 @@ par_verify_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     if ( pass ) {
@@ -2141,7 +2155,7 @@ par_verify_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* read data from data sets and validate it */
@@ -2230,7 +2244,7 @@ par_verify_dataset(int dset_num,
         i += CHUNK_SIZE;
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* close the file space */
@@ -2261,23 +2275,23 @@ par_verify_dataset(int dset_num,
         failure_mssg = "H5Pclose(dxpl) failed.";
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     return;
 
 } /* par_verify_dataset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    serial_insert_cache_image()
  *
  * Purpose:     Insert a cache image in the supplied file.
  *
- * 		To populate the cache image, validate the contents 
- * 		of the file before closing.
+ *         To populate the cache image, validate the contents
+ *         of the file before closing.
  *
- *              On failure, print an appropriate error message and 
+ *              On failure, print an appropriate error message and
  *              return FALSE.
  *
  * Return:      TRUE if succussful, FALSE otherwise.
@@ -2331,7 +2345,7 @@ serial_insert_cache_image(int file_name_idx, int mpi_size )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 2) Open the PHDF5 file with the cache image FAPL entry. 
+    /* 2) Open the PHDF5 file with the cache image FAPL entry.
      */
 
     if ( pass ) {
@@ -2390,7 +2404,7 @@ serial_insert_cache_image(int file_name_idx, int mpi_size )
 
 } /* serial_insert_cache_image() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    serial_verify_dataset()
  *
@@ -2466,7 +2480,7 @@ serial_verify_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* create the mem space to be used to read */
@@ -2484,7 +2498,7 @@ serial_verify_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* select in memory hyperslab */
@@ -2506,7 +2520,7 @@ serial_verify_dataset(int dset_num,
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -2603,7 +2617,7 @@ serial_verify_dataset(int dset_num,
     }
 
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* close the file space */
@@ -2627,18 +2641,18 @@ serial_verify_dataset(int dset_num,
         failure_mssg = "H5Sclose(memspace_id) failed.";
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     return;
 
 } /* serial_verify_dataset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    parse_flags
  *
- * Purpose:     Parse the flags passed to this program, and load the 
+ * Purpose:     Parse the flags passed to this program, and load the
  *              values into the supplied field.
  *
  * Return:      Success:        1
@@ -2650,7 +2664,7 @@ serial_verify_dataset(int dset_num,
  *-------------------------------------------------------------------------
  */
 static hbool_t
-parse_flags(int argc, char * argv[], hbool_t * setup_ptr, 
+parse_flags(int argc, char * argv[], hbool_t * setup_ptr,
     hbool_t * ici_ptr, int * file_idx_ptr, int * mpi_size_ptr, hbool_t display)
 {
     const char * fcn_name = "parse_flags()";
@@ -2671,7 +2685,7 @@ parse_flags(int argc, char * argv[], hbool_t * setup_ptr,
     }
 
 
-    if ( ( success ) && 
+    if ( ( success ) &&
          ( ( argc != 1 ) && ( argc != 2 ) && ( argc != 4 ) ) ) {
 
         success = FALSE;
@@ -2718,7 +2732,7 @@ parse_flags(int argc, char * argv[], hbool_t * setup_ptr,
 
         else if ( *ici_ptr )
 
-            HDfprintf(stdout, "t_cache_image ici %d %d\n", 
+            HDfprintf(stdout, "t_cache_image ici %d %d\n",
                       *file_idx_ptr, *mpi_size_ptr);
 
         else
@@ -2730,7 +2744,7 @@ parse_flags(int argc, char * argv[], hbool_t * setup_ptr,
 
 } /* parse_flags() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -2740,7 +2754,7 @@ parse_flags(int argc, char * argv[], hbool_t * setup_ptr,
  * Return:      void
  *
  * Programmer:  John Mainzer
- *              4/28/11 
+ *              4/28/11
  *
  * Modifications:
  *
@@ -2794,17 +2808,17 @@ usage(void)
     return;
 } /* usage() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_data_sets()
  *
- * Purpose:     If pass is TRUE on entry, verify that the data sets in the 
- *		file exist and contain the expected data.  
+ * Purpose:     If pass is TRUE on entry, verify that the data sets in the
+ *        file exist and contain the expected data.
  *
- *		Note that these data sets were created by 
- *		create_data_sets() above.  Thus any changes in that 
- *		function must be reflected in this function, and 
- *		vise-versa.
+ *        Note that these data sets were created by
+ *        create_data_sets() above.  Thus any changes in that
+ *        function must be reflected in this function, and
+ *        vise-versa.
  *
  *              On failure, set pass to FALSE, and set failure_mssg
  *              to point to an appropriate failure message.
@@ -2818,15 +2832,15 @@ usage(void)
  *
  * Modifications:
  *
- *              Added min_dset and max_dset parameters and supporting 
- *		code.  This allows the caller to specify a range of 
- *		datasets to verify.
- *						JRM -- 8/20/15
+ *              Added min_dset and max_dset parameters and supporting
+ *        code.  This allows the caller to specify a range of
+ *        datasets to verify.
+ *                        JRM -- 8/20/15
  *
  *-------------------------------------------------------------------------
  */
 
-static void 
+static void
 verify_data_sets(hid_t file_id, int min_dset, int max_dset)
 {
     const char * fcn_name = "verify_data_sets()";
@@ -2954,8 +2968,8 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
                 /* read the chunk from file */
                 if ( pass ) {
 
-                    status = H5Dread(dataset_ids[m], H5T_NATIVE_INT, 
-                                     memspace_id, filespace_ids[m], 
+                    status = H5Dread(dataset_ids[m], H5T_NATIVE_INT,
+                                     memspace_id, filespace_ids[m],
                                      H5P_DEFAULT, data_chunk);
 
                     if ( status < 0 ) {
@@ -2980,8 +2994,8 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
 
                                 valid_chunk = FALSE;
 
-				if ( verbose ) {
-				
+                if ( verbose ) {
+
                                     HDfprintf(stdout,
                                     "data_chunk[%0d][%0d] = %0d, expect %0d.\n",
                                     k, l, data_chunk[k][l],
@@ -2990,7 +3004,7 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
                                     HDfprintf(stdout,
                                      "m = %d, i = %d, j = %d, k = %d, l = %d\n",
                                      m, i, j, k, l);
-				}
+                }
                             }
                         }
                     }
@@ -3000,12 +3014,12 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
                         pass = FALSE;
                         failure_mssg = "slab validation failed.";
 
-			if ( verbose ) {
+            if ( verbose ) {
 
-                            fprintf(stdout, 
+                            fprintf(stdout,
                                   "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                                   i, j, m);
-			}
+            }
                     }
                 }
                 m++;
@@ -3056,7 +3070,7 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
 
 } /* verify_data_sets() */
 
-
+
 /****************************************************************************/
 /******************************* Test Functions *****************************/
 /****************************************************************************/
@@ -3064,21 +3078,21 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
 /*-------------------------------------------------------------------------
  * Function:    verify_cache_image_RO()
  *
- * Purpose:     Verify that a HDF5 file containing a cache image is 
- *              opened R/O and read correctly by PHDF5 with the specified 
+ * Purpose:     Verify that a HDF5 file containing a cache image is
+ *              opened R/O and read correctly by PHDF5 with the specified
  *              metadata write strategy.
- *              
+ *
  *              Basic cycle of operation is as follows:
  *
- *		1) Open the test file created at the beginning of this 
- *		   test read only.
+ *        1) Open the test file created at the beginning of this
+ *           test read only.
  *
- *		   Verify that the file contains a cache image.
+ *           Verify that the file contains a cache image.
  *
- *		   Verify that only process 0 reads the cache image.
+ *           Verify that only process 0 reads the cache image.
  *
- *		   Verify that all other processes receive the cache 
- *		   image block from process 0.
+ *           Verify that all other processes receive the cache
+ *           image block from process 0.
  *
  *              2) Verify that the file contains the expected data.
  *
@@ -3098,7 +3112,7 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3137,14 +3151,14 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
 
     show_progress = ( ( show_progress ) && ( mpi_rank == 0 ) );
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAMES[file_name_id], H5P_DEFAULT, 
+        if ( h5_fixname(FILENAMES[file_name_id], H5P_DEFAULT,
                         filename, sizeof(filename)) == NULL ) {
 
             pass = FALSE;
@@ -3152,7 +3166,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -3167,7 +3181,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
                        /* mdci_sbem_expected    */ TRUE,
                        /* read_only             */ TRUE,
                        /* set_mdci_fapl         */ FALSE,
-		       /* config_fsm            */ FALSE,
+            /* config_fsm            */ FALSE,
                        /* enable_page_buffer    */ FALSE,
                        /* hdf_file_name         */ filename,
                        /* cache_image_flags     */ H5C_CI__ALL_FLAGS,
@@ -3182,15 +3196,15 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
                        /* md_write_strat        */ md_write_strat);
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 2) Verify that the file contains the expected data. 
+    /* 2) Verify that the file contains the expected data.
      *
      *    Verify that only process 0 reads the cache image.
      *
-     *    Verify that all other processes receive the cache 
+     *    Verify that all other processes receive the cache
      *    image block from process 0.
      */
 
@@ -3212,14 +3226,14 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that all other processes receive the cache image block 
+    /* Verify that all other processes receive the cache image block
      * from process 0.
-     * 
-     * Since we have alread verified that only process 0 has read the 
-     * image, it is sufficient to verify that the image was loaded on 
+     *
+     * Since we have alread verified that only process 0 has read the
+     * image, it is sufficient to verify that the image was loaded on
      * all processes.
      */
 #if H5C_COLLECT_CACHE_STATS
@@ -3233,12 +3247,12 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* 3) Close the file. */
- 
+
     if ( pass ) {
 
         if ( H5Fclose(file_id) < 0  ) {
@@ -3249,7 +3263,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -3261,7 +3275,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
                        /* mdci_sbem_expected    */ TRUE,
                        /* read_only             */ TRUE,
                        /* set_mdci_fapl         */ FALSE,
-		       /* config_fsm            */ FALSE,
+            /* config_fsm            */ FALSE,
                        /* enable_page_buffer    */ FALSE,
                        /* hdf_file_name         */ filename,
                        /* cache_image_flags     */ H5C_CI__ALL_FLAGS,
@@ -3276,12 +3290,12 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
                        /* md_write_strat        */ md_write_strat);
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* 5) Verify that the file contains the expected data. */
- 
+
     if ( pass ) {
 
        verify_data_sets(file_id, 0, MAX_NUM_DSETS - 1);
@@ -3300,7 +3314,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
 
 
     /* 6) Close the file. */
- 
+
     if ( pass ) {
 
         if ( H5Fclose(file_id) < 0  ) {
@@ -3311,7 +3325,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -3326,7 +3340,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
 
             H5_FAILED();
 
-            if ( show_progress ) 
+            if ( show_progress )
                 HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", failure_mssg);
         }
     }
@@ -3336,32 +3350,32 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
 
 } /* verify_cache_image_RO() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_cache_image_RW()
  *
- * Purpose:     Verify that a HDF5 file containing a cache image is 
- *              opened and read correctly by PHDF5 with the specified 
+ * Purpose:     Verify that a HDF5 file containing a cache image is
+ *              opened and read correctly by PHDF5 with the specified
  *              metadata write strategy.
- *              
+ *
  *              Basic cycle of operation is as follows:
  *
- *		1) Open the test file created at the beginning of this 
- *		   test.
+ *        1) Open the test file created at the beginning of this
+ *           test.
  *
- *		   Verify that the file contains a cache image.
+ *           Verify that the file contains a cache image.
  *
  *              2) Verify that the file contains the expected data.
  *
- *		   Verify that only process 0 reads the cache image.
+ *           Verify that only process 0 reads the cache image.
  *
- *		   Verify that all other processes receive the cache 
- *		   image block from process 0.
+ *           Verify that all other processes receive the cache
+ *           image block from process 0.
  *
  *
  *              3) Close the file.
  *
- *              4) Open the file, and verify that it doesn't contain 
+ *              4) Open the file, and verify that it doesn't contain
  *                 a cache image.
  *
  *              5) Verify that the file contains the expected data.
@@ -3377,7 +3391,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3416,14 +3430,14 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
 
     show_progress = ( ( show_progress ) && ( mpi_rank == 0 ) );
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAMES[file_name_id], H5P_DEFAULT, 
+        if ( h5_fixname(FILENAMES[file_name_id], H5P_DEFAULT,
                         filename, sizeof(filename)) == NULL ) {
 
             pass = FALSE;
@@ -3431,7 +3445,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -3441,7 +3455,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
      *
      *    Verify that only process 0 reads the cache image.
      *
-     *    Verify that all other processes receive the cache 
+     *    Verify that all other processes receive the cache
      *    image block from process 0.
      */
 
@@ -3451,7 +3465,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
                        /* mdci_sbem_expected    */ TRUE,
                        /* read_only             */ FALSE,
                        /* set_mdci_fapl         */ FALSE,
-		       /* config_fsm            */ FALSE,
+            /* config_fsm            */ FALSE,
                        /* enable_page_buffer    */ FALSE,
                        /* hdf_file_name         */ filename,
                        /* cache_image_flags     */ H5C_CI__ALL_FLAGS,
@@ -3466,7 +3480,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
                        /* md_write_strat        */ md_write_strat);
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -3474,7 +3488,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
      *
      *    Verify that only process 0 reads the cache image.
      *
-     *    Verify that all other processes receive the cache 
+     *    Verify that all other processes receive the cache
      *    image block from process 0.
      */
     if ( pass ) {
@@ -3495,14 +3509,14 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that all other processes receive the cache image block 
+    /* Verify that all other processes receive the cache image block
      * from process 0.
-     * 
-     * Since we have alread verified that only process 0 has read the 
-     * image, it is sufficient to verify that the image was loaded on 
+     *
+     * Since we have alread verified that only process 0 has read the
+     * image, it is sufficient to verify that the image was loaded on
      * all processes.
      */
 #if H5C_COLLECT_CACHE_STATS
@@ -3516,12 +3530,12 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* 3) Close the file. */
- 
+
     if ( pass ) {
 
         if ( H5Fclose(file_id) < 0  ) {
@@ -3532,7 +3546,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -3544,7 +3558,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
                        /* mdci_sbem_expected    */ FALSE,
                        /* read_only             */ FALSE,
                        /* set_mdci_fapl         */ FALSE,
-		       /* config_fsm            */ FALSE,
+            /* config_fsm            */ FALSE,
                        /* enable_page_buffer    */ FALSE,
                        /* hdf_file_name         */ filename,
                        /* cache_image_flags     */ H5C_CI__ALL_FLAGS,
@@ -3559,12 +3573,12 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
                        /* md_write_strat        */ md_write_strat);
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
     /* 5) Verify that the file contains the expected data. */
- 
+
     if ( pass ) {
 
        verify_data_sets(file_id, 0, MAX_NUM_DSETS - 1);
@@ -3583,7 +3597,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
 
 
     /* 6) Close the file. */
- 
+
     if ( pass ) {
 
         if ( H5Fclose(file_id) < 0  ) {
@@ -3594,7 +3608,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
         }
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
@@ -3624,7 +3638,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
 
             H5_FAILED();
 
-            if ( show_progress ) 
+            if ( show_progress )
                 HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", failure_mssg);
         }
     }
@@ -3634,20 +3648,20 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
 
 } /* verify_cache_imageRW() */
 
-
+
 /*****************************************************************************
  *
  * Function:    smoke_check_1()
  *
- * Purpose:     Initial smoke check to verify correct behaviour of cache 
+ * Purpose:     Initial smoke check to verify correct behaviour of cache
  *              image in combination with parallel.
- *              
+ *
  *              As cache image is currently disabled in the parallel case,
  *              we construct a test file in parallel, verify it in serial
  *              and generate a cache image in passing, and then verify
  *              it again in parallel.
  *
- *              In passing, also verify that page buffering is silently 
+ *              In passing, also verify that page buffering is silently
  *              disabled in the parallel case.  Needless to say, this part
  *              of the test will have to be re-worked when and if page
  *              buffering is supported in parallel.
@@ -3702,7 +3716,7 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 1) Create a PHDF5 file without the cache image FAPL entry. 
+    /* 1) Create a PHDF5 file without the cache image FAPL entry.
      *
      *    Verify that a cache image is not requested
      */
@@ -3809,11 +3823,11 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 7) Verify the datasets in the file backwards 
+    /* 7) Verify the datasets in the file backwards
      *
      *    Verify that only process 0 reads the cache image.
      *
-     *    Verify that all other processes receive the cache 
+     *    Verify that all other processes receive the cache
      *    image block from process 0.
      */
 
@@ -3843,11 +3857,11 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
     if ( ( mpi_rank == 0 ) && ( show_progress ) )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that all other processes receive the cache image block 
+    /* Verify that all other processes receive the cache image block
      * from process 0.
-     * 
-     * Since we have alread verified that only process 0 has read the 
-     * image, it is sufficient to verify that the image was loaded on 
+     *
+     * Since we have alread verified that only process 0 has read the
+     * image, it is sufficient to verify that the image was loaded on
      * all processes.
      */
 #if H5C_COLLECT_CACHE_STATS
@@ -3908,11 +3922,11 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
 
-    /* 10) Verify the datasets in the file 
+    /* 10) Verify the datasets in the file
      *
      *     Verify that only process 0 reads the cache image.
      *
-     *     Verify that all other processes receive the cache 
+     *     Verify that all other processes receive the cache
      *     image block from process 0.
      */
 
@@ -3942,11 +3956,11 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
     if ( ( mpi_rank == 0 ) && ( show_progress ) )
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that all other processes receive the cache image block 
+    /* Verify that all other processes receive the cache image block
      * from process 0.
-     * 
-     * Since we have alread verified that only process 0 has read the 
-     * image, it is sufficient to verify that the image was loaded on 
+     *
+     * Since we have alread verified that only process 0 has read the
+     * image, it is sufficient to verify that the image was loaded on
      * all processes.
      */
 #if H5C_COLLECT_CACHE_STATS
@@ -4049,28 +4063,35 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
 
             H5_FAILED();
 
-            HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", 
+            HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n",
                       fcn_name, failure_mssg);
         }
     }
 
     return !pass;
-    
+
 } /* smoke_check_1() */
 
-
+
+/* This test uses many POSIX things that are not available on
+ * Windows. We're using a check for fork(2) here as a proxy for
+ * all POSIX/Unix/Linux things until this test can be made
+ * more platform-independent.
+ */
+#ifdef H5_HAVE_FORK
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Run parallel tests on the cache image feature.
- * 
- *              At present, cache image is disabled in parallel, and 
- *              thus these tests are restructed to verifying that a 
+ *
+ *              At present, cache image is disabled in parallel, and
+ *              thus these tests are restructed to verifying that a
  *              file with a cache image can be opened in the parallel
- *              case, and verifying that instructions to create a 
+ *              case, and verifying that instructions to create a
  *              cache image are ignored in the parallel case.
  *
- *              WARNING: This test uses fork() and execve(), and 
+ *              WARNING: This test uses fork() and execve(), and
  *                       therefore will not run on Windows.
  *
  * Return:      Success: 0
@@ -4108,14 +4129,14 @@ main(int argc, char **argv)
         HDfflush(stdout);
 
         i = 0;
-        while ( ( FILENAMES[i] != NULL ) && ( i < TEST_FILES_TO_CONSTRUCT ) ) { 
+        while ( ( FILENAMES[i] != NULL ) && ( i < TEST_FILES_TO_CONSTRUCT ) ) {
 
             HDfprintf(stdout, "   writing %s ... ", FILENAMES[i]);
             HDfflush(stdout);
             construct_test_file(i);
 
             if ( pass ) {
-            
+
                 printf("done.\n");
                 HDfflush(stdout);
 
@@ -4196,13 +4217,13 @@ main(int argc, char **argv)
             /* we may need to play with the path here */
             if ( execv("t_cache_image", child_argv) == -1 ) {
 
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                           "execl() of setup process failed. errno = %d(%s)\n",
                           errno, strerror(errno));
                 exit(1);
             }
 
-        } else if ( child_pid != -1 ) {  
+        } else if ( child_pid != -1 ) {
             /* this is the parent process -- wait until child is done */
             if ( -1 == waitpid(child_pid, &child_status, WUNTRACED)) {
 
@@ -4218,7 +4239,7 @@ main(int argc, char **argv)
 
             } else {
 
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                  "testfile construction complete -- proceeding with tests.\n");
             }
         } else { /* fork failed */
@@ -4231,14 +4252,14 @@ main(int argc, char **argv)
     MPI_Barrier(MPI_COMM_WORLD);
 
 
-    nerrs += verify_cache_image_RO(0, 
+    nerrs += verify_cache_image_RO(0,
                      H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY, mpi_rank);
 #if 1
-    nerrs += verify_cache_image_RO(1, 
+    nerrs += verify_cache_image_RO(1,
                      H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, mpi_rank);
-    nerrs += verify_cache_image_RW(0, 
+    nerrs += verify_cache_image_RW(0,
                      H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY, mpi_rank);
-    nerrs += verify_cache_image_RW(1, 
+    nerrs += verify_cache_image_RW(1,
                      H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, mpi_rank);
     nerrs += smoke_check_1(comm, info, mpi_rank, mpi_size);
 #endif
@@ -4274,4 +4295,14 @@ finish:
     return(nerrs > 0);
 
 } /* main() */
+#else /* H5_HAVE_FORK */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_FORK */
 

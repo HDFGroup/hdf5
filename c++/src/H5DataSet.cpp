@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef OLD_HEADER_FILENAME
@@ -30,6 +28,7 @@
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
+#include "H5LcreatProp.h"
 #include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
@@ -69,7 +68,7 @@ DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs(), id(existin
 
 //--------------------------------------------------------------------------
 // Function:    DataSet copy constructor
-///\brief       Copy constructor: makes a copy of the original DataSet object.
+///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: DataSet instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -92,9 +91,6 @@ DataSet::DataSet(const DataSet& original) : H5Object(), AbstractDs(), id(origina
 ///             \c loc can be DataSet, Group, H5File, or named DataType, that
 ///             is a datatype that has been named by DataType::commit.
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      Jul, 2008
-//              Added for application convenience.
 //--------------------------------------------------------------------------
 DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), AbstractDs(), id(H5I_INVALID_HID)
 {
@@ -111,9 +107,6 @@ DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, co
 ///\param       plist - IN: Property list - default to PropList::DEFAULT
 ///\exception   H5::ReferenceException
 // Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      Jul, 2008
-//              Added for application convenience.
 //--------------------------------------------------------------------------
 DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), AbstractDs(), id(H5I_INVALID_HID)
 {
@@ -579,10 +572,8 @@ int DataSet::iterateElems(void* buf, const DataType& type, const DataSpace& spac
 ///\param       size - IN: Array containing the new magnitude of each dimension
 ///\exception   H5::DataSetIException
 ///\par Description
-///             For more information, please see the Description section in
-///             C layer Reference Manual at:
-///\par
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5D.html#Dataset-Extend
+///             For information, please refer to the H5Dset_extent API in
+///             the HDF5 C Reference Manual.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSet::extend(const hsize_t* size) const
@@ -602,7 +593,6 @@ void DataSet::extend(const hsize_t* size) const
 ///\param       space - IN: Dataspace describing memory buffer & containing selection to use
 ///\exception   H5::DataSetIException
 // Programmer   Binh-Minh Ribler - 2014
-// Modification
 //--------------------------------------------------------------------------
 void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space) const
 {

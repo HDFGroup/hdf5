@@ -1,21 +1,21 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_HL_F90 C CXX Fortran)
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_HL_F90 C Fortran)
 
 #-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
-add_subdirectory (${HDF5_HL_F90_SOURCE_DIR}/src ${HDF5_HL_F90_BINARY_DIR}/src)
+add_subdirectory (src)
 
 #-----------------------------------------------------------------------------
 # Build the HL Fortran Examples
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_EXAMPLES)
-  add_subdirectory (${HDF5_HL_F90_SOURCE_DIR}/examples ${HDF5_HL_F90_BINARY_DIR}/examples)
+  add_subdirectory (examples)
 endif ()
 
 #-----------------------------------------------------------------------------
 # Testing
 #-----------------------------------------------------------------------------
 if (BUILD_TESTING)
-  add_subdirectory (${HDF5_HL_F90_SOURCE_DIR}/test ${HDF5_HL_F90_BINARY_DIR}/test)
+  add_subdirectory (test)
 endif ()

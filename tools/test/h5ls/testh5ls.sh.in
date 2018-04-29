@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 # Tests for the h5ls tool
 
@@ -82,6 +80,7 @@ $SRC_H5LS_TESTFILES/textlinksrc.h5
 $SRC_H5LS_TESTFILES/textlinktar.h5
 $SRC_H5LS_TESTFILES/tgroup.h5
 $SRC_H5LS_TESTFILES/tgrp_comments.h5
+$SRC_H5LS_TESTFILES/tgrpnullspace.h5
 $SRC_H5LS_TESTFILES/thlink.h5
 $SRC_H5LS_TESTFILES/tloop.h5
 $SRC_H5LS_TESTFILES/tnestedcomp.h5
@@ -137,6 +136,7 @@ $SRC_H5LS_TESTFILES/tgroup.ls
 $SRC_H5LS_TESTFILES/tgroup-1.ls
 $SRC_H5LS_TESTFILES/tgroup-2.ls
 $SRC_H5LS_TESTFILES/tgroup-3.ls
+$SRC_H5LS_TESTFILES/tgrpnullspace.ls
 $SRC_H5LS_TESTFILES/thlink-1.ls
 $SRC_H5LS_TESTFILES/tloop-1.ls
 $SRC_H5LS_TESTFILES/tmultifile.ls
@@ -183,7 +183,7 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+                $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
@@ -241,7 +241,7 @@ TOOLTEST() {
     # any unexpected output from that stream too.
     TESTING $H5LS $@
     (
-	cd $TESTDIR
+        cd $TESTDIR
         $RUNSERIAL $H5LS_BIN "$@"
     ) >$actual 2>$actual_err
 
@@ -253,37 +253,39 @@ TOOLTEST() {
     STDERR_FILTER $actual_err
     cat $actual_err >> $actual
     if [ $h5haveexitcode = 'yes' -a $exitcode -ne $retvalexpect ]; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
-	if [ yes = "$verbose" ]; then
-	    echo "test returned with exit code $exitcode"
-	    echo "test output: (up to $NLINES lines)"
-	    head -$NLINES $actual
-	    echo "***end of test output***"
-	    echo ""
-	fi
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+        if [ yes = "$verbose" ]; then
+            echo "test returned with exit code $exitcode"
+            echo "test output: (up to $NLINES lines)"
+            head -$NLINES $actual
+            echo "***end of test output***"
+            echo ""
+        fi
     elif [ ! -f $expect ]; then
-	# Create the expect file if it doesn't yet exist.
+    # Create the expect file if it doesn't yet exist.
         echo " CREATED"
         cp $actual $expect
+        echo "    Expected result (*.ls) missing"
+        nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
         echo " PASSED"
     else
         echo "*FAILED*"
-	echo "    Expected result differs from actual result"
-	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "    Expected result differs from actual result"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err $actual_sav $actual_err_sav
+        rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 }
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###              T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 # prepare for test
@@ -391,6 +393,9 @@ TOOLTEST tarray1.ls 0 -w80 -r -d tarray1.h5
 
 # test for empty data
 TOOLTEST tempty.ls 0 -w80 -d tempty.h5
+
+# test for displaying dataset and attribute of null space
+TOOLTEST tgrpnullspace.ls 0 -w80 -v -S tgrpnullspace.h5
 
 # test for all dataset types written to attributes
 # enable -S for avoiding printing NATIVE types

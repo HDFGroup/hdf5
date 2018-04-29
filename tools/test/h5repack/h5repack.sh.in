@@ -6,12 +6,10 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the files COPYING and Copyright.html.  COPYING can be found at the root
-# of the source code distribution tree; Copyright.html can be found at the
-# root level of an installed copy of the electronic HDF5 document set and
-# is linked from the top-level documents page.  It can also be found at
-# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from help@hdfgroup.org.
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
 #
 # Tests for the h5repack tool
 #
@@ -37,6 +35,9 @@ H5DIFF_BIN=`pwd`/$H5DIFF                # The path of the h5diff tool binary
 
 H5DUMP=../../src/h5dump/h5dump          # The h5dump tool name
 H5DUMP_BIN=`pwd`/$H5DUMP                # The path of the h5dump tool binary
+
+H5STAT=../../src/h5stat/h5stat          # The h5stat tool name
+H5STAT_BIN=`pwd`/$H5STAT                # The path of the h5stat tool binary
 
 RM='rm -rf'
 CMP='cmp'
@@ -81,6 +82,7 @@ test -d $TESTDIR || mkdir $TESTDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
+$SRC_H5REPACK_TESTFILES/bounds_latest_latest.h5
 $SRC_H5REPACK_TESTFILES/h5repack_attr.h5
 $SRC_H5REPACK_TESTFILES/h5repack_attr_refs.h5
 $SRC_H5REPACK_TESTFILES/h5repack_deflate.h5
@@ -103,6 +105,12 @@ $SRC_H5REPACK_TESTFILES/h5repack_refs.h5
 $SRC_H5REPACK_TESTFILES/h5repack_shuffle.h5
 $SRC_H5REPACK_TESTFILES/h5repack_soffset.h5
 $SRC_H5REPACK_TESTFILES/h5repack_szip.h5
+$SRC_H5REPACK_TESTFILES/h5repack_aggr.h5
+$SRC_H5REPACK_TESTFILES/h5repack_fsm_aggr_nopersist.h5
+$SRC_H5REPACK_TESTFILES/h5repack_fsm_aggr_persist.h5
+$SRC_H5REPACK_TESTFILES/h5repack_none.h5
+$SRC_H5REPACK_TESTFILES/h5repack_paged_nopersist.h5
+$SRC_H5REPACK_TESTFILES/h5repack_paged_persist.h5
 $SRC_H5DIFF_TESTFILES/h5diff_attr1.h5
 $SRC_TOOLS_TESTFILES/tfamily00000.h5
 $SRC_TOOLS_TESTFILES/tfamily00001.h5
@@ -115,6 +123,7 @@ $SRC_TOOLS_TESTFILES/tfamily00007.h5
 $SRC_TOOLS_TESTFILES/tfamily00008.h5
 $SRC_TOOLS_TESTFILES/tfamily00009.h5
 $SRC_TOOLS_TESTFILES/tfamily00010.h5
+$SRC_TOOLS_TESTFILES/tordergr.h5
 $SRC_TOOLS_TESTFILES/vds/1_a.h5
 $SRC_TOOLS_TESTFILES/vds/1_b.h5
 $SRC_TOOLS_TESTFILES/vds/1_c.h5
@@ -145,6 +154,7 @@ $SRC_H5REPACK_TESTFILES/h5repack-help.txt
 $SRC_H5REPACK_TESTFILES/h5repack_ext.bin
 $SRC_H5REPACK_TESTFILES/ublock.bin
 $SRC_H5REPACK_TESTFILES/h5repack.info
+$SRC_H5REPACK_TESTFILES/crtorder.tordergr.h5.ddl
 $SRC_H5REPACK_TESTFILES/deflate_limit.h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_filters.h5-gzip_verbose_filters.tst
@@ -156,6 +166,12 @@ $SRC_H5REPACK_TESTFILES/2_vds.h5-vds_chunk3x6x9-v.ddl
 $SRC_H5REPACK_TESTFILES/3_1_vds.h5-vds_chunk2x5x8-v.ddl
 $SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa-v.ddl
 $SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti-v.ddl
+$SRC_H5REPACK_TESTFILES/SP.h5repack_fsm_aggr_nopersist.h5.ddl
+$SRC_H5REPACK_TESTFILES/S.h5repack_fsm_aggr_persist.h5.ddl
+$SRC_H5REPACK_TESTFILES/STG.h5repack_none.h5.ddl
+$SRC_H5REPACK_TESTFILES/GS.h5repack_paged_nopersist.h5.ddl
+$SRC_H5REPACK_TESTFILES/SP.h5repack_paged_persist.h5.ddl
+$SRC_H5REPACK_TESTFILES/SPT.h5repack_aggr.h5.ddl
 "
 
 #
@@ -179,7 +195,7 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+                $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
@@ -325,8 +341,8 @@ VERIFY_LAYOUT_DSET()
     fi
 
     # clean up tmp files
-    rm -f $outfile
-    rm -f $layoutfile
+#    rm -f $outfile
+#    rm -f $layoutfile
 }
 
 #------------------------------------------
@@ -375,6 +391,8 @@ VERIFY_LAYOUT_VDS()
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.ddl) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual > /dev/null 2>&1 ; then
      echo " PASSED"
     else
@@ -386,7 +404,7 @@ VERIFY_LAYOUT_VDS()
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err
+    rm -f $actual $actual_err
     fi
 
     # clean up tmp files
@@ -496,6 +514,87 @@ VERIFY_LAYOUT_ALL()
     rm -f $layoutfile
 }
 
+#--------------------------------------------------------------
+# Verifying superblock of a file with different version bounds
+VERIFY_SUPERBLOCK()
+{
+    lowbound=$1
+    highbound=$2
+    superblock=$3
+    infile=$4
+    layoutfile=verbounds-low$lowbound-high$highbound.$4
+    outfile=out-verbounds-low$lowbound-high$highbound.$infile
+    expectedsuperblock="SUPERBLOCK_VERSION $superblock"
+
+    shift
+    shift
+    shift
+    shift
+
+    TESTING  $H5REPACK $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5REPACK_BIN -j $lowbound -k $highbound $infile $outfile
+    )
+    RET=$?
+    if [ $RET != 0 ] ; then
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+    else
+        echo " PASSED"
+        DIFFTEST $infile $outfile
+    fi
+
+    #---------------------------------
+    # check the layout from a dataset
+    VERIFY  "superblock"
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5DUMP_BIN -H -B $outfile > $layoutfile
+    )
+    $GREP "$expectedsuperblock" $TESTDIR/$layoutfile > /dev/null
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # clean up tmp files
+    rm -f $outfile
+    rm -f $layoutfile
+
+} # end of VERIFY_SUPERBLOCK
+
+#------------------------------------------------------------------
+# Verifying that a latest file cannot be opened with earlier bounds
+VERIFY_INVALIDBOUNDS()
+{
+    lowbound=$1
+    highbound=$2
+    infile=$3
+    outfile=out-verbounds-low$lowbound-high$highbound.$infile
+
+    #--------------------------------------
+    # check for failure with invalid bounds
+    TESTING  $H5REPACK $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5REPACK_BIN -j $lowbound -k $highbound $infile $outfile
+    )
+    RET=$?
+    if [ $RET != 0 ] ; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # clean up tmp files
+    rm -f $outfile
+
+} # end of VERIFY_INVALIDBOUNDS
+
 # same as TOOLTEST, but it uses the old syntax -i input_file -o output_file
 #
 TOOLTEST0()
@@ -541,11 +640,11 @@ TOOLTEST1()
     )
     RET=$?
     if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
     else
-	echo " PASSED"
-	DIFFTEST $infile $outfile
+    echo " PASSED"
+    DIFFTEST $infile $outfile
     fi
     rm -f $outfile
 }
@@ -572,11 +671,11 @@ TOOLTESTV()
     ) >$actual 2>$actual_err
     RET=$?
     if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
     else
-	echo " PASSED"
-	DIFFTEST $infile $outfile
+    echo " PASSED"
+    DIFFTEST $infile $outfile
     fi
 
     # display output compare
@@ -637,6 +736,8 @@ TOOLTESTM() {
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
+     echo "    Expected result (*.tst) missing"
+     nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
       echo " PASSED"
     else
@@ -648,7 +749,7 @@ TOOLTESTM() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-   rm -f $actual $actual_err $actual_sav $actual_err_sav
+        rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 
 }
@@ -682,7 +783,59 @@ TOOLTEST_DUMP()
      VERIFY h5dump output $@
      (
         cd $TESTDIR
-        $RUNSERIAL $H5DUMP_BIN -pH $outfile
+        $RUNSERIAL $H5DUMP_BIN -q creation_order -pH $outfile
+     ) >$actual 2>$actual_err
+     cat $actual_err >> $actual
+
+     RET=$?
+
+    fi
+
+    if cmp -s $expect $actual; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
+    fi
+
+   rm -f $actual $actual_err
+   rm -f $outfile
+}
+
+# This is similar to TOOLTEST_DUMP().
+# Test h5repack with options added for paged aggregation.
+# h5stat is used on the repacked file and the expected output
+# is compared for correctness.
+#
+TOOLTEST_STAT()
+{
+    infile=$2
+    outfile=out-$1.$2
+    expect="$TESTDIR/$1.$2.ddl"
+    actual="$TESTDIR/out-$1.$2.out"
+    actual_err="$TESTDIR/out-$1.$2.err"
+
+    shift
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    ) >$actual 2>$actual_err
+    RET=$?
+    if [ $RET != 0 ] ; then
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
+    else
+     echo " PASSED"
+     VERIFY h5stat output $@
+     (
+        cd $TESTDIR
+        $RUNSERIAL $H5STAT_BIN -S -s $outfile
      ) >$actual 2>$actual_err
      cat $actual_err >> $actual
 
@@ -762,11 +915,11 @@ TOOLTEST_META()
     # verify sizes.
     MESSAGE "Verify the sizes of both output files ($size1 vs $size2)"
     if [ $size1 -lt $size2 ]; then
-    	# pass
-	echo " PASSED"
+        # pass
+    echo " PASSED"
     else
-	#fail
-	echo "*FAILED*"
+    #fail
+    echo "*FAILED*"
         nerrors="`expr $nerrors + 1`"
     fi
 
@@ -793,6 +946,8 @@ TOOLTEST_HELP() {
     # Create the expect data file if it doesn't yet exist.
       echo " CREATED"
       cp $actual $expect-CREATED
+      echo "    Expected result (*.txt) missing"
+      nerrors="`expr $nerrors + 1`"
     elif cmp -s $expect $actual; then
       echo " PASSED"
     else
@@ -840,7 +995,7 @@ USE_FILTER_SZIP_ENCODER=`$RUNSERIAL $H5DETECTSZIP_BIN`
 fi
 
 ##############################################################################
-###			  T H E   T E S T S
+###              T H E   T E S T S
 ##############################################################################
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
@@ -1047,6 +1202,46 @@ else
  TOOLTEST deflate_file $arg
 fi
 
+#crtorder
+arg="tordergr.h5 -L"
+TOOLTEST_DUMP crtorder $arg
+
+###################################################################################################
+# Testing paged aggregation related options:
+#   -G pagesize
+#   -P 1 or 0
+#   -S strategy
+#   -T threshold
+#
+# The testfiles used are generated by test/gen_filespace.c and the file names are prepended with "h5repack_":
+#   (1) "fsm_aggr_nopersist.h5"  /* H5F_FSPACE_STRATEGY_FSM_AGGR + not persisting free-space */
+#   (2) "fsm_aggr_persist.h5"    /* H5F_FSPACE_STRATEGY_FSM_AGGR + persisting free-space */
+#   (3) "paged_nopersist.h5"     /* H5F_FSPACE_STRATEGY_PAGE + not persisting free-space */
+#   (4) "paged_persist.h5"       /* H5F_FSPACE_STRATEGY_PAGE + persisting free-space */
+#   (5) "aggr.h5"                /* H5F_FSPACE_STRATEGY_AGGR */
+#   (6) "none.h5"                /* H5F_FSPACE_STRATEGY_NONE */
+#
+#####################################################################################################
+#
+arg="h5repack_fsm_aggr_nopersist.h5 -S PAGE -P 1"
+TOOLTEST_STAT SP $arg
+#
+arg="h5repack_fsm_aggr_persist.h5 -S AGGR"
+TOOLTEST_STAT S $arg
+#
+arg="h5repack_none.h5 -S PAGE -T 10 -G 2048"
+TOOLTEST_STAT STG $arg
+#
+arg="h5repack_paged_nopersist.h5 -G 512 -S AGGR"
+TOOLTEST_STAT GS $arg
+#
+arg="h5repack_paged_persist.h5 -S NONE -P 1"
+TOOLTEST_STAT SP $arg
+#
+arg="h5repack_aggr.h5 -S FSM_AGGR -P 1 -T 5"
+TOOLTEST_STAT SPT $arg
+
+
 #########################################################
 # layout options (these files have no filters)
 #########################################################
@@ -1225,7 +1420,7 @@ TOOLTEST_META meta_long h5repack_layout.h5 --metadata_block_size=8192
 if test  $USE_FILTER_DEFLATE != "yes" ; then
     SKIP vds_dset_chunk_20x10x5
 else
-    VERIFY_LAYOUT_VDS vds_dset_chunk_20x10x5 1_vds.h5 vds_dset CHUNKED --layout vds_dset:CHUNK=20x10x5
+    VERIFY_LAYOUT_VDS vds_dset_chunk20x10x5 1_vds.h5 vds_dset CHUNKED --layout vds_dset:CHUNK=20x10x5
 fi
 
 if test  $USE_FILTER_DEFLATE != "yes" ; then
@@ -1251,6 +1446,18 @@ if test  $USE_FILTER_DEFLATE != "yes" ; then
 else
  VERIFY_LAYOUT_VDS vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
 fi
+
+#########################################################
+# Testing version bounds
+#########################################################
+# -j 0 -k 2, superblock will be 0
+VERIFY_SUPERBLOCK 0 2 0 h5repack_layout.h5 -j 0 -k 2 h5repack_layout.h5
+# -j 1 -k 2, superblock will be 2
+VERIFY_SUPERBLOCK 1 2 2 h5repack_layout.h5 -j 1 -k 2 h5repack_layout.h5
+# -j 2 -k 2, superblock will be 3
+VERIFY_SUPERBLOCK 2 2 3 h5repack_layout.h5 -j 2 -k 2 h5repack_layout.h5
+# -j 0 -k 1, file cannot be opened
+VERIFY_INVALIDBOUNDS 0 1 bounds_latest_latest.h5 
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

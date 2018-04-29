@@ -1,17 +1,16 @@
 dnl -------------------------------------------------------------------------
 dnl -------------------------------------------------------------------------
 dnl
+dnl Copyright by The HDF Group.
 dnl Copyright by the Board of Trustees of the University of Illinois.
 dnl All rights reserved.
 dnl
 dnl This file is part of HDF5.  The full HDF5 copyright notice, including
 dnl terms governing use, modification, and redistribution, is contained in
-dnl the files COPYING and Copyright.html.  COPYING can be found at the root
-dnl of the source code distribution tree; Copyright.html can be found at the
-dnl root level of an installed copy of the electronic HDF5 document set and
-dnl is linked from the top-level documents page.  It can also be found at
-dnl http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-dnl access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+dnl the COPYING file, which can be found at the root of the source code
+dnl dnl distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+dnl dnl If you do not have access to either file, you may request a copy from
+dnl dnl help@hdfgroup.org.
 dnl
 dnl Macros for HDF5 Fortran
 dnl

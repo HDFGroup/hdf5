@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
-PROJECT (HDF5_JAVA_HDF)
+cmake_minimum_required (VERSION 3.10)
+project (HDF5_JAVA_HDF C)
 
-add_subdirectory (${HDF5_JAVA_HDF_SOURCE_DIR}/hdf5lib     hdf5lib)
+add_subdirectory (hdf5lib)

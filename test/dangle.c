@@ -5,22 +5,19 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
  *              Tuesday, May 13, 2003
  *
- * Purpose:	Test dangling IDs
+ * Purpose:    Test dangling IDs
  */
 #include "h5test.h"
-#include "H5private.h"
 
 const char *FILENAME[] = {
     "dangle",
@@ -34,17 +31,17 @@ const char *FILENAME[] = {
 #define TYPENAME        "Type"
 #define ATTRNAME        "Attribute"
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_dangle_dataset
+ * Function:    test_dangle_dataset
  *
- * Purpose:	Check for dangling dataset IDs causing problems on library
+ * Purpose:    Check for dangling dataset IDs causing problems on library
  *              shutdown
  *
- * Return:	Success:	zero
- *		Failure:	non-zero
+ * Return:    Success:    zero
+ *        Failure:    non-zero
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, May 13, 2003
  *
  * Modifications:
@@ -54,7 +51,7 @@ const char *FILENAME[] = {
 static int
 test_dangle_dataset(H5F_close_degree_t degree)
 {
-    char	filename[1024];
+    char    filename[1024];
     hid_t fid;  /* File ID */
     hid_t fapl; /* File access property list */
     hid_t dsid; /* Dataset ID */
@@ -130,17 +127,17 @@ error:
     return 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_dangle_group
+ * Function:    test_dangle_group
  *
- * Purpose:	Check for dangling group IDs causing problems on library
+ * Purpose:    Check for dangling group IDs causing problems on library
  *              shutdown
  *
- * Return:	Success:	zero
- *		Failure:	non-zero
+ * Return:    Success:    zero
+ *        Failure:    non-zero
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, May 13, 2003
  *
  * Modifications:
@@ -150,7 +147,7 @@ error:
 static int
 test_dangle_group(H5F_close_degree_t degree)
 {
-    char	filename[1024];
+    char    filename[1024];
     hid_t fid;  /* File ID */
     hid_t fapl; /* File access property list */
     hid_t gid;  /* Group ID */
@@ -221,17 +218,17 @@ error:
     return 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_dangle_datatype1
+ * Function:    test_dangle_datatype1
  *
- * Purpose:	Check for dangling datatype IDs causing problems on library
+ * Purpose:    Check for dangling datatype IDs causing problems on library
  *              shutdown
  *
- * Return:	Success:	zero
- *		Failure:	non-zero
+ * Return:    Success:    zero
+ *        Failure:    non-zero
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, May 13, 2003
  *
  * Modifications:
@@ -241,7 +238,7 @@ error:
 static int
 test_dangle_datatype1(H5F_close_degree_t degree)
 {
-    char	filename[1024];
+    char    filename[1024];
     hid_t       fid;                    /* File ID */
     hid_t       fapl;                   /* File access property list */
     hid_t       tid;                    /* Datatype ID */
@@ -317,17 +314,17 @@ error:
     return 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_dangle_datatype2
+ * Function:    test_dangle_datatype2
  *
- * Purpose:	Check for dangling datatype IDs causing problems on library
+ * Purpose:    Check for dangling datatype IDs causing problems on library
  *              shutdown
  *
- * Return:	Success:	zero
- *		Failure:	non-zero
+ * Return:    Success:    zero
+ *        Failure:    non-zero
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 25, 2005
  *
  * Modifications:
@@ -337,7 +334,7 @@ error:
 static int
 test_dangle_datatype2(H5F_close_degree_t degree)
 {
-    char	filename[1024];
+    char    filename[1024];
     hid_t       fid;                    /* File ID */
     hid_t       fapl;                   /* File access property list */
     hid_t       did;                    /* Dataset ID */
@@ -404,17 +401,17 @@ error:
     return 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_dangle_attribute
+ * Function:    test_dangle_attribute
  *
- * Purpose:	Check for dangling attribute IDs causing problems on library
+ * Purpose:    Check for dangling attribute IDs causing problems on library
  *              shutdown
  *
- * Return:	Success:	zero
- *		Failure:	non-zero
+ * Return:    Success:    zero
+ *        Failure:    non-zero
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, June 18, 2003
  *
  * Modifications:
@@ -424,7 +421,7 @@ error:
 static int
 test_dangle_attribute(H5F_close_degree_t degree)
 {
-    char	filename[1024];
+    char    filename[1024];
     hid_t fid;  /* File ID */
     hid_t fapl; /* File access property list */
     hid_t dsid; /* Dataset ID */
@@ -511,17 +508,17 @@ error:
     return 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_dangle_force
+ * Function:    test_dangle_force
  *
- * Purpose:	Shut down all danging IDs with generic file & ID routines,
+ * Purpose:    Shut down all danging IDs with generic file & ID routines,
  *              instead of letting library shut then down.
  *
- * Return:	Success:	zero
- *		Failure:	non-zero
+ * Return:    Success:    zero
+ *        Failure:    non-zero
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, October 29, 2010
  *
  *-------------------------------------------------------------------------
@@ -529,7 +526,7 @@ error:
 static int
 test_dangle_force(void)
 {
-    char	filename[1024];
+    char    filename[1024];
     hid_t fid;  /* File ID */
     hid_t gid, gid2;  /* Group IDs */
     hid_t dsid, dsid2; /* Dataset IDs */
@@ -627,7 +624,7 @@ test_dangle_force(void)
 
     /* Release object ID array */
     HDfree(objs);
- 
+
     PASSED();
     return 0;
 
@@ -637,16 +634,16 @@ error:
     return 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Executes dangling ID tests
+ * Purpose:    Executes dangling ID tests
  *
- * Return:	Success:	zero
- *		Failure:	non-zero
+ * Return:    Success:    zero
+ *        Failure:    non-zero
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, May 13, 2003
  *
  * Modifications:
@@ -656,7 +653,7 @@ error:
 int
 main(void)
 {
-    int		nerrors=0;
+    int        nerrors=0;
 
     /* Run tests w/weak file close */
     puts("Testing dangling objects with weak file close:");

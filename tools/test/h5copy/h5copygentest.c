@@ -5,18 +5,15 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  * Generate the binary hdf5 file for the h5copy tests
  */
-#include <stdlib.h>
 #include "hdf5.h"
 #include "H5private.h"
 
@@ -35,12 +32,12 @@
 #define DATASET_COMPRESSED      "compressed"
 #define DATASET_NAMED_VL        "named_vl"
 #define DATASET_NESTED_VL       "nested_vl"
-#define DATASET_ATTR		"dset_attr"
-#define ATTR			"attr"
+#define DATASET_ATTR            "dset_attr"
+#define ATTR                    "attr"
 #define GROUP_EMPTY             "grp_empty"
 #define GROUP_DATASETS          "grp_dsets"
 #define GROUP_NESTED            "grp_nested"
-#define GROUP_ATTR		"grp_attr"
+#define GROUP_ATTR              "grp_attr"
 
 /* Obj reference */
 #define OBJ_REF_DS "Dset1"
@@ -228,7 +225,7 @@ static void gent_compressed(hid_t loc_id)
 /*-------------------------------------------------------------------------
  * Function:    gent_named_vl
  *
- * Purpose:     Generate a variable lenght named datatype for a dataset in
+ * Purpose:     Generate a variable length named datatype for a dataset in
                 LOC_ID
  *
  *-------------------------------------------------------------------------
@@ -329,8 +326,8 @@ static void gent_nested_vl(hid_t loc_id)
  * Function:    gent_att_compound_vlstr
  *
  * Purpose:     Generate a dataset and a group.
- *		Both has an attribute with a compound datatype consisting 
- *		of a variable length string
+ *              Both has an attribute with a compound datatype consisting 
+ *              of a variable length string
  *
  *-------------------------------------------------------------------------
  */
@@ -338,7 +335,7 @@ static void gent_att_compound_vlstr(hid_t loc_id)
 {
     typedef struct { /* Compound structure for the attribute */
         int i;
-        char *v;
+        const char *v;
     } s1;
     hsize_t dim[1] = {1};	/* Dimension size */
     hid_t sid = -1; 		/* Dataspace ID */
@@ -349,7 +346,7 @@ static void gent_att_compound_vlstr(hid_t loc_id)
     hid_t vl_str_tid = -1;	/* Variable length datatype ID */
     hid_t cmpd_tid = -1;	/* Compound datatype ID */
     hid_t null_sid = -1;	/* Null dataspace ID */
-    s1 buf;			/* Buffer */
+    s1 buf;                 /* Buffer */
 
     buf.i = 9;
     buf.v = "ThisIsAString";

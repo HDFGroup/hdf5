@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -63,16 +61,16 @@ static void * H5C__prefetched_entry_deserialize(const void *image_ptr,
     size_t len, void *udata, hbool_t *dirty_ptr);
 static herr_t H5C__prefetched_entry_image_len(const void *thing,
     size_t *image_len_ptr);
-static herr_t H5C__prefetched_entry_pre_serialize(H5F_t *f,
-    hid_t dxpl_id, void *thing, haddr_t addr, size_t len,
-    haddr_t *new_addr_ptr, size_t *new_len_ptr, unsigned *flags_ptr);
+static herr_t H5C__prefetched_entry_pre_serialize(H5F_t *f, void *thing,
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, size_t *new_len_ptr,
+    unsigned *flags_ptr);
 static herr_t H5C__prefetched_entry_serialize(const H5F_t *f, void *image_ptr,
     size_t len, void *thing);
 static herr_t H5C__prefetched_entry_notify(H5C_notify_action_t action, 
     void *thing);
 static herr_t H5C__prefetched_entry_free_icr(void *thing);
 static herr_t H5C__prefetched_entry_fsf_size(const void *thing,
-    size_t *fsf_size_ptr);
+    hsize_t *fsf_size_ptr);
 
 
 /*********************/
@@ -184,11 +182,9 @@ H5C__prefetched_entry_image_len(const void H5_ATTR_UNUSED *thing,
 
 
 static herr_t
-H5C__prefetched_entry_pre_serialize(H5F_t H5_ATTR_UNUSED *f, 
-    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED *thing, 
+H5C__prefetched_entry_pre_serialize(H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *thing, 
     haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED len,
-    haddr_t H5_ATTR_UNUSED *new_addr_ptr, 
-    size_t H5_ATTR_UNUSED *new_len_ptr, 
+    haddr_t H5_ATTR_UNUSED *new_addr_ptr, size_t H5_ATTR_UNUSED *new_len_ptr, 
     unsigned H5_ATTR_UNUSED *flags_ptr)
 {
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
@@ -341,7 +337,7 @@ done:
 
 static herr_t 
 H5C__prefetched_entry_fsf_size(const void H5_ATTR_UNUSED *thing, 
-    size_t H5_ATTR_UNUSED *fsf_size_ptr)
+    hsize_t H5_ATTR_UNUSED *fsf_size_ptr)
 {
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
 

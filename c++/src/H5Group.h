@@ -6,12 +6,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef __Group_H
@@ -21,23 +19,10 @@ namespace H5 {
 
 /*! \class Group
     \brief Class Group represents an HDF5 group.
-
-    Inheritance: H5Object -> H5Location -> IdComponent
 */
-// Class forwarding
-class ArrayType;
-class VarLenType;
-
+//  Inheritance: CommonFG/H5Object -> H5Location -> IdComponent
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
-        // Group constructor to create a group or file (aka root group).
-        Group(const char* name, size_t size_hint = 0);
-        Group(const H5std_string& name, size_t size_hint = 0);
-
-        // Group constructor to open a group or file (aka root group).
-        Group(const char* name);
-        Group(const H5std_string& name);
-
         // Close this group.
         virtual void close();
 
@@ -55,6 +40,9 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
         // Removed in 1.10.1, because H5Location is baseclass
 //        Group(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
+        // Returns the number of objects in this group.
+        hsize_t getNumObjs() const;
+
         // Opens an object within a group or a file, i.e., root group.
         hid_t getObjId(const char* name, const PropList& plist = PropList::DEFAULT) const;
         hid_t getObjId(const H5std_string& name, const PropList& plist = PropList::DEFAULT) const;
@@ -65,7 +53,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
         // default constructor
         Group();
 
-        // Copy constructor: makes a copy of the original object
+        // Copy constructor: same as the original Group.
         Group(const Group& original);
 
         // Gets the group id.

@@ -1,3 +1,14 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
 # runTest.cmake executes a command and captures the output in a file. File is then compared
 # against a reference file. Exit status of command can also be compared.
 cmake_policy(SET CMP0007 NEW)
@@ -44,6 +55,7 @@ endif ()
 
 if (TEST_ENV_VAR)
   set (ENV{${TEST_ENV_VAR}} "${TEST_ENV_VALUE}")
+  #message (STATUS "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
 endif ()
 
 if (NOT TEST_INPUT)
@@ -76,7 +88,7 @@ if (TEST_REGEX)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   string (REGEX MATCH "${TEST_REGEX}" REGEX_MATCH ${TEST_STREAM})
   string (COMPARE EQUAL "${REGEX_MATCH}" "${TEST_MATCH}" REGEX_RESULT)
-  if (${REGEX_RESULT} STREQUAL "0")
+  if ("${REGEX_RESULT}" STREQUAL "0")
     message (STATUS "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_MATCH}")
   endif ()
 endif ()
@@ -95,7 +107,7 @@ if (TEST_APPEND)
 endif ()
 
 # if the return value is !=${TEST_EXPECT} bail out
-if (NOT ${TEST_RESULT} STREQUAL ${TEST_EXPECT})
+if (NOT "${TEST_RESULT}" STREQUAL "${TEST_EXPECT}")
   if (NOT TEST_NOERRDISPLAY)
     if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
       file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
@@ -182,13 +194,13 @@ if (NOT TEST_SKIP_COMPARE)
     endif ()
   endif ()
 
-  if (NOT ${TEST_RESULT} STREQUAL 0)
+  if (NOT "${TEST_RESULT}" STREQUAL "0")
     set (TEST_RESULT 0)
     file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
     list (LENGTH test_act len_act)
     file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
     list (LENGTH test_ref len_ref)
-    if (NOT ${len_act} STREQUAL "0" AND NOT ${len_ref} STREQUAL "0")
+    if (NOT "${len_act}" STREQUAL "0" AND NOT "${len_ref}" STREQUAL "0")
       math (EXPR _FP_LEN "${len_ref} - 1")
       foreach (line RANGE 0 ${_FP_LEN})
         list (GET test_act ${line} str_act)
@@ -201,14 +213,14 @@ if (NOT TEST_SKIP_COMPARE)
         endif ()
       endforeach ()
     else ()
-      if (${len_act} STREQUAL "0")
+      if ("${len_act}" STREQUAL "0")
         message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_OUTPUT} is empty")
       endif ()
-      if (${len_ref} STREQUAL "0")
+      if ("${len_ref}" STREQUAL "0")
         message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_REFERENCE} is empty")
       endif ()
     endif ()
-    if (NOT ${len_act} STREQUAL ${len_ref})
+    if (NOT "${len_act}" STREQUAL "${len_ref}")
       set (TEST_RESULT 1)
     endif ()
   endif ()
@@ -216,7 +228,7 @@ if (NOT TEST_SKIP_COMPARE)
   message (STATUS "COMPARE Result: ${TEST_RESULT}")
 
   # again, if return value is !=0 scream and shout
-  if (NOT ${TEST_RESULT} STREQUAL 0)
+  if (NOT "${TEST_RESULT}" STREQUAL "0")
     message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
   endif ()
 
@@ -232,14 +244,14 @@ if (NOT TEST_SKIP_COMPARE)
         COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_FOLDER}/${TEST_ERRREF}
         RESULT_VARIABLE TEST_RESULT
     )
-    if (NOT ${TEST_RESULT} STREQUAL 0)
+    if (NOT "${TEST_RESULT}" STREQUAL "0")
       set (TEST_RESULT 0)
       file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT}.err test_act)
       list (LENGTH test_act len_act)
       file (STRINGS ${TEST_FOLDER}/${TEST_ERRREF} test_ref)
       list (LENGTH test_ref len_ref)
       math (EXPR _FP_LEN "${len_ref} - 1")
-      if (NOT ${len_act} STREQUAL "0" AND NOT ${len_ref} STREQUAL "0")
+      if (NOT "${len_act}" STREQUAL "0" AND NOT "${len_ref}" STREQUAL "0")
         math (EXPR _FP_LEN "${len_ref} - 1")
         foreach (line RANGE 0 ${_FP_LEN})
           list (GET test_act ${line} str_act)
@@ -252,14 +264,14 @@ if (NOT TEST_SKIP_COMPARE)
           endif ()
         endforeach ()
       else ()
-        if (${len_act} STREQUAL "0")
+        if ("${len_act}" STREQUAL "0")
           message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_OUTPUT}.err is empty")
         endif ()
-        if (${len_ref} STREQUAL "0")
+        if ("${len_ref}" STREQUAL "0")
           message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_ERRREF} is empty")
         endif ()
       endif ()
-      if (NOT ${len_act} STREQUAL ${len_ref})
+      if (NOT "${len_act}" STREQUAL "${len_ref}")
         set (TEST_RESULT 1)
       endif ()
     endif ()
@@ -267,7 +279,7 @@ if (NOT TEST_SKIP_COMPARE)
     message (STATUS "COMPARE Result: ${TEST_RESULT}")
 
     # again, if return value is !=0 scream and shout
-    if (NOT ${TEST_RESULT} STREQUAL 0)
+    if (NOT "${TEST_RESULT}" STREQUAL "0")
       message (FATAL_ERROR "Failed: The error output of ${TEST_OUTPUT}.err did not match ${TEST_ERRREF}")
     endif ()
   endif ()

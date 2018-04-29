@@ -5,16 +5,23 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef USE_CASE_COMMON_H
 #define USE_CASE_COMMON_H
+
+/* Use FUNC to safely handle variations of C99 __func__ keyword handling */
+#ifdef H5_HAVE_C99_FUNC
+#define FUNC __func__
+#elif defined(H5_HAVE_FUNCTION)
+#define FUNC __FUNCTION__
+#else
+#error "We need __func__ or __FUNCTION__ to test function names!"
+#endif
 
 /******************************************
  * Symbols used across multiple use cases *
@@ -34,7 +41,7 @@
 #define FALSE 0
 
 /* Testing macros */
-#define AT()        printf ("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define AT()        printf ("   at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
 #define UC_ERROR    {puts("*ERROR*"); fflush(stdout); AT(); goto error;}
 
 #endif /* USE_CASE_COMMON_H */

@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
@@ -42,16 +40,22 @@ const H5std_string FILENAME("tvlstr.h5");
 const int SPACE1_RANK = 1;
 const hsize_t SPACE1_DIM1 = 4;
 
-/****************************************************************
-**
-**  test_vlstr_alloc_custom(): Test VL datatype custom memory
-**        allocation routines.  This routine just uses malloc to
-**        allocate the memory and increments the amount of memory
-**        allocated.  It is passed into setVlenMemManager.
-**
-**  Note: exact copy from the C version.
-**  (Not used now)
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:    test_vlstr_alloc_custom
+ *
+ * Purpose      Test VL datatype custom memory allocation routines.
+ *
+ * Return       None
+ *
+ * Description
+ *      This routine just uses malloc to allocate the memory and
+ *      increments the amount of memory allocated.  It is passed
+ *      into setVlenMemManager.
+ *
+ *  Note: exact copy from the C version.
+ *  (Not used now)
+ *-------------------------------------------------------------------------
+ */
 #if 0 // not used now
 static void *test_vlstr_alloc_custom(size_t size, void *info)
 {
@@ -76,16 +80,22 @@ static void *test_vlstr_alloc_custom(size_t size, void *info)
 }
 #endif
 
-/****************************************************************
-**
-**  test_vlstr_free_custom(): Test VL datatype custom memory
-**        allocation routines.  This routine just uses free to
-**        release the memory and decrements the amount of memory
-**        allocated.  It is passed into setVlenMemManager.
-**
-**  Note: exact copy from the C version.
-**  (Not used now)
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:    test_vlstr_free_custom
+ *
+ * Purpose      Test VL datatype custom memory de-allocation routines.
+ *
+ * Return       None
+ *
+ * Description
+ *      This routine just uses free to release the memory and
+ *      decrements the amount of memory allocated.  It is passed
+ *      into setVlenMemManager.
+ *
+ *  Note: exact copy from the C version.
+ *  (Not used now)
+ *-------------------------------------------------------------------------
+ */
 #if 0 // not used now
 static void test_vlstr_free_custom(void *_mem, void *info)
 {
@@ -223,6 +233,7 @@ static void test_vlstring_dataset()
  *-------------------------------------------------------------------------
  */
 const H5std_string DSSTRARR_NAME("StringArray_dset");
+
 static void test_vlstring_array_dataset()
 {
     const char *string_ds_array[SPACE1_DIM1]= {
@@ -442,6 +453,7 @@ static void test_vlstrings_special()
  *-------------------------------------------------------------------------
  */
 const H5std_string      VLSTR_TYPE("vl_string_type");
+
 static void test_vlstring_type()
 {
     // Output message about test being performed.
@@ -610,10 +622,7 @@ static void test_compact_vlstring()
  *
  *-------------------------------------------------------------------------
  */
-// String for writing to attribute
 static char *string_att_write=NULL;
-
-// Info for a string attribute
 const H5std_string ATTRSTR_NAME("String_attr");
 const H5std_string ATTRSTR_DATA("String Attribute");
 
@@ -879,6 +888,7 @@ static void read_scalar_dset(H5File& file, DataType& type, DataSpace& space,
  */
 const H5std_string FILENAME2("tvlstr2.h5");
 const int REWRITE_NDATASETS = 32;
+
 static void test_vl_rewrite()
 {
     // Output message about test being performed
@@ -989,12 +999,6 @@ void test_vlstrings()
  * Purpose      Cleanup temporary test files
  *
  * Return       none
- *
- * Programmer   Quincey Koziol
- *              September 10, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 extern "C"
