@@ -410,7 +410,7 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     internal_offset[dset->shared->ndims] = 0;
 
     /* Write chunk */
-    if (H5D__chunk_direct_write(dset, filters, internal_offset, data_size, buf) < 0)
+    if (H5D__chunk_direct_write(dset, filters, internal_offset, data_size_32, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data")
 
 done:
