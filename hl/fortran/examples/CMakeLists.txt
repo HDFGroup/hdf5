@@ -8,17 +8,25 @@ set (examples
 
 foreach (example ${examples})
   add_executable (hl_f90_ex_${example} ${HDF5_HL_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  target_include_directories (hl_f90_ex_${example} PRIVATE
-      "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_SRC_DIR}/src"
+  target_include_directories (hl_f90_ex_${example}
+      PRIVATE
+          "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_SRC_DIR}/src"
   )
-  TARGET_FORTRAN_PROPERTIES (hl_f90_ex_${example} STATIC)
-  target_link_libraries (hl_f90_ex_${example} PRIVATE
-      ${HDF5_HL_F90_LIB_TARGET}
-      ${HDF5_F90_LIB_TARGET}
-      ${HDF5_LIB_TARGET}
+  target_compile_options(hl_f90_ex_${example}
+      PRIVATE
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
-  set_target_properties (hl_f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
-  set_target_properties (hl_f90_ex_${example} PROPERTIES FOLDER examples/hl/fortran)
+  target_link_libraries (hl_f90_ex_${example}
+      PRIVATE
+          ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
+  )
+  set_target_properties (hl_f90_ex_${example} PROPERTIES
+      LINKER_LANGUAGE Fortran
+      FOLDER examples/hl/fortran
+      LINK_FLAGS
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+  )
 
 endforeach ()
 

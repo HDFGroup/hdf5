@@ -230,24 +230,6 @@ macro (TARGET_C_PROPERTIES wintarget libtype)
   )
 endmacro ()
 
-#-------------------------------------------------------------------------------
-macro (TARGET_FORTRAN_PROPERTIES forttarget libtype)
-  if (${libtype} MATCHES "SHARED")
-    target_compile_options(${forttarget} PRIVATE
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/dll">
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
-    )
-  else ()
-    target_compile_options(${forttarget} PRIVATE
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
-    )
-  endif ()
-  set_target_properties (${forttarget} PROPERTIES LINK_FLAGS
-      $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
-      $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
-endmacro ()
-
 #-----------------------------------------------------------------------------
 # Configure the README.txt file for the binary package
 #-----------------------------------------------------------------------------
