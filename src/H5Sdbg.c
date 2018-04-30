@@ -76,7 +76,7 @@
 /*-------------------------------------------------------------------------
  * Function:	H5S_debug
  *
- * Purpose:	Prints debugging information about a data space.
+ * Purpose:	Prints debugging information about a dataspace.
  *
  * Return:	Non-negative on success/Negative on failure
  *

@@ -1,10 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_TOOLS_SRC)
-
-#-----------------------------------------------------------------------------
-# Apply Definitions to compiler in this directory and below
-#-----------------------------------------------------------------------------
-add_definitions (${HDF_EXTRA_C_FLAGS})
+project (HDF5_TOOLS_SRC C)
 
 #-- Add the h5diff and test executables
 add_subdirectory (h5diff)

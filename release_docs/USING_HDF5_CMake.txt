@@ -188,7 +188,7 @@ string(TOLOWER ${LIB_TYPE} SEARCH_TYPE)
 
 find_package (HDF5 NAMES hdf5 COMPONENTS C ${SEARCH_TYPE})
 # find_package (HDF5) # Find non-cmake built HDF5
-INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIR})
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIR}")
 set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
 
 set (example hdf_example)

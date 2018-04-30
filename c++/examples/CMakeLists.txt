@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-PROJECT (HDF5_CPP_EXAMPLES)
+project (HDF5_CPP_EXAMPLES CXX)
 
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
@@ -34,6 +34,7 @@ set (tutr_examples
 
 foreach (example ${examples})
   add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
+  set_property(TARGET cpp_ex_${example} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (cpp_ex_${example} STATIC " " " ")
   target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
@@ -41,6 +42,7 @@ endforeach ()
 
 foreach (example ${tutr_examples})
   add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
+  set_property(TARGET cpp_ex_${example} APPEND PROPERTY INCLUDE_DIRECTORIES "${HDF5_SRC_DIR};${HDF5_BINARY_DIR}")
   TARGET_C_PROPERTIES (cpp_ex_${example} STATIC " " " ")
   target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
