@@ -22,7 +22,7 @@ target_link_libraries (hl_f90_tstds
 set_target_properties (hl_f90_tstds PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/hl/fortran
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -45,7 +45,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/hl/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -68,7 +68,7 @@ target_link_libraries (hl_f90_tstlite
 set_target_properties (hl_f90_tstlite PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/hl/fortran
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -91,7 +91,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/hl/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -114,7 +114,7 @@ target_link_libraries (hl_f90_tstimage
 set_target_properties (hl_f90_tstimage PROPERTIES
     FOLDER test/hl/fortran
     LINKER_LANGUAGE Fortran
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -137,7 +137,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/hl/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -160,7 +160,7 @@ target_link_libraries (hl_f90_tsttable
 set_target_properties (hl_f90_tsttable PROPERTIES
     FOLDER test/hl/fortran
     LINKER_LANGUAGE Fortran
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -183,7 +183,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/hl/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )

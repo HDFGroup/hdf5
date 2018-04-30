@@ -133,7 +133,7 @@ set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test/fortran
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -166,7 +166,7 @@ if (BUILD_SHARED_LIBS)
       FOLDER libraries/test/fortran
       LINKER_LANGUAGE Fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -211,7 +211,7 @@ set_target_properties (testhdf5_fortran PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -252,7 +252,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -284,7 +284,7 @@ set_target_properties (testhdf5_fortran_1_8 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -316,7 +316,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -350,7 +350,7 @@ set_target_properties (fortranlib_test_F03 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -384,7 +384,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -409,7 +409,7 @@ set_target_properties (fflush1 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -434,7 +434,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -459,7 +459,7 @@ set_target_properties (fflush2 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -484,7 +484,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )

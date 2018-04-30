@@ -51,7 +51,7 @@ foreach (example ${examples})
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -61,7 +61,7 @@ foreach (example ${examples})
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
     )
-    target_compile_options(${forttarget}
+    target_compile_options(f90_ex_${example}-shared
         PRIVATE
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/dll">
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
@@ -74,7 +74,7 @@ foreach (example ${examples})
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-        LINK_FLAGS
+        LINK_FLAGS ""
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
     )
@@ -99,7 +99,7 @@ foreach (example ${F2003_examples})
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran03
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -109,7 +109,7 @@ foreach (example ${F2003_examples})
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
     )
-    target_compile_options(${forttarget}
+    target_compile_options(f03_ex_${example}-shared
         PRIVATE
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/dll">
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
@@ -122,7 +122,7 @@ foreach (example ${F2003_examples})
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran03
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-        LINK_FLAGS
+        LINK_FLAGS ""
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
     )
@@ -147,7 +147,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
@@ -157,7 +157,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
     )
-    target_compile_options(${forttarget}
+    target_compile_options(f90_ex_ph5example-shared
         PRIVATE
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/dll">
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
@@ -170,7 +170,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-        LINK_FLAGS
+        LINK_FLAGS ""
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
             $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
     )

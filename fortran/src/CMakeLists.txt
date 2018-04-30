@@ -265,7 +265,7 @@ set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES
     FOLDER libraries/fortran
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS
+    LINK_FLAGS ""
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
@@ -302,7 +302,7 @@ if (BUILD_SHARED_LIBS)
       FOLDER libraries/fortran
       LINKER_LANGUAGE Fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )

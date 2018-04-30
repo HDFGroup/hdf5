@@ -23,7 +23,7 @@ foreach (example ${examples})
   set_target_properties (hl_f90_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/hl/fortran
-      LINK_FLAGS
+      LINK_FLAGS ""
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
