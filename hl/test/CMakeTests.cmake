@@ -90,7 +90,6 @@ add_test (
         test_ds8.h5
         test_ds9.h5
         test_ds10.h5
-        test_dectris.h5
         test_image1.h5
         test_image2.h5
         test_image3.h5
@@ -115,7 +114,6 @@ HL_add_test (test_file_image)
 HL_add_test (test_table)
 HL_add_test (test_ds)
 HL_add_test (test_packet)
-HL_add_test (test_dset_opt)
 HL_add_test (test_ld)
 HL_add_test (test_dset_append)
 

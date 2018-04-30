@@ -125,12 +125,13 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* check arguments */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
     if(NULL == dset->oloc.file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-
-    if(mem_space_id < 0 || file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
+    if(mem_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid mem_space_id")
+    if(file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file_space_id")
 
     if(H5S_ALL != mem_space_id) {
         if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
@@ -212,6 +213,76 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dread_chunk
+ *
+ * Purpose:     Reads an entire chunk from the file directly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Matthew Strong (GE Healthcare)
+ *              14 February 2016
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
+         void *buf)
+{
+    hbool_t created_dxpl = FALSE;       /* Whether we created a DXPL */
+    hbool_t do_direct_read = TRUE;     /* Flag for direct writes */
+    herr_t  ret_value = SUCCEED;           /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "ii*h*Iu*x", dset_id, dxpl_id, offset, filters, buf);
+
+    /* Check arguments */
+    if(dset_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset ID")
+    if(!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf cannot be NULL")
+    if(!offset)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset cannot be NULL")
+    if(!filters)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filters cannot be NULL")
+
+    /* If the user passed in a default DXPL, create one to pass to H5Dwrite() */
+    if(H5P_DEFAULT == dxpl_id) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "cannot create dxpl")
+        created_dxpl = TRUE;
+    } /* end if */
+
+    /* Set direct write parameters */
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, &do_direct_read) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "cannot set direct read property")
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_READ_OFFSET_NAME, &offset) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "cannot set offset property")
+
+    /* Read chunk */
+    if(H5Dread(dset_id, 0, H5S_ALL, H5S_ALL, dxpl_id, buf) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "cannot read from dataset")
+
+    /* Get the filter mask */
+    if(H5Pget(dxpl_id, H5D_XFER_DIRECT_CHUNK_READ_FILTERS_NAME, filters) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "cannot get filter mask property")
+
+done:
+    if(created_dxpl) {
+        if(H5Pclose(dxpl_id) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close dxpl")
+    } /* end if */
+    else {
+        /* Reset the direct read flag on user DXPL */
+        do_direct_read = FALSE;
+        if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_READ_FLAG_NAME, &do_direct_read) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "cannot reset direct write property")
+    }
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dread_chunk() */
 
 
 /*-------------------------------------------------------------------------
@@ -308,6 +379,80 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dwrite_chunk
+ *
+ * Purpose:     Writes an entire chunk to the file directly.	
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		        30 July 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, 
+         size_t data_size, const void *buf)
+{
+    hbool_t created_dxpl = FALSE;       /* Whether we created a DXPL */
+    hbool_t do_direct_write = TRUE;     /* Flag for direct writes */
+    uint32_t data_size_32;              /* Chunk data size (limited to 32-bits currently) */
+    herr_t  ret_value = SUCCEED;           /* Return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
+
+    /* Check arguments */
+    if(dset_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset ID")
+    if(!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf cannot be NULL")
+    if(!offset)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset cannot be NULL")
+    if(!data_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data_size cannot be NULL")
+    data_size_32 = (uint32_t)data_size;
+    if(data_size != (size_t)data_size_32)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid data_size")
+
+    /* If the user passed in a default DXPL, create one to pass to H5Dwrite() */
+    if(H5P_DEFAULT == dxpl_id) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "cannot create dxpl")
+        created_dxpl = TRUE;
+    } /* end if */
+
+    /* Set direct write parameters */
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &do_direct_write) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "cannot set direct read property")
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &filters) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "cannot set filters property")
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, &offset) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "cannot set offset property")
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &data_size_32) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "cannot set data size property")
+
+    /* Write chunk */
+    if(H5Dwrite(dset_id, 0, H5S_ALL, H5S_ALL, dxpl_id, buf) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "cannot write to dataset")
+
+done:
+    if(created_dxpl) {
+        if(H5Pclose(dxpl_id) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to close dxpl")
+    } /* end if */
+    else {
+        /* Reset the direct write flag on user DXPL */
+        do_direct_write = FALSE;
+        if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &do_direct_write) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "cannot reset direct write property")
+    }
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dwrite_chunk() */
 
 
 /*-------------------------------------------------------------------------

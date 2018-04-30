@@ -532,6 +532,7 @@ set (test_CLEANFILES
     vds_swmr.h5
     vds_swmr_src_*.h5
     tmp/vds_src_2.h5
+    direct_chunk.h5
 )
 
 # Remove any output file left over from previous test run

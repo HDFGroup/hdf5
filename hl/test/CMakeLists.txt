@@ -47,7 +47,6 @@ HL_ADD_EXE (test_image)
 HL_ADD_EXE (test_file_image)
 HL_ADD_EXE (test_table)
 HL_ADD_EXE (test_ds)
-HL_ADD_EXE (test_dset_opt)
 HL_ADD_EXE (test_ld)
 HL_ADD_EXE (test_dset_append)
 
