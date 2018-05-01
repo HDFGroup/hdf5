@@ -2035,7 +2035,7 @@ H5_DLL herr_t H5CX_pop(void);
 /* Local variables for API routines */
 #define FUNC_ENTER_API_VARS                                                   \
     MPE_LOG_VARS                                                              \
-    H5TRACE_DECL
+    H5TRACE_DECL                                                              \
 
 #define FUNC_ENTER_API_COMMON                                                 \
     FUNC_ENTER_API_VARS                                                       \
@@ -2633,7 +2633,7 @@ func_init_failed:                                                             \
  * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
 #define H5_BEGIN_TAG(tag) {                                                 \
     haddr_t prv_tag = HADDR_UNDEF;                                          \
-    H5AC_tag(tag, &prv_tag);
+    H5AC_tag(tag, &prv_tag);                                                \
 
 #define H5_END_TAG                                                          \
     H5AC_tag(prv_tag, NULL);                                                \

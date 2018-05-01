@@ -1393,8 +1393,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
     /* Selection related cleanup */
 
     /* Set offset to zeros */
-    for(u = 0; u < space->extent.rank; u++)
-        space->select.offset[u] = 0;
+    HDmemset(space->select.offset, 0, sizeof(hsize_t) * space->extent.rank);
     space->select.offset_changed = FALSE;
 
     /* If the selection is 'all', update the number of elements selected */
@@ -2208,6 +2207,5 @@ H5S_set_version(H5F_t *f, H5S_t *ds)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5S_set_version() */
 

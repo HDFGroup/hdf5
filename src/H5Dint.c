@@ -378,7 +378,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_space_status
  *
- * Purpose:     Returns the status of data space allocation.
+ * Purpose:     Returns the status of dataspace allocation.
  *
  * Return:
  *              Success:        Non-negative
@@ -1358,11 +1358,14 @@ done:
 
 /*
  *-------------------------------------------------------------------------
- * Function: H5D__flush_append_setup
+ * Function:	H5D__flush_append_setup
  *
- * Purpose:  Set the append flush parameters for a dataset
+ * Purpose:	Set the append flush parameters for a dataset
  *
- * Return:   Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *		Wednesday, January 8, 2014
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1432,11 +1435,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5D__open_oid
+ * Function:	H5D__open_oid
  *
- * Purpose:  Opens a dataset for access.
+ * Purpose:	Opens a dataset for access.
  *
- * Return:   Dataset pointer on success, NULL on failure
+ * Return:	Dataset pointer on success, NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, October 12, 1998
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1608,7 +1614,6 @@ done:
  *           object that was attached to the ID.
  *
  * Return:   Non-negative on success/Negative on failure
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1639,6 +1644,9 @@ done:
  *           descriptor.
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, December  4, 1997
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1842,6 +1850,9 @@ done:
  *           multiple opens.  (From H5O_refresh_metadata_close())
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *		12/24/15
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1920,6 +1931,9 @@ done:
  *           opens.
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *		12/24/15
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1967,6 +1981,9 @@ done:
  *
  * Return:   Success:    Ptr to location
  *           Failure:    NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, April 24, 1998
  *-------------------------------------------------------------------------
  */
 H5O_loc_t *
@@ -1986,6 +2003,9 @@ H5D_oloc(H5D_t *dataset)
  *
  * Return:   Success:    Ptr to entry
  *           Failure:    NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, September 12, 2005
  *-------------------------------------------------------------------------
  */
 H5G_name_t *
@@ -2006,6 +2026,9 @@ H5D_nameof(H5D_t *dataset)
  *
  * Return:   Success:    Ptr to the dataset's datatype, uncopied.
  *           Failure:    NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June  4, 1998
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -2028,6 +2051,9 @@ H5D_typeof(const H5D_t *dset)
  * Purpose:  Allocate storage for the raw data of a dataset.
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January 16, 1998
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2196,6 +2222,9 @@ done:
  *           dataset.
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, October  5, 1998
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2267,6 +2296,9 @@ done:
  *           data of a dataset.
  *
  * Return:   Non-negative on success, negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 21, 1999
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2396,6 +2428,9 @@ done:
  *           dataspace.
  *
  * Return:   Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 22, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2441,6 +2476,9 @@ done:
  *           this data is not actually usable.
  *
  * Return:   Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, August 17, 1999
  *-------------------------------------------------------------------------
  */
 void *
@@ -2523,6 +2561,9 @@ done:
  * Purpose:  Check if the filters have be initialized for the dataset
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, October 11, 2007
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2693,13 +2734,13 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
             for(u = 0; u < dset->shared->layout.storage.u.virt.list_nused; u++) {
                 /* Patch extent */
                 if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].source_dset.virtual_select, size) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
                 dset->shared->layout.storage.u.virt.list[u].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
 
                 /* Patch sub-source datasets */
                 for(v = 0; v < dset->shared->layout.storage.u.virt.list[u].sub_dset_nalloc; v++)
                     if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].sub_dset[v].virtual_select, size) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
             } /* end for */
 
             /* Mark virtual datasets as not fully initialized so internal
@@ -3424,9 +3465,9 @@ H5D__get_space(const H5D_t *dset)
         if(H5D__virtual_set_extent_unlim(dset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update virtual dataset extent")
 
-    /* Read the data space message and return a data space object */
+    /* Read the dataspace message and return a dataspace object */
     if(NULL == (space = H5S_copy(dset->shared->space, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get data space")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
 
     /* Create an atom */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)

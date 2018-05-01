@@ -286,6 +286,9 @@ done:
  *           list of opened object IDs (in return value).
  *
  * Return:   Non-negative on success; Can't fail.
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, Dec 5, 2001
  *---------------------------------------------------------------------------
  */
 herr_t
@@ -389,6 +392,9 @@ done:
  *
  * Return:   H5_ITER_STOP if the array of object IDs is filled up.
  *           H5_ITER_CONT otherwise.
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, Dec 5, 2001
  *-------------------------------------------------------------------------
  */
 static int
@@ -790,7 +796,7 @@ done:
  *           should use all known file drivers.
  *
  * Return:   Success:    TRUE/FALSE
- * *         Failure:    Negative
+ *           Failure:    Negative
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1094,6 +1100,10 @@ done:
  *           only when its reference count reaches zero.
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Jul 18 1997
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1845,6 +1855,10 @@ done:
  * Purpose:  First phase of flushing cached data.
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		Jan  1 2017
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1882,6 +1896,10 @@ H5F__flush_phase1(H5F_t *f)
  * Purpose:  Second phase of flushing cached data.
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		Jan  1 2017
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1950,6 +1968,10 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
  * Purpose:  Flushes cached data.
  *
  * Return:   SUCCEED/FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug 29 1997
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2309,6 +2331,9 @@ done:
  *           appropriate.
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Oct 29, 2003
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -2345,6 +2370,10 @@ done:
  *
  * Return:   Success:    The number of open objects, after the increment
  *           Failure:    (can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  6 2007
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -2366,6 +2395,10 @@ H5F_incr_nopen_objs(H5F_t *f)
  *
  * Return:   Success:    The number of open objects, after the decrement
  *           Failure:    (can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  6 2007
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -2510,6 +2543,9 @@ done:
  *           address.  An undefined value is stored as all 1's.
  *
  * Return:   void
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, November  7, 1997
  *-------------------------------------------------------------------------
  */
 void
@@ -2547,6 +2583,9 @@ H5F_addr_encode_len(size_t addr_len, uint8_t **pp/*in,out*/, haddr_t addr)
  *           address.  An undefined value is stored as all 1's.
  *
  * Return:   void
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, November  7, 1997
  *-------------------------------------------------------------------------
  */
 void
@@ -2574,6 +2613,9 @@ H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
  *           with an undefined value.
  *
  * Return:   void
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, November  7, 1997
  *-------------------------------------------------------------------------
  */
 void
@@ -2638,6 +2680,9 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp/*in,out*/, haddr_t *addr
  *           with an undefined value.
  *
  * Return:   void
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, November  7, 1997
  *-------------------------------------------------------------------------
  */
 void
@@ -3089,6 +3134,8 @@ done:
  *
  * Return:   Success:        SUCCEED
  *           Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi; November 2013
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3185,6 +3232,9 @@ done:
  * Purpose:  Quick and dirty routine to set the file's 'base_addr' value
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		July 19, 2013
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3212,6 +3262,9 @@ done:
  * Purpose:  Quick and dirty routine to set the file's 'eoa' value
  *
  * Return:   Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		July 19, 2013
  *-------------------------------------------------------------------------
  */
 herr_t

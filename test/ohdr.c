@@ -64,11 +64,11 @@ test_cont(char *filename, hid_t fapl)
     hid_t    file=-1;
     H5F_t    *f = NULL;
     H5O_hdr_info_t hdr_info;
-    H5O_loc_t	oh_locA, oh_locB;
-    time_t	time_new;
-    const char	*short_name = "T";
-    const char	*long_name = "This is the message";
-    size_t	nchunks;
+    H5O_loc_t    oh_locA, oh_locB;
+    time_t    time_new;
+    const char    *short_name = "T";
+    const char    *long_name = "This is the message";
+    size_t    nchunks;
 
     TESTING("object header continuation block");
 

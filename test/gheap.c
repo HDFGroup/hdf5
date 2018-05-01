@@ -76,16 +76,16 @@ const char *FILENAME[] = {
 static int
 test_1 (hid_t fapl)
 {
-    hid_t	file = -1;
-    H5F_t 	*f = NULL;
-    H5HG_t	*obj = NULL;
-    uint8_t	out[GHEAP_TEST_NOBJS];
-    uint8_t	in[GHEAP_TEST_NOBJS];
-    size_t	u;
-    size_t	size;
-    herr_t	status;
-    int		nerrors = 0;
-    char	filename[1024];
+    hid_t    file = -1;
+    H5F_t     *f = NULL;
+    H5HG_t    *obj = NULL;
+    uint8_t    out[GHEAP_TEST_NOBJS];
+    uint8_t    in[GHEAP_TEST_NOBJS];
+    size_t    u;
+    size_t    size;
+    herr_t    status;
+    int        nerrors = 0;
+    char    filename[1024];
 
     TESTING("monotonically increasing lengths");
 
@@ -182,15 +182,15 @@ error:
 static int
 test_2 (hid_t fapl)
 {
-    hid_t	file = -1;
-    H5F_t 	*f = NULL;
-    H5HG_t	*obj = NULL;
-    uint8_t	out[GHEAP_TEST_NOBJS];
-    uint8_t	in[GHEAP_TEST_NOBJS];
-    size_t	u;
-    size_t	size;
-    int		nerrors = 0;
-    char	filename[1024];
+    hid_t    file = -1;
+    H5F_t     *f = NULL;
+    H5HG_t    *obj = NULL;
+    uint8_t    out[GHEAP_TEST_NOBJS];
+    uint8_t    in[GHEAP_TEST_NOBJS];
+    size_t    u;
+    size_t    size;
+    int        nerrors = 0;
+    char    filename[1024];
 
     TESTING("monotonically decreasing lengths");
 
@@ -280,15 +280,15 @@ test_2 (hid_t fapl)
 static int
 test_3 (hid_t fapl)
 {
-    hid_t	file = -1;
-    H5F_t 	*f = NULL;
-    H5HG_t	*obj = NULL;
-    uint8_t	out[GHEAP_TEST_NOBJS];
-    size_t	u;
-    size_t	size;
-    herr_t	status;
-    int		nerrors = 0;
-    char	filename[1024];
+    hid_t    file = -1;
+    H5F_t     *f = NULL;
+    H5HG_t    *obj = NULL;
+    uint8_t    out[GHEAP_TEST_NOBJS];
+    size_t    u;
+    size_t    size;
+    herr_t    status;
+    int        nerrors = 0;
+    char    filename[1024];
 
     TESTING("complete object removal");
 
@@ -370,15 +370,15 @@ test_3 (hid_t fapl)
 static int
 test_4 (hid_t fapl)
 {
-    hid_t	file = -1;
-    H5F_t 	*f = NULL;
-    H5HG_t	*obj = NULL;
-    uint8_t	out[GHEAP_TEST_NOBJS];
-    size_t	u;
-    size_t	size;
-    herr_t	status;
-    int		nerrors = 0;
-    char	filename[1024];
+    hid_t    file = -1;
+    H5F_t     *f = NULL;
+    H5HG_t    *obj = NULL;
+    uint8_t    out[GHEAP_TEST_NOBJS];
+    size_t    u;
+    size_t    size;
+    herr_t    status;
+    int        nerrors = 0;
+    char    filename[1024];
 
     TESTING("partial object removal");
 
@@ -467,13 +467,13 @@ test_4 (hid_t fapl)
 static int
 test_ooo_indices(hid_t fapl)
 {
-    hid_t	file = -1;
-    H5F_t 	*f = NULL;
-    unsigned	i, j;
-    H5HG_t	*obj = NULL;
-    herr_t	status;
-    int		nerrors=0;
-    char	filename[1024];
+    hid_t    file = -1;
+    H5F_t     *f = NULL;
+    unsigned    i, j;
+    H5HG_t    *obj = NULL;
+    herr_t    status;
+    int        nerrors=0;
+    char    filename[1024];
 
     TESTING("out of order indices");
 

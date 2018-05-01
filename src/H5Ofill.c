@@ -180,11 +180,11 @@ H5FL_BLK_EXTERN(type_conv);
  * Function:	H5O_fill_new_decode
  *
  * Purpose:	Decode a new fill value message.  The new fill value
- * 		message is fill value plus space allocation time and
- * 		fill value writing time and whether fill value is defined.
+ *          message is fill value plus space allocation time and
+ *          fill value writing time and whether fill value is defined.
  *
- * Return:	Success:	Ptr to new message in native struct.
- *		Failure:	NULL
+ * Return:	Success:    Ptr to new message in native struct.
+ *          Failure:    NULL
  *
  * Programmer:  Raymond Lu
  *              Feb 26, 2002
@@ -358,8 +358,8 @@ done:
  * Function:	H5O_fill_new_encode
  *
  * Purpose:	Encode a new fill value message.  The new fill value
- *              message is fill value plus space allocation time and
- *              fill value writing time and whether fill value is defined.
+ *          message is fill value plus space allocation time and
+ *          fill value writing time and whether fill value is defined.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -492,7 +492,7 @@ H5O_fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
  *		whether fill value is defined.
  *
  * Return:	Success:	Ptr to _DEST
- *		Failure:	NULL
+ *		    Failure:	NULL
  *
  * Programmer:  Raymond Lu
  *              Feb 26, 2002
@@ -604,13 +604,13 @@ done:
  * Function:	H5O_fill_new_size
  *
  * Purpose:	Returns the size of the raw message in bytes not counting the
- *		message type or size fields, but only the data fields.  This
- *		function doesn't take into account alignment.  The new fill
- *		value message is fill value plus space allocation time and
- *              fill value writing time and whether fill value is defined.
+ *          message type or size fields, but only the data fields.  This
+ *          function doesn't take into account alignment.  The new fill
+ *          value message is fill value plus space allocation time and
+ *          fill value writing time and whether fill value is defined.
  *
  * Return:	Success:	Message data size in bytes w/o alignment.
- *		Failure:	0
+ *          Failure:	0
  *
  * Programmer:  Raymond Lu
  *              Feb 26, 2002
@@ -944,9 +944,9 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream,
  * Function:	H5O_fill_convert
  *
  * Purpose:	Convert a fill value from whatever data type it currently has
- *		to the specified dataset type.  The `type' field of the fill
- *		value struct will be set to NULL to indicate that it has the
- *		same type as the dataset.
+ *          to the specified dataset type.  The `type' field of the fill
+ *          value struct will be set to NULL to indicate that it has the
+ *          same type as the dataset.
  *
  * Return:	Non-negative on success/Negative on failure
  *

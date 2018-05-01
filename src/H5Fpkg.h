@@ -362,8 +362,8 @@ struct H5F_file_t {
 
     /* SWMR-related fields */
     unsigned swmr_deltat;                   /* Delta t value for SWMR */
-    hbool_t  is_api_call_start;          /* Indicator of transaction started */
-    uint64_t api_call_start_time;
+    hbool_t  is_api_call_start;             /* Indicator of transaction started */
+    uint64_t api_call_start_time;           /* Timestamp of first metadata access */
 };
 
 /*
