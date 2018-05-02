@@ -19,13 +19,13 @@ foreach (example ${examples})
   target_link_libraries (hl_f90_ex_${example}
       PRIVATE
           ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
-      INTERFACE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
   set_target_properties (hl_f90_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/hl/fortran
+      LINK_FLAGS ""
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
 
 endforeach ()
