@@ -156,7 +156,7 @@ target_include_directories (${HDF5_HL_F90_LIB_TARGET}
 )
 target_compile_definitions(${HDF5_HL_F90_LIB_TARGET}
     PUBLIC
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"HDF5F90_WINDOWS">
+        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:HDF5F90_WINDOWS>
     PRIVATE
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
@@ -189,7 +189,7 @@ if (BUILD_SHARED_LIBS)
       PUBLIC
           "H5_BUILT_AS_DYNAMIC_LIB"
       PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"BUILD_HDF5_HL_DLL;HDF5F90_WINDOWS">
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:BUILD_HDF5_HL_DLL;HDF5F90_WINDOWS>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/dll>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
@@ -199,7 +199,7 @@ if (BUILD_SHARED_LIBS)
       PRIVATE
           ${LINK_Fortran_LIBS}
       INTERFACE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/DLL /DEF:${HDF5_HL_F90_SRC_BINARY_DIR}/hdf5_hl_fortrandll.def">
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-DLL -DEF:${HDF5_HL_F90_SRC_BINARY_DIR}/hdf5_hl_fortrandll.def">
   )
   set_target_properties (${HDF5_HL_F90_LIBSH_TARGET} PROPERTIES
       FOLDER libraries/hl/fortran
