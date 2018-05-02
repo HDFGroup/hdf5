@@ -43,16 +43,21 @@ set (Fortran_COMPILER_ID CMAKE_Fortran_COMPILER_ID)
 # H5fort_type_defines.h   used to generate H5f90i_gen.h + H5fortran_types.F90
 #-----------------------------------------------------------------------------
 
-add_executable (H5_buildiface
-      ${HDF5_F90_SRC_SOURCE_DIR}/H5_buildiface.F90
+add_executable (H5_buildiface ${HDF5_F90_SRC_SOURCE_DIR}/H5_buildiface.F90)
+target_include_directories(H5_buildiface
+    PRIVATE
+        "${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR}"
+)
+if (BUILD_SHARED_LIBS)
+  target_compile_definitions(H5_buildiface
+      PRIVATE
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
   )
-target_include_directories(H5_buildiface PRIVATE "${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR}")
-if (WIN32 AND MSVC)
-  if (BUILD_SHARED_LIBS)
-    set_target_properties (H5_buildiface PROPERTIES COMPILE_FLAGS "/MT")
-  endif ()
-  set_target_properties (H5_buildiface PROPERTIES LINK_FLAGS "-SUBSYSTEM:CONSOLE")
 endif ()
+target_link_libraries (H5_buildiface
+    INTERFACE
+        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+)
 set_target_properties (H5_buildiface PROPERTIES
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
