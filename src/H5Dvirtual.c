@@ -719,8 +719,8 @@ H5D__virtual_insert_gh_obj(H5F_t *f, H5O_storage_virtual_t *storage)
         uint32_t chksum;
         size_t i;
 
-        // H5F_SET_LATEST_FLAGS(f, H5F_LATEST_ALL_FLAGS);
-        if(H5F_set_libver_bounds(f, H5F_LIBVER_V110, H5F_LIBVER_V110) < 0)
+        // if(H5F_set_libver_bounds(f, H5F_LIBVER_V110, H5F_LIBVER_V110) < 0)
+        if(H5F_set_libver_bounds(f, H5F_LOW_BOUND(f), H5F_HIGH_BOUND(f)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "cannot set low/high bounds")
 
         /* Allocate array for caching results of strlen */
@@ -2597,12 +2597,6 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     storage = &io_info->dset->shared->layout.storage.u.virt;
     HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
-#if defined(H5_HAVE_PARALLEL) && defined(H5_DISABLE_PARALLEL_VDS)
-    /* Parallel reads are not supported (yet) */
-    if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel reads not supported on virtual datasets")
-#endif /* H5_HAVE_PARALLEL */
-
     /* Prepare for I/O operation */
     if(H5D__virtual_pre_io(io_info, storage, file_space, mem_space, &tot_nelmts) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation")
@@ -2787,12 +2781,6 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     storage = &io_info->dset->shared->layout.storage.u.virt;
     HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
-
-#if defined(H5_HAVE_PARALLEL) && defined(H5_DISABLE_PARALLEL_VDS)
-    /* Parallel writes are not supported (yet) */
-    if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel writes not supported on virtual datasets")
-#endif /* H5_HAVE_PARALLEL */
 
     /* Prepare for I/O operation */
     if(H5D__virtual_pre_io(io_info, storage, file_space, mem_space, &tot_nelmts) < 0)
