@@ -807,12 +807,6 @@ H5D__virtual_insert_gh_obj(H5F_t *f, H5O_storage_virtual_t *storage)
 
     } /* end if */
 
-#if 0
-    /* Heap information */
-    H5F_addr_encode(f, &p, mesg->storage.u.virt.serial_list_hobjid.addr);
-    UINT32ENCODE(p, mesg->storage.u.virt.serial_list_hobjid.idx);
-#endif
-
 done:
     heap_block = (uint8_t *)H5MM_xfree(heap_block);
     str_size = (size_t *)H5MM_xfree(str_size);

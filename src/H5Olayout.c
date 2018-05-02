@@ -687,7 +687,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
 
             /* Heap information
              * During H5Fclose, the cache flushing can call H5O_msg_flush calls
-	     * which we need to handle here...
+             * which we need to handle here...
              */
             H5F_addr_encode(f, &p, mesg->storage.u.virt.serial_list_hobjid.addr);
             UINT32ENCODE(p, mesg->storage.u.virt.serial_list_hobjid.idx);
