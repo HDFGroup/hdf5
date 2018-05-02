@@ -50,7 +50,8 @@
 /* Local Prototypes */
 /********************/
 
-/* Setup/teardown routines */
+static herr_t H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset,
+        hsize_t **offset_copy/*out*/);
 static herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
     H5D_storage_t *store, H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id,
@@ -76,6 +77,56 @@ H5FL_BLK_DEFINE(type_conv);
 
 /* Declare a free list to manage the H5D_chunk_map_t struct */
 H5FL_DEFINE(H5D_chunk_map_t);
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_offset_copy
+ *
+ * Purpose:     Gets a copy of the user's offset array that is guaraneteed
+ *              to be suitable for use by the library.
+ *
+ *              The caller must free the constructed offset array.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t **offset_copy)
+{
+    unsigned u;
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(dset);
+    HDassert(offset);
+    HDassert(offset_copy);
+
+    if (NULL == (*offset_copy = (hsize_t *)H5MM_calloc(H5O_LAYOUT_NDIMS * sizeof(hsize_t))))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate offset_copy array")
+
+    /* The library's chunking code requires the offset to terminate with a zero.
+     * So transfer the offset array to an internal offset array that we
+     * can properly terminate (handled via the calloc call).
+     */
+    for (u = 0; u < dset->shared->ndims; u++) {
+        /* Make sure the offset doesn't exceed the dataset's dimensions */
+        if (offset[u] > dset->shared->curr_dims[u])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
+
+        /* Make sure the offset fall right on a chunk's boundary */
+        if (offset[u] % dset->shared->layout.u.chunk.dim[u])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
+
+        (*offset_copy)[u] = offset[u];
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5D__get_offset_copy() */
 
 
 
@@ -122,33 +173,17 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 
-    /* check arguments */
+    /* Get dataset pointer */
     if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
     if (NULL == dset->oloc.file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
-    if (mem_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid mem_space_id")
-    if (file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file_space_id")
 
-    /* Check dataspaces */
-    if (H5S_ALL != mem_space_id) {
-        if (NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "mem_space_id is not a dataspace ID")
-
-        /* Check for valid selection */
-        if (H5S_SELECT_VALID(mem_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection + offset not within extent")
-    }
-    if (H5S_ALL != file_space_id) {
-        if (NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "file_space_id is not a dataspace ID")
-
-        /* Check for valid selection */
-        if (H5S_SELECT_VALID(file_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection + offset not within extent")
-    }
+    /* Get validated dataspace pointers */
+    if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from mem_space_id")
+    if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
@@ -186,9 +221,8 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
          void *buf)
 {
     H5D_t      *dset = NULL;
-    hsize_t     internal_offset[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
-    unsigned    u;                                  /* Local index variable */
-    herr_t      ret_value = SUCCEED;                /* Return value */
+    hsize_t    *offset_copy = NULL;         /* Internal copy of chunk offset */
+    herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*h*Iu*x", dset_id, dxpl_id, offset, filters, buf);
@@ -217,30 +251,19 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
-    /* The library's chunking code requires the offset to terminate with a zero.
-     * So transfer the offset array to an internal offset array that we
-     * can properly terminate (don't mess with the passed-in buffer).
+    /* Copy the user's offset array so we can be sure it's terminated properly.
+     * (we don't want to mess with the user's buffer).
      */
-    for (u = 0; u < dset->shared->ndims; u++) {
-        /* Make sure the offset doesn't exceed the dataset's dimensions */
-        if (offset[u] > dset->shared->curr_dims[u])
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
-
-        /* Make sure the offset fall right on a chunk's boundary */
-        if (offset[u] % dset->shared->layout.u.chunk.dim[u])
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
-
-        internal_offset[u] = offset[u];
-    }
-
-    /* Terminate the offset with a zero */
-    internal_offset[dset->shared->ndims] = 0;
+    if (H5D__get_offset_copy(dset, offset, &offset_copy) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "failure to copy offset array")
 
     /* Read the raw chunk */
-    if (H5D__chunk_direct_read(dset, internal_offset, filters, buf) < 0)
+    if (H5D__chunk_direct_read(dset, offset_copy, filters, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data")
 
 done:
+    offset_copy = (hsize_t *)H5MM_xfree(offset_copy);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread_chunk() */
 
@@ -289,33 +312,17 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 
-    /* check arguments */
+    /* Get dataset pointer and ensure it's associated with a file */
     if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
     if (NULL == dset->oloc.file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
-    if (mem_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid mem_space_id")
-    if (file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file_space_id")
 
-    /* Check dataspace selections */
-    if (H5S_ALL != mem_space_id) {
-        if (NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "mem_space_id is not a dataspace ID")
-
-        /* Check for valid selection */
-        if (H5S_SELECT_VALID(mem_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection + offset not within extent")
-    }
-    if (H5S_ALL != file_space_id) {
-        if (NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "file_space_id is not a dataspace ID")
-
-        /* Check for valid selection */
-        if (H5S_SELECT_VALID(file_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection + offset not within extent")
-    }
+    /* Get validated dataspace pointers */
+    if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from mem_space_id")
+    if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
@@ -353,10 +360,9 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
          size_t data_size, const void *buf)
 {
     H5D_t      *dset = NULL;
-    hsize_t     internal_offset[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
-    unsigned    u;                                  /* Local index variable */
-    uint32_t    data_size_32;                       /* Chunk data size (limited to 32-bits currently) */
-    herr_t      ret_value = SUCCEED;                /* Return value */
+    hsize_t    *offset_copy = NULL;         /* Internal copy of chunk offset */
+    uint32_t    data_size_32;               /* Chunk data size (limited to 32-bits currently) */
+    herr_t      ret_value = SUCCEED;        /* Return value */
     
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
@@ -390,30 +396,19 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
-    /* The library's chunking code requires the offset to terminate with a zero.
-     * So transfer the offset array to an internal offset array that we
-     * can properly terminate (don't mess with the passed-in buffer).
+    /* Copy the user's offset array so we can be sure it's terminated properly.
+     * (we don't want to mess with the user's buffer).
      */
-    for (u = 0; u < dset->shared->ndims; u++) {
-        /* Make sure the offset doesn't exceed the dataset's dimensions */
-        if (offset[u] > dset->shared->curr_dims[u])
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
-
-        /* Make sure the offset fall right on a chunk's boundary */
-        if (offset[u] % dset->shared->layout.u.chunk.dim[u])
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
-
-        internal_offset[u] = offset[u];
-    }
-
-    /* Terminate the offset with a zero */
-    internal_offset[dset->shared->ndims] = 0;
+    if (H5D__get_offset_copy(dset, offset, &offset_copy) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "failure to copy offset array")
 
     /* Write chunk */
-    if (H5D__chunk_direct_write(dset, filters, internal_offset, data_size_32, buf) < 0)
+    if (H5D__chunk_direct_write(dset, filters, offset_copy, data_size_32, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data")
 
 done:
+    offset_copy = (hsize_t *)H5MM_xfree(offset_copy);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite_chunk() */
 

@@ -26,7 +26,6 @@
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
@@ -207,6 +206,58 @@ H5S_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5S_term_package() */
+
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_validiated_dataspace
+ PURPOSE
+    Get a pointer to a validated H5S_t pointer
+ USAGE
+   H5S_t *H5S_get_validated_space(dataspace_id, space)
+    hid_t           space_id;       IN: The ID of the dataspace
+    const H5S_t *   space;          OUT: A pointer to the dataspace
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Gets a pointer to a dataspace struct after validating it. The pointer
+    can be NULL (if the ID is H5S_ALL, for example).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_get_validated_dataspace(hid_t space_id, const H5S_t **space)
+{
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(space);
+
+    if (space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid space_id (ID cannot be a negative number)")
+ 
+    if (H5S_ALL == space_id) {
+        /* No special dataspace struct for H5S_ALL */
+        *space = NULL;
+    }
+    else {
+        /* Get the dataspace pointer */
+        if (NULL == (*space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "space_id is not a dataspace ID")
+
+        /* Check for valid selection */
+        if (H5S_SELECT_VALID(*space) != TRUE)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection + offset not within extent")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5S_get_validated_dataspace() */
 
 
 /*--------------------------------------------------------------------------
