@@ -51,7 +51,7 @@ if (WIN32 AND MSVC)
   if (BUILD_SHARED_LIBS)
     set_target_properties (H5_buildiface PROPERTIES COMPILE_FLAGS "/MT")
   endif ()
-  set_target_properties (H5_buildiface PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+  set_target_properties (H5_buildiface PROPERTIES LINK_FLAGS "-SUBSYSTEM:CONSOLE")
 endif ()
 set_target_properties (H5_buildiface PROPERTIES
     LINKER_LANGUAGE Fortran
@@ -266,7 +266,7 @@ set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
     LINK_FLAGS ""
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
+        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
 H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} STATIC 0)
@@ -303,7 +303,7 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
       LINK_FLAGS ""
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
+          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_LIBSH_TARGET}")

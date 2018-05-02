@@ -33,7 +33,7 @@ set_target_properties (parallel_test PROPERTIES
     FOLDER test/fortran
     LINKER_LANGUAGE Fortran
     LINK_FLAGS
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"/SUBSYSTEM:CONSOLE">
+        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 )
 endif ()

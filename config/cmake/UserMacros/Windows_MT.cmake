@@ -40,7 +40,7 @@ macro (TARGET_STATIC_CRT_FLAGS)
       endif ()
     endforeach ()
     set (WIN_COMPILE_FLAGS "")
-    set (WIN_LINK_FLAGS "/NODEFAULTLIB:MSVCRT")
+    set (WIN_LINK_FLAGS "-NODEFAULTLIB:MSVCRT")
   endif ()
 endmacro ()
 
