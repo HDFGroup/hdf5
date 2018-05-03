@@ -29,12 +29,15 @@ target_link_libraries (parallel_test
         ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_Fortran_LIBS}
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"ws2_32.lib">
 )
+set_property(TARGET parallel_test APPEND_STRING PROPERTY
+    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+)
+set_property(TARGET parallel_test APPEND_STRING PROPERTY
+    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+)
 set_target_properties (parallel_test PROPERTIES
     FOLDER test/fortran
     LINKER_LANGUAGE Fortran
-    LINK_FLAGS
-        "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
-        $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
 )
 endif ()
 
