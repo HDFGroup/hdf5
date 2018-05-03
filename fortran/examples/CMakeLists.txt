@@ -47,12 +47,15 @@ foreach (example ${examples})
       PRIVATE
           ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
   )
-  set_property(TARGET f90_ex_${example} APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-  )
-  set_property(TARGET f90_ex_${example} APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
+#  set_property(TARGET f90_ex_${example} APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET f90_ex_${example} APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:>
+#  )
+  if(MSVC)
+    set_property(TARGET H5_buildiface APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+  endif()
   set_target_properties (f90_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran
@@ -73,10 +76,10 @@ foreach (example ${examples})
         PRIVATE
             ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
     )
-    set_property(TARGET f90_ex_${example}-shared APPEND_STRING PROPERTY
+    set_property(TARGET f90_ex_${example}-shared APPEND PROPERTY
         LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
     )
-    set_property(TARGET f90_ex_${example}-shared APPEND_STRING PROPERTY
+    set_property(TARGET f90_ex_${example}-shared APPEND PROPERTY
         LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
     )
     set_target_properties (f90_ex_${example}-shared PROPERTIES
@@ -101,10 +104,10 @@ foreach (example ${F2003_examples})
       PRIVATE
           ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
   )
-  set_property(TARGET f03_ex_${example} APPEND_STRING PROPERTY
+  set_property(TARGET f03_ex_${example} APPEND PROPERTY
       LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
   )
-  set_property(TARGET f03_ex_${example} APPEND_STRING PROPERTY
+  set_property(TARGET f03_ex_${example} APPEND PROPERTY
       LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
   set_target_properties (f03_ex_${example} PROPERTIES
@@ -127,10 +130,10 @@ foreach (example ${F2003_examples})
         PRIVATE
             ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
     )
-    set_property(TARGET f03_ex_${example}-shared APPEND_STRING PROPERTY
+    set_property(TARGET f03_ex_${example}-shared APPEND PROPERTY
         LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
     )
-    set_property(TARGET f03_ex_${example}-shared APPEND_STRING PROPERTY
+    set_property(TARGET f03_ex_${example}-shared APPEND PROPERTY
         LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
     )
     set_target_properties (f03_ex_${example}-shared PROPERTIES
@@ -155,10 +158,10 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
       PRIVATE
           ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
   )
-  set_property(TARGET f90_ex_ph5example APPEND_STRING PROPERTY
+  set_property(TARGET f90_ex_ph5example APPEND PROPERTY
       LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
   )
-  set_property(TARGET f90_ex_ph5example APPEND_STRING PROPERTY
+  set_property(TARGET f90_ex_ph5example APPEND PROPERTY
       LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
   set_target_properties (f90_ex_ph5example PROPERTIES
@@ -181,10 +184,10 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         PRIVATE
             ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
     )
-    set_property(TARGET f90_ex_ph5example-shared APPEND_STRING PROPERTY
+    set_property(TARGET f90_ex_ph5example-shared APPEND PROPERTY
         LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
     )
-    set_property(TARGET f90_ex_ph5example-shared APPEND_STRING PROPERTY
+    set_property(TARGET f90_ex_ph5example-shared APPEND PROPERTY
           LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
   )
     set_target_properties (f90_ex_ph5example-shared PROPERTIES

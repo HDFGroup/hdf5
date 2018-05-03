@@ -33,7 +33,7 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
   if (APPLE)
     option (HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path" OFF)
     if (HDF5_BUILD_WITH_INSTALL_NAME)
-      set_property(TARGET ${libtarget} APPEND_STRING PROPERTY
+      set_property(TARGET ${libtarget} APPEND PROPERTY
           LINK_FLAGS "-current_version ${HDF5_PACKAGE_VERSION} -compatibility_version ${HDF5_PACKAGE_VERSION}"
       )
       set_target_properties (${libtarget} PROPERTIES

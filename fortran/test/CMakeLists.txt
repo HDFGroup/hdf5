@@ -17,9 +17,12 @@ if (BUILD_SHARED_LIBS)
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
   )
 endif ()
-set_property(TARGET H5_test_buildiface APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-)
+#set_property(TARGET H5_test_buildiface APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#)
+if(MSVC)
+  set_property(TARGET H5_test_buildiface APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE")
+endif()
 set_target_properties (H5_test_buildiface PROPERTIES
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
@@ -133,12 +136,15 @@ target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
     PUBLIC
         ${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
 )
-set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-)
-set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-)
+#set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#)
+#set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#)
+if(MSVC)
+  set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+endif()
 set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test/fortran
     LINKER_LANGUAGE Fortran
@@ -167,15 +173,18 @@ if (BUILD_SHARED_LIBS)
       PUBLIC
           ${HDF5_F90_C_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
   )
-  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-  )
-  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
-  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-DLL">
-  )
+#  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#  )
+#  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-DLL">
+#  )
+  if(MSVC)
+    set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS};-DLL")
+  endif()
   set_target_properties (${HDF5_F90_TEST_LIBSH_TARGET} PROPERTIES
       FOLDER libraries/test/fortran
       LINKER_LANGUAGE Fortran
@@ -219,12 +228,15 @@ target_link_libraries (testhdf5_fortran
     PRIVATE
         ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
 )
-set_property(TARGET testhdf5_fortran APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-)
-set_property(TARGET testhdf5_fortran APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-)
+#set_property(TARGET testhdf5_fortran APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#)
+#set_property(TARGET testhdf5_fortran APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#)
+if(MSVC)
+  set_property(TARGET testhdf5_fortran APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+endif()
 set_target_properties (testhdf5_fortran PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
@@ -263,12 +275,15 @@ if (BUILD_SHARED_LIBS)
       PRIVATE
           ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
   )
-  set_property(TARGET testhdf5_fortran-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-  )
-  set_property(TARGET testhdf5_fortran-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
+#  set_property(TARGET testhdf5_fortran-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET testhdf5_fortran-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#  )
+  if(MSVC)
+    set_property(TARGET testhdf5_fortran-shared APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+  endif()
   set_target_properties (testhdf5_fortran-shared PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -298,12 +313,15 @@ target_link_libraries (testhdf5_fortran_1_8
     PRIVATE
         ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
 )
-set_property(TARGET testhdf5_fortran_1_8 APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-)
-set_property(TARGET testhdf5_fortran_1_8 APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-)
+#set_property(TARGET testhdf5_fortran_1_8 APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#)
+#set_property(TARGET testhdf5_fortran_1_8 APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#)
+if(MSVC)
+  set_property(TARGET testhdf5_fortran_1_8 APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+endif()
 set_target_properties (testhdf5_fortran_1_8 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
@@ -333,12 +351,15 @@ if (BUILD_SHARED_LIBS)
       PRIVATE
           ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
   )
-  set_property(TARGET testhdf5_fortran_1_8-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-  )
-  set_property(TARGET testhdf5_fortran_1_8-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
+#  set_property(TARGET testhdf5_fortran_1_8-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET testhdf5_fortran_1_8-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#  )
+  if(MSVC)
+    set_property(TARGET testhdf5_fortran_1_8-shared APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+  endif()
   set_target_properties (testhdf5_fortran_1_8-shared PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -370,12 +391,15 @@ target_link_libraries (fortranlib_test_F03
     PRIVATE
         ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
 )
-set_property(TARGET fortranlib_test_F03 APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-)
-set_property(TARGET fortranlib_test_F03 APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-)
+#set_property(TARGET fortranlib_test_F03 APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#)
+#set_property(TARGET fortranlib_test_F03 APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#)
+if(MSVC)
+  set_property(TARGET fortranlib_test_F03 APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+endif()
 set_target_properties (fortranlib_test_F03 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
@@ -407,12 +431,15 @@ if (BUILD_SHARED_LIBS)
       PRIVATE
           ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
   )
-  set_property(TARGET fortranlib_test_F03-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-  )
-  set_property(TARGET fortranlib_test_F03-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
+#  set_property(TARGET fortranlib_test_F03-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET fortranlib_test_F03-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#  )
+  if(MSVC)
+    set_property(TARGET fortranlib_test_F03-shared APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+  endif()
   set_target_properties (fortranlib_test_F03-shared PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -435,12 +462,15 @@ target_link_libraries (fflush1
     PRIVATE
         ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
 )
-set_property(TARGET fflush1 APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-)
-set_property(TARGET fflush1 APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-)
+#set_property(TARGET fflush1 APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#)
+#set_property(TARGET fflush1 APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#)
+if(MSVC)
+  set_property(TARGET fflush1 APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+endif()
 set_target_properties (fflush1 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
@@ -463,12 +493,15 @@ if (BUILD_SHARED_LIBS)
       PRIVATE
           ${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
   )
-  set_property(TARGET fflush1-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-  )
-  set_property(TARGET fflush1-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
+#  set_property(TARGET fflush1-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET fflush1-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#  )
+  if(MSVC)
+    set_property(TARGET fflush1-shared APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+  endif()
   set_target_properties (fflush1-shared PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -491,12 +524,15 @@ target_link_libraries (fflush2
     PRIVATE
         ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
 )
-set_property(TARGET fflush2 APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-)
-set_property(TARGET fflush2 APPEND_STRING PROPERTY
-    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-)
+#set_property(TARGET fflush2 APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#)
+#set_property(TARGET fflush2 APPEND PROPERTY
+#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#)
+if(MSVC)
+  set_property(TARGET fflush2 APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+endif()
 set_target_properties (fflush2 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
@@ -519,12 +555,15 @@ if (BUILD_SHARED_LIBS)
       PRIVATE
           ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
   )
-  set_property(TARGET fflush2-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-  )
-  set_property(TARGET fflush2-shared APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
+#  set_property(TARGET fflush2-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET fflush2-shared APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#  )
+  if(MSVC)
+    set_property(TARGET fflush2-shared APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+  endif()
   set_target_properties (fflush2-shared PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran

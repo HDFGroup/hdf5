@@ -25,12 +25,15 @@ macro (ADD_H5_FORTRAN_EXE file)
       PRIVATE
           ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_TARGET}
   )
-  set_property(TARGET hl_f90_${file} APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-  )
-  set_property(TARGET hl_f90_${file} APPEND_STRING PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
+#  set_property(TARGET hl_f90_${file} APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET hl_f90_${file} APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#  )
+  if(MSVC)
+    set_property(TARGET hl_f90_${file} APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+  endif()
   set_target_properties (hl_f90_${file} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/hl/fortran
@@ -50,12 +53,15 @@ macro (ADD_H5_FORTRAN_EXE file)
         PRIVATE
             ${HDF5_HL_F90_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET}
     )
-    set_property(TARGET hl_f90_${file}-shared APPEND_STRING PROPERTY
-        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-    )
-    set_property(TARGET hl_f90_${file}-shared APPEND_STRING PROPERTY
-        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-    )
+#    set_property(TARGET hl_f90_${file}-shared APPEND PROPERTY
+#        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#    )
+#    set_property(TARGET hl_f90_${file}-shared APPEND PROPERTY
+#        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#    )
+    if(MSVC)
+      set_property(TARGET hl_f90_${file}-shared APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+    endif()
     set_target_properties (hl_f90_${file}-shared PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER test/hl/fortran
