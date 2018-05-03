@@ -100,14 +100,14 @@ set (HDF5_HL_F90_F_BASE_SOURCES
 )
 
 add_custom_command (
-    OUTPUT ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/H5TBff_gen.F90
+    OUTPUT ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
     COMMAND $<TARGET_FILE:H5HL_buildiface>
     WORKING_DIRECTORY ${HDF5_HL_F90_BINARY_DIR}/static
     DEPENDS ${HDF5_HL_F90_F_BASE_SOURCES}
     COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 files"
 )
 add_custom_target (H5HLgen ALL
-    DEPENDS ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/H5TBff_gen.F90
+    DEPENDS ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
 )
 set_source_files_properties (
     ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90
