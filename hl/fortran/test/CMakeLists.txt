@@ -23,7 +23,7 @@ macro (ADD_H5_FORTRAN_EXE file)
   )
   target_link_libraries (hl_f90_${file}
       PRIVATE
-          ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_TARGET}
+          ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET
   )
 #  set_property(TARGET hl_f90_${file} APPEND PROPERTY
 #      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
@@ -51,7 +51,7 @@ macro (ADD_H5_FORTRAN_EXE file)
     )
     target_link_libraries (hl_f90_${file}-shared
         PRIVATE
-            ${HDF5_HL_F90_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET}
+            ${HDF5_HL_F90_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_TEST_LIBSH_TARGET}
     )
 #    set_property(TARGET hl_f90_${file}-shared APPEND PROPERTY
 #        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
