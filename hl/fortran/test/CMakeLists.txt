@@ -32,7 +32,7 @@ macro (ADD_H5_FORTRAN_EXE file)
 #      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 #  )
   if(MSVC)
-    set_property(TARGET hl_f90_${file} APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+    set_property(TARGET hl_f90_${file} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
   endif()
   set_target_properties (hl_f90_${file} PROPERTIES
       LINKER_LANGUAGE Fortran
@@ -60,7 +60,7 @@ macro (ADD_H5_FORTRAN_EXE file)
 #        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 #    )
     if(MSVC)
-      set_property(TARGET hl_f90_${file}-shared APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+      set_property(TARGET hl_f90_${file}-shared PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
     endif()
     set_target_properties (hl_f90_${file}-shared PROPERTIES
         LINKER_LANGUAGE Fortran

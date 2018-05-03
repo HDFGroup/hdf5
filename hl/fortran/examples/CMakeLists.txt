@@ -27,7 +27,7 @@ foreach (example ${examples})
 #      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
 #  )
   if(MSVC)
-    set_property(TARGET hl_f90_ex_${example} APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+    set_property(TARGET hl_f90_ex_${example} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
   endif()
   set_target_properties (hl_f90_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
