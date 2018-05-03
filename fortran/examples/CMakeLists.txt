@@ -76,12 +76,15 @@ foreach (example ${examples})
         PRIVATE
             ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
     )
-    set_property(TARGET f90_ex_${example}-shared APPEND PROPERTY
-        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-    )
-    set_property(TARGET f90_ex_${example}-shared APPEND PROPERTY
-        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-    )
+#    set_property(TARGET f90_ex_${example}-shared APPEND PROPERTY
+#        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#    )
+#    set_property(TARGET f90_ex_${example}-shared APPEND PROPERTY
+#        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#    )
+    if(MSVC)
+      set_property(TARGET f90_ex_${example}-shared APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+    endif()
     set_target_properties (f90_ex_${example}-shared PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran
