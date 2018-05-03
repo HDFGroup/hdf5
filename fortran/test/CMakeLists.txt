@@ -20,8 +20,8 @@ endif ()
 set_target_properties (H5_test_buildiface PROPERTIES
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
-    LINK_FLAGS ""
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+    LINK_FLAGS
+        "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">"
 )
 
 if (BUILD_SHARED_LIBS)
@@ -136,9 +136,9 @@ set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test/fortran
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS ""
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+    LINK_FLAGS
+        "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+        $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
 )
 H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_TEST_LIB_NAME} STATIC 0)
 add_dependencies(${HDF5_F90_TEST_LIB_TARGET} H5testgen)
@@ -167,10 +167,10 @@ if (BUILD_SHARED_LIBS)
       FOLDER libraries/test/fortran
       LINKER_LANGUAGE Fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS ""
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-DLL">
+      LINK_FLAGS
+          "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+          $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>
+          $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-DLL\">"
   )
   H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_TEST_LIB_NAME} SHARED "F")
   add_dependencies(${HDF5_F90_TEST_LIBSH_TARGET} H5testgenSH)
@@ -213,9 +213,9 @@ set_target_properties (testhdf5_fortran PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS ""
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+    LINK_FLAGS
+        "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+        $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
 )
 add_dependencies (testhdf5_fortran ${HDF5_F90_TEST_LIB_TARGET})
 
@@ -254,9 +254,9 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS ""
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+      LINK_FLAGS
+          "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+          $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
   )
   add_dependencies (testhdf5_fortran-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif ()
@@ -286,9 +286,9 @@ set_target_properties (testhdf5_fortran_1_8 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS ""
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+    LINK_FLAGS
+        "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+        $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
 )
 add_dependencies (testhdf5_fortran_1_8 ${HDF5_F90_TEST_LIB_TARGET})
 
@@ -318,9 +318,9 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS ""
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+      LINK_FLAGS
+          "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+          $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
   )
   add_dependencies (testhdf5_fortran_1_8-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif ()
@@ -352,9 +352,9 @@ set_target_properties (fortranlib_test_F03 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS ""
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+    LINK_FLAGS
+        "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+        $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
 )
 add_dependencies (fortranlib_test_F03 ${HDF5_F90_TEST_LIB_TARGET})
 
@@ -386,9 +386,9 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS ""
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+      LINK_FLAGS
+          "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+          $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
   )
   add_dependencies (fortranlib_test_F03-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif ()
@@ -411,9 +411,9 @@ set_target_properties (fflush1 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS ""
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+    LINK_FLAGS
+        "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+        $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
 )
 add_dependencies (fflush1 ${HDF5_F90_TEST_LIB_TARGET})
 
@@ -436,9 +436,9 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS ""
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+      LINK_FLAGS
+          "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+          $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
   )
   add_dependencies (fflush1-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif ()
@@ -461,9 +461,9 @@ set_target_properties (fflush2 PROPERTIES
     LINKER_LANGUAGE Fortran
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    LINK_FLAGS ""
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+    LINK_FLAGS
+        "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+        $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
 )
 add_dependencies (fflush2 ${HDF5_F90_TEST_LIB_TARGET})
 
@@ -486,9 +486,9 @@ if (BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-      LINK_FLAGS ""
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+      LINK_FLAGS
+          "$<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:\"-SUBSYSTEM:CONSOLE\">
+          $<$<STREQUAL:\"x${CMAKE_Fortran_SIMULATE_ID}\",\"xMSVC\">:${WIN_LINK_FLAGS}>"
   )
   add_dependencies (fflush2-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif ()
