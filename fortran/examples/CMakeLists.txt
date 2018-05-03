@@ -107,12 +107,15 @@ foreach (example ${F2003_examples})
       PRIVATE
           ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
   )
-  set_property(TARGET f03_ex_${example} APPEND PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-  )
-  set_property(TARGET f03_ex_${example} APPEND PROPERTY
-      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-  )
+#  set_property(TARGET f03_ex_${example} APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#  )
+#  set_property(TARGET f03_ex_${example} APPEND PROPERTY
+#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#  )
+  if(MSVC)
+    set_property(TARGET f03_ex_${example} APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+  endif()
   set_target_properties (f03_ex_${example} PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER examples/fortran03
@@ -133,12 +136,15 @@ foreach (example ${F2003_examples})
         PRIVATE
             ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
     )
-    set_property(TARGET f03_ex_${example}-shared APPEND PROPERTY
-        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-    )
-    set_property(TARGET f03_ex_${example}-shared APPEND PROPERTY
-        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-    )
+#    set_property(TARGET f03_ex_${example}-shared APPEND PROPERTY
+#        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
+#    )
+#    set_property(TARGET f03_ex_${example}-shared APPEND PROPERTY
+#        LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
+#    )
+    if(MSVC)
+      set_property(TARGET f03_ex_${example}-shared APPEND PROPERTY LINK_FLAGS "-SUBSYSTEM:CONSOLE;${WIN_LINK_FLAGS}")
+    endif()
     set_target_properties (f03_ex_${example}-shared PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran03
