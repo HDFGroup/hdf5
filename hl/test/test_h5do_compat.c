@@ -18,6 +18,8 @@
  * work correctly.
  */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
 #define FILE_NAME       "h5do_compat.h5"
 #define DATASET_NAME    "direct_chunk_io"
 
@@ -228,9 +230,11 @@ error:
     return 1;
 } /* test_direct_chunk_read() */
 
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
 
 /*-------------------------------------------------------------------------
- * Function:	Main function
+ * Function:	main
  *
  * Purpose:	    Test direct chunk write function H5DOwrite_chunk and
  *              chunk direct read function H5DOread_chunk
@@ -242,6 +246,14 @@ error:
  */
 int main( void )
 {
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+
+    HDputs("Direct chunk read/write wrapper tests SKIPPED.");
+    HDputs("(Backward compatibility not configured)");
+    return EXIT_SUCCESS;
+
+#else
+
     hid_t   fid         = H5I_INVALID_HID;
     hid_t   did         = H5I_INVALID_HID;
     int     nerrors     = 0;
@@ -270,4 +282,5 @@ int main( void )
 error:
     HDputs("*** TESTS FAILED ***");
     return EXIT_FAILURE;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end main() */

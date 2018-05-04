@@ -17,6 +17,7 @@
 /* public LT prototypes			*/
 #include "H5DOpublic.h"
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
  * Function:    H5DOwrite_chunk
@@ -67,6 +68,8 @@ H5DOread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
     else
         return SUCCEED;
  } /* end H5DOread_chunk() */
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
