@@ -11,16 +11,62 @@
  * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <stdio.h>
-
 /* High-level library internal header file */
 #include "H5HLprivate2.h"
 
 /* public LT prototypes			*/
 #include "H5DOpublic.h"
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5DOwrite_chunk
+ *
+ * Purpose:     Writes an entire chunk to the file directly.
+ *
+ *              The H5DOwrite_chunk() call was moved to H5Dwrite_chunk. This
+ *              simple wrapper remains so that people can still link to the
+ *              high-level library without changing their code.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset,
+         size_t data_size, const void *buf)
+{
+    /* Call underlying H5D function */
+    if (H5Dwrite_chunk(dset_id, dxpl_id, filters, offset, data_size, buf) < 0)
+        return FAIL;
+    else
+        return SUCCEED;
+
+} /* end H5DOwrite_chunk() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5DOread_chunk
+ *
+ * Purpose:     Reads an entire chunk from the file directly.
+ *
+ *              The H5DOread_chunk() call was moved to H5Dread_chunk. This
+ *              simple wrapper remains so that people can still link to the
+ *              high-level library without changing their code.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5DOread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
+         void *buf)
+{
+    /* Call underlying H5D function */
+    if (H5Dread_chunk(dset_id, dxpl_id, offset, filters, buf) < 0)
+        return FAIL;
+    else
+        return SUCCEED;
+ } /* end H5DOread_chunk() */
 
 
 /*-------------------------------------------------------------------------
@@ -113,7 +159,8 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
         goto done;
 
     /* Adjust the dimension size of the requested dimension, 
-       but first record the old dimension size */
+     * but first record the old dimension size
+     */
     old_size = size[axis];
     size[axis] += extension;
     if(size[axis] < old_size)
@@ -125,7 +172,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
 
     /* Get the new dataspace of the dataset */
     if(FAIL == (new_space_id = H5Dget_space(dset_id)))
-	goto done;
+        goto done;
 
     /* Select a hyperslab corresponding to the append operation */
     for(u = 0 ; u < ndims ; u++) {
@@ -181,7 +228,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
                 goto done;
 
 	        /* Do a dataset flush */
-	        if(H5Dflush(dset_id) < 0)
+            if(H5Dflush(dset_id) < 0)
                 goto done;
         } /* end if */
     } /* end if */

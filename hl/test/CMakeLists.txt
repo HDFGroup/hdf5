@@ -48,6 +48,7 @@ HL_ADD_EXE (test_table)
 HL_ADD_EXE (test_ds)
 HL_ADD_EXE (test_ld)
 HL_ADD_EXE (test_dset_append)
+HL_ADD_EXE (test_h5do_compat)
 
 # test_packet has two source files
 add_executable (hl_test_packet test_packet.c test_packet_vlen.c)

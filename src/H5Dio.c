@@ -51,7 +51,7 @@
 /********************/
 
 static herr_t H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset,
-        hsize_t **offset_copy/*out*/);
+        hsize_t *offset_copy/*out*/);
 static herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
     H5D_storage_t *store, H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id,
@@ -86,14 +86,12 @@ H5FL_DEFINE(H5D_chunk_map_t);
  * Purpose:     Gets a copy of the user's offset array that is guaraneteed
  *              to be suitable for use by the library.
  *
- *              The caller must free the constructed offset array.
- *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t **offset_copy)
+H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_copy)
 {
     unsigned u;
     herr_t ret_value = SUCCEED;     /* Return value */
@@ -104,13 +102,14 @@ H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t **offset_
     HDassert(offset);
     HDassert(offset_copy);
 
-    if (NULL == (*offset_copy = (hsize_t *)H5MM_calloc(H5O_LAYOUT_NDIMS * sizeof(hsize_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate offset_copy array")
 
     /* The library's chunking code requires the offset to terminate with a zero.
      * So transfer the offset array to an internal offset array that we
      * can properly terminate (handled via the calloc call).
      */
+
+    HDmemset(offset_copy, 0, H5O_LAYOUT_NDIMS * sizeof(hsize_t));
+
     for (u = 0; u < dset->shared->ndims; u++) {
         /* Make sure the offset doesn't exceed the dataset's dimensions */
         if (offset[u] > dset->shared->curr_dims[u])
@@ -120,7 +119,7 @@ H5D__get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t **offset_
         if (offset[u] % dset->shared->layout.u.chunk.dim[u])
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
 
-        (*offset_copy)[u] = offset[u];
+        offset_copy[u] = offset[u];
     }
 
 done:
@@ -133,30 +132,30 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Dread
  *
- * Purpose:	Reads (part of) a DSET from the file into application
- *		memory BUF. The part of the dataset to read is defined with
- *		MEM_SPACE_ID and FILE_SPACE_ID.	 The data points are
- *		converted from their file type to the MEM_TYPE_ID specified.
- *		Additional miscellaneous data transfer properties can be
- *		passed to this function with the PLIST_ID argument.
+ * Purpose:     Reads (part of) a DSET from the file into application
+ *              memory BUF. The part of the dataset to read is defined with
+ *              MEM_SPACE_ID and FILE_SPACE_ID.	 The data points are
+ *              converted from their file type to the MEM_TYPE_ID specified.
+ *              Additional miscellaneous data transfer properties can be
+ *              passed to this function with the PLIST_ID argument.
  *
- *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file dataspace is to be referenced.
+ *              The FILE_SPACE_ID can be the constant H5S_ALL which indicates
+ *              that the entire file dataspace is to be referenced.
  *
- *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory dataspace is the same as the file dataspace
- *		defined when the dataset was created.
+ *              The MEM_SPACE_ID can be the constant H5S_ALL in which case
+ *              the memory dataspace is the same as the file dataspace
+ *              defined when the dataset was created.
  *
- *		The number of elements in the memory dataspace must match
- *		the number of elements in the file dataspace.
+ *              The number of elements in the memory dataspace must match
+ *              the number of elements in the file dataspace.
  *
- *		The PLIST_ID can be the constant H5P_DEFAULT in which
- *		case the default data transfer properties are used.
+ *              The PLIST_ID can be the constant H5P_DEFAULT in which
+ *              case the default data transfer properties are used.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:  Robb Matzke
+ *              Thursday, December 4, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -221,8 +220,8 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
          void *buf)
 {
     H5D_t      *dset = NULL;
-    hsize_t    *offset_copy = NULL;         /* Internal copy of chunk offset */
-    herr_t      ret_value = SUCCEED;        /* Return value */
+    hsize_t     offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
+    herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*h*Iu*x", dset_id, dxpl_id, offset, filters, buf);
@@ -254,7 +253,7 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
     /* Copy the user's offset array so we can be sure it's terminated properly.
      * (we don't want to mess with the user's buffer).
      */
-    if (H5D__get_offset_copy(dset, offset, &offset_copy) < 0)
+    if (H5D__get_offset_copy(dset, offset, offset_copy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "failure to copy offset array")
 
     /* Read the raw chunk */
@@ -262,40 +261,38 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data")
 
 done:
-    offset_copy = (hsize_t *)H5MM_xfree(offset_copy);
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread_chunk() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dwrite
+ * Function:    H5Dwrite
  *
- * Purpose:	Writes (part of) a DSET from application memory BUF to the
- *		file.  The part of the dataset to write is defined with the
- *		MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
- *		are converted from their current type (MEM_TYPE_ID) to their
- *		file datatype.	 Additional miscellaneous data transfer
- *		properties can be passed to this function with the
- *		PLIST_ID argument.
+ * Purpose:     Writes (part of) a DSET from application memory BUF to the
+ *              file. The part of the dataset to write is defined with the
+ *              MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
+ *              are converted from their current type (MEM_TYPE_ID) to their
+ *              file datatype. Additional miscellaneous data transfer
+ *              properties can be passed to this function with the
+ *              PLIST_ID argument.
  *
- *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file dataspace is to be referenced.
+ *              The FILE_SPACE_ID can be the constant H5S_ALL which indicates
+ *              that the entire file dataspace is to be referenced.
  *
- *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory dataspace is the same as the file dataspace
- *		defined when the dataset was created.
+ *              The MEM_SPACE_ID can be the constant H5S_ALL in which case
+ *              the memory dataspace is the same as the file dataspace
+ *              defined when the dataset was created.
  *
- *		The number of elements in the memory dataspace must match
- *		the number of elements in the file dataspace.
+ *              The number of elements in the memory dataspace must match
+ *              the number of elements in the file dataspace.
  *
- *		The PLIST_ID can be the constant H5P_DEFAULT in which
- *		case the default data transfer properties are used.
+ *              The PLIST_ID can be the constant H5P_DEFAULT in which
+ *              case the default data transfer properties are used.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:  Robb Matzke
+ *              Thursday, December 4, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -360,9 +357,9 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
          size_t data_size, const void *buf)
 {
     H5D_t      *dset = NULL;
-    hsize_t    *offset_copy = NULL;         /* Internal copy of chunk offset */
-    uint32_t    data_size_32;               /* Chunk data size (limited to 32-bits currently) */
-    herr_t      ret_value = SUCCEED;        /* Return value */
+    hsize_t     offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
+    uint32_t    data_size_32;                   /* Chunk data size (limited to 32-bits currently) */
+    herr_t      ret_value = SUCCEED;            /* Return value */
     
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
@@ -399,7 +396,7 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     /* Copy the user's offset array so we can be sure it's terminated properly.
      * (we don't want to mess with the user's buffer).
      */
-    if (H5D__get_offset_copy(dset, offset, &offset_copy) < 0)
+    if (H5D__get_offset_copy(dset, offset, offset_copy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "failure to copy offset array")
 
     /* Write chunk */
@@ -407,8 +404,6 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data")
 
 done:
-    offset_copy = (hsize_t *)H5MM_xfree(offset_copy);
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite_chunk() */
 

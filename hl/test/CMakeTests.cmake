@@ -79,6 +79,7 @@ add_test (
         file_img1.h5
         file_img2.h5
         test_append.h5
+        h5do_compat.h5
         test_detach.h5
         test_ds1.h5
         test_ds2.h5
@@ -116,4 +117,5 @@ HL_add_test (test_ds)
 HL_add_test (test_packet)
 HL_add_test (test_ld)
 HL_add_test (test_dset_append)
+HL_add_test (test_h5do_compat)
 
